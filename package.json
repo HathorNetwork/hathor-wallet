@@ -1,0 +1,47 @@
+{
+  "name": "thin-wallet",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.17.1",
+    "bitcore-mnemonic": "^1.7.0",
+    "bootstrap": "^4.0.0",
+    "crypto-js": "^3.1.9-1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-react": "^7.5.1",
+    "font-awesome": "^4.7.0",
+    "jquery": "^3.2.1",
+    "node-sass-chokidar": "0.0.3",
+    "npm-run-all": "^4.1.2",
+    "popper.js": "^1.12.9",
+    "qrcode.react": "^0.8.0",
+    "react": "^16.5.0",
+    "react-copy-to-clipboard": "^5.0.1",
+    "react-dom": "^16.2.0",
+    "react-loading": "^1.0.3",
+    "react-paginate": "^5.0.0",
+    "react-redux": "^5.0.7",
+    "react-router-dom": "4.2.2",
+    "react-scripts": "1.1.0",
+    "redux": "^4.0.0"
+  },
+  "scripts": {
+    "build-css": "node-sass-chokidar src/ -o src/",
+    "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
+    "start-js": "react-scripts start",
+    "start": "npm-run-all -p watch-css start-js",
+    "build-js": "react-scripts build",
+    "build": "npm-run-all build-css build-js",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "jsdoc": "^3.5.5"
+  }
+}
