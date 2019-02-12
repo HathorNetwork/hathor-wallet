@@ -38,16 +38,14 @@ class WS extends EventEmitter {
 
   onOpen = () => {
     this.connected = true;
-    // Save in redux
-    store.dispatch(isOnlineUpdate({isOnline: true}));
+    this.setIsOnline(true);
     this.heartbeat = setInterval(this.sendPing, HEARTBEAT_TMO);
     wallet.subscribeAllAddresses();
   }
 
   onClose = () => {
     this.connected = false;
-    // Save in redux
-    store.dispatch(isOnlineUpdate({isOnline: false}));
+    this.setIsOnline(false);
     setTimeout(this.setup, 500);
     clearInterval(this.heartbeat);
   }
@@ -58,8 +56,7 @@ class WS extends EventEmitter {
 
   sendMessage = (msg) => {
     if (!this.connected) {
-      // Save in redux
-      store.dispatch(isOnlineUpdate({isOnline: false}));
+      this.setIsOnline(false);
       return;
     }
     
@@ -72,11 +69,15 @@ class WS extends EventEmitter {
   }
 
   endConnection = () => {
-    // Save in redux
-    store.dispatch(isOnlineUpdate({isOnline: undefined}));
+    this.setIsOnline(undefined);
     this.connected = false;
     this.ws.onclose = () => {};
     this.ws.close();
+  }
+
+  setIsOnline = (value) => {
+    // Save in redux
+    store.dispatch(isOnlineUpdate({isOnline: value}));
   }
 }
 

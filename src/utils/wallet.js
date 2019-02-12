@@ -1,6 +1,6 @@
 import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE } from '../constants';
 import Mnemonic from 'bitcore-mnemonic';
-import { HDPrivateKey, Address, crypto, encoding, util } from 'bitcore-lib';
+import { HDPrivateKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
 import walletApi from '../api/wallet';
 import store from '../store/index';
@@ -253,7 +253,7 @@ const wallet = {
    * Validate if pin is correct
    *
    * @param {string} pin
-   * @return {bool}
+   * @return {boolean}
    * @memberof Wallet
    * @inner
    */
@@ -266,7 +266,7 @@ const wallet = {
   /**
    * Checks if has more generated addresses after the last shared one
    *
-   * @return {bool}
+   * @return {boolean}
    * @memberof Wallet
    * @inner
    */
@@ -298,7 +298,7 @@ const wallet = {
    * This method checks if we can generate more addresses or if we have already reached the limit
    * In the constants file we have the LIMIT_ADDRESS_GENERATION that can skip this validation
    *
-   * @return {bool}
+   * @return {boolean}
    * @memberof Wallet
    * @inner
    */
@@ -389,7 +389,7 @@ const wallet = {
    * Check if unspentTx is locked or can be used
    *
    * @param {Object} unspentTx
-   * @return {bool}
+   * @return {boolean}
    * @memberof Wallet
    * @inner
    */
@@ -405,7 +405,7 @@ const wallet = {
   /**
    * Get data from localStorage and save to redux
    *
-   * @return {bool} if was saved
+   * @return {boolean} if was saved
    * @memberof Wallet
    * @inner
    */
@@ -457,7 +457,7 @@ const wallet = {
   /**
    * Check if wallet is already loaded
    *
-   * @return {bool}
+   * @return {boolean}
    * @memberof Wallet
    * @inner
    */
@@ -894,14 +894,14 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  getOutputChange(value) {
+  getOutputChange(value, pin) {
     let address = localStorage.getItem('wallet:address');
     let outputChange = {'address': address, 'value': value};
     // Updating address because the last one was used
     if (this.hasNewAddress()) {
       this.getNextAddress();
     } else {
-      this.generateNewAddress(this.state.pin);
+      this.generateNewAddress(pin);
     }
     return outputChange;
   },
@@ -912,7 +912,7 @@ const wallet = {
    * @param {Array} key [tx_id, index]
    * @param {string} tokenUID UID of the token to check existence
    *
-   * @return {bool}
+   * @return {boolean}
    *
    * @memberof Wallet
    * @inner
@@ -929,50 +929,6 @@ const wallet = {
       }
     }
   },
-
-  /*
-   * Update data token with signature and public key information
-   *
-   * @param {Object} data Object with inputs and outputs {'inputs': [{'tx_id', 'index'}], 'outputs': ['address', 'value', 'timelock']}
-   * @param {string} dataToSignHex data to sign the transaction in hexadecimal
-   * @param {string} tokenUID UID of the token to check existence
-   * @param {string} pin PIN to decrypt the private key
-   *
-   * @return {Object} data
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  updateSendTokenData(data, dataToSignHex, tokenUID, pin) {
-    let buf = util.buffer.hexToBuffer(dataToSignHex);
-    let hashbuf = crypto.Hash.sha256sha256(buf);
-    hashbuf = new encoding.BufferReader(hashbuf).readReverse();
-
-    let savedData = JSON.parse(localStorage.getItem('wallet:data'));
-    let unspentTxs = savedData.unspentTxs;
-    for (let input of data.inputs) {
-      let objectKey = [input.tx_id, input.index];
-      if (!this.checkUnspentTxExists(objectKey, tokenUID)) {
-        // Input does not exist in unspent txs
-        return;
-      }
-      let addressTarget = unspentTxs[tokenUID][objectKey].address;
-      let encryptedPrivateKey = savedData.keys[addressTarget].privkey;
-      let privateKeyStr = wallet.decryptKey(encryptedPrivateKey, pin);
-      let key = HDPrivateKey(privateKeyStr)
-      let privateKey = key.privateKey;
-
-      let sig = crypto.ECDSA.sign(hashbuf, privateKey, 'little').set({
-        nhashtype: crypto.Signature.SIGHASH_ALL
-      });
-      let signatureHex = sig.toDER().toString('hex')
-      let publicKeyHex = util.buffer.bufferToHex(key.publicKey.toBuffer())
-      input['signature'] = signatureHex;
-      input['public_key'] = publicKeyHex;
-    }
-
-    return data;
-  }
 }
 
 export default wallet;

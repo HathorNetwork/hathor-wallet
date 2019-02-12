@@ -3,6 +3,9 @@ import walletApi from '../api/wallet';
 import $ from 'jquery';
 import helpers from '../utils/helpers';
 import wallet from '../utils/wallet';
+import { util } from 'bitcore-lib';
+import transaction from '../utils/transaction';
+import AddressError from '../utils/errors';
 import dateFormatter from '../utils/date';
 import ReactLoading from 'react-loading';
 import ModalPin from '../components/ModalPin'
@@ -125,7 +128,7 @@ class SendTokens extends React.Component {
       } else {
         if (newData.inputsAmount > outputsAmount) {
           // Need to create change output
-          let outputChange = wallet.getOutputChange(newData.inputsAmount - outputsAmount);
+          let outputChange = wallet.getOutputChange(newData.inputsAmount - outputsAmount, this.state.pin);
           data['outputs'].push(outputChange);
         }
       }
@@ -154,7 +157,7 @@ class SendTokens extends React.Component {
       } else {
         if (inputsAmount > outputsAmount) {
           // Need to create change output
-          let outputChange = wallet.getOutputChange(inputsAmount - outputsAmount);
+          let outputChange = wallet.getOutputChange(inputsAmount - outputsAmount, this.state.pin);
           data['outputs'].push(outputChange);
         }
       }
@@ -178,9 +181,14 @@ class SendTokens extends React.Component {
     // TODO add token index for each output to support multi tokens
     if (data) {
       this.setState({ errorMessage: '', loading: true });
-      walletApi.getSignData(data).then((response) => {
-        data = wallet.updateSendTokenData(data, response.data_to_sign, this.tokenUID, this.state.pin);
-        walletApi.sendTokens(data).then((response) => {
+      try {
+        let dataToSign = transaction.dataToSign(data);
+        data = transaction.updateInputData(data, dataToSign, this.tokenUID, this.state.pin);
+        // Completing data in the same object
+        transaction.completeTx(data);
+        let txBytes = transaction.txToBytes(data);
+        let txHex = util.buffer.bufferToHex(txBytes);
+        walletApi.sendTokens(txHex).then((response) => {
           if (response.success) {
             this.props.history.push('/wallet/');
           } else {
@@ -191,11 +199,14 @@ class SendTokens extends React.Component {
           console.log(e);
           this.setState({ loading: false });
         });
-      }, (e) => {
-        // Error in request
-        console.log(e);
-        this.setState({ loading: false });
-      });
+      } catch(e) {
+        if (e instanceof AddressError) {
+          this.setState({ errorMessage: e.message, loading: false });
+        } else {
+          // Unhandled error
+          throw e;
+        }
+      }
     }
   }
 

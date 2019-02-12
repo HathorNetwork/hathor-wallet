@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { MIN_API_VERSION } from '../constants';
 import versionApi from '../api/version';
 import helpers from '../utils/helpers';
+import transaction from '../utils/transaction';
 import { isVersionAllowedUpdate } from "../actions/index";
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from '../components/Version';
@@ -19,6 +20,7 @@ class VersionError extends React.Component {
   versionUpdated = () => {
     versionApi.getVersion().then((data) => {
       this.props.isVersionAllowedUpdate({allowed: helpers.isVersionAllowed(data.version)});
+      transaction.updateTransactionWeightConstants(data.min_weight, data.min_tx_weight_coefficient);
     }, (e) => {
       // Error in request
       console.log(e);
