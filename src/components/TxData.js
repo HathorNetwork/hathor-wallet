@@ -2,6 +2,7 @@ import React from 'react';
 import dateFormatter from '../utils/date';
 import $ from 'jquery';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { Link } from 'react-router-dom'
 import helpers from '../utils/helpers';
 import HathorAlert from './HathorAlert';
 
@@ -40,7 +41,7 @@ class TxData extends React.Component {
     const renderInputs = (inputs) => {
       return inputs.map((input, idx) => {
         return (
-          <li key={`${input.tx_id}${input.index}`}><a target="_blank" href={`/transaction/${input.tx_id}`}>{input.tx_id}</a> ({input.index})</li>
+          <li key={`${input.tx_id}${input.index}`}><Link to={`/transaction/${input.tx_id}`}>{input.tx_id}</Link> ({input.index})</li>
         );
       });
     }
@@ -84,7 +85,7 @@ class TxData extends React.Component {
     const renderParents = (parents) => {
       return parents.map((parent, idx) => {
         return (
-          <li key={parent}><a target="_blank" href={`/transaction/${parent}`}>{parent}</a></li>
+          <li key={parent}><Link to={`/transaction/${parent}`}>{parent}</Link></li>
         );
       });
     }
@@ -95,9 +96,9 @@ class TxData extends React.Component {
       }
       if (hashes.length === 1) {
         const h = hashes[0];
-        return <a className="text-dark" target="_blank" href={`/transaction/${h}`}>{h}</a>;
+        return <Link className="text-dark" to={`/transaction/${h}`}>{h}</Link>;
       }
-      const v = hashes.map((h) => <li key={h}><a className="text-dark" target="_blank" href={`/transaction/${h}`}>{h}</a></li>)
+      const v = hashes.map((h) => <li key={h}><Link className="text-dark" to={`/transaction/${h}`}>{h}</Link></li>)
       return (<ul>
         {v}
       </ul>)

@@ -1,5 +1,8 @@
 {
   "name": "thin-wallet",
+  "productName": "Hathor Wallet",
+  "description": "Light wallet for Hathor Network",
+  "author": "Hathor Foundation",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -22,9 +25,11 @@
     "react-paginate": "^5.0.0",
     "react-redux": "^5.0.7",
     "react-router-dom": "4.2.2",
-    "react-scripts": "1.1.0",
+    "react-scripts": "2.0.3",
     "redux": "^4.0.0"
   },
+  "main": "public/electron.js",
+  "homepage": "./",
   "scripts": {
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
@@ -33,15 +38,38 @@
     "build-js": "react-scripts build",
     "build": "npm-run-all build-css build-js",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron": "electron --inspect=5858 .",
+    "preelectron-pack": "npm run build",
+    "electron-pack": "build --macos -c.extraMetadata.main=build/electron.js"
+  },
+  "devDependencies": {
+    "electron": "^4.0.3",
+    "electron-builder": "^20.38.5",
+    "jsdoc": "^3.5.5"
+  },
+  "build": {
+    "compression": "maximum",
+    "win": {
+      "icon": "build/icon.png",
+      "target": "nsis"
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "target": "dmg"
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   },
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ],
-  "devDependencies": {
-    "jsdoc": "^3.5.5"
-  }
+  ]
 }
