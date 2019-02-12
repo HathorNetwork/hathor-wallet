@@ -39,3 +39,6 @@ export const MIN_API_VERSION = '0.11.0-beta';
 export const LIMIT_ADDRESS_GENERATION = true;
 
 export const HATHOR_BIP44_CODE = 280;
+
+// FIXME tx version should not be hardcoded
+export const DEFAULT_TX_VERSION  = 1;

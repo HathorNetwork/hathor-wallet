@@ -10,16 +10,8 @@ const walletApi = {
     });
   },
 
-  getSignData(data) {
-    return requestInstance.get('sign_data', {'params': data}).then((res) => {
-      return res.data
-    }, (res) => {
-      throw new Error(res);
-    });
-  },
-
-  sendTokens(data) {
-    const postData = {data};
+  sendTokens(txHex) {
+    const postData = {tx_hex: txHex};
     return requestInstance.post('thin_wallet/send_tokens', postData).then((res) => {
       return res.data
     }, (res) => {

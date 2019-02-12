@@ -12,6 +12,7 @@ import versionApi from './api/version';
 import { isVersionAllowedUpdate, historyUpdate, voidedTx, winnerTx } from "./actions/index";
 import helpers from './utils/helpers';
 import wallet from './utils/wallet';
+import transaction from './utils/transaction';
 import { connect } from "react-redux";
 import WebSocketHandler from './WebSocketHandler';
 
@@ -38,6 +39,7 @@ class Root extends React.Component {
 
     versionApi.getVersion().then((data) => {
       this.props.isVersionAllowedUpdate({allowed: helpers.isVersionAllowed(data.version)});
+      transaction.updateTransactionWeightConstants(data.min_weight, data.min_tx_weight_coefficient);
     }, (e) => {
       // Error in request
       console.log(e);
