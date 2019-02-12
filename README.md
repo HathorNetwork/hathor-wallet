@@ -22,3 +22,16 @@ To generate a html page with the documentation from the code comments run:
 `jsdoc src/utils/wallet.js`
 
 and it will generate a `index.html` file in `out/index.html`
+
+## Run Electron
+
+`npm run build`
+`npm run electron`
+
+## Build package for Electron
+
+`npm run electron-pack`
+
+If you have an error building `Error: Python executable "/path/to/python" is v3.6.5, which is not supported by gyp.`
+
+Just run `npm config set python /usr/bin/python` and try again

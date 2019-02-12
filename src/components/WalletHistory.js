@@ -1,6 +1,7 @@
 import React from 'react';
 import dateFormatter from '../utils/date';
 import HathorPaginate from '../components/HathorPaginate';
+import { Link } from 'react-router-dom'
 import { WALLET_HISTORY_COUNT } from '../constants';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
@@ -96,7 +97,7 @@ class WalletHistory extends React.Component {
         return (
           <tr key={`${tx.tx_id}${tx.index}${tx.from_tx_id}`}>
             <td>
-              <a className={tx.voided && !tx.from_tx_id ? 'voided' : ''} target="_blank" href={`/transaction/${tx.from_tx_id ? tx.from_tx_id : tx.tx_id}`}>{tx.from_tx_id ? tx.from_tx_id.substring(0,32) : tx.tx_id.substring(0,32)}...</a>
+              <Link className={tx.voided && !tx.from_tx_id ? 'voided' : ''} to={`/transaction/${tx.from_tx_id ? tx.from_tx_id : tx.tx_id}`}>{tx.from_tx_id ? tx.from_tx_id.substring(0,32) : tx.tx_id.substring(0,32)}...</Link>
               <CopyToClipboard text={tx.from_tx_id ? tx.from_tx_id : tx.tx_id} onCopy={this.copied}>
                 <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
               </CopyToClipboard>
@@ -107,9 +108,9 @@ class WalletHistory extends React.Component {
             <td>
               {tx.from_tx_id ?
                 <div>
-                  <a className={tx.voided ? 'voided' : ''} href={`/transaction/${tx.tx_id}`} target="_blank">
+                  <Link className={tx.voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>
                     Spent {tx.voided ? '(Voided)' : ''}
-                  </a> 
+                  </Link> 
                   <CopyToClipboard text={tx.tx_id} onCopy={this.copied}>
                     <i className="fa fa-clone pointer ml-1" title="Copy hash to clipboard"></i>
                   </CopyToClipboard>
