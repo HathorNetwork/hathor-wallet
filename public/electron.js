@@ -63,12 +63,14 @@ function createWindow () {
   })
 }
 
-// Set "About" options
-app.setAboutPanelOptions({
-  'applicationName': appName,
-  'applicationVersion': '0.1.0',
-  'version': '',
-});
+if (process.platform === 'darwin') {
+  // Set "About" options only on macOS
+  app.setAboutPanelOptions({
+    'applicationName': appName,
+    'applicationVersion': '0.1.0',
+    'version': '',
+  });
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

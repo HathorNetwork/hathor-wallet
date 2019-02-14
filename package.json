@@ -2,7 +2,7 @@
   "name": "thin-wallet",
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
-  "author": "Hathor Foundation",
+  "author": "Hathor Foundation <contact@hathor.network> (https://hathor.network/)",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -41,11 +41,12 @@
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 .",
     "preelectron-pack": "npm run build",
-    "electron-pack": "build --macos -c.extraMetadata.main=build/electron.js"
+    "electron-pack": "build --mac --win --linux -c.extraMetadata.main=build/electron.js"
   },
   "devDependencies": {
     "electron": "^4.0.3",
     "electron-builder": "^20.38.5",
+    "fsevents": "^1.2.7",
     "jsdoc": "^3.5.5"
   },
   "build": {
