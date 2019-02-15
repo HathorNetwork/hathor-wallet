@@ -225,7 +225,9 @@ const wallet = {
    *
    * @param {string} privateKey String of private key
    * @param {string} pin
+   *
    * @return {Object} encrypted private key and pin hash
+   *
    * @memberof Wallet
    * @inner
    */
@@ -240,7 +242,9 @@ const wallet = {
    *
    * @param {string} key Encrypted private key
    * @param {string} pin
+   *
    * @return {string} string of private key
+   *
    * @memberof Wallet
    * @inner
    */
@@ -253,7 +257,9 @@ const wallet = {
    * Validate if pin is correct
    *
    * @param {string} pin
+   *
    * @return {boolean}
+   *
    * @memberof Wallet
    * @inner
    */
@@ -267,6 +273,7 @@ const wallet = {
    * Checks if has more generated addresses after the last shared one
    *
    * @return {boolean}
+   *
    * @memberof Wallet
    * @inner
    */
@@ -279,6 +286,7 @@ const wallet = {
   /**
    * Get next address after the last shared one (only if it's already generated)
    * Update the data in localStorage and Redux
+   *
    * @memberof Wallet
    * @inner
    */
@@ -299,6 +307,7 @@ const wallet = {
    * In the constants file we have the LIMIT_ADDRESS_GENERATION that can skip this validation
    *
    * @return {boolean}
+   *
    * @memberof Wallet
    * @inner
    */
@@ -322,7 +331,9 @@ const wallet = {
    * Generate a new address
    * We need the pin to decrypt the private key and generate the new one
    * We update the wallet data and new address shared
+   *
    * @param {string} pin
+   *
    * @memberof Wallet
    * @inner
    */
@@ -363,7 +374,9 @@ const wallet = {
    * Calculate the balance for each token (available and locked) from the unspentTxs
    *
    * @param {Object} unspentTxs
+   *
    * @return {Object} Object with {available: number, locked: number} for each of the tokens
+   *
    * @memberof Wallet
    * @inner
    */
@@ -389,7 +402,9 @@ const wallet = {
    * Check if unspentTx is locked or can be used
    *
    * @param {Object} unspentTx
+   *
    * @return {boolean}
+   *
    * @memberof Wallet
    * @inner
    */
@@ -406,6 +421,7 @@ const wallet = {
    * Get data from localStorage and save to redux
    *
    * @return {boolean} if was saved
+   *
    * @memberof Wallet
    * @inner
    */
@@ -441,6 +457,7 @@ const wallet = {
    * @param {Object} spentTxs
    * @param {Object} voidedSpentTxs
    * @param {Object} voidedUnspentTxs
+   *
    * @memberof Wallet
    * @inner
    */
@@ -458,6 +475,7 @@ const wallet = {
    * Check if wallet is already loaded
    *
    * @return {boolean}
+   *
    * @memberof Wallet
    * @inner
    */
@@ -477,6 +495,7 @@ const wallet = {
 
   /**
    * Subscribe to receive updates from all generated addresses
+   *
    * @memberof Wallet
    * @inner
    */
@@ -585,6 +604,7 @@ const wallet = {
    * @param {Object} spentTxs
    *
    * @return {Array} history reversed sorted by timestamp
+   *
    * @memberof Wallet
    * @inner
    */
@@ -651,7 +671,7 @@ const wallet = {
    *
    * For outputs we have the following situations:
    *
-   * . Not used yet, so it's still in the unspentTxs, we remove it from there and decrease the balance
+   * . Not used yet, so it's still in the unspentTxs, we remove it from there only
    * . Already used, so it's in spentTxs, we remove from there
    * . Not found anywhere, so it was already updated in another conflict resolution
    *
@@ -665,6 +685,7 @@ const wallet = {
    * @param {Object} spentTxs
    * @param {Object} voidedUnspentTxs
    * @param {Object} voidedSpentTxs
+   *
    * @memberof Wallet
    * @inner
    */
@@ -711,6 +732,9 @@ const wallet = {
 
         if (spentTxs[objectKey].length === 0) {
           // If it was the last element, we must recreate in unspentTxs, if it's not there already
+          if (!(voidedElement.token_uid in unspentTxs)) {
+            unspentTxs[voidedElement.token_uid] = {};
+          }
           unspentTxs[voidedElement.token_uid][objectKey] = {
             address: address,
             value: voidedElement.value,
@@ -762,6 +786,7 @@ const wallet = {
    * @param {Object} spentTxs
    * @param {Object} voidedUnspentTxs
    * @param {Object} voidedSpentTxs
+   *
    * @memberof Wallet
    * @inner
    */

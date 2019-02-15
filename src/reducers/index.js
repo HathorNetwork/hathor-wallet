@@ -1,6 +1,5 @@
 import wallet from '../utils/wallet';
 
-
 const initialState = {
 /*
  * 'sortedHistory': history data sorted by timestamp
