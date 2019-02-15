@@ -13,3 +13,5 @@ export const sharedAddressUpdate = data => ({ type: "shared_address", payload: d
 export const isVersionAllowedUpdate = data => ({ type: "is_version_allowed_update", payload: data });
 
 export const isOnlineUpdate = data => ({ type: "is_online_update", payload: data });
+
+export const lastFailedRequest = data => ({ type: "last_failed_request", payload: data });

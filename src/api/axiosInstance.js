@@ -1,9 +1,12 @@
-import { BASE_URL } from '../constants.js';
-const axios = require('axios');
+import helpers from '../utils/helpers';
+import axios from 'axios';
+import store from '../store/index';
+import { lastFailedRequest } from '../actions/index';
+import $ from 'jquery';
 
-const createRequestInstance = () => {
+const createRequestInstance = (resolve) => {
   const defaultOptions = {
-    baseURL: BASE_URL,
+    baseURL: helpers.getServerURL(),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -13,11 +16,14 @@ const createRequestInstance = () => {
   instance.interceptors.response.use((response) => {
     return response;
   }, (error) => {
-    throw new Error(error);
+    // Save request config in redux
+    let config = error.config;
+    config.resolve = resolve;
+    store.dispatch(lastFailedRequest(error.config));
+    $('#requestErrorModal').modal('show');
+    return Promise.reject(error);
   });
   return instance;
 }
 
-const requestInstance = createRequestInstance();
-
-export default requestInstance;
+export default createRequestInstance;

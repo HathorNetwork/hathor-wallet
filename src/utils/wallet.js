@@ -156,7 +156,7 @@ const wallet = {
     localStorage.setItem('wallet:lastGeneratedIndex', i - 1);
     localStorage.setItem('wallet:data', JSON.stringify(dataJson));
 
-    walletApi.getAddressHistory(addresses).then((response) => {
+    walletApi.getAddressHistory(addresses, (response) => {
       // Response returns the addresses histories in the same order
       let toGenerate = 0;
       let lastSharedAddress = null;
@@ -550,6 +550,16 @@ const wallet = {
     this.cleanLocalStorage();
     store.dispatch(cleanData());
     WebSocketHandler.endConnection();
+  },
+
+  /*
+   * Clean data from server
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  cleanServer() {
+    localStorage.removeItem('wallet:server');
   },
 
   /**

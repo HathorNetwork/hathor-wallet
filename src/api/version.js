@@ -1,11 +1,11 @@
-import requestInstance from './axiosInstance';
+import createRequestInstance from './axiosInstance';
 
 const versionApi = {
-  getVersion() {
-    return requestInstance.get(`version`).then((res) => {
-      return res.data
+  getVersion(resolve) {
+    return createRequestInstance(resolve).get(`version`).then((res) => {
+      resolve(res.data);
     }, (res) => {
-      throw new Error(res);
+      return Promise.reject(res);
     });
   }
 };

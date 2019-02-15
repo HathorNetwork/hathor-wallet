@@ -73,6 +73,8 @@ const initialState = {
   isVersionAllowed: undefined,
   // If the connection with the server is online
   isOnline: undefined,
+  // Config of the last request that failed
+  lastFailedRequest: undefined,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -126,6 +128,8 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {sortedHistory: action.payload.sortedHistory, unspentTxs: action.payload.unspentTxs});
     case 'clean_data':
       return Object.assign({}, initialState, {isVersionAllowed: state.isVersionAllowed});
+    case 'last_failed_request':
+      return Object.assign({}, state, {lastFailedRequest: action.payload});
     default:
       return state;
   }

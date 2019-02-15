@@ -296,3 +296,16 @@ svg.svg-wrapper {
 .dagWrapper {
   width: 100%;
 }
+
+.logout-btn {
+  border: 0;
+  background-color: transparent;
+  color: #fff;
+  opacity: 0.5;
+  cursor: pointer;
+  outline: 0;
+}
+
+.logout-btn:hover {
+  opacity: 0.75;
+}

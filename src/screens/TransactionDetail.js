@@ -28,7 +28,7 @@ class TransactionDetail extends React.Component {
   }
 
   getTx() {
-    txApi.getTransaction(this.props.match.params.id).then((data) => {
+    txApi.getTransaction(this.props.match.params.id, (data) => {
       this.txReceived(data);
     }, (e) => {
       // Error in request

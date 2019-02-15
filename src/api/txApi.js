@@ -1,17 +1,17 @@
-import requestInstance from './axiosInstance';
+import createRequestInstance from './axiosInstance';
 
 const txApi = {
-  getTransactionBase(data) {
-    return requestInstance.get(`transaction`, {params: data}).then((res) => {
-      return res.data
+  getTransactionBase(data, resolve) {
+    return createRequestInstance(resolve).get(`transaction`, {params: data}).then((res) => {
+      resolve(res.data);
     }, (res) => {
-      throw new Error(res);
+      return Promise.reject(res);
     });
   },
 
-  getTransaction(id) {
+  getTransaction(id, resolve) {
     const data = {id};
-    return this.getTransactionBase(data);
+    return this.getTransactionBase(data, resolve);
   },
 };
 

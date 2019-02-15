@@ -188,7 +188,7 @@ class SendTokens extends React.Component {
         transaction.completeTx(data);
         let txBytes = transaction.txToBytes(data);
         let txHex = util.buffer.bufferToHex(txBytes);
-        walletApi.sendTokens(txHex).then((response) => {
+        walletApi.sendTokens(txHex, (response) => {
           if (response.success) {
             this.props.history.push('/wallet/');
           } else {

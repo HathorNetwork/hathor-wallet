@@ -1,4 +1,5 @@
 import { GENESIS_BLOCK, GENESIS_TX, DECIMAL_PLACES, MIN_API_VERSION } from '../constants';
+import path from 'path';
 
 const helpers = {
   updateListWs(list, newEl, max) {
@@ -58,6 +59,49 @@ const helpers = {
 
   getCleanVersionArray(version) {
     return version.replace(/[^\d.]/g, '').split('.');
+  },
+
+  isServerChosen() {
+    return this.getServerURL() !== null;
+  },
+
+  getServerURL() {
+    return localStorage.getItem('wallet:server');
+  },
+
+  getWSServerURL() {
+    let serverURL = localStorage.getItem('wallet:server');
+    if (serverURL) {
+      let pieces = serverURL.split(':');
+      let firstPiece = pieces.splice(0, 1);
+      let protocol = '';
+      if (firstPiece[0].indexOf('s') > -1) {
+        // Has ssl
+        protocol = 'wss';
+      } else {
+        // No ssl
+        protocol = 'ws';
+      }
+      serverURL = path.join(`${protocol}:${pieces.join(':')}`, 'ws/');
+    }
+    return serverURL;
+  },
+
+  fixAxiosConfig(axios, config) {
+    // Axios fails merging this configuration to the default configuration because it has an issue
+    // with circular structures: https://github.com/mzabriskie/axios/issues/370
+    // Got it from https://github.com/softonic/axios-retry/blob/master/es/index.js#L203
+    if (axios.defaults.agent === config.agent) {
+      delete config.agent;
+    }
+    if (axios.defaults.httpAgent === config.httpAgent) {
+      delete config.httpAgent;
+    }
+    if (axios.defaults.httpsAgent === config.httpsAgent) {
+      delete config.httpsAgent;
+    }
+
+    config.transformRequest = [data => data];
   }
 }
 

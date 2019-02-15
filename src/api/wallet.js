@@ -1,21 +1,21 @@
-import requestInstance from './axiosInstance';
+import createRequestInstance from './axiosInstance';
 
 const walletApi = {
-  getAddressHistory(addresses) {
+  getAddressHistory(addresses, resolve) {
     const data = {addresses};
-    return requestInstance.get('thin_wallet/address_history', {'params': data}).then((res) => {
-      return res.data
+    return createRequestInstance().get('thin_wallet/address_history', {'params': data}).then((res) => {
+      resolve(res.data)
     }, (res) => {
-      throw new Error(res);
+      return Promise.reject(res);
     });
   },
 
-  sendTokens(txHex) {
+  sendTokens(txHex, resolve) {
     const postData = {tx_hex: txHex};
-    return requestInstance.post('thin_wallet/send_tokens', postData).then((res) => {
-      return res.data
+    return createRequestInstance().post('thin_wallet/send_tokens', postData).then((res) => {
+      resolve(res.data)
     }, (res) => {
-      throw new Error(res);
+      return Promise.reject(res);
     });
   },
 
