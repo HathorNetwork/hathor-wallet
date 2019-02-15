@@ -7,7 +7,7 @@ const mapStateToProps = (state) => {
 };
 
 
-const Server = (props) => {
+const ServerStatus = (props) => {
   return (
     props.isOnline !== undefined && 
     <div className="d-flex flex-column version-wrapper align-items-center">
@@ -17,4 +17,4 @@ const Server = (props) => {
   );
 };
 
-export default connect(mapStateToProps)(Server);
+export default connect(mapStateToProps)(ServerStatus);

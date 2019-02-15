@@ -1,11 +1,19 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import logo from '../assets/images/hathor-white-logo.png';
+import wallet from '../utils/wallet';
 import Version from './Version';
-import Server from './Server';
+import ServerStatus from './ServerStatus';
 
 
 class Navigation extends React.Component {
+
+  logout = () => {
+    wallet.cleanWallet();
+    wallet.cleanServer();
+    this.props.history.push('/');
+  }
+
   render() {
     return (
       <div className="main-nav">
@@ -25,8 +33,9 @@ class Navigation extends React.Component {
               </li>
             </ul>
             <div className="navbar-right d-flex flex-row align-items-center navigation-search">
-              <Server />
+              <ServerStatus />
               <Version />
+              <button className="logout-btn ml-3" onClick={this.logout}>Logout</button>
             </div>
           </div>
         </nav>

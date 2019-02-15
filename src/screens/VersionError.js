@@ -1,35 +1,24 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { MIN_API_VERSION } from '../constants';
-import versionApi from '../api/version';
-import helpers from '../utils/helpers';
-import transaction from '../utils/transaction';
-import { isVersionAllowedUpdate } from "../actions/index";
+import version from '../utils/version';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from '../components/Version';
-
-
-const mapDispatchToProps = dispatch => {
-  return {
-    isVersionAllowedUpdate: data => dispatch(isVersionAllowedUpdate(data)),
-  };
-};
+import wallet from '../utils/wallet';
 
 
 class VersionError extends React.Component {
   versionUpdated = () => {
-    versionApi.getVersion().then((data) => {
-      this.props.isVersionAllowedUpdate({allowed: helpers.isVersionAllowed(data.version)});
-      transaction.updateTransactionWeightConstants(data.min_weight, data.min_tx_weight_coefficient);
-    }, (e) => {
-      // Error in request
-      console.log(e);
-    });
+    version.checkVersion();
+  }
+
+  changeServer = () => {
+    wallet.cleanServer();
+    window.location.href = '/server/';
   }
 
   render() {
     return (
-      <div>
+      <div className="component-div">
         <div className="main-nav">
           <nav className="navbar navbar-expand-lg navbar-dark">
             <div className="d-flex flex-column align-items-center navbar-brand">
@@ -46,10 +35,11 @@ class VersionError extends React.Component {
           <p>Your API backend version is not compatible with this admin. We expect at least the version {MIN_API_VERSION}</p>
           <p>Please update you API version and try again</p>
           <button className="btn btn-primary" onClick={this.versionUpdated}>Try again</button>
+          <button className="btn btn-primary ml-3" onClick={this.changeServer}>Change Server</button>
         </div>
       </div>
     );
   }
 }
 
-export default connect(null, mapDispatchToProps)(VersionError);
+export default VersionError;

@@ -40,6 +40,12 @@ export const LIMIT_ADDRESS_GENERATION = true;
 
 export const HATHOR_BIP44_CODE = 280;
 
+export const DEFAULT_SERVERS = [
+  'http://localhost:8080/',
+  'https://node2.testnet.hathor.network:8080/',
+  'https://node3.testnet.hathor.network:8080/'
+];
+
 // FIXME tx version should not be hardcoded
 export const DEFAULT_TX_VERSION  = 1;
 

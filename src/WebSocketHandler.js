@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { WS_URL } from './constants';
+import helpers from './utils/helpers';
 import wallet from './utils/wallet';
 import { isOnlineUpdate } from "./actions/index";
 import store from './store/index';
@@ -22,7 +22,11 @@ class WS extends EventEmitter {
     if (this.connected) {
       return;
     }
-    this.ws = new WebSocket(WS_URL);
+    let wsURL = helpers.getWSServerURL();
+    if (wsURL === null) {
+      return;
+    }
+    this.ws = new WebSocket(wsURL);
 
     this.ws.onopen = this.onOpen;
     this.ws.onmessage = this.onMessage;
@@ -71,8 +75,10 @@ class WS extends EventEmitter {
   endConnection = () => {
     this.setIsOnline(undefined);
     this.connected = false;
-    this.ws.onclose = () => {};
-    this.ws.close();
+    if (this.ws) {
+      this.ws.onclose = () => {};
+      this.ws.close();
+    }
   }
 
   setIsOnline = (value) => {
