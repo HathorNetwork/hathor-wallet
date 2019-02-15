@@ -82,7 +82,7 @@ const transaction = {
     let arr = new ArrayBuffer(bytes);
     let view = new DataView(arr);
     if (bytes === 8) {
-      // byteOffset = 0; litteEndian = false
+      // byteOffset = 0; isLitteEndian = false
       view.setFloat64(0, number, false);
     }
     return buffer.Buffer.from(arr);
@@ -277,7 +277,7 @@ const transaction = {
       let objectKey = [input.tx_id, input.index];
       if (!wallet.checkUnspentTxExists(objectKey, tokenUID)) {
         // Input does not exist in unspent txs
-        return;
+        return data;
       }
       let addressTarget = unspentTxs[tokenUID][objectKey].address;
       let encryptedPrivateKey = savedData.keys[addressTarget].privkey;
@@ -305,7 +305,6 @@ const transaction = {
    *  'weight': 0,
    *  'nonce': 0,
    *  'timestamp': 1,
-   *  'height': 1
    * }
    *
    * @return {number} Minimum weight calculated (float)
@@ -339,7 +338,7 @@ const transaction = {
   /**
    * Complete the txData
    *
-   * Add weight, nonce, version, height and timestamp to the txData
+   * Add weight, nonce, version, and timestamp to the txData
    * 
    * @param {Object} txData Object with inputs and outputs
    * {
@@ -354,7 +353,6 @@ const transaction = {
     incompleteTxData['weight'] = 0;
     incompleteTxData['nonce'] = 0;
     incompleteTxData['version'] = DEFAULT_TX_VERSION;
-    incompleteTxData['height'] = 0;
     incompleteTxData['timestamp'] = dateFormatter.dateToTimestamp(new Date());
     let minimumWeight = this.calculateTxWeight(incompleteTxData);
     incompleteTxData['weight'] = minimumWeight;
@@ -371,7 +369,6 @@ const transaction = {
    *  'weight': 0,
    *  'nonce': 0,
    *  'timestamp': 1,
-   *  'height': 1
    * }
    *
    * @return {Buffer}

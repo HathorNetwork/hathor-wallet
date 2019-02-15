@@ -1,5 +1,23 @@
 {
   "name": "thin-wallet",
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!<rootDir>/node_modules/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 20,
+        "functions": 5,
+        "lines": 35,
+        "statements": 35
+      }
+    },
+    "coverageReporters": [
+      "html",
+      "text"
+    ]
+  },
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Foundation <contact@hathor.network> (https://hathor.network/)",
@@ -38,17 +56,20 @@
     "start": "npm-run-all -p watch-css start-js",
     "build-js": "react-scripts build",
     "build": "npm-run-all build-css build-js",
-    "test": "react-scripts test --env=jsdom",
+    "test": "react-scripts test --env=node",
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 .",
     "preelectron-pack": "npm run build",
     "electron-pack": "build --mac --win --linux -c.extraMetadata.main=build/electron.js"
   },
   "devDependencies": {
+    "axios-mock-adapter": "^1.16.0",
     "electron": "^4.0.3",
     "electron-builder": "^20.38.5",
-    "fsevents": "^1.2.7",
-    "jsdoc": "^3.5.5"
+    "jest-html-reporter": "^2.4.4",
+    "jest-localstorage-mock": "^2.4.0",
+    "jsdoc": "^3.5.5",
+    "mock-socket": "^8.0.5"
   },
   "build": {
     "compression": "maximum",
