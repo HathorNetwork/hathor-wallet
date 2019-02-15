@@ -1,10 +1,11 @@
 import { OP_GREATERTHAN_TIMESTAMP, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, OP_PUSHDATA1 } from '../opcodes';
-import { DECIMAL_PLACES, DEFAULT_TX_VERSION } from '../constants';
+import { DECIMAL_PLACES, DEFAULT_TX_VERSION, MAX_OUTPUT_VALUE_32 } from '../constants';
 import { HDPrivateKey, crypto, encoding, util } from 'bitcore-lib';
 import AddressError from './errors';
 import dateFormatter from './date';
 import wallet from './wallet';
 import buffer from 'buffer';
+import Long from 'long';
 
 /**
  * Transaction utils with methods to serialize, create and handle transactions
@@ -27,13 +28,42 @@ const transaction = {
     let arr = new ArrayBuffer(bytes);
     let view = new DataView(arr);
     if (bytes === 1) {
-      // byteOffset = 0; litteEndian = false
+      // byteOffset = 0; isLittleEndian = false
       view.setUint8(0, number, false);
     } else if (bytes === 2) {
-      // byteOffset = 0; litteEndian = false
+      // byteOffset = 0; isLittleEndian = false
       view.setUint16(0, number, false);
     } else if (bytes === 4) {
       view.setUint32(0, number, false);
+    }
+    return buffer.Buffer.from(arr);
+  },
+
+  /**
+   * Transform signed int to bytes (1, 2, or 4 bytes)
+   *
+   * @param {number} number Integer to be transformed to bytes
+   * @param {number} bytes How many bytes this number uses
+   *
+   * @return {Buffer} number in bytes
+   * @memberof Transaction
+   * @inner
+   */
+  signedIntToBytes(number, bytes) {
+    let arr = new ArrayBuffer(bytes);
+    let view = new DataView(arr);
+    if (bytes === 1) {
+      // byteOffset = 0; isLittleEndian = false
+      view.setInt8(0, number, false);
+    } else if (bytes === 2) {
+      // byteOffset = 0; isLittleEndian = false
+      view.setInt16(0, number, false);
+    } else if (bytes === 4) {
+      view.setInt32(0, number, false);
+    } else if (bytes === 8) {
+      // In case of 8 bytes I need to handle the int with a Long lib
+      let long = Long.fromNumber(number, false);
+      arr = long.toBytesBE();
     }
     return buffer.Buffer.from(arr);
   },
@@ -198,9 +228,9 @@ const transaction = {
     // Tx version
     arr.push(this.intToBytes(DEFAULT_TX_VERSION, 2))
     // Len inputs
-    arr.push(this.intToBytes(txData.inputs.length, 2))
+    arr.push(this.intToBytes(txData.inputs.length, 1))
     // Len outputs
-    arr.push(this.intToBytes(txData.outputs.length, 2))
+    arr.push(this.intToBytes(txData.outputs.length, 1))
     // Len tokens
     // XXX For now we will have only Hathor token, so tokens array will be empty
     arr.push(this.intToBytes(0, 1))
@@ -213,7 +243,7 @@ const transaction = {
     }
 
     for (let outputTx of txData.outputs) {
-      arr.push(this.intToBytes(outputTx.value, 4));
+      arr.push(this.outputValueToBytes(outputTx.value));
       // Token data for now will be always 0
       arr.push(this.intToBytes(0, 1));
 
@@ -356,14 +386,12 @@ const transaction = {
     arr.push(this.floatToBytes(txData.weight, 8));
     // Timestamp
     arr.push(this.intToBytes(txData.timestamp, 4))
-    // Height
-    arr.push(this.intToBytes(txData.height, 8))
     // Len inputs
-    arr.push(this.intToBytes(txData.inputs.length, 2))
+    arr.push(this.intToBytes(txData.inputs.length, 1))
     // Len outputs
-    arr.push(this.intToBytes(txData.outputs.length, 2))
+    arr.push(this.intToBytes(txData.outputs.length, 1))
     // Len parents (parents will be calculated in the backend)
-    arr.push(this.intToBytes(0, 2))
+    arr.push(this.intToBytes(0, 1))
     // Len tokens
     // XXX For now we will have only Hathor token, so tokens array will be empty
     arr.push(this.intToBytes(0, 1))
@@ -376,7 +404,7 @@ const transaction = {
     }
 
     for (let outputTx of txData.outputs) {
-      arr.push(this.intToBytes(outputTx.value, 4));
+      arr.push(this.outputValueToBytes(outputTx.value));
       // Token data for now will be always 0
       arr.push(this.intToBytes(0, 1));
 
@@ -388,6 +416,25 @@ const transaction = {
     // Add nonce in the end
     arr.push(this.intToBytes(txData.nonce, 4));
     return util.buffer.concat(arr);
+  },
+
+  /**
+   * Get the bytes from the output value
+   * If value is above the maximum for 32 bits we get from 8 bytes, otherwise only 4 bytes
+   *
+   * @param {number} value Output value
+   *
+   * @return {Buffer}
+   *
+   * @memberof Transaction
+   * @inner
+   */
+  outputValueToBytes(value) {
+    if (value > MAX_OUTPUT_VALUE_32) {
+      return this.signedIntToBytes(-value, 8);
+    } else {
+      return this.signedIntToBytes(value, 4);
+    }
   },
 
   /**

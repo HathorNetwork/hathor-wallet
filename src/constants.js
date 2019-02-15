@@ -42,3 +42,6 @@ export const HATHOR_BIP44_CODE = 280;
 
 // FIXME tx version should not be hardcoded
 export const DEFAULT_TX_VERSION  = 1;
+
+// Max value (inclusive) before having to use 8 bytes: 2147483648 ~= 2.14748e+09
+export const MAX_OUTPUT_VALUE_32 = 2 ** 31 - 1
