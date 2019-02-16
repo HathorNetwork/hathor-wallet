@@ -63,7 +63,7 @@ test('Can generate new address', () => {
 test('Generate new address', () => {
   let words = 'purse orchard camera cloud piece joke hospital mechanic timber horror shoulder rebuild you decrease garlic derive rebuild random naive elbow depart okay parrot cliff';
   let pin = '123456';
-  wallet.generateWallet(words, '', pin);
+  wallet.generateWallet(words, '', pin, true);
 
   let data = JSON.parse(localStorage.getItem('wallet:data'));
   expect(Object.keys(data.keys).length).toBe(GAP_LIMIT);
@@ -96,7 +96,7 @@ test('Generate new address', () => {
 test('Last used index', () => {
   let words = 'purse orchard camera cloud piece joke hospital mechanic timber horror shoulder rebuild you decrease garlic derive rebuild random naive elbow depart okay parrot cliff';
   let pin = '123456';
-  wallet.generateWallet(words, '', pin);
+  wallet.generateWallet(words, '', pin, true);
 
   let data = JSON.parse(localStorage.getItem('wallet:data'));
   for (let address in data.keys) {

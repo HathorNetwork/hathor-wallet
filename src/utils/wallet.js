@@ -38,14 +38,15 @@ const wallet = {
    * can be a string with words or a number with the entropy (256 - to generate 24 words)
    * @param {string} passphrase
    * @param {string} pin
+   * @param {boolean} loadHistory if should load history from generated addresses
    *
    * @return {string} words generated (null if words are not valid)
    * @memberof Wallet
    * @inner
    */
-  generateWallet(words, passphrase, pin) {
+  generateWallet(words, passphrase, pin, loadHistory) {
     if (this.wordsValid(words) && Mnemonic.isValid(words)) {
-      return this.executeGenerateWallet(words, passphrase, pin);
+      return this.executeGenerateWallet(words, passphrase, pin, loadHistory);
     } else {
       return null;
     }
@@ -87,12 +88,13 @@ const wallet = {
    * can be a string with words or a number with the entropy (256 - to generate 24 words)
    * @param {string} passphrase
    * @param {string} pin
+   * @param {boolean} loadHistory if should load the history from the generated addresses
    *
    * @return {string} words generated
    * @memberof Wallet
    * @inner
    */
-  executeGenerateWallet(mnemonicData, passphrase, pin) {
+  executeGenerateWallet(mnemonicData, passphrase, pin, loadHistory) {
     WebSocketHandler.setup();
     let code = new Mnemonic(mnemonicData);
     let xpriv = code.toHDPrivateKey(passphrase);
@@ -113,8 +115,10 @@ const wallet = {
     localStorage.setItem('wallet:accessData', JSON.stringify(access));
     localStorage.setItem('wallet:data', JSON.stringify(walletData));
 
-    // Load history from address
-    this.loadAddressHistory(0, GAP_LIMIT, privkey, pin);
+    if (loadHistory) {
+      // Load history from address
+      this.loadAddressHistory(0, GAP_LIMIT, privkey, pin);
+    }
     return code.phrase;
   },
 
@@ -128,6 +132,9 @@ const wallet = {
    * @param {number} count How many addresses I will load
    * @param {HDPrivateKey} privkey
    * @param {string} pin
+   *
+   * @return {Promise} Promise that resolves when addresses history is finished loading from server
+   *
    * @memberof Wallet
    * @inner
    */
@@ -156,54 +163,60 @@ const wallet = {
     localStorage.setItem('wallet:lastGeneratedIndex', i - 1);
     localStorage.setItem('wallet:data', JSON.stringify(dataJson));
 
-    walletApi.getAddressHistory(addresses, (response) => {
-      // Response returns the addresses histories in the same order
-      let toGenerate = 0;
-      let lastSharedAddress = null;
-      let lastSharedIndex = null;
-      for (let [index, data] of response.history.entries()) {
-        if (data.history.length > 0) {
-          // If we have transaction in this address we need to generate more
-          toGenerate = index + 1;
-          lastSharedAddress = null;
-          lastSharedIndex = null;
+    const promise = new Promise((resolve, reject) => {
+      walletApi.getAddressHistory(addresses, (response) => {
+        // Response returns the addresses histories in the same order
+        let toGenerate = 0;
+        let lastSharedAddress = null;
+        let lastSharedIndex = null;
+        for (let [index, data] of response.history.entries()) {
+          if (data.history.length > 0) {
+            // If we have transaction in this address we need to generate more
+            toGenerate = index + 1;
+            lastSharedAddress = null;
+            lastSharedIndex = null;
+          } else {
+            // If it's the first without history can be the address to show on the screen to be used
+            if (lastSharedAddress === null) {
+              lastSharedAddress = data.address;
+              lastSharedIndex = startIndex + index;
+            }
+          }
+        }
+
+        // Save in redux
+        store.dispatch(historyUpdate(response.history));
+
+        // Updating voided tx data
+        for (let responseData of response.history) {
+          for (let historyData of responseData.history) {
+            if (historyData.voided) {
+              store.dispatch(voidedTx({'address': responseData.address, 'element': historyData}));
+            }
+          }
+        }
+
+        if (toGenerate > 0) {
+          if (lastSharedAddress) {
+            this.updateAddress(lastSharedAddress, lastSharedIndex);
+          }
+          // Load more addresses
+          this.loadAddressHistory(i, toGenerate, privkey, pin);
         } else {
-          // If it's the first without history can be the address to show on the screen to be used
-          if (lastSharedAddress === null) {
-            lastSharedAddress = data.address;
-            lastSharedIndex = startIndex + index;
+          if (count === GAP_LIMIT) {
+            // This is the case when the last GAP_LIMIT addresses were all already used
+            this.updateAddress(lastSharedAddress, lastSharedIndex);
           }
         }
-      }
-
-      // Save in redux
-      store.dispatch(historyUpdate(response.history));
-
-      // Updating voided tx data
-      for (let responseData of response.history) {
-        for (let historyData of responseData.history) {
-          if (historyData.voided) {
-            store.dispatch(voidedTx({'address': responseData.address, 'element': historyData}));
-          }
-        }
-      }
-
-      if (toGenerate > 0) {
-        if (lastSharedAddress) {
-          this.updateAddress(lastSharedAddress, lastSharedIndex);
-        }
-        // Load more addresses
-        this.loadAddressHistory(i, toGenerate, privkey, pin);
-      } else {
-        if (count === GAP_LIMIT) {
-          // This is the case when the last GAP_LIMIT addresses were all already used
-          this.updateAddress(lastSharedAddress, lastSharedIndex);
-        }
-      }
-    }, (e) => {
-      // Error in request
-      console.log(e);
+        
+        resolve();
+      }, (e) => {
+        // Error in request
+        console.log(e);
+        reject(e);
+      });
     });
+    return promise;
   },
 
   /**

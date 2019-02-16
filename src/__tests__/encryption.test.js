@@ -3,7 +3,7 @@ import wallet from '../utils/wallet';
 test('Private key encryption/decryption', () => {
   let pin = '123456';
 
-  wallet.executeGenerateWallet(256, '', pin);
+  wallet.executeGenerateWallet(256, '', pin, false);
 
   expect(wallet.isPinCorrect(pin)).toBeTruthy();
   expect(wallet.isPinCorrect('123')).toBeFalsy();

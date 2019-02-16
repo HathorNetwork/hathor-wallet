@@ -1,5 +1,6 @@
 import { GAP_LIMIT, HATHOR_TOKEN_UID } from '../constants';
 import wallet from '../utils/wallet';
+import { HDPrivateKey } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
 import { cleanData } from '../actions/index';
 import store from '../store/index';
@@ -91,23 +92,11 @@ const checkData = () => {
   doneCb();
 }
 
-const startCheckLocalStorage = () => {
-  // Saving data history to localStorage is asyncronous but should be fast
-  var count = 0;
-  const checkLocalStorage = () => {
-    let lastGeneratedIndex = localStorage.getItem('wallet:lastGeneratedIndex');
-    if (lastGeneratedIndex !== null && parseInt(lastGeneratedIndex, 10) === GAP_LIMIT) {
-      checkData();
-    } else {
-      setTimeout(() => {
-        count++;
-        if (count < 10) {
-          checkLocalStorage();
-        }
-      }, 1000)
-    }
-  }
-  checkLocalStorage();
+const readyLoadHistory = (pin) => {
+  const encrypted = JSON.parse(localStorage.getItem('wallet:accessData')).mainKey;
+  const privKeyStr = wallet.decryptKey(encrypted, pin);
+  const privKey = HDPrivateKey(privKeyStr)
+  return wallet.loadAddressHistory(0, GAP_LIMIT, privKey, pin);
 }
 
 beforeEach(() => {
@@ -122,10 +111,16 @@ test('Generate new HD wallet', (done) => {
   doneCb = done;
 
   // Generate new wallet and save data in localStorage
-  let words = wallet.executeGenerateWallet(256, '', pin);
+  let words = wallet.executeGenerateWallet(256, '', pin, false);
   check(words.split(' ').length, 24, done);
 
-  startCheckLocalStorage();
+  const promise = readyLoadHistory(pin);
+
+  promise.then(() => {
+    checkData();
+  }, (e) => {
+    done.fail('Error loading history from addresses');
+  });
 }, 15000); // 15s to timeout in case done() is not called
 
 test('Generate HD wallet from predefined words', (done) => {
@@ -136,8 +131,14 @@ test('Generate HD wallet from predefined words', (done) => {
 
 
   // Generate new wallet and save data in localStorage
-  let retWords = wallet.generateWallet(words, '', pin);
+  let retWords = wallet.generateWallet(words, '', pin, false);
   check(retWords, words);
 
-  startCheckLocalStorage();
+  const promise = readyLoadHistory(pin);
+
+  promise.then(() => {
+    checkData();
+  }, (e) => {
+    done.fail('Error loading history from addresses');
+  });
 }, 15000); // 15s to timeout in case done() is not called

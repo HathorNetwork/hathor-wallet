@@ -167,7 +167,7 @@ test('Prepare data to send tokens', () => {
   // Now we will update the data in the inputs
   let words = 'purse orchard camera cloud piece joke hospital mechanic timber horror shoulder rebuild you decrease garlic derive rebuild random naive elbow depart okay parrot cliff';
   // Generate new wallet and save data in localStorage
-  wallet.generateWallet(words, '', '123456');
+  wallet.generateWallet(words, '', '123456', true);
   // Adding data to localStorage to be used in the signing process
   let savedData = JSON.parse(localStorage.getItem('wallet:data'));
   let addr = localStorage.getItem('wallet:address');

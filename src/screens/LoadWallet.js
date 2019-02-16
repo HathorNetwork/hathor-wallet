@@ -16,7 +16,7 @@ class LoadWallet extends React.Component {
     } else {
       words = this.refs.walletForm.refs.oneWordInput.value;
     }
-    let success = wallet.generateWallet(words, this.refs.walletForm.state.passphrase, this.refs.walletForm.state.pin);
+    let success = wallet.generateWallet(words, this.refs.walletForm.state.passphrase, this.refs.walletForm.state.pin, true);
     if (success) {
       this.props.history.push('/wallet/');
     } else {

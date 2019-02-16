@@ -7,7 +7,7 @@ beforeEach(() => {
 
 test('Loaded', () => {
   expect(wallet.loaded()).toBeFalsy();
-  wallet.executeGenerateWallet(256, '', '123456');
+  wallet.executeGenerateWallet(256, '', '123456', false);
   expect(wallet.loaded()).toBeTruthy();
 });
 
@@ -171,7 +171,7 @@ test('Can use unspent txs', () => {
 });
 
 test('Output change', () => {
-  wallet.executeGenerateWallet(256, '', '123456');
+  wallet.executeGenerateWallet(256, '', '123456', true);
   let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
   let address = localStorage.getItem('wallet:address');
   let change = wallet.getOutputChange(1000, '123456');
