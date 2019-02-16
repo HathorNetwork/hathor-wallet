@@ -5,7 +5,7 @@ import WalletForm from '../components/WalletForm';
 
 class NewWallet extends React.Component {
   create = () => {
-    let words = wallet.executeGenerateWallet(256, this.refs.walletForm.state.passphrase, this.refs.walletForm.state.pin);
+    let words = wallet.executeGenerateWallet(256, this.refs.walletForm.state.passphrase, this.refs.walletForm.state.pin, true);
     this.refs.walletForm.setState({words: words});
   }
 
