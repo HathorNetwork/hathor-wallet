@@ -11,6 +11,7 @@ import ReactLoading from 'react-loading';
 import ModalPin from '../components/ModalPin'
 import { DECIMAL_PLACES, HATHOR_TOKEN_UID } from '../constants';
 import { connect } from "react-redux";
+import _ from 'lodash';
 
 
 const mapStateToProps = (state) => {
@@ -56,6 +57,16 @@ class SendTokens extends React.Component {
   moreInput = () => {
     let newCount = this.state.inputCount + 1;
     this.setState({ inputCount: newCount });
+  }
+
+  validateData = () => {
+    const isValid = this.refs.formSendTokens.checkValidity();
+    if (isValid === false) {
+      this.refs.formSendTokens.classList.add('was-validated');
+    } else {
+      this.refs.formSendTokens.classList.remove('was-validated');
+    }
+    return isValid;
   }
 
   getData = () => {
@@ -114,6 +125,11 @@ class SendTokens extends React.Component {
       outputsAmount += output.value;
     }
 
+    if (outputsAmount === 0) {
+      this.setState({ errorMessage: 'Total value can\'t be 0', loading: false });
+      return null;
+    }
+
     const noInputs = this.refs.noInputs.checked;
     if (noInputs) {
       // If no inputs selected we select our inputs and, maybe add also a change output
@@ -130,6 +146,8 @@ class SendTokens extends React.Component {
           // Need to create change output
           let outputChange = wallet.getOutputChange(newData.inputsAmount - outputsAmount, this.state.pin);
           data['outputs'].push(outputChange);
+          // Shuffle outputs, so we don't have change output always in the same index
+          data['outputs'] = _.shuffle(data['outputs']);
         }
       }
 
@@ -176,6 +194,8 @@ class SendTokens extends React.Component {
 
   send = () => {
     $('#pinModal').modal('toggle');
+    const isValid = this.validateData();
+    if (!isValid) return;
     let data = this.getData();
     data = this.handleInitialData(data);
     // TODO add token index for each output to support multi tokens
@@ -245,7 +265,7 @@ class SendTokens extends React.Component {
         outputs.push(
           <div className="input-group mb-3" key={i}>
             <input type="text" placeholder="Address" className="form-control output-address col-4" />
-            <input type="number" step={helpers.prettyValue(1)} placeholder={helpers.prettyValue(0)} className="form-control output-value col-2" />
+            <input type="number" step={helpers.prettyValue(1)} min={helpers.prettyValue(1)} placeholder={helpers.prettyValue(0)} className="form-control output-value col-2" />
             <div className="form-check mr-3 d-flex flex-column justify-content-center">
               <input className="form-check-input mt-0 has-timelock" data-index={i} type="checkbox" onChange={this.handleCheckboxTimelockChange}/>
               <label className="form-check-label">
@@ -277,7 +297,7 @@ class SendTokens extends React.Component {
     const renderUnlockedPage = () => {
       return (
         <div>
-          <form id="formSendTokens">
+          <form ref="formSendTokens" id="formSendTokens">
             <div className="outputs-wrapper">
               <label>Outputs</label>
               {renderOutputs()}
@@ -292,7 +312,7 @@ class SendTokens extends React.Component {
               <label htmlFor="inputs">Inputs</label>
               {renderInputs()}
             </div>
-            <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#pinModal">Send Tokens</button>
+            <button type="button" className="btn btn-primary" data-toggle="modal" disabled={this.state.loading} data-target="#pinModal">Send Tokens</button>
           </form>
           <p className="text-danger mt-3">{this.state.errorMessage}</p>
         </div>

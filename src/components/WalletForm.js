@@ -28,7 +28,6 @@ class WalletForm extends React.Component {
         errorMessage = 'Pin is required';
       }
       this.setState({ formInvalid, errorMessage });
-      this.setState({ formInvalid: formInvalid });
     } else {
       this.setState({ formInvalid: formInvalid, loading: true, errorMessage: '' });
       this.props.submit();
