@@ -31,6 +31,7 @@ class RequestErrorModal extends React.Component {
   handleChangeServer = () => {
     $('#requestErrorModal').modal('hide');
     wallet.cleanServer();
+    wallet.cleanWallet();
     this.props.history.push('/server/');
   }
 

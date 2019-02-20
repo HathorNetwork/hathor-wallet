@@ -13,6 +13,7 @@ class VersionError extends React.Component {
 
   changeServer = () => {
     wallet.cleanServer();
+    wallet.cleanWallet();
     window.location.href = '/server/';
   }
 

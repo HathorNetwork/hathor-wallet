@@ -24,6 +24,7 @@ class ModalPin extends React.Component {
   }
 
   handlePin = (e) => {
+    e.preventDefault();
     if (this.refs.formPin.checkValidity() === false) {
       this.refs.formPin.classList.add('was-validated');
     } else {
