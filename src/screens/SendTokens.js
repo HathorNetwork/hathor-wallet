@@ -285,8 +285,8 @@ class SendTokens extends React.Component {
       for (let i=0; i<this.state.inputCount; i++) {
         inputs.push(
           <div className="input-group mb-3" key={i}>
-            <input type="text" placeholder="Tx id" className="form-control input-id col-4" />
-            <input type="text" placeholder="Index" className="form-control input-index col-4" />
+            <input type="text" placeholder="Tx id" className="form-control input-id col-6" />
+            <input type="text" placeholder="Index" className="form-control input-index col-1" />
             {i === 0 ? <button type="button" className="btn btn-primary" onClick={this.moreInput}>+</button> : null}
           </div>
         )
