@@ -1,6 +1,12 @@
 import { GENESIS_BLOCK, GENESIS_TX, DECIMAL_PLACES, MIN_API_VERSION } from '../constants';
 import path from 'path';
 
+/*
+ * Helper methods
+ *
+ * @namespace Helpers
+ */
+
 const helpers = {
   updateListWs(list, newEl, max) {
     // We remove the last element if we already have the max
@@ -102,6 +108,26 @@ const helpers = {
     }
 
     config.transformRequest = [data => data];
+  },
+
+  /*
+   * Returns the right string depending on the quantity (plural or singular)
+   *
+   * @param {number} quantity Value considered to check plural or singular
+   * @param {string} singular String to be returned in case of singular
+   * @param {string} plural String to be returned in case of plural
+   *
+   * @return {string} plural or singular
+   * @memberof Helpers
+   * @inner
+   *
+   */
+  plural(quantity, singular, plural) {
+    if (quantity === 1) {
+      return singular;
+    } else {
+      return plural;
+    }
   }
 }
 

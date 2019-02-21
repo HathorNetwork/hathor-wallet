@@ -10,18 +10,31 @@ class TransactionDetail extends React.Component {
 
     this.state = {
       transaction: null,
+      meta: null,
+      spentOutputs: null,
       loaded: false,
       success: null,
+      confirmationData: null,
     }
   }
 
   componentDidMount() {
     this.getTx();
+    this.getConfirmationData();
+  }
+
+  getConfirmationData = () => {
+    txApi.getConfirmationData(this.props.match.params.id, (data) => {
+      this.setState({ confirmationData: data });
+    }, (e) => {
+      // Error in request
+      console.log(e);
+    });
   }
 
   txReceived(data) {
     if (data.success) {
-      this.setState({ transaction: data.tx, loaded: true, success: true });
+      this.setState({ transaction: data.tx, meta: data.meta, spentOutputs: data.spent_outputs, loaded: true, success: true });
     } else {
       this.setState({ loaded: true, success: false, transaction: null });
     }
@@ -46,7 +59,7 @@ class TransactionDetail extends React.Component {
     const renderTx = () => {
       return (
         <div>
-          {this.state.transaction ? <TxData transaction={this.state.transaction} showRaw={true} showConflicts={true} /> : <p className="text-danger">Transaction with hash {this.props.match.params.id} not found</p>}
+          {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} /> : <p className="text-danger">Transaction with hash {this.props.match.params.id} not found</p>}
         </div>
       );
     }
