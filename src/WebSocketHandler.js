@@ -5,6 +5,7 @@ import { isOnlineUpdate } from "./actions/index";
 import store from './store/index';
 
 const HEARTBEAT_TMO = 30000;     // 30s
+const WS_READYSTATE_READY = 1;
 
 
 class WS extends EventEmitter {
@@ -63,8 +64,15 @@ class WS extends EventEmitter {
       this.setIsOnline(false);
       return;
     }
-    
-    this.ws.send(msg);
+
+    if (this.ws.readyState === WS_READYSTATE_READY) {
+      this.ws.send(msg);
+    } else {
+      // If it is still connecting, we wait a little and try again
+      setTimeout(() => {
+        this.sendMessage(msg);
+      }, 1000);
+    }
   }
 
   sendPing = () => {

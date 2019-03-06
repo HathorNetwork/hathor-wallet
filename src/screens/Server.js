@@ -2,6 +2,7 @@ import React from 'react';
 import { DEFAULT_SERVERS } from '../constants';
 import $ from 'jquery';
 import version from '../utils/version';
+import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
 
 
@@ -29,16 +30,24 @@ class Server extends React.Component {
       this.setState({ errorMessage: 'New server is not valid' });
       return;
     }
-    this.setState({ loading: true });
     let newServer = null;
     if (this.state.newServer) {
       newServer = this.refs.newServer.value;
     } else {
       newServer = this.state.selectedValue;
     }
-    localStorage.setItem('wallet:server', newServer);
+
+    if (!wallet.isPinCorrect(this.refs.pin.value)) {
+      this.setState({ errorMessage: 'Invalid PIN' });
+      return;
+    }
+
+    this.setState({ loading: true, errorMessage: '' });
+    // Update new server in local storage
+    wallet.changeServer(newServer)
     version.checkVersion(() => {
-      this.props.history.push('/');
+      wallet.reloadData(this.refs.pin.value);
+      this.props.history.push('/wallet/');
     }, () => {
       this.setState({ loading: false });
     });
@@ -88,9 +97,10 @@ class Server extends React.Component {
           <div ref="newServerWrapper" className="mt-3" style={{display: 'none'}}>
             <input type="text" placeholder="New server" ref="newServer" className="form-control col-4" />
           </div>
+          <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder="PIN" className="form-control col-4 mt-3" />
         </form>
         <div className="d-flex flex-row align-items-center mt-3">
-          <button onClick={this.serverSelected} type="button" className="btn btn-primary mr-3">Connect to server</button>
+          <button onClick={this.serverSelected} type="button" className="btn btn-hathor mr-3">Connect to server</button>
           {this.state.loading && <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />}
         </div>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>

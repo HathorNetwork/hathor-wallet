@@ -12,9 +12,15 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    show: false
+    show: false,
+    width: 1024,
+    height: 768,
+    webPreferences: {
+      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js')
+    }
   })
-  mainWindow.maximize()
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })
@@ -67,7 +73,7 @@ if (process.platform === 'darwin') {
   // Set "About" options only on macOS
   app.setAboutPanelOptions({
     'applicationName': appName,
-    'applicationVersion': '0.1.0',
+    'applicationVersion': '0.2.0-beta',
     'version': '',
   });
 }

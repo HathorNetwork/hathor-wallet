@@ -3,7 +3,6 @@ import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
 import { connect } from 'react-redux';
 import helpers from '../utils/helpers';
-import wallet from '../utils/wallet';
 
 
 const mapStateToProps = (state) => {
@@ -30,8 +29,6 @@ class RequestErrorModal extends React.Component {
 
   handleChangeServer = () => {
     $('#requestErrorModal').modal('hide');
-    wallet.cleanServer();
-    wallet.cleanWallet();
     this.props.history.push('/server/');
   }
 
@@ -43,7 +40,7 @@ class RequestErrorModal extends React.Component {
 
   modalHiddenRetry = () => {
     let config = this.props.lastFailedRequest;
-    let axios = createRequestInstance();
+    let axios = createRequestInstance(config.resolve);
     helpers.fixAxiosConfig(axios, config);
     axios(config).then((response) => {
       config.resolve(response.data);
@@ -64,10 +61,11 @@ class RequestErrorModal extends React.Component {
             </div>
             <div className="modal-body">
               <p>Your request failed to reach the server. What do you want to do?</p>
+              <p>You are connected to <strong>{helpers.getServerURL()}</strong></p>
             </div>
             <div className="modal-footer">
               <button onClick={this.handleChangeServer} type="button" className="btn btn-secondary">Change server</button>
-              <button onClick={this.handleRetryRequest} type="button" className="btn btn-primary">Retry request</button>
+              <button onClick={this.handleRetryRequest} type="button" className="btn btn-hathor">Retry request</button>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { GENESIS_BLOCK, GENESIS_TX, DECIMAL_PLACES, MIN_API_VERSION } from '../constants';
+import { GENESIS_BLOCK, GENESIS_TX, DECIMAL_PLACES, MIN_API_VERSION, DEFAULT_SERVER } from '../constants';
 import path from 'path';
 
 /*
@@ -67,29 +67,27 @@ const helpers = {
     return version.replace(/[^\d.]/g, '').split('.');
   },
 
-  isServerChosen() {
-    return this.getServerURL() !== null;
-  },
-
   getServerURL() {
-    return localStorage.getItem('wallet:server');
+    let server = localStorage.getItem('wallet:server');
+    if (server === null) {
+      server = DEFAULT_SERVER;
+    }
+    return server;
   },
 
   getWSServerURL() {
-    let serverURL = localStorage.getItem('wallet:server');
-    if (serverURL) {
-      let pieces = serverURL.split(':');
-      let firstPiece = pieces.splice(0, 1);
-      let protocol = '';
-      if (firstPiece[0].indexOf('s') > -1) {
-        // Has ssl
-        protocol = 'wss';
-      } else {
-        // No ssl
-        protocol = 'ws';
-      }
-      serverURL = path.join(`${protocol}:${pieces.join(':')}`, 'ws/');
+    let serverURL = this.getServerURL();
+    const pieces = serverURL.split(':');
+    const firstPiece = pieces.splice(0, 1);
+    let protocol = '';
+    if (firstPiece[0].indexOf('s') > -1) {
+      // Has ssl
+      protocol = 'wss';
+    } else {
+      // No ssl
+      protocol = 'ws';
     }
+    serverURL = path.join(`${protocol}:${pieces.join(':')}`, 'ws/');
     return serverURL;
   },
 
@@ -128,6 +126,26 @@ const helpers = {
     } else {
       return plural;
     }
+  },
+
+  /*
+   * Return the count of element inside the array
+   *
+   * @param {Array} array The array where the element is
+   * @param {*} element The element that will be counted how many time appears in the array
+   *
+   * @return {number} count of the element inside the array
+   * @memberof Helpers
+   * @inner
+   */
+  elementCount(array, element) {
+    let count = 0;
+    for (const el of array) {
+      if (el === element) {
+        count++;
+      }
+    }
+    return count;
   }
 }
 

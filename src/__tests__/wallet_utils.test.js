@@ -1,5 +1,6 @@
 import wallet from '../utils/wallet';
 import dateFormatter from '../utils/date';
+import ReactDOMServer from 'react-dom/server';
 
 beforeEach(() => {
   wallet.cleanLocalStorage();
@@ -7,7 +8,8 @@ beforeEach(() => {
 
 test('Loaded', () => {
   expect(wallet.loaded()).toBeFalsy();
-  wallet.executeGenerateWallet(256, '', '123456', false);
+  const words = wallet.generateWalletWords(256);
+  wallet.executeGenerateWallet(words, '', '123456', 'password', false);
   expect(wallet.loaded()).toBeTruthy();
 });
 
@@ -126,10 +128,12 @@ test('Update address history', () => {
 });
 
 test('Valid words', () => {
-  expect(wallet.wordsValid('less than 24 words')).toBeFalsy();
-  expect(wallet.wordsValid(123)).toBeFalsy();
-  expect(wallet.wordsValid(256)).toBeTruthy();
-  expect(wallet.generateWallet({})).toBeFalsy();
+  expect(wallet.wordsValid('less than 24 words').valid).toBe(false);
+  expect(wallet.wordsValid(123).valid).toBe(false);
+  expect(wallet.wordsValid(256).valid).toBe(false);
+  expect(wallet.generateWallet({})).toBe(null);
+  const words = wallet.generateWalletWords(256);
+  expect(wallet.wordsValid(words).valid).toBe(true);
 });
 
 test('Inputs from amount', () => {
@@ -171,7 +175,8 @@ test('Can use unspent txs', () => {
 });
 
 test('Output change', () => {
-  wallet.executeGenerateWallet(256, '', '123456', true);
+  const words = wallet.generateWalletWords(256);
+  wallet.executeGenerateWallet(words, '', '123456', 'password', true);
   let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
   let address = localStorage.getItem('wallet:address');
   let change = wallet.getOutputChange(1000, '123456');
@@ -209,4 +214,69 @@ test('Unspent txs exist', () => {
   expect(wallet.checkUnspentTxExists('1,0', '00')).toBeTruthy();
   expect(wallet.checkUnspentTxExists('1,1', '00')).toBeTruthy();
   expect(wallet.checkUnspentTxExists('0,1', '00')).toBeFalsy();
+});
+
+test('Wallet locked', () => {
+  expect(wallet.isLocked()).toBe(false);
+  wallet.lock();
+  expect(wallet.isLocked()).toBe(true);
+  wallet.unlock();
+  expect(wallet.isLocked()).toBe(false);
+});
+
+test('Wallet backup', () => {
+  expect(wallet.isBackupDone()).toBe(false);
+  wallet.markBackupAsDone();
+  expect(wallet.isBackupDone()).toBe(true);
+});
+
+test('Get wallet words', () => {
+  const words = wallet.generateWalletWords(256);
+  wallet.executeGenerateWallet(words, '', '123456', 'password', true);
+  expect(parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10)).toBe(0)
+
+  const sharedAddress = localStorage.getItem('wallet:address');
+  const key = JSON.parse(localStorage.getItem('wallet:data')).keys[sharedAddress];
+  expect(wallet.getWalletWords('password')).toBe(words);
+
+  wallet.addPassphrase('passphrase', '123456', 'password');
+  expect(wallet.getWalletWords('password')).toBe(words);
+  expect(parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10)).toBe(0)
+
+  const newSharedAddress = localStorage.getItem('wallet:address');
+  expect(sharedAddress).not.toBe(newSharedAddress);
+  expect(key.index).toBe(JSON.parse(localStorage.getItem('wallet:data')).keys[newSharedAddress].index);
+});
+
+test('Change server', () => {
+  const words = wallet.generateWalletWords(256);
+  wallet.executeGenerateWallet(words, '', '123456', 'password', true);
+  const accessData = JSON.parse(localStorage.getItem('wallet:accessData'));
+  const keys = JSON.parse(localStorage.getItem('wallet:data')).keys;
+
+  wallet.reloadData('123456');
+
+  expect(JSON.parse(localStorage.getItem('wallet:accessData'))).toEqual(accessData);
+});
+
+test('Started', () => {
+  expect(wallet.started()).toBe(false);
+  localStorage.setItem('wallet:started', true);
+  expect(wallet.started()).toBe(true);
+});
+
+test('Reset all data', () => {
+  const words = wallet.generateWalletWords(256);
+  wallet.executeGenerateWallet(words, '', '123456', 'password', true);
+  localStorage.setItem('wallet:started', true);
+  localStorage.setItem('wallet:server', 'http://server');
+  localStorage.setItem('wallet:locked', true);
+
+  wallet.resetAllData();
+
+  expect(localStorage.getItem('wallet:started')).toBeNull();
+  expect(localStorage.getItem('wallet:server')).toBeNull();
+  expect(localStorage.getItem('wallet:locked')).toBeNull();
+  expect(localStorage.getItem('wallet:accessData')).toBeNull();
+  expect(localStorage.getItem('wallet:data')).toBeNull();
 });

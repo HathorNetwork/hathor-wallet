@@ -3,7 +3,7 @@ import createRequestInstance from './axiosInstance';
 const walletApi = {
   getAddressHistory(addresses, resolve) {
     const data = {addresses};
-    return createRequestInstance().get('thin_wallet/address_history', {'params': data}).then((res) => {
+    return createRequestInstance(resolve).get('thin_wallet/address_history', {'params': data}).then((res) => {
       resolve(res.data)
     }, (res) => {
       return Promise.reject(res);
@@ -12,7 +12,7 @@ const walletApi = {
 
   sendTokens(txHex, resolve) {
     const postData = {tx_hex: txHex};
-    return createRequestInstance().post('thin_wallet/send_tokens', postData).then((res) => {
+    return createRequestInstance(resolve).post('thin_wallet/send_tokens', postData).then((res) => {
       resolve(res.data)
     }, (res) => {
       return Promise.reject(res);

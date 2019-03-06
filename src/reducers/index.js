@@ -74,6 +74,12 @@ const initialState = {
   isOnline: undefined,
   // Config of the last request that failed
   lastFailedRequest: undefined,
+  // Wallet password
+  password: undefined,
+  // Wallet pin
+  pin: undefined,
+  // Wallet words
+  words: undefined,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -129,6 +135,12 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, initialState, {isVersionAllowed: state.isVersionAllowed});
     case 'last_failed_request':
       return Object.assign({}, state, {lastFailedRequest: action.payload});
+    case 'update_password':
+      return Object.assign({}, state, {password: action.payload});
+    case 'update_pin':
+      return Object.assign({}, state, {pin: action.payload});
+    case 'update_words':
+      return Object.assign({}, state, {words: action.payload});
     default:
       return state;
   }
