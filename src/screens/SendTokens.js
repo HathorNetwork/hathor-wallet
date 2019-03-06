@@ -273,7 +273,7 @@ class SendTokens extends React.Component {
               </label>
             </div>
             <input type="datetime-local" placeholder="Date and time in GMT" step="1" id={`output-timelock-${i}`} className="form-control output-timelock col-3" style={{display: 'none'}}/>
-            {i === 0 ? <button type="button" className="btn btn-primary" onClick={this.moreOutput}>+</button> : null}
+            {i === 0 ? <button type="button" className="btn btn-hathor" onClick={this.moreOutput}>+</button> : null}
           </div>
         )
       }
@@ -287,7 +287,7 @@ class SendTokens extends React.Component {
           <div className="input-group mb-3" key={i}>
             <input type="text" placeholder="Tx id" className="form-control input-id col-6" />
             <input type="text" placeholder="Index" className="form-control input-index col-1" />
-            {i === 0 ? <button type="button" className="btn btn-primary" onClick={this.moreInput}>+</button> : null}
+            {i === 0 ? <button type="button" className="btn btn-hathor" onClick={this.moreInput}>+</button> : null}
           </div>
         )
       }
@@ -312,7 +312,7 @@ class SendTokens extends React.Component {
               <label htmlFor="inputs">Inputs</label>
               {renderInputs()}
             </div>
-            <button type="button" className="btn btn-primary" data-toggle="modal" disabled={this.state.loading} data-target="#pinModal">Send Tokens</button>
+            <button type="button" className="btn btn-hathor" data-toggle="modal" disabled={this.state.loading} data-target="#pinModal">Send Tokens</button>
           </form>
           <p className="text-danger mt-3">{this.state.errorMessage}</p>
         </div>

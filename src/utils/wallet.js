@@ -1,4 +1,4 @@
-import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE } from '../constants';
+import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK } from '../constants';
 import Mnemonic from 'bitcore-mnemonic';
 import { HDPrivateKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
@@ -21,11 +21,20 @@ import _ from 'lodash';
  * - accessData: object with data to access the wallet
  *   . mainKey: string with encrypted private key
  *   . hash: string with hash of pin
+ *   . words: string with encrypted words
+ *   . hashPasswd: string with hash of password
  * - address: string with last shared address to show on screen
  * - lastSharedIndex: number with the index of the last shared address
  * - lastGeneratedIndex: number with the index of the last generated address
  * - lastUsedIndex: number with the index of the last used address
  * - lastUsedAddress: string the last used address
+ * - server: string with server to connect and execute requests
+ * - started: if wallet was already started (after welcome screen)
+ * - backup: if words backup was already done
+ * - locked: if wallet is locked
+ * - closed: when the wallet was closed
+ * - txMinWeight: minimum weight of a transaction (variable got from the backend)
+ * - txWeightCoefficient: minimum weight coefficient of a transaction (variable got from the backend)
  *
  * @namespace Wallet
  */
@@ -34,31 +43,30 @@ const wallet = {
   /**
    * Validate if can generate the wallet with those parameters and then, call to generate it
    *
-   * @param {string|number} mnemonicData Data to generate the HD Wallet seed,
-   * can be a string with words or a number with the entropy (256 - to generate 24 words)
+   * @param {string} words Words to generate the HD Wallet seed,
    * @param {string} passphrase
    * @param {string} pin
+   * @param {string} password
    * @param {boolean} loadHistory if should load history from generated addresses
    *
    * @return {string} words generated (null if words are not valid)
    * @memberof Wallet
    * @inner
    */
-  generateWallet(words, passphrase, pin, loadHistory) {
-    if (this.wordsValid(words) && Mnemonic.isValid(words)) {
-      return this.executeGenerateWallet(words, passphrase, pin, loadHistory);
+  generateWallet(words, passphrase, pin, password, loadHistory) {
+    if (this.wordsValid(words).valid) {
+      return this.executeGenerateWallet(words, passphrase, pin, password, loadHistory);
     } else {
       return null;
     }
   },
 
   /**
-   * Verify if words passed to generate wallet are valid
+   * Verify if words passed to generate wallet are valid. In case of invalid, returns message
    *
-   * @param {string|number} words Data to generate the HD Wallet seed,
-   * can be a string with words or a number with the entropy (256 - to generate 24 words)
+   * @param {string} words Words (separated by space) to generate the HD Wallet seed
    *
-   * @return {boolean} if words are valid
+   * @return {Object} {'valid': boolean, 'message': string}
    * @memberof Wallet
    * @inner
    */
@@ -66,46 +74,61 @@ const wallet = {
     if (_.isString(words)) {
       if (words.split(' ').length !== 24) {
         // Must have 24 words
-        return false;
-      }
-    } else if (_.isNumber(words)) {
-      if (words !== 256) {
-        // Must generate words with 256 of entropy
-        return false;
+        return {'valid': false, 'message': 'Must have 24 words'};
+      } else if (!Mnemonic.isValid(words)) {
+        // Invalid sequence of words
+        return {'valid': false, 'message': 'Invalid sequence of words'};
       }
     } else {
-      // Must be string or number
-      return false;
+      // Must be string
+      return {'valid': false, 'message': 'Must be a string'};
     }
-    return true;
+    return {'valid': true, 'message': ''};
+  },
+
+  /**
+   * Generate HD wallet words
+   *
+   * @param {string|number} entropy Data to generate the HD Wallet seed - entropy (256 - to generate 24 words)
+   *
+   * @return {string} words generated
+   * @memberof Wallet
+   * @inner
+   */
+  generateWalletWords(entropy) {
+    const code = new Mnemonic(entropy);
+    return code.phrase;
   },
 
   /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
-   * @param {string|number} mnemonicData Data to generate the HD Wallet seed,
-   * can be a string with words or a number with the entropy (256 - to generate 24 words)
+   * @param {string} words Words to generate the HD Wallet seed
    * @param {string} passphrase
    * @param {string} pin
+   * @param {string} password
    * @param {boolean} loadHistory if should load the history from the generated addresses
    *
    * @return {string} words generated
    * @memberof Wallet
    * @inner
    */
-  executeGenerateWallet(mnemonicData, passphrase, pin, loadHistory) {
+  executeGenerateWallet(words, passphrase, pin, password, loadHistory) {
     WebSocketHandler.setup();
-    let code = new Mnemonic(mnemonicData);
-    let xpriv = code.toHDPrivateKey(passphrase);
+    let code = new Mnemonic(words);
+    let xpriv = code.toHDPrivateKey(passphrase, NETWORK);
     let privkey = xpriv.derive(`m/44'/${HATHOR_BIP44_CODE}'/0'/0`);
 
     let encryptedData = this.encryptData(privkey.xprivkey, pin)
+    let encryptedDataWords = this.encryptData(words, password)
 
-    // Save in localStorage the encrypted private key and the hash of the pin
+    // Save in localStorage the encrypted private key and the hash of the pin and password
     let access = {
       mainKey: encryptedData.encrypted.toString(),
-      hash: encryptedData.pinHash.toString()
+      hash: encryptedData.hash.toString(),
+      words: encryptedDataWords.encrypted.toString(),
+      hashPasswd: encryptedDataWords.hash.toString(),
     }
 
     let walletData = {
@@ -146,7 +169,7 @@ const wallet = {
     for (var i=startIndex; i<startIndex+count; i++) {
       // Generate each key from index, encrypt and save
       let key = privkey.derive(i);
-      var address = Address(key.publicKey);
+      var address = Address(key.publicKey, NETWORK);
       let keyData = this.encryptData(key.xprivkey, pin);
       dataJson['keys'][address.toString()] = {privkey: keyData.encrypted.toString(), index: i};
       addresses.push(address.toString());
@@ -220,6 +243,23 @@ const wallet = {
   },
 
   /**
+   * Add passphrase to the wallet
+   *
+   * @param {string} passphrase Passphrase to be added
+   * @param {string} pin
+   * @param {string} password
+   *
+   * @return {string} words generated (null if words are not valid)
+   * @memberof Wallet
+   * @inner
+   */
+  addPassphrase(passphrase, pin, password) {
+    const words = this.getWalletWords(password);
+    this.cleanWallet()
+    return this.generateWallet(words, passphrase, pin, password, true);
+  },
+
+  /**
    * Update address shared in localStorage and redux
    *
    * @param {string} lastSharedAddress
@@ -246,23 +286,37 @@ const wallet = {
    */
   encryptData(privateKey, pin) {
     const encrypted = CryptoJS.AES.encrypt(privateKey, pin);
-    const pinHash = CryptoJS.SHA256(CryptoJS.SHA256(pin));
-    return {'encrypted': encrypted, 'pinHash': pinHash}
+    const hash = this.hashPassword(pin);
+    return {'encrypted': encrypted, 'hash': hash}
   },
 
   /**
-   * Decrypt private key with pin
+   * Get the hash (sha256) of a password
    *
-   * @param {string} key Encrypted private key
-   * @param {string} pin
+   * @param {string} password Password to be hashes
    *
-   * @return {string} string of private key
+   * @return {Object} Object with hash of password
    *
    * @memberof Wallet
    * @inner
    */
-  decryptKey(key, pin) {
-    let decrypted = CryptoJS.AES.decrypt(key, pin);
+  hashPassword(password) {
+    return CryptoJS.SHA256(CryptoJS.SHA256(password));
+  },
+
+  /**
+   * Decrypt data with password
+   *
+   * @param {string} data Encrypted data
+   * @param {string} password
+   *
+   * @return {string} string of decrypted data
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  decryptData(data, password) {
+    let decrypted = CryptoJS.AES.decrypt(data, password);
     return decrypted.toString(CryptoJS.enc.Utf8);
   },
 
@@ -278,8 +332,24 @@ const wallet = {
    */
   isPinCorrect(pin) {
     let data = JSON.parse(localStorage.getItem('wallet:accessData'));
-    let pinHash = CryptoJS.SHA256(CryptoJS.SHA256(pin)).toString();
+    let pinHash = this.hashPassword(pin).toString();
     return pinHash === data.hash;
+  },
+
+  /**
+   * Validate if password is correct
+   *
+   * @param {string} password
+   *
+   * @return {boolean}
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  isPasswordCorrect(password) {
+    let data = JSON.parse(localStorage.getItem('wallet:accessData'));
+    let passwordHash = this.hashPassword(password).toString();
+    return passwordHash === data.hashPasswd;
   },
 
   /**
@@ -354,14 +424,14 @@ const wallet = {
     // Get private key
     let accessData = JSON.parse(localStorage.getItem('wallet:accessData'));
     let toDecrypt = accessData.mainKey;
-    let decrypted = this.decryptKey(toDecrypt, pin);
+    let decrypted = this.decryptData(toDecrypt, pin);
     let privKey = HDPrivateKey(decrypted);
 
     // Get last shared index to discover new index
     let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
     let newIndex = lastSharedIndex + 1;
     let newKey = privKey.derive(newIndex);
-    let newAddress = Address(newKey.publicKey);
+    let newAddress = Address(newKey.publicKey, NETWORK);
     let newKeyData = this.encryptData(newKey.xprivkey, pin);
 
     // Update address data and last generated indexes
@@ -497,6 +567,30 @@ const wallet = {
   },
 
   /**
+   * Check if wallet was already started (user clicked in 'Get started')
+   *
+   * @return {boolean}
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  started() {
+    return localStorage.getItem('wallet:started') !== null;
+  },
+
+  /**
+   * Save wallet as started
+   *
+   * @return {boolean}
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  markWalletAsStarted() {
+    return localStorage.setItem('wallet:started', true);
+  },
+
+  /**
    * Subscribe to receive updates from an address in the websocket
    *
    * @param {string} address
@@ -594,6 +688,20 @@ const wallet = {
     localStorage.removeItem('wallet:server');
   },
 
+  /*
+   * Clean all data from everything
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  resetAllData() {
+    this.cleanWallet();
+    this.cleanServer();
+    localStorage.removeItem('wallet:started');
+    localStorage.removeItem('wallet:backup');
+    localStorage.removeItem('wallet:locked');
+  },
+
   /**
    * Remove all localStorages saved items
    * @memberof Wallet
@@ -607,6 +715,7 @@ const wallet = {
     localStorage.removeItem('wallet:lastGeneratedIndex');
     localStorage.removeItem('wallet:lastUsedIndex');
     localStorage.removeItem('wallet:lastUsedAddress');
+    localStorage.removeItem('wallet:closed');
   },
 
   /**
@@ -977,6 +1086,142 @@ const wallet = {
       }
     }
   },
+
+  /*
+   * Lock wallet
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  lock() {
+    localStorage.setItem('wallet:locked', true);
+  },
+
+  /*
+   * Unlock wallet
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  unlock() {
+    localStorage.removeItem('wallet:locked');
+  },
+
+  /*
+   * Return if wallet is locked
+   *
+   * @return {boolean} if wallet is locked
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  isLocked() {
+    return localStorage.getItem('wallet:locked') !== null;
+  },
+
+  /*
+   * Return if wallet was closed
+   *
+   * @return {boolean} if wallet was closed
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  wasClosed() {
+    return localStorage.getItem('wallet:closed') !== null;
+  },
+
+  /**
+   * Get words of the loaded wallet
+   *
+   * @param {string} password Password to decrypt the words
+   *
+   * @return {string} words of the wallet
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getWalletWords(password) {
+    const data = JSON.parse(localStorage.getItem('wallet:accessData'));
+    return this.decryptData(data.words, password);
+  },
+
+  /*
+   * Save backup done in localStorage
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  markBackupAsDone() {
+    localStorage.setItem('wallet:backup', true);
+  },
+
+  /*
+   * Save backup not done in localStorage
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  markBackupAsNotDone() {
+    localStorage.removeItem('wallet:backup');
+  },
+
+  /*
+   * Return if backup of wallet words is done
+   *
+   * @return {boolean} if wallet words are saved
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  isBackupDone() {
+    return localStorage.getItem('wallet:backup') !== null;
+  },
+
+  /*
+   * Reload data in the localStorage
+   *
+   * @param {string} pin PIN to decrypt data
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  reloadData(pin) {
+    // Get old access data
+    const accessData = JSON.parse(localStorage.getItem('wallet:accessData'));
+
+    // Clean all data in the wallet from the old server
+    this.cleanWallet();
+    // Restart websocket connection
+    WebSocketHandler.setup();
+
+    const walletData = {
+      keys: {}
+    }
+
+    // Prepare to save new data
+    localStorage.setItem('wallet:accessData', JSON.stringify(accessData));
+    localStorage.setItem('wallet:data', JSON.stringify(walletData));
+
+    const toDecrypt = accessData.mainKey;
+    const decrypted = this.decryptData(toDecrypt, pin);
+    const privKey = HDPrivateKey(decrypted);
+
+    // Load history from new server
+    this.loadAddressHistory(0, GAP_LIMIT, privKey, pin);
+  },
+
+  /*
+   * Change server in localStorage
+   *
+   * @param {string} newServer New server to connect
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  changeServer(newServer) {
+    localStorage.setItem('wallet:server', newServer);
+  }
 }
 
 export default wallet;

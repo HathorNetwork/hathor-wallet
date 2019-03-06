@@ -3,7 +3,6 @@ import { MIN_API_VERSION } from '../constants';
 import version from '../utils/version';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from '../components/Version';
-import wallet from '../utils/wallet';
 
 
 class VersionError extends React.Component {
@@ -12,9 +11,7 @@ class VersionError extends React.Component {
   }
 
   changeServer = () => {
-    wallet.cleanServer();
-    wallet.cleanWallet();
-    window.location.href = '/server/';
+    this.props.history.push('/server/');
   }
 
   render() {
@@ -35,8 +32,8 @@ class VersionError extends React.Component {
         <div className="content-wrapper">
           <p>Your API backend version is not compatible with this admin. We expect at least the version {MIN_API_VERSION}</p>
           <p>Please update you API version and try again</p>
-          <button className="btn btn-primary" onClick={this.versionUpdated}>Try again</button>
-          <button className="btn btn-primary ml-3" onClick={this.changeServer}>Change Server</button>
+          <button className="btn btn-hathor" onClick={this.versionUpdated}>Try again</button>
+          <button className="btn btn-hathor ml-3" onClick={this.changeServer}>Change Server</button>
         </div>
       </div>
     );

@@ -9,8 +9,8 @@
       "global": {
         "branches": 20,
         "functions": 5,
-        "lines": 35,
-        "statements": 35
+        "lines": 30,
+        "statements": 30
       }
     },
     "coverageReporters": [
@@ -21,7 +21,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Foundation <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.1.0",
+  "version": "0.2.0-beta",
   "private": true,
   "dependencies": {
     "axios": "^0.17.1",

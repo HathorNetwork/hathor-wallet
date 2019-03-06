@@ -2,9 +2,19 @@ import React from 'react';
 import WalletHistory from '../components/WalletHistory';
 import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
+import ModalBackupWords from '../components/ModalBackupWords';
 import HathorAlert from '../components/HathorAlert';
 import wallet from '../utils/wallet';
+import $ from 'jquery';
+import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
+
+
+const mapDispatchToProps = dispatch => {
+  return {
+    updateWords: data => dispatch(updateWords(data)),
+  };
+};
 
 
 const mapStateToProps = (state) => {
@@ -17,13 +27,13 @@ class Wallet extends React.Component {
     super(props);
 
     this.state = {
-      warning: null,
       balance: null,
+      backupDone: true,
     }
   }
 
   componentDidMount = () => {
-    this.setState({ balance: wallet.calculateBalance(this.props.unspentTxs) });
+    this.setState({ balance: wallet.calculateBalance(this.props.unspentTxs), backupDone: wallet.isBackupDone() });
   }
 
   componentDidUpdate(prevProps) {
@@ -32,35 +42,37 @@ class Wallet extends React.Component {
     }
   }
 
-  showWarning = (message) => {
-    this.setState({ warning: message })
-    this.refs.alertWarning.show(5000);
-  }
-
-  backupKeysWarning = (keysCount) => {
-    const warnMessage = `${keysCount} new keys were generated! Backup your wallet`;
-    this.showWarning(warnMessage);
-  }
-
-  gapLimitWarning = () => {
-    const warnMessage = 'You have achieved the limit of unused addresses in sequence. Use this one to generate more.';
-    this.showWarning(warnMessage);
-  }
-
   sendTokens = () => {
     this.props.history.push('/wallet/send_tokens');
   }
 
-  willLockWallet = () => {
-    wallet.cleanWallet();
-    this.props.history.push('/');
+  lockWallet = () => {
+    wallet.lock();
+    this.props.history.push('/locked/');
   }
 
-  addressLoaded = () => {
-    this.setState({addressLoaded: true});
+  backupClicked = (e) => {
+    e.preventDefault();
+    $('#backupWordsModal').modal('show');
+  }
+
+  backupSuccess = () => {
+    $('#backupWordsModal').modal('hide');
+    wallet.markBackupAsDone();
+    this.props.updateWords(null);
+    this.setState({ backupDone: true });
+    this.refs.alertSuccess.show(1000);
   }
 
   render() {
+    const renderBackupAlert = () => {
+      return (
+        <div ref="backupAlert" className="alert alert-warning backup-alert" role="alert">
+          You haven't done the backup of your wallet yet. You should do it as soon as possible for your own safety. <a href="true" onClick={(e) => this.backupClicked(e)}>Do it now</a>
+        </div>
+      )
+    }
+
     const renderWallet = () => {
       return (
         <div>
@@ -88,8 +100,8 @@ class Wallet extends React.Component {
     const renderBtns = (wrapperClass) => {
       return (
         <div className={wrapperClass}>
-          <div><button className="btn send-tokens btn-primary" onClick={this.sendTokens}>Send tokens</button></div>
-          <div><button className="btn btn-primary" onClick={this.willLockWallet}>Lock wallet</button></div>
+          <div><button className="btn send-tokens btn-hathor" onClick={this.sendTokens}>Send tokens</button></div>
+          <div><button className="btn btn-hathor" onClick={this.lockWallet}>Lock wallet</button></div>
         </div>
       );
     }
@@ -98,17 +110,21 @@ class Wallet extends React.Component {
       return (
         <div>
           {renderWallet()}
-          {this.state.warning ? <HathorAlert ref="alertWarning" text={this.state.warning} type="warning" /> : null}
         </div>
       );
     }
 
     return (
-      <div className="content-wrapper">
-        {renderUnlockedWallet()}
+      <div>
+        {!this.state.backupDone && renderBackupAlert()}
+        <div className="content-wrapper">
+          {renderUnlockedWallet()}
+        </div>
+        <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
+        <HathorAlert ref="alertSuccess" text="Backup completed!" type="success" />
       </div>
     );
   }
 }
 
-export default connect(mapStateToProps)(Wallet);
+export default connect(mapStateToProps, mapDispatchToProps)(Wallet);

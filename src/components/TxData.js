@@ -187,7 +187,7 @@ class TxData extends React.Component {
       return (
         <div className="mt-3">
           <label className="graph-label">{label}:</label>
-          <img alt={label} className="mt-3" src={graphURL(this.props.transaction.hash, type)} />
+          <img alt={label} className="mt-3 graph-img" src={graphURL(this.props.transaction.hash, type)} />
         </div>
       );
     }
@@ -196,7 +196,7 @@ class TxData extends React.Component {
       if (this.props.confirmationData) {
         let acc = helpers.roundFloat(this.props.confirmationData.accumulated_weight);
         if (this.props.confirmationData.accumulated_bigger) {
-          return `Bigger than ${acc}`;
+          return `Over ${acc}`;
         } else {
           return acc;
         }

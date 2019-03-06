@@ -14,7 +14,7 @@ class ModalPin extends React.Component {
 
   componentDidMount = () => {
     $('#pinModal').on('hide.bs.modal', (e) => {
-      this.setState({ errorChangePassword: '' });
+      this.setState({ errorMessage: '' });
       this.refs.pinInput.refs.pin.value = '';
     })
 
@@ -64,7 +64,7 @@ class ModalPin extends React.Component {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button onClick={this.handlePin} type="button" className="btn btn-primary">Go</button>
+              <button onClick={this.handlePin} type="button" className="btn btn-hathor">Go</button>
             </div>
           </div>
         </div>

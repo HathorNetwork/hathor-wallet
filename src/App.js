@@ -3,14 +3,18 @@ import { Switch, BrowserRouter as Router, Route, Redirect } from 'react-router-d
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import Navigation from './components/Navigation';
+import WaitVersion from './components/WaitVersion';
 import TransactionDetail from './screens/TransactionDetail';
 import Server from './screens/Server';
+import ChoosePassphrase from './screens/ChoosePassphrase';
+import Welcome from './screens/Welcome';
 import Signin from './screens/Signin';
+import LockedWallet from './screens/LockedWallet';
 import NewWallet from './screens/NewWallet';
+import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import VersionError from './screens/VersionError';
 import { historyUpdate, voidedTx, winnerTx } from "./actions/index";
-import helpers from './utils/helpers';
 import version from './utils/version';
 import wallet from './utils/wallet';
 import { connect } from "react-redux";
@@ -36,12 +40,6 @@ class Root extends React.Component {
   componentDidMount() {
     WebSocketHandler.on('wallet', this.handleWebsocket);
     WebSocketHandler.on('storage', this.handleWebsocketStorage);
-
-    if (helpers.isServerChosen()) {
-      version.checkVersion();
-    }
-
-    this.loadedData = wallet.localStorageToRedux();
   }
 
   componentWillUnmount() {
@@ -76,70 +74,84 @@ class Root extends React.Component {
   }
 
   render() {
-    if (this.props.isVersionAllowed === undefined && helpers.isServerChosen()) {
-      // Waiting for version
-      return null;
-    } else if (this.props.isVersionAllowed === false) {
-      return <VersionError />;
+    return (
+      <Router>
+        <Switch>
+          <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+          <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+          <StartedRoute exact path="/settings" component={Settings} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+          <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+          <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
+          <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
+          <StartedRoute exact path="/signin" component={Signin} loaded={false} />
+          <NavigationRoute exact path="/server" component={Server} />
+          <NavigationRoute exact path="/transaction/:id" component={TransactionDetail} />
+          <NavigationRoute exact path="/locked" component={LockedWallet} />
+          <Route exact path="/welcome" component={Welcome} />
+          <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        </Switch>
+      </Router>
+    )
+  }
+}
+
+/*
+ * Validate if version is allowed for the loaded wallet
+ */
+const returnLoadedWalletComponent = (Component, props, rest) => {
+  // Check version
+  if (rest.versionAllowed === undefined) {
+    version.checkVersion(() => {
+      wallet.localStorageToRedux();
+    });
+    return <WaitVersion {...props} />;
+  } else if (rest.versionAllowed === false) {
+    return <VersionError {...props} />;
+  } else {
+    // If was closed and is loaded we need to redirect to locked screen
+    if (wallet.wasClosed()) {
+      return <Redirect to={{pathname: '/locked/'}} />;
     } else {
-      return (
-        <Router>
-          <Switch>
-            <LoadedRoute exact path="/wallet/send_tokens" component={SendTokens} />
-            <LoadedRoute exact path="/wallet" component={Wallet} />
-            <NavigationRoute exact path="/transaction/:id" component={TransactionDetail} />
-            <NotLoadedRoute exact path="/new_wallet" component={NewWallet} />
-            <NotLoadedRoute exact path="/load_wallet" component={LoadWallet} />
-            <NoServerRoute exact path="/server" component={Server} />
-            <NotLoadedRoute exact path="" component={Signin} />
-          </Switch>
-        </Router>
-      )
+      return returnDefaultComponent(Component, props);
     }
   }
 }
 
 /*
- * No server route is used for components that should be rendered before the server is chosen (without server)
- * So we first check if the server is chosen, if it is, we redirect to the Signin screen
+ * If not started, go to welcome screen. If loaded and locked, go to locked screen. If started, we have some options:
+ * - If wallet is already loaded and the component requires it's loaded, we show the component.
+ * - If wallet is already loaded and the component requires it's not loaded, we go to the wallet detail screen.
+ * - If wallet is not loaded and the component requires it's loaded, we go to the signin screen.
+ * - If wallet is not loaded and the component requires it's not loaded, we show the component.
  */
-const NoServerRoute = ({ component: Component, ...rest }) => {
-  return (
-    <Route {...rest} render={(props) => (
-      helpers.isServerChosen()
-        ? <Redirect to={{pathname: '/'}} />
-        : returnDefaultComponent(Component, props)
-    )} />
-  )
+const returnStartedRoute = (Component, props, rest) => {
+  if (wallet.started()) {
+    if (wallet.loaded()) {
+      if (wallet.isLocked()) {
+        return <Redirect to={{pathname: '/locked/'}} />;
+      } else if (rest.loaded) {
+        return returnLoadedWalletComponent(Component, props, rest);
+      } else {
+        return <Redirect to={{pathname: '/wallet/'}} />;
+      }
+    } else {
+      if (rest.loaded) {
+        return <Redirect to={{pathname: '/signin/'}} />;
+      } else {
+        return <Component {...props} />;
+      }
+    }
+  } else {
+    return <Redirect to={{pathname: '/welcome/'}} />;
+  }
 }
 
 /*
- * Loaded routes are the routes that should be loaded only if the wallet is already loaded
- * So we first check if the wallet is loaded, if it's not we redirect to the Signin screen
- * If the server is not chosen we redirect to the screen to choose the server
+ * Route for the components that will be shown after the wallet was started (After user clicked in 'Get started' in Welcome screen)
  */
-const LoadedRoute = ({ component: Component, ...rest }) => (
+const StartedRoute = ({component: Component, ...rest}) => (
   <Route {...rest} render={(props) => (
-    helpers.isServerChosen()
-      ? (wallet.loaded()
-        ? returnDefaultComponent(Component, props)
-        : <Redirect to={{pathname: '/'}} />)
-      : <Redirect to={{pathname: '/server/'}} />
-  )} />
-)
-
-/*
- * Not loaded routes are the routes that should be loaded only if the wallet is not already loaded
- * So we first check if the wallet is loaded, if it is we redirect to the Wallet screen
- * If the server is not chosen we redirect to the screen to choose the server
- */
-const NotLoadedRoute = ({ component: Component, ...rest }) => (
-  <Route {...rest} render={(props) => (
-    helpers.isServerChosen()
-      ? (wallet.loaded()
-        ? <Redirect to={{pathname: '/wallet/'}} />
-        : returnDefaultComponent(Component, props))
-      : <Redirect to={{pathname: '/server/'}} />
+    returnStartedRoute(Component, props, rest)
   )} />
 )
 
@@ -157,9 +169,7 @@ const returnDefaultComponent = (Component, props) => {
  */
 const NavigationRoute = ({ component: Component, ...rest }) => (
   <Route {...rest} render={(props) => (
-    helpers.isServerChosen()
-      ? returnDefaultComponent(Component, props)
-      : <Redirect to={{pathname: '/server/'}} />
+      returnDefaultComponent(Component, props)
   )} />
 )
 

@@ -281,7 +281,7 @@ const transaction = {
       }
       let addressTarget = unspentTxs[tokenUID][objectKey].address;
       let encryptedPrivateKey = savedData.keys[addressTarget].privkey;
-      let privateKeyStr = wallet.decryptKey(encryptedPrivateKey, pin);
+      let privateKeyStr = wallet.decryptData(encryptedPrivateKey, pin);
       let key = HDPrivateKey(privateKeyStr)
       let privateKey = key.privateKey;
 
