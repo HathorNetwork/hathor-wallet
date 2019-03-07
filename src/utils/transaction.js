@@ -323,15 +323,16 @@ const transaction = {
       sumOutputs += output.value;
     }
 
-    let minWeight = parseFloat(localStorage.getItem('wallet:txMinWeight'));
-    let minWeightCoefficient = parseFloat(localStorage.getItem('wallet:txWeightCoefficient'));
+    // We need to take into consideration the decimal places because it is inside the amount.
+    // For instance, if one wants to transfer 20 HTRs, the amount will be 2000.
+    const amount = sumOutputs / (10 ** DECIMAL_PLACES);
 
-    // We need to remove the decimal places because it is in the amount
-    // If you want to transfer 20 hathors, the amount will be 2000, that's why we reduce the log of decimal places
-    let weight = (minWeightCoefficient * Math.log2(txSize) + Math.log2(sumOutputs) - DECIMAL_PLACES * Math.log2(10) + 0.5);
+    const txWeightConstants = this.getTransactionWeightConstants();
+
+    let weight = (txWeightConstants.txWeightCoefficient * Math.log2(txSize) + 4 / (1 + txWeightConstants.txMinWeightK / amount) + 4);
 
     // Make sure the calculated weight is at least the minimum
-    weight = Math.max(weight, minWeight)
+    weight = Math.max(weight, txWeightConstants.txMinWeight)
     return weight
   },
 
@@ -450,9 +451,24 @@ const transaction = {
    * @memberof Transaction
    * @inner
    */
-  updateTransactionWeightConstants(txMinWeight, txWeightCoefficient) {
+  updateTransactionWeightConstants(txMinWeight, txWeightCoefficient, txMinWeightK) {
     localStorage.setItem('wallet:txMinWeight', txMinWeight);
     localStorage.setItem('wallet:txWeightCoefficient', txWeightCoefficient);
+    localStorage.setItem('wallet:txMinWeightK', txMinWeightK);
+  },
+
+  /**
+   * Return the transaction weight constants that was saved using a response from the backend
+   *
+   * @return {Object} Object with the parameters {'txMinWeight', 'txWeightCoefficient', 'txMinWeightK'}
+   *
+   * @memberof Transaction
+   * @inner
+   */
+  getTransactionWeightConstants() {
+    return {'txMinWeight': parseFloat(localStorage.getItem('wallet:txMinWeight')),
+            'txWeightCoefficient': parseFloat(localStorage.getItem('wallet:txWeightCoefficient')),
+            'txMinWeightK': parseFloat(localStorage.getItem('wallet:txMinWeightK'))}
   }
 }
 
