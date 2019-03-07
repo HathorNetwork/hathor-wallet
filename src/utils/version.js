@@ -8,7 +8,7 @@ const version = {
   checkVersion(callbackSuccess, callbackError) {
     versionApi.getVersion((data) => {
       store.dispatch(isVersionAllowedUpdate({allowed: helpers.isVersionAllowed(data.version)}));
-      transaction.updateTransactionWeightConstants(data.min_weight, data.min_tx_weight_coefficient);
+      transaction.updateTransactionWeightConstants(data.min_tx_weight, data.min_tx_weight_coefficient, data.min_tx_weight_k);
       if (callbackSuccess) {
         callbackSuccess();
       }
