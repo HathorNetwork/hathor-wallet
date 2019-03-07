@@ -377,21 +377,19 @@ const transaction = {
    */
   txToBytes(txData) {
     let arr = []
+    // Serialize first the funds part
+    //
     // Tx version
     arr.push(this.intToBytes(DEFAULT_TX_VERSION, 2))
-    // Weight is a float with 8 bytes
-    arr.push(this.floatToBytes(txData.weight, 8));
-    // Timestamp
-    arr.push(this.intToBytes(txData.timestamp, 4))
+    // Len tokens
+    // XXX For now we will have only Hathor token, so tokens array will be empty
+    arr.push(this.intToBytes(0, 1))
     // Len inputs
     arr.push(this.intToBytes(txData.inputs.length, 1))
     // Len outputs
     arr.push(this.intToBytes(txData.outputs.length, 1))
-    // Len parents (parents will be calculated in the backend)
-    arr.push(this.intToBytes(0, 1))
-    // Len tokens
-    // XXX For now we will have only Hathor token, so tokens array will be empty
-    arr.push(this.intToBytes(0, 1))
+
+    // TODO Add tokens serialization here
 
     for (let inputTx of txData.inputs) {
       arr.push(util.buffer.hexToBuffer(inputTx.tx_id));
@@ -409,6 +407,15 @@ const transaction = {
       arr.push(this.intToBytes(outputScript.length, 2));
       arr.push(outputScript);
     }
+
+    // Now serialize the graph part
+    //
+    // Weight is a float with 8 bytes
+    arr.push(this.floatToBytes(txData.weight, 8));
+    // Timestamp
+    arr.push(this.intToBytes(txData.timestamp, 4))
+    // Len parents (parents will be calculated in the backend)
+    arr.push(this.intToBytes(0, 1))
 
     // Add nonce in the end
     arr.push(this.intToBytes(txData.nonce, 4));
