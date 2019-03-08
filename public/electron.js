@@ -1,7 +1,14 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, Menu} = require('electron')
+const Sentry = require('@sentry/electron')
 const url = require('url');
 const path = require('path');
+const constants = require('./constants');
+
+Sentry.init({
+  dsn: constants.SENTRY_DSN,
+  release: process.env.npm_package_version
+})
 
 const appName = 'Hathor Wallet';
 
@@ -24,9 +31,6 @@ function createWindow () {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })
-
-  // Open chrome dev tools when opening window
-  //mainWindow.webContents.openDevTools()
 
   // and load the index.html of the app.
   mainWindow.loadURL(
@@ -57,6 +61,20 @@ function createWindow () {
           { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
       ]}
   ];
+
+  if (process.env.NODE_ENV !== 'production') {
+    const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
+
+    // Add shortcut to open chrome dev tools
+    template.push({
+        label: 'Debug',
+        accelerator: 'CmdOrCtrl+Shift+I',
+        click: () => { mainWindow.webContents.toggleDevTools() }
+      })
+
+    // Install react extension on chrome dev tools
+    installExtension(REACT_DEVELOPER_TOOLS)
+  }
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 

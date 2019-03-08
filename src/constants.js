@@ -77,3 +77,21 @@ export const CONFIRM_RESET_MESSAGE = 'I want to reset my wallet';
 // - The string must contain at least one special character (!@#$%^&)
 // - The string must be eight characters or longer
 export const PASSWORD_PATTERN = "(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$"
+
+
+// Local storage data useful for debugging purposes.
+// WARNING: we cannot include any arbitrarily large fields (e.g. wallet:data) on Sentry request.
+// WARNING: the request has a max size of 200kb and if it is bigger than this it'll be denied by Sentry.
+export const DEBUG_LOCAL_DATA_KEYS = [
+  `wallet:server`,
+  `wallet:tokens`,
+  `wallet:started`,
+  `wallet:backup`,
+  `wallet:locked`,
+  `wallet:closed`,
+  `wallet:lastSharedIndex`,
+  `wallet:lastGeneratedIndex`,
+  `wallet:lastUsedIndex`,
+  `wallet:lastUsedAddress`,
+  `wallet:address`
+]

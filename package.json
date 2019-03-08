@@ -24,6 +24,7 @@
   "version": "0.2.0-beta",
   "private": true,
   "dependencies": {
+    "@sentry/electron": "^0.16",
     "axios": "^0.17.1",
     "bitcore-mnemonic": "^1.7.0",
     "bootstrap": "^4.0.0",
@@ -63,9 +64,11 @@
     "electron-pack": "build --mac --win --linux -c.extraMetadata.main=build/electron.js"
   },
   "devDependencies": {
+    "@sentry/cli": "^1.40.0",
     "axios-mock-adapter": "^1.16.0",
     "electron": "^4.0.3",
     "electron-builder": "^20.38.5",
+    "electron-devtools-installer": "^2.2.4",
     "jest-html-reporter": "^2.4.4",
     "jest-localstorage-mock": "^2.4.0",
     "jsdoc": "^3.5.5",
