@@ -14,7 +14,8 @@ class LockedWallet extends React.Component {
     }
   }
 
-  unlockClicked = () => {
+  unlockClicked = (e) => {
+    e.preventDefault();
     const isValid = this.refs.unlockForm.checkValidity();
     if (isValid) {
       this.refs.unlockForm.classList.remove('was-validated')
@@ -50,7 +51,7 @@ class LockedWallet extends React.Component {
         <div className="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
           <div className="d-flex align-items-start flex-column">
             <p>Your wallet is locked. Please write down your PIN to unlock it.</p>
-            <form ref="unlockForm" className="w-100">
+            <form ref="unlockForm" className="w-100" onSubmit={this.unlockClicked}>
               <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder="PIN" className="form-control" />
             </form>
             {this.state.errorMessage && <p className="mt-4 text-danger">{this.state.errorMessage}</p>}
