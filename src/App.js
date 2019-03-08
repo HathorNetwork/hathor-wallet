@@ -20,6 +20,8 @@ import wallet from './utils/wallet';
 import { connect } from "react-redux";
 import WebSocketHandler from './WebSocketHandler';
 import RequestErrorModal from './components/RequestError';
+import * as Sentry from '@sentry/electron'
+import { DEBUG_LOCAL_DATA_KEYS } from './constants';
 
 
 const mapDispatchToProps = dispatch => {
@@ -45,6 +47,18 @@ class Root extends React.Component {
   componentWillUnmount() {
     WebSocketHandler.removeListener('wallet', this.handleWebsocket);
     WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
+  }
+
+  componentDidCatch(error, info) {
+    Sentry.withScope(scope => {
+      Object.entries(info).forEach(
+        ([key, item]) => scope.setExtra(key, item)
+      );
+      DEBUG_LOCAL_DATA_KEYS.forEach(
+        (key) => scope.setExtra(key, localStorage.getItem(key))
+      )
+      Sentry.captureException(error);
+    });
   }
 
   handleWebsocket = (wsData) => {

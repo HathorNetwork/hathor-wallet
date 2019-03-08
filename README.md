@@ -36,6 +36,37 @@ If you have an error building `Error: Python executable "/path/to/python" is v3.
 
 Just run `npm config set python /usr/bin/python` and try again
 
+## Sentry
+
+Sentry is a error tracking tool, that allow us to receive error data from clients - it will be disabled on stable versions of the wallet.
+
+### DSN
+On `public/constants.js` we have a default Sentry DSN.
+To override it simply set the environment variable `SENTRY_DSN`.
+
+### Source maps
+To allow stack traces to be mapped to source code, Sentry needs the source maps.
+To upload the source maps, create a `.sentryclirc` with the format:
+
+```
+[defaults]
+url=https://sentry.io/
+org=<ORGANIZATION_NAME>
+project=<PROJECT_NAME>
+
+[auth]
+token=<CLI_API_TOKEN>
+```
+
+You can find more information about the configuration file and its fields [here](https://docs.sentry.io/cli/configuration/).
+After configuring it, just run the `upload_source_maps.sh` script to upload the source maps.
+
+**WARNING**: Please note that this will override all the source maps for the current sentry release.
+
+The sentry release used is the `version` field in the `package.json` file.
+So in order to not break any released source maps, only run the script after bumping `package.json` to a new version.
+For test purposes use `*-beta` versions or identifiers that will not colide with semantic versioning.
+
 ## TODO
 
 - The algorithm to automatically choose the unspent transactions when sending tokens is naive. For now we do not consider any anonymity factor.
