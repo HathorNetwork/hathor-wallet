@@ -77,9 +77,9 @@ class Root extends React.Component {
     if (wallet.loaded()) {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
-      if (wsData.type === 'storage:tx_voided') {
+      if (wsData.type === 'wallet:element_voided') {
         this.props.voidedTx(wsData);
-      } else if (wsData.type === 'storage:tx_winner') {
+      } else if (wsData.type === 'wallet:element_winner') {
         this.props.winnerTx(wsData);
       } else {
         console.log('Websocket message not handled. Type:', wsData.type);
