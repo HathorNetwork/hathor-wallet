@@ -26,11 +26,7 @@ export const GENESIS_TX = [
 
 export const GAP_LIMIT = 20;
 
-export const HATHOR_TOKEN_UID = '00';
-
-export const HATHOR_TOKEN_INDEX = 0;
-
-export const VERSION = '0.2.0-beta';
+export const VERSION = '0.3.3-beta';
 
 export const MIN_API_VERSION = '0.11.0-beta';
 
@@ -78,6 +74,24 @@ export const CONFIRM_RESET_MESSAGE = 'I want to reset my wallet';
 // - The string must be eight characters or longer
 export const PASSWORD_PATTERN = "(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$"
 
+// Token masks
+
+// First bit in the index byte indicates whether it's an authority output
+export const TOKEN_INDEX_MASK = 0b01111111
+export const TOKEN_AUTHORITY_MASK = 0b10000000
+
+// Last bit indicates a token uid creation UTXO
+export const TOKEN_CREATION_MASK = 0b00000001
+// Second to last bit is mint authority
+export const TOKEN_MINT_MASK = 0b00000010
+// And next one is melt authority
+export const TOKEN_MELT_MASK = 0b00000100
+
+// Hathor token config
+export const HATHOR_TOKEN_CONFIG = {'name': 'Hathor', 'symbol': 'HTR', 'uid': '00'};
+
+// Hathor token default index
+export const HATHOR_TOKEN_INDEX = 0;
 
 // Local storage data useful for debugging purposes.
 // WARNING: we cannot include any arbitrarily large fields (e.g. wallet:data) on Sentry request.

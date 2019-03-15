@@ -1,27 +1,23 @@
 import React from 'react';
 import dateFormatter from '../utils/date';
 import $ from 'jquery';
-import { MAX_GRAPH_LEVEL } from '../constants';
+import { MAX_GRAPH_LEVEL, HATHOR_TOKEN_CONFIG, HATHOR_TOKEN_INDEX } from '../constants';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom'
 import helpers from '../utils/helpers';
 import HathorAlert from './HathorAlert';
+import { connect } from "react-redux";
+
+
+const mapStateToProps = (state) => {
+  return { tokens: state.tokens };
+};
 
 
 class TxData extends React.Component {
-  constructor(props) {
-    super(props);
+  state = { raw: false, children: false };
 
-    this.state = {
-      raw: false
-    }
-
-    this.copied = this.copied.bind(this);
-  }
-
-
-
-  toggleRaw(e) {
+  toggleRaw = (e) => {
     e.preventDefault();
     this.setState({ raw: !this.state.raw }, () => {
       if (this.state.raw) {
@@ -32,10 +28,35 @@ class TxData extends React.Component {
     });
   }
 
-  copied(text, result) {
+  toggleChildren = (e) => {
+    e.preventDefault();
+    this.setState({ children: !this.state.children }, () => {
+      if (this.state.children) {
+        $(this.refs.childrenTx).show(300);
+      } else {
+        $(this.refs.childrenTx).hide(300);
+      }
+    });
+  }
+
+  copied = (text, result) => {
     if (result) {
       // If copied with success
       this.refs.alertCopied.show(1000);
+    }
+  }
+
+  getOutputToken = (tokenData) => {
+    if (tokenData === HATHOR_TOKEN_INDEX) {
+      return HATHOR_TOKEN_CONFIG.symbol;
+    } else {
+      const tokenUID = this.props.transaction.tokens[tokenData - 1];
+      const tokenConfig = this.props.tokens.find((token) => token.uid === tokenUID);
+      if (tokenConfig === undefined) {
+        return tokenUID;
+      } else {
+        return tokenConfig.symbol;
+      }
     }
   }
 
@@ -49,11 +70,17 @@ class TxData extends React.Component {
       });
     }
 
+    const renderOutputToken = (output) => {
+      return (
+        <strong>({this.getOutputToken(output.decoded.token_data)})</strong>
+      );
+    }
+
     const renderOutputs = (outputs) => {
       return outputs.map((output, idx) => {
         return (
           <li key={idx}>
-            {helpers.prettyValue(output.value)} -> {output.decoded ? renderDecodedScript(output.decoded) : `${output.script} (unknown script)` }
+            {helpers.prettyValue(output.value)} {renderOutputToken(output)} -> {output.decoded ? renderDecodedScript(output.decoded) : `${output.script} (unknown script)` }
             {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>Spent</Link>)</span> : ''}
           </li>
         );
@@ -234,8 +261,8 @@ class TxData extends React.Component {
             {renderListWithLinks(this.props.transaction.parents, false)}
           </div>
           <div>
-            <label>Children:</label>
-            {renderListWithLinks(this.props.meta.children, false)}
+            <label>Children: </label><a href="true" className="ml-1" onClick={(e) => this.toggleChildren(e)}>{this.state.children ? 'Click to hide' : 'Click to show'}</a>
+            <div ref="childrenTx" style={{display: 'none'}}>{renderListWithLinks(this.props.meta.children, false)}</div>
           </div>
           <div>
             <label>First block:</label>
@@ -271,4 +298,4 @@ class TxData extends React.Component {
   }
 }
 
-export default TxData;
+export default connect(mapStateToProps)(TxData);

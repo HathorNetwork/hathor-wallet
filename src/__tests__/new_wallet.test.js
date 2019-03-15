@@ -1,4 +1,4 @@
-import { GAP_LIMIT, HATHOR_TOKEN_UID } from '../constants';
+import { GAP_LIMIT, HATHOR_TOKEN_CONFIG } from '../constants';
 import wallet from '../utils/wallet';
 import { HDPrivateKey } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
@@ -67,15 +67,15 @@ const checkData = () => {
   let walletDataJson = JSON.parse(walletData);
   check('sortedHistory' in walletDataJson, true, doneCb);
   check(typeof walletDataJson['sortedHistory'], 'object', doneCb);
-  check(walletDataJson['sortedHistory'].length, 1, doneCb);
-  check(walletDataJson['sortedHistory'][0].tx_id, txId, doneCb);
+  check(walletDataJson['sortedHistory']['00'].length, 1, doneCb);
+  check(walletDataJson['sortedHistory']['00'][0].tx_id, txId, doneCb);
 
   check('unspentTxs' in walletDataJson, true, doneCb);
   check(typeof walletDataJson['unspentTxs'], 'object', doneCb);
   let key = [txId, 0];
-  check(key in walletDataJson['unspentTxs'][HATHOR_TOKEN_UID], true, doneCb);
-  check(walletDataJson['unspentTxs'][HATHOR_TOKEN_UID][key].value, 2000, doneCb);
-  check(walletDataJson['unspentTxs'][HATHOR_TOKEN_UID][key].address, addressUsed, doneCb);
+  check(key in walletDataJson['unspentTxs'][HATHOR_TOKEN_CONFIG.uid], true, doneCb);
+  check(walletDataJson['unspentTxs'][HATHOR_TOKEN_CONFIG.uid][key].value, 2000, doneCb);
+  check(walletDataJson['unspentTxs'][HATHOR_TOKEN_CONFIG.uid][key].address, addressUsed, doneCb);
 
   check('spentTxs' in walletDataJson, true, doneCb);
   check(typeof walletDataJson['spentTxs'], 'object', doneCb);

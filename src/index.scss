@@ -36,7 +36,7 @@ a:hover {
 }
 
 .content-wrapper {
-  margin: 2rem auto;
+  margin: 6rem auto 2rem auto; // Top is the fixed navigation bar plus the content margin
 }
 
 .content-signin-wrapper {
@@ -57,6 +57,11 @@ a:hover {
 
 .main-nav {
   background-color: $darkBlue;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1030;
 }
 
 .main-nav nav {
@@ -94,10 +99,6 @@ a:hover {
   font-size: 11px;
 }
 
-.tab-content-wrapper {
-  padding: 2rem;
-}
-
 .pagination {
   padding-top: 2rem;
 }
@@ -113,13 +114,18 @@ a:hover {
 
 .page-link:hover {
   color: $darkBlueHover;
+  cursor: pointer;
+}
+
+.page-link:focus {
+  box-shadow: none;
 }
 
 #tx-table tbody tr {
   cursor: pointer;
 }
 
-#peer-table tbody td, #peer-table thead th, #tx-table tbody td, #tx-table thead th, #wallet-history tbody td, #wallet-history thead th {
+#peer-table tbody td, #peer-table thead th, #tx-table tbody td, #tx-table thead th, #token-history tbody td, #token-history thead th {
   text-align: center;
 }
 
@@ -189,8 +195,32 @@ i.pointer {
   border: none;
 }
 
-#wallet-history .spent-tx, #wallet-history .voided {
+#token-history .spent-tx, #token-history .voided {
   text-decoration: line-through;
+}
+
+#token-history .input-tr .state, #token-history .input-tr .value {
+  color: #dc3545;
+}
+
+#token-history .output-tr .state, #token-history .output-tr .value {
+  color: #28a745;
+}
+
+#token-history .state.voided, #token-history .value .voided,  {
+  color: #6c757d !important;
+}
+
+#token-history .voided-element {
+  text-decoration: none;
+  background-color: #6c757d;
+  font-size: 0.75rem;
+  width: 1.5rem;
+  height: 0.75rem;
+  padding: 0.4rem;
+  border-radius: 0.75rem;
+  color: white;
+  margin-left: 1rem;
 }
 
 tr.tr-title {
@@ -230,7 +260,7 @@ svg.svg-wrapper {
 
 @media (max-width: 992px) {
   .content-wrapper {
-    margin: 2rem;
+    margin: 6rem 2rem 2rem 2rem;
   }
 
   .navbar-nav li.nav-item {
@@ -239,6 +269,10 @@ svg.svg-wrapper {
 
   .navbar-right {
     padding: 0.5rem 1rem;
+  }
+
+  .wallet-wrapper {
+    padding: 0 3rem;
   }
 }
 
@@ -365,6 +399,7 @@ svg.svg-wrapper {
 }
 
 .backup-alert {
+  top: 4rem;
   text-align: center;
 }
 
@@ -400,4 +435,131 @@ svg.svg-wrapper {
   background-color: #888;
   color: white;
   border-radius: 16px;
+}
+
+.token-bar {
+  position: fixed;
+  top: 4rem;
+  left: 0;
+  z-index: 1000;
+  background-color: #ececec;
+  color: #2c2c2c;
+  height: calc(100% - 4rem);
+}
+
+.token-bar .header {
+  cursor: pointer;
+  min-height: 56px;
+  padding: 1rem;
+  width: 100%;
+  background-color: #878787;
+  color: white;
+}
+
+.token-bar .header i {
+  font-size: 1.2rem;
+}
+
+.token-bar .body {
+  width: 100%;
+  overflow-y: scroll;
+}
+
+.token-bar .token-wrapper {
+  width: 100%;
+  padding: 1rem;
+}
+
+.token-bar .token-wrapper:not(.selected) {
+  cursor: pointer;
+}
+
+.token-bar .token-wrapper.selected {
+  background-color: #2c2c2c;
+  color: white;
+}
+
+.token-bar .footer {
+  border-top: 1px solid #2c2c2c;
+  width: 100%;
+  min-height: min-content;
+}
+
+.token-bar .token-icon {
+  font-size: 1.2rem;
+}
+
+.token-bar .icon-wrapper {
+  width: 100%;
+  min-height: 56px;
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.token-bar span.ellipsis {
+  text-overflow: clip;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.token-bar .icon-wrapper span {
+  margin-left: 0.5rem;
+  font-size: 1rem;
+}
+
+.token-bar.closed {
+  transition: all 0.4s linear;
+  width: 5rem;
+}
+
+.token-bar.opened {
+  transition: width 0.4s linear;
+  width: 13rem;
+}
+
+.wallet-wrapper {
+  padding: 0 4rem;
+}
+
+#formCreateToken .address-checkbox {
+  padding-top: 2rem;
+}
+
+.token-name {
+  font-size: 1.5rem;
+}
+
+.token-name i {
+  font-size: 1.2rem;
+  color: rgba(0,0,0,0.5);
+}
+
+.send-tokens-wrapper {
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  margin-bottom: 2rem;
+}
+
+.remove-token-btn {
+  background-color: transparent;
+  border: 1px solid #dc3545;
+  float: right;
+}
+
+.unknown-token {
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border: 1px solid #ddd;
+}
+
+.unknown-symbol {
+  background-color: $darkBlue;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.75rem;
+  color: white;
+}
+
+.hidden {
+  display: none;
 }

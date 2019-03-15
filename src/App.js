@@ -2,12 +2,14 @@ import React from 'react';
 import { Switch, BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
+import CreateToken from './screens/CreateToken';
 import Navigation from './components/Navigation';
 import WaitVersion from './components/WaitVersion';
 import TransactionDetail from './screens/TransactionDetail';
 import Server from './screens/Server';
 import ChoosePassphrase from './screens/ChoosePassphrase';
 import Welcome from './screens/Welcome';
+import UnknownTokens from './screens/UnknownTokens';
 import Signin from './screens/Signin';
 import LockedWallet from './screens/LockedWallet';
 import NewWallet from './screens/NewWallet';
@@ -91,15 +93,17 @@ class Root extends React.Component {
     return (
       <Router>
         <Switch>
+          <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+          <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
           <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
           <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
           <StartedRoute exact path="/settings" component={Settings} loaded={true} versionAllowed={this.props.isVersionAllowed} />
           <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+          <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+          <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} versionAllowed={this.props.isVersionAllowed} />
           <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
           <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
           <StartedRoute exact path="/signin" component={Signin} loaded={false} />
-          <NavigationRoute exact path="/server" component={Server} />
-          <NavigationRoute exact path="/transaction/:id" component={TransactionDetail} />
           <NavigationRoute exact path="/locked" component={LockedWallet} />
           <Route exact path="/welcome" component={Welcome} />
           <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />

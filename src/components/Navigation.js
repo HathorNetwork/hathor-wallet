@@ -25,7 +25,10 @@ class Navigation extends React.Component {
                 <NavLink to="/wallet/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Wallet</NavLink>
               </li>
               <li className="nav-item">
-                <NavLink to="/settings/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Settings</NavLink>
+                <NavLink to="/wallet/send_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Send tokens</NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink to="/create_token/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Create token</NavLink>
               </li>
             </ul>
             <div className="navbar-right d-flex flex-row align-items-center navigation-search">

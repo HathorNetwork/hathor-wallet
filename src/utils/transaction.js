@@ -217,7 +217,7 @@ const transaction = {
   /**
    * Return transaction data to sign in inputs
    * 
-   * @param {Object} txData Object with inputs and outputs {'inputs': [{'tx_id', 'index'}], 'outputs': ['address', 'value', 'timelock']}
+   * @param {Object} txData Object with inputs and outputs {'inputs': [{'tx_id', 'index', 'token'}], 'outputs': ['address', 'value', 'timelock', 'tokenData'], 'tokens': [uid, uid2]}
    *
    * @return {Buffer}
    * @memberof Transaction
@@ -232,8 +232,11 @@ const transaction = {
     // Len outputs
     arr.push(this.intToBytes(txData.outputs.length, 1))
     // Len tokens
-    // XXX For now we will have only Hathor token, so tokens array will be empty
-    arr.push(this.intToBytes(0, 1))
+    arr.push(this.intToBytes(txData.tokens.length, 1))
+
+    for (const token of txData.tokens) {
+      arr.push(new encoding.BufferReader(token).buf);
+    }
 
     for (let inputTx of txData.inputs) {
       arr.push(util.buffer.hexToBuffer(inputTx.tx_id));
@@ -244,8 +247,8 @@ const transaction = {
 
     for (let outputTx of txData.outputs) {
       arr.push(this.outputValueToBytes(outputTx.value));
-      // Token data for now will be always 0
-      arr.push(this.intToBytes(0, 1));
+      // Token data
+      arr.push(this.intToBytes(outputTx.tokenData, 1));
 
       let outputScript = this.createOutputScript(outputTx.address, outputTx.timelock);
       arr.push(this.intToBytes(outputScript.length, 2));
@@ -257,9 +260,8 @@ const transaction = {
   /*
    * Add input data to each input of tx data
    *
-   * @param {Object} data Object with inputs and outputs {'inputs': [{'tx_id', 'index'}], 'outputs': ['address', 'value', 'timelock']}
+   * @param {Object} data Object with inputs and outputs {'inputs': [{'tx_id', 'index', 'token'}], 'outputs': ['address', 'value', 'timelock']}
    * @param {Buffer} dataToSign data to sign the transaction in bytes
-   * @param {string} tokenUID UID of the token to check existence
    * @param {string} pin PIN to decrypt the private key
    *
    * @return {Object} data
@@ -267,31 +269,59 @@ const transaction = {
    * @memberof Transaction
    * @inner
    */
-  updateInputData(data, dataToSign, tokenUID, pin) {
-    let hashbuf = crypto.Hash.sha256sha256(dataToSign);
-    hashbuf = new encoding.BufferReader(hashbuf).readReverse();
+  signTx(data, dataToSign, pin) {
+    const hashbuf = this.getDataToSignHash(dataToSign);
 
-    let savedData = JSON.parse(localStorage.getItem('wallet:data'));
-    let unspentTxs = savedData.unspentTxs;
-    for (let input of data.inputs) {
-      let objectKey = [input.tx_id, input.index];
-      if (!wallet.checkUnspentTxExists(objectKey, tokenUID)) {
+    const savedData = JSON.parse(localStorage.getItem('wallet:data'));
+    const unspentTxs = savedData.unspentTxs;
+    for (const input of data.inputs) {
+      const objectKey = [input.tx_id, input.index];
+      if (!wallet.checkUnspentTxExists(objectKey, input.token)) {
         // Input does not exist in unspent txs
         return data;
       }
-      let addressTarget = unspentTxs[tokenUID][objectKey].address;
-      let encryptedPrivateKey = savedData.keys[addressTarget].privkey;
-      let privateKeyStr = wallet.decryptData(encryptedPrivateKey, pin);
-      let key = HDPrivateKey(privateKeyStr)
-      let privateKey = key.privateKey;
-
-      let sig = crypto.ECDSA.sign(hashbuf, privateKey, 'little').set({
-        nhashtype: crypto.Signature.SIGHASH_ALL
-      });
-      let inputData = this.createInputData(sig.toDER(), key.publicKey.toBuffer());
-      input['data'] = inputData;
+      const addressTarget = unspentTxs[input.token][objectKey].address;
+      const encryptedPrivateKey = savedData.keys[addressTarget].privkey;
+      input['data'] = this.getSignature(encryptedPrivateKey, hashbuf, pin);
     }
     return data;
+  },
+
+  /*
+   * Get signature of an input based in the private key
+   *
+   * @param {Buffer} hash hashed data to sign the transaction
+   * @param {string} encryptedPrivateKey string with the private key encrypted
+   *
+   * @return {Buffer} input data
+   *
+   * @memberof Transaction
+   * @inner
+   */
+  getSignature(encryptedPrivateKey, hash, pin) {
+    const privateKeyStr = wallet.decryptData(encryptedPrivateKey, pin);
+    const key = HDPrivateKey(privateKeyStr)
+    const privateKey = key.privateKey;
+
+    const sig = crypto.ECDSA.sign(hash, privateKey, 'little').set({
+      nhashtype: crypto.Signature.SIGHASH_ALL
+    });
+    return this.createInputData(sig.toDER(), key.publicKey.toBuffer());
+  },
+
+  /*
+   * Execute hash of the data to sign
+   *
+   * @param {Buffer} dataToSign data to sign the transaction in bytes
+   *
+   * @return {Buffer} data to sign hashed
+   *
+   * @memberof Transaction
+   * @inner
+   */
+  getDataToSignHash(dataToSign) {
+    const hashbuf = crypto.Hash.sha256sha256(dataToSign);
+    return new encoding.BufferReader(hashbuf).readReverse();
   },
 
   /**
@@ -333,7 +363,8 @@ const transaction = {
 
     // Make sure the calculated weight is at least the minimum
     weight = Math.max(weight, txWeightConstants.txMinWeight)
-    return weight
+    // FIXME precision difference between backend and frontend (weight (17.76246721531992) is smaller than the minimum weight (17.762467215319923))
+    return weight + 1e-6;
   },
 
   /**
@@ -364,8 +395,9 @@ const transaction = {
    *
    * @param {Object} txData Object with inputs and outputs
    * {
-   *  'inputs': [{'tx_id', 'index'}],
-   *  'outputs': ['address', 'value', 'timelock'],
+   *  'inputs': [{'tx_id', 'index', 'token'}],
+   *  'outputs': ['address', 'value', 'timelock', 'tokenData'],
+   *  'tokens': [uid, uid2],
    *  'version': 1,
    *  'weight': 0,
    *  'nonce': 0,
@@ -383,14 +415,15 @@ const transaction = {
     // Tx version
     arr.push(this.intToBytes(DEFAULT_TX_VERSION, 2))
     // Len tokens
-    // XXX For now we will have only Hathor token, so tokens array will be empty
-    arr.push(this.intToBytes(0, 1))
+    arr.push(this.intToBytes(txData.tokens.length, 1))
     // Len inputs
     arr.push(this.intToBytes(txData.inputs.length, 1))
     // Len outputs
     arr.push(this.intToBytes(txData.outputs.length, 1))
 
-    // TODO Add tokens serialization here
+    for (const token of txData.tokens) {
+      arr.push(new encoding.BufferReader(token).buf);
+    }
 
     for (let inputTx of txData.inputs) {
       arr.push(util.buffer.hexToBuffer(inputTx.tx_id));
@@ -401,8 +434,8 @@ const transaction = {
 
     for (let outputTx of txData.outputs) {
       arr.push(this.outputValueToBytes(outputTx.value));
-      // Token data for now will be always 0
-      arr.push(this.intToBytes(0, 1));
+      // Token data
+      arr.push(this.intToBytes(outputTx.tokenData, 1));
 
       let outputScript = this.createOutputScript(outputTx.address, outputTx.timelock);
       arr.push(this.intToBytes(outputScript.length, 2));

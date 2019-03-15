@@ -58,6 +58,7 @@ test('Update address history', () => {
       'index': 0,
       'is_output': true,
       'token_uid': '00',
+      'token_data': 0,
       'value': 100,
       'timestamp': 1548990444,
       'timelock': null,
@@ -79,6 +80,7 @@ test('Update address history', () => {
     {
       'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295d',
       'index': 0,
+      'token_data': 0,
       'is_output': true,
       'token_uid': '00',
       'value': 200,
@@ -86,18 +88,32 @@ test('Update address history', () => {
       'timelock': null,
       'voided': false
 
-    }
+    },
   ]
+  const authority = {
+    'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295c',
+    'index': 0,
+    'token_data': 0b10000001, // Authority output
+    'is_output': true,
+    'token_uid': '00',
+    'value': 200,
+    'timestamp': 1548990448,
+    'timelock': null,
+    'voided': false
+
+  }
+
   let history = [
     {
       'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-      'history': addressHistory,
+      'history': [...addressHistory, authority],
     }
   ]
 
   let unspentTxs = {};
   let spentTxs = {};
-  let sortedHistory = wallet.historyUpdate(history, unspentTxs, spentTxs);
+  let authorityOutputs = {};
+  let sortedHistory = wallet.historyUpdate(history, unspentTxs, spentTxs, authorityOutputs);
 
   let expectedUnspent = {
     '00': {
@@ -106,6 +122,18 @@ test('Update address history', () => {
         'value': 200,
         'timelock': null,
         'timestamp': 1548990448
+      }
+    }
+  }
+
+  let expectedAuthority = {
+    '00': {
+      '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295c,0': {
+        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+        'value': 200,
+        'timelock': null,
+        'timestamp': 1548990448,
+        'tokenData': 0b10000001, // Authority output
       }
     }
   }
@@ -122,13 +150,24 @@ test('Update address history', () => {
     ]
   }
 
-  expect(sortedHistory).toEqual(expect.arrayContaining(addressHistory));
+  expect('00' in sortedHistory).toBe(true);
+  expect(sortedHistory['00']).toEqual(expect.arrayContaining(addressHistory));
   expect(unspentTxs).toEqual(expect.objectContaining(expectedUnspent));
   expect(spentTxs).toEqual(expect.objectContaining(expectedSpent));
+  expect(authorityOutputs).toEqual(expect.objectContaining(expectedAuthority));
+
+  // Test authority
+  localStorage.setItem('wallet:data', JSON.stringify({'authorityOutputs': expectedAuthority}));
+  const rightKey = '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295c,0';
+  const wrongKey = '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295d,0';
+  expect(wallet.checkAuthorityExists(wrongKey, '00')).toBe(false);
+  expect(wallet.checkAuthorityExists(rightKey, '01')).toBe(false);
+  expect(wallet.checkAuthorityExists(rightKey, '00')).toBe(true);
 });
 
 test('Valid words', () => {
   expect(wallet.wordsValid('less than 24 words').valid).toBe(false);
+  expect(wallet.wordsValid('a a a a a a a a a a a a a a a a a a a a a a a a').valid).toBe(false);
   expect(wallet.wordsValid(123).valid).toBe(false);
   expect(wallet.wordsValid(256).valid).toBe(false);
   expect(wallet.generateWallet({})).toBe(null);
@@ -228,6 +267,8 @@ test('Wallet backup', () => {
   expect(wallet.isBackupDone()).toBe(false);
   wallet.markBackupAsDone();
   expect(wallet.isBackupDone()).toBe(true);
+  wallet.markBackupAsNotDone();
+  expect(wallet.isBackupDone()).toBe(false);
 });
 
 test('Get wallet words', () => {
@@ -261,16 +302,18 @@ test('Change server', () => {
 
 test('Started', () => {
   expect(wallet.started()).toBe(false);
-  localStorage.setItem('wallet:started', true);
+  wallet.markWalletAsStarted();
   expect(wallet.started()).toBe(true);
 });
 
 test('Reset all data', () => {
   const words = wallet.generateWalletWords(256);
   wallet.executeGenerateWallet(words, '', '123456', 'password', true);
-  localStorage.setItem('wallet:started', true);
-  localStorage.setItem('wallet:server', 'http://server');
-  localStorage.setItem('wallet:locked', true);
+  wallet.markWalletAsStarted();
+  const server = 'http://server';
+  wallet.changeServer(server);
+  expect(localStorage.getItem('wallet:server')).toBe(server);
+  wallet.lock();
 
   wallet.resetAllData();
 
@@ -279,4 +322,10 @@ test('Reset all data', () => {
   expect(localStorage.getItem('wallet:locked')).toBeNull();
   expect(localStorage.getItem('wallet:accessData')).toBeNull();
   expect(localStorage.getItem('wallet:data')).toBeNull();
+});
+
+test('Closed', () => {
+  expect(wallet.wasClosed()).toBe(false);
+  wallet.close()
+  expect(wallet.wasClosed()).toBe(true);
 });

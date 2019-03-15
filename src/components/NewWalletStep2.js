@@ -13,8 +13,10 @@ class NewWalletStep2 extends React.Component {
   }
 
   validationSuccess = () => {
+    $('#backupWordsModal').on('hidden.bs.modal', (e) => {
+      this.props.validationSuccess();
+    });
     $('#backupWordsModal').modal('hide');
-    this.props.validationSuccess();
   }
 
   render() {

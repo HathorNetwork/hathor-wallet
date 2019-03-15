@@ -37,7 +37,11 @@ const helpers = {
   },
 
   prettyValue(value) {
-    return (value/10**DECIMAL_PLACES).toFixed(DECIMAL_PLACES);
+    const fixedPlaces = (value/10**DECIMAL_PLACES).toFixed(DECIMAL_PLACES);
+    const integerPart = fixedPlaces.split('.')[0];
+    const decimalPart = fixedPlaces.split('.')[1];
+    const integerFormated = new Intl.NumberFormat('en-US').format(integerPart);
+    return `${integerFormated}.${decimalPart}`;
   },
 
   isVersionAllowed(version) {
@@ -146,6 +150,10 @@ const helpers = {
       }
     }
     return count;
+  },
+
+  minimumAmount() {
+    return 1 / (10**DECIMAL_PLACES);
   }
 }
 

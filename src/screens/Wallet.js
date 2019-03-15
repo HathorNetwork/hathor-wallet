@@ -3,6 +3,8 @@ import WalletHistory from '../components/WalletHistory';
 import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
 import ModalBackupWords from '../components/ModalBackupWords';
+import ModalAddToken from '../components/ModalAddToken';
+import TokenBar from '../components/TokenBar';
 import HathorAlert from '../components/HathorAlert';
 import wallet from '../utils/wallet';
 import $ from 'jquery';
@@ -23,14 +25,7 @@ const mapStateToProps = (state) => {
 
 
 class Wallet extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      balance: null,
-      backupDone: true,
-    }
-  }
+  state = { balance: null, backupDone: true, successMessage: '' };
 
   componentDidMount = () => {
     this.setState({ balance: wallet.calculateBalance(this.props.unspentTxs), backupDone: wallet.isBackupDone() });
@@ -42,15 +37,6 @@ class Wallet extends React.Component {
     }
   }
 
-  sendTokens = () => {
-    this.props.history.push('/wallet/send_tokens');
-  }
-
-  lockWallet = () => {
-    wallet.lock();
-    this.props.history.push('/locked/');
-  }
-
   backupClicked = (e) => {
     e.preventDefault();
     $('#backupWordsModal').modal('show');
@@ -60,8 +46,21 @@ class Wallet extends React.Component {
     $('#backupWordsModal').modal('hide');
     wallet.markBackupAsDone();
     this.props.updateWords(null);
-    this.setState({ backupDone: true });
-    this.refs.alertSuccess.show(1000);
+    this.setState({ backupDone: true, successMessage: 'Backup completed!' }, () => {
+      this.refs.alertSuccess.show(1000);
+    });
+  }
+
+  newTokenSuccess = () => {
+    $('#addTokenModal').modal('hide');
+    this.setState({ successMessage: 'Token added!' }, () => {
+      this.refs.alertSuccess.show(1000);
+    });
+  }
+
+  addTokenClicked = (e) => {
+    e.preventDefault()
+    $('#addTokenModal').modal('show');
   }
 
   render() {
@@ -79,7 +78,6 @@ class Wallet extends React.Component {
           <div className="d-none d-sm-flex flex-row align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-start justify-content-between">
               <WalletBalance balance={this.state.balance} />
-              {renderBtns("d-flex flex-column")}
             </div>
             <WalletAddress goToSignin={this.goToSignin} />
           </div>
@@ -87,7 +85,6 @@ class Wallet extends React.Component {
             <div className="d-flex flex-column align-items-center justify-content-between">
               <WalletBalance balance={this.state.balance} />
               <div className="d-flex flex-row align-items-center">
-                {renderBtns("d-flex")}
               </div>
             </div>
             <WalletAddress goToSignin={this.goToSignin} />
@@ -97,18 +94,9 @@ class Wallet extends React.Component {
       );
     }
 
-    const renderBtns = (wrapperClass) => {
-      return (
-        <div className={wrapperClass}>
-          <div><button className="btn send-tokens btn-hathor" onClick={this.sendTokens}>Send tokens</button></div>
-          <div><button className="btn btn-hathor" onClick={this.lockWallet}>Lock wallet</button></div>
-        </div>
-      );
-    }
-
     const renderUnlockedWallet = () => {
       return (
-        <div>
+        <div className='wallet-wrapper'>
           {renderWallet()}
         </div>
       );
@@ -121,7 +109,9 @@ class Wallet extends React.Component {
           {renderUnlockedWallet()}
         </div>
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
-        <HathorAlert ref="alertSuccess" text="Backup completed!" type="success" />
+        <ModalAddToken success={this.newTokenSuccess} />
+        <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
+        <TokenBar {...this.props} balance={this.state.balance} addToken={this.addTokenClicked} />
       </div>
     );
   }

@@ -15,7 +15,7 @@ class HathorPaginate extends React.Component {
          subContainerClassName={"pages pagination"}
          activeClassName={"active"}
          breakClassName="page-item"
-         breakLabel={<a  href="true" className="page-link">...</a>}
+         breakLabel={<span className="page-link">...</span>}
          pageClassName="page-item"
          previousClassName="page-item"
          nextClassName="page-item"
