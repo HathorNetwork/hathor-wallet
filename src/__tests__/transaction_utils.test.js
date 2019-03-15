@@ -146,7 +146,8 @@ test('Prepare data to send tokens', () => {
     'inputs': [
       {
         'tx_id': tx_id,
-        'index': 0
+        'index': 0,
+        'token': '00',
       }
     ],
     'outputs': [
@@ -160,9 +161,10 @@ test('Prepare data to send tokens', () => {
         'value': 1000,
         'timelock': 1550249803
       }
-    ]
+    ],
+    'tokens': ['123'],
   }
-  let expectedDataToSignHex = '000101020000034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e000000000003e800001976a9140ad2c15b8afe6598da1d327951043cf7ad057bcf88ac000003e800001f045c66ef4b6f76a91441f267e9a6fbff734fb8f062fc35d231f33ff8d588ac';
+  let expectedDataToSignHex = '00010102011200034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e000000000003e800001976a9140ad2c15b8afe6598da1d327951043cf7ad057bcf88ac000003e800001f045c66ef4b6f76a91441f267e9a6fbff734fb8f062fc35d231f33ff8d588ac';
   let dataToSign = transaction.dataToSign(txData);
   expect(dataToSign.toString('hex')).toBe(expectedDataToSignHex);
 
@@ -178,12 +180,12 @@ test('Prepare data to send tokens', () => {
 
   // First trying with input that does not exist in localStorage
   txData['inputs'][0].index = 1;
-  txData = transaction.updateInputData(txData, dataToSign, '00', '123456');
+  txData = transaction.signTx(txData, dataToSign, '123456');
   expect(txData['inputs'][0].data).toBe(undefined);
 
   // Now fixing and trying again
   txData['inputs'][0].index = 0;
-  txData = transaction.updateInputData(txData, dataToSign, '00', '123456');
+  txData = transaction.signTx(txData, dataToSign, '123456');
   expect(txData['inputs'][0].data).not.toBe(undefined);
   expect(txData['inputs'][0].data.length > 0).toBeTruthy();
 
@@ -195,6 +197,6 @@ test('Prepare data to send tokens', () => {
 
   // Fixing timestamp to compare the serialization
   txData['timestamp'] = 1550249810;
-  let expectedTxHex = '000100010200034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e000069463044022003c41f4abfa9800c72aa0f862acc9c970c5aced03731b1136a0cddd1ea93771a02204918b5cc823b852599d4aa51d390213abac64842e87db43a068289c553710f80210346cddff43dffab8e13398633ab7a7caf0d634551e89ae6fd563e282f6744b983000003e800001976a9140ad2c15b8afe6598da1d327951043cf7ad057bcf88ac000003e800001f045c66ef4b6f76a91441f267e9a6fbff734fb8f062fc35d231f33ff8d588ac4030849c597ec3485c66ef520000000000';
+  let expectedTxHex = '00010101021200034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e00006946304402202278ecdfc92d814710a4dd7236a2fd7a9f2e81056a36872daad89bb840db01ea02204e7f99e026c04988af55e7cb831fc7b0e4ad32bd3bee5e73dfce5f7e6ae199d2210346cddff43dffab8e13398633ab7a7caf0d634551e89ae6fd563e282f6744b983000003e800001976a9140ad2c15b8afe6598da1d327951043cf7ad057bcf88ac000003e800001f045c66ef4b6f76a91441f267e9a6fbff734fb8f062fc35d231f33ff8d588ac4030861b12dcee1a5c66ef520000000000';
   expect(transaction.txToBytes(txData).toString('hex')).toBe(expectedTxHex);
 });

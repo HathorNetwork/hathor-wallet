@@ -1,8 +1,9 @@
-import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK } from '../constants';
+import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK } from '../constants';
 import Mnemonic from 'bitcore-mnemonic';
 import { HDPrivateKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
 import walletApi from '../api/wallet';
+import tokens from './tokens';
 import store from '../store/index';
 import { historyUpdate, sharedAddressUpdate, reloadData, voidedTx, cleanData } from '../actions/index';
 import WebSocketHandler from '../WebSocketHandler';
@@ -12,12 +13,13 @@ import _ from 'lodash';
 /**
  * We use localStorage and Redux to save data
  * In localStorage we have the following keys (prefixed by wallet:)
- * - walletData: object with data from the wallet including (all have full description in the reducers file)
+ * - data: object with data from the wallet including (all have full description in the reducers file)
  *   . sortedHistory: Array of history reversed sorted by timestamp
  *   . unpentTxs: Object with unspentTxs data indexed first by token_uid and then by [tx_id, index]
  *   . spentTxs: Object with spentTxs data indexed by [from_tx_id, index]
  *   . voidedUnspentTxs: Object with unspentTxs that were voided indexed only by [tx_id, index]
  *   . voidedSpentTxs: Object with spentTxs that were voided indexed by [from_tx_id, index]
+ *   . authorityOutputs: Object with authority outputs indexed first by token_uid and then by [tx_id, index]
  * - accessData: object with data to access the wallet
  *   . mainKey: string with encrypted private key
  *   . hash: string with hash of pin
@@ -35,6 +37,7 @@ import _ from 'lodash';
  * - closed: when the wallet was closed
  * - txMinWeight: minimum weight of a transaction (variable got from the backend)
  * - txWeightCoefficient: minimum weight coefficient of a transaction (variable got from the backend)
+ * - tokens: array with tokens information {'name', 'symbol', 'uid'}
  *
  * @namespace Wallet
  */
@@ -454,6 +457,27 @@ const wallet = {
   },
 
   /**
+   * Get the address to be used and generate a new one
+   *
+   * @param {string} pin
+   *
+   * @return {string} address
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getAddressToUse(pin) {
+    const address = localStorage.getItem('wallet:address');
+    // Updating address because the last one was used
+    if (this.hasNewAddress()) {
+      this.getNextAddress();
+    } else {
+      this.generateNewAddress(pin);
+    }
+    return address;
+  },
+
+  /**
    * Calculate the balance for each token (available and locked) from the unspentTxs
    *
    * @param {Object} unspentTxs
@@ -512,13 +536,17 @@ const wallet = {
     let data = localStorage.getItem('wallet:data');
     if (data) {
       data = JSON.parse(data);
+
+      const dataToken = tokens.getTokens();
       // Saving wallet data
       store.dispatch(reloadData({
-        sortedHistory: data.sortedHistory || [],
+        sortedHistory: data.sortedHistory || {},
         unspentTxs: data.unspentTxs || {},
         spentTxs: data.spentTxs || {},
         voidedSpentTxs: data.voidedSpentTxs || {},
         voidedUnspentTxs: data.voidedUnspentTxs || {},
+        authorityOutputs: data.authorityOutputs || {},
+        tokens: dataToken,
       }));
 
       // Saving address data
@@ -544,13 +572,14 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  saveAddressHistory(sortedHistory, unspentTxs, spentTxs, voidedSpentTxs, voidedUnspentTxs) {
+  saveAddressHistory(sortedHistory, unspentTxs, spentTxs, voidedSpentTxs, voidedUnspentTxs, authorityOutputs) {
     let data = JSON.parse(localStorage.getItem('wallet:data'));
     data['sortedHistory'] = sortedHistory;
     data['unspentTxs'] = unspentTxs;
     data['spentTxs'] = spentTxs;
     data['voidedSpentTxs'] = voidedSpentTxs;
     data['voidedUnspentTxs'] = voidedUnspentTxs;
+    data['authorityOutputs'] = authorityOutputs;
     localStorage.setItem('wallet:data', JSON.stringify(data));
   },
 
@@ -700,6 +729,7 @@ const wallet = {
     localStorage.removeItem('wallet:started');
     localStorage.removeItem('wallet:backup');
     localStorage.removeItem('wallet:locked');
+    localStorage.removeItem('wallet:tokens');
   },
 
   /**
@@ -730,15 +760,40 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  historyUpdate(payload, unspentTxs, spentTxs) {
-    let newSortedHistory = [];
+  historyUpdate(payload, unspentTxs, spentTxs, authorityOutputs) {
+    let newSortedHistory = {};
     for (let newHistory of payload) {
       if (newHistory.history.length > 0 ) {
         // Set this address as used
         this.setLastUsedIndex(newHistory.address);
         for (let addressHistory of newHistory.history) {
+          // If is output authority don't save to history
+          if (addressHistory.is_output && this.isAuthorityOutput(addressHistory)) {
+            if (!(addressHistory.token_uid in authorityOutputs)) {
+              authorityOutputs[addressHistory.token_uid] = {};
+            }
+            const objectKey = [addressHistory.tx_id, addressHistory.index];
+            authorityOutputs[addressHistory.token_uid][objectKey] = {
+              address: newHistory.address,
+              value: addressHistory.value,
+              timestamp: addressHistory.timestamp,
+              timelock: addressHistory.timelock,
+              tokenData: addressHistory.token_data
+            };
+            continue;
+          } else if (!addressHistory.is_output) {
+            // If it's input and in the authorityOutputs we don't add it anywhere
+            let objectKey = [addressHistory.from_tx_id, addressHistory.index];
+            let tokenUID = addressHistory.token_uid;
+            if (tokenUID in authorityOutputs && objectKey in authorityOutputs[tokenUID]) {
+              continue;
+            }
+          }
           // Adding each history in the array that will be sorted
-          newSortedHistory.push(addressHistory);
+          if (!(addressHistory.token_uid in newSortedHistory)) {
+            newSortedHistory[addressHistory.token_uid] = [];
+          }
+          newSortedHistory[addressHistory.token_uid].push(addressHistory);
 
           if (addressHistory.is_output) {
             // If it's output we add it in the unspentTxs only if not in the spentTxs yet
@@ -780,10 +835,12 @@ const wallet = {
       }
     }
 
-    // Sorting the newHistory array
-    newSortedHistory.sort((a, b) => {
-      return b.timestamp - a.timestamp;
-    });
+    for (const key in newSortedHistory) {
+      // Sorting the newHistory arrays
+      newSortedHistory[key].sort((a, b) => {
+        return b.timestamp - a.timestamp;
+      });
+    }
 
     return newSortedHistory;
   },
@@ -1034,7 +1091,7 @@ const wallet = {
           currentAmount += unspentTxs[tokenUID][key].value;
           let tx_id = key.split(',')[0];
           let index = key.split(',')[1];
-          inputs.push({ tx_id, index });
+          inputs.push({ tx_id, index, token: tokenUID });
         }
       }
     }
@@ -1045,22 +1102,17 @@ const wallet = {
    * Get output of a change of a transaction
    *
    * @param {number} value Amount of the change output
+   * @param {string} pin PIN to generate new address (in case it's necessary)
+   * @param {number} tokenData Token index of the output
    *
    * @return {Object} {'address': string, 'value': number}
    *
    * @memberof Wallet
    * @inner
    */
-  getOutputChange(value, pin) {
-    let address = localStorage.getItem('wallet:address');
-    let outputChange = {'address': address, 'value': value};
-    // Updating address because the last one was used
-    if (this.hasNewAddress()) {
-      this.getNextAddress();
-    } else {
-      this.generateNewAddress(pin);
-    }
-    return outputChange;
+  getOutputChange(value, pin, tokenData) {
+    const address = this.getAddressToUse(pin);
+    return {'address': address, 'value': value, 'tokenData': tokenData};
   },
 
   /*
@@ -1080,6 +1132,30 @@ const wallet = {
       let jsonData = JSON.parse(data);
       let unspentTxs = jsonData.unspentTxs;
       if (tokenUID in unspentTxs && key in unspentTxs[tokenUID]) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
+
+  /*
+   * Verify if has authority output available from tx_id, index and tokenUID
+   *
+   * @param {Array} key [tx_id, index]
+   * @param {string} tokenUID UID of the token to check existence
+   *
+   * @return {boolean}
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  checkAuthorityExists(key, tokenUID) {
+    const data = localStorage.getItem('wallet:data');
+    if (data) {
+      const jsonData = JSON.parse(data);
+      const authorityOutputs = jsonData.authorityOutputs;
+      if (tokenUID in authorityOutputs && key in authorityOutputs[tokenUID]) {
         return true;
       } else {
         return false;
@@ -1129,6 +1205,16 @@ const wallet = {
    */
   wasClosed() {
     return localStorage.getItem('wallet:closed') !== null;
+  },
+
+  /*
+   * Set in localStorage as closed
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  close() {
+    localStorage.setItem('wallet:closed', true);
   },
 
   /**
@@ -1195,6 +1281,18 @@ const wallet = {
     // Restart websocket connection
     WebSocketHandler.setup();
 
+    // Cleaning redux and leaving only tokens data
+    const dataToken = tokens.getTokens();
+    store.dispatch(reloadData({
+      sortedHistory: {},
+      unspentTxs: {},
+      spentTxs: {},
+      voidedSpentTxs: {},
+      voidedUnspentTxs: {},
+      authorityOutputs: {},
+      tokens: dataToken,
+    }));
+
     const walletData = {
       keys: {}
     }
@@ -1209,6 +1307,20 @@ const wallet = {
 
     // Load history from new server
     this.loadAddressHistory(0, GAP_LIMIT, privKey, pin);
+  },
+
+  /*
+   * Verifies if output is an authority one checking with authority mask
+   *
+   * @param {Object} output Output object with 'token_data' key
+   *
+   * @return {boolean} if output is authority
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  isAuthorityOutput(output) {
+    return (output.token_data & TOKEN_AUTHORITY_MASK) > 0
   },
 
   /*

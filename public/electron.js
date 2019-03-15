@@ -62,20 +62,6 @@ function createWindow () {
       ]}
   ];
 
-  if (process.env.NODE_ENV !== 'production') {
-    const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
-
-    // Add shortcut to open chrome dev tools
-    template.push({
-        label: 'Debug',
-        accelerator: 'CmdOrCtrl+Shift+I',
-        click: () => { mainWindow.webContents.toggleDevTools() }
-      })
-
-    // Install react extension on chrome dev tools
-    installExtension(REACT_DEVELOPER_TOOLS)
-  }
-
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
   // Emitted when the window is closed.
@@ -91,7 +77,7 @@ if (process.platform === 'darwin') {
   // Set "About" options only on macOS
   app.setAboutPanelOptions({
     'applicationName': appName,
-    'applicationVersion': '0.2.0-beta',
+    'applicationVersion': '0.3.3-beta',
     'version': '',
   });
 }
