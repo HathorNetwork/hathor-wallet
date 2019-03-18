@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
@@ -22,8 +22,6 @@ import wallet from './utils/wallet';
 import { connect } from "react-redux";
 import WebSocketHandler from './WebSocketHandler';
 import RequestErrorModal from './components/RequestError';
-import * as Sentry from '@sentry/electron'
-import { DEBUG_LOCAL_DATA_KEYS } from './constants';
 
 
 const mapDispatchToProps = dispatch => {
@@ -49,18 +47,6 @@ class Root extends React.Component {
     WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
   }
 
-  componentDidCatch(error, info) {
-    Sentry.withScope(scope => {
-      Object.entries(info).forEach(
-        ([key, item]) => scope.setExtra(key, item)
-      );
-      DEBUG_LOCAL_DATA_KEYS.forEach(
-        (key) => scope.setExtra(key, localStorage.getItem(key))
-      )
-      Sentry.captureException(error);
-    });
-  }
-
   handleWebsocket = (wsData) => {
     if (wallet.loaded()) {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
@@ -83,24 +69,22 @@ class Root extends React.Component {
 
   render() {
     return (
-      <Router>
-        <Switch>
-          <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-          <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-          <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-          <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-          <StartedRoute exact path="/settings" component={Settings} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-          <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-          <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-          <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-          <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
-          <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
-          <StartedRoute exact path="/signin" component={Signin} loaded={false} />
-          <NavigationRoute exact path="/locked" component={LockedWallet} />
-          <Route exact path="/welcome" component={Welcome} />
-          <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        </Switch>
-      </Router>
+      <Switch>
+        <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/settings" component={Settings} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
+        <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
+        <StartedRoute exact path="/signin" component={Signin} loaded={false} />
+        <NavigationRoute exact path="/locked" component={LockedWallet} />
+        <Route exact path="/welcome" component={Welcome} />
+        <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+      </Switch>
     )
   }
 }
