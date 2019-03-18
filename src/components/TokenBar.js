@@ -33,7 +33,14 @@ class TokenBar extends React.Component {
   }
 
   getUnknownTokens = () => {
-    const diff = this.props.allTokens.size - this.props.registeredTokens.length;
+    let diff = 0;
+    for (const uid of this.props.allTokens) {
+      const index = this.props.registeredTokens.findIndex((token) => token.uid === uid);
+      if (index === -1) {
+        // Token still does not exist in registered tokens
+        diff += 1;
+      }
+    }
     return diff;
   }
 
