@@ -14,13 +14,19 @@ import { connect } from "react-redux";
 
 const mapDispatchToProps = dispatch => {
   return {
-    updateWords: data => dispatch(updateWords(data)),
+    updateWords: (data) => dispatch(updateWords(data)),
   };
 };
 
 
 const mapStateToProps = (state) => {
-  return { unspentTxs: state.unspentTxs };
+  const filteredHistoryTransactions = wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken);
+  const balance = wallet.calculateBalance(filteredHistoryTransactions, state.selectedToken);
+  return {
+    balance: balance,
+    historyTransactions: filteredHistoryTransactions,
+    selectedToken: state.selectedToken,
+  };
 };
 
 
@@ -28,13 +34,9 @@ class Wallet extends React.Component {
   state = { balance: null, backupDone: true, successMessage: '' };
 
   componentDidMount = () => {
-    this.setState({ balance: wallet.calculateBalance(this.props.unspentTxs), backupDone: wallet.isBackupDone() });
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.unspentTxs !== this.props.unspentTxs) {
-      this.setState({ balance: wallet.calculateBalance(this.props.unspentTxs) });
-    }
+    this.setState({
+      backupDone: wallet.isBackupDone()
+    });
   }
 
   backupClicked = (e) => {
@@ -77,19 +79,22 @@ class Wallet extends React.Component {
         <div>
           <div className="d-none d-sm-flex flex-row align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-start justify-content-between">
-              <WalletBalance balance={this.state.balance} />
+              <WalletBalance balance={this.props.balance} />
             </div>
             <WalletAddress goToSignin={this.goToSignin} />
           </div>
           <div className="d-sm-none d-flex flex-column align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-center justify-content-between">
-              <WalletBalance balance={this.state.balance} />
+              <WalletBalance balance={this.props.balance} />
               <div className="d-flex flex-row align-items-center">
               </div>
             </div>
             <WalletAddress goToSignin={this.goToSignin} />
           </div>
-          <WalletHistory ref={(node) => { this.historyNode = node; }} />
+          <WalletHistory
+            historyTransactions={this.props.historyTransactions}
+            selectedToken={this.props.selectedToken}
+            ref={(node) => { this.historyNode = node; }} />
         </div>
       );
     }

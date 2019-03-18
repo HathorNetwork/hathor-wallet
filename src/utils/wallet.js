@@ -1,11 +1,11 @@
 import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK } from '../constants';
 import Mnemonic from 'bitcore-mnemonic';
-import { HDPrivateKey, Address } from 'bitcore-lib';
+import { HDPublicKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
 import walletApi from '../api/wallet';
 import tokens from './tokens';
 import store from '../store/index';
-import { historyUpdate, sharedAddressUpdate, reloadData, voidedTx, cleanData } from '../actions/index';
+import { historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
 import WebSocketHandler from '../WebSocketHandler';
 import dateFormatter from './date';
 import _ from 'lodash';
@@ -14,12 +14,7 @@ import _ from 'lodash';
  * We use localStorage and Redux to save data
  * In localStorage we have the following keys (prefixed by wallet:)
  * - data: object with data from the wallet including (all have full description in the reducers file)
- *   . sortedHistory: Array of history reversed sorted by timestamp
- *   . unpentTxs: Object with unspentTxs data indexed first by token_uid and then by [tx_id, index]
- *   . spentTxs: Object with spentTxs data indexed by [from_tx_id, index]
- *   . voidedUnspentTxs: Object with unspentTxs that were voided indexed only by [tx_id, index]
- *   . voidedSpentTxs: Object with spentTxs that were voided indexed by [from_tx_id, index]
- *   . authorityOutputs: Object with authority outputs indexed first by token_uid and then by [tx_id, index]
+ *   . historyTransactions: Object of transactions indexed by tx_id
  * - accessData: object with data to access the wallet
  *   . mainKey: string with encrypted private key
  *   . hash: string with hash of pin
@@ -135,7 +130,8 @@ const wallet = {
     }
 
     let walletData = {
-      keys: {}
+      keys: {},
+      xpubkey: privkey.xpubkey,
     }
 
     localStorage.setItem('wallet:accessData', JSON.stringify(access));
@@ -143,9 +139,41 @@ const wallet = {
 
     if (loadHistory) {
       // Load history from address
-      this.loadAddressHistory(0, GAP_LIMIT, privkey, pin);
+      this.loadAddressHistory(0, GAP_LIMIT);
     }
     return code.phrase;
+  },
+
+  /**
+   * Get wallet last generated address index
+   *
+   * @return {number} Index that was last generated
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getLastGeneratedIndex() {
+    const raw = localStorage.getItem('wallet:lastGeneratedIndex');
+    if (!raw) {
+      return 0;
+    }
+    return parseInt(raw, 10);
+  },
+
+  /**
+   * Get wallet data already parsed from JSON
+   *
+   * @return {Object} wallet data
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getWalletData() {
+    const data = localStorage.getItem('wallet:data');
+    if (!data) {
+      return null;
+    }
+    return JSON.parse(data);
   },
 
   /**
@@ -156,86 +184,45 @@ const wallet = {
    *
    * @param {number} startIndex Address index to start to load history
    * @param {number} count How many addresses I will load
-   * @param {HDPrivateKey} privkey
-   * @param {string} pin
    *
    * @return {Promise} Promise that resolves when addresses history is finished loading from server
    *
    * @memberof Wallet
    * @inner
    */
-  loadAddressHistory(startIndex, count, privkey, pin) {
-    // First generate all private keys and its addresses, then get history
-    let addresses = [];
-    let dataJson = JSON.parse(localStorage.getItem('wallet:data'));
-
-    for (var i=startIndex; i<startIndex+count; i++) {
-      // Generate each key from index, encrypt and save
-      let key = privkey.derive(i);
-      var address = Address(key.publicKey, NETWORK);
-      let keyData = this.encryptData(key.xprivkey, pin);
-      dataJson['keys'][address.toString()] = {privkey: keyData.encrypted.toString(), index: i};
-      addresses.push(address.toString());
-
-      // Subscribe in websocket to this address updates
-      this.subscribeAddress(address.toString());
-
-      if (localStorage.getItem('wallet:address') === null) {
-        // If still don't have an address to show on the screen
-        this.updateAddress(address.toString(), i);
-      }
-    }
-
-    localStorage.setItem('wallet:lastGeneratedIndex', i - 1);
-    localStorage.setItem('wallet:data', JSON.stringify(dataJson));
-
+  loadAddressHistory(startIndex, count) {
     const promise = new Promise((resolve, reject) => {
+      // First generate all private keys and its addresses, then get history
+      let addresses = [];
+      let dataJson = this.getWalletData();
+
+      const xpub = HDPublicKey(dataJson.xpubkey);
+      const stopIndex = startIndex + count;
+      for (var i=startIndex; i<stopIndex; i++) {
+        // Generate each key from index, encrypt and save
+        let key = xpub.derive(i);
+        var address = Address(key.publicKey, NETWORK);
+        dataJson.keys[address.toString()] = {privkey: null, index: i};
+        addresses.push(address.toString());
+
+        // Subscribe in websocket to this address updates
+        this.subscribeAddress(address.toString());
+
+        if (localStorage.getItem('wallet:address') === null) {
+          // If still don't have an address to show on the screen
+          this.updateAddress(address.toString(), i, true);
+        }
+      }
+
+      let lastGeneratedIndex = this.getLastGeneratedIndex();
+      if (lastGeneratedIndex < stopIndex - 1) {
+        localStorage.setItem('wallet:lastGeneratedIndex', stopIndex - 1);
+      }
+      localStorage.setItem('wallet:data', JSON.stringify(dataJson));
+
       walletApi.getAddressHistory(addresses, (response) => {
-        // Response returns the addresses histories in the same order
-        let toGenerate = 0;
-        let lastSharedAddress = null;
-        let lastSharedIndex = null;
-        for (let [index, data] of response.history.entries()) {
-          if (data.history.length > 0) {
-            // If we have transaction in this address we need to generate more
-            toGenerate = index + 1;
-            lastSharedAddress = null;
-            lastSharedIndex = null;
-          } else {
-            // If it's the first without history can be the address to show on the screen to be used
-            if (lastSharedAddress === null) {
-              lastSharedAddress = data.address;
-              lastSharedIndex = startIndex + index;
-            }
-          }
-        }
-
         // Save in redux
-        store.dispatch(historyUpdate(response.history));
-
-        // Updating voided tx data
-        for (let responseData of response.history) {
-          for (let historyData of responseData.history) {
-            if (historyData.voided) {
-              store.dispatch(voidedTx({'address': responseData.address, 'element': historyData}));
-            }
-          }
-        }
-
-        if (toGenerate > 0) {
-          if (lastSharedAddress) {
-            this.updateAddress(lastSharedAddress, lastSharedIndex);
-          }
-          // Load more addresses
-          this.loadAddressHistory(i, toGenerate, privkey, pin);
-        } else {
-          if (count === GAP_LIMIT) {
-            // This is the case when the last GAP_LIMIT addresses were all already used
-            this.updateAddress(lastSharedAddress, lastSharedIndex);
-          }
-        }
-        
-        resolve();
+        store.dispatch(historyUpdate({'data': response.history, 'resolve': resolve}));
       }, (e) => {
         // Error in request
         console.log(e);
@@ -270,10 +257,12 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  updateAddress(lastSharedAddress, lastSharedIndex) {
+  updateAddress(lastSharedAddress, lastSharedIndex, updateRedux) {
     localStorage.setItem('wallet:address', lastSharedAddress);
     localStorage.setItem('wallet:lastSharedIndex', lastSharedIndex);
-    store.dispatch(sharedAddressUpdate({lastSharedAddress, lastSharedIndex}));
+    if (updateRedux) {
+      store.dispatch(sharedAddressUpdate({lastSharedAddress, lastSharedIndex}));
+    }
   },
 
   /**
@@ -364,7 +353,7 @@ const wallet = {
    * @inner
    */
   hasNewAddress() {
-    let lastGeneratedIndex = parseInt(localStorage.getItem('wallet:lastGeneratedIndex'), 10);
+    let lastGeneratedIndex = this.getLastGeneratedIndex();
     let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
     return lastGeneratedIndex > lastSharedIndex;
   },
@@ -378,10 +367,10 @@ const wallet = {
    */
   getNextAddress() {
     let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
-    let data = JSON.parse(localStorage.getItem('wallet:data'));
+    let data = this.getWalletData();
     for (let address in data.keys) {
       if (data.keys[address].index === lastSharedIndex + 1) {
-        this.updateAddress(address, lastSharedIndex + 1);
+        this.updateAddress(address, lastSharedIndex + 1, true);
         break;
       }
     }
@@ -399,7 +388,7 @@ const wallet = {
    */
   canGenerateNewAddress() {
     let lastUsedIndex = parseInt(localStorage.getItem('wallet:lastUsedIndex'), 10);
-    let lastGeneratedIndex = parseInt(localStorage.getItem('wallet:lastGeneratedIndex'), 10);
+    let lastGeneratedIndex = this.getLastGeneratedIndex();
     if (LIMIT_ADDRESS_GENERATION) {
       if (lastUsedIndex + GAP_LIMIT > lastGeneratedIndex) {
         // Still haven't reached the limit
@@ -415,38 +404,32 @@ const wallet = {
 
   /**
    * Generate a new address
-   * We need the pin to decrypt the private key and generate the new one
    * We update the wallet data and new address shared
-   *
-   * @param {string} pin
    *
    * @memberof Wallet
    * @inner
    */
-  generateNewAddress(pin) {
-    // Get private key
-    let accessData = JSON.parse(localStorage.getItem('wallet:accessData'));
-    let toDecrypt = accessData.mainKey;
-    let decrypted = this.decryptData(toDecrypt, pin);
-    let privKey = HDPrivateKey(decrypted);
+  generateNewAddress() {
+    const dataJson = this.getWalletData();
+    const xpub = HDPublicKey(dataJson.xpubkey);
 
     // Get last shared index to discover new index
     let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
     let newIndex = lastSharedIndex + 1;
-    let newKey = privKey.derive(newIndex);
-    let newAddress = Address(newKey.publicKey, NETWORK);
-    let newKeyData = this.encryptData(newKey.xprivkey, pin);
+
+    const newKey = xpub.derive(newIndex);
+    const newAddress = Address(newKey.publicKey, NETWORK);
 
     // Update address data and last generated indexes
-    this.updateAddress(newAddress.toString(), newIndex);
-    let lastGeneratedIndex = parseInt(localStorage.getItem('wallet:lastGeneratedIndex'), 10);
+    this.updateAddress(newAddress.toString(), newIndex, true);
+    let lastGeneratedIndex = this.getLastGeneratedIndex();
     if (newIndex > lastGeneratedIndex) {
       localStorage.setItem('wallet:lastGeneratedIndex', newIndex);
     }
 
     // Save new keys to local storage
-    let data = JSON.parse(localStorage.getItem('wallet:data'));
-    data.keys[newAddress.toString()] = {privkey: newKeyData.encrypted.toString(), index: newIndex};
+    let data = this.getWalletData();
+    data.keys[newAddress.toString()] = {privkey: null, index: newIndex};
     localStorage.setItem('wallet:data', JSON.stringify(data));
 
     // Save in redux the new shared address
@@ -459,48 +442,113 @@ const wallet = {
   /**
    * Get the address to be used and generate a new one
    *
-   * @param {string} pin
-   *
    * @return {string} address
    *
    * @memberof Wallet
    * @inner
    */
-  getAddressToUse(pin) {
+  getAddressToUse() {
     const address = localStorage.getItem('wallet:address');
     // Updating address because the last one was used
     if (this.hasNewAddress()) {
       this.getNextAddress();
     } else {
-      this.generateNewAddress(pin);
+      this.generateNewAddress();
     }
     return address;
   },
 
   /**
-   * Calculate the balance for each token (available and locked) from the unspentTxs
+   * Validates if transaction is from this wallet (uses an address of this wallet)
+   * and if this output/input is also from the selectedToken
    *
-   * @param {Object} unspentTxs
+   * @param {Object} tx Transaction object
+   * @param {string} selectedToken Token uid
    *
-   * @return {Object} Object with {available: number, locked: number} for each of the tokens
+   * @return {boolean}
    *
    * @memberof Wallet
    * @inner
    */
-  calculateBalance(unspentTxs) {
-    let balance = {};
-    for (let token in unspentTxs) {
-      let tokenBalance = {available: 0, locked: 0};
-      for (let key in unspentTxs[token]) {
-        let uTx = unspentTxs[token][key];
-        // Checking if unspentTx is locked
-        if (this.canUseUnspentTx(uTx)) {
-          tokenBalance['available'] += uTx.value;
-        } else {
-          tokenBalance['locked'] += uTx.value;
+  hasTokenAndAddress(tx, selectedToken) {
+    // TODO Move it from here.
+    const keys = JSON.parse(localStorage.getItem('wallet:data')).keys;
+
+    for (let txin of tx.inputs) {
+      if (txin.token === selectedToken) {
+        if (txin.decoded.address in keys) {
+          return true;
         }
       }
-      balance[token] = tokenBalance;
+    }
+    for (let txout of tx.outputs) {
+      if (txout.token === selectedToken) {
+        if (txout.decoded.address in keys) {
+          return true;
+        }
+      }
+    }
+    return false;
+  },
+
+  /**
+   * Filters an array of transactions to only the ones from this wallet and selectedToken
+   *
+   * @param {Object} historyTransactions Object of transactions indexed by tx_id
+   * @param {string} selectedToken Token uid
+   *
+   * @return {Object} array of the filtered transactions
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  filterHistoryTransactions(historyTransactions, selectedToken) {
+    const data = [];
+    for (const tx_id in historyTransactions) {
+      const tx = historyTransactions[tx_id];
+      if (this.hasTokenAndAddress(tx, selectedToken)) {
+        data.push(tx);
+      }
+    }
+    data.sort((a, b) => {
+      return b.timestamp - a.timestamp;
+    });
+    return data;
+  },
+
+  /**
+   * Calculate the balance for each token (available and locked) from the historyTransactions
+   *
+   * @param {Object} historyTransactions Array of transactions
+   * @param {string} selectedToken token uid to get the balance
+   *
+   * @return {Object} Object with {available: number, locked: number}
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  calculateBalance(historyTransactions, selectedToken) {
+    const keys = this.getWalletData().keys;
+
+    let balance = {available: 0, locked: 0};
+    for (let tx of historyTransactions) {
+      if (tx.is_voided) {
+        // Ignore voided transactions.
+        continue;
+      }
+      for (let txout of tx.outputs) {
+        if (this.isAuthorityOutput(txout)) {
+          // Ignore authority outputs.
+          continue;
+        }
+        if (txout.spent_by === null && txout.token === selectedToken && txout.decoded.address in keys) {
+          if (this.canUseUnspentTx(txout)) {
+            balance.available += txout.value;
+          } else {
+            balance.locked += txout.value;
+          }
+        }
+      }
     }
     return balance;
   },
@@ -508,7 +556,7 @@ const wallet = {
   /**
    * Check if unspentTx is locked or can be used
    *
-   * @param {Object} unspentTx
+   * @param {Object} unspentTx (needs to have decoded.timelock key)
    *
    * @return {boolean}
    *
@@ -516,9 +564,9 @@ const wallet = {
    * @inner
    */
   canUseUnspentTx(unspentTx) {
-    if (unspentTx.timelock) {
+    if (unspentTx.decoded.timelock) {
       let currentTimestamp = dateFormatter.dateToTimestamp(new Date());
-      return currentTimestamp > unspentTx.timelock;
+      return currentTimestamp > unspentTx.decoded.timelock;
     } else {
       return true;
     }
@@ -533,19 +581,13 @@ const wallet = {
    * @inner
    */
   localStorageToRedux() {
-    let data = localStorage.getItem('wallet:data');
+    let data = this.getWalletData();
     if (data) {
-      data = JSON.parse(data);
-
       const dataToken = tokens.getTokens();
       // Saving wallet data
       store.dispatch(reloadData({
-        sortedHistory: data.sortedHistory || {},
-        unspentTxs: data.unspentTxs || {},
-        spentTxs: data.spentTxs || {},
-        voidedSpentTxs: data.voidedSpentTxs || {},
-        voidedUnspentTxs: data.voidedUnspentTxs || {},
-        authorityOutputs: data.authorityOutputs || {},
+        historyTransactions: data.historyTransactions || {},
+        allTokens: new Set(data.allTokens || []),
         tokens: dataToken,
       }));
 
@@ -563,23 +605,16 @@ const wallet = {
   /**
    * Save wallet data from redux to localStorage
    *
-   * @param {Array} sortedHistory
-   * @param {Object} unspentTxs
-   * @param {Object} spentTxs
-   * @param {Object} voidedSpentTxs
-   * @param {Object} voidedUnspentTxs
+   * @param {Object} historyTransactions
+   * @param {Object} allTokens Set of all tokens added to the wallet
    *
    * @memberof Wallet
    * @inner
    */
-  saveAddressHistory(sortedHistory, unspentTxs, spentTxs, voidedSpentTxs, voidedUnspentTxs, authorityOutputs) {
-    let data = JSON.parse(localStorage.getItem('wallet:data'));
-    data['sortedHistory'] = sortedHistory;
-    data['unspentTxs'] = unspentTxs;
-    data['spentTxs'] = spentTxs;
-    data['voidedSpentTxs'] = voidedSpentTxs;
-    data['voidedUnspentTxs'] = voidedUnspentTxs;
-    data['authorityOutputs'] = authorityOutputs;
+  saveAddressHistory(historyTransactions, allTokens) {
+    let data = this.getWalletData();
+    data['historyTransactions'] = historyTransactions;
+    data['allTokens'] = [...allTokens];
     localStorage.setItem('wallet:data', JSON.stringify(data));
   },
 
@@ -636,10 +671,9 @@ const wallet = {
    * @inner
    */
   subscribeAllAddresses() {
-    let data = localStorage.getItem('wallet:data');
+    let data = this.getWalletData();
     if (data) {
-      let parsedData = JSON.parse(data);
-      for (let address in parsedData.keys) {
+      for (let address in data.keys) {
         this.subscribeAddress(address);
       }
     }
@@ -663,10 +697,9 @@ const wallet = {
    * @inner
    */
   unsubscribeAllAddresses() {
-    let data = localStorage.getItem('wallet:data');
+    let data = this.getWalletData();
     if (data) {
-      let parsedData = JSON.parse(data);
-      for (let address in parsedData.keys) {
+      for (let address in data.keys) {
         this.unsubscribeAddress(address);
       }
     }
@@ -680,10 +713,9 @@ const wallet = {
    * @inner
    */
   setLastUsedIndex(address) {
-    let data = localStorage.getItem('wallet:data');
+    let data = this.getWalletData();
     if (data) {
-      let parsedData = JSON.parse(data);
-      let index = parsedData.keys[address].index;
+      let index = data.keys[address].index;
       let lastUsedIndex = localStorage.getItem('wallet:lastUsedIndex');
       if (lastUsedIndex === null || index > parseInt(lastUsedIndex, 10)) {
         localStorage.setItem('wallet:lastUsedAddress', address);
@@ -697,6 +729,7 @@ const wallet = {
    * - Clean local storage
    * - Clean redux
    * - Unsubscribe websocket connections
+   *
    * @memberof Wallet
    * @inner
    */
@@ -748,395 +781,112 @@ const wallet = {
     localStorage.removeItem('wallet:closed');
   },
 
-  /**
-   * Update history data (sortedHistory, unspentTxs, spentTxs)
-   *
-   * @param {Array} payload Array of objects indexed by address with array of transactions for this address
-   * @param {Object} unspentTxs
-   * @param {Object} spentTxs
-   *
-   * @return {Array} history reversed sorted by timestamp
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  historyUpdate(payload, unspentTxs, spentTxs, authorityOutputs) {
-    let newSortedHistory = {};
-    for (let newHistory of payload) {
-      if (newHistory.history.length > 0 ) {
-        // Set this address as used
-        this.setLastUsedIndex(newHistory.address);
-        for (let addressHistory of newHistory.history) {
-          // If is output authority don't save to history
-          if (addressHistory.is_output && this.isAuthorityOutput(addressHistory)) {
-            if (!(addressHistory.token_uid in authorityOutputs)) {
-              authorityOutputs[addressHistory.token_uid] = {};
-            }
-            const objectKey = [addressHistory.tx_id, addressHistory.index];
-            authorityOutputs[addressHistory.token_uid][objectKey] = {
-              address: newHistory.address,
-              value: addressHistory.value,
-              timestamp: addressHistory.timestamp,
-              timelock: addressHistory.timelock,
-              tokenData: addressHistory.token_data
-            };
-            continue;
-          } else if (!addressHistory.is_output) {
-            // If it's input and in the authorityOutputs we don't add it anywhere
-            let objectKey = [addressHistory.from_tx_id, addressHistory.index];
-            let tokenUID = addressHistory.token_uid;
-            if (tokenUID in authorityOutputs && objectKey in authorityOutputs[tokenUID]) {
-              continue;
-            }
-          }
-          // Adding each history in the array that will be sorted
-          if (!(addressHistory.token_uid in newSortedHistory)) {
-            newSortedHistory[addressHistory.token_uid] = [];
-          }
-          newSortedHistory[addressHistory.token_uid].push(addressHistory);
-
-          if (addressHistory.is_output) {
-            // If it's output we add it in the unspentTxs only if not in the spentTxs yet
-            let objectKey = [addressHistory.tx_id, addressHistory.index];
-            if (!(objectKey in spentTxs)) {
-              if (!(addressHistory.token_uid in unspentTxs)) {
-                unspentTxs[addressHistory.token_uid] = {};
-              }
-              unspentTxs[addressHistory.token_uid][objectKey] = {
-                address: newHistory.address,
-                value: addressHistory.value,
-                timestamp: addressHistory.timestamp,
-                timelock: addressHistory.timelock
-              };
-            }
-          } else {
-            // If it's input we add it to the spentTxs
-            // If it's in the unspentTxs we remove it from there
-            let objectKey = [addressHistory.from_tx_id, addressHistory.index];
-            let tokenUID = addressHistory.token_uid;
-            if (tokenUID in unspentTxs && objectKey in unspentTxs[tokenUID]) {
-              // Removing from unspentTxs
-              delete unspentTxs[tokenUID][objectKey];
-            }
-
-            // Adding into spentTxs
-            if (!(objectKey in spentTxs)) {
-              spentTxs[objectKey] = []
-            }
-            spentTxs[objectKey].push({
-              address: newHistory.address,
-              value: addressHistory.value,
-              tx_id: addressHistory.tx_id,
-              timestamp: addressHistory.timestamp,
-              timelock: addressHistory.timelock
-            })
-          }
-        }
-      }
-    }
-
-    for (const key in newSortedHistory) {
-      // Sorting the newHistory arrays
-      newSortedHistory[key].sort((a, b) => {
-        return b.timestamp - a.timestamp;
-      });
-    }
-
-    return newSortedHistory;
-  },
-
-  /**
-   * Update unspent/spent txs data when a wallet element is voided
-   *
-   * For outputs we have the following situations:
-   *
-   * . Not used yet, so it's still in the unspentTxs, we remove it from there only
-   * . Already used, so it's in spentTxs, we remove from there
-   * . Not found anywhere, so it was already updated in another conflict resolution
-   *
-   * For inputs we have the following situations:
-   * . If it's in the unspentTxs, we have to do nothing
-   * . If it's in the spentTxs, we remove from the array. If this was the last tx, we recreate in the unspent
-   *
-   * @param {Object} voidedElement Object with data of element that was voided
-   * @param {string} address Address used in this voided element
-   * @param {Object} unspentTxs
-   * @param {Object} spentTxs
-   * @param {Object} voidedUnspentTxs
-   * @param {Object} voidedSpentTxs
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  onWalletElementVoided(voidedElement, address, unspentTxs, spentTxs, voidedUnspentTxs, voidedSpentTxs) {
-    if (voidedElement.is_output) {
-      // Handle output
-      let objectKey = [voidedElement.tx_id, voidedElement.index];
-      // If element is still in unspentTxs, remove it from there
-      if (voidedElement.token_uid in unspentTxs && objectKey in unspentTxs[voidedElement.token_uid]) {
-        delete unspentTxs[voidedElement.token_uid][objectKey];
-      }
-
-      // If element is in spentTxs, remove it from there
-      if (objectKey in spentTxs) {
-        delete spentTxs[objectKey];
-      }
-
-      // Create this element in voidedUnspentTxs if still not there
-      if (!(objectKey in voidedUnspentTxs)) {
-        voidedUnspentTxs[objectKey] = {
-          address: address,
-          value: voidedElement.value,
-          timestamp: voidedElement.timestamp,
-          timelock: voidedElement.timelock
-        };
-      }
-    } else {
-      // Handle input
-      let objectKey = [voidedElement.from_tx_id, voidedElement.index];
-
-      // Try to find in spentTxs
-      if (objectKey in spentTxs) {
-        let foundIndex = -1;
-        for (let [idx, el] of spentTxs[objectKey].entries()) {
-          if (el.tx_id === voidedElement.tx_id) {
-            foundIndex = idx;
-          }
-        }
-
-        if (foundIndex > -1) {
-          // If found, remove it
-          spentTxs[objectKey].splice(foundIndex, 1);
-        }
-
-        if (spentTxs[objectKey].length === 0) {
-          // If it was the last element, we must recreate in unspentTxs, if it's not there already
-          if (!(voidedElement.token_uid in unspentTxs)) {
-            unspentTxs[voidedElement.token_uid] = {};
-          }
-          unspentTxs[voidedElement.token_uid][objectKey] = {
-            address: address,
-            value: voidedElement.value,
-            timestamp: voidedElement.timestamp,
-            timelock: voidedElement.timelock
-          }
-        }
-      }
-      if (!(objectKey in voidedSpentTxs)) {
-        voidedSpentTxs[objectKey] = [];
-      }
-      // Save in voidedSpentTxs if it's not there yet
-      let foundNewIndex = -1;
-      for (let [idx, el] of voidedSpentTxs[objectKey].entries()) {
-        if (el.tx_id === voidedElement.tx_id) {
-          foundNewIndex = idx;
-        }
-      }
-
-      if (foundNewIndex === -1) {
-        // Not found, so create
-        voidedSpentTxs[objectKey].push({
-          address: address,
-          value: voidedElement.value,
-          tx_id: voidedElement.tx_id,
-          timestamp: voidedElement.timestamp,
-          timelock: voidedElement.timelock
-        });
-      }
-    }
-  },
-
-  /**
-   * Update unspent/spent txs data when a wallet element is a winner
-   *
-   * For outputs we have the following situations:
-   *
-   * . In case it's in the spent or unspent we do nothing
-   * . In case is not found, it was deleted because of a previous conflict, so we recreate in the unspent
-   *
-   * For inputs we have the following situations:
-   * . If it's in the unspent_txs, we remove from there and add in the spent_txs
-   * . If it's in the spent_txs, we do nothing
-   * . If it's not in both, we add in the spent_txs
-   *
-   * @param {Object} winnerElement Object with data of element that was winner
-   * @param {string} address Address used in this winner element
-   * @param {Object} unspentTxs
-   * @param {Object} spentTxs
-   * @param {Object} voidedUnspentTxs
-   * @param {Object} voidedSpentTxs
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  onWalletElementWinner(winnerElement, address, unspentTxs, spentTxs, voidedUnspentTxs, voidedSpentTxs) {
-    if (winnerElement.is_output) {
-      // Handle output
-      let objectKey = [winnerElement.tx_id, winnerElement.index];
-      // If element is not in unspentTxs neither in spentTxs, we recreate it in unspentTxs
-      let found = false;
-      if (winnerElement.token_uid in unspentTxs && objectKey in unspentTxs[winnerElement.token_uid]) {
-        found = true;
-      } else {
-        if (objectKey in spentTxs && spentTxs[objectKey].length > 0) {
-          found = true;
-        }
-      }
-
-      if (!found) {
-        // Recreate element in unspentTxs
-        if (!(winnerElement.token_uid in unspentTxs)) {
-          unspentTxs[winnerElement.token_uid] = {}
-        }
-        unspentTxs[winnerElement.token_uid][objectKey] = {
-          address: address,
-          value: winnerElement.value,
-          timestamp: winnerElement.timestamp,
-          timelock: winnerElement.timelock
-        };
-      }
-
-      // If found in voidedUnspentTxs, remove it from there
-      if (objectKey in voidedUnspentTxs) {
-        delete voidedUnspentTxs[objectKey];
-      }
-    } else {
-      // Handle input
-      let objectKey = [winnerElement.from_tx_id, winnerElement.index];
-
-      // Remove from voidedSpentTxs if it's there
-      if (objectKey in voidedSpentTxs) {
-        let foundIndex = -1;
-        for (let [idx, el] of voidedSpentTxs[objectKey].entries()) {
-          if (el.tx_id === winnerElement.tx_id) {
-            foundIndex = idx;
-          }
-        }
-
-        if (foundIndex > -1) {
-          voidedSpentTxs[objectKey].splice(foundIndex, 1);
-        }
-      }
-
-      // Protect if does not have in spentTxs
-      if (!(objectKey in spentTxs)) {
-        spentTxs[objectKey] = [];
-      }
-
-      if (winnerElement.token_uid in unspentTxs && objectKey in unspentTxs[winnerElement.token_uid]) {
-        // Remove from unspentTxs, if it's there
-        delete unspentTxs[winnerElement.token_uid][objectKey];
-        // Now recreate it in spentTxs
-        spentTxs[objectKey].push({
-          address: address,
-          value: winnerElement.value,
-          tx_id: winnerElement.tx_id,
-          timestamp: winnerElement.timestamp,
-          timelock: winnerElement.timelock
-        });
-      } else {
-        // If not in unspentTxs, try to find in spentTxs
-        let foundSpent = false;
-        if (objectKey in spentTxs) {
-          for (let el of spentTxs[objectKey]) {
-            if (el.tx_id === winnerElement.tx_id) {
-              foundSpent = true;
-            }
-          }
-        }
-
-        if (!foundSpent) {
-          // If not found, create
-          spentTxs[objectKey].push({
-            address: address,
-            value: winnerElement.value,
-            tx_id: winnerElement.tx_id,
-            timestamp: winnerElement.timestamp,
-            timelock: winnerElement.timelock
-          });
-        }
-      }
-    }
-  },
-
   /*
-   * Get inputs to be used in transaction from amount required and tokenUID
+   * Get inputs to be used in transaction from amount required and selectedToken
    *
+   * @param {Object} historyTransactions Object of transactions indexed by tx_id
    * @param {number} amount Amount required to send transaction
-   * @param {string} tokenUID UID of token that is being sent
+   * @param {string} selectedToken UID of token that is being sent
    *
-   * @return {Object} {'inputs': Array of objects {'tx_id', 'index'}, 'inputsAmount': number}
+   * @return {Object} {'inputs': Array of objects {'tx_id', 'index', 'token', 'address'}, 'inputsAmount': number}
    *
    * @memberof Wallet
    * @inner
    */
-  getInputsFromAmount(amount, tokenUID) {
-    let data = localStorage.getItem('wallet:data');
-    let inputs = [];
-    let currentAmount = 0;
-    if (data) {
-      let jsonData = JSON.parse(data);
-      let unspentTxs = jsonData.unspentTxs;
-
-      if (!(tokenUID in unspentTxs)) {
-        return {'inputs': inputs, 'inputsAmount': currentAmount}
+  getInputsFromAmount(historyTransactions, amount, selectedToken) {
+    const keys = this.getWalletData().keys;
+    const ret = {'inputs': [], 'inputsAmount': 0};
+    for (const tx_id in historyTransactions) {
+      const tx = historyTransactions[tx_id];
+      if (tx.is_voided) {
+        // Ignore voided transactions.
+        continue;
       }
-
-      for (let key in unspentTxs[tokenUID]) {
-        if (currentAmount >= amount) {
-          break;
+      for (const [index, txout] of tx.outputs.entries()) {
+        if (this.isAuthorityOutput(txout)) {
+          // Ignore authority outputs.
+          continue;
         }
-
-        if (this.canUseUnspentTx(unspentTxs[tokenUID][key])) {
-          currentAmount += unspentTxs[tokenUID][key].value;
-          let tx_id = key.split(',')[0];
-          let index = key.split(',')[1];
-          inputs.push({ tx_id, index, token: tokenUID });
+        if (ret.inputsAmount >= amount) {
+          return ret;
+        }
+        if (txout.spent_by === null && txout.token === selectedToken && txout.decoded.address in keys) {
+          if (this.canUseUnspentTx(txout)) {
+            ret.inputsAmount += txout.value;
+            ret.inputs.push({ tx_id: tx.tx_id, index, token: selectedToken, address: txout.decoded.address });
+          }
         }
       }
     }
-    return {'inputs': inputs, 'inputsAmount': currentAmount}
+    return ret;
   },
 
   /*
    * Get output of a change of a transaction
    *
    * @param {number} value Amount of the change output
-   * @param {string} pin PIN to generate new address (in case it's necessary)
    * @param {number} tokenData Token index of the output
    *
-   * @return {Object} {'address': string, 'value': number}
+   * @return {Object} {'address': string, 'value': number, 'tokenData': number}
    *
    * @memberof Wallet
    * @inner
    */
-  getOutputChange(value, pin, tokenData) {
-    const address = this.getAddressToUse(pin);
+  getOutputChange(value, tokenData) {
+    const address = this.getAddressToUse();
     return {'address': address, 'value': value, 'tokenData': tokenData};
   },
 
   /*
-   * Verify if has unspentTxs from tx_id, index and tokenUID
+   * Verify if has unspentTxs from tx_id, index and selectedToken
    *
-   * @param {Array} key [tx_id, index]
-   * @param {string} tokenUID UID of the token to check existence
+   * @param {Object} historyTransactions Object of transactions indexed by tx_id
+   * @param {string} txId Transaction id to search
+   * @param {number} index Output index to search
+   * @param {string} selectedToken UID of the token to check existence
    *
-   * @return {boolean}
+   * @return {Object} {success: boolean, message: Error message in case of failure, output: output object in case of success}
    *
    * @memberof Wallet
    * @inner
    */
-  checkUnspentTxExists(key, tokenUID) {
-    let data = localStorage.getItem('wallet:data');
-    if (data) {
-      let jsonData = JSON.parse(data);
-      let unspentTxs = jsonData.unspentTxs;
-      if (tokenUID in unspentTxs && key in unspentTxs[tokenUID]) {
-        return true;
-      } else {
-        return false;
+  checkUnspentTxExists(historyTransactions, txId, index, selectedToken) {
+    const keys = this.getWalletData().keys;
+    for (const tx_id in historyTransactions) {
+      const tx = historyTransactions[tx_id]
+      if (tx.tx_id !== txId) {
+        continue;
       }
+      if (tx.is_voided) {
+        // If tx is voided, not unspent
+        return {exists: false, message: `Transaction [${txId}] is voided`};
+      }
+      if (tx.outputs.length - 1 < index) {
+        // Output with this index does not exist
+        return {exists: false, message: `Transaction [${txId}] does not have this output [index=${index}]`};
+      }
+
+      const txout = tx.outputs[index];
+      if (this.isAuthorityOutput(txout)) {
+        // Ignore authority outputs for now.
+        return {exists: false, message: `Output [${index}] of transaction [${txId}] is an authority output`};
+      }
+
+      if (!(txout.decoded.address in keys)) {
+        return {exists: false, message: `Output [${index}] of transaction [${txId}] is not yours`};
+      }
+
+      if (txout.token !== selectedToken) {
+        return {exists: false, message: `Output [${index}] of transaction [${txId}] is not from selected token [${selectedToken}]`};
+      }
+
+      if (txout.spent_by !== null) {
+        return {exists: false, message: `Output [${index}] of transaction [${txId}] is already spent`};
+      }
+      return {exists: true, 'output': txout};
     }
+    // Requests txId does not exist in historyTransactions
+    return {exists: false, message: `Transaction [${txId}] does not exist in the wallet`};
   },
 
   /*
@@ -1267,14 +1017,13 @@ const wallet = {
   /*
    * Reload data in the localStorage
    *
-   * @param {string} pin PIN to decrypt data
-   *
    * @memberof Wallet
    * @inner
    */
-  reloadData(pin) {
+  reloadData() {
     // Get old access data
     const accessData = JSON.parse(localStorage.getItem('wallet:accessData'));
+    const walletData = this.getWalletData();
 
     // Clean all data in the wallet from the old server
     this.cleanWallet();
@@ -1284,29 +1033,21 @@ const wallet = {
     // Cleaning redux and leaving only tokens data
     const dataToken = tokens.getTokens();
     store.dispatch(reloadData({
-      sortedHistory: {},
-      unspentTxs: {},
-      spentTxs: {},
-      voidedSpentTxs: {},
-      voidedUnspentTxs: {},
-      authorityOutputs: {},
+      historyTransactions: {},
       tokens: dataToken,
     }));
 
-    const walletData = {
-      keys: {}
+    const newWalletData = {
+      keys: {},
+      xpubkey: walletData.xpubkey,
     }
 
     // Prepare to save new data
     localStorage.setItem('wallet:accessData', JSON.stringify(accessData));
-    localStorage.setItem('wallet:data', JSON.stringify(walletData));
-
-    const toDecrypt = accessData.mainKey;
-    const decrypted = this.decryptData(toDecrypt, pin);
-    const privKey = HDPrivateKey(decrypted);
+    localStorage.setItem('wallet:data', JSON.stringify(newWalletData));
 
     // Load history from new server
-    this.loadAddressHistory(0, GAP_LIMIT, privKey, pin);
+    return this.loadAddressHistory(0, GAP_LIMIT);
   },
 
   /*
@@ -1333,7 +1074,84 @@ const wallet = {
    */
   changeServer(newServer) {
     localStorage.setItem('wallet:server', newServer);
-  }
+  },
+
+  /*
+   * Prepare data (inputs and outputs) to be used in the send tokens
+   *
+   * @param {Object} data Object with array of inputs and outputs
+   * @param {Object} token Corresponding token
+   * @param {boolean} chooseInputs If should choose inputs automatically
+   * @param {Object} historyTransactions Object of transactions indexed by tx_id
+   * @param {Object} Array with all tokens already selected in the send tokens
+   *
+   * @return {Object} {success: boolean, message: error message in case of failure, data: prepared data in case of success}
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  prepareSendTokensData(data, token, chooseInputs, historyTransactions, allTokens) {
+    // Get the data and verify if we need to select the inputs or add a change output
+
+    // First get the amount of outputs
+    let outputsAmount = 0;
+    for (let output of data.outputs) {
+      outputsAmount += output.value;
+    }
+
+    if (outputsAmount === 0) {
+      return {success: false, message:  `Token: ${token.symbol}. Total value can't be 0`};
+    }
+
+    if (chooseInputs) {
+      // If no inputs selected we select our inputs and, maybe add also a change output
+      let newData = this.getInputsFromAmount(historyTransactions, outputsAmount, token.uid);
+
+      data['inputs'] = newData['inputs'];
+
+      if (newData.inputsAmount < outputsAmount) {
+        // Don't have this amount of token
+        return {success: false, message:  `Token ${token.symbol}: Insufficient amount of tokens`};
+      }
+
+      if (newData.inputsAmount > outputsAmount) {
+        // Need to create change output
+        let outputChange = this.getOutputChange(newData.inputsAmount - outputsAmount, tokens.getTokenIndex(allTokens, token.uid));
+        data['outputs'].push(outputChange);
+        // Shuffle outputs, so we don't have change output always in the same index
+        data['outputs'] = _.shuffle(data['outputs']);
+      }
+
+    } else {
+      // Validate the inputs used and if have to create a change output
+      let inputsAmount = 0;
+      for (const input of data.inputs) {
+        const utxo = wallet.checkUnspentTxExists(historyTransactions, input.tx_id, input.index, token.uid);
+        if (!utxo.exists) {
+          return {success: false, message: `Token: ${token.symbol}. ${utxo.message}`};
+        }
+
+        const output = utxo.output;
+        if (this.canUseUnspentTx(output)) {
+          inputsAmount += output.value;
+          input.address = output.decoded.address;
+        } else {
+          return {success: false, message: `Token: ${token.symbol}. Output [${input.tx_id}, ${input.index}] is locked until ${dateFormatter.parseTimestamp(output.decoded.timelock)}`};
+        }
+      }
+
+      if (inputsAmount < outputsAmount) {
+        return {success: false, message: `Token: ${token.symbol}. Sum of outputs is larger than the sum of inputs`};
+      }
+
+      if (inputsAmount > outputsAmount) {
+        // Need to create change output
+        let outputChange = wallet.getOutputChange(inputsAmount - outputsAmount, tokens.getTokenIndex(allTokens, token.uid));
+        data['outputs'].push(outputChange);
+      }
+    }
+    return {success: true, data};
+  },
 }
 
 export default wallet;

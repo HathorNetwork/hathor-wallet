@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
 import helpers from '../utils/helpers';
+import wallet from '../utils/wallet';
 
 
 class TokenHistory extends React.Component {
@@ -22,6 +23,36 @@ class TokenHistory extends React.Component {
       // If copied with success
       this.refs.alertCopied.show(1000);
     }
+  }
+
+  prepareTx = (tx) => {
+    // TODO Move it from here.
+    const keys = JSON.parse(localStorage.getItem('wallet:data')).keys;
+    const selectedToken = this.props.selectedToken;
+    let found = false;
+    let value = 0;
+
+    for (let txin of tx.inputs) {
+      if (wallet.isAuthorityOutput(txin)) {
+        continue;
+      }
+      if (txin.token === selectedToken && txin.decoded.address in keys) {
+        found = true;
+        value -= txin.value;
+      }
+    }
+
+    for (let txout of tx.outputs) {
+      if (wallet.isAuthorityOutput(txout)) {
+        continue;
+      }
+      if (txout.token === selectedToken && txout.decoded.address in keys) {
+        found = true;
+        value += txout.value;
+      }
+    }
+
+    return {found, value};
   }
 
   render() {
@@ -44,10 +75,10 @@ class TokenHistory extends React.Component {
           <table className="mt-3 table table-striped" id="token-history">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Date</th>
-                <th>Index</th>
-                <th>State</th>
+                <th>ID</th>
+                <th>Type</th>
+                <th></th>
                 <th>Value</th>
               </tr>
             </thead>
@@ -71,18 +102,31 @@ class TokenHistory extends React.Component {
       const endIndex = startIndex + this.props.count;
       const history = this.props.history.slice(startIndex, endIndex);
       return history.map((tx, idx) => {
+        const extra = this.prepareTx(tx);
+        if (!extra.found) {
+          return null;
+        }
+        let statusElement = '';
+        let trClass = '';
+        if (extra.value > 0) {
+          statusElement = <span>Received <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          trClass = 'output-tr';
+        } else if (extra.value < 0) {
+          statusElement = <span>Sent <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          trClass = 'input-tr';
+        }
         return (
-          <tr key={`${tx.tx_id}${tx.index}${tx.from_tx_id}`} className={tx.is_output ? 'output-tr' : 'input-tr'}>
+          <tr key={`${tx.tx_id}`} className={trClass}>
+            <td>{dateFormatter.parseTimestamp(tx.timestamp)}</td>
             <td>
-              <Link className={tx.voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>{tx.tx_id.substring(0,12)}...{tx.tx_id.substring(52,64)}</Link>
+              <Link className={tx.is_voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>{tx.tx_id.substring(0,12)}...{tx.tx_id.substring(52,64)}</Link>
               <CopyToClipboard text={tx.tx_id} onCopy={this.copied}>
                 <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
               </CopyToClipboard>
             </td>
-            <td>{dateFormatter.parseTimestamp(tx.timestamp)}</td>
-            <td>{tx.from_tx_id ? '-' : tx.index}</td>
-            <td className={tx.voided ? 'voided state' : 'state'}>{tx.is_output ? 'Received' : 'Sent'} <i className={`fa ml-3 ${tx.is_output ? 'fa-long-arrow-down' : 'fa-long-arrow-up'}`}></i></td>
-            <td className='value'><span className={tx.voided ? 'voided' : ''}>{helpers.prettyValue(tx.value)}</span>{tx.voided && renderVoidedElement()}</td>
+            <td className={tx.is_voided ? 'voided state' : 'state'}>{statusElement}</td>
+            <td>{tx.is_voided && renderVoidedElement()}</td>
+            <td className='value'><span className={tx.is_voided ? 'voided' : ''}>{helpers.prettyValue(extra.value)}</span></td>
           </tr>
         );
       });

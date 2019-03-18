@@ -35,16 +35,12 @@ class ModalAddManyTokens extends React.Component {
     for (const config of configsArr) {
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
-        const tokenData = tokens.getTokenFromConfigurationString(config);
-        if (tokenData === null) {
-          this.setState({ errorMessage: `Invalid configuration string: ${config}` });
+        const validation = tokens.validateTokenToAddByConfigurationString(config);
+        if (validation.success === false) {
+          this.setState({ errorMessage: validation.message });
           return;
         }
-        const existedToken = tokens.tokenExists(tokenData.uid);
-        if (existedToken) {
-          this.setState({ errorMessage: `You already have this token: ${config} (${existedToken.name})` });
-          return;
-        }
+        const tokenData = validation.tokenData;
         toAdd.push(tokenData);
       }
     }

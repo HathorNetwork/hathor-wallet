@@ -272,17 +272,10 @@ const transaction = {
   signTx(data, dataToSign, pin) {
     const hashbuf = this.getDataToSignHash(dataToSign);
 
-    const savedData = JSON.parse(localStorage.getItem('wallet:data'));
-    const unspentTxs = savedData.unspentTxs;
+    const keys = wallet.getWalletData().keys;
     for (const input of data.inputs) {
-      const objectKey = [input.tx_id, input.index];
-      if (!wallet.checkUnspentTxExists(objectKey, input.token)) {
-        // Input does not exist in unspent txs
-        return data;
-      }
-      const addressTarget = unspentTxs[input.token][objectKey].address;
-      const encryptedPrivateKey = savedData.keys[addressTarget].privkey;
-      input['data'] = this.getSignature(encryptedPrivateKey, hashbuf, pin);
+      const index = keys[input.address].index;
+      input['data'] = this.getSignature(index, hashbuf, pin);
     }
     return data;
   },
@@ -290,23 +283,26 @@ const transaction = {
   /*
    * Get signature of an input based in the private key
    *
+   * @param {number} index Index of the address to get the private key
    * @param {Buffer} hash hashed data to sign the transaction
-   * @param {string} encryptedPrivateKey string with the private key encrypted
+   * @param {string} pin PIN to decrypt the private key
    *
    * @return {Buffer} input data
    *
    * @memberof Transaction
    * @inner
    */
-  getSignature(encryptedPrivateKey, hash, pin) {
+  getSignature(index, hash, pin) {
+    const encryptedPrivateKey = JSON.parse(localStorage.getItem('wallet:accessData')).mainKey;
     const privateKeyStr = wallet.decryptData(encryptedPrivateKey, pin);
     const key = HDPrivateKey(privateKeyStr)
-    const privateKey = key.privateKey;
+    const derivedKey = key.derive(index);
+    const privateKey = derivedKey.privateKey;
 
     const sig = crypto.ECDSA.sign(hash, privateKey, 'little').set({
       nhashtype: crypto.Signature.SIGHASH_ALL
     });
-    return this.createInputData(sig.toDER(), key.publicKey.toBuffer());
+    return this.createInputData(sig.toDER(), derivedKey.publicKey.toBuffer());
   },
 
   /*

@@ -36,133 +36,13 @@ test('Clean local storage', () => {
 test('Save address history to localStorage', () => {
   expect(localStorage.getItem('wallet:data')).toBeNull();
   localStorage.setItem('wallet:data', '{}');
-  let sortedHistory = [{'tx_id': 1}, {'tx_id': 2}];
-  let unspentTxs = {'00': {'1,0': {'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r', 'value': 2000}}};
-  let spentTxs = {'2,0': {'address': '1knH3y5dZuC8DQBaLhgJP33fGBr6vstr8'}};
-  let voidedSpentTxs = {};
-  let voidedUnspentTxs = {};
-  wallet.saveAddressHistory(sortedHistory, unspentTxs, spentTxs, voidedSpentTxs, voidedUnspentTxs);
+  const historyTransactions = {'id': {'tx_id': 'id'}}
+  const allTokens = new Set(['00']);
+  wallet.saveAddressHistory(historyTransactions, allTokens);
 
   let data = JSON.parse(localStorage.getItem('wallet:data'));
-  expect(data.sortedHistory).toEqual(expect.arrayContaining(sortedHistory));
-  expect(data.unspentTxs).toEqual(expect.objectContaining(unspentTxs));
-  expect(data.spentTxs).toEqual(expect.objectContaining(spentTxs));
-  expect(data.voidedSpentTxs).toEqual(expect.objectContaining(voidedSpentTxs));
-  expect(data.voidedUnspentTxs).toEqual(expect.objectContaining(voidedUnspentTxs));
-});
-
-test('Update address history', () => {
-  let addressHistory = [
-    {
-      'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e',
-      'index': 0,
-      'is_output': true,
-      'token_uid': '00',
-      'token_data': 0,
-      'value': 100,
-      'timestamp': 1548990444,
-      'timelock': null,
-      'voided': false
-
-    },
-    {
-      'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295f',
-      'index': 0,
-      'is_output': false,
-      'token_uid': '00',
-      'value': 100,
-      'voided': false,
-      'timestamp': 1548990446,
-      'timelock': null,
-      'from_tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e'
-
-    },
-    {
-      'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295d',
-      'index': 0,
-      'token_data': 0,
-      'is_output': true,
-      'token_uid': '00',
-      'value': 200,
-      'timestamp': 1548990448,
-      'timelock': null,
-      'voided': false
-
-    },
-  ]
-  const authority = {
-    'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295c',
-    'index': 0,
-    'token_data': 0b10000001, // Authority output
-    'is_output': true,
-    'token_uid': '00',
-    'value': 200,
-    'timestamp': 1548990448,
-    'timelock': null,
-    'voided': false
-
-  }
-
-  let history = [
-    {
-      'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-      'history': [...addressHistory, authority],
-    }
-  ]
-
-  let unspentTxs = {};
-  let spentTxs = {};
-  let authorityOutputs = {};
-  let sortedHistory = wallet.historyUpdate(history, unspentTxs, spentTxs, authorityOutputs);
-
-  let expectedUnspent = {
-    '00': {
-      '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295d,0': {
-        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-        'value': 200,
-        'timelock': null,
-        'timestamp': 1548990448
-      }
-    }
-  }
-
-  let expectedAuthority = {
-    '00': {
-      '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295c,0': {
-        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-        'value': 200,
-        'timelock': null,
-        'timestamp': 1548990448,
-        'tokenData': 0b10000001, // Authority output
-      }
-    }
-  }
-
-  let expectedSpent = {
-    '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e,0': [
-      {
-        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-        'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295f',
-        'timestamp': 1548990446,
-        'value': 100,
-        'timelock': null,
-      }
-    ]
-  }
-
-  expect('00' in sortedHistory).toBe(true);
-  expect(sortedHistory['00']).toEqual(expect.arrayContaining(addressHistory));
-  expect(unspentTxs).toEqual(expect.objectContaining(expectedUnspent));
-  expect(spentTxs).toEqual(expect.objectContaining(expectedSpent));
-  expect(authorityOutputs).toEqual(expect.objectContaining(expectedAuthority));
-
-  // Test authority
-  localStorage.setItem('wallet:data', JSON.stringify({'authorityOutputs': expectedAuthority}));
-  const rightKey = '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295c,0';
-  const wrongKey = '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295d,0';
-  expect(wallet.checkAuthorityExists(wrongKey, '00')).toBe(false);
-  expect(wallet.checkAuthorityExists(rightKey, '01')).toBe(false);
-  expect(wallet.checkAuthorityExists(rightKey, '00')).toBe(true);
+  expect(data.historyTransactions).toEqual(expect.objectContaining(historyTransactions));
+  expect(data.allTokens).toEqual(expect.objectContaining(allTokens));
 });
 
 test('Valid words', () => {
@@ -176,41 +56,71 @@ test('Valid words', () => {
 });
 
 test('Inputs from amount', () => {
-  let unspentTxs = {
-    '00':
-    {
-      '1,0':
-      {
-        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-        'value': 2000
-      },
-      '1,1':
-      {
-        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-        'value': 2000
-      }
-    }
-  };
-  localStorage.setItem('wallet:data', JSON.stringify({'unspentTxs': unspentTxs}));
+  const historyTransactionts = {
+    '1': {
+      'tx_id': '1',
+      'outputs': [
+        {
+          'decoded': {
+            'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+          },
+          'value': 2000,
+          'token': '00',
+          'spent_by': null
+        },
+        {
+          'decoded': {
+            'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+          },
+          'value': 2000,
+          'token': '00',
+          'spent_by': null
+        },
+      ],
+      'inputs': [],
+    },
+  }
+  localStorage.setItem('wallet:data', JSON.stringify({'keys': {'171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r': {}}}));
 
-  let ret1 = wallet.getInputsFromAmount(10, '01');
+  const ret1 = wallet.getInputsFromAmount(historyTransactionts, 10, '01');
   expect(ret1.inputs.length).toBe(0);
   expect(ret1.inputsAmount).toBe(0);
 
-  let ret2 = wallet.getInputsFromAmount(200, '00');
+  const ret2 = wallet.getInputsFromAmount(historyTransactionts, 200, '00');
   expect(ret2.inputs.length).toBe(1);
   expect(ret2.inputsAmount).toBe(2000);
 });
 
 test('Can use unspent txs', () => {
-  let unspentTx1 = {'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r', 'value': 2000, 'timelock': null};
-  let timestamp = dateFormatter.dateToTimestamp(new Date());
-  let unspentTx2 = {'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r', 'value': 2000, 'timelock': timestamp - 1};
-  let unspentTx3 = {'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r', 'value': 2000, 'timelock': timestamp + 1000};
+  const unspentTx1 = {
+    'decoded': {
+      'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+      'timelock': null,
+    },
+    'value': 2000,
+    'spent_by': null,
+  };
+  const timestamp = dateFormatter.dateToTimestamp(new Date());
+  const unspentTx2 = {
+    'decoded': {
+      'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+      'timelock': timestamp - 1,
+    },
+    'value': 2000,
+    'spent_by': null,
+  };
+  const unspentTx3 = {
+    'decoded': {
+      'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+      'timelock': timestamp + 1000,
+    },
+    'value': 2000,
+    'spent_by': null,
+  };
 
-  expect(wallet.canUseUnspentTx(unspentTx1)).toBeTruthy();
-  expect(wallet.canUseUnspentTx(unspentTx2)).toBeTruthy();
-  expect(wallet.canUseUnspentTx(unspentTx3)).toBeFalsy();
+  expect(wallet.canUseUnspentTx(unspentTx1)).toBe(true);
+  expect(wallet.canUseUnspentTx(unspentTx2)).toBe(true);
+  expect(wallet.canUseUnspentTx(unspentTx3)).toBe(false);
 });
 
 test('Output change', () => {
@@ -218,7 +128,7 @@ test('Output change', () => {
   wallet.executeGenerateWallet(words, '', '123456', 'password', true);
   let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
   let address = localStorage.getItem('wallet:address');
-  let change = wallet.getOutputChange(1000, '123456');
+  let change = wallet.getOutputChange(1000, '00');
 
   expect(parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10)).toBe(lastSharedIndex+1);
   expect(change.address).toBe(address);
@@ -226,33 +136,43 @@ test('Output change', () => {
   expect(localStorage.getItem('wallet:address')).not.toBe(address);
 
   localStorage.setItem('wallet:lastSharedIndex', localStorage.getItem('wallet:lastGeneratedIndex'));
-  wallet.getOutputChange(1000, '123456');
+  wallet.getOutputChange(1000, '00');
   expect(parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10)).toBe(parseInt(localStorage.getItem('wallet:lastGeneratedIndex'), 10));
 });
 
 test('Unspent txs exist', () => {
-  let unspentTxs = {
-    '00':
-    {
-      '1,0':
-      {
-        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-        'value': 2000
-      },
-      '1,1':
-      {
-        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
-        'value': 2000
-      }
-    }
-  };
-  localStorage.setItem('wallet:data', JSON.stringify({'unspentTxs': unspentTxs}));
+  const historyTransactionts = {
+    '1': {
+      'tx_id': '1',
+      'outputs': [
+        {
+          'decoded': {
+            'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+          },
+          'value': 2000,
+          'token': '00',
+          'spent_by': null
+        },
+        {
+          'decoded': {
+            'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+          },
+          'value': 2000,
+          'token': '00',
+          'spent_by': null
+        },
+      ],
+      'inputs': [],
+    },
+  }
 
-  expect(wallet.checkUnspentTxExists('0,0', '00')).toBeFalsy();
-  expect(wallet.checkUnspentTxExists('0,0', '01')).toBeFalsy();
-  expect(wallet.checkUnspentTxExists('1,0', '00')).toBeTruthy();
-  expect(wallet.checkUnspentTxExists('1,1', '00')).toBeTruthy();
-  expect(wallet.checkUnspentTxExists('0,1', '00')).toBeFalsy();
+  localStorage.setItem('wallet:data', JSON.stringify({'keys': {'171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r': {}}}));
+
+  expect(wallet.checkUnspentTxExists(historyTransactionts, '0', '0', '00').exists).toBe(false);
+  expect(wallet.checkUnspentTxExists(historyTransactionts, '0', '0', '01').exists).toBe(false);
+  expect(wallet.checkUnspentTxExists(historyTransactionts, '1', '0', '00').exists).toBe(true);
+  expect(wallet.checkUnspentTxExists(historyTransactionts, '1', '1', '00').exists).toBe(true);
+  expect(wallet.checkUnspentTxExists(historyTransactionts, '0', '1', '00').exists).toBe(false);
 });
 
 test('Wallet locked', () => {
@@ -295,7 +215,7 @@ test('Change server', () => {
   const accessData = JSON.parse(localStorage.getItem('wallet:accessData'));
   const keys = JSON.parse(localStorage.getItem('wallet:data')).keys;
 
-  wallet.reloadData('123456');
+  wallet.reloadData();
 
   expect(JSON.parse(localStorage.getItem('wallet:accessData'))).toEqual(accessData);
 });

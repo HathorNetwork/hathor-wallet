@@ -14,6 +14,14 @@ const mapStateToProps = (state) => {
 
 class ModalTokenInfo extends React.Component {
   state = { successMessage: '', token: null };
+  timer = null;
+
+  componentWillUnmount = () => {
+    // Preventing calling setState when the component is not mounted
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+  }
 
   componentDidMount = () => {
     this.getToken();
@@ -34,7 +42,7 @@ class ModalTokenInfo extends React.Component {
     if (result) {
       // If copied with success
       this.setState({ successMessage: 'Copied!' });
-      setTimeout(() => {
+      this.timer = setTimeout(() => {
         this.setState({ successMessage: '' });
       }, 2000);
     }

@@ -140,6 +140,28 @@ test('Create input data', () => {
 });
 
 test('Prepare data to send tokens', () => {
+  // Now we will update the data in the inputs
+  let words = 'purse orchard camera cloud piece joke hospital mechanic timber horror shoulder rebuild you decrease garlic derive rebuild random naive elbow depart okay parrot cliff';
+  // Generate new wallet and save data in localStorage
+  wallet.generateWallet(words, '', '123456', 'password', true);
+  // Adding data to localStorage to be used in the signing process
+  let savedData = JSON.parse(localStorage.getItem('wallet:data'));
+  let addr = localStorage.getItem('wallet:address');
+  savedData['historyTransactions'] = {
+    '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e': {
+      'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e',
+      'outputs': [
+        {
+          'decoded': {
+            'address': addr
+          },
+          'value': 1000,
+        },
+      ]
+    }
+  };
+  localStorage.setItem('wallet:data', JSON.stringify(savedData));
+
   // First get data to sign
   let tx_id = '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e';
   let txData = {
@@ -148,6 +170,7 @@ test('Prepare data to send tokens', () => {
         'tx_id': tx_id,
         'index': 0,
         'token': '00',
+        'address': addr,
       }
     ],
     'outputs': [
@@ -168,23 +191,6 @@ test('Prepare data to send tokens', () => {
   let dataToSign = transaction.dataToSign(txData);
   expect(dataToSign.toString('hex')).toBe(expectedDataToSignHex);
 
-  // Now we will update the data in the inputs
-  let words = 'purse orchard camera cloud piece joke hospital mechanic timber horror shoulder rebuild you decrease garlic derive rebuild random naive elbow depart okay parrot cliff';
-  // Generate new wallet and save data in localStorage
-  wallet.generateWallet(words, '', '123456', 'password', true);
-  // Adding data to localStorage to be used in the signing process
-  let savedData = JSON.parse(localStorage.getItem('wallet:data'));
-  let addr = localStorage.getItem('wallet:address');
-  savedData['unspentTxs'] = {'00': {'00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e,0': {'address': addr}}};
-  localStorage.setItem('wallet:data', JSON.stringify(savedData));
-
-  // First trying with input that does not exist in localStorage
-  txData['inputs'][0].index = 1;
-  txData = transaction.signTx(txData, dataToSign, '123456');
-  expect(txData['inputs'][0].data).toBe(undefined);
-
-  // Now fixing and trying again
-  txData['inputs'][0].index = 0;
   txData = transaction.signTx(txData, dataToSign, '123456');
   expect(txData['inputs'][0].data).not.toBe(undefined);
   expect(txData['inputs'][0].data.length > 0).toBeTruthy();

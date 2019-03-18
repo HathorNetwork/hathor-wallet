@@ -2,8 +2,6 @@ import React from 'react';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
-import ModalPin from './ModalPin'
-import $ from 'jquery';
 import wallet from '../utils/wallet';
 import { connect } from "react-redux";
 
@@ -19,32 +17,21 @@ class WalletAddress extends React.Component {
 
     this.state = {
       loaded: true,
-      pin: '',
     }
-  }
-
-  getNewAddress = () => {
-    $('#pinModal').modal('hide');
-    wallet.generateNewAddress(this.state.pin);
   }
 
   generateNewAddress = (e) => {
     e.preventDefault();
-    // If we have already generated the next address we don't need to
-    // ask for the PIN. Otherwise we open the modal to ask for the PIN
+    // We check if the next address was already generated, otherwise we generate, in case we can do it
     if (wallet.hasNewAddress()) {
       wallet.getNextAddress();
     } else {
       if (wallet.canGenerateNewAddress()) {
-        $('#pinModal').modal('show');
+        wallet.generateNewAddress();
       } else {
         this.refs.alertError.show(3000);
       }
     }
-  }
-
-  handleChangePin = (e) => {
-    this.setState({ pin: e.target.value });
   }
 
   downloadQrCode = (e) => {
@@ -81,7 +68,6 @@ class WalletAddress extends React.Component {
         {this.state.loaded ? renderAddress() : null}
         <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
         <HathorAlert ref="alertError" text="You must use an old address before generating new ones" type="danger" />
-        <ModalPin execute={this.getNewAddress} handleChangePin={this.handleChangePin} />
       </div>
     );
   }

@@ -207,8 +207,14 @@ i.pointer {
   color: #28a745;
 }
 
-#token-history .state.voided, #token-history .value .voided,  {
+#token-history .state.voided, #token-history .value .voided {
   color: #6c757d !important;
+}
+
+#token-history .value {
+	text-align: right;
+	font-family: monospace;
+	font-size: 1.2rem;
 }
 
 #token-history .voided-element {

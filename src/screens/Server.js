@@ -46,7 +46,7 @@ class Server extends React.Component {
     // Update new server in local storage
     wallet.changeServer(newServer)
     version.checkVersion(() => {
-      wallet.reloadData(this.refs.pin.value);
+      wallet.reloadData();
       this.props.history.push('/wallet/');
     }, () => {
       this.setState({ loading: false });

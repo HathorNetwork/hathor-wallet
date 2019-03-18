@@ -1,5 +1,6 @@
 import React from 'react';
 import $ from 'jquery';
+import dateFormatter from '../utils/date';
 import helpers from '../utils/helpers';
 import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
@@ -10,7 +11,9 @@ import { connect } from "react-redux";
 
 
 const mapStateToProps = (state) => {
-  return { unspentTxs: state.unspentTxs };
+  return {
+    historyTransactions: state.historyTransactions,
+  };
 };
 
 
@@ -56,7 +59,7 @@ class CreateToken extends React.Component {
     let amount = 0;
     if (this.inputCheckbox.current.checked) {
       // Select inputs automatically
-      const inputs = wallet.getInputsFromAmount(helpers.minimumAmount(), HATHOR_TOKEN_CONFIG.uid);
+      const inputs = wallet.getInputsFromAmount(this.props.historyTransactions, helpers.minimumAmount(), HATHOR_TOKEN_CONFIG.uid);
       if (inputs.inputs.length === 0) {
         this.setState({ errorMessage: 'You don\'t have any available hathor token to create a new token' });
         return null;
@@ -74,25 +77,24 @@ class CreateToken extends React.Component {
         return null;
       }
 
-      const objectKey = [txId, index];
-      if (!wallet.checkUnspentTxExists(objectKey, HATHOR_TOKEN_CONFIG.uid)) {
+      const utxo = wallet.checkUnspentTxExists(this.props.historyTransactions, txId, index, HATHOR_TOKEN_CONFIG.uid);
+      if (!utxo.exists) {
         // Input does not exist in unspent txs
-        this.setState({ errorMessage: 'Input does not exist in unspent txs' });
+        this.setState({ errorMessage: utxo.message });
         return null;
       }
 
-      const unspentTx = this.props.unspentTxs[HATHOR_TOKEN_CONFIG.uid][objectKey];
-
-      if (!wallet.canUseUnspentTx(unspentTx)) {
-        this.setState({ errorMessage: `Output [${objectKey}] is locked` });
+      const output = utxo.output;
+      if (!wallet.canUseUnspentTx(output)) {
+        this.setState({ errorMessage: `Output [${txId}, ${index}] is locked until ${dateFormatter.parseTimestamp(output.decoded.timelock)}` });
         return null;
       }
 
-      input = {'tx_id': txId, 'index': index, 'token': HATHOR_TOKEN_CONFIG.uid};
-      amount = unspentTx.value;
+      input = {'tx_id': txId, 'index': index, 'token': HATHOR_TOKEN_CONFIG.uid, 'address': output.decoded.address};
+      amount = output.value;
     }
     // Change output for Hathor because the whole input will go as change
-    const outputChange = wallet.getOutputChange(amount, this.state.pin, HATHOR_TOKEN_INDEX);
+    const outputChange = wallet.getOutputChange(amount, HATHOR_TOKEN_INDEX);
     return {'input': input, 'output': outputChange};
   }
 
@@ -107,19 +109,25 @@ class CreateToken extends React.Component {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
-      address = wallet.getAddressToUse(this.state.pin);
+      address = wallet.getAddressToUse();
     } else {
       address = this.refs.address.value;
     }
-    tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, this.refs.amount.value, this.state.pin,
-      () => {
-        this.setState({ loading: false });
-        this.props.history.push('/wallet/');
-      },
-      (message) => {
-        this.setState({ loading: false, errorMessage: message });
-      }
-    );
+    const promise = new Promise((resolve, reject) => {
+      const retPromise = tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, this.refs.amount.value, this.state.pin);
+      retPromise.then(() => {
+        resolve();
+      }, (message) => {
+        reject(message);
+      });
+    });
+
+    promise.then(() => {
+      this.setState({ loading: false });
+      this.props.history.push('/wallet/');
+    }, (message) => {
+      this.setState({ loading: false, errorMessage: message });
+    });
   }
 
   handleCheckboxAddress = (e) => {
@@ -160,7 +168,7 @@ class CreateToken extends React.Component {
             </div>
             <div className="form-group col-3">
               <label>Symbol</label>
-              <input required ref="symbol" placeholder="MYC (max 5 chars)" type="text" pattern="\w{1,5}" className="form-control" />
+              <input required ref="symbol" placeholder="MYC (max 5 characters)" type="text" pattern="\w{1,5}" className="form-control" />
             </div>
           </div>
           <div className="row">

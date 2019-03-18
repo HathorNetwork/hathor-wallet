@@ -6,7 +6,12 @@ import { selectToken } from '../actions/index';
 
 
 const mapStateToProps = (state) => {
-  return { tokens: state.tokens, selectedToken: state.selectedToken, sortedHistory: state.sortedHistory };
+  return {
+    registeredTokens: state.tokens,
+    allTokens: state.allTokens,
+    selectedToken: state.selectedToken,
+    historyTransactions: state.historyTransactions,
+  };
 };
 
 
@@ -24,19 +29,12 @@ class TokenBar extends React.Component {
     this.state = {
       opened: false,
       selected: 'HTR',
-      unknownTokens: 0,
     }
   }
 
-  componentDidUpdate = (prevProps) => {
-    this.updateUnknownTokens();
-  }
-
-  updateUnknownTokens = () => {
-    const diffTokens = Object.keys(this.props.sortedHistory).length - this.props.tokens.length;
-    if (diffTokens !== this.state.unknownTokens) {
-      this.setState({ unknownTokens: diffTokens });
-    }
+  getUnknownTokens = () => {
+    const diff = this.props.allTokens.size - this.props.registeredTokens.length;
+    return diff;
   }
 
   toggleExpand = () => {
@@ -56,11 +54,10 @@ class TokenBar extends React.Component {
     this.props.history.push('/settings/');
   }
 
-  getBalance = (uid) => {
-    let total = 0;
-    if (uid in this.props.balance) {
-      total = this.props.balance[uid].available + this.props.balance[uid].locked;
-    }
+  getTokenBalance = (uid) => {
+    const filteredHistoryTransactions = wallet.filterHistoryTransactions(this.props.historyTransactions, uid);
+    const balance = wallet.calculateBalance(filteredHistoryTransactions, uid);
+    const total = balance.available + balance.locked;
     return helpers.prettyValue(total);
   }
 
@@ -69,11 +66,13 @@ class TokenBar extends React.Component {
   }
 
   render() {
+    const unknownTokens = this.getUnknownTokens();
+
     const renderTokens = () => {
-      return this.props.tokens.map((token) => {
+      return this.props.registeredTokens.map((token) => {
         return (
           <div key={token.uid} className={`token-wrapper ${token.uid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(token.uid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` - ${this.getBalance(token.uid)}`}</span>
+            <span className='ellipsis'>{token.symbol} {this.state.opened && ` - ${this.getTokenBalance(token.uid)}`}</span>
           </div>
         )
       });
@@ -90,9 +89,9 @@ class TokenBar extends React.Component {
 
     const renderUnknownTokens = () => {
       return (
-        <div title={`${this.state.unknownTokens} unknown ${helpers.plural(this.state.unknownTokens, 'token', 'tokens')}`} className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.unknownClicked}>
-          <div className="unknown-symbol d-flex flex-row align-items-center justify-content-center">{this.state.unknownTokens}</div>
-          {this.state.opened && <span className='ellipsis'>Unknown {helpers.plural(this.state.unknownTokens, 'token', 'tokens')}</span>}
+        <div title={`${unknownTokens} unknown ${helpers.plural(unknownTokens, 'token', 'tokens')}`} className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.unknownClicked}>
+          <div className="unknown-symbol d-flex flex-row align-items-center justify-content-center">{unknownTokens}</div>
+          {this.state.opened && <span className='ellipsis'>Unknown {helpers.plural(unknownTokens, 'token', 'tokens')}</span>}
         </div>
       );
     }
@@ -109,7 +108,7 @@ class TokenBar extends React.Component {
               <i className='fa fa-plus token-icon' title='Add token'></i>
               {this.state.opened && <span className='ellipsis'>Add token</span>}
             </div>
-            {this.state.unknownTokens > 0 ? renderUnknownTokens() : null}
+            {unknownTokens > 0 ? renderUnknownTokens() : null}
           </div>
         </div>
         <div className='footer d-flex align-items-center justify-content-center flex-column'>

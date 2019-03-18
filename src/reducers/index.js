@@ -1,86 +1,13 @@
 import wallet from '../utils/wallet';
-import { HATHOR_TOKEN_CONFIG } from '../constants';
+import { GAP_LIMIT, HATHOR_TOKEN_CONFIG, NETWORK } from '../constants';
+import { HDPublicKey, Address } from 'bitcore-lib';
 
 const initialState = {
 /*
- * 'sortedHistory': history data for each token sorted by timestamp
- *   {'token_uid':
- *    [{
- *     'tx_id': str,
- *     'index': int,
- *     'value': int,
- *     'timestamp': int,
- *     'is_output': bool,
- *     'voided': bool
- *     'from_tx_id': str, (only in case is_output = false)
- *    }]
- *  }
+ * 'historyTransactions':
+ *   {'tx_id': tx_data}
  */
-  sortedHistory: {},
-/*
- * 'unspentTxs': object contet:
- *   {'token_uid':
- *     {['tx_id', 'index']:
- *       {
- *         'address',
- *         'value',
- *         'timelock',
- *         'timestamp',
- *       }
- *     }
- *   },
- */
-  unspentTxs: {},
-/*
- *
- * 'spentTxs': object content:
- * {
- *   {['from_tx_id', 'index']:
- *     [
- *       {
- *         'address',
- *         'tx_id',
- *         'timestamp',
- *         'value',
- *         'timelock' // timelock of the spending output
- *       }
- *     ]
- *   }
- * }
- */
-  spentTxs: {},
-/*
- * 'voidedSpentTxs': object content same as 'spentTxs': stores the spentTxs that were voided
- *                   and are not spending the wallet balance anymore
- */
-  voidedSpentTxs: {},
-/*
- *   'voidedUnspentTxs': object content: stores the unspentTxs that were voided
- *                       and are not increasing the wallet balance anymore
- * {['tx_id', 'index']:
- *   {
- *     'address',
- *     'value',
- *     'timelock',
- *     'timestamp',
- *   }
- * }
- */
-  voidedUnspentTxs: {},
-/*
- * 'authorityOutputs': object contet:
- *   {'token_uid':
- *     {['tx_id', 'index']:
- *       {
- *         'address',
- *         'value',
- *         'timelock',
- *         'timestamp',
- *       }
- *     }
- *   },
- */
-  authorityOutputs: {},
+  historyTransactions: {},
   // Address to be used and is shown in the screen
   lastSharedAddress: null,
   // Index of the address to be used
@@ -102,68 +29,93 @@ const initialState = {
   tokens: [HATHOR_TOKEN_CONFIG],
   // Token selected (by default is HATHOR)
   selectedToken: HATHOR_TOKEN_CONFIG.uid,
+  // List of all tokens seen in transactions
+  allTokens: new Set(),
 };
 
 const rootReducer = (state = initialState, action) => {
-  let unspentTxs = Object.assign({}, state.unspentTxs);
-  let spentTxs = Object.assign({}, state.spentTxs);
-  let voidedSpentTxs = Object.assign({}, state.voidedSpentTxs);
-  let voidedUnspentTxs = Object.assign({}, state.voidedUnspentTxs);
-  let authorityOutputs = Object.assign({}, state.authorityOutputs);
   switch (action.type) {
     case 'history_update':
-      let newSortedHistory = wallet.historyUpdate(action.payload, unspentTxs, spentTxs, authorityOutputs);
-      let sortedHistory = {};
-      for (const key in state.sortedHistory) {
-        if (key in newSortedHistory) {
-          sortedHistory[key] = [...newSortedHistory[key], ...state.sortedHistory[key]];
-        } else {
-          sortedHistory[key] = state.sortedHistory[key];
-        }
-      }
-      for (const key in newSortedHistory) {
-        if (!(key in state.sortedHistory)) {
-          sortedHistory[key] = newSortedHistory[key];
-        }
-      }
-      wallet.saveAddressHistory(sortedHistory, unspentTxs, spentTxs, voidedSpentTxs, voidedUnspentTxs, authorityOutputs);
-      return Object.assign({}, state, {sortedHistory, unspentTxs, spentTxs, authorityOutputs});
-    case 'voided_tx':
-      let voidedElement = action.payload.element;
-      wallet.onWalletElementVoided(voidedElement, action.payload.address, unspentTxs, spentTxs, voidedUnspentTxs, voidedSpentTxs);
+      const payload = action.payload.data;
+      const historyTransactions = Object.assign({}, state.historyTransactions);
+      const allTokens = new Set(state.allTokens);
+      const dataJson = wallet.getWalletData();
 
-      // Update sortedHistory data with voided = true for the tx updated
-      for (const key in state.sortedHistory) {
-        for (const el of state.sortedHistory[key]) {
-          if (el.tx_id === voidedElement.tx_id &&
-              el.index === voidedElement.index &&
-              el.is_output === voidedElement.is_output &&
-              el.from_tx_id === voidedElement.from_tx_id) {
-            el.voided = true;
+      let maxIndex = -1;
+      let lastUsedAddress = null;
+      for (const tx of payload) {
+        historyTransactions[tx.tx_id] = tx
+
+        for (const txin of tx.inputs) {
+          const key = dataJson.keys[txin.decoded.address];
+          if (key) {
+            allTokens.add(txin.token);
+            if (key.index > maxIndex) {
+              maxIndex = key.index;
+              lastUsedAddress = txin.decoded.address
+            }
+          }
+        }
+        for (const txout of tx.outputs) {
+          const key = dataJson.keys[txout.decoded.address];
+          if (key) {
+            allTokens.add(txout.token);
+            if (key.index > maxIndex) {
+              maxIndex = key.index;
+              lastUsedAddress = txout.decoded.address
+            }
           }
         }
       }
-      wallet.saveAddressHistory(state.sortedHistory, unspentTxs, spentTxs, voidedSpentTxs, voidedUnspentTxs);
-      const sortedHistoryUpdatedVoided = Object.assign({}, state.sortedHistory);
-      return Object.assign({}, state, {sortedHistoryUpdatedVoided, unspentTxs, spentTxs, voidedUnspentTxs, voidedSpentTxs});
-    case 'winner_tx':
-      let winnerElement = action.payload.element;
-      wallet.onWalletElementWinner(winnerElement, action.payload.address, unspentTxs, spentTxs, voidedUnspentTxs, voidedSpentTxs);
 
-      // Update sortedHistory data with voided = false for the tx updated
-      for (const key in state.sortedHistory) {
-        for (const el of state.sortedHistory[key]) {
-          if (el.tx_id === winnerElement.tx_id &&
-              el.index === winnerElement.index &&
-              el.is_output === winnerElement.is_output &&
-              el.from_tx_id === winnerElement.from_tx_id) {
-            el.voided = false;
-          }
+      const storageLastUsedIndex = localStorage.getItem('wallet:lastUsedIndex');
+      const lastUsedIndex = storageLastUsedIndex !== null ? parseInt(storageLastUsedIndex, 10) : -1;
+
+      const storageLastSharedIndex = localStorage.getItem('wallet:lastSharedIndex');
+      const lastSharedIndex = storageLastSharedIndex !== null ? parseInt(storageLastSharedIndex, 10) : -1;
+
+      let newSharedAddress = null;
+      let newSharedIndex = -1;
+
+      if (maxIndex > lastUsedIndex && lastUsedAddress !== null) {
+        // Setting last used index and last shared index
+        wallet.setLastUsedIndex(lastUsedAddress);
+        // Setting last shared address, if necessary
+        const candidateIndex = maxIndex + 1;
+        if (candidateIndex > lastSharedIndex) {
+          const xpub = HDPublicKey(dataJson.xpubkey);
+          const key = xpub.derive(candidateIndex);
+          const address = Address(key.publicKey, NETWORK).toString();
+          newSharedIndex = candidateIndex;
+          newSharedAddress = address;
+          wallet.updateAddress(address, candidateIndex, false);
         }
       }
-      wallet.saveAddressHistory(state.sortedHistory, unspentTxs, spentTxs, voidedSpentTxs, voidedUnspentTxs);
-      const sortedHistoryUpdatedWinner = Object.assign({}, state.sortedHistory);
-      return Object.assign({}, state, {sortedHistoryUpdatedWinner, unspentTxs, spentTxs, voidedUnspentTxs, voidedSpentTxs});
+
+      const lastGeneratedIndex = wallet.getLastGeneratedIndex();
+      // Just in the case where there is no element in all data
+      maxIndex = Math.max(maxIndex, 0);
+      if (maxIndex + GAP_LIMIT > lastGeneratedIndex) {
+        const startIndex = lastGeneratedIndex + 1;
+        const count = maxIndex + GAP_LIMIT - lastGeneratedIndex;
+        const promise = wallet.loadAddressHistory(startIndex, count);
+        promise.then(() => {
+          if (action.payload.resolve) {
+            action.payload.resolve();
+          }
+        })
+      } else {
+        if (action.payload.resolve) {
+          action.payload.resolve();
+        }
+      }
+
+      const newLastSharedAddress = newSharedAddress === null ? state.lastSharedAddress : newSharedAddress;
+      const newLastSharedIndex = newSharedIndex === null ? state.lastSharedIndex : newSharedIndex;
+      wallet.saveAddressHistory(historyTransactions, allTokens);
+
+      return Object.assign({}, state, {historyTransactions, allTokens, lastSharedIndex: newLastSharedIndex, lastSharedAddress: newLastSharedAddress});
+
     case 'shared_address':
       return Object.assign({}, state, {lastSharedAddress: action.payload.lastSharedAddress, lastSharedIndex: action.payload.lastSharedIndex});
     case 'is_version_allowed_update':
@@ -171,15 +123,7 @@ const rootReducer = (state = initialState, action) => {
     case 'is_online_update':
       return Object.assign({}, state, {isOnline: action.payload.isOnline});
     case 'reload_data':
-      return Object.assign({}, state, {
-        sortedHistory: action.payload.sortedHistory,
-        unspentTxs: action.payload.unspentTxs,
-        spentTxs: action.payload.spentTxs,
-        voidedSpentTxs: action.payload.voidedSpentTxs,
-        voidedUnspentTxs: action.payload.voidedUnspentTxs,
-        authorityOutputs: action.payload.authorityOutputs,
-        tokens: action.payload.tokens,
-      });
+      return Object.assign({}, state, action.payload);
     case 'clean_data':
       return Object.assign({}, initialState, {isVersionAllowed: state.isVersionAllowed});
     case 'last_failed_request':
