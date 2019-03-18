@@ -1,8 +1,4 @@
-export const historyUpdate = data => ({ type: "history_update", payload: data });
-
-export const winnerTx = data => ({ type: "winner_tx", payload: data });
-
-export const voidedTx = data => ({ type: "voided_tx", payload: data });
+export const historyUpdate = (data) => ({ type: "history_update", payload: data });
 
 export const reloadData = data => ({ type: "reload_data", payload: data });
 

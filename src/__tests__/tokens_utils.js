@@ -1,11 +1,16 @@
 import tokens from '../utils/tokens';
-import { GAP_LIMIT } from '../constants';
+import { GAP_LIMIT, HATHOR_TOKEN_CONFIG } from '../constants';
 import { HDPrivateKey } from 'bitcore-lib';
 import wallet from '../utils/wallet';
 import { util } from 'bitcore-lib';
+import WebSocketHandler from '../WebSocketHandler';
 
 const createdTxHash = '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e';
 const createdToken = util.buffer.bufferToHex(tokens.getTokenUID(createdTxHash, 0));
+
+beforeEach(() => {
+  WebSocketHandler.connected = true;
+});
 
 // Mock any POST request to /thin_wallet/send_tokens
 // arguments for reply are (status, data, headers)
@@ -50,22 +55,21 @@ test('New token', (done) => {
     // Adding data to localStorage to be used in the signing process
     const savedData = JSON.parse(localStorage.getItem('wallet:data'));
     const createdKey = `${createdTxHash},0`;
-    savedData['unspentTxs'] = {
-      '00': {
-        '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e,0': {
-          'address': address,
-          'value': 100
-        }
-      },
+    savedData['historyTransactions'] = {
+      '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e': {
+        'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e',
+        'outputs': [
+          {
+            'decoded': {
+              'address': address
+            },
+            'value': 1000,
+          },
+        ]
+      }
     };
-    savedData['authorityOutputs'] = {};
-    savedData['authorityOutputs'][createdToken] = {};
-    savedData['authorityOutputs'][createdToken][createdKey] = {
-      'address': address,
-      'value': 100
-    }
     localStorage.setItem('wallet:data', JSON.stringify(savedData));
-    const input = {'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e', 'index': '0', 'token': '00'};
+    const input = {'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e', 'index': '0', 'token': '00', 'address': address};
     const output = {'address': address, 'value': 100, 'tokenData': 0};
     const tokenName = 'TestCoin';
     const tokenSymbol = 'TTC';
@@ -91,3 +95,19 @@ test('New token', (done) => {
     done.fail('Error creating token');
   })
 }, 15000);
+
+test('Tokens handling', () => {
+  const token1 = {'name': '1234', 'uid': '1234'};
+  const token2 = {'name': 'abcd', 'uid': 'abcd'};
+  const token3 = {'name': HATHOR_TOKEN_CONFIG.name, 'uid': HATHOR_TOKEN_CONFIG.uid};
+  const myTokens = [token1, token2, token3];
+  const filteredTokens = tokens.filterTokens(myTokens, HATHOR_TOKEN_CONFIG);
+
+  expect(filteredTokens.length).toBe(2);
+  expect(filteredTokens[0].uid).toBe('1234');
+  expect(filteredTokens[1].uid).toBe('abcd');
+
+  expect(tokens.getTokenIndex(myTokens, HATHOR_TOKEN_CONFIG.uid)).toBe(0);
+  expect(tokens.getTokenIndex(myTokens, '1234')).toBe(1);
+  expect(tokens.getTokenIndex(myTokens, 'abcd')).toBe(2);
+});

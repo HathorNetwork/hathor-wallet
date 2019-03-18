@@ -11,7 +11,11 @@ import { connect } from "react-redux";
 
 
 const mapStateToProps = (state) => {
-  return { sortedHistory: state.sortedHistory, unspentTxs: state.unspentTxs, tokens: state.tokens };
+  return {
+    registeredTokens: state.tokens,
+    allTokens: state.allTokens,
+    historyTransactions: state.historyTransactions,
+  };
 };
 
 
@@ -24,40 +28,31 @@ class UnknownTokens extends React.Component {
     this.historyRefs = [];
 
     this.state = {
-      unknownTokens: null,
       uidSelected: null,
       successMessage: ''
     };
   }
 
-  componentDidMount = () => {
-    this.updateUnknownTokens();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.sortedHistory !== this.props.sortedHistory || prevProps.tokens !== this.props.tokens) {
-      this.updateUnknownTokens();
-    }
-  }
-
-  updateUnknownTokens = () => {
-    const balance = wallet.calculateBalance(this.props.unspentTxs);
+  getUnknownTokens = () => {
     let unknownTokens = [];
     this.historyRefs = [];
     this.anchorOpenRefs = [];
     this.anchorHideRefs = [];
-    for (const key in this.props.sortedHistory) {
+    for (const token of this.props.allTokens) {
       // If has balance but does not have token saved yet
-      if (this.props.tokens.find((token) => token.uid === key) === undefined) {
-        const tokenBalance = key in balance ? balance[key] : {'available': 0, 'locked': 0};
-        const calcPages = Math.ceil(this.props.sortedHistory[key].length / WALLET_HISTORY_COUNT);
-        unknownTokens.push({'uid': key, 'balance': tokenBalance, 'history': this.props.sortedHistory[key], 'totalPages': calcPages});
+      if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
+        const filteredHistoryTransactions = wallet.filterHistoryTransactions(this.props.historyTransactions, token);
+        const balance = wallet.calculateBalance(filteredHistoryTransactions, token);
+
+        const calcPages = Math.ceil(filteredHistoryTransactions.length / WALLET_HISTORY_COUNT);
+        unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions, 'totalPages': calcPages});
+
         this.historyRefs.push(React.createRef());
         this.anchorOpenRefs.push(React.createRef());
         this.anchorHideRefs.push(React.createRef());
       }
     }
-    this.setState({ unknownTokens });
+    return unknownTokens;
   }
 
   openHistory = (e, index) => {
@@ -102,11 +97,13 @@ class UnknownTokens extends React.Component {
   }
 
   render = () => {
+    const unknownTokens = this.getUnknownTokens();
+
     const renderTokens = () => {
-      if (this.state.unknownTokens.length === 0) {
+      if (unknownTokens.length === 0) {
         return <p>You don't have any unknown tokens</p>;
       } else {
-        return this.state.unknownTokens.map((token, index) => {
+        return unknownTokens.map((token, index) => {
           return (
             <div key={token.uid} className="unknown-token card">
               <div className="header d-flex flex-row align-items-center justify-content-between">
@@ -125,7 +122,7 @@ class UnknownTokens extends React.Component {
                 </div>
               </div>
               <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
-                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} totalPages={token.totalPages} />
+                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} totalPages={token.totalPages} selectedToken={token.uid} />
               </div>
             </div>
           );
@@ -139,7 +136,7 @@ class UnknownTokens extends React.Component {
           <h3 className="mr-4">Unknown tokens</h3>
           <a onClick={(e) => this.massiveImport(e)} href="true">Bulk import</a>
         </div>
-        {this.state.unknownTokens && renderTokens()}
+        {unknownTokens && renderTokens()}
         <ModalAddToken success={this.newTokenSuccess} uid={this.state.uidSelected} />
         <ModalAddManyTokens success={this.massiveImportSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />

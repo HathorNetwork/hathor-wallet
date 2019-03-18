@@ -5,8 +5,9 @@ import { util } from 'bitcore-lib';
 import transaction from '../utils/transaction';
 import AddressError from '../utils/errors';
 import ReactLoading from 'react-loading';
-import ModalPin from '../components/ModalPin'
-import SendTokensOne from '../components/SendTokensOne'
+import ModalPin from '../components/ModalPin';
+import SendTokensOne from '../components/SendTokensOne';
+import tokens from '../utils/tokens';
 import { HATHOR_TOKEN_CONFIG } from '../constants';
 import { connect } from "react-redux";
 
@@ -45,9 +46,10 @@ class SendTokens extends React.Component {
   getData = () => {
     let data = {'inputs': [], 'outputs': []};
     for (const ref of this.references) {
-      let dataOne = ref.current.getWrappedInstance().getData();
+      const instance = ref.current.getWrappedInstance();
+      let dataOne = instance.getData();
       if (!dataOne) return;
-      dataOne = ref.current.getWrappedInstance().handleInitialData(dataOne);
+      dataOne = instance.handleInitialData(dataOne);
       if (!dataOne) return;
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
@@ -61,7 +63,7 @@ class SendTokens extends React.Component {
     if (!isValid) return;
     let data = this.getData();
     if (!data) return;
-    data.tokens = this.state.txTokens.filter((token) => token.uid !== HATHOR_TOKEN_CONFIG.uid).map((token) => token.uid);
+    data.tokens = tokens.filterTokens(this.state.txTokens, HATHOR_TOKEN_CONFIG).map((token) => token.uid);
     if (data) {
       this.setState({ errorMessage: '', loading: true });
       try {
@@ -101,12 +103,13 @@ class SendTokens extends React.Component {
     this.setState(newState);
   }
 
-  addAnother = () => {
+  addAnotherToken = () => {
     if (this.state.txTokens.length === this.props.tokens.length) {
       this.setState({ errorMessage: 'All your tokens were already added' });
       return;
     }
 
+    // Among all the token options we choose the first one that is not already selected
     const newToken = this.props.tokens.find((token) => {
       return this.state.txTokens.find((txToken) =>
         txToken.uid === token.uid
@@ -144,7 +147,7 @@ class SendTokens extends React.Component {
           <form ref="formSendTokens" id="formSendTokens">
             {renderOnePage()}
             <div className="mt-5">
-              <button type="button" className="btn btn-hathor mr-4" onClick={this.addAnother} disabled={this.state.loading}>Add another token</button>
+              <button type="button" className="btn btn-hathor mr-4" onClick={this.addAnotherToken} disabled={this.state.loading}>Add another token</button>
               <button type="button" className="btn btn-hathor" data-toggle="modal" disabled={this.state.loading} data-target="#pinModal">Send Tokens</button>
             </div>
           </form>

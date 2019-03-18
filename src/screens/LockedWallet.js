@@ -14,6 +14,10 @@ class LockedWallet extends React.Component {
     }
   }
 
+  componentDidMount(){
+   this.refs.pin.focus();
+  }
+
   unlockClicked = (e) => {
     e.preventDefault();
     const isValid = this.refs.unlockForm.checkValidity();
@@ -27,7 +31,7 @@ class LockedWallet extends React.Component {
       // Everything is fine, so redirect to wallet
       wallet.unlock();
       // Reload wallet data
-      wallet.reloadData(this.refs.pin.value);
+      wallet.reloadData();
       this.props.history.push('/wallet/');
     } else {
       this.refs.unlockForm.classList.add('was-validated')

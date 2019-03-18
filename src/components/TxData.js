@@ -5,6 +5,7 @@ import { MAX_GRAPH_LEVEL, HATHOR_TOKEN_CONFIG, HATHOR_TOKEN_INDEX } from '../con
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom'
 import helpers from '../utils/helpers';
+import wallet from '../utils/wallet';
 import HathorAlert from './HathorAlert';
 import { connect } from "react-redux";
 
@@ -49,14 +50,13 @@ class TxData extends React.Component {
   getOutputToken = (tokenData) => {
     if (tokenData === HATHOR_TOKEN_INDEX) {
       return HATHOR_TOKEN_CONFIG.symbol;
+    }
+    const tokenUID = this.props.transaction.tokens[tokenData - 1];
+    const tokenConfig = this.props.tokens.find((token) => token.uid === tokenUID);
+    if (tokenConfig === undefined) {
+      return tokenUID;
     } else {
-      const tokenUID = this.props.transaction.tokens[tokenData - 1];
-      const tokenConfig = this.props.tokens.find((token) => token.uid === tokenUID);
-      if (tokenConfig === undefined) {
-        return tokenUID;
-      } else {
-        return tokenConfig.symbol;
-      }
+      return tokenConfig.symbol;
     }
   }
 
@@ -78,12 +78,16 @@ class TxData extends React.Component {
 
     const renderOutputs = (outputs) => {
       return outputs.map((output, idx) => {
-        return (
-          <li key={idx}>
-            {helpers.prettyValue(output.value)} {renderOutputToken(output)} -> {output.decoded ? renderDecodedScript(output.decoded) : `${output.script} (unknown script)` }
-            {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>Spent</Link>)</span> : ''}
-          </li>
-        );
+        if (!wallet.isAuthorityOutput(output)) {
+          return (
+            <li key={idx}>
+              {helpers.prettyValue(output.value)} {renderOutputToken(output)} -> {output.decoded ? renderDecodedScript(output.decoded) : `${output.script} (unknown script)` }
+              {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>Spent</Link>)</span> : ''}
+            </li>
+          );
+        } else {
+          return null;
+        }
       });
     }
 

@@ -3,6 +3,7 @@ import wallet from '../utils/wallet';
 import { HDPrivateKey } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
 import { cleanData } from '../actions/index';
+import WebSocketHandler from '../WebSocketHandler';
 import store from '../store/index';
 
 var addressUsed = '';
@@ -22,23 +23,21 @@ mock.onGet('thin_wallet/address_history').reply((config) => {
     let ret = {
       'history': [
         {
-          'address': config.params.addresses[0],
-          'history': [
+          'tx_id': '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e',
+          'timestamp': 1548892556,
+          'is_voided': false,
+          'inputs': [],
+          'outputs': [
             {
-              'tx_id': txId,
-              'index': 0,
-              'is_output': true,
-              'timelock': null,
-              'timestamp': 1548892556,
-              'token_uid': '00',
+              'decoded': {
+                'timelock': null,
+                'address': config.params.addresses[0],
+              },
+              'token': '00',
               'value': 2000,
               'voided': false
             }
-          ]
-        },
-        {
-          'address': config.params.addresses[1],
-          'history': []
+          ],
         }
       ]
     }
@@ -65,29 +64,9 @@ const checkData = () => {
   let walletData = localStorage.getItem('wallet:data');
   checkNot(walletData, null, doneCb);
   let walletDataJson = JSON.parse(walletData);
-  check('sortedHistory' in walletDataJson, true, doneCb);
-  check(typeof walletDataJson['sortedHistory'], 'object', doneCb);
-  check(walletDataJson['sortedHistory']['00'].length, 1, doneCb);
-  check(walletDataJson['sortedHistory']['00'][0].tx_id, txId, doneCb);
-
-  check('unspentTxs' in walletDataJson, true, doneCb);
-  check(typeof walletDataJson['unspentTxs'], 'object', doneCb);
-  let key = [txId, 0];
-  check(key in walletDataJson['unspentTxs'][HATHOR_TOKEN_CONFIG.uid], true, doneCb);
-  check(walletDataJson['unspentTxs'][HATHOR_TOKEN_CONFIG.uid][key].value, 2000, doneCb);
-  check(walletDataJson['unspentTxs'][HATHOR_TOKEN_CONFIG.uid][key].address, addressUsed, doneCb);
-
-  check('spentTxs' in walletDataJson, true, doneCb);
-  check(typeof walletDataJson['spentTxs'], 'object', doneCb);
-  check(isObjectEmpty(walletDataJson['spentTxs']), true, doneCb);
-
-  check('voidedUnspentTxs' in walletDataJson, true, doneCb);
-  check(typeof walletDataJson['voidedUnspentTxs'], 'object', doneCb);
-  check(isObjectEmpty(walletDataJson['voidedUnspentTxs']), true, doneCb);
-
-  check('voidedSpentTxs' in walletDataJson, true, doneCb);
-  check(typeof walletDataJson['voidedSpentTxs'], 'object', doneCb);
-  check(isObjectEmpty(walletDataJson['voidedSpentTxs']), true, doneCb);
+  check('historyTransactions' in walletDataJson, true, doneCb);
+  check(typeof walletDataJson['historyTransactions'], 'object', doneCb);
+  check('00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e' in walletDataJson['historyTransactions'], true, doneCb);
 
   doneCb();
 }
@@ -104,6 +83,7 @@ beforeEach(() => {
   store.dispatch(cleanData());
   addressUsed = '';
   addressShared = '';
+  WebSocketHandler.connected = true;
   doneCb = null;
 });
 

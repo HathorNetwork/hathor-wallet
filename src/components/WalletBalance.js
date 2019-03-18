@@ -18,7 +18,6 @@ class WalletBalance extends React.Component {
 
   render = () => {
     const renderBalance = () => {
-      const hathorBalance = (this.props.selectedToken in this.props.balance) ? this.props.balance[this.props.selectedToken] : {'available': 0, 'locked': 0};
       const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
       const symbol = token ? token.symbol : '';
 
@@ -34,9 +33,9 @@ class WalletBalance extends React.Component {
             <strong>{token ? token.name : ''}</strong>
             {this.props.selectedToken !== HATHOR_TOKEN_CONFIG.uid && renderInfoButton()}
           </p>
-          <p><strong>Total:</strong> {helpers.prettyValue(hathorBalance.available + hathorBalance.locked)} {symbol}</p>
-          <p><strong>Available:</strong> {helpers.prettyValue(hathorBalance.available)} {symbol}</p>
-          <p><strong>Locked:</strong> {helpers.prettyValue(hathorBalance.locked)} {symbol}</p>
+          <p><strong>Total:</strong> {helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
+          <p><strong>Available:</strong> {helpers.prettyValue(this.props.balance.available)} {symbol}</p>
+          <p><strong>Locked:</strong> {helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
         </div>
       );
     }

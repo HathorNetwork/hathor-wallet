@@ -35,24 +35,21 @@ class ModalAddToken extends React.Component {
         this.setState({ errorMessage: 'Must provide configuration string or uid, name, and symbol' });
         return;
       }
+      const validation = tokens.validateTokenToAddByUid(uid);
+      if (validation.success === false) {
+        this.setState({ errorMessage: validation.message });
+        return;
+      }
     } else {
-      const tokenData = tokens.getTokenFromConfigurationString(this.refs.config.value);
-      if (tokenData === null) {
-        this.setState({ errorMessage: 'Invalid configuration string' });
+      const validation = tokens.validateTokenToAddByConfigurationString(this.refs.config.value, this.props.uid);
+      if (validation.success === false) {
+        this.setState({ errorMessage: validation.message });
         return;
       }
-      if (this.props.uid && this.props.uid !== tokenData.uid) {
-        this.setState({ errorMessage: `Configuration string uid does not match: ${this.props.uid} != ${tokenData.uid}` });
-        return;
-      }
+      const tokenData = validation.tokenData;
       uid = tokenData.uid;
       shortName = tokenData.name;
       symbol = tokenData.symbol;
-    }
-    const existedToken = tokens.tokenExists(uid);
-    if (existedToken) {
-      this.setState({ errorMessage: `You already have this token: (${existedToken.name})` });
-      return;
     }
     tokens.addToken(uid, shortName, symbol);
     this.props.success();

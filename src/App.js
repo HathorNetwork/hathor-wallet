@@ -16,7 +16,7 @@ import NewWallet from './screens/NewWallet';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import VersionError from './screens/VersionError';
-import { historyUpdate, voidedTx, winnerTx } from "./actions/index";
+import { historyUpdate } from "./actions/index";
 import version from './utils/version';
 import wallet from './utils/wallet';
 import { connect } from "react-redux";
@@ -28,9 +28,7 @@ import { DEBUG_LOCAL_DATA_KEYS } from './constants';
 
 const mapDispatchToProps = dispatch => {
   return {
-    historyUpdate: data => dispatch(historyUpdate(data)),
-    winnerTx: data => dispatch(winnerTx(data)),
-    voidedTx: data => dispatch(voidedTx(data)),
+    historyUpdate: (data) => dispatch(historyUpdate(data)),
   };
 };
 
@@ -68,7 +66,7 @@ class Root extends React.Component {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
       if (wsData.type === 'wallet:address_history') {
-        this.props.historyUpdate([{address: wsData.address, history: [wsData.history]}]);
+        this.props.historyUpdate({'data': [wsData.history]});
       } else {
         console.log('Websocket message not handled. Type:', wsData.type);
       }
@@ -79,13 +77,7 @@ class Root extends React.Component {
     if (wallet.loaded()) {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
-      if (wsData.type === 'wallet:element_voided') {
-        this.props.voidedTx(wsData);
-      } else if (wsData.type === 'wallet:element_winner') {
-        this.props.winnerTx(wsData);
-      } else {
-        console.log('Websocket message not handled. Type:', wsData.type);
-      }
+      console.log('Websocket message not handled. Type:', wsData.type);
     }
   }
 
