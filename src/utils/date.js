@@ -24,6 +24,10 @@ const dateFormatter = {
 
   dateToTimestamp(date) {
     return Math.floor(date.getTime() / 1000);
+  },
+
+  now() {
+    return this.dateToTimestamp(new Date());
   }
 };
 

@@ -1,11 +1,13 @@
 import { OP_GREATERTHAN_TIMESTAMP, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, OP_PUSHDATA1 } from '../opcodes';
-import { DECIMAL_PLACES, DEFAULT_TX_VERSION, MAX_OUTPUT_VALUE_32 } from '../constants';
+import { DECIMAL_PLACES, DEFAULT_TX_VERSION, MAX_OUTPUT_VALUE_32, MAX_NONCE } from '../constants';
 import { HDPrivateKey, crypto, encoding, util } from 'bitcore-lib';
+import { crypto as libCrypto } from 'crypto';
 import AddressError from './errors';
 import dateFormatter from './date';
 import wallet from './wallet';
 import buffer from 'buffer';
 import Long from 'long';
+import _ from 'lodash';
 
 /**
  * Transaction utils with methods to serialize, create and handle transactions
@@ -381,30 +383,12 @@ const transaction = {
     incompleteTxData['weight'] = 0;
     incompleteTxData['nonce'] = 0;
     incompleteTxData['version'] = DEFAULT_TX_VERSION;
-    incompleteTxData['timestamp'] = dateFormatter.dateToTimestamp(new Date());
+    incompleteTxData['timestamp'] = dateFormatter.now();
     let minimumWeight = this.calculateTxWeight(incompleteTxData);
     incompleteTxData['weight'] = minimumWeight;
   },
 
-  /**
-   * Serialize tx to bytes
-   *
-   * @param {Object} txData Object with inputs and outputs
-   * {
-   *  'inputs': [{'tx_id', 'index', 'token'}],
-   *  'outputs': ['address', 'value', 'timelock', 'tokenData'],
-   *  'tokens': [uid, uid2],
-   *  'version': 1,
-   *  'weight': 0,
-   *  'nonce': 0,
-   *  'timestamp': 1,
-   * }
-   *
-   * @return {Buffer}
-   * @memberof Transaction
-   * @inner
-   */
-  txToBytes(txData) {
+  txToFundsBytes(txData) {
     let arr = []
     // Serialize first the funds part
     //
@@ -438,14 +422,43 @@ const transaction = {
       arr.push(outputScript);
     }
 
-    // Now serialize the graph part
-    //
+    return arr;
+  },
+
+  txToGraphBytes(txData) {
+    let arr = [];
     // Weight is a float with 8 bytes
     arr.push(this.floatToBytes(txData.weight, 8));
     // Timestamp
     arr.push(this.intToBytes(txData.timestamp, 4))
     // Len parents (parents will be calculated in the backend)
     arr.push(this.intToBytes(0, 1))
+    return arr;
+  },
+
+  /**
+   * Serialize tx to bytes
+   *
+   * @param {Object} txData Object with inputs and outputs
+   * {
+   *  'inputs': [{'tx_id', 'index', 'token'}],
+   *  'outputs': ['address', 'value', 'timelock', 'tokenData'],
+   *  'tokens': [uid, uid2],
+   *  'version': 1,
+   *  'weight': 0,
+   *  'nonce': 0,
+   *  'timestamp': 1,
+   * }
+   *
+   * @return {Buffer}
+   * @memberof Transaction
+   * @inner
+   */
+  txToBytes(txData) {
+    const fundsArr = this.txToFundsBytes(txData);
+    const graphArr = this.txToGraphBytes(txData);
+
+    let arr = [...fundsArr, ...graphArr];
 
     // Add nonce in the end
     arr.push(this.intToBytes(txData.nonce, 4));
@@ -498,7 +511,66 @@ const transaction = {
     return {'txMinWeight': parseFloat(localStorage.getItem('wallet:txMinWeight')),
             'txWeightCoefficient': parseFloat(localStorage.getItem('wallet:txWeightCoefficient')),
             'txMinWeightK': parseFloat(localStorage.getItem('wallet:txMinWeightK'))}
-  }
+  },
+
+  getTarget(txData) {
+      return 2**(256 - txData.weight) - 1;
+  },
+
+  getFundsHash(txData) {
+    let fundsHash = libCrypto.createHash('sha256');
+    const fundsBytes = util.buffer.concat(this.txToFundsBytes(txData));
+    return fundsHash.update(fundsBytes).digest();
+  },
+
+  getGraphHash(txData) {
+    let graphHash = libCrypto.createHash('sha256');
+    const graphBytes = util.buffer.concat(this.txToGraphBytes(txData));
+    return graphHash.update(graphBytes).digest();
+  },
+
+  getHeaderWithoutNonce(txData) {
+    const graphHash = this.getGraphHash(txData);
+    const fundsHash = this.getFundsHash(txData);
+    return util.buffer.concat([...graphHash, ...fundsHash]);
+  },
+
+  getPowPart1(txData) {
+    let hash = libCrypto.createHash('sha256');
+    return hash.update(this.getHeaderWithoutNonce(txData));
+  },
+
+  getPowPart2(pow1, nonce) {
+    pow1.update(this.intToBytes(nonce, 4));
+    let hash = libCrypto.createHash('sha256');
+    hash.update(pow1.digest()).digest();
+    // SHA256D gets the hash in little-endian format. Reverse the bytes to get the big-endian representation.
+    _.reverse(hash);
+    return hash;
+  },
+
+  resolve(txData) {
+    let powPart1 = this.getPowPart1(txData);
+    const target = this.getTarget(txData);
+    let nonce = 0;
+    let lastTime = txData.timestamp;
+    while (nonce < MAX_NONCE) {
+      const now = dateFormatter.now();
+      if ((now - lastTime) > 2) {
+        txData.timestamp = now;
+        powPart1 = this.getPowPart1(txData);
+        lastTime = now;
+        nonce = 0;
+      }
+
+      const result = this.getPowPart2(Object.assign({}, powPart1));
+      if (parseInt(util.buffer.bufferToHex(result), 16) < target) {
+        return result;
+      }
+      txData.nonce += 1;
+    }
+    return null;
+  },
 }
 
 export default transaction;

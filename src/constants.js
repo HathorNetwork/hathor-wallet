@@ -109,3 +109,5 @@ export const DEBUG_LOCAL_DATA_KEYS = [
   `wallet:lastUsedAddress`,
   `wallet:address`
 ]
+
+export const MAX_NONCE = 2**32;
