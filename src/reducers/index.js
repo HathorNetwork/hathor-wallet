@@ -136,8 +136,8 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {words: action.payload});
     case 'select_token':
       return Object.assign({}, state, {selectedToken: action.payload});
-    case 'new_token':
-      return Object.assign({}, state, {selectedToken: action.payload.uid, tokens: [...state.tokens, action.payload]});
+    case 'new_tokens':
+      return Object.assign({}, state, {selectedToken: action.payload.uid, tokens: action.payload.tokens});
     default:
       return state;
   }
