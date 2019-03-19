@@ -1,5 +1,5 @@
 {
-  "name": "thin-wallet",
+  "name": "hathor-wallet",
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,ts,tsx}",
@@ -85,7 +85,7 @@
       "target": "dmg"
     },
     "linux": {
-      "icon": "build/icon.png",
+      "artifactName": "${productName}",
       "target": [
         "AppImage",
         "deb"
