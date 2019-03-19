@@ -7,7 +7,7 @@ import Version from '../components/Version';
 
 class VersionError extends React.Component {
   versionUpdated = () => {
-    version.checkVersion();
+    version.checkApiVersion();
   }
 
   changeServer = () => {

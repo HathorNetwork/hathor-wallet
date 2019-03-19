@@ -16,6 +16,7 @@ import NewWallet from './screens/NewWallet';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import VersionError from './screens/VersionError';
+import WalletVersionError from './screens/WalletVersionError';
 import { historyUpdate } from "./actions/index";
 import version from './utils/version';
 import wallet from './utils/wallet';
@@ -76,7 +77,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <StartedRoute exact path="/settings" component={Settings} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={true} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
@@ -95,7 +96,8 @@ class Root extends React.Component {
 const returnLoadedWalletComponent = (Component, props, rest) => {
   // Check version
   if (rest.versionAllowed === undefined) {
-    version.checkVersion(() => {
+    const promise = version.checkApiVersion();
+    promise.then(() => {
       wallet.localStorageToRedux();
     });
     return <WaitVersion {...props} />;
@@ -153,9 +155,13 @@ const StartedRoute = ({component: Component, ...rest}) => (
  * Return a div grouping the Navigation and the Component
  */
 const returnDefaultComponent = (Component, props) => {
-  return (
-    <div className="component-div"><Navigation {...props}/><Component {...props} /><RequestErrorModal {...props} /></div>
-  );
+  if (version.checkWalletVersion()) {
+    return (
+      <div className="component-div"><Navigation {...props}/><Component {...props} /><RequestErrorModal {...props} /></div>
+    );
+  } else {
+    return <WalletVersionError {...props} />;
+  }
 }
 
 /*

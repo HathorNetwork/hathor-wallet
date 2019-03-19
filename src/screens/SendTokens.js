@@ -147,7 +147,7 @@ class SendTokens extends React.Component {
           <form ref="formSendTokens" id="formSendTokens">
             {renderOnePage()}
             <div className="mt-5">
-              <button type="button" className="btn btn-hathor mr-4" onClick={this.addAnotherToken} disabled={this.state.loading}>Add another token</button>
+              <button type="button" className="btn btn-secondary mr-4" onClick={this.addAnotherToken} disabled={this.state.loading}>Add another token</button>
               <button type="button" className="btn btn-hathor" data-toggle="modal" disabled={this.state.loading} data-target="#pinModal">Send Tokens</button>
             </div>
           </form>
