@@ -45,7 +45,8 @@ class Server extends React.Component {
     this.setState({ loading: true, errorMessage: '' });
     // Update new server in local storage
     wallet.changeServer(newServer)
-    version.checkVersion(() => {
+    const promise = version.checkApiVersion();
+    promise.then(() => {
       wallet.reloadData();
       this.props.history.push('/wallet/');
     }, () => {

@@ -1,4 +1,4 @@
-import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK } from '../constants';
+import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK, VERSION } from '../constants';
 import Mnemonic from 'bitcore-mnemonic';
 import { HDPublicKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
@@ -229,6 +229,8 @@ const wallet = {
         reject(e);
       });
     });
+    // Update the version of the wallet that the data was loaded
+    localStorage.setItem('wallet:version', VERSION);
     return promise;
   },
 

@@ -20,4 +20,4 @@ export const updateWords = data => ({ type: "update_words", payload: data });
 
 export const selectToken = data => ({ type: "select_token", payload: data });
 
-export const newToken = data => ({ type: "new_token", payload: data });
+export const newTokens = data => ({ type: "new_tokens", payload: data });

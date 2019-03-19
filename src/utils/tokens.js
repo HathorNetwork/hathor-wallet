@@ -2,7 +2,7 @@ import transaction from './transaction';
 import { crypto, util } from 'bitcore-lib';
 import store from '../store/index';
 import walletApi from '../api/wallet';
-import { newToken } from '../actions/index';
+import { newTokens } from '../actions/index';
 import buffer from 'buffer';
 import { HATHOR_TOKEN_CONFIG, TOKEN_CREATION_MASK, TOKEN_MINT_MASK, TOKEN_MELT_MASK, DECIMAL_PLACES } from '../constants';
 
@@ -45,7 +45,41 @@ const tokens = {
     let tokens = this.getTokens();
     tokens.push(newConfig);
     this.saveToStorage(tokens);
-    store.dispatch(newToken(newConfig));
+    store.dispatch(newTokens({tokens, uid: uid}));
+  },
+
+  /*
+   * Edit token name and symbol. Save in localStorage and redux
+   *
+   * @param {string} uid Token uid to be edited
+   * @param {string} name New token name
+   * @param {string} synbol New token symbol
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  editToken(uid, name, symbol) {
+    const tokens = this.getTokens();
+    const filteredTokens = tokens.filter((token) => token.uid !== uid);
+    const newConfig = {uid, name, symbol};
+    const editedTokens = [...filteredTokens, newConfig];
+    this.saveToStorage(editedTokens);
+    store.dispatch(newTokens({tokens: editedTokens, uid}));
+  },
+
+  /*
+   * Unregister token from localStorage and redux
+   *
+   * @param {string} uid Token uid to be unregistered
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  unregisterToken(uid) {
+    const tokens = this.getTokens();
+    const filteredTokens = tokens.filter((token) => token.uid !== uid);
+    this.saveToStorage(filteredTokens);
+    store.dispatch(newTokens({tokens: filteredTokens, uid: HATHOR_TOKEN_CONFIG.uid}));
   },
 
   /*
