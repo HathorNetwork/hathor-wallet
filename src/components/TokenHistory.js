@@ -26,8 +26,7 @@ class TokenHistory extends React.Component {
   }
 
   prepareTx = (tx) => {
-    // TODO Move it from here.
-    const keys = JSON.parse(localStorage.getItem('wallet:data')).keys;
+    const keys = wallet.getWalletData().keys;
     const selectedToken = this.props.selectedToken;
     let found = false;
     let value = 0;
