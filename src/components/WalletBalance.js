@@ -1,7 +1,10 @@
 import React from 'react';
 import $ from 'jquery';
 import helpers from '../utils/helpers';
+import tokens from '../utils/tokens';
 import ModalTokenInfo from './ModalTokenInfo';
+import ModalConfirm from './ModalConfirm';
+import ModalEditToken from './ModalEditToken';
 import { connect } from "react-redux";
 import { HATHOR_TOKEN_CONFIG } from '../constants';
 
@@ -16,23 +19,46 @@ class WalletBalance extends React.Component {
     $('#tokenInfoModal').modal('show');
   }
 
-  render = () => {
-    const renderBalance = () => {
-      const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
-      const symbol = token ? token.symbol : '';
+  unregisterClicked = () => {
+    $('#confirmModal').modal('show');
+  }
 
-      const renderInfoButton = () => {
+  unregisterConfirmed = () => {
+    $('#confirmModal').modal('hide');
+    tokens.unregisterToken(this.props.selectedToken);
+  }
+
+  editClicked = () => {
+    $('#editTokenModal').modal('show');
+  }
+
+  editSuccess = () => {
+    $('#editTokenModal').modal('hide');
+  }
+
+  render = () => {
+    const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
+    const symbol = token ? token.symbol : '';
+
+    const renderBalance = () => {
+      const renderTokenButtons = () => {
         return (
-          <i className="fa fa-info-circle pointer ml-2" title="Open token information" onClick={this.infoClicked}></i>
+          <div className='ml-3'>
+            <i className="fa fa-info-circle pointer" title="Open token information" onClick={this.infoClicked}></i>
+            <i className="fa fa-pencil pointer ml-3" title="Edit token" onClick={this.editClicked}></i>
+            <i className="fa fa-trash pointer ml-3" title="Unregister token" onClick={this.unregisterClicked}></i>
+          </div>
         );
       }
 
       return (
         <div>
-          <p className='token-name'>
-            <strong>{token ? token.name : ''}</strong>
-            {this.props.selectedToken !== HATHOR_TOKEN_CONFIG.uid && renderInfoButton()}
-          </p>
+          <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
+            <p className='token-name mb-0'>
+              <strong>{token ? token.name : ''}</strong>
+            </p>
+            {this.props.selectedToken !== HATHOR_TOKEN_CONFIG.uid && renderTokenButtons()}
+          </div>
           <p><strong>Total:</strong> {helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
           <p><strong>Available:</strong> {helpers.prettyValue(this.props.balance.available)} {symbol}</p>
           <p><strong>Locked:</strong> {helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
@@ -40,10 +66,21 @@ class WalletBalance extends React.Component {
       );
     }
 
+    const getUnregisterBody = () => {
+      return (
+        <div>
+          <p>Are you sure you want to unregister the token <strong>{token.name} ({token.symbol})</strong></p>
+          <p>You won't lose your tokens, you just won't see this token on the side bar anymore</p>
+        </div>
+      )
+    }
+
     return (
       <div>
         {this.props.balance && renderBalance()}
         <ModalTokenInfo />
+        <ModalConfirm title="Unregister token" body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
+        <ModalEditToken token={token} success={this.editSuccess} />
       </div>
     );
   }
