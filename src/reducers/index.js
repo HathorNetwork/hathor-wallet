@@ -15,6 +15,8 @@ const initialState = {
   isVersionAllowed: undefined,
   // If the connection with the server is online
   isOnline: undefined,
+  // Network that you are connected
+  network: undefined,
   // Config of the last request that failed
   lastFailedRequest: undefined,
   // Wallet password
@@ -47,6 +49,8 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {isVersionAllowed: action.payload.allowed});
     case 'is_online_update':
       return Object.assign({}, state, {isOnline: action.payload.isOnline});
+    case 'network_update':
+      return Object.assign({}, state, {network: action.payload.network});
     case 'reload_data':
       return Object.assign({}, state, action.payload);
     case 'clean_data':
