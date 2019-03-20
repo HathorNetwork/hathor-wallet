@@ -473,8 +473,11 @@ const wallet = {
    * @inner
    */
   hasTokenAndAddress(tx, selectedToken) {
-    // TODO Move it from here.
-    const keys = JSON.parse(localStorage.getItem('wallet:data')).keys;
+    const walletData = this.getWalletData();
+    if (walletData === null) {
+      return false;
+    }
+    const keys = walletData.keys;
 
     for (let txin of tx.inputs) {
       if (txin.token === selectedToken) {
@@ -530,9 +533,12 @@ const wallet = {
    * @inner
    */
   calculateBalance(historyTransactions, selectedToken) {
-    const keys = this.getWalletData().keys;
-
     let balance = {available: 0, locked: 0};
+    const data = this.getWalletData();
+    if (data === null) {
+      return balance;
+    }
+    const keys = data.keys;
     for (let tx of historyTransactions) {
       if (tx.is_voided) {
         // Ignore voided transactions.
@@ -796,8 +802,12 @@ const wallet = {
    * @inner
    */
   getInputsFromAmount(historyTransactions, amount, selectedToken) {
-    const keys = this.getWalletData().keys;
     const ret = {'inputs': [], 'inputsAmount': 0};
+    const data = this.getWalletData();
+    if (data === null) {
+      return ret;
+    }
+    const keys = data.keys;
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id];
       if (tx.is_voided) {
@@ -853,7 +863,11 @@ const wallet = {
    * @inner
    */
   checkUnspentTxExists(historyTransactions, txId, index, selectedToken) {
-    const keys = this.getWalletData().keys;
+    const data = this.getWalletData();
+    if (data === null) {
+      return {exists: false, message: 'Data not loaded yet'};
+    }
+    const keys = data.keys;
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id]
       if (tx.tx_id !== txId) {
@@ -903,7 +917,7 @@ const wallet = {
    * @inner
    */
   checkAuthorityExists(key, tokenUID) {
-    const data = localStorage.getItem('wallet:data');
+    const data = this.getWalletData();
     if (data) {
       const jsonData = JSON.parse(data);
       const authorityOutputs = jsonData.authorityOutputs;

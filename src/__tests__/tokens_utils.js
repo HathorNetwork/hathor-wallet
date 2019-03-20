@@ -9,7 +9,7 @@ const createdTxHash = '00034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd66
 const createdToken = util.buffer.bufferToHex(tokens.getTokenUID(createdTxHash, 0));
 
 beforeEach(() => {
-  WebSocketHandler.connected = true;
+  WebSocketHandler.started = true;
 });
 
 // Mock any POST request to /thin_wallet/send_tokens

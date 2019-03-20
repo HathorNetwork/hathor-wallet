@@ -83,7 +83,7 @@ beforeEach(() => {
   store.dispatch(cleanData());
   addressUsed = '';
   addressShared = '';
-  WebSocketHandler.connected = true;
+  WebSocketHandler.started = true;
   doneCb = null;
 });
 
