@@ -40,8 +40,9 @@ const helpers = {
     const fixedPlaces = (value/10**DECIMAL_PLACES).toFixed(DECIMAL_PLACES);
     const integerPart = fixedPlaces.split('.')[0];
     const decimalPart = fixedPlaces.split('.')[1];
-    const integerFormated = new Intl.NumberFormat('en-US').format(integerPart);
-    return `${integerFormated}.${decimalPart}`;
+    const integerFormated = new Intl.NumberFormat('en-US').format(Math.abs(integerPart));
+    const signal = value < 0 ? '-' : '';
+    return `${signal}${integerFormated}.${decimalPart}`;
   },
 
   isVersionAllowed(version, minVersion) {
