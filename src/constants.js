@@ -28,14 +28,14 @@ export const GENESIS_TX = [
 export const GAP_LIMIT = 20;
 
 // Wallet version
-export const VERSION = '0.5.0-beta';
+export const VERSION = '0.5.1-beta';
 
 // Minimum expected API version
-export const MIN_API_VERSION = '0.11.0-beta';
+export const MIN_API_VERSION = '0.23.0-beta';
 
 // Before this version the data in localStorage from the wallet is not compatible
 // So we must reset the wallet to continue using it
-export const FIRST_WALLET_COMPATIBLE_VERSION = '0.4.0-beta';
+export const FIRST_WALLET_COMPATIBLE_VERSION = '0.5.0-beta';
 
 // If we should forbid to generate a quantity of
 // unused addresses more than the GAP_LIMIT
