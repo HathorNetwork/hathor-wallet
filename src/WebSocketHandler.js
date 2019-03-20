@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import helpers from './utils/helpers';
 import wallet from './utils/wallet';
+import version from './utils/version';
 import { isOnlineUpdate } from "./actions/index";
 import store from './store/index';
 
@@ -12,7 +13,10 @@ class WS extends EventEmitter {
   constructor(){
     if (!WS.instance) {
       super();
-      this.connected = false;
+      // Boolean to show when there is a websocket started with the server
+      this.started = false;
+      // Boolean to show when the websocket connection is working
+      this.connected = undefined;
       this.setup();
     }
 
@@ -20,7 +24,7 @@ class WS extends EventEmitter {
   }
 
   setup = () => {
-    if (this.connected) {
+    if (this.started) {
       return;
     }
     let wsURL = helpers.getWSServerURL();
@@ -42,13 +46,20 @@ class WS extends EventEmitter {
   }
 
   onOpen = () => {
+    if (this.connected === false) {
+      // If was not connected  we need to reload data
+      wallet.reloadData();
+      version.checkApiVersion();
+    }
     this.connected = true;
+    this.started = true;
     this.setIsOnline(true);
     this.heartbeat = setInterval(this.sendPing, HEARTBEAT_TMO);
     wallet.subscribeAllAddresses();
   }
 
   onClose = () => {
+    this.started = false;
     this.connected = false;
     this.setIsOnline(false);
     setTimeout(this.setup, 500);
@@ -60,7 +71,7 @@ class WS extends EventEmitter {
   }
 
   sendMessage = (msg) => {
-    if (!this.connected) {
+    if (!this.started) {
       this.setIsOnline(false);
       return;
     }
@@ -82,7 +93,8 @@ class WS extends EventEmitter {
 
   endConnection = () => {
     this.setIsOnline(undefined);
-    this.connected = false;
+    this.started = false;
+    this.connected = undefined;
     if (this.ws) {
       this.ws.onclose = () => {};
       this.ws.close();

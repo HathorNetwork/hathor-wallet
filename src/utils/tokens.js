@@ -366,7 +366,6 @@ const tokens = {
     if (uid === HATHOR_TOKEN_CONFIG.uid) {
       return 0;
     } else {
-      // This code is duplicate. We can move it to `utils/wallet`.
       const tokensWithoutHathor = this.filterTokens(tokens, HATHOR_TOKEN_CONFIG);
       const myIndex = tokensWithoutHathor.findIndex((token) => token.uid === uid);
       return myIndex + 1;

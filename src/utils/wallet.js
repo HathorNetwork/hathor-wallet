@@ -355,8 +355,8 @@ const wallet = {
    * @inner
    */
   hasNewAddress() {
-    let lastGeneratedIndex = this.getLastGeneratedIndex();
-    let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
+    const lastGeneratedIndex = this.getLastGeneratedIndex();
+    const lastSharedIndex = this.getLastSharedIndex();
     return lastGeneratedIndex > lastSharedIndex;
   },
 
@@ -368,7 +368,7 @@ const wallet = {
    * @inner
    */
   getNextAddress() {
-    let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
+    const lastSharedIndex = this.getLastSharedIndex();
     let data = this.getWalletData();
     for (let address in data.keys) {
       if (data.keys[address].index === lastSharedIndex + 1) {
@@ -389,7 +389,7 @@ const wallet = {
    * @inner
    */
   canGenerateNewAddress() {
-    let lastUsedIndex = parseInt(localStorage.getItem('wallet:lastUsedIndex'), 10);
+    const lastUsedIndex = this.getLastUsedIndex();
     let lastGeneratedIndex = this.getLastGeneratedIndex();
     if (LIMIT_ADDRESS_GENERATION) {
       if (lastUsedIndex + GAP_LIMIT > lastGeneratedIndex) {
@@ -416,7 +416,7 @@ const wallet = {
     const xpub = HDPublicKey(dataJson.xpubkey);
 
     // Get last shared index to discover new index
-    let lastSharedIndex = parseInt(localStorage.getItem('wallet:lastSharedIndex'), 10);
+    const lastSharedIndex = this.getLastSharedIndex();
     let newIndex = lastSharedIndex + 1;
 
     const newKey = xpub.derive(newIndex);
@@ -473,8 +473,11 @@ const wallet = {
    * @inner
    */
   hasTokenAndAddress(tx, selectedToken) {
-    // TODO Move it from here.
-    const keys = JSON.parse(localStorage.getItem('wallet:data')).keys;
+    const walletData = this.getWalletData();
+    if (walletData === null) {
+      return false;
+    }
+    const keys = walletData.keys;
 
     for (let txin of tx.inputs) {
       if (txin.token === selectedToken) {
@@ -530,9 +533,12 @@ const wallet = {
    * @inner
    */
   calculateBalance(historyTransactions, selectedToken) {
-    const keys = this.getWalletData().keys;
-
     let balance = {available: 0, locked: 0};
+    const data = this.getWalletData();
+    if (data === null) {
+      return balance;
+    }
+    const keys = data.keys;
     for (let tx of historyTransactions) {
       if (tx.is_voided) {
         // Ignore voided transactions.
@@ -596,7 +602,7 @@ const wallet = {
       // Saving address data
       store.dispatch(sharedAddressUpdate({
         lastSharedAddress: localStorage.getItem('wallet:address'),
-        lastSharedIndex: localStorage.getItem('wallet:lastSharedIndex')
+        lastSharedIndex: this.getLastSharedIndex(),
       }));
       return true;
     } else {
@@ -718,7 +724,7 @@ const wallet = {
     let data = this.getWalletData();
     if (data) {
       let index = data.keys[address].index;
-      let lastUsedIndex = localStorage.getItem('wallet:lastUsedIndex');
+      const lastUsedIndex = this.getLastUsedIndex();
       if (lastUsedIndex === null || index > parseInt(lastUsedIndex, 10)) {
         localStorage.setItem('wallet:lastUsedAddress', address);
         localStorage.setItem('wallet:lastUsedIndex', index);
@@ -796,8 +802,12 @@ const wallet = {
    * @inner
    */
   getInputsFromAmount(historyTransactions, amount, selectedToken) {
-    const keys = this.getWalletData().keys;
     const ret = {'inputs': [], 'inputsAmount': 0};
+    const data = this.getWalletData();
+    if (data === null) {
+      return ret;
+    }
+    const keys = data.keys;
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id];
       if (tx.is_voided) {
@@ -853,7 +863,11 @@ const wallet = {
    * @inner
    */
   checkUnspentTxExists(historyTransactions, txId, index, selectedToken) {
-    const keys = this.getWalletData().keys;
+    const data = this.getWalletData();
+    if (data === null) {
+      return {exists: false, message: 'Data not loaded yet'};
+    }
+    const keys = data.keys;
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id]
       if (tx.tx_id !== txId) {
@@ -903,7 +917,7 @@ const wallet = {
    * @inner
    */
   checkAuthorityExists(key, tokenUID) {
-    const data = localStorage.getItem('wallet:data');
+    const data = this.getWalletData();
     if (data) {
       const jsonData = JSON.parse(data);
       const authorityOutputs = jsonData.authorityOutputs;
@@ -1153,6 +1167,142 @@ const wallet = {
       }
     }
     return {success: true, data};
+  },
+
+  /**
+   * Get localStorage index and, in case is not null, parse to int
+   *
+   * @param {string} key Index key to get in the localStorage
+   *
+   * @return {number} Index parsed to integer or null
+   * @memberof Wallet
+   * @inner
+   */
+  getLocalStorageIndex(key) {
+    let index = localStorage.getItem(`wallet:${key}`);
+    if (index !== null) {
+      index = parseInt(index, 10);
+    }
+    return index;
+  },
+
+  /**
+   * Get localStorage last used index (in case is not set return null)
+   *
+   * @return {number} Last used index parsed to integer or null
+   * @memberof Wallet
+   * @inner
+   */
+  getLastUsedIndex() {
+    return this.getLocalStorageIndex('lastUsedIndex');
+  },
+
+  /**
+   * Get localStorage last shared index (in case is not set return null)
+   *
+   * @return {number} Last shared index parsed to integer or null
+   * @memberof Wallet
+   * @inner
+   */
+  getLastSharedIndex() {
+    return this.getLocalStorageIndex('lastSharedIndex');
+  },
+
+  /**
+   * Update the historyTransactions and allTokens from a new array of history that arrived
+   *
+   * Check if need to call loadHistory again to get more addresses data
+   *
+   * @param {Object} historyTransactions Object of transactions indexed by tx_id to be added the new txs
+   * @param {Set} allTokens Set of all tokens (uid) already added
+   * @param {Array} newHistory Array of new data that arrived from the server to be added to local data
+   * @param {function} resolve Resolve method from promise to be called after finishing handling the new history
+   *
+   * @return {Object} Return an object with {newSharedAddress, newSharedIndex}
+   * @memberof Wallet
+   * @inner
+   */
+  updateHistoryData(oldHistoryTransactions, oldAllTokens, newHistory, resolve) {
+    const dataJson = this.getWalletData();
+    const historyTransactions = Object.assign({}, oldHistoryTransactions);
+    const allTokens = new Set(oldAllTokens);
+
+    let maxIndex = -1;
+    let lastUsedAddress = null;
+    for (const tx of newHistory) {
+      historyTransactions[tx.tx_id] = tx
+
+      for (const txin of tx.inputs) {
+        const key = dataJson.keys[txin.decoded.address];
+        if (key) {
+          allTokens.add(txin.token);
+          if (key.index > maxIndex) {
+            maxIndex = key.index;
+            lastUsedAddress = txin.decoded.address
+          }
+        }
+      }
+      for (const txout of tx.outputs) {
+        const key = dataJson.keys[txout.decoded.address];
+        if (key) {
+          allTokens.add(txout.token);
+          if (key.index > maxIndex) {
+            maxIndex = key.index;
+            lastUsedAddress = txout.decoded.address
+          }
+        }
+      }
+    }
+
+    let lastUsedIndex = this.getLastUsedIndex();
+    if (lastUsedIndex === null) {
+      lastUsedIndex = -1;
+    }
+
+    let lastSharedIndex = this.getLastSharedIndex();
+    if (lastSharedIndex === null) {
+      lastSharedIndex = -1;
+    }
+
+    let newSharedAddress = null;
+    let newSharedIndex = -1;
+
+    if (maxIndex > lastUsedIndex && lastUsedAddress !== null) {
+      // Setting last used index and last shared index
+      this.setLastUsedIndex(lastUsedAddress);
+      // Setting last shared address, if necessary
+      const candidateIndex = maxIndex + 1;
+      if (candidateIndex > lastSharedIndex) {
+        const xpub = HDPublicKey(dataJson.xpubkey);
+        const key = xpub.derive(candidateIndex);
+        const address = Address(key.publicKey, NETWORK).toString();
+        newSharedIndex = candidateIndex;
+        newSharedAddress = address;
+        this.updateAddress(address, candidateIndex, false);
+      }
+    }
+
+    const lastGeneratedIndex = this.getLastGeneratedIndex();
+    // Just in the case where there is no element in all data
+    maxIndex = Math.max(maxIndex, 0);
+    if (maxIndex + GAP_LIMIT > lastGeneratedIndex) {
+      const startIndex = lastGeneratedIndex + 1;
+      const count = maxIndex + GAP_LIMIT - lastGeneratedIndex;
+      const promise = this.loadAddressHistory(startIndex, count);
+      promise.then(() => {
+        if (resolve) {
+          resolve();
+        }
+      })
+    } else {
+      if (resolve) {
+        resolve();
+      }
+    }
+
+    this.saveAddressHistory(historyTransactions, allTokens);
+
+    return {historyTransactions, allTokens, newSharedAddress, newSharedIndex};
   },
 }
 

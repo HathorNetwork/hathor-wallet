@@ -10,6 +10,8 @@ export const isVersionAllowedUpdate = data => ({ type: "is_version_allowed_updat
 
 export const isOnlineUpdate = data => ({ type: "is_online_update", payload: data });
 
+export const networkUpdate = data => ({ type: "network_update", payload: data });
+
 export const lastFailedRequest = data => ({ type: "last_failed_request", payload: data });
 
 export const updatePassword = data => ({ type: "update_password", payload: data });

@@ -274,7 +274,11 @@ const transaction = {
   signTx(data, dataToSign, pin) {
     const hashbuf = this.getDataToSignHash(dataToSign);
 
-    const keys = wallet.getWalletData().keys;
+    const walletData = wallet.getWalletData();
+    if (walletData === null) {
+      return data;
+    }
+    const keys = walletData.keys;
     for (const input of data.inputs) {
       const index = keys[input.address].index;
       input['data'] = this.getSignature(index, hashbuf, pin);

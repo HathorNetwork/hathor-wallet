@@ -3,7 +3,7 @@ import { GAP_LIMIT } from '../constants';
 import WebSocketHandler from '../WebSocketHandler';
 
 beforeEach(() => {
-  WebSocketHandler.connected = false;
+  WebSocketHandler.started = false;
   wallet.cleanLocalStorage();
 });
 
@@ -61,7 +61,7 @@ test('Can generate new address', () => {
 });
 
 test('Generate new address', () => {
-  WebSocketHandler.connected = true;
+  WebSocketHandler.started = true;
   let words = 'purse orchard camera cloud piece joke hospital mechanic timber horror shoulder rebuild you decrease garlic derive rebuild random naive elbow depart okay parrot cliff';
   let pin = '123456';
   wallet.generateWallet(words, '', pin, 'password', true);
@@ -95,7 +95,7 @@ test('Generate new address', () => {
 });
 
 test('Last used index', () => {
-  WebSocketHandler.connected = true;
+  WebSocketHandler.started = true;
   let words = 'purse orchard camera cloud piece joke hospital mechanic timber horror shoulder rebuild you decrease garlic derive rebuild random naive elbow depart okay parrot cliff';
   let pin = '123456';
   wallet.generateWallet(words, '', pin, 'password', true);
@@ -113,7 +113,7 @@ test('Last used index', () => {
 
 test('Subscribe address to websocket', (done) => {
   let address = '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r';
-  WebSocketHandler.connected = true;
+  WebSocketHandler.started = true;
   WebSocketHandler.on('subscribe_success', (wsData) => {
     if (wsData.address === address) {
       // If got here test was successful, so ending it
@@ -141,7 +141,7 @@ test('Subscribe all addresses to websocket', (done) => {
     keys[address] = {};
   }
   localStorage.setItem('wallet:data', JSON.stringify({keys: keys}));
-  WebSocketHandler.connected = true;
+  WebSocketHandler.started = true;
   WebSocketHandler.on('subscribe_success', (wsData) => {
     let foundIndex = -1;
     for (let [idx, address] of addresses.entries()) {
