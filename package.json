@@ -21,7 +21,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Foundation <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.5.1-beta",
+  "version": "0.5.2-beta",
   "private": true,
   "dependencies": {
     "@sentry/electron": "^0.16",
@@ -85,7 +85,6 @@
       "target": "dmg"
     },
     "linux": {
-      "artifactName": "${productName}",
       "target": [
         "AppImage",
         "deb"

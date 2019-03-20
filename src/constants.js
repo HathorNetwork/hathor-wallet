@@ -28,7 +28,7 @@ export const GENESIS_TX = [
 export const GAP_LIMIT = 20;
 
 // Wallet version
-export const VERSION = '0.5.1-beta';
+export const VERSION = '0.5.2-beta';
 
 // Minimum expected API version
 export const MIN_API_VERSION = '0.23.0-beta';
