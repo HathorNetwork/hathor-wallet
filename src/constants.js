@@ -28,10 +28,10 @@ export const GENESIS_TX = [
 export const GAP_LIMIT = 20;
 
 // Wallet version
-export const VERSION = '0.5.2-beta';
+export const VERSION = '0.5.4-beta';
 
 // Minimum expected API version
-export const MIN_API_VERSION = '0.23.0-beta';
+export const MIN_API_VERSION = '0.23.1-beta';
 
 // Before this version the data in localStorage from the wallet is not compatible
 // So we must reset the wallet to continue using it
