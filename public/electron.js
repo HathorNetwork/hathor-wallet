@@ -77,7 +77,7 @@ if (process.platform === 'darwin') {
   // Set "About" options only on macOS
   app.setAboutPanelOptions({
     'applicationName': appName,
-    'applicationVersion': '0.5.2-beta',
+    'applicationVersion': '0.5.4-beta',
     'version': '',
   });
 }
