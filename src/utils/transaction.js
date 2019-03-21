@@ -124,7 +124,7 @@ const transaction = {
     // Validate address checksum
     let checksum = addressBytes.slice(-4);
     let addressSlice = addressBytes.slice(0, -4);
-    let correctChecksum = this.getAddressChecksum(addressSlice);
+    let correctChecksum = this.getChecksum(addressSlice);
     if (!util.buffer.equals(checksum, correctChecksum)) {
       throw new AddressError('Invalid checksum for address');
     }
@@ -132,16 +132,17 @@ const transaction = {
   },
   
   /**
-   * Return the checksum of the address
+   * Return the checksum of the bytes passed
+   * Checksum is calculated as the 4 first bytes of the double sha256
    * 
-   * @param {Buffer} addressSlice Part of the address in bytes to calculate the checksum
+   * @param {Buffer} bytes Data from where the checksum is calculated
    *
    * @return {Buffer}
    * @memberof Transaction
    * @inner
    */
-  getAddressChecksum(addressSlice) {
-    return crypto.Hash.sha256sha256(addressSlice).slice(0, 4);
+  getChecksum(bytes) {
+    return crypto.Hash.sha256sha256(bytes).slice(0, 4);
   },
 
   /**

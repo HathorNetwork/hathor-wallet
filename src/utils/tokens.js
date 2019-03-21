@@ -168,22 +168,24 @@ const tokens = {
    * @param {string} name Token name
    * @param {string} symbol Token symbol
    *
-   * @return {string} base64 of the configuration
+   * @return {string} Configuration string of the token
    *
    * @memberof Tokens
    * @inner
    *
    */
   getConfigurationString(uid, name, symbol) {
-    const config = [uid, name, symbol];
-    // Base64 of array stringified
-    return buffer.Buffer.from(JSON.stringify(config)).toString('base64')
+    const partialConfig = `${name}:${symbol}:${uid}`;
+    const checksum = transaction.getChecksum(buffer.Buffer.from(partialConfig));
+    return `[${partialConfig}:${checksum.toString('hex')}]`;
   },
 
   /*
    * Returns token from configuration string
+   * Configuration string has the following format:
+   * [name:symbol:uid:checksum]
    *
-   * @param {string} config Configuration string in base64
+   * @param {string} config Configuration string with token data plus a checksum
    *
    * @return {Object} token {'uid', 'name', 'symbol'} or null in case config is invalid
    *
@@ -192,18 +194,28 @@ const tokens = {
    *
    */
   getTokenFromConfigurationString(config) {
-    let data = null;
-    try {
-      const stringified = buffer.Buffer.from(config, 'base64').toString();
-      data = JSON.parse(stringified);
-      if (data.length !== 3) {
-        return null;
-      }
-    } catch(e) {
+    // First we validate that first char is [ and last one is ]
+    if (!config || config[0] !== '[' || config[config.length - 1] !== ']') {
+      return null;
+    }
+    // Then we remove the [] and split the string by :
+    const configArr = config.slice(1, -1).split(':');
+    if (configArr.length < 4) {
       return null;
     }
 
-    return {'uid': data[0], 'name': data[1], 'symbol': data[2]};
+    // Last element is the checksum
+    const checksum = configArr.splice(-1);
+    const configWithoutChecksum = configArr.join(':');
+    const correctChecksum = transaction.getChecksum(buffer.Buffer.from(configWithoutChecksum));
+    if (correctChecksum.toString('hex') !== checksum[0]) {
+      return null;
+    }
+    const uid = configArr.pop();
+    const symbol = configArr.pop();
+    // Assuming that the name might have : on it
+    const name = configArr.join(':');
+    return {uid, name, symbol};
   },
 
   /*
