@@ -48,3 +48,14 @@ global.mock = new MockAdapter(axios);
 mock.onGet('thin_wallet/address_history').reply((config) => {
   return [200, {'history': []}];
 });
+
+mock.onGet('version').reply((config) => {
+  const data = {
+    version: '1.0.0',
+    network: 'mainnet',
+    min_tx_weight: 14,
+    min_tx_weight_coefficient: 1.6,
+    min_tx_weight_k: 100,
+  }
+  return [200, data];
+});

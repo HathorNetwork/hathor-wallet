@@ -4,6 +4,7 @@ import { HDPublicKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
 import walletApi from '../api/wallet';
 import tokens from './tokens';
+import version from './version';
 import store from '../store/index';
 import { historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
 import WebSocketHandler from '../WebSocketHandler';
@@ -231,6 +232,8 @@ const wallet = {
     });
     // Update the version of the wallet that the data was loaded
     localStorage.setItem('wallet:version', VERSION);
+    // Check api version everytime we load address history
+    version.checkApiVersion();
     return promise;
   },
 

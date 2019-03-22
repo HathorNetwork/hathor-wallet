@@ -1,7 +1,6 @@
 import EventEmitter from 'events';
 import helpers from './utils/helpers';
 import wallet from './utils/wallet';
-import version from './utils/version';
 import { isOnlineUpdate } from "./actions/index";
 import store from './store/index';
 
@@ -49,7 +48,6 @@ class WS extends EventEmitter {
     if (this.connected === false) {
       // If was not connected  we need to reload data
       wallet.reloadData();
-      version.checkApiVersion();
     }
     this.connected = true;
     this.started = true;
