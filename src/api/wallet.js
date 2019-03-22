@@ -10,6 +10,15 @@ const walletApi = {
     });
   },
 
+  getParents(txHex, resolve) {
+    const data = {tx_hex: txHex};
+    return createRequestInstance(resolve).get('thin_wallet/parents', {'params': data}).then((res) => {
+      resolve(res.data)
+    }, (res) => {
+      return Promise.reject(res);
+    });
+  },
+
   sendTokens(txHex, resolve) {
     const postData = {tx_hex: txHex};
     return createRequestInstance(resolve).post('thin_wallet/send_tokens', postData).then((res) => {

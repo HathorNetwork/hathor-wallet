@@ -46,18 +46,19 @@
     "react-redux": "^5.0.7",
     "react-router-dom": "4.2.2",
     "react-scripts": "2.0.3",
-    "redux": "^4.0.0"
+    "redux": "^4.0.0",
+    "worker-loader": "^2.0.0"
   },
   "main": "public/electron.js",
   "homepage": "./",
   "scripts": {
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
-    "start-js": "react-scripts start",
+    "start-js": "react-app-rewired start",
     "start": "npm-run-all -p watch-css start-js",
     "build-js": "react-scripts build",
     "build": "npm-run-all build-css build-js",
-    "test": "react-scripts test --env=node",
+    "test": "react-app-rewired test --env=node",
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 .",
     "preelectron-pack": "npm run build",
@@ -72,7 +73,9 @@
     "jest-html-reporter": "^2.4.4",
     "jest-localstorage-mock": "^2.4.0",
     "jsdoc": "^3.5.5",
-    "mock-socket": "^8.0.5"
+    "mock-socket": "^8.0.5",
+    "react-app-rewired": "^2.1.1",
+    "thread-loader": "^2.1.2"
   },
   "build": {
     "compression": "maximum",

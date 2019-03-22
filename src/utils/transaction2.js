@@ -4,21 +4,17 @@ import { HDPrivateKey, crypto, encoding, util } from 'bitcore-lib';
 import { createHash } from 'crypto';
 import AddressError from './errors';
 import dateFormatter from './date';
-import wallet from './wallet';
-import walletApi from '../api/wallet';
-import txApi from '../api/txApi';
 import buffer from 'buffer';
 import Long from 'long';
 import _ from 'lodash';
-import PowWorker from "./PowWorker.worker.js";
 
 /**
- * Transaction utils with methods to serialize, create and handle transactions
- *
- * @namespace Transaction
+ * XXX FIXME Fast workaround just to test something in web worker
+ * XXX FIXME Prevent circular imports in transaction.js and worker file
+ * XXX FIXME I am still having problemas in getFundsHash method. Problems that don't happen when running in the main thread
  */
 
-const transaction = {
+const transaction2 = {
   /**
    * Transform int to bytes
    *
@@ -261,58 +257,6 @@ const transaction = {
       arr.push(outputScript);
     }
     return util.buffer.concat(arr);
-  },
-
-  /*
-   * Add input data to each input of tx data
-   *
-   * @param {Object} data Object with inputs and outputs {'inputs': [{'tx_id', 'index', 'token'}], 'outputs': ['address', 'value', 'timelock']}
-   * @param {Buffer} dataToSign data to sign the transaction in bytes
-   * @param {string} pin PIN to decrypt the private key
-   *
-   * @return {Object} data
-   *
-   * @memberof Transaction
-   * @inner
-   */
-  signTx(data, dataToSign, pin) {
-    const hashbuf = this.getDataToSignHash(dataToSign);
-
-    const walletData = wallet.getWalletData();
-    if (walletData === null) {
-      return data;
-    }
-    const keys = walletData.keys;
-    for (const input of data.inputs) {
-      const index = keys[input.address].index;
-      input['data'] = this.getSignature(index, hashbuf, pin);
-    }
-    return data;
-  },
-
-  /*
-   * Get signature of an input based in the private key
-   *
-   * @param {number} index Index of the address to get the private key
-   * @param {Buffer} hash hashed data to sign the transaction
-   * @param {string} pin PIN to decrypt the private key
-   *
-   * @return {Buffer} input data
-   *
-   * @memberof Transaction
-   * @inner
-   */
-  getSignature(index, hash, pin) {
-    const encryptedPrivateKey = JSON.parse(localStorage.getItem('wallet:accessData')).mainKey;
-    const privateKeyStr = wallet.decryptData(encryptedPrivateKey, pin);
-    const key = HDPrivateKey(privateKeyStr)
-    const derivedKey = key.derive(index);
-    const privateKey = derivedKey.privateKey;
-
-    const sig = crypto.ECDSA.sign(hash, privateKey, 'little').set({
-      nhashtype: crypto.Signature.SIGHASH_ALL
-    });
-    return this.createInputData(sig.toDER(), derivedKey.publicKey.toBuffer());
   },
 
   /*
@@ -585,115 +529,6 @@ const transaction = {
     _.reverse(finalDigest);
     return finalDigest;
   },
-
-  calculatePow(txData, powPart1, lastTime, target) {
-    const now = dateFormatter.now();
-    if ((now - lastTime) > 2) {
-      txData.timestamp = now;
-      powPart1 = this.getPowPart1(txData);
-      lastTime = now;
-      txData.nonce = 0;
-    }
-
-    const result = this.getPowPart2(_.cloneDeep(powPart1), txData.nonce);
-    console.log(txData.nonce, txData.timestamp);
-    console.log(parseInt(util.buffer.bufferToHex(result), 16), target);
-    if (parseInt(util.buffer.bufferToHex(result), 16) < target) {
-      return { result, lastTime, txData, powPart1 };
-    }
-    txData.nonce += 1;
-    return { result: null, lastTime, txData, powPart1 };
-  },
-
-  callCalculatePow(txData, powPart1, resolve, lastTime, target) {
-    setTimeout(() => {
-      const result = this.calculatePow(txData, powPart1, lastTime, target);
-      if (result.result === null && txData.nonce < MAX_NONCE) {
-        this.callCalculatePow(result.txData, result.powPart1, resolve, result.lastTime, target);
-      } else {
-        resolve(result.result);
-      }
-    }, 0);
-  },
-
-  resolve(txData) {
-    let powPart1 = this.getPowPart1(txData);
-    let lastTime = txData.timestamp;
-    txData.nonce = 0;
-    const target = this.getTarget(txData);
-    const promise = new Promise((resolve, reject) => {
-      this.callCalculatePow(txData, powPart1, resolve, lastTime, target);
-    });
-    return promise;
-  },
-
-  resolveWebWorker(txData) {
-    const promise = new Promise((resolve, reject) => {
-      console.log('Calling web worker');
-      const worker = new PowWorker();
-      worker.addEventListener('message', event => {
-        console.log('Web worker replied', event);
-        resolve(event.data);
-      });
-      console.log('Posting message to web worker');
-      worker.postMessage(txData);
-    });
-    return promise;
-  },
-
-  resolvePowAndSend(data) {
-    const txBytes = transaction.txToBytes(data);
-    const txHex = util.buffer.bufferToHex(txBytes);
-    const promise = new Promise((resolve, reject) => {
-      walletApi.getParents(txHex, (response) => {
-        if (response.success) {
-          data.parents = response.parents.split(',')
-          const promise = this.resolveWebWorker(data);
-          promise.then((result) => {
-            if (result === null) {
-              reject('Failed to resolve pow');
-            }
-            const newTxBytes = transaction.txToBytes(data);
-            const newTxHex = util.buffer.bufferToHex(newTxBytes);
-            txApi.pushTx(newTxHex, (response) => {
-              if (response.success) {
-                resolve();
-              } else {
-                reject(response.message);
-              }
-            }, (e) => {
-              // Error in request
-              reject(e.message);
-            });
-          });
-        } else {
-          reject(response.message);
-        }
-      }, (e) => {
-        // Error in request
-        reject(e.message);
-      });
-    });
-    return promise;
-  },
-
-  sendTx(data) {
-    const txBytes = transaction.txToBytes(data);
-    const txHex = util.buffer.bufferToHex(txBytes);
-    const promise = new Promise((resolve, reject) => {
-      walletApi.sendTokens(txHex, (response) => {
-        if (response.success) {
-          resolve();
-        } else {
-          reject(response.message);
-        }
-      }, (e) => {
-        // Error in request
-        reject(e.message);
-      });
-    });
-    return promise;
-  },
 }
 
-export default transaction;
+export default transaction2;

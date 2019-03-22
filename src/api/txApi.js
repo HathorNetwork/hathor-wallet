@@ -38,6 +38,15 @@ const txApi = {
       return Promise.reject(res);
     });
   },
+
+  pushTx(txHex, resolve) {
+    const postData = {tx_hex: txHex};
+    return createRequestInstance(resolve).post('push_tx', postData).then((res) => {
+      resolve(res.data)
+    }, (res) => {
+      return Promise.reject(res);
+    });
+  },
 };
 
 export default txApi;

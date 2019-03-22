@@ -1,14 +1,12 @@
 import React from 'react';
 import $ from 'jquery';
-import walletApi from '../api/wallet';
-import { util } from 'bitcore-lib';
 import transaction from '../utils/transaction';
 import AddressError from '../utils/errors';
 import ReactLoading from 'react-loading';
 import ModalPin from '../components/ModalPin';
 import SendTokensOne from '../components/SendTokensOne';
 import tokens from '../utils/tokens';
-import { HATHOR_TOKEN_CONFIG } from '../constants';
+import { HATHOR_TOKEN_CONFIG, RESOLVE_POW } from '../constants';
 import { connect } from "react-redux";
 
 
@@ -71,27 +69,28 @@ class SendTokens extends React.Component {
         data = transaction.signTx(data, dataToSign, this.state.pin);
         // Completing data in the same object
         transaction.completeTx(data);
-        let txBytes = transaction.txToBytes(data);
-        let txHex = util.buffer.bufferToHex(txBytes);
-        walletApi.sendTokens(txHex, (response) => {
-          if (response.success) {
-            this.props.history.push('/wallet/');
-          } else {
-            this.setState({ errorMessage: response.message, loading: false });
-          }
-        }, (e) => {
-          // Error in request
-          console.log(e);
-          this.setState({ loading: false });
-        });
       } catch(e) {
         if (e instanceof AddressError) {
           this.setState({ errorMessage: e.message, loading: false });
+          return;
         } else {
           // Unhandled error
           throw e;
         }
       }
+
+      let promise = null;
+      if (RESOLVE_POW) {
+        promise = transaction.resolvePowAndSend(data);
+      } else {
+        promise = transaction.sendTx(data);
+      }
+
+      promise.then(() => {
+        this.props.history.push('/wallet/');
+      }, (message) => {
+        this.setState({ errorMessage: message, loading: false });
+      });
     }
   }
 

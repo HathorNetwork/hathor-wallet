@@ -118,3 +118,6 @@ export const DEBUG_LOCAL_DATA_KEYS = [
 ]
 
 export const MAX_NONCE = 2**32;
+
+// If should resolve the pow in the frontend
+export const RESOLVE_POW = true;
