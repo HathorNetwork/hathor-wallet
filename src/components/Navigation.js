@@ -6,7 +6,6 @@ import ServerStatus from './ServerStatus';
 
 
 class Navigation extends React.Component {
-
   render() {
     return (
       <div className="main-nav">
@@ -29,6 +28,16 @@ class Navigation extends React.Component {
               </li>
               <li className="nav-item">
                 <NavLink to="/create_token/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Create token</NavLink>
+              </li>
+              <li className="nav-item dropdown">
+                <a href="true" className="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Explorer
+                </a>
+                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <NavLink to="/dashboard-tx/" exact className="nav-link">Transactions</NavLink>
+                  <NavLink to="/decode-tx/" exact className="nav-link">Decode Tx</NavLink>
+                  <NavLink to="/push-tx/" exact className="nav-link">Push Tx</NavLink>
+                </div>
               </li>
             </ul>
             <div className="navbar-right d-flex flex-row align-items-center navigation-search">

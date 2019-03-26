@@ -28,7 +28,7 @@ export const GENESIS_TX = [
 export const GAP_LIMIT = 20;
 
 // Wallet version
-export const VERSION = '0.5.5-beta';
+export const VERSION = '0.6.0-beta';
 
 // Minimum expected API version
 export const MIN_API_VERSION = '0.23.1-beta';
@@ -116,3 +116,10 @@ export const DEBUG_LOCAL_DATA_KEYS = [
   `wallet:lastUsedAddress`,
   `wallet:address`
 ]
+
+// Quantity of blocks/txs to show per page in the dashboard
+export const DASHBOARD_BLOCKS_COUNT = 6;
+export const DASHBOARD_TX_COUNT = 6;
+
+// Quantity of blocks/txs to show in their list page
+export const TX_COUNT = 10;
