@@ -10,6 +10,7 @@ import SendTokensOne from '../components/SendTokensOne';
 import tokens from '../utils/tokens';
 import { HATHOR_TOKEN_CONFIG } from '../constants';
 import { connect } from "react-redux";
+import BackButton from '../components/BackButton';
 
 
 const mapStateToProps = (state) => {
@@ -143,7 +144,7 @@ class SendTokens extends React.Component {
 
     const renderPage = () => {
       return (
-        <div className='content-wrapper'>
+        <div>
           <form ref="formSendTokens" id="formSendTokens">
             {renderOnePage()}
             <div className="mt-5">
@@ -167,6 +168,7 @@ class SendTokens extends React.Component {
 
     return (
       <div className="content-wrapper flex align-items-center">
+        <BackButton {...this.props} />
         {renderPage()}
         {this.state.loading ? isLoading() : null}
         <ModalPin execute={this.send} handleChangePin={this.handleChangePin} />

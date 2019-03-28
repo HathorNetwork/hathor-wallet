@@ -8,6 +8,7 @@ import tokens from '../utils/tokens';
 import { HATHOR_TOKEN_CONFIG, HATHOR_TOKEN_INDEX } from '../constants';
 import ModalPin from '../components/ModalPin'
 import { connect } from "react-redux";
+import BackButton from '../components/BackButton';
 
 
 const mapStateToProps = (state) => {
@@ -160,6 +161,7 @@ class CreateToken extends React.Component {
 
     return (
       <div className="content-wrapper">
+        <BackButton {...this.props} />
         <form ref="formCreateToken" id="formCreateToken">
           <div className="row">
             <div className="form-group col-6">

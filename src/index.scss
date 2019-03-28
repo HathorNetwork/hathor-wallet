@@ -199,11 +199,11 @@ i.pointer {
   text-decoration: line-through;
 }
 
-#token-history .input-tr .state, #token-history .input-tr .value {
+#token-history .input-tr .state, #token-history .input-tr .value, .sent-value {
   color: #dc3545;
 }
 
-#token-history .output-tr .state, #token-history .output-tr .value {
+#token-history .output-tr .state, #token-history .output-tr .value, .received-value {
   color: #28a745;
 }
 
@@ -582,4 +582,53 @@ svg.svg-wrapper {
   margin-bottom: 3rem;
   margin-top: 3rem;
   padding-left: 0;
+}
+
+.back-div i {
+  color: $darkBlue;
+  font-size: 1.5rem;
+}
+
+.back-div a {
+  text-decoration: underline;
+}
+
+.important-div > div {
+  text-align: center;
+  font-size: 1.3rem;
+  padding: 1rem;
+}
+
+.common-div > div {
+  padding: 0.8rem;
+}
+
+.bordered-wrapper {
+  flex-basis: 100%;
+}
+
+.bordered-wrapper > div {
+  width: 100%;
+  border: 2px solid #eee;
+  border-bottom: 0px;
+}
+
+.bordered-wrapper > div:first-child {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.bordered-wrapper > div:last-child {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  border-bottom: 2px solid #eee;
+}
+
+.address-badge {
+  padding: 0.2rem 0.4rem;
+  border-radius: 1rem;
+  background-color: #0273a0;
+  color: white;
+  font-size: 0.7rem;
+  float: right;
 }

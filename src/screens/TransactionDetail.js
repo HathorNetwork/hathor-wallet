@@ -2,6 +2,7 @@ import React from 'react';
 import ReactLoading from 'react-loading';
 import txApi from '../api/txApi';
 import TxData from '../components/TxData';
+import BackButton from '../components/BackButton';
 
 
 class TransactionDetail extends React.Component {
@@ -59,6 +60,7 @@ class TransactionDetail extends React.Component {
     const renderTx = () => {
       return (
         <div>
+          <BackButton {...this.props} />
           {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} /> : <p className="text-danger">Transaction with hash {this.props.match.params.id} not found</p>}
         </div>
       );
