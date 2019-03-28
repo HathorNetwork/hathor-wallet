@@ -69,7 +69,7 @@ class ErrorWrapper extends React.Component {
   render() {
     const renderApp = (props) => <ErrorBoundary {...props} onError={this.onError} error={this.state.error} />
     const renderModal = (props) => <ModalUnhandledError {...props} {...this.state} resetError={() => this.onError(null)} />
-    return <div className="component-div">
+    return <div className="components-wrapper">
       <Route path="/" render={renderApp} />
       <Route path="/" render={renderModal} />
     </div>

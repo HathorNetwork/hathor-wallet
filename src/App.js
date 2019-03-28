@@ -3,6 +3,8 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
+import BlockList from './screens/BlockList';
+import TransactionList from './screens/TransactionList';
 import Navigation from './components/Navigation';
 import WaitVersion from './components/WaitVersion';
 import TransactionDetail from './screens/TransactionDetail';
@@ -23,6 +25,9 @@ import wallet from './utils/wallet';
 import { connect } from "react-redux";
 import WebSocketHandler from './WebSocketHandler';
 import RequestErrorModal from './components/RequestError';
+import DashboardTx from './screens/DashboardTx';
+import DecodeTx from './screens/DecodeTx';
+import PushTx from './screens/PushTx';
 
 
 const mapDispatchToProps = dispatch => {
@@ -79,6 +84,11 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={true} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
+        <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
+        <StartedRoute exact path="/dashboard-tx" component={DashboardTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
+        <StartedRoute  exact path="/transactions" component={TransactionList} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
+        <StartedRoute  exact path="/blocks" component={BlockList} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />

@@ -81,25 +81,32 @@ test('Decode address', () => {
 });
 
 test('Validate address', () => {
-  let addressB58 = '1zEETJWa3U6fBm8eUXbG7ddj6k4KjoR7j';
+  let addressB58 = 'H8rodtbo5TcfUkRBs6ujQTg2u1Re3xVZ11';
   let decoded = transaction.decodeAddress(addressB58);
-  expect(transaction.validateAddress(decoded)).toBeTruthy();
+  expect(transaction.validateAddress(addressB58, decoded)).toBeTruthy();
 
   let wrongAddressB58 = 'EETJWa3U6fBm8eUXbG7ddj6k4KjoR7j';
   let decodedWrong = transaction.decodeAddress(wrongAddressB58);
   // https://jestjs.io/docs/en/expect#tothrowerror
   // Note: You must wrap the code in a function, otherwise the error will not be caught and the assertion will fail.
   const validateAddressWrong = () => {
-    transaction.validateAddress(decodedWrong);
+    transaction.validateAddress(wrongAddressB58, decodedWrong);
   }
   expect(validateAddressWrong).toThrowError(AddressError);
 
   let wrong2AddressB58 = '1zEETJWa3U6fBm8eUXbG7ddj6k4KjoR77';
   let decodedWrong2 = transaction.decodeAddress(wrong2AddressB58);
   const validateAddressWrong2 = () => {
-    transaction.validateAddress(decodedWrong2);
+    transaction.validateAddress(wrong2AddressB58, decodedWrong2);
   }
   expect(validateAddressWrong2).toThrowError(AddressError);
+
+  let wrong3AddressB58 = '1zEETJWa3U6fBm8eUXbG7ddj6k4KjoR7j';
+  let decodedWrong3 = transaction.decodeAddress(wrong3AddressB58);
+  const validateAddressWrong3 = () => {
+    transaction.validateAddress(wrong3AddressB58, decodedWrong3);
+  }
+  expect(validateAddressWrong3).toThrowError(AddressError);
 });
 
 test('Push data', () => {
@@ -120,12 +127,12 @@ test('Push data', () => {
 });
 
 test('Create output script', () => {
-  let address = '1zEETJWa3U6fBm8eUXbG7ddj6k4KjoR7j';
-  let expectedHex = '76a9140ad2c15b8afe6598da1d327951043cf7ad057bcf88ac';
+  let address = 'H8rodtbo5TcfUkRBs6ujQTg2u1Re3xVZ11';
+  let expectedHex = '76a91419a8eb751eab5a13027e8cae215f6a5dafc1a8dd88ac';
   expect(transaction.createOutputScript(address).toString('hex')).toBe(expectedHex);
 
   let timestamp = 1550249803;
-  let expectedHex2 = '045c66ef4b6f76a9140ad2c15b8afe6598da1d327951043cf7ad057bcf88ac';
+  let expectedHex2 = '045c66ef4b6f76a91419a8eb751eab5a13027e8cae215f6a5dafc1a8dd88ac';
   expect(transaction.createOutputScript(address, timestamp).toString('hex')).toBe(expectedHex2);
 });
 
@@ -175,19 +182,19 @@ test('Prepare data to send tokens', () => {
     ],
     'outputs': [
       {
-        'address': '1zEETJWa3U6fBm8eUXbG7ddj6k4KjoR7j',
+        'address': 'H8rodtbo5TcfUkRBs6ujQTg2u1Re3xVZ11',
         'value': 1000,
         'timelock': null
       },
       {
-        'address': '171hK8MaRpG2SqQMMQ34EdTharUmP1Qk4r',
+        'address': 'HQHv7d72jeby3hqAozUbh9Knhe8TCiTKnp',
         'value': 1000,
         'timelock': 1550249803
       }
     ],
     'tokens': ['123'],
   }
-  let expectedDataToSignHex = '00010102011200034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e000000000003e800001976a9140ad2c15b8afe6598da1d327951043cf7ad057bcf88ac000003e800001f045c66ef4b6f76a91441f267e9a6fbff734fb8f062fc35d231f33ff8d588ac';
+  let expectedDataToSignHex = '00010102011200034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e000000000003e800001976a91419a8eb751eab5a13027e8cae215f6a5dafc1a8dd88ac000003e800001f045c66ef4b6f76a914c2f29cfdb73822200a07ab51d261b425af811fed88ac';
   let dataToSign = transaction.dataToSign(txData);
   expect(dataToSign.toString('hex')).toBe(expectedDataToSignHex);
 
@@ -203,6 +210,6 @@ test('Prepare data to send tokens', () => {
 
   // Fixing timestamp to compare the serialization
   txData['timestamp'] = 1550249810;
-  let expectedTxHex = '00010101021200034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e00006946304402202278ecdfc92d814710a4dd7236a2fd7a9f2e81056a36872daad89bb840db01ea02204e7f99e026c04988af55e7cb831fc7b0e4ad32bd3bee5e73dfce5f7e6ae199d2210346cddff43dffab8e13398633ab7a7caf0d634551e89ae6fd563e282f6744b983000003e800001976a9140ad2c15b8afe6598da1d327951043cf7ad057bcf88ac000003e800001f045c66ef4b6f76a91441f267e9a6fbff734fb8f062fc35d231f33ff8d588ac4030861b12dcee1a5c66ef520000000000';
+  let expectedTxHex = '00010101021200034a15973117852c45520af9e4296c68adb9d39dc99a0342e23cd6686b295e00006a473045022100b314f00e18199a8b58acb7e379f6276e40118910319d86d7b0bc0d7cb00c1ea0022069a1450312d8c0fa2c7d0cf169655daa386d00333a72f529f85dea2b9510584c210346cddff43dffab8e13398633ab7a7caf0d634551e89ae6fd563e282f6744b983000003e800001976a91419a8eb751eab5a13027e8cae215f6a5dafc1a8dd88ac000003e800001f045c66ef4b6f76a914c2f29cfdb73822200a07ab51d261b425af811fed88ac40308798722c78a05c66ef520000000000';
   expect(transaction.txToBytes(txData).toString('hex')).toBe(expectedTxHex);
 });

@@ -1,5 +1,5 @@
 import { OP_GREATERTHAN_TIMESTAMP, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, OP_PUSHDATA1 } from '../opcodes';
-import { DECIMAL_PLACES, DEFAULT_TX_VERSION, MAX_OUTPUT_VALUE_32, MAX_NONCE } from '../constants';
+import { DECIMAL_PLACES, DEFAULT_TX_VERSION, MAX_OUTPUT_VALUE_32, P2PKH_BYTE, P2SH_BYTE, MAX_NONCE } from '../constants';
 import { HDPrivateKey, crypto, encoding, util } from 'bitcore-lib';
 import { createHash } from 'crypto';
 import AddressError from './errors';
@@ -111,7 +111,9 @@ const transaction = {
    * 
    * 1. Address must have 25 bytes
    * 2. Address checksum must be valid
+   * 3. Address first byte must match one of the options for P2PKH or P2SH
    *
+   * @param {string} address Address in base58
    * @param {Buffer} addressBytes Address in bytes
    *
    * @throws {AddressError} Will throw an error if address is not valid
@@ -120,18 +122,25 @@ const transaction = {
    * @memberof Transaction
    * @inner
    */
-  validateAddress(addressBytes) {
+  validateAddress(address, addressBytes) {
+    const errorMessage = `Invalid address: ${address}`;
     // Validate address length
     if (addressBytes.length !== 25) {
-      throw new AddressError('Address should have 25 bytes');
+      throw new AddressError(errorMessage);
     }
 
     // Validate address checksum
-    let checksum = addressBytes.slice(-4);
-    let addressSlice = addressBytes.slice(0, -4);
-    let correctChecksum = this.getChecksum(addressSlice);
+    const checksum = addressBytes.slice(-4);
+    const addressSlice = addressBytes.slice(0, -4);
+    const correctChecksum = this.getChecksum(addressSlice);
     if (!util.buffer.equals(checksum, correctChecksum)) {
-      throw new AddressError('Invalid checksum for address');
+      throw new AddressError(errorMessage);
+    }
+
+    // Validate version byte. Should be the p2pkh or p2sh
+    const firstByte = addressBytes[0];
+    if (firstByte !== P2PKH_BYTE && firstByte !== P2SH_BYTE) {
+      throw new AddressError(errorMessage);
     }
     return true;
   },
@@ -185,7 +194,7 @@ const transaction = {
   createOutputScript(address, timelock) {
     let arr = [];
     let addressBytes = this.decodeAddress(address);
-    if (this.validateAddress(addressBytes)) {
+    if (this.validateAddress(address, addressBytes)) {
       let addressHash = addressBytes.slice(1, -4);
       if (timelock) {
         let timelockBytes = this.intToBytes(timelock, 4);

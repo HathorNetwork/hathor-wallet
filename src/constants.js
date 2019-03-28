@@ -1,3 +1,5 @@
+import { Networks } from 'bitcore-lib';
+
 export const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8080/";
 
 let tmp_ws_url = process.env.REACT_APP_WS_URL || "ws://127.0.0.1:8080/ws/";
@@ -28,7 +30,7 @@ export const GENESIS_TX = [
 export const GAP_LIMIT = 20;
 
 // Wallet version
-export const VERSION = '0.5.5-beta';
+export const VERSION = '0.6.0-beta';
 
 // Minimum expected API version
 export const MIN_API_VERSION = '0.23.1-beta';
@@ -66,9 +68,6 @@ export const WORDS_VALIDATION = 6
 
 // Entropy for the new HD wallet words
 export const HD_WALLET_ENTROPY = 256
-
-// Network to generate addresses ('mainnet' or 'testnet')
-export const NETWORK = process.env.HATHOR_WALLET_NETWORK || 'mainnet';
 
 // Message to be written when user wants to reset all wallet data
 export const CONFIRM_RESET_MESSAGE = 'I want to reset my wallet';
@@ -121,3 +120,76 @@ export const MAX_NONCE = 2**32;
 
 // If should resolve the pow in the frontend
 export const RESOLVE_POW = true;
+
+// Version bytes for address generation
+// Mainnet: P2PKH will start with H and P2SH will start with h
+// Testnet: P2PKH will start with W and P2SH will start with w
+const versionBytes = {
+  'mainnet': {
+    'p2pkh': 0x28,
+    'p2sh': 0x64,
+  },
+  'testnet': {
+    'p2pkh': 0x49,
+    'p2sh': 0x87,
+  },
+}
+
+// Networks is an object of the bitcore-lib
+// Some of it's parameters are not used by us (network parameters), so I just kept their default
+// name: network name
+// alias: another name we can use as the network name
+// pubkeyhash: prefix for p2pkh addresses
+// scripthash: prefix for p2sh addresses
+// privatekey: prefix for private key WIF (Wallet Import Format)
+// xpubkey: prefix for xpubkeys (we will use 'xpub' for both mainnet and testnet)
+// xprivkey: prefix for xprivkeys (we will use 'xprv' for both mainnet and testnet)
+// networkMagic: used to send messages through the network (not used by us)
+// port: used to connect to the network (not used by us)
+// dnsSeed: list of dns to connect (not used by us)
+
+const mainnet = Networks.add({
+  name: 'mainnet',
+  alias: 'production',
+  pubkeyhash: versionBytes['mainnet']['p2pkh'],
+  privatekey: 0x80,
+  scripthash: versionBytes['mainnet']['p2sh'],
+  xpubkey: 0x0488b21e,
+  xprivkey: 0x0488ade4,
+  networkMagic: 0xf9beb4d9,
+  port: 8333,
+  dnsSeeds: []
+});
+
+const testnet = Networks.add({
+  name: 'testnet',
+  alias: 'test',
+  pubkeyhash: versionBytes['testnet']['p2pkh'],
+  privatekey: 0x80,
+  scripthash: versionBytes['testnet']['p2sh'],
+  xpubkey: 0x0488b21e,
+  xprivkey: 0x0488ade4,
+  networkMagic: 0xf9beb4d9,
+  port: 8333,
+  dnsSeeds: []
+});
+
+const networks = {
+  testnet,
+  mainnet
+}
+
+const currentNetwork = process.env.HATHOR_WALLET_NETWORK || 'mainnet';
+
+export const P2PKH_BYTE = versionBytes[currentNetwork].p2pkh;
+export const P2SH_BYTE = versionBytes[currentNetwork].p2sh;
+
+// Network to generate addresses ('mainnet' or 'testnet')
+export const NETWORK = networks[currentNetwork];
+
+// Quantity of blocks/txs to show per page in the dashboard
+export const DASHBOARD_BLOCKS_COUNT = 6;
+export const DASHBOARD_TX_COUNT = 6;
+
+// Quantity of blocks/txs to show in their list page
+export const TX_COUNT = 10;

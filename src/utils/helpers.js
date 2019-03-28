@@ -20,12 +20,12 @@ const helpers = {
 
   getTxType(tx) {
     if (GENESIS_TX.indexOf(tx.hash) > -1) {
-      return 'Tx';
+      return 'Transaction';
     } else if (GENESIS_BLOCK.indexOf(tx.hash) > -1) {
       return 'Block';
     } else {
       if (tx.inputs.length > 0) {
-        return 'Tx';
+        return 'Transaction';
       } else {
         return 'Block';
       }
@@ -154,7 +154,11 @@ const helpers = {
 
   minimumAmount() {
     return 1 / (10**DECIMAL_PLACES);
-  }
+  },
+
+  getShortHash(hash) {
+    return `${hash.substring(0,12)}...${hash.substring(52,64)}`;
+  },
 }
 
 export default helpers;
