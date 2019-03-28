@@ -3,6 +3,7 @@ import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
 import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
+import BackButton from '../components/BackButton';
 
 
 class Settings extends React.Component {
@@ -27,6 +28,7 @@ class Settings extends React.Component {
   render() {
     return (
       <div className="content-wrapper settings">
+        <BackButton {...this.props} />
         <div>
           <p><strong>Server:</strong> You are connected to {helpers.getServerURL()}</p>
           <button className="btn btn-hathor" onClick={this.changeServer}>Change server</button>

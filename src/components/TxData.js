@@ -16,7 +16,63 @@ const mapStateToProps = (state) => {
 
 
 class TxData extends React.Component {
-  state = { raw: false, children: false };
+  state = { raw: false, children: false, tokens: [] };
+
+  componentDidMount = () => {
+    this.calculateTokens();
+  }
+
+  componentDidUpdate = (prevProps) => {
+    if (prevProps.transaction !== this.props.transaction) {
+      this.calculateTokens();
+    }
+  }
+
+  calculateTokens = () => {
+    // Adding transactions tokens to state
+    const tokens = [];
+    for (const output of this.props.transaction.outputs) {
+      if (wallet.isAuthorityOutput(output)) continue;
+      this.checkToken(tokens, output.decoded.token_data);
+    }
+
+    for (const input of this.props.transaction.inputs) {
+      if (wallet.isAuthorityOutput(input)) continue;
+      this.checkToken(tokens, input.decoded.token_data);
+    }
+
+    this.setState({ tokens });
+  }
+
+  checkToken = (tokens, tokenData) => {
+    if (tokenData === HATHOR_TOKEN_INDEX) {
+      return;
+    }
+
+    const tokenUID = this.props.transaction.tokens[tokenData - 1];
+    const tokenConfig = this.props.tokens.find((token) => token.uid === tokenUID);
+    if (tokenConfig === undefined) {
+      // Get token unknown index
+      let unknownCount = 1;
+      for (const token of tokens) {
+        if (token.uid === tokenUID) {
+          return;
+        }
+
+        if (token.unknown) {
+          unknownCount += 1;
+        }
+      }
+
+      const symbol = `UNK${unknownCount}`;
+      tokens.push({uid: tokenUID, name: `Unknown ${unknownCount}`, symbol, unknown: true});
+    } else {
+      const foundToken = tokens.find((token) => token.uid === tokenUID);
+      if (foundToken === undefined) {
+        tokens.push({uid: tokenUID, name: tokenConfig.name, symbol: tokenConfig.symbol, unknown: false});
+      }
+    }
+  }
 
   toggleRaw = (e) => {
     e.preventDefault();
@@ -31,13 +87,7 @@ class TxData extends React.Component {
 
   toggleChildren = (e) => {
     e.preventDefault();
-    this.setState({ children: !this.state.children }, () => {
-      if (this.state.children) {
-        $(this.refs.childrenTx).show(300);
-      } else {
-        $(this.refs.childrenTx).hide(300);
-      }
-    });
+    this.setState({ children: !this.state.children });
   }
 
   copied = (text, result) => {
@@ -52,42 +102,55 @@ class TxData extends React.Component {
       return HATHOR_TOKEN_CONFIG.symbol;
     }
     const tokenUID = this.props.transaction.tokens[tokenData - 1];
-    const tokenConfig = this.props.tokens.find((token) => token.uid === tokenUID);
-    if (tokenConfig === undefined) {
-      return tokenUID;
-    } else {
-      return tokenConfig.symbol;
+    return this.getSymbol(tokenUID);
+  }
+
+  getSymbol = (uid) => {
+    if (uid === HATHOR_TOKEN_CONFIG.uid) {
+      return HATHOR_TOKEN_CONFIG.symbol;
     }
+    const tokenConfig = this.state.tokens.find((token) => token.uid === uid);
+    if (tokenConfig === undefined) return '';
+    return tokenConfig.symbol;
   }
 
   render() {
-
     const renderInputs = (inputs) => {
       return inputs.map((input, idx) => {
         return (
-          <li key={`${input.tx_id}${input.index}`}><Link to={`/transaction/${input.tx_id}`}>{input.tx_id}</Link> ({input.index})</li>
+          <div key={`${input.tx_id}${input.index}`}>
+            <Link to={`/transaction/${input.tx_id}`}>{helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && wallet.isAddressMine(input.decoded.address) && renderAddressBadge()}
+            {renderOutput(input, 0, false)}
+          </div>
         );
       });
     }
 
     const renderOutputToken = (output) => {
       return (
-        <strong>({this.getOutputToken(output.decoded.token_data)})</strong>
+        <strong>{this.getOutputToken(output.decoded.token_data)}</strong>
       );
+    }
+
+    const renderOutput = (output, idx, addBadge) => {
+      if (!wallet.isAuthorityOutput(output)) {
+        return (
+          <div key={idx}>
+            <div>{helpers.prettyValue(output.value)} {renderOutputToken(output)} {output.decoded && addBadge && wallet.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
+            <div>
+              {output.decoded ? renderDecodedScript(output.decoded) : `${output.script} (unknown script)` }
+              {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>Spent</Link>)</span> : ''}
+            </div>
+          </div>
+        );
+      } else {
+        return null;
+      }
     }
 
     const renderOutputs = (outputs) => {
       return outputs.map((output, idx) => {
-        if (!wallet.isAuthorityOutput(output)) {
-          return (
-            <li key={idx}>
-              {helpers.prettyValue(output.value)} {renderOutputToken(output)} -> {output.decoded ? renderDecodedScript(output.decoded) : `${output.script} (unknown script)` }
-              {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>Spent</Link>)</span> : ''}
-            </li>
-          );
-        } else {
-          return null;
-        }
+        return renderOutput(output, idx, true);
       });
     }
 
@@ -129,6 +192,10 @@ class TxData extends React.Component {
       return (<ul>
         {v}
       </ul>)
+    }
+
+    const renderDivList = (hashes) => {
+      return hashes.map((h) => <div key={h}><Link to={`/transaction/${h}`}>{helpers.getShortHash(h)}</Link></div>)
     }
 
     const renderTwins = () => {
@@ -236,45 +303,136 @@ class TxData extends React.Component {
       }
     }
 
+    const renderScore = () => {
+      return (
+        <div>
+          <label>Score:</label> {helpers.roundFloat(this.props.meta.score)}
+        </div>
+      );
+    }
+
+    const renderTokenList = () => {
+      const tokens = this.state.tokens.map((token) => {
+        return (
+          <div key={token.uid}>
+            <span>{token.name} <strong>({token.symbol})</strong> | {token.uid}</span>
+          </div>
+        );
+      });
+      return (
+        <div className="d-flex flex-column align-items-start mb-3 common-div bordered-wrapper">
+          <div><label>Tokens:</label></div>
+          {tokens}
+        </div>
+      );
+    }
+
+    const renderFirstBlock = () => {
+      return (
+         <Link to={`/transaction/${this.props.meta.first_block}`}> {helpers.getShortHash(this.props.meta.first_block)}</Link>
+      )
+    }
+
+    const renderAddressBadge = () => {
+      return (
+        <span className='address-badge'> Your address </span>
+      )
+    }
+
+    const renderBalanceData = (balance) => {
+      return Object.keys(balance).map((token) => {
+        if (balance[token] > 0) {
+          return (
+            <div key={token}>
+              <span className='received-value'><strong>{this.getSymbol(token)}: </strong> Received <i className='fa ml-2 mr-2 fa-long-arrow-down'></i> {helpers.prettyValue(balance[token])}</span>
+            </div>
+          )
+        } else {
+          return (
+            <div key={token}>
+              <span className='sent-value'><strong>{this.getSymbol(token)}: </strong> Sent <i className='fa ml-2 mr-2 fa-long-arrow-up'></i> {helpers.prettyValue(balance[token])}</span>
+            </div>
+          );
+        }
+      });
+    }
+
+    const renderBalance = () => {
+      const balance = wallet.getTxBalance(this.props.transaction);
+      if (Object.keys(balance).length === 0) return null;
+
+      // If all balances are 0, we return null
+      let only0 = true;
+      for (const key in balance) {
+        if (balance[key] !== 0) {
+          only0 = false;
+          break;
+        }
+      }
+
+      if (only0) return null;
+
+      return (
+        <div className="d-flex flex-column common-div bordered-wrapper mt-3">
+          <div><label>Balance:</label></div>
+          {renderBalanceData(balance)}
+        </div>
+      );
+    }
+
     const loadTxData = () => {
       return (
         <div className="tx-data-wrapper">
           {this.props.showConflicts ? renderConflicts() : ''}
-          <div><label>Hash:</label> {this.props.transaction.hash}</div>
-          <div><label>Type:</label> {helpers.getTxType(this.props.transaction)}</div>
-          <div><label>Time:</label> {dateFormatter.parseTimestamp(this.props.transaction.timestamp)}</div>
-          <div><label>Nonce:</label> {this.props.transaction.nonce}</div>
-          <div><label>Weight:</label> {helpers.roundFloat(this.props.transaction.weight)}</div>
-          <div><label>Accumulated weight:</label> {renderAccumulatedWeight()}</div>
-          <div><label>Confirmation level:</label> {this.props.confirmationData ? `${helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%` : 'Retrieving confirmation level data...'}</div>
-          <div><label>Score:</label> {helpers.roundFloat(this.props.meta.score)}</div>
-          <div>
-            <label>Inputs:</label>
-            <ul>
+          <div><label>Transaction ID:</label> {this.props.transaction.hash}</div>
+          {renderBalance()}
+          <div className="d-flex flex-row align-items-start mt-3 mb-3">
+            <div className="d-flex flex-column align-items-start common-div bordered-wrapper mr-3">
+              <div><label>Type:</label> {helpers.getTxType(this.props.transaction)}</div>
+              <div><label>Time:</label> {dateFormatter.parseTimestamp(this.props.transaction.timestamp)}</div>
+              <div><label>Nonce:</label> {this.props.transaction.nonce}</div>
+              <div><label>Weight:</label> {helpers.roundFloat(this.props.transaction.weight)}</div>
+              {helpers.getTxType(this.props.transaction) === 'Block' && renderScore()}
+              <div>
+                <label>First block:</label>
+                {this.props.meta.first_block && renderFirstBlock()}
+              </div>
+            </div>
+            <div className="d-flex flex-column align-items-center important-div bordered-wrapper">
+              <div><label>Accumulated weight:</label> {renderAccumulatedWeight()}</div>
+              <div><label>Confirmation level:</label> {this.props.confirmationData ? `${helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%` : 'Retrieving confirmation level data...'}</div>
+            </div>
+          </div>
+          <div className="d-flex flex-row align-items-start mb-3">
+            <div className="f-flex flex-column align-items-start common-div bordered-wrapper mr-3">
+              <div><label>Inputs:</label></div>
               {renderInputs(this.props.transaction.inputs)}
-            </ul>
-          </div>
-          <div>
-            <label>Outputs:</label>
-            <ul>
+            </div>
+            <div className="d-flex flex-column align-items-center common-div bordered-wrapper">
+              <div><label>Outputs:</label></div>
               {renderOutputs(this.props.transaction.outputs)}
-            </ul>
+            </div>
           </div>
-          <div>
-            <label>Parents:</label>
-            {renderListWithLinks(this.props.transaction.parents, false)}
+          {this.state.tokens.length > 0 && renderTokenList()}
+          <div className="d-flex flex-row align-items-start mb-3">
+            <div className="f-flex flex-column align-items-start common-div bordered-wrapper mr-3">
+              <div><label>Parents:</label></div>
+              {renderDivList(this.props.transaction.parents)}
+            </div>
+            <div className="f-flex flex-column align-items-start common-div bordered-wrapper mr-3">
+              <div><label>Children: </label>{this.props.meta.children.length > 0 && <a href="true" className="ml-1" onClick={(e) => this.toggleChildren(e)}>{this.state.children ? 'Click to hide' : 'Click to show'}</a>}</div>
+              {this.state.children && renderDivList(this.props.meta.children)}
+            </div>
           </div>
-          <div>
-            <label>Children: </label><a href="true" className="ml-1" onClick={(e) => this.toggleChildren(e)}>{this.state.children ? 'Click to hide' : 'Click to show'}</a>
-            <div ref="childrenTx" style={{display: 'none'}}>{renderListWithLinks(this.props.meta.children, false)}</div>
+          <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
+            {this.props.showGraphs && renderGraph('Verification neighbors', 'verification')}
           </div>
-          <div>
-            <label>First block:</label>
-            {this.props.meta.first_block ? renderListWithLinks([this.props.meta.first_block], false) : null}
+          <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
+            {this.props.showGraphs && renderGraph('Funds neighbors', 'funds')}
           </div>
-          {this.props.showGraphs && renderGraph('Verification neighbors', 'verification')}
-          {this.props.showGraphs && renderGraph('Funds neighbors', 'funds')}
-          {this.props.showRaw ? showRawWrapper() : null}
+          <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
+            {this.props.showRaw ? showRawWrapper() : null}
+          </div>
         </div>
       );
     }

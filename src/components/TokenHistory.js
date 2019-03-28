@@ -118,7 +118,7 @@ class TokenHistory extends React.Component {
           <tr key={`${tx.tx_id}`} className={trClass}>
             <td>{dateFormatter.parseTimestamp(tx.timestamp)}</td>
             <td>
-              <Link className={tx.is_voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>{tx.tx_id.substring(0,12)}...{tx.tx_id.substring(52,64)}</Link>
+              <Link className={tx.is_voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>{helpers.getShortHash(tx.tx_id)}</Link>
               <CopyToClipboard text={tx.tx_id} onCopy={this.copied}>
                 <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
               </CopyToClipboard>

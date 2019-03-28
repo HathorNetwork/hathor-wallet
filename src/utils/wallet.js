@@ -1,4 +1,4 @@
-import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK, VERSION } from '../constants';
+import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK, VERSION, HATHOR_TOKEN_INDEX, HATHOR_TOKEN_CONFIG } from '../constants';
 import Mnemonic from 'bitcore-mnemonic';
 import { HDPublicKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
@@ -480,18 +480,17 @@ const wallet = {
     if (walletData === null) {
       return false;
     }
-    const keys = walletData.keys;
 
     for (let txin of tx.inputs) {
       if (txin.token === selectedToken) {
-        if (txin.decoded.address in keys) {
+        if (this.isAddressMine(txin.decoded.address)) {
           return true;
         }
       }
     }
     for (let txout of tx.outputs) {
       if (txout.token === selectedToken) {
-        if (txout.decoded.address in keys) {
+        if (this.isAddressMine(txout.decoded.address)) {
           return true;
         }
       }
@@ -541,7 +540,6 @@ const wallet = {
     if (data === null) {
       return balance;
     }
-    const keys = data.keys;
     for (let tx of historyTransactions) {
       if (tx.is_voided) {
         // Ignore voided transactions.
@@ -552,7 +550,7 @@ const wallet = {
           // Ignore authority outputs.
           continue;
         }
-        if (txout.spent_by === null && txout.token === selectedToken && txout.decoded.address in keys) {
+        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address)) {
           if (this.canUseUnspentTx(txout)) {
             balance.available += txout.value;
           } else {
@@ -810,7 +808,6 @@ const wallet = {
     if (data === null) {
       return ret;
     }
-    const keys = data.keys;
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id];
       if (tx.is_voided) {
@@ -825,7 +822,7 @@ const wallet = {
         if (ret.inputsAmount >= amount) {
           return ret;
         }
-        if (txout.spent_by === null && txout.token === selectedToken && txout.decoded.address in keys) {
+        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address)) {
           if (this.canUseUnspentTx(txout)) {
             ret.inputsAmount += txout.value;
             ret.inputs.push({ tx_id: tx.tx_id, index, token: selectedToken, address: txout.decoded.address });
@@ -870,7 +867,6 @@ const wallet = {
     if (data === null) {
       return {exists: false, message: 'Data not loaded yet'};
     }
-    const keys = data.keys;
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id]
       if (tx.tx_id !== txId) {
@@ -891,7 +887,7 @@ const wallet = {
         return {exists: false, message: `Output [${index}] of transaction [${txId}] is an authority output`};
       }
 
-      if (!(txout.decoded.address in keys)) {
+      if (!(this.isAddressMine(txout.decoded.address))) {
         return {exists: false, message: `Output [${index}] of transaction [${txId}] is not yours`};
       }
 
@@ -1306,6 +1302,76 @@ const wallet = {
     this.saveAddressHistory(historyTransactions, allTokens);
 
     return {historyTransactions, allTokens, newSharedAddress, newSharedIndex};
+  },
+
+  /**
+   * Check if address is from the loaded wallet
+   *
+   * @param {string} address Address to check
+   *
+   * @return {boolean}
+   * @memberof Wallet
+   * @inner
+   */
+  isAddressMine(address) {
+    const data = this.getWalletData();
+    if (data && address in data.keys) {
+      return true;
+    }
+    return false;
+  },
+
+  /**
+   * Get balance of a transaction for the loaded wallet
+   * For each token if the wallet sent or received amount
+   *
+   * @param {Object} tx Transaction with outputs, inputs and tokens
+   *
+   * @return {Object} Object with balance for each token {'uid': value}
+   * @memberof Wallet
+   * @inner
+   */
+  getTxBalance(tx) {
+    let balance = {};
+
+    for (const txin of tx.inputs) {
+      if (this.isAuthorityOutput(txin)) {
+        continue;
+      }
+      if (this.isAddressMine(txin.decoded.address)) {
+        let tokenUID = '';
+        if (txin.decoded.token_data === HATHOR_TOKEN_INDEX) {
+          tokenUID = HATHOR_TOKEN_CONFIG.uid;
+        } else {
+          tokenUID = tx.tokens[txin.decoded.token_data - 1];
+        }
+        if (tokenUID in balance) {
+          balance[tokenUID] -= txin.value;
+        } else {
+          balance[tokenUID] = -txin.value;
+        }
+      }
+    }
+
+    for (const txout of tx.outputs) {
+      if (this.isAuthorityOutput(txout)) {
+        continue;
+      }
+      if (this.isAddressMine(txout.decoded.address)) {
+        let tokenUID = '';
+        if (txout.decoded.token_data === HATHOR_TOKEN_INDEX) {
+          tokenUID = HATHOR_TOKEN_CONFIG.uid;
+        } else {
+          tokenUID = tx.tokens[txout.decoded.token_data - 1];
+        }
+        if (tokenUID in balance) {
+          balance[tokenUID] += txout.value;
+        } else {
+          balance[tokenUID] = txout.value;
+        }
+      }
+    }
+    return balance;
   },
 }
 
