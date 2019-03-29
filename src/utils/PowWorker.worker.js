@@ -23,6 +23,8 @@ self.addEventListener("message", e => {
       console.log('Updating nonce', txData.nonce);
       txData.timestamp = now;
       powPart1 = transaction2.getPowPart1(txData);
+      console.log('Pow part 1 ', util.buffer.bufferToHex(_.cloneDeep(powPart1).digest()));
+      console.log('Pow part 1 de novo', util.buffer.bufferToHex(transaction2.getPowPart1(txData).digest()));
       lastTime = now;
       txData.nonce = 0;
     }

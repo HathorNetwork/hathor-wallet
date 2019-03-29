@@ -360,8 +360,10 @@ const transaction2 = {
     for (let inputTx of txData.inputs) {
       arr.push(util.buffer.hexToBuffer(inputTx.tx_id));
       arr.push(this.intToBytes(inputTx.index, 1));
-      arr.push(this.intToBytes(inputTx.data.length, 2));
-      arr.push(buffer.Buffer.from(inputTx.data));
+      const inputData = new Uint8Array(inputTx.data);
+      console.log(util.buffer.bufferToHex(buffer.Buffer.from(inputData)));
+      arr.push(this.intToBytes(inputData.length, 2));
+      arr.push(buffer.Buffer.from(inputData));
     }
 
     for (let outputTx of txData.outputs) {
@@ -387,6 +389,7 @@ const transaction2 = {
     if (txData.parents) {
       arr.push(this.intToBytes(txData.parents.length, 1))
       for (const parent of txData.parents) {
+        console.log('Parents', parent);
         arr.push(util.buffer.hexToBuffer(parent));
       }
     } else {
@@ -416,7 +419,9 @@ const transaction2 = {
    */
   txToBytes(txData) {
     const fundsArr = this.txToFundsBytes(txData);
+    console.log('Funds arr', util.buffer.bufferToHex(fundsArr));
     const graphArr = this.txToGraphBytes(txData);
+    console.log('Graph arr', util.buffer.bufferToHex(graphArr));
 
     let arr = [...fundsArr, ...graphArr];
 
@@ -512,13 +517,15 @@ const transaction2 = {
 
   getHeaderWithoutNonce(txData) {
     const graphHash = this.getGraphHash(txData);
+    console.log('Graph hash', util.buffer.bufferToHex(graphHash));
     const fundsHash = this.getFundsHash(txData);
-    return this.concatArrayBuffers(graphHash, graphHash);
+    console.log('Funds hash', util.buffer.bufferToHex(fundsHash));
+    return this.concatArrayBuffers(fundsHash, graphHash);
   },
 
   getPowPart1(txData) {
     let hash = createHash('sha256');
-    hash.update(this.getHeaderWithoutNonce(txData));
+    hash.update(buffer.Buffer.from(this.getHeaderWithoutNonce(txData)));
     return hash;
   },
 
@@ -527,7 +534,7 @@ const transaction2 = {
     const hash = createHash('sha256');
     const finalDigest = hash.update(digest).digest();
     // SHA256D gets the hash in little-endian format. Reverse the bytes to get the big-endian representation.
-    _.reverse(finalDigest);
+    //_.reverse(finalDigest);
     return finalDigest;
   },
 }
