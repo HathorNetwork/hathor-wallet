@@ -11,8 +11,8 @@ class TxRow extends React.Component {
 
   render() {
     return (
-      <tr onClick={(e) => this.handleClickTr(this.props.tx.hash)}>
-        <td className="pr-3">{this.props.tx.hash}</td>
+      <tr onClick={(e) => this.handleClickTr(this.props.tx.tx_id)}>
+        <td className="pr-3">{this.props.tx.tx_id}</td>
         <td className="pr-3">{dateFormatter.parseTimestamp(this.props.tx.timestamp)}</td>
       </tr>
     );

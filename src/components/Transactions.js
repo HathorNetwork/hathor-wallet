@@ -6,6 +6,7 @@ import TxRow from './TxRow';
 import SearchTx from './SearchTx';
 import helpers from '../utils/helpers';
 import WebSocketHandler from '../WebSocketHandler';
+import BackButton from '../components/BackButton';
 
 
 class Transactions extends React.Component {
@@ -43,9 +44,9 @@ class Transactions extends React.Component {
       let hasAfter = (this.state.hasAfter || (transactions.length === TX_COUNT && !this.state.hasAfter))
       transactions = helpers.updateListWs(transactions, tx, TX_COUNT);
 
-      let firstHash = transactions[0].hash;
+      let firstHash = transactions[0].tx_id;
       let firstTimestamp = transactions[0].timestamp;
-      let lastHash = transactions[transactions.length-1].hash;
+      let lastHash = transactions[transactions.length-1].tx_id;
       let lastTimestamp = transactions[transactions.length-1].timestamp;
 
       // Finally we update the state again
@@ -62,8 +63,8 @@ class Transactions extends React.Component {
     let firstTimestamp = null;
     let lastTimestamp = null;
     if (data.transactions.length) {
-      firstHash = data.transactions[0].hash;
-      lastHash = data.transactions[data.transactions.length-1].hash;
+      firstHash = data.transactions[0].tx_id;
+      lastHash = data.transactions[data.transactions.length-1].tx_id;
       firstTimestamp = data.transactions[0].timestamp;
       lastTimestamp = data.transactions[data.transactions.length-1].timestamp;
     }
@@ -105,6 +106,28 @@ class Transactions extends React.Component {
     this.getData(false, this.state.lastTimestamp, this.state.lastHash, 'next');
   }
 
+  newData = (data) => {
+    // Data received from Search tx when searching by address
+    const transactions = []
+    for (const tx of data) {
+      if (helpers.isBlock(tx) && this.props.type === 'block') {
+        transactions.push(tx);
+        continue;
+      }
+
+      if (!helpers.isBlock(tx) && this.props.type === 'tx') {
+        transactions.push(tx);
+        continue;
+      }
+    }
+
+    this.setState({ transactions });
+  }
+
+  resetData = () => {
+    this.getData(true, null, null, '');
+  }
+
   render() {
     const loadPagination = () => {
       if (this.state.transactions.length === 0) {
@@ -142,15 +165,16 @@ class Transactions extends React.Component {
     const loadTableBody = () => {
       return this.state.transactions.map((tx, idx) => {
         return (
-          <TxRow key={tx.hash} tx={tx} />
+          <TxRow key={tx.tx_id} tx={tx} />
         );
       });
     }
 
     return (
       <div className="tab-content-wrapper">
+        <BackButton {...this.props} />
         <h1>{this.props.type === 'tx' ? 'Transactions' : 'Blocks'}</h1>
-        <SearchTx {...this.props} />
+        <SearchTx {...this.props} newData={this.newData} resetData={this.resetData} />
         {!this.state.loaded ? <ReactLoading type='spin' color='#0081af' delay={500} /> : loadTable()}
         {loadPagination()}
       </div>
