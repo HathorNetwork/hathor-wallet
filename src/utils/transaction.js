@@ -98,7 +98,11 @@ const transaction = {
    * @inner
    */
   decodeAddress(address) {
-    return encoding.Base58.decode(address);
+    try {
+      return encoding.Base58.decode(address);
+    } catch (e) {
+      throw new AddressError('Invalid base58 address');
+    }
   },
 
   /**

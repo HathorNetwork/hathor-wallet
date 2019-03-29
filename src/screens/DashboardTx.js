@@ -5,24 +5,28 @@ import TxRow from '../components/TxRow';
 import SearchTx from '../components/SearchTx';
 import helpers from '../utils/helpers';
 import WebSocketHandler from '../WebSocketHandler';
+import BackButton from '../components/BackButton';
 
 
 class DashboardTx extends React.Component {
   state = { transactions: [], blocks: [] };
 
   componentDidMount = () => {
+    this.getInitialData();
+    WebSocketHandler.on('network', this.handleWebsocket);
+  }
+
+  componentWillUnmount = () => {
+    WebSocketHandler.removeListener('network', this.handleWebsocket);
+  }
+
+  getInitialData = () => {
     txApi.getDashboardTx(DASHBOARD_BLOCKS_COUNT, DASHBOARD_TX_COUNT, (data) => {
       this.updateData(data.transactions, data.blocks);
     }, (e) => {
       // Error in request
       console.log(e);
     });
-
-    WebSocketHandler.on('network', this.handleWebsocket);
-  }
-
-  componentWillUnmount = () => {
-    WebSocketHandler.removeListener('network', this.handleWebsocket);
   }
 
   handleWebsocket = (wsData) => {
@@ -58,6 +62,25 @@ class DashboardTx extends React.Component {
     this.props.history.push(to);
   }
 
+  newData = (data) => {
+    // Data received when searching for address
+    // Should separate into transactions and blocks
+    const transactions = [];
+    const blocks = [];
+    for (const tx of data) {
+      if (helpers.isBlock(tx)) {
+        blocks.push(tx);
+      } else {
+        transactions.push(tx);
+      }
+    }
+    this.updateData(transactions, blocks);
+  }
+
+  resetData = () => {
+    this.getInitialData();
+  }
+
   render() {
     const renderTableBody = () => {
       return (
@@ -77,19 +100,20 @@ class DashboardTx extends React.Component {
     const renderRows = (elements) => {
       return elements.map((tx, idx) => {
         return (
-          <TxRow key={tx.hash} tx={tx} />
+          <TxRow key={tx.tx_id} tx={tx} />
         );
       });
     }
 
     return (
       <div className="content-wrapper">
-        <SearchTx {...this.props} />
+        <BackButton {...this.props} />
+        <SearchTx {...this.props} newData={this.newData} resetData={this.resetData} />
         <div className="table-responsive">
           <table className="table" id="tx-table">
             <thead>
               <tr>
-                <th>Hash</th>
+                <th>ID</th>
                 <th>Timestamp</th>
               </tr>
             </thead>

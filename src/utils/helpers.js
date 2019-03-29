@@ -1,4 +1,4 @@
-import { GENESIS_BLOCK, GENESIS_TX, DECIMAL_PLACES, DEFAULT_SERVER } from '../constants';
+import { GENESIS_BLOCK, DECIMAL_PLACES, DEFAULT_SERVER } from '../constants';
 import path from 'path';
 
 /*
@@ -19,17 +19,21 @@ const helpers = {
   },
 
   getTxType(tx) {
-    if (GENESIS_TX.indexOf(tx.hash) > -1) {
-      return 'Transaction';
-    } else if (GENESIS_BLOCK.indexOf(tx.hash) > -1) {
+    if (this.isBlock(tx)) {
       return 'Block';
     } else {
-      if (tx.inputs.length > 0) {
-        return 'Transaction';
-      } else {
-        return 'Block';
-      }
+      return 'Transaction';
     }
+  },
+
+  isBlock(tx) {
+    if (GENESIS_BLOCK.indexOf(tx.tx_id) > -1) {
+      return true;
+    }
+    if (tx.inputs.length === 0) {
+      return true;
+    }
+    return false;
   },
 
   roundFloat(n) {
