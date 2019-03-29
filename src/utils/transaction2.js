@@ -361,7 +361,7 @@ const transaction2 = {
       arr.push(util.buffer.hexToBuffer(inputTx.tx_id));
       arr.push(this.intToBytes(inputTx.index, 1));
       arr.push(this.intToBytes(inputTx.data.length, 2));
-      arr.push(inputTx.data);
+      arr.push(buffer.Buffer.from(inputTx.data));
     }
 
     for (let outputTx of txData.outputs) {
@@ -479,7 +479,8 @@ const transaction2 = {
 
   getFundsHash(txData) {
     let fundsHash = createHash('sha256');
-    const fundsBytes = util.buffer.concat(this.txToFundsBytes(txData));
+    const x = this.txToFundsBytes(txData);
+    const fundsBytes = util.buffer.concat(x);
     return fundsHash.update(fundsBytes).digest();
   },
 
@@ -512,7 +513,7 @@ const transaction2 = {
   getHeaderWithoutNonce(txData) {
     const graphHash = this.getGraphHash(txData);
     const fundsHash = this.getFundsHash(txData);
-    return this.concatArrayBuffers(graphHash, fundsHash);
+    return this.concatArrayBuffers(graphHash, graphHash);
   },
 
   getPowPart1(txData) {

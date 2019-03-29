@@ -379,7 +379,8 @@ const transaction = {
     // Make sure the calculated weight is at least the minimum
     weight = Math.max(weight, txWeightConstants.txMinWeight)
     // FIXME precision difference between backend and frontend (weight (17.76246721531992) is smaller than the minimum weight (17.762467215319923))
-    return weight + 1e-6;
+    //return weight + 1e-6;
+    return 19
   },
 
   /**
@@ -662,9 +663,13 @@ const transaction = {
             if (result === null) {
               reject('Failed to resolve pow');
             }
+            console.log('Worker', result);
+            console.log('Data', data);
+            data.nonce = result.nonce;
+            data.timestamp = result.timestamp;
             const newTxBytes = transaction.txToBytes(data);
             const newTxHex = util.buffer.bufferToHex(newTxBytes);
-            txApi.pushTx(newTxHex, (response) => {
+            txApi.pushTx(newTxHex, false, (response) => {
               if (response.success) {
                 resolve();
               } else {

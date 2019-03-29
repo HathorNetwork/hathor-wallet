@@ -119,7 +119,7 @@ export const DEBUG_LOCAL_DATA_KEYS = [
 export const MAX_NONCE = 2**32;
 
 // If should resolve the pow in the frontend
-export const RESOLVE_POW = true;
+export const RESOLVE_POW = false;
 
 // Version bytes for address generation
 // Mainnet: P2PKH will start with H and P2SH will start with h

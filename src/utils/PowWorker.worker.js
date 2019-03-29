@@ -13,8 +13,10 @@ self.addEventListener("message", e => {
   console.log(txData);
   let powPart1 = transaction2.getPowPart1(txData);
   let lastTime = txData.timestamp;
+  let found = false;
   txData.nonce = 0;
   const target = transaction2.getTarget(txData);
+  console.log('Target', target)
   while (txData.nonce < MAX_NONCE) {
     const now = dateFormatter.now();
     if ((now - lastTime) > 2) {
@@ -27,10 +29,15 @@ self.addEventListener("message", e => {
 
     const result = transaction2.getPowPart2(_.cloneDeep(powPart1), txData.nonce);
     if (parseInt(util.buffer.bufferToHex(result), 16) < target) {
-      self.postMessage(result);
+      console.log('Result', parseInt(util.buffer.bufferToHex(result), 16))
+      console.log('Result2 ', util.buffer.bufferToHex(result))
+      self.postMessage({hash: result, nonce: txData.nonce, timestamp: txData.timestamp});
+      found = true;
       break;
     }
     txData.nonce += 1;
   }
-  self.postMessage(null);
+  if (!found) {
+    self.postMessage(null);
+  }
 });
