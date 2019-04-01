@@ -609,8 +609,6 @@ const transaction = {
     }
 
     const result = this.getPowPart2(_.cloneDeep(powPart1), txData.nonce);
-    console.log(txData.nonce, txData.timestamp);
-    console.log(parseInt(util.buffer.bufferToHex(result), 16), target);
     if (parseInt(util.buffer.bufferToHex(result), 16) < target) {
       return { result, lastTime, txData, powPart1 };
     }
@@ -642,13 +640,10 @@ const transaction = {
 
   resolveWebWorker(txData) {
     const promise = new Promise((resolve, reject) => {
-      console.log('Calling web worker');
       const worker = new PowWorker();
       worker.addEventListener('message', event => {
-        console.log('Web worker replied', event);
         resolve(event.data);
       });
-      console.log('Posting message to web worker');
       worker.postMessage(txData);
     });
     return promise;
@@ -666,8 +661,6 @@ const transaction = {
             if (result === null) {
               reject('Failed to resolve pow');
             }
-            console.log('Worker', result);
-            console.log('Data', data);
             data.nonce = result.nonce;
             data.timestamp = result.timestamp;
             const newTxBytes = transaction.txToBytes(data);
