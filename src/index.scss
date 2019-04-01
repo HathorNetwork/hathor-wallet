@@ -593,6 +593,16 @@ svg.svg-wrapper {
   text-decoration: underline;
 }
 
+.inside-white-wrapper .back-div {
+  background-color: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.inside-white-wrapper .back-div a, .inside-white-wrapper .back-div i {
+  color: white;
+}
+
 .important-div > div {
   text-align: center;
   font-size: 1.3rem;
