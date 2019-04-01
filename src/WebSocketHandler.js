@@ -16,6 +16,8 @@ class WS extends EventEmitter {
       this.started = false;
       // Boolean to show when the websocket connection is working
       this.connected = undefined;
+      // Store variable that is passed to Redux if ws is online
+      this.isOnline = undefined;
       this.setup();
     }
 
@@ -101,7 +103,12 @@ class WS extends EventEmitter {
 
   setIsOnline = (value) => {
     // Save in redux
-    store.dispatch(isOnlineUpdate({isOnline: value}));
+    // Need also to keep the value in 'this' because I was accessing redux store
+    // from inside a reducer and was getting error
+    if (this.isOnline !== value) {
+      store.dispatch(isOnlineUpdate({isOnline: value}));
+      this.isOnline = value;
+    }
   }
 }
 
