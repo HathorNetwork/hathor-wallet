@@ -121,7 +121,7 @@ class Transactions extends React.Component {
       }
     }
 
-    this.setState({ transactions });
+    this.handleDataFetched({ transactions }, true, '');
   }
 
   resetData = () => {
