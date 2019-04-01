@@ -11,7 +11,7 @@ class Navigation extends React.Component {
       <div className="main-nav">
         <nav className="navbar navbar-expand-lg navbar-dark">
           <div className="d-flex flex-column align-items-center">
-            <Link className="navbar-brand" to="/" href="/">
+            <Link className="navbar-brand" to="/wallet/" href="/wallet/">
               <img src={logo} alt="" />
             </Link>
           </div>

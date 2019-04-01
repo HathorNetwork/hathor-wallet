@@ -17,6 +17,7 @@ import LockedWallet from './screens/LockedWallet';
 import NewWallet from './screens/NewWallet';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
+import Page404 from './screens/Page404';
 import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
 import { historyUpdate } from "./actions/index";
@@ -87,14 +88,14 @@ class Root extends React.Component {
         <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
         <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
         <StartedRoute exact path="/dashboard-tx" component={DashboardTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
-        <StartedRoute  exact path="/transactions" component={TransactionList} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
-        <StartedRoute  exact path="/blocks" component={BlockList} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
+        <StartedRoute exact path="/transactions" component={TransactionList} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
+        <StartedRoute exact path="/blocks" component={BlockList} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/welcome" component={Welcome} />
-        <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <Route path="" component={Page404} />
       </Switch>
     )
   }
