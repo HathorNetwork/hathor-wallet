@@ -202,7 +202,7 @@ class TxData extends React.Component {
       if (!this.props.meta.twins.length) {
         return;
       } else {
-        return <p>This transaction has twin {helpers.plural(this.props.meta.twins.length, 'transaction', 'transactions')}: {renderListWithLinks(this.props.meta.twins, true)}</p>
+        return <div>This transaction has twin {helpers.plural(this.props.meta.twins.length, 'transaction', 'transactions')}: {renderListWithLinks(this.props.meta.twins, true)}</div>
       }
     }
 
@@ -231,10 +231,10 @@ class TxData extends React.Component {
               </p>
               <hr />
               {conflictNotTwin.length > 0 &&
-                <p className="mb-0">
+                <div className="mb-0">
                   <span>Transactions double spending the same outputs as this transaction: </span>
                   {renderListWithLinks(conflictNotTwin, true)}
-                </p>}
+                </div>}
               {renderTwins()}
             </div>
           );
@@ -250,10 +250,10 @@ class TxData extends React.Component {
             <p>
               This transaction is verifying (directly or indirectly) a voided double-spending transaction, hence it is voided as well.
             </p>
-            <p className="mb-0">
+            <div className="mb-0">
               <span>This transaction is voided because of these transactions: </span>
               {renderListWithLinks(this.props.meta.voided_by, true)}
-            </p>
+            </div>
           </div>
         )
       }
@@ -262,16 +262,16 @@ class TxData extends React.Component {
       return (
         <div className="alert alert-danger">
           <h4 className="alert-heading">This transaction is <strong>NOT</strong> valid.</h4>
-          <p>
+          <div>
             <span>It is voided by: </span>
             {renderListWithLinks(this.props.meta.voided_by, true)}
-          </p>
+          </div>
           <hr />
           {conflictNotTwin.length > 0 &&
-            <p className="mb-0">
+            <div className="mb-0">
               <span>Conflicts with: </span>
               {renderListWithLinks(conflictNotTwin, true)}
-            </p>}
+            </div>}
           {renderTwins()}
         </div>
       )
