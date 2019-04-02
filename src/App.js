@@ -95,6 +95,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/welcome" component={Welcome} />
+        <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <Route path="" component={Page404} />
       </Switch>
     )
@@ -132,6 +133,19 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
  * - If wallet is not loaded and the component requires it's not loaded, we show the component.
  */
 const returnStartedRoute = (Component, props, rest) => {
+  // On Windows the pathname that is being pushed into history has a prefix of '/C:'
+  // So everytime I use 'push' it works, because I set the pathname
+  // However when I use history.goBack, it gets the pathname from the history stack
+  // So it does not find the path because of the prefix
+  // Besides that, when electron loads initially it needs to load index.html from the filesystem
+  // So the first load from electron get from '/C:/' in windows. That's why we need the second 'if'
+  const pathname = rest.location.pathname;
+  if (pathname.length > 3 && pathname.slice(0,4).toLowerCase() === '/c:/') {
+    if (pathname.length > 11 && pathname.slice(-11).toLowerCase() !== '/index.html') {
+      return <Redirect to={{pathname: pathname.slice(3)}} />;
+    }
+  }
+
   if (wallet.started()) {
     if (wallet.loaded()) {
       if (wallet.isLocked()) {
