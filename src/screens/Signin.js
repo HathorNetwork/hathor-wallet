@@ -2,11 +2,22 @@ import React from 'react';
 import logo from '../assets/images/hathor-logo.png';
 
 
+/**
+ * Screen used to select between create a new wallet or import an old one
+ *
+ * @memberof Screens
+ */
 class Signin extends React.Component {
+  /**
+   * Go to the new wallet screen
+   */
   goToNewWallet = () => {
     this.props.history.push('/new_wallet/');
   }
 
+  /**
+   * Go to the load wallet screen
+   */
   goToLoadWallet = () => {
     this.props.history.push('/load_wallet/');
   }

@@ -4,6 +4,11 @@ import helpers from '../utils/helpers';
 import _ from 'lodash';
 
 
+/**
+ * Component that wraps the outputs of a token in the Send Tokens screen
+ *
+ * @memberof Components
+ */
 class OutputsWrapper extends React.Component {
   constructor(props) {
     super(props);
@@ -15,6 +20,11 @@ class OutputsWrapper extends React.Component {
     this.uniqueID = _.uniqueId()
   }
 
+  /**
+   * Handles the click on the timelock checkbox of each output to show/hide the timelock field
+   *
+   * @param {Object} event Event emitted when user clicks on the checkbox
+   */
   handleCheckboxTimelockChange = (e) => {
     const value = e.target.checked;
     if (value) {

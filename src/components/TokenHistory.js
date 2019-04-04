@@ -8,9 +8,22 @@ import helpers from '../utils/helpers';
 import wallet from '../utils/wallet';
 
 
+/**
+ * Component that shows the history data of a token
+ *
+ * @memberof Components
+ */
 class TokenHistory extends React.Component {
+  /**
+   * page {number} Page of the history (default is 1)
+   */
   state = { page: 1 };
 
+  /**
+   * Method called when user clicked on a page button
+   *
+   * @param {Object} data Object that has the index of page button clicked
+   */
   handlePageClick = (data) => {
     let selected = data.selected;
     let page = selected + 1;
@@ -18,6 +31,13 @@ class TokenHistory extends React.Component {
     this.setState({ page: page });
   }
 
+  /**
+   * Method called on copy to clipboard success  
+   * Show alert success message
+   *
+   * @param {string} text Text copied to clipboard
+   * @param {*} result Null in case of error
+   */
   copied = (text, result) => {
     if (result) {
       // If copied with success
@@ -25,6 +45,13 @@ class TokenHistory extends React.Component {
     }
   }
 
+  /**
+   * For each transaction we calculate the final balance for the user and the selected token
+   *
+   * @param {Object} tx Transaction data
+   *
+   * @return {Object} {found, value} where 'found' is a boolean that shows if any of the addresses is of this user and 'value' is the final value of the transaction
+   */
   prepareTx = (tx) => {
     const keys = wallet.getWalletData().keys;
     const selectedToken = this.props.selectedToken;

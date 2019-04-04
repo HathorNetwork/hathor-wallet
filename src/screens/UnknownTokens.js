@@ -19,6 +19,11 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * List of unknown tokens with its transactions and possibility to add them
+ *
+ * @memberof Screens
+ */
 class UnknownTokens extends React.Component {
   constructor(props) {
     super(props);
@@ -27,12 +32,22 @@ class UnknownTokens extends React.Component {
     this.anchorOpenRefs = [];
     this.historyRefs = [];
 
+    /**
+     * uidSelected {string} UID of the token the user clicked to add
+     * successMessage {string} Message to be shown in the alert in case of success
+     */
     this.state = {
       uidSelected: null,
       successMessage: ''
     };
   }
 
+  /**
+   * Get all unknown tokens from the wallet  
+   * Comparing `allTokens` and `tokens` in the Redux we get the ones that are unknown
+   *
+   * @return {Array} Array with unknown tokens {uid, balance, history, totalPages}
+   */
   getUnknownTokens = () => {
     let unknownTokens = [];
     this.historyRefs = [];
@@ -55,6 +70,12 @@ class UnknownTokens extends React.Component {
     return unknownTokens;
   }
 
+  /**
+   * Triggered when user clicks to open the history of the unknown token
+   *
+   * @param {Object} e Event emitted by the click
+   * @param {number} index Index of the unknown token user clicked
+   */
   openHistory = (e, index) => {
     e.preventDefault();
     $(this.historyRefs[index].current).show(400);
@@ -62,6 +83,12 @@ class UnknownTokens extends React.Component {
     $(this.anchorOpenRefs[index].current).hide(300);
   }
 
+  /**
+   * Triggered when user clicks to hide the history of the unknown token
+   *
+   * @param {Object} e Event emitted by the click
+   * @param {number} index Index of the unknown token user clicked
+   */
   hideHistory = (e, index) => {
     e.preventDefault();
     $(this.historyRefs[index].current).hide(400);
@@ -69,6 +96,12 @@ class UnknownTokens extends React.Component {
     $(this.anchorOpenRefs[index].current).show(300);
   }
 
+  /**
+   * Triggered when user clicks to add the unknown token
+   *
+   * @param {Object} e Event emitted by the click
+   * @param {string} uid UID of the unknown token the user wants to add
+   */
   addToken = (e, uid) => {
     e.preventDefault();
     this.setState({ uidSelected: uid }, () => {
@@ -76,6 +109,9 @@ class UnknownTokens extends React.Component {
     });
   }
 
+  /**
+   * Triggered when a new token is added, then show alert message
+   */
   newTokenSuccess = () => {
     $('#addTokenModal').modal('hide');
     this.setState({ successMessage: 'Token added!'}, () => {
@@ -83,11 +119,21 @@ class UnknownTokens extends React.Component {
     });
   }
 
+  /**
+   * Triggered when user clicks to do a bulk import
+   *
+   * @param {Object} e Event emitted by the click
+   */
   massiveImport = (e) => {
     e.preventDefault();
     $('#addManyTokensModal').modal('show');
   }
 
+  /**
+   * Triggered after success doing a bulk import
+   *
+   * @param {number} count Quantity of tokens that were added
+   */
   massiveImportSuccess = (count) => {
     $('#addManyTokensModal').modal('hide');
     const message = `${count} ${helpers.plural(count, 'token was', 'tokens were')} added!`;

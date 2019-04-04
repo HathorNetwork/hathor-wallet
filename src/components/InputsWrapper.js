@@ -1,6 +1,11 @@
 import React from 'react';
 
 
+/**
+ * Component that wraps the inputs of a token in the Send Tokens screen
+ *
+ * @memberof Components
+ */
 class InputsWrapper extends React.Component {
   constructor(props) {
     super(props);

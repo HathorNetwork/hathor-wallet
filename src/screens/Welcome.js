@@ -3,9 +3,20 @@ import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
 
 
+/**
+ * First screen of the wallet to show a welcome message and brief explanation
+ *
+ * @memberof Screens
+ */
 class Welcome extends React.Component {
+  /**
+   * formValidated {boolean} If required checkbox of form was checked
+   */
   state = { formValidated: false }
 
+  /**
+   * When user clicks the button to start the wallet, then check form and redirect to signin screen
+   */
   getStarted = () => {
     const isValid = this.refs.agreeForm.checkValidity();
     this.setState({ formValidated: !isValid });

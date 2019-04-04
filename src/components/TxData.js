@@ -15,7 +15,17 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Component that renders data of a transaction (used in TransactionDetail and DecodeTx screens)
+ *
+ * @memberof Components
+ */
 class TxData extends React.Component {
+  /**
+   * raw {boolean} if should show raw transaction
+   * children {boolean} if should show children (default is hidden but user can show with a click)
+   * tokens {Array} tokens contained in this transaction
+   */
   state = { raw: false, children: false, tokens: [] };
 
   componentDidMount = () => {
@@ -28,6 +38,9 @@ class TxData extends React.Component {
     }
   }
 
+  /**
+   * Add all tokens of this transaction (inputs and outputs) to the state
+   */
   calculateTokens = () => {
     // Adding transactions tokens to state
     const tokens = [];
@@ -44,6 +57,12 @@ class TxData extends React.Component {
     this.setState({ tokens });
   }
 
+  /**
+   * Checks if token was already added and if it's a known token, then add it
+   *
+   * @param {Array} tokens Array of already added tokens
+   * @param {number} tokenData Represents the index of the token in this transaction
+   */
   checkToken = (tokens, tokenData) => {
     if (tokenData === HATHOR_TOKEN_INDEX) {
       return;
@@ -74,6 +93,11 @@ class TxData extends React.Component {
     }
   }
 
+  /**
+   * Show/hide raw transaction in hexadecimal
+   *
+   * @param {Object} e Event emitted when clicking link
+   */
   toggleRaw = (e) => {
     e.preventDefault();
     this.setState({ raw: !this.state.raw }, () => {
@@ -85,11 +109,23 @@ class TxData extends React.Component {
     });
   }
 
+  /**
+   * Show/hide children of the transaction
+   *
+   * @param {Object} e Event emitted when clicking link
+   */
   toggleChildren = (e) => {
     e.preventDefault();
     this.setState({ children: !this.state.children });
   }
 
+  /**
+   * Method called on copy to clipboard success  
+   * Show alert success message
+   *
+   * @param {string} text Text copied to clipboard
+   * @param {*} result Null in case of error
+   */
   copied = (text, result) => {
     if (result) {
       // If copied with success
@@ -97,6 +133,13 @@ class TxData extends React.Component {
     }
   }
 
+  /**
+   * Get symbol of token from an output gettings its UID from tokenData
+   *
+   * @param {number} tokenData
+   *
+   * @return {string} Token symbol
+   */
   getOutputToken = (tokenData) => {
     if (tokenData === HATHOR_TOKEN_INDEX) {
       return HATHOR_TOKEN_CONFIG.symbol;
@@ -105,6 +148,13 @@ class TxData extends React.Component {
     return this.getSymbol(tokenUID);
   }
 
+  /**
+   * Get symbol of token from UID iterating through possible tokens in the transaction
+   *
+   * @param {string} uid UID of token to get the symbol
+   *
+   * @return {string} Token symbol
+   */
   getSymbol = (uid) => {
     if (uid === HATHOR_TOKEN_CONFIG.uid) {
       return HATHOR_TOKEN_CONFIG.symbol;

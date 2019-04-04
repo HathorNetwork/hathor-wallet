@@ -1,6 +1,11 @@
 import React from 'react';
 
 
+/**
+ * Component that shows a confirm modal with two buttons (close modal, or execute action from props.handleYes)
+ *
+ * @memberof Components
+ */
 const ModalConfirm = (props) => {
   return (
     <div className="modal fade" id="confirmModal" tabIndex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">

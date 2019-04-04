@@ -15,6 +15,11 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Component that renders one token wrapper in the Send Tokens screen
+ *
+ * @memberof Components
+ */
 class SendTokensOne extends React.Component {
   constructor(props) {
     super(props);
@@ -25,11 +30,17 @@ class SendTokensOne extends React.Component {
     this.outputs = [React.createRef()];
     this.uniqueID = _.uniqueId();
 
+    /**
+     * inputsCount {number} How many inputs were filled for this token
+     * outputsCount {number} How many outputs were filled for this token
+     * selected {Object} The config of the selected token
+     * selectedTokens {Array} The list of all tokens already selected on the Send Tokens screen
+     */
     this.state = {
-      inputsCount: 1, // How many inputs were filled for this token
-      outputsCount: 1, // How many outputs were filled for this token
-      selected: null, // The selected token
-      selectedTokens: [] // A list of selected tokens in the Send Tokens screen
+      inputsCount: 1,
+      outputsCount: 1,
+      selected: null,
+      selectedTokens: []
     };
   }
 
@@ -44,19 +55,25 @@ class SendTokensOne extends React.Component {
     }
   }
 
+  /**
+   * Add a new output wrapper for this token
+   */
   addOutput = () => {
     this.outputs.push(React.createRef());
     const newCount = this.state.outputsCount + 1;
     this.setState({ outputsCount: newCount });
   }
 
+  /**
+   * Add a new input wrapper for this token
+   */
   addInput = () => {
     this.inputs.push(React.createRef());
     const newCount = this.state.inputsCount + 1;
     this.setState({ inputsCount: newCount });
   }
 
-  /*
+  /**
    * Iterate through inputs and outputs to add each information typed to the data object
    */
   getData = () => {
@@ -98,7 +115,7 @@ class SendTokensOne extends React.Component {
     return data;
   }
 
-  /*
+  /**
    * Validate inputs and outpus
    * 1. If inputs were not selected, select inputs from outputs amount
    * 2. If amount of selected inputs is larger than outputs amount, we create a change output
@@ -115,6 +132,11 @@ class SendTokensOne extends React.Component {
     return result.data;
   }
 
+  /**
+   * Called when select input checkbox is clicked
+   *
+   * @param {Object} e Event emitted when checkbox is clicked
+   */
   handleCheckboxChange = (e) => {
     const value = e.target.checked;
     if (value) {
@@ -124,6 +146,11 @@ class SendTokensOne extends React.Component {
     }
   }
 
+  /**
+   * Called when selected token is changed
+   *
+   * @param {Object} e Event emitted when select is changed
+   */
   changeSelect = (e) => {
     const selected = this.props.tokens.find((token) => token.uid === e.target.value);
     this.setState({ selected });

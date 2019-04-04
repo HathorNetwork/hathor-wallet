@@ -1,8 +1,18 @@
 import React from 'react';
 
 
+/**
+ * Component that adds a left arrow and a link to go back one page
+ *
+ * @memberof Components
+ */
 class BackButton extends React.Component {
 
+  /**
+   * Called when link is clicked and goes back one page
+   *
+   * @param {Object} e Event emitted when link is clicked
+   */
   goBack = (e) => {
     e.preventDefault();
     this.props.history.goBack();

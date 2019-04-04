@@ -1,15 +1,28 @@
 import React from 'react';
 
 
+/**
+ * Component to choose a password  
+ * Shows two password fields with required pattern and validations
+ *
+ * @memberof Components
+ */
 class PinPasswordWrapper extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * errorMessage {string} Message to be shown when an error happens
+     */
     this.state = {
       errorMessage: '',
     }
   }
 
+  /**
+   * Called when user finish filling the inputs  
+   * Validates the form and call the success message
+   */
   next = () => {
     const isValid = this.refs.passwordForm.checkValidity();
     if (isValid) {

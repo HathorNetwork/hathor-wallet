@@ -17,12 +17,26 @@ const mapDispatchToProps = dispatch => {
 };
 
 
+/**
+ * Screen used when the previous wallet version installed is not compatible with the new version  
+ * So user can reset the wallet, or install the previous version again
+ *
+ * @memberof Screens
+ */
 class WalletVersionError extends React.Component {
+  /**
+   * Called if user clicks the button to do the words backup
+   *
+   * @param {Object} e Event emitted when clicking on the button
+   */
   backupClicked = (e) => {
     e.preventDefault();
     $('#backupWordsModal').modal('show');
   }
 
+  /**
+   * Called when backup of words succeed, then close modal and show success message
+   */
   backupSuccess = () => {
     $('#backupWordsModal').modal('hide');
     wallet.markBackupAsDone();
@@ -30,11 +44,19 @@ class WalletVersionError extends React.Component {
     this.refs.alertSuccess.show(2000);
   }
 
+  /**
+   * Called if user clicks the button to reset the wallet
+   *
+   * @param {Object} e Event emitted when clicking on the button
+   */
   resetClicked = (e) => {
     e.preventDefault();
     $('#confirmResetModal').modal('show');
   }
 
+  /**
+   * Called when reset wallet succeed, then close modal and go to welcome screen
+   */
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
     wallet.resetAllData();

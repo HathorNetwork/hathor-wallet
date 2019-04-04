@@ -2,6 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 
+/**
+ * Component that renders a textarea to get the serialization of a transaction in hexadecimal  
+ * Used in PushTx and DecodeTx screens
+ *
+ * @memberof Components
+ */
 const TxTextInput = (props) => {
   return (
     <div className="d-flex flex-column tx-input-wrapper">

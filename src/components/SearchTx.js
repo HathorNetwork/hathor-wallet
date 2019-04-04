@@ -5,15 +5,31 @@ import transaction from '../utils/transaction';
 import AddressError from '../utils/errors';
 
 
+/**
+ * Component that shows a search input, when user can search for transaction/block ID or an address
+ *
+ * @memberof Components
+ */
 class SearchTx extends React.Component {
+  /**
+   * filtered {boolean} Saves if the list is already filtered
+   */
   state = { filtered: false };
 
+  /**
+   * Called when user types something, so we can capture the 'Enter' and execute search
+   *
+   * @param {Object} e Event emitted when typing
+   */
   handleKeyUp = (e) => {
     if (e.key === 'Enter') {
       this.search();
     }
   }
 
+  /**
+   * Called to execute search when user typed 'Enter' or clicked the icon
+   */
   search = () => {
     const text = this.refs.txSearch.value;
     if (text) {
@@ -46,6 +62,11 @@ class SearchTx extends React.Component {
     }
   }
 
+  /**
+   * Called to execute the API request to the node that searches for an address
+   *
+   * @param {string} address Address to search for
+   */
   searchAddress = (address) => {
     walletApi.getAddressHistory([address], (response) => {
       this.props.newData(response.history);
@@ -53,6 +74,9 @@ class SearchTx extends React.Component {
     });
   }
 
+  /**
+   * When search parameter is invalid shows an error alert
+   */
   showError = () => {
     this.refs.alertError.show(3000);
   }

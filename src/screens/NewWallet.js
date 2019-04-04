@@ -24,12 +24,26 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Screen used to generate a new wallet creating new words
+ * Depending on the state can show:
+ * - Message with checkbox, so user can understand what the creation of words means
+ * - Component with option to backup the words
+ * - Choose password component
+ * - Choose pin component
+ *
+ * @memberof Screens
+ */
 class NewWallet extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * step2 {boolean} If should show step2 component
+     * askPassword {boolean} If should show password component
+     * askPIN {boolean} If should show PIN component
+     */
     this.state = {
-      words: '',
       step2: false,
       askPassword: false,
       askPIN: false,
@@ -52,14 +66,23 @@ class NewWallet extends React.Component {
     }
   }
 
+  /**
+   * User clicked to do backup later, so shows Choose password component
+   */
   backupLater = () => {
     this.setState({ askPassword: true });
   }
 
+  /**
+   * User succeded on choosing a password, then show the Choose PIN component
+   */
   passwordSuccess = () => {
     this.setState({ askPIN: true });
   }
 
+  /**
+   * After choosing a new PIN with success, executes the wallet creation and redirect to the wallet
+   */
   pinSuccess = () => {
     // First we clean what can still be there of a last wallet
     wallet.cleanWallet();
@@ -73,20 +96,32 @@ class NewWallet extends React.Component {
     this.props.history.push('/wallet/');
   }
 
+  /**
+   * After user backed up the words with success we mark it as done and show the component to Choose Password
+   */
   validationSuccess = () => {
     wallet.markBackupAsDone();
     this.refs.alertSuccess.show(1000);
     this.setState({ askPassword: true });
   }
 
+  /**
+   * Going back from Choose Password component to the Step2
+   */
   passwordBack = () => {
     this.setState({ askPassword: false });
   }
 
+  /**
+   * Going back from Choose PIN component to Choose Password
+   */
   pinBack = () => {
     this.setState({ askPIN: false });
   }
 
+  /**
+   * Going back from Step2 component to initial New Wallet component
+   */
   step2Back = () => {
     this.setState({ step2: false });
   }

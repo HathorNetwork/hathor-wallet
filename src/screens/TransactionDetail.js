@@ -5,10 +5,23 @@ import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
 
 
+/**
+ * Shows the detail of a transaction or block
+ *
+ * @memberof Screens
+ */
 class TransactionDetail extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * transaction {Object} Loaded transaction
+     * loaded {boolean} If had success loading transaction from the server
+     * success {boolean} If a transaction was returned from the server or an error ocurred
+     * meta {Object} Metadata of loaded transaction received from the server
+     * spentOutputs {Object} Spent outputs of loaded transaction received from the server
+     * confirmationData {Object} Confirmation data of loaded transaction received from the server
+     */
     this.state = {
       transaction: null,
       meta: null,
@@ -24,6 +37,9 @@ class TransactionDetail extends React.Component {
     this.getConfirmationData();
   }
 
+  /**
+   * Get accumulated weight and confirmation level of the transaction
+   */
   getConfirmationData = () => {
     txApi.getConfirmationData(this.props.match.params.id, (data) => {
       this.setState({ confirmationData: data });
@@ -33,6 +49,9 @@ class TransactionDetail extends React.Component {
     });
   }
 
+  /**
+   * Update state after receiving the transaction response back from the server
+   */
   txReceived(data) {
     if (data.success) {
       this.setState({ transaction: data.tx, meta: data.meta, spentOutputs: data.spent_outputs, loaded: true, success: true });
@@ -41,6 +60,9 @@ class TransactionDetail extends React.Component {
     }
   }
 
+  /**
+   * Get transaction in the server when mounting the page
+   */
   getTx() {
     txApi.getTransaction(this.props.match.params.id, (data) => {
       this.txReceived(data);
@@ -50,9 +72,13 @@ class TransactionDetail extends React.Component {
     });
   }
 
+  /**
+   * When transaction changed in the page we need to load the new one and the new confirmation data
+   */
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.match.params.id !== prevProps.match.params.id) {
       this.getTx();
+      this.getConfirmationData();
     }
   }
 

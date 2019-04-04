@@ -1,14 +1,23 @@
 import React from 'react';
 
 
+/**
+ * Component to show an alert on the bottom right corner of the screen
+ *
+ * @memberof Components
+ */
 class HathorAlert extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * show {boolean} If should show the alert or not
+     */
     this.state = {
       show: false
     }
 
+    // Set timeout timer to be cleared in case of unmount
     this.timer = null;
   }
 
@@ -19,6 +28,11 @@ class HathorAlert extends React.Component {
     }
   }
 
+  /**
+   * Show the alert. Change state and set a new state change for the future
+   *
+   * @param {number} Duration that the alert will appear on the screen (in milliseconds)
+   */
   show = (duration) => {
     this.setState({ show: true });
     this.timer = setTimeout(() => {

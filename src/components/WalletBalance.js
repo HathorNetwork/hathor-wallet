@@ -13,25 +13,45 @@ const mapStateToProps = (state) => {
   return { selectedToken: state.selectedToken, tokens: state.tokens };
 };
 
+/**
+ * Component that render the balance of the selected token
+ *
+ * @memberof Components
+ */
 class WalletBalance extends React.Component {
 
+  /**
+   * Called when user clicks on the info icon of the token, then opens the modal
+   */
   infoClicked = () => {
     $('#tokenInfoModal').modal('show');
   }
 
+  /**
+   * Called when user clicks to unregister the token, then opens the modal
+   */
   unregisterClicked = () => {
     $('#confirmModal').modal('show');
   }
 
+  /**
+   * When user confirms the unregister of the token, hide the modal and execute it
+   */
   unregisterConfirmed = () => {
     $('#confirmModal').modal('hide');
     tokens.unregisterToken(this.props.selectedToken);
   }
 
+  /**
+   * Called when user clicks to edit the token, then  opens the modal
+   */
   editClicked = () => {
     $('#editTokenModal').modal('show');
   }
 
+  /**
+   * When user finish editing the token, closes the modal
+   */
   editSuccess = () => {
     $('#editTokenModal').modal('hide');
   }

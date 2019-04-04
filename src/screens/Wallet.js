@@ -30,8 +30,17 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Main screen of the wallet
+ *
+ * @memberof Screens
+ */
 class Wallet extends React.Component {
-  state = { balance: null, backupDone: true, successMessage: '' };
+  /**
+   * backupDone {boolean} if words backup was already done
+   * successMessage {string} Message to be shown on alert success
+   */
+  state = { backupDone: true, successMessage: '' };
 
   componentDidMount = () => {
     this.setState({
@@ -39,11 +48,19 @@ class Wallet extends React.Component {
     });
   }
 
+  /**
+   * Triggered when user clicks to do the backup of words, then opens backup modal
+   *
+   * @param {Object} e Event emitted when user click
+   */
   backupClicked = (e) => {
     e.preventDefault();
     $('#backupWordsModal').modal('show');
   }
 
+  /**
+   * Called when the backup of words was done with success, then close the modal and show alert success
+   */
   backupSuccess = () => {
     $('#backupWordsModal').modal('hide');
     wallet.markBackupAsDone();
@@ -53,6 +70,9 @@ class Wallet extends React.Component {
     });
   }
 
+  /**
+   * Called when a new token was added with success, then close the modal and show alert success
+   */
   newTokenSuccess = () => {
     $('#addTokenModal').modal('hide');
     this.setState({ successMessage: 'Token added!' }, () => {
@@ -60,6 +80,11 @@ class Wallet extends React.Component {
     });
   }
 
+  /**
+   * Triggered when user clicks to do the add a token, then opens the new token modal
+   *
+   * @param {Object} e Event emitted when user click
+   */
   addTokenClicked = (e) => {
     e.preventDefault()
     $('#addTokenModal').modal('show');
@@ -116,7 +141,7 @@ class Wallet extends React.Component {
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <ModalAddToken success={this.newTokenSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        <TokenBar {...this.props} balance={this.state.balance} addToken={this.addTokenClicked} />
+        <TokenBar {...this.props} addToken={this.addTokenClicked} />
       </div>
     );
   }

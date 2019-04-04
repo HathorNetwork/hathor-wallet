@@ -4,21 +4,36 @@ import $ from 'jquery';
 import wallet from '../utils/wallet';
 
 
+/**
+ * Screen used to choose a passphrase for your wallet
+ *
+ * @memberof Screens
+ */
 class ChoosePassphrase extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * errorMessage {string} Message to show when error happens on the form
+     */
     this.state = {
       errorMessage: ''
     }
   }
 
+  /**
+   * Method called after confirming modal that changes addresses in the wallet and redirects to the main wallet screen
+   */
   handlePassphrase = () => {
     $('#confirmModal').modal('hide');
     wallet.addPassphrase(this.refs.passphrase.value, this.refs.pin.value, this.refs.password.value);
     this.props.history.push('/wallet/');
   }
 
+  /**
+   * Method called when user clicks in the button to change the passphrase, then a modal opens to confirm the action
+   * Validates if all form requirements are okay
+   */
   addClicked = () => {
     const isValid = this.refs.passphraseForm.checkValidity();
     if (isValid) {
