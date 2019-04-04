@@ -9,7 +9,22 @@ import WebSocketHandler from '../WebSocketHandler';
 import BackButton from '../components/BackButton';
 
 
+/**
+ * Component that renders a list of transactions or blocks, depending on the type
+ *
+ * @memberof Components
+ */
 class Transactions extends React.Component {
+  /**
+   * transactions {Array} array of transactions or blocks to be listed
+   * firstHash {string} ID of the first element of the list (used in the pagination)
+   * firstTimestamp {number} timestamp of the first element of the list (used in the pagination)
+   * lastHash {string} ID of the last element of the list (used in the pagination)
+   * lastTimestamp {number} timestamp of the last element of the list (used in the pagination)
+   * loaded {boolean} if the elements are already loaded
+   * hasAfter {boolean} if has more elements in the next page (if can go next on pagination)
+   * hasBefora {boolean} if has more elements in the last page (if can go previous on pagination)
+   */
   state = {
     transactions: [],
     firstHash: null,
@@ -31,12 +46,22 @@ class Transactions extends React.Component {
     WebSocketHandler.removeListener('network', this.handleWebsocket);
   }
 
+  /**
+   * Called when a new element arrives from the websocket
+   *
+   * @param {Object} wsData Object with type of data and the element
+   */
   handleWebsocket = (wsData) => {
     if (wsData.type === 'network:new_tx_accepted') {
       this.updateListWs(wsData);
     }
   }
 
+  /**
+   * Update the list rendered with new element that arrived from websocket
+   *
+   * @param {Object} tx Object with data from element
+   */
   updateListWs = (tx) => {
     // We only add new tx/blocks if it's the first page
     if (!this.state.hasBefore && ((tx.is_block && this.props.type === 'block') || (!tx.is_block && this.props.type === 'tx'))) {
@@ -54,6 +79,13 @@ class Transactions extends React.Component {
     }
   }
 
+  /**
+   * Called after data is fetched from the server, to update component state
+   *
+   * @param {Object} data Object with 'transactions' key
+   * @param {boolean} first If it was the first call
+   * @param {string} page if was called 'previous' or 'next' page (can be '')
+   */
   handleDataFetched = (data, first, page) => {
     // Handle differently if is the first GET response we receive
     // page indicates if was clicked 'previous' or 'next'
@@ -87,6 +119,14 @@ class Transactions extends React.Component {
     this.setState({ transactions: data.transactions, loaded: true, firstHash, lastHash, firstTimestamp, lastTimestamp, hasAfter, hasBefore });
   }
 
+  /**
+   * Get data from server
+   *
+   * @param {boolean} first If it was the first call
+   * @param {number} timestamp Timestamp to be used as parameter on the search (can be null)
+   * @param {string} hash Hash to used as parameter on the search (can be '')
+   * @param {string} page if was called 'previous' or 'next' page (can be '')
+   */
   getData = (first, timestamp, hash, page) => {
     txApi.getTransactions(this.props.type, TX_COUNT, timestamp, hash, page, (data) => {
       this.handleDataFetched(data, first, page);
@@ -96,16 +136,31 @@ class Transactions extends React.Component {
     });
   }
 
+  /**
+   * Called when user clicked on the 'Previous' button, then get new data
+   *
+   * @param {Object} e Event emitted by the button click
+   */
   previousClicked = (e) => {
     e.preventDefault();
     this.getData(false, this.state.firstTimestamp, this.state.firstHash, 'previous');
   }
 
+  /**
+   * Called when user clicked on the 'Next' button, then get new data
+   *
+   * @param {Object} e Event emitted by the button click
+   */
   nextClicked = (e) => {
     e.preventDefault();
     this.getData(false, this.state.lastTimestamp, this.state.lastHash, 'next');
   }
 
+  /**
+   * Called when user searches for an address and received new data
+   *
+   * @param {Object} data New data to be rendered on the page
+   */
   newData = (data) => {
     // Data received from Search tx when searching by address
     const transactions = []
@@ -124,6 +179,9 @@ class Transactions extends React.Component {
     this.handleDataFetched({ transactions }, true, '');
   }
 
+  /**
+   * Called when user undo a search and want to see initial data again
+   */
   resetData = () => {
     this.getData(true, null, null, '');
   }

@@ -3,7 +3,15 @@ import $ from 'jquery';
 import tokens from '../utils/tokens';
 
 
+/**
+ * Component that shows a modal to add many unknown tokens to the wallet (bulk import)
+ *
+ * @memberof Components
+ */
 class ModalAddManyTokens extends React.Component {
+  /**
+   * errorMessage {string} Message that will be shown to the user in case of error
+   */
   state = { errorMessage: '' };
 
   componentDidMount = () => {
@@ -22,6 +30,12 @@ class ModalAddManyTokens extends React.Component {
     $('#addManyTokensModal').off();
   }
 
+  /**
+   * Method called when user clicks the button to add the tokens  
+   * Validates that all configuration strings written are valid
+   *
+   * @param {Object} e Event emitted when user clicks the button
+   */
   handleAdd = (e) => {
     e.preventDefault();
     const configs = this.refs.configs.value;

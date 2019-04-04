@@ -12,7 +12,7 @@ import dateFormatter from './date';
 import _ from 'lodash';
 
 /**
- * We use localStorage and Redux to save data
+ * We use localStorage and Redux to save data.
  * In localStorage we have the following keys (prefixed by wallet:)
  * - data: object with data from the wallet including (all have full description in the reducers file)
  *   . historyTransactions: Object of transactions indexed by tx_id
@@ -37,7 +37,6 @@ import _ from 'lodash';
  *
  * @namespace Wallet
  */
-
 const wallet = {
   /**
    * Validate if can generate the wallet with those parameters and then, call to generate it

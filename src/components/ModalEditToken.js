@@ -2,6 +2,12 @@ import React from 'react';
 import tokens from '../utils/tokens';
 
 
+/**
+ * Component that shows a modal with a form to edit a token  
+ * User can edit the name and symbol
+ *
+ * @memberof Components
+ */
 class ModalEditToken extends React.Component {
   constructor(props) {
     super(props);
@@ -9,6 +15,9 @@ class ModalEditToken extends React.Component {
     this.shortName = React.createRef();
     this.symbol = React.createRef();
 
+    /**
+     * formValidated {boolean} If form is valid
+     */
     this.state = {
       formValidated: false
     };
@@ -26,11 +35,19 @@ class ModalEditToken extends React.Component {
     }
   }
 
+  /**
+   * Update input of name and symbol with the selected token to edit
+   */
   updateInputs = () => {
     this.shortName.current.value = this.props.token.name;
     this.symbol.current.value = this.props.token.symbol;
   }
 
+  /**
+   * Called when user clicks to save the new data, then validates the data and calls a method passed in props
+   *
+   * @param {Object} e Event emitted when button is clicked
+   */
   handleSave = (e) => {
     e.preventDefault();
     const isValid = this.refs.formEditToken.checkValidity();

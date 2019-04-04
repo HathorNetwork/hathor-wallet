@@ -8,6 +8,12 @@ const HEARTBEAT_TMO = 30000;     // 30s
 const WS_READYSTATE_READY = 1;
 
 
+/**
+ * Handles websocket connections and message transmission
+ *
+ * @class
+ * @name WebSocketHandler
+ */
 class WS extends EventEmitter {
   constructor(){
     if (!WS.instance) {
@@ -24,6 +30,9 @@ class WS extends EventEmitter {
     return WS.instance;
   }
 
+  /**
+   * Start websocket object and its methods
+   */
   setup = () => {
     if (this.started) {
       return;
@@ -40,12 +49,20 @@ class WS extends EventEmitter {
     this.ws.onclose = this.onClose;
   }
 
+  /**
+   * Handle message receiving from websocket
+   *
+   * @param {Object} evt Event that has data (evt.data) sent in the websocket
+   */
   onMessage = evt => {
     const message = JSON.parse(evt.data)
     const _type = message.type.split(':')[0]
     this.emit(_type, message)
   }
 
+  /**
+   * Method called when websocket connection is opened
+   */
   onOpen = () => {
     if (this.connected === false) {
       // If was not connected  we need to reload data
@@ -58,6 +75,9 @@ class WS extends EventEmitter {
     wallet.subscribeAllAddresses();
   }
 
+  /**
+   * Method called when websocket connection is closed
+   */
   onClose = () => {
     this.started = false;
     this.connected = false;
@@ -66,10 +86,20 @@ class WS extends EventEmitter {
     clearInterval(this.heartbeat);
   }
 
+  /**
+   * Method called when an error happend on websocket
+   *
+   * @param {Object} evt Event that contains the error
+   */
   onError = evt => {
     console.log('ws error', evt);
   }
 
+  /**
+   * Method called to send a message to the server
+   *
+   * @param {string} msg Message to be sent to the server (usually JSON stringified)
+   */
   sendMessage = (msg) => {
     if (!this.started) {
       this.setIsOnline(false);
@@ -86,11 +116,19 @@ class WS extends EventEmitter {
     }
   }
 
+  /**
+   * Ping method to check if server is still alive
+   *
+   */
   sendPing = () => {
     const msg = JSON.stringify({'type': 'ping'})
     this.sendMessage(msg)
   }
 
+  /**
+   * Method called to end a websocket connection
+   *
+   */
   endConnection = () => {
     this.setIsOnline(undefined);
     this.started = false;
@@ -101,6 +139,11 @@ class WS extends EventEmitter {
     }
   }
 
+  /**
+   * Set in redux if websocket is online
+   *
+   * @param {*} value Can be true|false|undefined
+   */
   setIsOnline = (value) => {
     // Save in redux
     // Need also to keep the value in 'this' because I was accessing redux store

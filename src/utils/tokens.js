@@ -7,12 +7,14 @@ import buffer from 'buffer';
 import { HATHOR_TOKEN_CONFIG, TOKEN_CREATION_MASK, TOKEN_MINT_MASK, TOKEN_MELT_MASK, DECIMAL_PLACES } from '../constants';
 
 
-/*
+/**
+ * Methods to create and handle tokens
+ *
  * @namespace Tokens
  */
 
 const tokens = {
-  /*
+  /**
    * Create a token UID from the tx_id and index that the tx is spending to create the token
    *
    * @param {string} txID Transaction id in hexadecimal of the output that is being spent when creating the token
@@ -30,7 +32,7 @@ const tokens = {
     return crypto.Hash.sha256(util.buffer.concat(arr));
   },
 
-  /*
+  /**
    * Add a new token to the localStorage and redux
    *
    * @param {string} uid Token uid
@@ -48,7 +50,7 @@ const tokens = {
     store.dispatch(newTokens({tokens, uid: uid}));
   },
 
-  /*
+  /**
    * Edit token name and symbol. Save in localStorage and redux
    *
    * @param {string} uid Token uid to be edited
@@ -67,7 +69,7 @@ const tokens = {
     store.dispatch(newTokens({tokens: editedTokens, uid}));
   },
 
-  /*
+  /**
    * Unregister token from localStorage and redux
    *
    * @param {string} uid Token uid to be unregistered
@@ -82,7 +84,7 @@ const tokens = {
     store.dispatch(newTokens({tokens: filteredTokens, uid: HATHOR_TOKEN_CONFIG.uid}));
   },
 
-  /*
+  /**
    * Validation token by configuration string
    * Check if string is valid and, if uid is passed, check also if uid matches
    *
@@ -111,7 +113,7 @@ const tokens = {
     }
   },
 
-  /*
+  /**
    * Validation token by uid. Check if already exist
    *
    * @param {string} uid Uid to check for existence
@@ -130,7 +132,7 @@ const tokens = {
     return {success: true};
   },
 
-  /*
+  /**
    * Returns the saved tokens in localStorage
    *
    * @return {Object} Array of objects ({'name', 'symbol', 'uid'}) of saved tokens
@@ -148,7 +150,7 @@ const tokens = {
     return dataToken;
   },
 
-  /*
+  /**
    * Updates the saved tokens in localStorage
    *
    * @param {Object} Array of objects ({'name', 'symbol', 'uid'}) with new tokens
@@ -161,7 +163,7 @@ const tokens = {
     localStorage.setItem('wallet:tokens', JSON.stringify(newTokens));
   },
 
-  /*
+  /**
    * Returns token configuration string
    *
    * @param {string} uid Token uid
@@ -180,7 +182,7 @@ const tokens = {
     return `[${partialConfig}:${checksum.toString('hex')}]`;
   },
 
-  /*
+  /**
    * Returns token from configuration string
    * Configuration string has the following format:
    * [name:symbol:uid:checksum]
@@ -218,7 +220,7 @@ const tokens = {
     return {uid, name, symbol};
   },
 
-  /*
+  /**
    * Indicates if a token with this uid was already added in the wallet
    *
    * @param {string} uid UID of the token to search
@@ -238,7 +240,7 @@ const tokens = {
     return null;
   },
 
-  /*
+  /**
    * Create the tx for the new token in the backend and creates a new mint and melt outputs to be used in the future
    *
    * @param {Object} input {'tx_id', 'index', 'token'} Hathor input to be spent to generate the token
@@ -296,7 +298,7 @@ const tokens = {
     return promise;
   },
 
-  /*
+  /**
    * Mint new tokens
    *
    * @param {string} txId Hash of the transaction to be used to mint tokens
@@ -346,7 +348,7 @@ const tokens = {
     return promise;
   },
 
-  /*
+  /**
    * Filter an array of tokens removing one element
    *
    * @param {Object} tokens Array of token configs
@@ -361,7 +363,7 @@ const tokens = {
     return tokens.filter((token) => token.uid !== toRemove.uid);
   },
 
-  /*
+  /**
    * Gets the token index to be added to the tokenData in the output from tx
    *
    * @param {Object} tokens Array of token configs

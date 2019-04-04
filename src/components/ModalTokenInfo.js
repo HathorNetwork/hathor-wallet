@@ -12,7 +12,16 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Component that shows a modal with information of a token (uid, name, symbol, and configuration string)
+ *
+ * @memberof Components
+ */
 class ModalTokenInfo extends React.Component {
+  /**
+   * errorMessage {string} Message that will be shown to the user in case of error
+   * token {Object} Token config to show the info
+   */
   state = { successMessage: '', token: null };
   timer = null;
 
@@ -28,16 +37,27 @@ class ModalTokenInfo extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+    // If changed token should update the modal
     if (prevProps.selectedToken !== this.props.selectedToken) {
       this.getToken();
     }
   }
 
+  /**
+   * Get token config from Redux and save in the state
+   */
   getToken = () => {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
     this.setState({ token });
   }
 
+  /**
+   * Method called on copy to clipboard success  
+   * Show alert success message
+   *
+   * @param {string} text Text copied to clipboard
+   * @param {*} result Null in case of error
+   */
   copied = (text, result) => {
     if (result) {
       // If copied with success
@@ -48,6 +68,9 @@ class ModalTokenInfo extends React.Component {
     }
   }
 
+  /**
+   * Get configuration string for the token
+   */
   getTokenConfigurationString = () => {
     return tokens.getConfigurationString(this.state.token.uid, this.state.token.name, this.state.token.symbol);
   }

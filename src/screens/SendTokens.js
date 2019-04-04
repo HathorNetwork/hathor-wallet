@@ -18,6 +18,12 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Screen used to send tokens to another wallet.  
+ * Can send more than one token in the same transaction.
+ *
+ * @memberof Screens
+ */
 class SendTokens extends React.Component {
   constructor(props) {
     super(props);
@@ -25,6 +31,12 @@ class SendTokens extends React.Component {
     // Holds the children components references
     this.references = [React.createRef()];
 
+    /**
+     * errorMessage {string} Message to be shown in case of error in form
+     * loading {boolean} If should show spinner while waiting for server response
+     * pin {string} PIN that user writes in the modal
+     * txTokens {Array} Array of tokens configs already added by the user (start with only hathor)
+     */
     this.state = {
       errorMessage: '',
       loading: false,
@@ -34,6 +46,11 @@ class SendTokens extends React.Component {
   }
 
 
+  /**
+   * Check if form is valid
+   *
+   * @return {boolean}
+   */
   validateData = () => {
     const isValid = this.refs.formSendTokens.checkValidity();
     if (isValid === false) {
@@ -44,6 +61,12 @@ class SendTokens extends React.Component {
     return isValid;
   }
 
+  /**
+   * Get inputs and outputs data from child components  
+   * Each child component holds inputs/outputs for one token
+   *
+   * @return {Object} Object holding all inputs and outputs {'inputs': [...], 'outputs': [...]}
+   */
   getData = () => {
     let data = {'inputs': [], 'outputs': []};
     for (const ref of this.references) {
@@ -58,6 +81,10 @@ class SendTokens extends React.Component {
     return data;
   }
 
+  /**
+   * Method executed when user validates its PIN on the modal  
+   * Checks if the form is valid, get data from child components, complete the transaction and execute API request
+   */
   send = () => {
     $('#pinModal').modal('toggle');
     const isValid = this.validateData();
@@ -96,14 +123,29 @@ class SendTokens extends React.Component {
     }
   }
 
+  /**
+   * Update PIN state when changing it on the PIN modal
+   *
+   * @param {Object} e Event when changing PIN text
+   */
   handleChangePin = (e) => {
     this.setState({ pin: e.target.value });
   }
 
+  /**
+   * Update class state
+   *
+   * @param {Object} newState New state for the class
+   */
   updateState = (newState) => {
     this.setState(newState);
   }
 
+  /**
+   * Executed when user clicks to add another token to this transaction  
+   * Checks if still have a known token available that is not selected yet  
+   * Create a new child reference with this new token
+   */
   addAnotherToken = () => {
     if (this.state.txTokens.length === this.props.tokens.length) {
       this.setState({ errorMessage: 'All your tokens were already added' });
@@ -122,12 +164,24 @@ class SendTokens extends React.Component {
     this.setState({ txTokens });
   }
 
+  /**
+   * Called when the select of a new token has changed  
+   * Used to change the selects in all other child components because the selected token can't be selected anymore
+   *
+   * @param {Object} selected Config of token that was selected {'name', 'symbol', 'uid'}
+   * @param {number} index Index of the child component
+   */
   tokenSelectChange = (selected, index) => {
     let txTokens = [...this.state.txTokens];
     txTokens[index] = selected;
     this.setState({ txTokens });
   }
 
+  /**
+   * Called when user removes a child component (removes a token)
+   *
+   * @param {number} index Index of the child component
+   */
   removeToken = (index) => {
     let txTokens = [...this.state.txTokens];
     txTokens.splice(index, 1);

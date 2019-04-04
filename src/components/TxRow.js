@@ -3,8 +3,18 @@ import dateFormatter from '../utils/date';
 import { withRouter } from "react-router-dom";
 
 
+/**
+ * Component that renders the row of the list of transactions/blocks in the explorer
+ *
+ * @memberof Components
+ */
 class TxRow extends React.Component {
 
+  /**
+   * When clicking in a row we redirect to the TransactionDetail screen
+   *
+   * @param {string} hash ID of the transaction clicked
+   */
   handleClickTr = (hash) => {
     this.props.history.push(`/transaction/${hash}`);
   }

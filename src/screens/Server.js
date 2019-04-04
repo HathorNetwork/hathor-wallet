@@ -6,10 +6,21 @@ import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
 
 
+/**
+ * Screen to change the server that the wallet is connected
+ *
+ * @memberof Screens
+ */
 class Server extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * errorMessage {string} Message to be shown in case of error in form
+     * loading {boolean} If should show spinner while waiting for server response
+     * newServer {boolean} If user selected checkbox that he wants to set a new server
+     * selectedValue {string} Server selected from the user
+     */
     this.state = {
       newServer: false,
       errorMessage: '',
@@ -24,6 +35,10 @@ class Server extends React.Component {
     });
   }
 
+  /**
+   * Called after user click the button to change the server  
+   * Check if form is valid and then reload that from new server
+   */
   serverSelected = () => {
     this.setState({ errorMessage: '' });
     if ((this.state.newServer && this.refs.newServer.value === '') || (!this.state.newServer && this.state.selectedValue === '')) {
@@ -54,6 +69,11 @@ class Server extends React.Component {
     });
   }
 
+  /**
+   * Update state if user wants to choose a new server or one of the default options
+   *
+   * @param {Object} e Event of checkbox change
+   */
   handleCheckboxChange = (e) => {
     const value = e.target.checked;
     this.setState({ newServer: value });
@@ -64,6 +84,11 @@ class Server extends React.Component {
     }
   }
 
+  /**
+   * Update state of the selected server
+   *
+   * @param {Object} e Event of select change
+   */
   handleSelectChange = (e) => {
     this.setState({ selectedValue: DEFAULT_SERVERS[e.target.value] });
   }

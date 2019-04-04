@@ -1,6 +1,11 @@
 import React from 'react';
 
 
+/**
+ * Component that shows an input for the PIN with the regex pattern
+ *
+ * @memberof Components
+ */
 class PinInput extends React.Component {
   render() {
     return (

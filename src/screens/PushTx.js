@@ -3,9 +3,24 @@ import TxTextInput from '../components/TxTextInput';
 import txApi from '../api/txApi';
 
 
+/**
+ * Allow the user to push a transaction to the network from its hexadecimal serialization form
+ *
+ * @memberof Screens
+ */
 class PushTx extends React.Component {
+  /**
+   * errorMessage {string} Message to be shown in case of error in form
+   * success {boolean} If push transaction replied success
+   * canForce {boolean} If push transaction response allowed to force next request
+   * force {boolean} If user decided to force this push
+   * dataToPush {string} Text to push in the input
+   */
   state = { success: false, errorMessage: null, canForce: false, force: false, dataToPush: ''}
 
+  /**
+   * Called when user clicks on the 'PushTx' button, so we call the API
+   */
   buttonClicked = () => {
     this.setState({ success: false });
     txApi.pushTx(this.state.dataToPush, this.state.force, (data) => {
@@ -20,10 +35,20 @@ class PushTx extends React.Component {
     });
   }
 
+  /**
+   * Update the force state when user click on the 'Force' checkbox
+   *
+   * @param {Object} e Event called when changing checkbox state
+   */
   handleCheckboxChange = (e) => {
     this.setState({ force: e.target.checked });
   }
 
+  /**
+   * Update the data state when user changes the textarea text
+   *
+   * @param {Object} e Event called when changing text
+   */
   handleChangeData = (e) => {
     this.setState({ dataToPush: e.target.value });
   }

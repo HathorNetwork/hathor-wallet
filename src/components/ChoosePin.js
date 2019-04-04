@@ -11,7 +11,18 @@ const mapDispatchToProps = dispatch => {
 };
 
 
+/**
+ * Component to choose a PIN  
+ * Shows two PIN fields with required pattern and validations
+ *
+ * @memberof Components
+ */
 class ChoosePin extends React.Component {
+  /**
+   * Called when input PIN changes the value
+   *
+   * @param {string} New value in input
+   */
   handleChange = (value) => {
     this.props.updatePin(value);
   }

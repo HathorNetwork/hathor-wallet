@@ -3,9 +3,24 @@ import { CONFIRM_RESET_MESSAGE } from '../constants';
 import wallet from '../utils/wallet';
 
 
+/**
+ * Component that shows a modal to ask form confirmation data to reset the wallet  
+ * Asks for the password and for the user to write a sentence saying that really wants to reset
+ *
+ * @memberof Components
+ */
 class ModalResetAllData extends React.Component {
+  /**
+   * errorMessage {string} Message to be shown to the user in case of error in the form
+   */
   state = { errorMessage: '' };
 
+  /**
+   * Method to be called when user clicks the button to confirm  
+   * Validates the form and then calls a method from props to indicate success
+   *
+   * @param {Object} e Event emitted when button is clicked
+   */
   handleConfirm = (e) => {
     e.preventDefault();
     if (this.refs.formConfirm.checkValidity() === false) {

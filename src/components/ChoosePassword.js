@@ -12,7 +12,18 @@ const mapDispatchToProps = dispatch => {
 };
 
 
+/**
+ * Component to choose a password  
+ * Shows two password fields with required pattern and validations
+ *
+ * @memberof Components
+ */
 class ChoosePassword extends React.Component {
+  /**
+   * Called when input password changes the value
+   *
+   * @param {string} New value in input
+   */
   handleChange = (value) => {
     this.props.updatePassword(value);
   }

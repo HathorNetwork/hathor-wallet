@@ -5,11 +5,22 @@ import logo from '../assets/images/hathor-white-logo.png';
 import Version from '../components/Version';
 
 
+/**
+ * Screen that appears when the API version of the connected server is not valid
+ *
+ * @memberof Screens
+ */
 class VersionError extends React.Component {
+  /**
+   * Called when user clicks to Try Again, then check the API version again
+   */
   versionUpdated = () => {
     version.checkApiVersion();
   }
 
+  /**
+   * Called when user clicks to Change Server, then redirects to change server screen
+   */
   changeServer = () => {
     this.props.history.push('/server/');
   }

@@ -2,6 +2,11 @@ import React from 'react';
 import ReactPaginate from 'react-paginate';
 
 
+/**
+ * Component to show a pagination
+ *
+ * @memberof Components
+ */
 class HathorPaginate extends React.Component {
   render() {
     return (

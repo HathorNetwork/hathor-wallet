@@ -3,6 +3,11 @@ import logo from '../assets/images/hathor-logo.png';
 import BackButton from '../components/BackButton';
 
 
+/**
+ * Screen that shows 404 error message to the user
+ *
+ * @memberof Screens
+ */
 const Page404 = (props) => {
   return (
     <div className="outside-content-wrapper">

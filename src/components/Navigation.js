@@ -5,6 +5,11 @@ import Version from './Version';
 import ServerStatus from './ServerStatus';
 
 
+/**
+ * Component that shows a navigation bar with the menu options
+ *
+ * @memberof Components
+ */
 class Navigation extends React.Component {
   render() {
     return (

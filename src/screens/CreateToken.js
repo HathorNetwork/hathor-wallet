@@ -10,7 +10,6 @@ import ModalPin from '../components/ModalPin'
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 
-
 const mapStateToProps = (state) => {
   return {
     historyTransactions: state.historyTransactions,
@@ -18,6 +17,11 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Create a new token
+ *
+ * @memberof Screens
+ */
 class CreateToken extends React.Component {
   constructor(props) {
     super(props);
@@ -28,6 +32,11 @@ class CreateToken extends React.Component {
     this.txId = React.createRef();
     this.index = React.createRef();
 
+    /**
+     * errorMessage {string} Message to show when error happens on the form
+     * loading {boolean} While waiting for server response, loading is true and show a spinner
+     * pin {string} PIN that user writes in the modal
+     */
     this.state = {
       errorMessage: '',
       loading: false,
@@ -35,10 +44,18 @@ class CreateToken extends React.Component {
     };
   }
 
+  /**
+   * Method used to save what user wrote on PIN input in the modal
+   *
+   * @param {Object} e Event for the PIN input change
+   */
   handleChangePin = (e) => {
     this.setState({ pin: e.target.value });
   }
 
+  /**
+   * Validates if the create token form is valid
+   */
   formValid = () => {
     const isValid = this.refs.formCreateToken.checkValidity();
     if (isValid) {
@@ -99,6 +116,9 @@ class CreateToken extends React.Component {
     return {'input': input, 'output': outputChange};
   }
 
+  /**
+   * Method execute after user verifies the action in the PIN modal and closes the modal and executes token creation
+   */
   createToken = () => {
     $('#pinModal').modal('hide');
     if (!this.formValid()) {
@@ -131,6 +151,11 @@ class CreateToken extends React.Component {
     });
   }
 
+  /**
+   * Shows/hides address field depending on the checkbox click
+   *
+   * @param {Object} e Event for the address checkbox input change
+   */
   handleCheckboxAddress = (e) => {
     const value = e.target.checked;
     if (value) {
@@ -140,6 +165,11 @@ class CreateToken extends React.Component {
     }
   }
 
+  /**
+   * Shows/hides input field depending on the checkbox click
+   *
+   * @param {Object} e Event for the inputWrapper checkbox input change
+   */
   handleCheckboxInput = (e) => {
     const value = e.target.checked;
     if (value) {

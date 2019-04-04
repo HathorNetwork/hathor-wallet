@@ -3,15 +3,29 @@ import ModalBackupWords from '../components/ModalBackupWords';
 import $ from 'jquery';
 
 
+/**
+ * Component that shows the step2 of a new wallet with a warning message and possibility to do the words backup now or later
+ *
+ * @memberof Components
+ */
 class NewWalletStep2 extends React.Component {
+  /**
+   * When user decides to do the backup later
+   */
   backupLater = () => {
     this.props.backupLater();
   }
 
+  /**
+   * When user decides to do the backup now (opens backup modal)
+   */
   backupNow = () => {
     $('#backupWordsModal').modal('show');
   }
 
+  /**
+   * When user has success doing the validation backup
+   */
   validationSuccess = () => {
     $('#backupWordsModal').on('hidden.bs.modal', (e) => {
       this.props.validationSuccess();

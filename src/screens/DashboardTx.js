@@ -8,7 +8,16 @@ import WebSocketHandler from '../WebSocketHandler';
 import BackButton from '../components/BackButton';
 
 
+/**
+ * Dashboard screen that show some blocks and some transactions
+ *
+ * @memberof Screens
+ */
 class DashboardTx extends React.Component {
+  /**
+   * transactions {Array} Array of transactions to show in the dashboard
+   * blocks {Array} Array of blocks to show in the dashboard
+   */
   state = { transactions: [], blocks: [] };
 
   componentDidMount = () => {
@@ -20,6 +29,9 @@ class DashboardTx extends React.Component {
     WebSocketHandler.removeListener('network', this.handleWebsocket);
   }
 
+  /**
+   * Get initial data to fill the screen and update the state with this data
+   */
   getInitialData = () => {
     txApi.getDashboardTx(DASHBOARD_BLOCKS_COUNT, DASHBOARD_TX_COUNT, (data) => {
       this.updateData(data.transactions, data.blocks);
@@ -29,12 +41,18 @@ class DashboardTx extends React.Component {
     });
   }
 
+  /**
+   * Handle websocket message to see if should update the list
+   */
   handleWebsocket = (wsData) => {
     if (wsData.type === 'network:new_tx_accepted') {
       this.updateListWs(wsData);
     }
   }
 
+  /**
+   * Update list because a new element arrived
+   */
   updateListWs = (tx) => {
     if (tx.is_block) {
       let blocks = this.state.blocks;
@@ -53,18 +71,26 @@ class DashboardTx extends React.Component {
     }
   }
 
+  /**
+   * Update state data for transactions and blocks
+   */
   updateData = (transactions, blocks) => {
     this.setState({ transactions, blocks });
   }
 
+  /**
+   * Go to specific transaction or block page after clicking on the link
+   */
   goToList = (e, to) => {
     e.preventDefault();
     this.props.history.push(to);
   }
 
+  /**
+   * Reload data after search for address was executed  
+   * Must separate into transactions and blocks
+   */
   newData = (data) => {
-    // Data received when searching for address
-    // Should separate into transactions and blocks
     const transactions = [];
     const blocks = [];
     for (const tx of data) {
@@ -77,6 +103,10 @@ class DashboardTx extends React.Component {
     this.updateData(transactions, blocks);
   }
 
+  /**
+   * Reset data loading initial data  
+   * Executed when searching 'empty' after a previous filter was done
+   */
   resetData = () => {
     this.getInitialData();
   }

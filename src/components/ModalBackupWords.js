@@ -20,10 +20,24 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Component that shows a modal to do backup of words  
+ * If user is already inside the wallet asks for the user password
+ *
+ * @memberof Components
+ */
 class ModalBackupWords extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * errorMessage {string} Message to be shown to the user in case of error in the form
+     * passwordSuccess {boolean} If user wrote the correct password
+     * showValidation {boolean} If should show validation component
+     * passwordFormValidated {boolean} If password form is valid or not
+     * wordsValidation {Array} Array of selected words to be used to validate the backup
+     * chosenWords {Array} Array of words that user selected in the order he selected
+     */
     this.state = {
       errorMessage: '',
       passwordSuccess: false,
@@ -57,6 +71,11 @@ class ModalBackupWords extends React.Component {
     $('#backupWordsModal').off();
   }
 
+  /**
+   * Called when the user writes the password, so we can decrypt the saved words and show to him
+   *
+   * @param {Object} e Event emitted when button is clicked
+   */
   handlePassword = (e) => {
     e.preventDefault();
     if (this.refs.formPassword.checkValidity() === false) {
@@ -74,11 +93,18 @@ class ModalBackupWords extends React.Component {
     }
   }
 
+  /**
+   * Called when user clicks the button saying that he has saved the words already  
+   * So we select some words to do the validation and show validation component in the modal
+   */
   handleWordsSaved = () => {
     const wordsValidation = _.shuffle(this.props.words.split(' ')).slice(0, WORDS_VALIDATION);
     this.setState({ showValidation: true, wordsValidation });
   }
 
+  /**
+   * Called when user finishes the backup. We validate the backup and shows a success message, in case of success
+   */
   handleValidateBackup = () => {
     if (this.state.chosenWords.length !== WORDS_VALIDATION) {
       this.setState({ errorMessage: 'Invalid number of words' });
@@ -97,6 +123,9 @@ class ModalBackupWords extends React.Component {
     this.props.validationSuccess();
   }
 
+  /**
+   * Called when user removes an already chosen word from the backup validation (just remove the word from the array)
+   */
   chosenWordRemoved = (word) => {
     let chosenWords = this.state.chosenWords;
     const idx = chosenWords.indexOf(word);
@@ -104,6 +133,9 @@ class ModalBackupWords extends React.Component {
     this.setState({ chosenWords });
   }
 
+  /**
+   * Called when user clicks in a word on the backup validation (just add the word in the array)
+   */
   validationWordClicked = (word) => {
     let chosenWords = this.state.chosenWords;
     chosenWords.push(word);

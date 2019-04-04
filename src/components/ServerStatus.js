@@ -10,6 +10,11 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Component that shows the status of the server from the websocket connection
+ *
+ * @memberof Components
+ */
 const ServerStatus = (props) => {
   return (
     props.isOnline !== undefined && 

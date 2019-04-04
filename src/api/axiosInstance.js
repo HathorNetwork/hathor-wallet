@@ -4,6 +4,12 @@ import store from '../store/index';
 import { lastFailedRequest } from '../actions/index';
 import $ from 'jquery';
 
+/**
+ * Create axios instance settings base URL and content type  
+ * Besides that, it captures error to show modal error and save in Redux
+ *
+ * @module Axios
+ */
 const createRequestInstance = (resolve) => {
   const defaultOptions = {
     baseURL: helpers.getServerURL(),

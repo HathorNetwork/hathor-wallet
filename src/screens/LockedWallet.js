@@ -5,19 +5,33 @@ import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 
 
+/**
+ * When wallet is locked show this screen and ask for PIN to unlock the wallet
+ *
+ * @memberof Screens
+ */
 class LockedWallet extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * errorMessage {string} Message to be shown in case of error in modal
+     */
     this.state = {
       errorMessage: ''
     }
   }
 
-  componentDidMount(){
+  componentDidMount() {
    this.refs.pin.focus();
   }
 
+  /**
+   * When user clicks on the unlock button  
+   * Checks if form is valid and if PIN is correct, then unlocks the wallet loading the data and redirecting
+   *
+   * @param {Object} e Event of when the button is clicked
+   */
   unlockClicked = (e) => {
     e.preventDefault();
     const isValid = this.refs.unlockForm.checkValidity();
@@ -38,11 +52,19 @@ class LockedWallet extends React.Component {
     }
   }
 
+  /**
+   * When user clicks on the reset link, then raises a modal to asks for reset confirmation
+   *
+   * @param {Object} e Event of when the link is clicked
+   */
   resetClicked = (e) => {
     e.preventDefault();
     $('#confirmResetModal').modal('show');
   }
 
+  /**
+   * When reset modal validates, then execute method to reset all data from the wallet and redirect to Welcome screen
+   */
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
     wallet.resetAllData();

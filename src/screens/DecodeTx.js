@@ -4,7 +4,20 @@ import TxData from '../components/TxData';
 import txApi from '../api/txApi';
 
 
+/**
+ * Screen used to decode a transaction and show its detail
+ *
+ * @memberof Screens
+ */
 class DecodeTx extends React.Component {
+  /**
+   * transaction {Object} Decoded transaction
+   * success {boolean} If had success decoding transaction on the server
+   * dataToDecode {string} Text written by the user as the serialized transaction to be decoded
+   * meta {Object} Metadata of decoded transaction received from the server
+   * spentOutputs {Object} Spent outputs of decoded transaction received from the server
+   * confirmationData {Object} Confirmation data of decoded transaction received from the server
+   */
   state = {
     transaction: null,
     success: null,
@@ -14,10 +27,20 @@ class DecodeTx extends React.Component {
     confirmationData: null,
   };
 
+  /**
+   * Method called after change on the text area with the encoded hexadecimal
+   *
+   * @param {Object} e Event called when changing input
+   */
   handleChangeData = (e) => {
     this.setState({ dataToDecode: e.target.value });
   }
 
+  /**
+   * This method is called after transaction was decoded, then shows its details on the screen
+   *
+   * @param {Object} data Transaction decoded
+   */
   txDecoded = (data) => {
     if (data.success) {
       this.setState({ transaction: data.tx, meta: data.meta, spentOutputs: data.spent_outputs, loaded: true, success: true });
@@ -27,6 +50,9 @@ class DecodeTx extends React.Component {
     }
   }
 
+  /**
+   * Get data from accumulated weight of the decoded transaction
+   */
   getConfirmationData = () => {
     txApi.getConfirmationData(this.state.transaction.hash, (data) => {
       this.setState({ confirmationData: data });
@@ -37,6 +63,9 @@ class DecodeTx extends React.Component {
   }
 
 
+  /**
+   * Called after the 'Decode' button is clicked, so sends hexadecimal to server to be decoded
+   */
   buttonClicked = () => {
     txApi.decodeTx(this.state.dataToDecode, (data) => {
       this.txDecoded(data);

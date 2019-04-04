@@ -10,10 +10,18 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Component that shows a modal when a request error happens. Gives the user the option to retry the request or change server
+ *
+ * @memberof Components
+ */
 class RequestErrorModal extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * retry {boolean} If user selected to retry the request
+     */
     this.state = {
       retry: false
     };
@@ -22,22 +30,32 @@ class RequestErrorModal extends React.Component {
   componentDidMount = () => {
     $('#requestErrorModal').on('hidden.bs.modal', (e) => {
       if (this.state.retry) {
+        // If modal is closing and user selected retry should get last request from Redux and try again
         this.modalHiddenRetry();
       }
     });
   }
 
+  /**
+   * User clicked to change server, then push to choose server screen
+   */
   handleChangeServer = () => {
     $('#requestErrorModal').modal('hide');
     this.props.history.push('/server/');
   }
 
+  /**
+   * User clicked to retry request, then update the state, hide the modal and when hidden will try again
+   */
   handleRetryRequest = () => {
     this.setState({ retry: true }, () => {
       $('#requestErrorModal').modal('hide');
     });
   }
 
+  /**
+   * When modal is hidden and user selected to retry we get data from last request from Redux and execute again
+   */
   modalHiddenRetry = () => {
     let config = this.props.lastFailedRequest;
     let axios = createRequestInstance(config.resolve);

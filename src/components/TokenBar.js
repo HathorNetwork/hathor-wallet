@@ -22,16 +22,30 @@ const mapDispatchToProps = dispatch => {
 };
 
 
+/**
+ * Component that shows the left bar of tokens
+ *
+ * @memberof Components
+ */
 class TokenBar extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * opened {boolean} If bar is opened or not (default is false)
+     * selected {string} Symbol of the selected token (default is 'HTR')
+     */
     this.state = {
       opened: false,
       selected: 'HTR',
     }
   }
 
+  /**
+   * Get quantity of unknown tokens comparing allTokens and registeredTokens in redux
+   *
+   * @return {number} Quantity of unknown tokens
+   */
   getUnknownTokens = () => {
     let diff = 0;
     for (const uid of this.props.allTokens) {
@@ -44,23 +58,44 @@ class TokenBar extends React.Component {
     return diff;
   }
 
+  /**
+   * Called when user clicked to expand bar
+   */
   toggleExpand = () => {
     this.setState({ opened: !this.state.opened });
   }
 
+  /**
+   * Called when user selects another token
+   * 
+   * @param {string} uid UID of token user selected
+   */
   tokenSelected = (uid) => {
     this.props.selectToken(uid);
   }
 
+  /**
+   * Called when user clicks to lock wallet, then redirects to locked screen
+   */
   lockWallet = () => {
     wallet.lock();
     this.props.history.push('/locked/');
   }
 
+  /**
+   * Called when user clicks to go to settings, then redirects to settings screen
+   */
   goToSettings = () => {
     this.props.history.push('/settings/');
   }
 
+  /**
+   * Get the balance of one token
+   *
+   * @param {string} uid UID to get balance from
+   *
+   * @return {string} Available balance of token formatted
+   */
   getTokenBalance = (uid) => {
     const filteredHistoryTransactions = wallet.filterHistoryTransactions(this.props.historyTransactions, uid);
     const balance = wallet.calculateBalance(filteredHistoryTransactions, uid);
@@ -68,6 +103,9 @@ class TokenBar extends React.Component {
     return helpers.prettyValue(total);
   }
 
+  /**
+   * Called when user clicks in the unknown tokens number, then redirects to unknown tokens screen
+   */
   unknownClicked = () => {
     this.props.history.push('/unknown_tokens/');
   }

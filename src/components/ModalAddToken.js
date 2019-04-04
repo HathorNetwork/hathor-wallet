@@ -3,7 +3,15 @@ import $ from 'jquery';
 import tokens from '../utils/tokens';
 
 
+/**
+ * Component that shows a modal to add one specific unknown token to the wallet
+ *
+ * @memberof Components
+ */
 class ModalAddToken extends React.Component {
+  /**
+   * errorMessage {string} Message that will be shown to the user in case of error
+   */
   state = { errorMessage: '' };
 
   componentDidMount = () => {
@@ -25,6 +33,12 @@ class ModalAddToken extends React.Component {
     $('#addTokenModal').off();
   }
 
+  /**
+   * Method called when user clicks the button to add the token  
+   * Validates that the data written is valid
+   *
+   * @param {Object} e Event emitted when user clicks the button
+   */
   handleAdd = (e) => {
     e.preventDefault();
     let uid = this.props.uid ? this.props.uid : this.refs.uid.value;

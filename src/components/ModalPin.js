@@ -4,9 +4,18 @@ import PinInput from './PinInput';
 import wallet from '../utils/wallet';
 
 
+/**
+ * Component that shows a modal with a form to ask for the user PIN
+ *
+ * @memberof Components
+ */
 class ModalPin extends React.Component {
   constructor(props) {
     super(props);
+
+    /**
+     * errorMessage {string} Message to be shown to the user in case of error in the form
+     */
     this.state = {
       errorMessage: '',
     }
@@ -23,6 +32,11 @@ class ModalPin extends React.Component {
     })
   }
 
+  /**
+   * Method called after user clicks the 'Go' button. We validate the form and that the pin is correct, then call a method from props
+   *
+   * @param {Object} e Event emitted when button is clicked
+   */
   handlePin = (e) => {
     e.preventDefault();
     if (this.refs.formPin.checkValidity() === false) {

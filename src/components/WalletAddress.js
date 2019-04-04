@@ -11,15 +11,17 @@ const mapStateToProps = (state) => {
 };
 
 
+/**
+ * Component that renders the address part of the wallet with base58 address, qrcode and the links
+ *
+ * @memberof Components
+ */
 class WalletAddress extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      loaded: true,
-    }
-  }
-
+  /**
+   * Called when user clicks to generate a new address
+   *
+   * @param {Object} e Event emitted by the link clicked
+   */
   generateNewAddress = (e) => {
     e.preventDefault();
     // We check if the next address was already generated, otherwise we generate, in case we can do it
@@ -34,11 +36,23 @@ class WalletAddress extends React.Component {
     }
   }
 
+  /**
+   * Called when user clicks to download the qrcode
+   *
+   * @param {Object} e Event emitted by the link clicked
+   */
   downloadQrCode = (e) => {
     e.currentTarget.href = document.getElementsByTagName('canvas')[0].toDataURL();
     e.currentTarget.download = "QrCode.png";
   }
 
+  /**
+   * Method called on copy to clipboard success  
+   * Show alert success message
+   *
+   * @param {string} text Text copied to clipboard
+   * @param {*} result Null in case of error
+   */
   copied = (text, result) => {
     if (result) {
       // If copied with success
@@ -65,7 +79,7 @@ class WalletAddress extends React.Component {
 
     return (
       <div>
-        {this.state.loaded ? renderAddress() : null}
+        {renderAddress()}
         <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
         <HathorAlert ref="alertError" text="You must use an old address before generating new ones" type="danger" />
       </div>

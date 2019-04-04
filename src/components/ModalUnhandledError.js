@@ -2,13 +2,28 @@ import React from 'react';
 import wallet from '../utils/wallet';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
+/**
+ * Component that shows a modal when an unhandled error happens  
+ * Shows a message to the user with a button for him to copy the error or reset the wallet
+ *
+ * @memberof Components
+ */
 class ModalUnhandledError extends React.Component {
+
+  /**
+   * Called when user clicks the button to reset the wallet, then reset data and go to Welcome screen
+   *
+   * @param {Object} e Event emitted on button click
+   */
   handleConfirm = (e) => {
     e.preventDefault();
     wallet.resetAllData();
     this.props.history.push('/welcome/');
   }
 
+  /**
+   * Called when user clicks the button to go to home ('/'), then reset error data and redirects page
+   */
   handleGoToHome = () => {
     this.props.resetError();
     this.props.history.push('/');
