@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK, VERSION, HATHOR_TOKEN_INDEX, HATHOR_TOKEN_CONFIG } from '../constants';
+import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK, VERSION, HATHOR_TOKEN_INDEX, HATHOR_TOKEN_CONFIG, SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS } from '../constants';
 import Mnemonic from 'bitcore-mnemonic';
 import { HDPublicKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
@@ -17,6 +17,14 @@ import { historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../ac
 import WebSocketHandler from '../WebSocketHandler';
 import dateFormatter from './date';
 import _ from 'lodash';
+
+let Sentry = null;
+// Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
+if (window.require) {
+  Sentry = window.require('@sentry/electron');
+} else {
+  Sentry = require('@sentry/browser');
+}
 
 /**
  * We use localStorage and Redux to save data.
@@ -41,6 +49,7 @@ import _ from 'lodash';
  * - txMinWeight: minimum weight of a transaction (variable got from the backend)
  * - txWeightCoefficient: minimum weight coefficient of a transaction (variable got from the backend)
  * - tokens: array with tokens information {'name', 'symbol', 'uid'}
+ * - sentry: if user allowed to send errors to sentry
  *
  * @namespace Wallet
  */
@@ -778,6 +787,7 @@ const wallet = {
     localStorage.removeItem('wallet:backup');
     localStorage.removeItem('wallet:locked');
     localStorage.removeItem('wallet:tokens');
+    localStorage.removeItem('wallet:sentry');
   },
 
   /**
@@ -1378,6 +1388,104 @@ const wallet = {
       }
     }
     return balance;
+  },
+
+  /**
+   * Verifies if user allowed to send errors to sentry
+   *
+   * @return {boolean}
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  isSentryAllowed() {
+    return this.getSentryPermission() === true;
+  },
+
+  /**
+   * Set in localStorage that user allowed to send errors to sentry
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  allowSentry() {
+    localStorage.setItem('wallet:sentry', true);
+    this.updateSentryState();
+  },
+
+  /**
+   * Set in localStorage that user did not allow to send errors to sentry
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  disallowSentry() {
+    localStorage.setItem('wallet:sentry', false);
+    this.updateSentryState();
+  },
+
+  /**
+   * Return sentry permission saved in localStorage
+   *
+   * @return {boolean} Sentry permission (can be null)
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getSentryPermission() {
+    return JSON.parse(localStorage.getItem('wallet:sentry'));
+  },
+
+  /**
+   * Init Sentry with DSN passed (if Sentry is initialized with empty string will be turned off)
+   *
+   * @param {string} dsn Sentry connection string
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  initSentry(dsn) {
+    Sentry.init({
+      dsn: dsn,
+      release: process.env.npm_package_version
+    })
+  },
+
+  /**
+   * Check from localStorage data and init or turn off Sentry
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  updateSentryState() {
+    if (this.isSentryAllowed()) {
+      // Init Sentry
+      this.initSentry(SENTRY_DSN);
+    } else {
+      // Turn off Sentry
+      this.initSentry('');
+    }
+  },
+
+  /**
+   * Add scope and extra data to sentry exception
+   *
+   * @param {Object} error Error stacktrace
+   * @param {Object} info Extra info with context when error happened
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  sentryWithScope(error, info) {
+    Sentry.withScope(scope => {
+      Object.entries(info).forEach(
+        ([key, item]) => scope.setExtra(key, item)
+      );
+      DEBUG_LOCAL_DATA_KEYS.forEach(
+        (key) => scope.setExtra(key, localStorage.getItem(key))
+      )
+      Sentry.captureException(error);
+    });
   },
 }
 

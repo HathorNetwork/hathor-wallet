@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import * as Sentry from '@sentry/electron'
-import { DEBUG_LOCAL_DATA_KEYS } from './constants';
+import wallet from './utils/wallet';
 import $ from 'jquery';
 import App from './App';
 import ModalUnhandledError from './components/ModalUnhandledError';
@@ -23,7 +22,7 @@ class ErrorBoundary extends React.Component {
   state = { hasUiError: false, }
 
   handleErrorEvent = (event) => {
-    this.props.onError(event.error, false)
+    this.props.onError(event.error, false, {})
   }
 
   componentDidMount() {
@@ -40,16 +39,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, info) {
     this.props.onError(error, true)
-
-    Sentry.withScope(scope => {
-      Object.entries(info).forEach(
-        ([key, item]) => scope.setExtra(key, item)
-      );
-      DEBUG_LOCAL_DATA_KEYS.forEach(
-        (key) => scope.setExtra(key, localStorage.getItem(key))
-      )
-      Sentry.captureException(error);
-    });
+    wallet.sentryWithScope(error, info);
   }
 
   // Remove corrupted UI subtree to prevent error corrupt higher components
@@ -63,18 +53,18 @@ class ErrorBoundary extends React.Component {
 }
 
 class ErrorWrapper extends React.Component {
-  state = { error: null, renderError: null }
+  state = { error: null, renderError: null, info: null }
 
-  onError = (error, renderError) => {
+  onError = (error, renderError, info) => {
     // Don't propagate error messages listened more than once
     if (error !== this.state.error) {
-      this.setState({ error, renderError })
+      this.setState({ error, renderError, info })
       $('#unhandledErrorModal').modal('show')
     }
   }
 
   render() {
-    const renderApp = (props) => <ErrorBoundary {...props} onError={this.onError} error={this.state.error} />
+    const renderApp = (props) => <ErrorBoundary {...props} onError={this.onError} error={this.state.error} info={this.state.info} />
     const renderModal = (props) => <ModalUnhandledError {...props} {...this.state} resetError={() => this.onError(null)} />
     return <div className="components-wrapper">
       <Route path="/" render={renderApp} />

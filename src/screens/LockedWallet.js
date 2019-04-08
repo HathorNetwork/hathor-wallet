@@ -31,6 +31,8 @@ class LockedWallet extends React.Component {
 
   componentDidMount() {
    this.refs.pin.focus();
+    // Update Sentry when user started wallet now
+    wallet.updateSentryState();
   }
 
   /**

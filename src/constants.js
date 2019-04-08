@@ -269,3 +269,8 @@ export const DASHBOARD_TX_COUNT = 6;
  * Quantity of elements to show per page in the transactions/blocks list
  */
 export const TX_COUNT = 10;
+
+/**
+ * Sentry connection DSN
+ */
+export const SENTRY_DSN = process.env.SENTRY_DSN || 'https://69c067d1587c465cac836eaf25467ce1@sentry.io/1410476'

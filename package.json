@@ -24,7 +24,7 @@
   "version": "0.6.3-beta",
   "private": true,
   "dependencies": {
-    "@sentry/electron": "^0.16",
+    "@sentry/electron": "^0.17.0",
     "axios": "^0.17.1",
     "bitcore-mnemonic": "^1.7.0",
     "bootstrap": "^4.0.0",
@@ -64,6 +64,7 @@
     "electron-pack": "build --mac --win --linux -c.extraMetadata.main=build/electron.js"
   },
   "devDependencies": {
+    "@sentry/browser": "^5.0.5",
     "@sentry/cli": "^1.40.0",
     "axios-mock-adapter": "^1.16.0",
     "electron": "^4.0.3",

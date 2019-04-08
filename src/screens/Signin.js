@@ -7,6 +7,7 @@
 
 import React from 'react';
 import logo from '../assets/images/hathor-logo.png';
+import wallet from '../utils/wallet';
 
 
 /**
@@ -15,6 +16,11 @@ import logo from '../assets/images/hathor-logo.png';
  * @memberof Screens
  */
 class Signin extends React.Component {
+  componentDidMount() {
+    // Update Sentry when user started wallet now
+    wallet.updateSentryState();
+  }
+
   /**
    * Go to the new wallet screen
    */
