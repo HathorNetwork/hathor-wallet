@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Hathor Labs and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import { OP_GREATERTHAN_TIMESTAMP, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, OP_PUSHDATA1 } from '../opcodes';
 import { DECIMAL_PLACES, DEFAULT_TX_VERSION, MAX_OUTPUT_VALUE_32, P2PKH_BYTE, P2SH_BYTE } from '../constants';
 import { HDPrivateKey, crypto, encoding, util } from 'bitcore-lib';
