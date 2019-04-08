@@ -7,6 +7,7 @@
 
 import React from 'react';
 import wallet from '../utils/wallet';
+import { Link } from 'react-router-dom';
 import helpers from '../utils/helpers';
 import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
@@ -62,6 +63,7 @@ class Settings extends React.Component {
         <div>
           <h4>Advanced Settings</h4>
           <div className="d-flex flex-column align-items-start mt-4">
+            <p><strong>Automatically report bugs to Hathor:</strong> {wallet.isSentryAllowed() ? <span>Yes</span> : <span>No</span>} <Link className='ml-3' to='/permission/'> Change </Link></p>
             <button className="btn btn-hathor" onClick={this.addPassphrase}>Add passphrase</button>
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>Reset all data</button>
           </div>

@@ -22,14 +22,14 @@ class Welcome extends React.Component {
   state = { formValidated: false }
 
   /**
-   * When user clicks the button to start the wallet, then check form and redirect to signin screen
+   * When user clicks the button to start the wallet, then check form and redirect to Sentry Permission screen
    */
   getStarted = () => {
     const isValid = this.refs.agreeForm.checkValidity();
     this.setState({ formValidated: !isValid });
     if (isValid) {
       wallet.markWalletAsStarted();
-      this.props.history.push('/signin/');
+      this.props.history.push('/permission/');
     }
   }
 

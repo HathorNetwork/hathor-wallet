@@ -66,3 +66,5 @@ mock.onGet('version').reply((config) => {
   }
   return [200, data];
 });
+
+global.window = {};

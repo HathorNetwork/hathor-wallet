@@ -18,6 +18,7 @@ import TransactionDetail from './screens/TransactionDetail';
 import Server from './screens/Server';
 import ChoosePassphrase from './screens/ChoosePassphrase';
 import Welcome from './screens/Welcome';
+import SentryPermission from './screens/SentryPermission';
 import UnknownTokens from './screens/UnknownTokens';
 import Signin from './screens/Signin';
 import LockedWallet from './screens/LockedWallet';
@@ -102,6 +103,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/welcome" component={Welcome} />
+        <Route exact path="/permission" component={SentryPermission} />
         <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <Route path="" component={Page404} />
       </Switch>
