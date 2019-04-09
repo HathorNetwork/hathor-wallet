@@ -481,7 +481,7 @@ const transaction = {
    * Get the bytes from the output value
    * If value is above the maximum for 32 bits we get from 8 bytes, otherwise only 4 bytes
    *
-   * @param {number} value Output value
+   * @param {decimal} value Output value
    *
    * @return {Buffer}
    *
@@ -489,10 +489,12 @@ const transaction = {
    * @inner
    */
   outputValueToBytes(value) {
-    if (value > MAX_OUTPUT_VALUE_32) {
-      return this.signedIntToBytes(-value, 8);
+    if (value.gt(MAX_OUTPUT_VALUE_32)) {
+      console.log(value.toString());
+      console.log(this.signedIntToBytes(value.times(-1).toString(), 8));
+      return this.signedIntToBytes(value.times(-1).toString(), 8);
     } else {
-      return this.signedIntToBytes(value, 4);
+      return this.signedIntToBytes(value.toNumber(), 4);
     }
   },
 

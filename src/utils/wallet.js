@@ -9,6 +9,7 @@ import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_
 import Mnemonic from 'bitcore-mnemonic';
 import { HDPublicKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
+import { Decimal } from 'decimal.js-light';
 import walletApi from '../api/wallet';
 import tokens from './tokens';
 import version from './version';
@@ -819,7 +820,7 @@ const wallet = {
    * @inner
    */
   getInputsFromAmount(historyTransactions, amount, selectedToken) {
-    const ret = {'inputs': [], 'inputsAmount': 0};
+    const ret = {'inputs': [], 'inputsAmount': new Decimal(0)};
     const data = this.getWalletData();
     if (data === null) {
       return ret;
@@ -835,12 +836,12 @@ const wallet = {
           // Ignore authority outputs.
           continue;
         }
-        if (ret.inputsAmount >= amount) {
+        if (ret.inputsAmount.gte(amount)) {
           return ret;
         }
         if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address)) {
           if (this.canUseUnspentTx(txout)) {
-            ret.inputsAmount += txout.value;
+            ret.inputsAmount = ret.inputsAmount.add(new Decimal(txout.value));
             ret.inputs.push({ tx_id: tx.tx_id, index, token: selectedToken, address: txout.decoded.address });
           }
         }
@@ -1125,12 +1126,16 @@ const wallet = {
     // Get the data and verify if we need to select the inputs or add a change output
 
     // First get the amount of outputs
-    let outputsAmount = 0;
+    let outputsAmount = new Decimal(0);
     for (let output of data.outputs) {
-      outputsAmount += output.value;
+      outputsAmount = outputsAmount.add(output.value);
     }
 
-    if (outputsAmount === 0) {
+    console.log(outputsAmount);
+    console.log(data.outputs);
+    console.log(outputsAmount.toString());
+
+    if (outputsAmount.eq(new Decimal(0))) {
       return {success: false, message:  `Token: ${token.symbol}. Total value can't be 0`};
     }
 
@@ -1140,14 +1145,14 @@ const wallet = {
 
       data['inputs'] = newData['inputs'];
 
-      if (newData.inputsAmount < outputsAmount) {
+      if (newData.inputsAmount.lt(outputsAmount)) {
         // Don't have this amount of token
         return {success: false, message:  `Token ${token.symbol}: Insufficient amount of tokens`};
       }
 
-      if (newData.inputsAmount > outputsAmount) {
+      if (newData.inputsAmount.gt(outputsAmount)) {
         // Need to create change output
-        let outputChange = this.getOutputChange(newData.inputsAmount - outputsAmount, tokens.getTokenIndex(allTokens, token.uid));
+        let outputChange = this.getOutputChange(newData.inputsAmount.sub(outputsAmount), tokens.getTokenIndex(allTokens, token.uid));
         data['outputs'].push(outputChange);
         // Shuffle outputs, so we don't have change output always in the same index
         data['outputs'] = _.shuffle(data['outputs']);
@@ -1155,7 +1160,7 @@ const wallet = {
 
     } else {
       // Validate the inputs used and if have to create a change output
-      let inputsAmount = 0;
+      let inputsAmount = new Decimal(0);
       for (const input of data.inputs) {
         const utxo = wallet.checkUnspentTxExists(historyTransactions, input.tx_id, input.index, token.uid);
         if (!utxo.exists) {
@@ -1164,20 +1169,20 @@ const wallet = {
 
         const output = utxo.output;
         if (this.canUseUnspentTx(output)) {
-          inputsAmount += output.value;
+          inputsAmount = inputsAmount.add(new Decimal(output.value));
           input.address = output.decoded.address;
         } else {
           return {success: false, message: `Token: ${token.symbol}. Output [${input.tx_id}, ${input.index}] is locked until ${dateFormatter.parseTimestamp(output.decoded.timelock)}`};
         }
       }
 
-      if (inputsAmount < outputsAmount) {
+      if (inputsAmount.lt(outputsAmount)) {
         return {success: false, message: `Token: ${token.symbol}. Sum of outputs is larger than the sum of inputs`};
       }
 
-      if (inputsAmount > outputsAmount) {
+      if (inputsAmount.gt(outputsAmount)) {
         // Need to create change output
-        let outputChange = wallet.getOutputChange(inputsAmount - outputsAmount, tokens.getTokenIndex(allTokens, token.uid));
+        let outputChange = wallet.getOutputChange(inputsAmount.sub(outputsAmount), tokens.getTokenIndex(allTokens, token.uid));
         data['outputs'].push(outputChange);
       }
     }

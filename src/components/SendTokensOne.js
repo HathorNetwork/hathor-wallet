@@ -8,11 +8,12 @@
 import React from 'react';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
+import { Decimal } from 'decimal.js-light';
+import { DECIMAL_PLACES } from '../constants';
 import tokens from '../utils/tokens';
 import dateFormatter from '../utils/date';
 import OutputsWrapper from '../components/OutputsWrapper'
 import InputsWrapper from '../components/InputsWrapper'
-import { DECIMAL_PLACES } from '../constants';
 import { connect } from "react-redux";
 import _ from 'lodash';
 
@@ -90,7 +91,7 @@ class SendTokensOne extends React.Component {
       const value = output.current.value.current.value;
 
       if (address && value) {
-        let dataOutput = {'address': address, 'value': parseInt(value*(10**DECIMAL_PLACES), 10), 'tokenData': tokens.getTokenIndex(this.state.selectedTokens, this.state.selected.uid)};
+        let dataOutput = {'address': address, 'value': new Decimal(value).times(10**DECIMAL_PLACES), 'tokenData': tokens.getTokenIndex(this.state.selectedTokens, this.state.selected.uid)};
 
         const hasTimelock = output.current.timelockCheckbox.current.checked;
         if (hasTimelock) {

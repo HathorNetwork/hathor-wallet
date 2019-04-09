@@ -9,6 +9,7 @@ import React from 'react';
 import $ from 'jquery';
 import dateFormatter from '../utils/date';
 import helpers from '../utils/helpers';
+import { Decimal } from 'decimal.js-light';
 import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
 import tokens from '../utils/tokens';
@@ -81,10 +82,10 @@ class CreateToken extends React.Component {
    */
   getHathorData = () => {
     let input = null;
-    let amount = 0;
+    let amount = new Decimal(0);
     if (this.inputCheckbox.current.checked) {
       // Select inputs automatically
-      const inputs = wallet.getInputsFromAmount(this.props.historyTransactions, helpers.minimumAmount(), HATHOR_TOKEN_CONFIG.uid);
+      const inputs = wallet.getInputsFromAmount(this.props.historyTransactions, new Decimal(helpers.minimumAmount()), HATHOR_TOKEN_CONFIG.uid);
       if (inputs.inputs.length === 0) {
         this.setState({ errorMessage: 'You don\'t have any available hathor token to create a new token' });
         return null;
@@ -116,7 +117,7 @@ class CreateToken extends React.Component {
       }
 
       input = {'tx_id': txId, 'index': index, 'token': HATHOR_TOKEN_CONFIG.uid, 'address': output.decoded.address};
-      amount = output.value;
+      amount = new Decimal(output.value);
     }
     // Change output for Hathor because the whole input will go as change
     const outputChange = wallet.getOutputChange(amount, HATHOR_TOKEN_INDEX);

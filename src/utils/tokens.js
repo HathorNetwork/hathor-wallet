@@ -6,12 +6,13 @@
  */
 
 import transaction from './transaction';
+import { Decimal } from 'decimal.js-light';
 import { crypto, util } from 'bitcore-lib';
 import store from '../store/index';
 import walletApi from '../api/wallet';
 import { newTokens } from '../actions/index';
 import buffer from 'buffer';
-import { HATHOR_TOKEN_CONFIG, TOKEN_CREATION_MASK, TOKEN_MINT_MASK, TOKEN_MELT_MASK, DECIMAL_PLACES } from '../constants';
+import { DECIMAL_PLACES, HATHOR_TOKEN_CONFIG, TOKEN_CREATION_MASK, TOKEN_MINT_MASK, TOKEN_MELT_MASK } from '../constants';
 
 
 /**
@@ -271,7 +272,7 @@ const tokens = {
     const tokenData = 0b10000001;
     // Create token uid
     const tokenUID = this.getTokenUID(input.tx_id, input.index);
-    const authorityOutput = {'address': address, 'value': tokenMasks, 'tokenData': tokenData};
+    const authorityOutput = {'address': address, 'value': new Decimal(tokenMasks), 'tokenData': tokenData};
     // Create tx data
     let txData = {'inputs': [input], 'outputs': [authorityOutput, output], 'tokens': [tokenUID]};
     // Get data to sign
@@ -325,11 +326,11 @@ const tokens = {
     // Now we will mint the tokens
     const newInput = {'tx_id': txId, 'index': 0, 'token': token, 'address': address};
     // Output1: Mint token amount
-    const tokenOutput1 = {'address': address, 'value': parseInt(amount*(10**DECIMAL_PLACES), 10), 'tokenData': 1};
+    const tokenOutput1 = {'address': address, 'value': new Decimal(amount).times(10**DECIMAL_PLACES), 'tokenData': 1};
     // Output2: new mint authority
-    const tokenOutput2 = {'address': address, 'value': TOKEN_MINT_MASK, 'tokenData': tokenData};
+    const tokenOutput2 = {'address': address, 'value': new Decimal(TOKEN_MINT_MASK), 'tokenData': tokenData};
     // Output3: new melt authority
-    const tokenOutput3 = {'address': address, 'value': TOKEN_MELT_MASK, 'tokenData': tokenData};
+    const tokenOutput3 = {'address': address, 'value': new Decimal(TOKEN_MELT_MASK), 'tokenData': tokenData};
     // Create new data
     let newTxData = {'inputs': [newInput], 'outputs': [tokenOutput1, tokenOutput2, tokenOutput3], 'tokens': [token]};
     // Get new data to sign

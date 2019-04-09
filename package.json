@@ -29,6 +29,7 @@
     "bitcore-mnemonic": "^1.7.0",
     "bootstrap": "^4.0.0",
     "crypto-js": "^3.1.9-1",
+    "decimal.js-light": "^2.5.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-react": "^7.5.1",
     "font-awesome": "^4.7.0",
