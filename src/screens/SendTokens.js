@@ -10,7 +10,7 @@ import $ from 'jquery';
 import walletApi from '../api/wallet';
 import { util } from 'bitcore-lib';
 import transaction from '../utils/transaction';
-import AddressError from '../utils/errors';
+import { AddressError, OutputValueError } from '../utils/errors';
 import ReactLoading from 'react-loading';
 import ModalPin from '../components/ModalPin';
 import SendTokensOne from '../components/SendTokensOne';
@@ -120,7 +120,7 @@ class SendTokens extends React.Component {
           this.setState({ loading: false });
         });
       } catch(e) {
-        if (e instanceof AddressError) {
+        if (e instanceof AddressError || e instanceof OutputValueError) {
           this.setState({ errorMessage: e.message, loading: false });
         } else {
           // Unhandled error

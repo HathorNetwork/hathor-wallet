@@ -10,9 +10,10 @@ import $ from 'jquery';
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import dateFormatter from '../utils/date';
+import helpers from '../utils/helpers';
 import OutputsWrapper from '../components/OutputsWrapper'
 import InputsWrapper from '../components/InputsWrapper'
-import { DECIMAL_PLACES } from '../constants';
+import { DECIMAL_PLACES, MAX_OUTPUT_VALUE } from '../constants';
 import { connect } from "react-redux";
 import _ from 'lodash';
 
@@ -87,10 +88,16 @@ class SendTokensOne extends React.Component {
     let data = {'outputs': [], 'inputs': []};
     for (const output of this.outputs) {
       const address = output.current.address.current.value;
-      const value = output.current.value.current.value;
+      const valueStr = output.current.value.current.value;
 
-      if (address && value) {
-        let dataOutput = {'address': address, 'value': parseInt(value*(10**DECIMAL_PLACES), 10), 'tokenData': tokens.getTokenIndex(this.state.selectedTokens, this.state.selected.uid)};
+      if (address && valueStr) {
+        // Doing the check here because need to validate before doing parseInt
+        const tokensValue = valueStr*(10**DECIMAL_PLACES);
+        if (tokensValue > MAX_OUTPUT_VALUE) {
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${helpers.prettyValue(MAX_OUTPUT_VALUE)}` });
+          return null;
+        }
+        let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'tokenData': tokens.getTokenIndex(this.state.selectedTokens, this.state.selected.uid)};
 
         const hasTimelock = output.current.timelockCheckbox.current.checked;
         if (hasTimelock) {

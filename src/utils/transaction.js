@@ -6,10 +6,11 @@
  */
 
 import { OP_GREATERTHAN_TIMESTAMP, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, OP_PUSHDATA1 } from '../opcodes';
-import { DECIMAL_PLACES, DEFAULT_TX_VERSION, MAX_OUTPUT_VALUE_32, P2PKH_BYTE, P2SH_BYTE } from '../constants';
+import { DECIMAL_PLACES, DEFAULT_TX_VERSION, MAX_OUTPUT_VALUE_32, MAX_OUTPUT_VALUE, P2PKH_BYTE, P2SH_BYTE } from '../constants';
 import { HDPrivateKey, crypto, encoding, util } from 'bitcore-lib';
-import AddressError from './errors';
+import { AddressError, OutputValueError } from './errors';
 import dateFormatter from './date';
+import helpers from './helpers';
 import wallet from './wallet';
 import buffer from 'buffer';
 import Long from 'long';
@@ -483,12 +484,17 @@ const transaction = {
    *
    * @param {number} value Output value
    *
+   * @throws {OutputValueError} Will throw an error if output value is invalid
+   *
    * @return {Buffer}
    *
    * @memberof Transaction
    * @inner
    */
   outputValueToBytes(value) {
+    if (value > MAX_OUTPUT_VALUE) {
+      throw new OutputValueError(`Maximum value is ${helpers.prettyValue(MAX_OUTPUT_VALUE)}`);
+    }
     if (value > MAX_OUTPUT_VALUE_32) {
       return this.signedIntToBytes(-value, 8);
     } else {
