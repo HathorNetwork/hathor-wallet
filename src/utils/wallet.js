@@ -5,12 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK, VERSION, HATHOR_TOKEN_INDEX, HATHOR_TOKEN_CONFIG, SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS } from '../constants';
+import { GAP_LIMIT, LIMIT_ADDRESS_GENERATION, HATHOR_BIP44_CODE, NETWORK, TOKEN_AUTHORITY_MASK, VERSION, HATHOR_TOKEN_INDEX, HATHOR_TOKEN_CONFIG, SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, MAX_OUTPUT_VALUE } from '../constants';
 import Mnemonic from 'bitcore-mnemonic';
 import { HDPublicKey, Address } from 'bitcore-lib';
 import CryptoJS from 'crypto-js';
 import walletApi from '../api/wallet';
 import tokens from './tokens';
+import helpers from './helpers';
+import { OutputValueError } from './errors';
 import version from './version';
 import store from '../store/index';
 import { historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
@@ -1233,6 +1235,8 @@ const wallet = {
    * @param {Array} newHistory Array of new data that arrived from the server to be added to local data
    * @param {function} resolve Resolve method from promise to be called after finishing handling the new history
    *
+   * @throws {OutputValueError} Will throw an error if one of the output value is invalid
+   *
    * @return {Object} Return an object with {newSharedAddress, newSharedIndex}
    * @memberof Wallet
    * @inner
@@ -1245,6 +1249,13 @@ const wallet = {
     let maxIndex = -1;
     let lastUsedAddress = null;
     for (const tx of newHistory) {
+      // If one of the outputs has a value that cannot be handled by the wallet we discard it
+      for (const output of tx.outputs) {
+        if (output.value > MAX_OUTPUT_VALUE) {
+          throw new OutputValueError(`Transaction with id ${tx.tx_id} has output value of ${helpers.prettyValue(output.value)}. Maximum value is ${helpers.prettyValue(MAX_OUTPUT_VALUE)}`);
+        }
+      }
+
       historyTransactions[tx.tx_id] = tx
 
       for (const txin of tx.inputs) {

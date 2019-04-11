@@ -17,6 +17,12 @@
  * @memberof Errors
  * @inner
  */
-class AddressError extends Error {}
+export class AddressError extends Error {}
 
-export default AddressError
+/**
+ * Error thrown when output value is invalid
+ *
+ * @memberof Errors
+ * @inner
+ */
+export class OutputValueError extends Error {}

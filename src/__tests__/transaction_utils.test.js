@@ -7,7 +7,7 @@
 
 import transaction from '../utils/transaction';
 import wallet from '../utils/wallet';
-import AddressError from '../utils/errors';
+import { AddressError } from '../utils/errors';
 import buffer from 'buffer';
 import { OP_PUSHDATA1 } from '../opcodes';
 import { DEFAULT_TX_VERSION } from '../constants';
