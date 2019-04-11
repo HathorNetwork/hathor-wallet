@@ -14,10 +14,10 @@ Welcome to Hathor Light Wallet. To view the source code of the project access [G
 
 `npm run buil` and it will create a folder build with the files to use
 
-## Config
+## Server
 
-By default the frontend expects the server running in http://localhost:8080.
-You can change this with the environment variable `REACT_APP_BASE_URL`
+By default the wallet will connect to the server selected as the `DEFAULT_SERVER` in the constants file (`src/constants.js`).
+You can change this anytime in the 'Change Server' screen inside the wallet.
 
 ## Documentation
 
