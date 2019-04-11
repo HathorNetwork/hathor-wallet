@@ -45,7 +45,7 @@ export const GAP_LIMIT = 20;
 /**
  * Wallet version
  */
-export const VERSION = '0.6.3-beta';
+export const VERSION = '0.6.5-beta';
 
 /**
  * Minimum expected API version
