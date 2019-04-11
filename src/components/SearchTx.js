@@ -9,7 +9,7 @@ import React from 'react';
 import HathorAlert from '../components/HathorAlert';
 import walletApi from '../api/wallet';
 import transaction from '../utils/transaction';
-import AddressError from '../utils/errors';
+import { AddressError } from '../utils/errors';
 
 
 /**

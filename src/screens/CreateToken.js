@@ -10,9 +10,10 @@ import $ from 'jquery';
 import dateFormatter from '../utils/date';
 import helpers from '../utils/helpers';
 import wallet from '../utils/wallet';
+import { AddressError } from '../utils/errors';
 import ReactLoading from 'react-loading';
 import tokens from '../utils/tokens';
-import { HATHOR_TOKEN_CONFIG, HATHOR_TOKEN_INDEX } from '../constants';
+import { HATHOR_TOKEN_CONFIG, HATHOR_TOKEN_INDEX, MAX_OUTPUT_VALUE, DECIMAL_PLACES } from '../constants';
 import ModalPin from '../components/ModalPin'
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
@@ -68,6 +69,13 @@ class CreateToken extends React.Component {
     if (isValid) {
       if (this.refs.address.value === '' && !this.refs.autoselectAddress.checked) {
         this.setState({ errorMessage: 'Must choose an address or auto select' });
+        return false;
+      }
+
+      // Validating maximum amount
+      const tokensValue = this.refs.amount.value*(10**DECIMAL_PLACES);
+      if (tokensValue > MAX_OUTPUT_VALUE) {
+        this.setState({ errorMessage: `Maximum value to mint token is ${helpers.prettyValue(MAX_OUTPUT_VALUE)}` });
         return false;
       }
       return true;
@@ -142,12 +150,21 @@ class CreateToken extends React.Component {
       address = this.refs.address.value;
     }
     const promise = new Promise((resolve, reject) => {
-      const retPromise = tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, this.refs.amount.value, this.state.pin);
-      retPromise.then(() => {
-        resolve();
-      }, (message) => {
-        reject(message);
-      });
+      try {
+        const retPromise = tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**DECIMAL_PLACES), 10), this.state.pin);
+        retPromise.then(() => {
+          resolve();
+        }, (message) => {
+          reject(message);
+        });
+      } catch(e) {
+        if (e instanceof AddressError) {
+          reject(e.message);
+        } else {
+          // Unhandled error
+          throw e;
+        }
+      }
     });
 
     promise.then(() => {

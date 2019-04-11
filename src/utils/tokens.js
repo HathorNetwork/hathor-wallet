@@ -9,9 +9,10 @@ import transaction from './transaction';
 import { crypto, util } from 'bitcore-lib';
 import store from '../store/index';
 import walletApi from '../api/wallet';
+import { AddressError, OutputValueError } from '../utils/errors';
 import { newTokens } from '../actions/index';
 import buffer from 'buffer';
-import { HATHOR_TOKEN_CONFIG, TOKEN_CREATION_MASK, TOKEN_MINT_MASK, TOKEN_MELT_MASK, DECIMAL_PLACES } from '../constants';
+import { HATHOR_TOKEN_CONFIG, TOKEN_CREATION_MASK, TOKEN_MINT_MASK, TOKEN_MELT_MASK } from '../constants';
 
 
 /**
@@ -290,8 +291,8 @@ const tokens = {
           const mintPromise = this.mintTokens(response.tx.hash, response.tx.tokens[0], address, mintAmount, pin)
           mintPromise.then(() => {
             resolve();
-          }, (e) => {
-            reject();
+          }, (message) => {
+            reject(message);
           });
         } else {
           reject(response.message);
@@ -320,37 +321,46 @@ const tokens = {
    * @inner
    */
   mintTokens(txId, token, address, amount, pin) {
-    // Authority output token data
-    const tokenData = 0b10000001;
-    // Now we will mint the tokens
-    const newInput = {'tx_id': txId, 'index': 0, 'token': token, 'address': address};
-    // Output1: Mint token amount
-    const tokenOutput1 = {'address': address, 'value': parseInt(amount*(10**DECIMAL_PLACES), 10), 'tokenData': 1};
-    // Output2: new mint authority
-    const tokenOutput2 = {'address': address, 'value': TOKEN_MINT_MASK, 'tokenData': tokenData};
-    // Output3: new melt authority
-    const tokenOutput3 = {'address': address, 'value': TOKEN_MELT_MASK, 'tokenData': tokenData};
-    // Create new data
-    let newTxData = {'inputs': [newInput], 'outputs': [tokenOutput1, tokenOutput2, tokenOutput3], 'tokens': [token]};
-    // Get new data to sign
-    const newDataToSign = transaction.dataToSign(newTxData);
-    // Sign mint tx
-    newTxData = transaction.signTx(newTxData, newDataToSign, pin);
-    // Assemble tx and send to backend
-    transaction.completeTx(newTxData);
-    const newTxBytes = transaction.txToBytes(newTxData);
-    const newTxHex = util.buffer.bufferToHex(newTxBytes);
     const promise = new Promise((resolve, reject) => {
-      walletApi.sendTokens(newTxHex, (response) => {
-        if (response.success) {
-          resolve();
+      // Authority output token data
+      const tokenData = 0b10000001;
+      // Now we will mint the tokens
+      const newInput = {'tx_id': txId, 'index': 0, 'token': token, 'address': address};
+      // Output1: Mint token amount
+      const tokenOutput1 = {'address': address, 'value': amount, 'tokenData': 1};
+      // Output2: new mint authority
+      const tokenOutput2 = {'address': address, 'value': TOKEN_MINT_MASK, 'tokenData': tokenData};
+      // Output3: new melt authority
+      const tokenOutput3 = {'address': address, 'value': TOKEN_MELT_MASK, 'tokenData': tokenData};
+      // Create new data
+      let newTxData = {'inputs': [newInput], 'outputs': [tokenOutput1, tokenOutput2, tokenOutput3], 'tokens': [token]};
+      try {
+        // Get new data to sign
+        const newDataToSign = transaction.dataToSign(newTxData);
+        // Sign mint tx
+        newTxData = transaction.signTx(newTxData, newDataToSign, pin);
+        // Assemble tx and send to backend
+        transaction.completeTx(newTxData);
+        const newTxBytes = transaction.txToBytes(newTxData);
+        const newTxHex = util.buffer.bufferToHex(newTxBytes);
+        walletApi.sendTokens(newTxHex, (response) => {
+          if (response.success) {
+            resolve();
+          } else {
+            reject(response.message);
+          }
+        }, (e) => {
+          // Error in request
+          reject(e.message);
+        });
+      } catch (e) {
+        if (e instanceof AddressError || e instanceof OutputValueError) {
+          reject(e.message);
         } else {
-          reject(response.message);
+          // Unhandled error
+          throw e;
         }
-      }, (e) => {
-        // Error in request
-        reject(e.message);
-      });
+      }
     });
     return promise;
   },
