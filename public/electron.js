@@ -6,7 +6,7 @@
  */
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu} = require('electron')
+const {app, BrowserWindow, Tray, Menu} = require('electron')
 const Sentry = require('@sentry/electron')
 const url = require('url');
 const path = require('path');
@@ -34,7 +34,7 @@ function createWindow () {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js')
     }
-  })
+  })  
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -79,7 +79,16 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  mainWindow.on("close", (e) => {
+    e.preventDefault()
+    mainWindow.hide()
+  })
+
+  
 }
+
+
 
 if (process.platform === 'darwin') {
   // Set "About" options only on macOS
@@ -94,6 +103,38 @@ if (process.platform === 'darwin') {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
+
+let tray = null
+app.on('ready', () => {
+  tray = new Tray(path.join(__dirname, 'icon.png'))
+  const contextMenu = Menu.buildFromTemplate([
+    { 
+      label: 'Show/Hide', 
+      type: 'normal',
+      click() {  
+        if(mainWindow.isVisible())
+        {
+          mainWindow.hide()
+        }
+        else
+        {
+          mainWindow.show()
+        }
+      }
+    },
+    { 
+      label: 'Exit', 
+      type: 'normal',
+      click() {
+        app.exit()
+      }
+    }
+  ])
+
+  tray.setContextMenu(contextMenu)
+  
+
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
