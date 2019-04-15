@@ -52,6 +52,7 @@ if (window.require) {
  * - txWeightCoefficient: minimum weight coefficient of a transaction (variable got from the backend)
  * - tokens: array with tokens information {'name', 'symbol', 'uid'}
  * - sentry: if user allowed to send errors to sentry
+ * - notification: if user allowed to send notifications
  *
  * @namespace Wallet
  */
@@ -1497,6 +1498,67 @@ const wallet = {
       )
       Sentry.captureException(error);
     });
+  },
+
+  /**
+   * Sending notification in case the user allowed it
+   *
+   * @return {Notification} Notification object, in case the user allowed it. Otherwise, returns undefined
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  sendNotification(message) {
+    if (this.isNotificationOn()) {
+      return new Notification('Hathor Wallet', {body: message, silent: false});
+    }
+  },
+
+  /**
+   * Checks if the transaction was already added to the history data of the wallet
+   *
+   * @param {Object} txData Transaction data with a key 'tx_id'
+   *
+   * @return {boolean} If the transaction is in the wallet or not
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  txExists(txData) {
+    const data = this.getWalletData();
+    return txData.tx_id in data['historyTransactions'];
+  },
+
+  /**
+   * Checks if the notification is turned on
+   *
+   * @return {boolean} If the notification is turned on
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  isNotificationOn() {
+    return JSON.parse(localStorage.getItem('wallet:notification')) !== false;
+  },
+
+  /**
+   * Turns notification on
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  turnNotificationOn() {
+    localStorage.setItem('wallet:notification', true);
+  },
+
+  /**
+   * Turns notification off
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  turnNotificationOff() {
+    localStorage.setItem('wallet:notification', false);
   },
 }
 

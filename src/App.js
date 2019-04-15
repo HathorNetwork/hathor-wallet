@@ -67,6 +67,17 @@ class Root extends React.Component {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
       if (wsData.type === 'wallet:address_history') {
+        // If is a new transaction, we send a notification to the user, in case it's turned on
+        if (!wallet.txExists(wsData.history)) {
+          const message = 'New transaction! Click to open'
+          const notification = wallet.sendNotification(message);
+          // Set the notification click, in case we have sent one
+          if (notification !== undefined) {
+            notification.onclick = () => {
+              this.props.history.push(`/transaction/${wsData.history.tx_id}/`);
+            }
+          }
+        }
         this.props.historyUpdate({'data': [wsData.history]});
       } else {
         console.log('Websocket message not handled. Type:', wsData.type);
