@@ -2,6 +2,10 @@
 
 Welcome to Hathor Light Wallet. To view the source code of the project access [Github](https://github.com/HathorNetwork/hathor-wallet).
 
+## Architecture
+
+The wallet is developed using Javascript with [React](https://reactjs.org/). We use [Electron](https://electronjs.org/) to generate native desktop apps from it.
+
 ## Download
 
 You can download the newest version of the wallet for each specific platform.
@@ -30,16 +34,16 @@ This screen will show a warning, so you need to click on 'More info'. Another sc
 ## Screenshots
 
 The basic view of the wallet.  Note that different types of tokens are made possible in the Hathor Network.  On the left hand side we see both a HTR tab and a MTK tab, for the Hathor token, and a different, ERC-20 like, token.   
-![Wallet Home](https://drive.google.com/thumbnail?id=1_1-Xh_koKX6PhW6pWPDDFvuKHn-V4MyE&sz=w500-h375)
+![Wallet Home](https://drive.google.com/thumbnail?id=15ocrSVhZ2h1KmvysqSigfS6Vxs1CPChR&sz=w1920-h1080)
 
 Sending tokens.  
-![Send Tokens](https://drive.google.com/thumbnail?id=1Lq6Q0j2J0989vfYzykVSpYjra3bLTI2u&sz=w500-h375)
+![Send Tokens](https://drive.google.com/thumbnail?id=1Nw2eNBvdjftJaMY_X6dp3hssHzif1b2o&sz=w1920-h1080)
 
 The wallet includes a block and transaction explorer.  
-![Explorer](https://drive.google.com/thumbnail?id=1YdEfGB7L9E2tA4vGDTsGdGvoKw5bqdhT&sz=w500-h375)
+![Explorer](https://drive.google.com/thumbnail?id=1YcqUC80FU_xpaymEobxGWKTrYjIALfHJ&sz=w1920-h1080)
 
 A transaction is displayed.  
-![Transaction Detail](https://drive.google.com/thumbnail?id=1N3IaiT0kBT1QkRq6xU_b_D66EZBVajiB&sz=w500-h375)
+![Transaction Detail](https://drive.google.com/thumbnail?id=13CMtOMuhdlxJZLHdJ7LxhruI_8PZSdcO&sz=w1920-h1080)
 
 ## For development
 
