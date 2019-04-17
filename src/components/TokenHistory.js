@@ -7,7 +7,6 @@
 
 import React from 'react';
 import dateFormatter from '../utils/date';
-import HathorPaginate from '../components/HathorPaginate';
 import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
@@ -22,20 +21,89 @@ import wallet from '../utils/wallet';
  */
 class TokenHistory extends React.Component {
   /**
-   * page {number} Page of the history (default is 1)
+   * hasAfter {boolean} if should activate 'Next' button in pagination
+   * hasBefore {boolean} if should activate 'Previous' button in pagination
+   * firstHash {string} ID of the first transaction being shown
+   * lastHash {string} ID of the last transaction being shown
+   * reference {string} ID of the reference transaction used when clicking on pagination button
+   * direction {string} 'previous' or 'next', dependending on which pagination button the user has clicked
+   * transactions {Array} List of transactions to be shown in the screen
    */
-  state = { page: 1 };
+  state = {
+    hasAfter: false,
+    hasBefore: false,
+    firstHash: null,
+    lastHash: null,
+    reference: null,
+    direction: null,
+    transactions: [],
+  };
+
+  componentDidMount = () => {
+    this.handleHistoryUpdate();
+  }
+
+  componentDidUpdate = (prevProps) => {
+    if (this.props.history !== prevProps.history) {
+      this.handleHistoryUpdate();
+    }
+  }
 
   /**
-   * Method called when user clicked on a page button
+   * Called when user clicks 'Next' pagination button
    *
-   * @param {Object} data Object that has the index of page button clicked
+   * @param {Object} e Event emitted when button is clicked
    */
-  handlePageClick = (data) => {
-    let selected = data.selected;
-    let page = selected + 1;
+  nextClicked = (e) => {
+    e.preventDefault();
+    this.setState({ reference: this.state.lastHash, direction: 'next' }, () => {
+      this.handleHistoryUpdate();
+    });
+  }
 
-    this.setState({ page: page });
+  /**
+   * Called when user clicks 'Previous' pagination button
+   *
+   * @param {Object} e Event emitted when button is clicked
+   */
+  previousClicked = (e) => {
+    e.preventDefault();
+    this.setState({ reference: this.state.firstHash, direction: 'previous' }, () => {
+      this.handleHistoryUpdate();
+    });
+  }
+
+  /**
+   * Calculates the transactions that will be shown in the list, besides the pagination data
+   */
+  handleHistoryUpdate = () => {
+    if (this.props.history.length > 0) {
+      let startIndex = 0;
+      let endIndex = this.props.count;;
+      if (this.state.reference !== null) {
+        // If has a reference, a pagination button was clicked, so we need to find the index
+        // to calculate the slice to be done in the history
+        const idxReference = this.props.history.findIndex((tx) =>
+          tx.tx_id === this.state.reference
+        )
+        if (this.state.direction === 'previous') {
+          endIndex = idxReference;
+          startIndex = Math.max(0, endIndex - this.props.count);
+        } else if (this.state.direction === 'next') {
+          startIndex = idxReference + 1;
+          endIndex = startIndex + this.props.count
+        }
+      }
+      const hasAfter = this.props.history.length > endIndex;
+      const hasBefore = startIndex > 0;
+      const transactions = this.props.history.slice(startIndex, endIndex);
+      const firstHash = transactions.length > 0 ? transactions[0].tx_id : null;
+      const lastHash = transactions.length > 0 ? transactions[transactions.length - 1].tx_id : null;
+      let reference = this.state.reference;
+      // If back to first page, we have no reference anymore, so new transactions can appear automatically
+      if (startIndex === 0) reference = null;
+      this.setState({ hasAfter, hasBefore, firstHash, lastHash, transactions, reference });
+    }
   }
 
   /**
@@ -59,8 +127,7 @@ class TokenHistory extends React.Component {
    *
    * @return {Object} {found, value} where 'found' is a boolean that shows if any of the addresses is of this user and 'value' is the final value of the transaction
    */
-  prepareTx = (tx) => {
-    const keys = wallet.getWalletData().keys;
+  prepareTx = (tx, keys) => {
     const selectedToken = this.props.selectedToken;
     let found = false;
     let value = 0;
@@ -92,12 +159,16 @@ class TokenHistory extends React.Component {
     const loadPagination = () => {
       if (this.props.history === null ||
           this.props.history.length === 0 ||
-          this.props.totalPages === 1) {
+          (this.state.hasBefore === false && this.state.hasAfter === false)) {
         return null;
       } else {
         return (
-          <HathorPaginate pageCount={this.props.totalPages}
-            onPageChange={this.handlePageClick} />
+          <nav aria-label="Token pagination" className="d-flex justify-content-center">
+            <ul className="pagination">
+              <li className={(!this.state.hasBefore || this.props.history.length === 0) ? "page-item mr-3 disabled" : "page-item mr-3"}><a className="page-link" onClick={(e) => this.previousClicked(e)} href="true">Previous</a></li>
+              <li className={(!this.state.hasAfter || this.props.history.length === 0) ? "page-item disabled" : "page-item"}><a className="page-link" href="true" onClick={(e) => this.nextClicked(e)}>Next</a></li>
+            </ul>
+          </nav>
         );
       }
     }
@@ -131,11 +202,9 @@ class TokenHistory extends React.Component {
     }
 
     const renderHistoryData = () => {
-      const startIndex = (this.state.page - 1) * this.props.count;
-      const endIndex = startIndex + this.props.count;
-      const history = this.props.history.slice(startIndex, endIndex);
-      return history.map((tx, idx) => {
-        const extra = this.prepareTx(tx);
+      const keys = wallet.getWalletData().keys;
+      return this.state.transactions.map((tx, idx) => {
+        const extra = this.prepareTx(tx, keys);
         if (!extra.found) {
           return null;
         }

@@ -508,6 +508,10 @@ const wallet = {
     }
 
     for (let txin of tx.inputs) {
+      if (this.isAuthorityOutput(txin)) {
+        continue;
+      }
+
       if (txin.token === selectedToken) {
         if (this.isAddressMine(txin.decoded.address, walletData)) {
           return true;
@@ -515,6 +519,10 @@ const wallet = {
       }
     }
     for (let txout of tx.outputs) {
+      if (this.isAuthorityOutput(txout)) {
+        continue;
+      }
+
       if (txout.token === selectedToken) {
         if (this.isAddressMine(txout.decoded.address, walletData)) {
           return true;
