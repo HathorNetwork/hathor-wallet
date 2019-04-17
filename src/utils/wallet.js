@@ -486,28 +486,32 @@ const wallet = {
    *
    * @param {Object} tx Transaction object
    * @param {string} selectedToken Token uid
+   * @param {Object} walletData Wallet data in localStorage already loaded
    *
    * @return {boolean}
    *
    * @memberof Wallet
    * @inner
    */
-  hasTokenAndAddress(tx, selectedToken) {
-    const walletData = this.getWalletData();
+  hasTokenAndAddress(tx, selectedToken, walletData) {
+    if (walletData === undefined) {
+      walletData = this.getWalletData();
+    }
+
     if (walletData === null) {
       return false;
     }
 
     for (let txin of tx.inputs) {
       if (txin.token === selectedToken) {
-        if (this.isAddressMine(txin.decoded.address)) {
+        if (this.isAddressMine(txin.decoded.address, walletData)) {
           return true;
         }
       }
     }
     for (let txout of tx.outputs) {
       if (txout.token === selectedToken) {
-        if (this.isAddressMine(txout.decoded.address)) {
+        if (this.isAddressMine(txout.decoded.address, walletData)) {
           return true;
         }
       }
@@ -527,10 +531,11 @@ const wallet = {
    * @inner
    */
   filterHistoryTransactions(historyTransactions, selectedToken) {
+    const walletData = this.getWalletData();
     const data = [];
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id];
-      if (this.hasTokenAndAddress(tx, selectedToken)) {
+      if (this.hasTokenAndAddress(tx, selectedToken, walletData)) {
         data.push(tx);
       }
     }
@@ -567,7 +572,7 @@ const wallet = {
           // Ignore authority outputs.
           continue;
         }
-        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address)) {
+        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address, data)) {
           if (this.canUseUnspentTx(txout)) {
             balance.available += txout.value;
           } else {
@@ -840,7 +845,7 @@ const wallet = {
         if (ret.inputsAmount >= amount) {
           return ret;
         }
-        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address)) {
+        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address, data)) {
           if (this.canUseUnspentTx(txout)) {
             ret.inputsAmount += txout.value;
             ret.inputs.push({ tx_id: tx.tx_id, index, token: selectedToken, address: txout.decoded.address });
@@ -905,7 +910,7 @@ const wallet = {
         return {exists: false, message: `Output [${index}] of transaction [${txId}] is an authority output`};
       }
 
-      if (!(this.isAddressMine(txout.decoded.address))) {
+      if (!(this.isAddressMine(txout.decoded.address, data))) {
         return {exists: false, message: `Output [${index}] of transaction [${txId}] is not yours`};
       }
 
@@ -1335,13 +1340,17 @@ const wallet = {
    * Check if address is from the loaded wallet
    *
    * @param {string} address Address to check
+   * @param {Object} data Wallet data in localStorage already loaded
    *
    * @return {boolean}
    * @memberof Wallet
    * @inner
    */
-  isAddressMine(address) {
-    const data = this.getWalletData();
+  isAddressMine(address, data) {
+    if (data === undefined) {
+      data = this.getWalletData();
+    }
+
     if (data && address in data.keys) {
       return true;
     }
