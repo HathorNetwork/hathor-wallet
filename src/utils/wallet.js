@@ -15,7 +15,7 @@ import helpers from './helpers';
 import { OutputValueError } from './errors';
 import version from './version';
 import store from '../store/index';
-import { historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
+import { loadingAddresses, historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
 import WebSocketHandler from '../WebSocketHandler';
 import dateFormatter from './date';
 import _ from 'lodash';
@@ -126,7 +126,7 @@ const wallet = {
    * @param {string} password
    * @param {boolean} loadHistory if should load the history from the generated addresses
    *
-   * @return {string} words generated
+   * @return {Promise} Promise that resolves when finishes loading address history, in case loadHistory = true, else returns null
    * @memberof Wallet
    * @inner
    */
@@ -155,11 +155,16 @@ const wallet = {
     localStorage.setItem('wallet:accessData', JSON.stringify(access));
     localStorage.setItem('wallet:data', JSON.stringify(walletData));
 
+    let promise = null;
     if (loadHistory) {
       // Load history from address
-      this.loadAddressHistory(0, GAP_LIMIT);
+      store.dispatch(loadingAddresses(true));
+      promise = this.loadAddressHistory(0, GAP_LIMIT);
+      promise.then(() => {
+        store.dispatch(loadingAddresses(false));
+      });
     }
-    return code.phrase;
+    return promise;
   },
 
   /**
@@ -1064,6 +1069,7 @@ const wallet = {
     const walletData = this.getWalletData();
 
     // Clean all data in the wallet from the old server
+    store.dispatch(loadingAddresses(true));
     this.cleanWallet();
     // Restart websocket connection
     WebSocketHandler.setup();
@@ -1085,7 +1091,11 @@ const wallet = {
     localStorage.setItem('wallet:data', JSON.stringify(newWalletData));
 
     // Load history from new server
-    return this.loadAddressHistory(0, GAP_LIMIT);
+    const promise = this.loadAddressHistory(0, GAP_LIMIT);
+    promise.then(() => {
+      store.dispatch(loadingAddresses(false));
+    });
+    return promise;
   },
 
   /*
@@ -1242,7 +1252,7 @@ const wallet = {
    *
    * @throws {OutputValueError} Will throw an error if one of the output value is invalid
    *
-   * @return {Object} Return an object with {newSharedAddress, newSharedIndex}
+   * @return {Object} Return an object with {historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesLoaded}
    * @memberof Wallet
    * @inner
    */
@@ -1326,6 +1336,8 @@ const wallet = {
         }
       })
     } else {
+      // When it gets here, it means that already loaded all transactions
+      // so no need to load more
       if (resolve) {
         resolve();
       }
@@ -1333,7 +1345,7 @@ const wallet = {
 
     this.saveAddressHistory(historyTransactions, allTokens);
 
-    return {historyTransactions, allTokens, newSharedAddress, newSharedIndex};
+    return {historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesLoaded: lastGeneratedIndex + 1};
   },
 
   /**
