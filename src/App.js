@@ -95,7 +95,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
         <StartedRoute exact path="/settings" component={Settings} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={true} loadingAddresses={true} />
+        <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={true} loadingAddresses={false} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
         <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
         <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
