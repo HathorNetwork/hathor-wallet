@@ -77,7 +77,7 @@ class SentryPermission extends React.Component {
           <form>
             <div className="form-check mt-4 mb-4">
               <input required type="checkbox" onChange={(e) => this.checkboxChanged(e)} checked={this.state.checkboxPermission} className="form-check-input" id="permission" ref="permission" />
-              <label className="form-check-label" htmlFor="permission"> I allow Hathor Wallet to send error information to Sentry</label>
+              <label className="form-check-label" htmlFor="permission"> I allow Hathor Wallet to report error information to Hathor team.</label>
             </div>
           </form>
             <div className="d-flex align-items-center flex-column">

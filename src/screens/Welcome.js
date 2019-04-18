@@ -49,7 +49,7 @@ class Welcome extends React.Component {
           <form ref="agreeForm" className={`w-100 mb-4 ${this.state.formValidated ? 'was-validated' : ''}`}>
             <div className="form-check">
               <input required type="checkbox" className="form-check-input" id="confirmAgree" />
-              <label className="form-check-label" htmlFor="confirmAgree"> I agree to participate in the testnet of Hathor, and I acknowledge that the tokens are not for real</label>
+              <label className="form-check-label" htmlFor="confirmAgree"> I agree to participate in the testnet of Hathor, and I acknowledge that the tokens are not for real.</label>
             </div>
           </form>
             <div className="d-flex align-items-center flex-column">
