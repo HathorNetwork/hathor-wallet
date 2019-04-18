@@ -10,7 +10,6 @@ import WalletHistory from '../components/WalletHistory';
 import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
 import ModalBackupWords from '../components/ModalBackupWords';
-import ModalAddToken from '../components/ModalAddToken';
 import TokenBar from '../components/TokenBar';
 import HathorAlert from '../components/HathorAlert';
 import wallet from '../utils/wallet';
@@ -77,26 +76,6 @@ class Wallet extends React.Component {
     });
   }
 
-  /**
-   * Called when a new token was added with success, then close the modal and show alert success
-   */
-  newTokenSuccess = () => {
-    $('#addTokenModal').modal('hide');
-    this.setState({ successMessage: 'Token added!' }, () => {
-      this.refs.alertSuccess.show(1000);
-    });
-  }
-
-  /**
-   * Triggered when user clicks to do the add a token, then opens the new token modal
-   *
-   * @param {Object} e Event emitted when user click
-   */
-  addTokenClicked = (e) => {
-    e.preventDefault()
-    $('#addTokenModal').modal('show');
-  }
-
   render() {
     const renderBackupAlert = () => {
       return (
@@ -146,9 +125,8 @@ class Wallet extends React.Component {
           {renderUnlockedWallet()}
         </div>
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
-        <ModalAddToken success={this.newTokenSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        <TokenBar {...this.props} addToken={this.addTokenClicked} />
+        <TokenBar {...this.props} />
       </div>
     );
   }

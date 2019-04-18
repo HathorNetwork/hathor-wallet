@@ -17,6 +17,7 @@ import WaitVersion from './components/WaitVersion';
 import TransactionDetail from './screens/TransactionDetail';
 import Server from './screens/Server';
 import ChoosePassphrase from './screens/ChoosePassphrase';
+import CustomTokens from './screens/CustomTokens';
 import Welcome from './screens/Welcome';
 import SentryPermission from './screens/SentryPermission';
 import UnknownTokens from './screens/UnknownTokens';
@@ -86,6 +87,7 @@ class Root extends React.Component {
     return (
       <Switch>
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="/custom_tokens" component={CustomTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />

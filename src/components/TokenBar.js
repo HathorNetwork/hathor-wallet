@@ -156,10 +156,6 @@ class TokenBar extends React.Component {
           </div>
           <div className='body'>
             {renderTokens()}
-            <div className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.props.addToken}>
-              <i className='fa fa-plus token-icon' title='Add token'></i>
-              {this.state.opened && <span className='ellipsis'>Add token</span>}
-            </div>
             {unknownTokens > 0 ? renderUnknownTokens() : null}
           </div>
         </div>
