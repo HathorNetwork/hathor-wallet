@@ -42,17 +42,21 @@ const initialState = {
   // If is in the proccess of loading addresses transactions from the full node
   loadingAddresses: false,
   // Quantity of addresses already loaded to give a feedback to the user
-  addressesLoaded: 0,
+  addressesFound: 0,
+  // Quantity of transactions already loaded to give a feedback to the user
+  transactionsFound: 0,
 };
 
 const rootReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'history_update':
-      const { historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesLoaded } = wallet.updateHistoryData(state.historyTransactions, state.allTokens, action.payload.data, action.payload.resolve);
+      const { historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesFound } = wallet.updateHistoryData(state.historyTransactions, state.allTokens, action.payload.data, action.payload.resolve);
+
+      const transactionsFound = Object.keys(historyTransactions).length;
 
       const newLastSharedAddress = newSharedAddress === null ? state.lastSharedAddress : newSharedAddress;
       const newLastSharedIndex = newSharedIndex === null ? state.lastSharedIndex : newSharedIndex;
-      return Object.assign({}, state, {historyTransactions, allTokens, lastSharedIndex: newLastSharedIndex, lastSharedAddress: newLastSharedAddress, addressesLoaded});
+      return Object.assign({}, state, {historyTransactions, allTokens, lastSharedIndex: newLastSharedIndex, lastSharedAddress: newLastSharedAddress, addressesFound, transactionsFound});
 
     case 'shared_address':
       return Object.assign({}, state, {lastSharedAddress: action.payload.lastSharedAddress, lastSharedIndex: action.payload.lastSharedIndex});
@@ -80,8 +84,8 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {selectedToken: action.payload.uid, tokens: action.payload.tokens});
     case 'loading_addresses_update':
       return Object.assign({}, state, {loadingAddresses: action.payload});
-    case 'addresses_loaded_update':
-      return Object.assign({}, state, {addressesLoaded: action.payload});
+    case 'data_loaded_update':
+      return Object.assign({}, state, {addressesFound: action.payload.addressesFound, transactionsFound: action.payload.transactionsFound});
     default:
       return state;
   }

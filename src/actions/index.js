@@ -81,6 +81,6 @@ export const newTokens = data => ({ type: "new_tokens", payload: data });
 export const loadingAddresses = data => ({ type: "loading_addresses_update", payload: data });
 
 /**
- * Set quantity of addresses already loaded
+ * Set quantity of addresses and transactions already loaded
  */
-export const addressesLoaded = data => ({ type: "addresses_loaded_update", payload: data });
+export const dataLoaded = data => ({ type: "data_loaded_update", payload: data });

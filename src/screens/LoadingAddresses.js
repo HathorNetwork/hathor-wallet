@@ -9,19 +9,20 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import ReactLoading from 'react-loading';
 import logo from '../assets/images/hathor-logo.png';
-import { addressesLoaded } from "../actions/index";
+import { dataLoaded } from "../actions/index";
 import { connect } from "react-redux";
 
 const mapDispatchToProps = dispatch => {
   return {
-    addressesLoaded: (data) => dispatch(addressesLoaded(data)),
+    dataLoaded: (data) => dispatch(dataLoaded(data)),
   };
 };
 
 
 const mapStateToProps = (state) => {
   return {
-    alreadyLoaded: state.addressesLoaded,
+    addressesFound: state.addressesFound,
+    transactionsFound: state.transactionsFound,
     loadingAddresses: state.loadingAddresses
   };
 };
@@ -39,7 +40,7 @@ class LoadingAddresses extends React.Component {
   state = { canRedirect: false };
 
   componentDidMount = () => {
-    this.props.addressesLoaded(0);
+    this.props.dataLoaded({addressesFound: 0, transactionsFound: 0});
     // To prevent only a blink in this screen when user loads the addresses really fast
     // I set that the user will see this screen at least for 2 seconds
     setTimeout(() => {
@@ -65,8 +66,9 @@ class LoadingAddresses extends React.Component {
               </div>
             </div>
             <p>Please wait while we load the transactions of all your addresses.</p>
-            <p>You will be automatically redirected when the wallet finishes loading them.</p>
-            <p><strong>Addresses loaded:</strong> {this.props.alreadyLoaded}</p>
+            <p>You will be automatically redirected to the wallet when we finish loading them.</p>
+            <p><strong>Addresses found:</strong> {this.props.addressesFound}</p>
+            <p><strong>Transactions found:</strong> {this.props.transactionsFound}</p>
           </div>
         </div>
       </div>

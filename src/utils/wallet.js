@@ -1260,7 +1260,7 @@ const wallet = {
    *
    * @throws {OutputValueError} Will throw an error if one of the output value is invalid
    *
-   * @return {Object} Return an object with {historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesLoaded}
+   * @return {Object} Return an object with {historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesFound}
    * @memberof Wallet
    * @inner
    */
@@ -1353,7 +1353,7 @@ const wallet = {
 
     this.saveAddressHistory(historyTransactions, allTokens);
 
-    return {historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesLoaded: lastGeneratedIndex + 1};
+    return {historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesFound: lastGeneratedIndex + 1};
   },
 
   /**
