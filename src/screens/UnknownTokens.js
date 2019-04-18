@@ -173,7 +173,7 @@ class UnknownTokens extends React.Component {
                 </div>
               </div>
               <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
-                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} selectedToken={token.uid} />
+                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
               </div>
             </div>
           );

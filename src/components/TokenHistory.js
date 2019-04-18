@@ -83,9 +83,7 @@ class TokenHistory extends React.Component {
       if (this.state.reference !== null) {
         // If has a reference, a pagination button was clicked, so we need to find the index
         // to calculate the slice to be done in the history
-        const idxReference = this.props.history.findIndex((tx) =>
-          tx.tx_id === this.state.reference
-        )
+        const idxReference = this.getReferenceIndex();
         if (this.state.direction === 'previous') {
           endIndex = idxReference;
           startIndex = Math.max(0, endIndex - this.props.count);
@@ -107,6 +105,16 @@ class TokenHistory extends React.Component {
   }
 
   /**
+   * Calculates the index of the reference hash in the history list
+   */
+  getReferenceIndex = () => {
+    const idxReference = this.props.history.findIndex((tx) =>
+      tx.tx_id === this.state.reference
+    )
+    return idxReference;
+  }
+
+  /**
    * Method called on copy to clipboard success  
    * Show alert success message
    *
@@ -118,6 +126,37 @@ class TokenHistory extends React.Component {
       // If copied with success
       this.refs.alertCopied.show(1000);
     }
+  }
+
+  /**
+   * Calculates the current page number that user is seeing
+   */
+  getPageNumber = () => {
+    if (this.state.reference === null) {
+      return 1;
+    } else {
+      const idxReference = this.getReferenceIndex();
+      let quantityBefore = 0;
+      if (this.state.direction === 'next') {
+        quantityBefore = idxReference + 1;
+      } else {
+        quantityBefore = idxReference - this.props.count;
+      }
+      const pagesBefore = Math.ceil(quantityBefore / this.props.count);
+      return pagesBefore + 1;
+    }
+  }
+
+  /**
+   * Goes to first page of the history list
+   *
+   * @param {Object} event emitted when clicking on the link
+   */
+  goToPage1 = (e) => {
+    e.preventDefault();
+    this.setState({ reference: null, direction: null }, () => {
+      this.handleHistoryUpdate();
+    });
   }
 
   /**
@@ -234,8 +273,22 @@ class TokenHistory extends React.Component {
       });
     }
 
+    const renderPage = () => {
+      const page = this.getPageNumber();
+      let span = null;
+      if (page === 1) {
+        span = <span>You are seeing transactions in real time</span>;
+      } else {
+        span = <span className="text-warning">To see transactions in real time, <a href="true" onClick={(e) => this.goToPage1(e)}>go to page 1</a></span>;
+      }
+      return (
+        <p className="mt-3 mb-0 page-text"><strong>Page {page}</strong> - {span}</p>
+      );
+    }
+
     return (
       <div>
+        {this.props.showPage && renderPage()}
         {renderHistory()}
         <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
       </div>
