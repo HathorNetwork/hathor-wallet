@@ -50,7 +50,6 @@ const mapStateToProps = (state) => {
   return { isVersionAllowed: state.isVersionAllowed };
 };
 
-
 class Root extends React.Component {
   componentDidMount() {
     WebSocketHandler.on('wallet', this.handleWebsocket);
