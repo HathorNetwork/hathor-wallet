@@ -17,6 +17,16 @@ Sentry.init({
   release: process.env.npm_package_version
 })
 
+let tray = null
+let iconOS;
+
+if (process.platform === 'darwin') {
+  iconOS = 'icon.icns'
+}else {
+  iconOS = 'icon.png'
+}
+
+
 const appName = 'Hathor Wallet';
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -29,7 +39,7 @@ function createWindow () {
     show: false,
     width: 1024,
     height: 768,
-    icon: path.join(__dirname, 'icon.png'),
+    icon: path.join(__dirname, iconOS ),
     webPreferences: {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js')
@@ -54,6 +64,16 @@ function createWindow () {
   var template = [{
       label: appName,
       submenu: [
+          { type: 'checkbox', label: 'Systray', checked: true, click: function(item) { 
+            if(item.checked) {
+               if(tray != null){
+                  startSystray()
+                }                
+            }else{
+                tray.destroy()
+            }
+          }},
+          { type: 'separator' },
           { label: `About ${appName}`, selector: 'orderFrontStandardAboutPanel:' },
           { type: 'separator' },
           { label: 'Quit', accelerator: 'Command+Q', click: function() { app.quit(); }}
@@ -88,8 +108,6 @@ function createWindow () {
   
 }
 
-
-
 if (process.platform === 'darwin') {
   // Set "About" options only on macOS
   app.setAboutPanelOptions({
@@ -104,8 +122,12 @@ if (process.platform === 'darwin') {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
 
-let tray = null
+
 app.on('ready', () => {
+    startSystray()
+})
+
+function startSystray() {
   tray = new Tray(path.join(__dirname, 'icon.png'))
   const contextMenu = Menu.buildFromTemplate([
     { 
@@ -132,9 +154,7 @@ app.on('ready', () => {
   ])
 
   tray.setContextMenu(contextMenu)
-  
-
-})
+}
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
