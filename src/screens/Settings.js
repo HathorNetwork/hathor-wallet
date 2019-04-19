@@ -64,7 +64,7 @@ class Settings extends React.Component {
           <h4>Advanced Settings</h4>
           <div className="d-flex flex-column align-items-start mt-4">
             <p><strong>Automatically report bugs to Hathor:</strong> {wallet.isSentryAllowed() ? <span>Yes</span> : <span>No</span>} <Link className='ml-3' to='/permission/'> Change </Link></p>
-            <button className="btn btn-hathor" onClick={this.addPassphrase}>Add passphrase</button>
+            <button className="btn btn-hathor" onClick={this.addPassphrase}>Set a passphrase</button>
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>Reset all data</button>
           </div>
         </div>
