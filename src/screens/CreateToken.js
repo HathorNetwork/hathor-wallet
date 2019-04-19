@@ -14,7 +14,8 @@ import { AddressError } from '../utils/errors';
 import ReactLoading from 'react-loading';
 import tokens from '../utils/tokens';
 import { HATHOR_TOKEN_CONFIG, HATHOR_TOKEN_INDEX, MAX_OUTPUT_VALUE, DECIMAL_PLACES } from '../constants';
-import ModalPin from '../components/ModalPin'
+import ModalPin from '../components/ModalPin';
+import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 
@@ -44,11 +45,15 @@ class CreateToken extends React.Component {
      * errorMessage {string} Message to show when error happens on the form
      * loading {boolean} While waiting for server response, loading is true and show a spinner
      * pin {string} PIN that user writes in the modal
+     * name {string} Name of the created token
+     * configurationString {string} Configuration string of the created token
      */
     this.state = {
       errorMessage: '',
       loading: false,
-      pin: ''
+      pin: '',
+      name: '',
+      configurationString: ''
     };
   }
 
@@ -152,8 +157,8 @@ class CreateToken extends React.Component {
     const promise = new Promise((resolve, reject) => {
       try {
         const retPromise = tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**DECIMAL_PLACES), 10), this.state.pin);
-        retPromise.then(() => {
-          resolve();
+        retPromise.then((token) => {
+          resolve(token);
         }, (message) => {
           reject(message);
         });
@@ -167,12 +172,33 @@ class CreateToken extends React.Component {
       }
     });
 
-    promise.then(() => {
-      this.setState({ loading: false });
-      this.props.history.push('/wallet/');
+    promise.then((token) => {
+      this.showAlert(token);
     }, (message) => {
       this.setState({ loading: false, errorMessage: message });
     });
+  }
+
+  /**
+   * Method called after creating a token, then show an alert with explanation of the token
+   *
+   * @param {Object} token Object with {uid, name, symbol}
+   */
+  showAlert = (token) => {
+    this.setState({ name: token.name, configurationString: tokens.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
+      $('#alertModal').modal('show');
+    });
+  }
+
+  /**
+   * Method called after clicking the button in the alert modal, then redirects to the wallet screen
+   */
+  alertButtonClick = () => {
+    $('#alertModal').on('hidden.bs.modal', (e) => {
+      this.setState({ loading: false });
+      this.props.history.push('/wallet/');
+    });
+    $('#alertModal').modal('hide');
   }
 
   /**
@@ -209,6 +235,17 @@ class CreateToken extends React.Component {
         <div className="d-flex flex-row">
           <p className="mr-3">Please, wait while we create your token</p>
           <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />
+        </div>
+      )
+    }
+
+    const getAlertBody = () => {
+      return (
+        <div>
+          <p>Your token has been successfully created!</p>
+          <p>You can share the following configuration string with other people to let them use your brand new token.</p>
+          <p>Remember to <strong>make a backup</strong> of this configuration string.</p>
+          <p><strong>{this.state.configurationString}</strong></p>
         </div>
       )
     }
@@ -267,6 +304,7 @@ class CreateToken extends React.Component {
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
         {this.state.loading ? isLoading() : null}
         <ModalPin execute={this.createToken} handleChangePin={this.handleChangePin} />
+        <ModalAlert title={`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
       </div>
     );
   }
