@@ -216,6 +216,11 @@ class CreateToken extends React.Component {
     return (
       <div className="content-wrapper">
         <BackButton {...this.props} />
+        <h3 className="mt-4">Create Token</h3>
+        <p className="mt-5">Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.</p>
+        <p>Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.</p>
+        <p>Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.</p>
+        <hr className="mb-5 mt-5"/>
         <form ref="formCreateToken" id="formCreateToken">
           <div className="row">
             <div className="form-group col-6">
@@ -257,7 +262,7 @@ class CreateToken extends React.Component {
             <input type="text" placeholder="Tx id" ref={this.txId} className="form-control input-id col-6" />
             <input type="text" placeholder="Index" ref={this.index} className="form-control input-index col-1 ml-3" />
           </div>
-          <button type="button" disabled={this.state.loading} className="btn btn-hathor" data-toggle="modal" data-target="#pinModal">Create</button>
+          <button type="button" disabled={this.state.loading} className="mt-3 btn btn-hathor" data-toggle="modal" data-target="#pinModal">Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
         {this.state.loading ? isLoading() : null}

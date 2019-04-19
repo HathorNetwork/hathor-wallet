@@ -145,6 +145,8 @@ class DashboardTx extends React.Component {
     return (
       <div className="content-wrapper">
         <BackButton {...this.props} />
+        <h3 className="mt-4">Explorer</h3>
+        <p className="mt-4">Here you can see the most recent transactions and blocks of the network.</p>
         <SearchTx {...this.props} newData={this.newData} resetData={this.resetData} />
         <div className="table-responsive">
           <table className="table" id="tx-table">

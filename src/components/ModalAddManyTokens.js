@@ -77,16 +77,16 @@ class ModalAddManyTokens extends React.Component {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Add many tokens</h5>
+              <h5 className="modal-title" id="exampleModalLabel">Register Custom Tokens</h5>
               <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <p>Write the configuration string for each token separated by comma</p>
+              <p>You can register one or more tokens writing the configuration string of each one below.</p>
               <form ref="formAddToken">
                 <div className="form-group">
-                  <textarea className="form-control" rows={8} ref="configs" placeholder="Configuration strings separated by comma" />
+                  <textarea className="form-control" rows={8} ref="configs" placeholder="Configuration strings" />
                 </div>
                 <div className="row">
                   <div className="col-12 col-sm-10">
@@ -99,7 +99,7 @@ class ModalAddManyTokens extends React.Component {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button onClick={this.handleAdd} type="button" className="btn btn-hathor">Add</button>
+              <button onClick={this.handleAdd} type="button" className="btn btn-hathor">Register</button>
             </div>
           </div>
         </div>
