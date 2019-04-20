@@ -243,9 +243,9 @@ class TxData extends React.Component {
       }
       if (hashes.length === 1) {
         const h = hashes[0];
-        return <Link className={textDark ? "text-dark" : ""} to={`/transaction/${h}`}> {h}</Link>;
+        return <Link className={textDark ? "text-dark" : ""} to={`/transaction/${h}`}> {h} {h === this.props.transaction.hash && ' (Current transaction)'}</Link>;
       }
-      const v = hashes.map((h) => <li key={h}><Link className={textDark ? "text-dark" : ""} to={`/transaction/${h}`}>{h}</Link></li>)
+      const v = hashes.map((h) => <li key={h}><Link className={textDark ? "text-dark" : ""} to={`/transaction/${h}`}>{h} {h === this.props.transaction.hash && ' (Current transaction)'}</Link></li>)
       return (<ul>
         {v}
       </ul>)
