@@ -45,15 +45,17 @@ class ModalAddManyTokens extends React.Component {
    */
   handleAdd = (e) => {
     e.preventDefault();
-    const configs = this.refs.configs.value;
+    const configs = this.refs.configs.value.trim();
     let toAdd = [];
     if (configs === '') {
       this.setState({ errorMessage: 'Must provide configuration string' });
       return;
     }
 
-    const configsArr = configs.split(',');
-    for (const config of configsArr) {
+    const regex = /\[[\w\s]+(:\w+){3}\]/g;
+    const matches = configs.matchAll(regex);
+    for (const match of matches) {
+      const config = match[0];
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
         const validation = tokens.validateTokenToAddByConfigurationString(config);
