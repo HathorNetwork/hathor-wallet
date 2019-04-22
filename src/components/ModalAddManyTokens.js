@@ -53,9 +53,8 @@ class ModalAddManyTokens extends React.Component {
     }
 
     const regex = /\[[\w\s]+(:\w+){3}\]/g;
-    const matches = configs.matchAll(regex);
-    for (const match of matches) {
-      const config = match[0];
+    const matches = configs.match(regex);
+    for (const config of matches) {
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
         const validation = tokens.validateTokenToAddByConfigurationString(config);
