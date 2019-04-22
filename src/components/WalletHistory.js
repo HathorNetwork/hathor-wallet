@@ -34,7 +34,7 @@ class WalletHistory extends React.Component {
     const renderHistory = () => {
       const totalPages = this.getTotalPages();
       return (
-        <div className="d-flex flex-column">
+        <div className="d-flex flex-column mt-5">
           <strong>Transaction history</strong>
           <TokenHistory history={this.props.historyTransactions} totalPages={totalPages} count={WALLET_HISTORY_COUNT} selectedToken={this.props.selectedToken} />
         </div>

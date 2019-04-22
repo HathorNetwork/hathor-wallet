@@ -91,7 +91,7 @@ class ModalAddressQRCode extends React.Component {
             </div>
             <div className="modal-body d-flex flex-column align-items-center">
               <QRCode onClick={this.openQrCode} size={200} value={`hathor:${this.props.lastSharedAddress}`} />
-              <span ref="address" className="mt-1">
+              <span ref="address" className="mt-3">
                 {this.props.lastSharedAddress}
                 <CopyToClipboard text={this.props.lastSharedAddress} onCopy={this.copied}>
                   <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
