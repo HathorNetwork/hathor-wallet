@@ -1510,6 +1510,8 @@ const wallet = {
    */
   sendNotification(message) {
     if (this.isNotificationOn()) {
+      // For the native app in electron we dont need to request permission, because it's always granted
+      // That's why we check only the localStorage choice of the user
       return new Notification('Hathor Wallet', {body: message, silent: false});
     }
   },

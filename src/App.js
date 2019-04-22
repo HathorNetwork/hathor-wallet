@@ -69,7 +69,7 @@ class Root extends React.Component {
       if (wsData.type === 'wallet:address_history') {
         // If is a new transaction, we send a notification to the user, in case it's turned on
         if (!wallet.txExists(wsData.history)) {
-          const message = 'New transaction! Click to open'
+          const message = 'You\'ve received a new transaction! Click to open it.'
           const notification = wallet.sendNotification(message);
           // Set the notification click, in case we have sent one
           if (notification !== undefined) {
