@@ -34,16 +34,16 @@ This screen will show a warning, so you need to click on 'More info'. Another sc
 ## Screenshots
 
 The basic view of the wallet.  Note that different types of tokens are made possible in the Hathor Network.  On the left hand side we see both a HTR tab and a MTK tab, for the Hathor token, and a different, ERC-20 like, token.   
-![Wallet Home](https://drive.google.com/thumbnail?id=15ocrSVhZ2h1KmvysqSigfS6Vxs1CPChR&sz=w1920-h1080)
+![Wallet Home](https://drive.google.com/thumbnail?id=1_1-Xh_koKX6PhW6pWPDDFvuKHn-V4MyE&sz=w3000-h2250)
 
 Sending tokens.  
-![Send Tokens](https://drive.google.com/thumbnail?id=1Nw2eNBvdjftJaMY_X6dp3hssHzif1b2o&sz=w1920-h1080)
+![Send Tokens](https://drive.google.com/thumbnail?id=1Lq6Q0j2J0989vfYzykVSpYjra3bLTI2u&sz=w3000-h2250)
 
 The wallet includes a block and transaction explorer.  
-![Explorer](https://drive.google.com/thumbnail?id=1YcqUC80FU_xpaymEobxGWKTrYjIALfHJ&sz=w1920-h1080)
+![Explorer](https://drive.google.com/thumbnail?id=1YdEfGB7L9E2tA4vGDTsGdGvoKw5bqdhT&sz=w3000-h2250)
 
 A transaction is displayed.  
-![Transaction Detail](https://drive.google.com/thumbnail?id=13CMtOMuhdlxJZLHdJ7LxhruI_8PZSdcO&sz=w1920-h1080)
+![Transaction Detail](https://drive.google.com/thumbnail?id=1N3IaiT0kBT1QkRq6xU_b_D66EZBVajiB&sz=w3000-h2250)
 
 ## For development
 
