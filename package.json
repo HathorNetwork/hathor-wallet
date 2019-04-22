@@ -46,7 +46,8 @@
     "react-redux": "^5.0.7",
     "react-router-dom": "4.2.2",
     "react-scripts": "2.0.3",
-    "redux": "^4.0.0"
+    "redux": "^4.0.0",
+    "viz.js": "^2.1.2"
   },
   "main": "public/electron.js",
   "homepage": "./",

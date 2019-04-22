@@ -15,6 +15,9 @@ import helpers from '../utils/helpers';
 import wallet from '../utils/wallet';
 import HathorAlert from './HathorAlert';
 import { connect } from "react-redux";
+import txApi from '../api/txApi';
+import Viz from 'viz.js';
+import { Module, render } from 'viz.js/full.render.js';
 
 
 const mapStateToProps = (state) => {
@@ -37,12 +40,44 @@ class TxData extends React.Component {
 
   componentDidMount = () => {
     this.calculateTokens();
+    this.updateGraphs();
   }
 
   componentDidUpdate = (prevProps) => {
     if (prevProps.transaction !== this.props.transaction) {
       this.calculateTokens();
+      this.updateGraphs();
     }
+  }
+
+  /**
+   * Returns the url to get the graph for each type
+   *
+   * @param {string} hash ID of the transaction to get the graph
+   * @param {string} type Type of graph to be returned (funds or verification)
+   */
+  graphURL = (hash, type) => {
+    return `${helpers.getServerURL()}graphviz/?format=dot&tx=${hash}&graph_type=${type}&max_level=${MAX_GRAPH_LEVEL}`;
+  }
+
+  /**
+   * Update graphs on the screen to add the ones from the server
+   */
+  updateGraphs = () => {
+    const viz = new Viz({ Module, render });
+    const url1 = this.graphURL(this.props.transaction.hash, 'funds');
+    const url2 = this.graphURL(this.props.transaction.hash, 'verification');
+    txApi.getGraphviz(url1, (response) => {
+      viz.renderSVGElement(response).then((element) => {
+        document.getElementById('graph-funds').appendChild(element);
+      });
+    });
+
+    txApi.getGraphviz(url2, (response) => {
+      viz.renderSVGElement(response).then((element) => {
+        document.getElementById('graph-verification').appendChild(element);
+      });
+    });
   }
 
   /**
@@ -334,15 +369,10 @@ class TxData extends React.Component {
       )
     }
 
-    const graphURL = (hash, type) => {
-      return `${helpers.getServerURL()}graphviz/?format=png&tx=${hash}&graph_type=${type}&max_level=${MAX_GRAPH_LEVEL}`;
-    }
-
     const renderGraph = (label, type) => {
       return (
-        <div className="mt-3">
+        <div className="mt-3 graph-div" id={`graph-${type}`} key={`graph-${type}-${this.props.transaction.hash}`}>
           <label className="graph-label">{label}:</label>
-          <img alt={label} className="mt-3 graph-img" src={graphURL(this.props.transaction.hash, type)} />
         </div>
       );
     }
