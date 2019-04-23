@@ -277,9 +277,9 @@ class TokenHistory extends React.Component {
       const page = this.getPageNumber();
       let span = null;
       if (page === 1) {
-        span = <span>You are seeing transactions in real time</span>;
+        span = <span>You are receiving transactions in real time.</span>;
       } else {
-        span = <span className="text-warning">To see transactions in real time, <a href="true" onClick={(e) => this.goToPage1(e)}>go to page 1</a></span>;
+        span = <span className="text-warning">To receive transactions in real time, <a href="true" onClick={(e) => this.goToPage1(e)}>go to page 1</a>.</span>;
       }
       return (
         <p className="mt-3 mb-0 page-text"><strong>Page {page}</strong> - {span}</p>
