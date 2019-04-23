@@ -18,14 +18,15 @@ Sentry.init({
 })
 
 let tray = null
-let iconOS;
+let iconOS = null;
+let trayIcon = null;
 
 if (process.platform === 'darwin') {
-  iconOS = 'icon.icns'
-}else {
-  iconOS = 'icon.png'
+  iconOS = 'icon.icns';
+  trayIcon = 'icon_tray.png';
+} else {
+  trayIcon = iconOS = 'icon.png';
 }
-
 
 const appName = 'Hathor Wallet';
 
@@ -39,7 +40,7 @@ function createWindow () {
     show: false,
     width: 1024,
     height: 768,
-    icon: path.join(__dirname, iconOS ),
+    icon: path.join(__dirname, iconOS),
     webPreferences: {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js')
@@ -64,17 +65,18 @@ function createWindow () {
   var template = [{
       label: appName,
       submenu: [
-          { type: 'checkbox', label: 'Systray', checked: true, click: function(item) { 
-            if(item.checked) {
-               if(tray != null){
-                  startSystray()
-                }                
-            }else{
-                tray.destroy()
+          { label: `About ${appName}`, selector: 'orderFrontStandardAboutPanel:' },
+          { type: 'separator' },
+          { type: 'checkbox', label: 'Systray', checked: false, click: function(item) {
+            if (item.checked) {
+              if (tray === null) {
+                startSystray();
+              }
+            } else {
+              tray.destroy();
+              tray = null;
             }
           }},
-          { type: 'separator' },
-          { label: `About ${appName}`, selector: 'orderFrontStandardAboutPanel:' },
           { type: 'separator' },
           { label: 'Quit', accelerator: 'Command+Q', click: function() { app.quit(); }}
       ]}, {
@@ -101,11 +103,12 @@ function createWindow () {
   })
 
   mainWindow.on("close", (e) => {
-    e.preventDefault()
-    mainWindow.hide()
+    if (tray !== null && !tray.isDestroyed()) {
+      // In case the user is using systray we don't close the app, just hide it
+      e.preventDefault()
+      mainWindow.hide()
+    }
   })
-
-  
 }
 
 if (process.platform === 'darwin') {
@@ -122,25 +125,17 @@ if (process.platform === 'darwin') {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
 
-
-app.on('ready', () => {
-    startSystray()
-})
-
 function startSystray() {
-  tray = new Tray(path.join(__dirname, 'icon.png'))
+  tray = new Tray(path.join(__dirname, trayIcon));
   const contextMenu = Menu.buildFromTemplate([
-    { 
+    {
       label: 'Show/Hide', 
       type: 'normal',
       click() {  
-        if(mainWindow.isVisible())
-        {
-          mainWindow.hide()
-        }
-        else
-        {
-          mainWindow.show()
+        if (mainWindow.isVisible()) {
+          mainWindow.hide();
+        } else {
+          mainWindow.show();
         }
       }
     },
