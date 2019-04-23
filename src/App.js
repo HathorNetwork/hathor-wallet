@@ -38,6 +38,7 @@ import RequestErrorModal from './components/RequestError';
 import DashboardTx from './screens/DashboardTx';
 import DecodeTx from './screens/DecodeTx';
 import PushTx from './screens/PushTx';
+import store from './store/index';
 
 
 const mapDispatchToProps = dispatch => {
@@ -89,19 +90,19 @@ class Root extends React.Component {
   render() {
     return (
       <Switch>
-        <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/settings" component={Settings} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
+        <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
+        <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} />
+        <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} />
+        <StartedRoute exact path="/wallet" component={Wallet} loaded={true} />
+        <StartedRoute exact path="/settings" component={Settings} loaded={true} />
+        <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
         <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={true} loadingAddresses={false} />
-        <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/dashboard-tx" component={DashboardTx} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/transactions" component={TransactionList} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
-        <StartedRoute exact path="/blocks" component={BlockList} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
+        <StartedRoute exact path="/transaction/:id" component={TransactionDetail} />
+        <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} />
+        <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} />
+        <StartedRoute exact path="/dashboard-tx" component={DashboardTx} loaded={true} />
+        <StartedRoute exact path="/transactions" component={TransactionList} loaded={true} />
+        <StartedRoute exact path="/blocks" component={BlockList} loaded={true} />
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
@@ -109,7 +110,7 @@ class Root extends React.Component {
         <Route exact path="/welcome" component={Welcome} />
         <Route exact path="/loading_addresses" component={LoadingAddresses} />
         <Route exact path="/permission" component={SentryPermission} />
-        <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} loadingAddresses={this.props.loadingAddresses} />
+        <StartedRoute exact path="" component={Wallet} loaded={true} />
         <Route path="" component={Page404} />
       </Switch>
     )
@@ -120,21 +121,24 @@ class Root extends React.Component {
  * Validate if version is allowed for the loaded wallet
  */
 const returnLoadedWalletComponent = (Component, props, rest) => {
+  // For server screen we don't need to check version
+  const isServerScreen = props.match.path === '/server';
+  const reduxState = store.getState();
   // Check version
-  if (rest.versionAllowed === undefined) {
+  if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
     const promise = version.checkApiVersion();
     promise.then(() => {
       wallet.localStorageToRedux();
     });
     return <WaitVersion {...props} />;
-  } else if (rest.versionAllowed === false) {
+  } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
     return <VersionError {...props} />;
   } else {
     // If was closed and is loaded we need to redirect to locked screen
     if (wallet.wasClosed()) {
       return <Redirect to={{ pathname: '/locked/' }} />;
     } else {
-      if (rest.loadingAddresses) {
+      if (reduxState.loadingAddresses) {
         // If wallet is still loading addresses we redirect to the loading screen
         return <Redirect to={{
           pathname: '/loading_addresses/',
