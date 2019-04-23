@@ -491,7 +491,7 @@ const wallet = {
    *
    * @param {Object} tx Transaction object
    * @param {string} selectedToken Token uid
-   * @param {Object} walletData Wallet data in localStorage already loaded
+   * @param {Object} walletData Wallet data in localStorage already loaded. This parameter is optional and if nothing is passed, the data will be loaded again. We expect this field to be the return of the method wallet.getWalletData()
    *
    * @return {boolean}
    *
@@ -1360,7 +1360,7 @@ const wallet = {
    * Check if address is from the loaded wallet
    *
    * @param {string} address Address to check
-   * @param {Object} data Wallet data in localStorage already loaded
+   * @param {Object} data Wallet data in localStorage already loaded. This parameter is optional and if nothing is passed, the data will be loaded again. We expect this field to be the return of the method wallet.getWalletData()
    *
    * @return {boolean}
    * @memberof Wallet
