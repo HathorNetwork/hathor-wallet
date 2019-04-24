@@ -20,6 +20,7 @@ import $ from 'jquery';
 const createRequestInstance = (resolve) => {
   const defaultOptions = {
     baseURL: helpers.getServerURL(),
+    timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
     },
