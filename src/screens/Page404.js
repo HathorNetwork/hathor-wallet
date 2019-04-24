@@ -18,7 +18,7 @@ import BackButton from '../components/BackButton';
 const Page404 = (props) => {
   return (
     <div className="outside-content-wrapper">
-      <div className="inside-white-wrapper col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+      <div className="inside-white-wrapper col-sm-12 col-md-8">
         <BackButton {...props} />
         <div>
           <div className="d-flex align-items-center flex-column">

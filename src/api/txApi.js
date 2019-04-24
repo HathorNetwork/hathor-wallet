@@ -147,6 +147,24 @@ const txApi = {
       return Promise.reject(res);
     });
   },
+
+  /*
+   * Call api to get graphviz
+   *
+   * @param {string} url URL to get graph data
+   * @param {function} resolve Method to be called after response arrives
+   *
+   * @return {Promise}
+   * @memberof ApiTransaction
+   * @inner
+   */
+  getGraphviz(url, resolve) {
+    return createRequestInstance(resolve).get(url).then((res) => {
+      resolve(res.data);
+    }, (res) => {
+      return Promise.reject(res);
+    });
+  },
 };
 
 export default txApi;

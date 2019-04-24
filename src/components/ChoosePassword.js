@@ -40,7 +40,7 @@ class ChoosePassword extends React.Component {
       return (
         <div className="mt-4 mb-4">
           <p>Please, choose a password to encrypt your sensitive data while using the wallet.</p>
-          <p className="mt-3">Your password must have at least 8 characters and at least one lower case character, one upper case character, one number, and one special character</p>
+          <p className="mt-3">Your password must have at least 8 characters and at least one lower case character, one upper case character, one number, and one special character.</p>
         </div>
       );
     }

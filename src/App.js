@@ -18,6 +18,7 @@ import TransactionDetail from './screens/TransactionDetail';
 import LoadingAddresses from './screens/LoadingAddresses';
 import Server from './screens/Server';
 import ChoosePassphrase from './screens/ChoosePassphrase';
+import CustomTokens from './screens/CustomTokens';
 import Welcome from './screens/Welcome';
 import SentryPermission from './screens/SentryPermission';
 import UnknownTokens from './screens/UnknownTokens';
@@ -91,12 +92,13 @@ class Root extends React.Component {
     return (
       <Switch>
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
+        <StartedRoute exact path="/custom_tokens" component={CustomTokens} loaded={true} />
         <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} />
         <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} />
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} />
         <StartedRoute exact path="/settings" component={Settings} loaded={true} />
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
-        <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={true} loadingAddresses={false} />
+        <StartedRoute exact path="/server" component={Server} loaded={true} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} />
         <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} />
         <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} />

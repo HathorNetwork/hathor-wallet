@@ -59,7 +59,7 @@ class SentryPermission extends React.Component {
   render() {
     return (
       <div className="outside-content-wrapper">
-        <div className="inside-white-wrapper col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+        <div className="inside-white-wrapper col-sm-12 col-md-8">
           <div>
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
@@ -77,7 +77,7 @@ class SentryPermission extends React.Component {
           <form>
             <div className="form-check mt-4 mb-4">
               <input required type="checkbox" onChange={(e) => this.checkboxChanged(e)} checked={this.state.checkboxPermission} className="form-check-input" id="permission" ref="permission" />
-              <label className="form-check-label" htmlFor="permission"> I allow Hathor Wallet to send error information to Sentry</label>
+              <label className="form-check-label" htmlFor="permission"> I allow Hathor Wallet to report error information to Hathor team.</label>
             </div>
           </form>
             <div className="d-flex align-items-center flex-column">

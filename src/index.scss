@@ -133,6 +133,16 @@ a:hover {
   font-weight: bold;
 }
 
+.address-wrapper {
+  padding: 1rem;
+  border: 1px solid #ddd;
+}
+
+.address-wrapper p {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
 div.new-address-wrapper, button.send-tokens {
   margin-bottom: 1rem;
   margin-right: 1rem;
@@ -362,7 +372,7 @@ svg.svg-wrapper {
   width: 100%;
 }
 
-.graph-img {
+.graph-div svg {
   max-width: 100%;
 }
 
@@ -371,10 +381,15 @@ svg.svg-wrapper {
   width: 100%;
   height: 100%;
   overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
 }
 
 .inside-white-wrapper {
   background-color: transparent;
+  max-width: 728px;
   padding: 4rem !important;
 }
 

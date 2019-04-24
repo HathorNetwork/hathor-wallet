@@ -23,15 +23,12 @@ class ModalAddToken extends React.Component {
 
   componentDidMount = () => {
     $('#addTokenModal').on('hide.bs.modal', (e) => {
-      this.refs.uid.value = '';
-      this.refs.shortName.value = '';
-      this.refs.symbol.value = '';
       this.refs.config.value = '';
       this.setState({ errorMessage: '' });
     })
 
     $('#addTokenModal').on('shown.bs.modal', (e) => {
-      this.refs.uid.focus();
+      this.refs.config.focus();
     })
   }
 
@@ -41,38 +38,24 @@ class ModalAddToken extends React.Component {
   }
 
   /**
-   * Method called when user clicks the button to add the token  
+   * Method called when user clicks the button to register the token  
    * Validates that the data written is valid
    *
    * @param {Object} e Event emitted when user clicks the button
    */
   handleAdd = (e) => {
     e.preventDefault();
-    let uid = this.props.uid ? this.props.uid : this.refs.uid.value;
-    let shortName = this.refs.shortName.value;
-    let symbol = this.refs.symbol.value;
     if (this.refs.config.value === '') {
-      if (uid === '' || shortName === '' || symbol === '') {
-        this.setState({ errorMessage: 'Must provide configuration string or uid, name, and symbol' });
-        return;
-      }
-      const validation = tokens.validateTokenToAddByUid(uid);
-      if (validation.success === false) {
-        this.setState({ errorMessage: validation.message });
-        return;
-      }
-    } else {
-      const validation = tokens.validateTokenToAddByConfigurationString(this.refs.config.value, this.props.uid);
-      if (validation.success === false) {
-        this.setState({ errorMessage: validation.message });
-        return;
-      }
-      const tokenData = validation.tokenData;
-      uid = tokenData.uid;
-      shortName = tokenData.name;
-      symbol = tokenData.symbol;
+      this.setState({ errorMessage: 'Must provide configuration string or uid, name, and symbol' });
+      return;
     }
-    tokens.addToken(uid, shortName, symbol);
+    const validation = tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
+    if (validation.success === false) {
+      this.setState({ errorMessage: validation.message });
+      return;
+    }
+    const tokenData = validation.tokenData;
+    tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
     this.props.success();
   }
 
@@ -82,28 +65,16 @@ class ModalAddToken extends React.Component {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Add a new token</h5>
+              <h5 className="modal-title" id="exampleModalLabel">Register a new token</h5>
               <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
+              <p>To register a token that already exists, just write down its configuration string</p>
               <form ref="formAddToken">
                 <div className="form-group">
-                  {this.props.uid ? <span className="mb-2"><strong>Token uid:</strong> {this.props.uid}</span> : null}
-                  <input type="text" defaultValue={this.props.uid ? this.props.uid : ''} className={`form-control ${this.props.uid ? 'hidden' : ''}`} ref="uid" placeholder="Token uid" />
-                </div>
-                <div className="form-group">
-                  <input type="text" className="form-control" ref="shortName" placeholder="Short name" />
-                </div>
-                <div className="form-group">
-                  <input type="text" className="form-control" pattern="\w{1,5}" ref="symbol" placeholder="Symbol" />
-                </div>
-                <div className="d-flex flex-column align-items-center mb-2">
-                  <span> OR </span>
-                </div>
-                <div className="form-group">
-                  <input type="text" className="form-control" ref="config" placeholder="Configuration string" />
+                  <textarea type="text" className="form-control" ref="config" placeholder="Configuration string" />
                 </div>
                 <div className="row">
                   <div className="col-12 col-sm-10">
@@ -116,7 +87,7 @@ class ModalAddToken extends React.Component {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button onClick={this.handleAdd} type="button" className="btn btn-hathor">Add</button>
+              <button onClick={this.handleAdd} type="button" className="btn btn-hathor">Register</button>
             </div>
           </div>
         </div>

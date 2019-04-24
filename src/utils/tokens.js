@@ -290,7 +290,7 @@ const tokens = {
           this.addToken(response.tx.tokens[0], name, symbol);
           const mintPromise = this.mintTokens(response.tx.hash, response.tx.tokens[0], address, mintAmount, pin)
           mintPromise.then(() => {
-            resolve();
+            resolve({uid: response.tx.tokens[0], name, symbol});
           }, (message) => {
             reject(message);
           });
