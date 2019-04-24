@@ -78,13 +78,6 @@ const checkData = () => {
   doneCb();
 }
 
-const readyLoadHistory = (pin) => {
-  const encrypted = JSON.parse(localStorage.getItem('wallet:accessData')).mainKey;
-  const privKeyStr = wallet.decryptData(encrypted, pin);
-  const privKey = HDPrivateKey(privKeyStr)
-  return wallet.loadAddressHistory(0, GAP_LIMIT, privKey, pin);
-}
-
 beforeEach(() => {
   wallet.cleanLocalStorage();
   store.dispatch(cleanData());
@@ -100,9 +93,7 @@ test('Generate new HD wallet', (done) => {
   // Generate new wallet and save data in localStorage
   const words = wallet.generateWalletWords(256);
   check(wallet.wordsValid(words).valid, true, done);
-  wallet.executeGenerateWallet(words, '', pin, 'password', false);
-
-  const promise = readyLoadHistory(pin);
+  const promise = wallet.executeGenerateWallet(words, '', pin, 'password', true);
 
   promise.then(() => {
     checkData();
@@ -119,10 +110,7 @@ test('Generate HD wallet from predefined words', (done) => {
 
 
   // Generate new wallet and save data in localStorage
-  let retWords = wallet.generateWallet(words, '', pin, 'password', false);
-  check(retWords, words);
-
-  const promise = readyLoadHistory(pin);
+  const promise = wallet.generateWallet(words, '', pin, 'password', true);
 
   promise.then(() => {
     checkData();
