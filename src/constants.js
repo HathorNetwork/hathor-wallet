@@ -50,7 +50,7 @@ export const VERSION = '0.7.0-beta';
 /**
  * Minimum expected API version
  */
-export const MIN_API_VERSION = '0.25.0-beta';
+export const MIN_API_VERSION = '0.24.0-beta';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
