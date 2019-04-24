@@ -18,7 +18,7 @@ Sentry.init({
 })
 
 const appName = 'Hathor Wallet';
-const walletVersion = '0.6.5-beta';
+const walletVersion = '0.7.0-beta';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
