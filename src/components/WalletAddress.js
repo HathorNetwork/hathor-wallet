@@ -73,7 +73,7 @@ class WalletAddress extends React.Component {
       return (
         <div className="d-flex flex-column align-items-center address-wrapper card">
           <p><strong>Address to receive tokens</strong></p>
-          <span ref="address" className="mt-1">
+          <span ref="address" className="mt-1 mb-2">
             {this.props.lastSharedAddress}
             <CopyToClipboard text={this.props.lastSharedAddress} onCopy={this.copied}>
               <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
