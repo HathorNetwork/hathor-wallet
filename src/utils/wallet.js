@@ -15,7 +15,7 @@ import helpers from './helpers';
 import { OutputValueError } from './errors';
 import version from './version';
 import store from '../store/index';
-import { historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
+import { loadingAddresses, historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
 import WebSocketHandler from '../WebSocketHandler';
 import dateFormatter from './date';
 import _ from 'lodash';
@@ -127,7 +127,7 @@ const wallet = {
    * @param {string} password
    * @param {boolean} loadHistory if should load the history from the generated addresses
    *
-   * @return {string} words generated
+   * @return {Promise} Promise that resolves when finishes loading address history, in case loadHistory = true, else returns null
    * @memberof Wallet
    * @inner
    */
@@ -156,11 +156,16 @@ const wallet = {
     localStorage.setItem('wallet:accessData', JSON.stringify(access));
     localStorage.setItem('wallet:data', JSON.stringify(walletData));
 
+    let promise = null;
     if (loadHistory) {
       // Load history from address
-      this.loadAddressHistory(0, GAP_LIMIT);
+      store.dispatch(loadingAddresses(true));
+      promise = this.loadAddressHistory(0, GAP_LIMIT);
+      promise.then(() => {
+        store.dispatch(loadingAddresses(false));
+      });
     }
-    return code.phrase;
+    return promise;
   },
 
   /**
@@ -487,28 +492,40 @@ const wallet = {
    *
    * @param {Object} tx Transaction object
    * @param {string} selectedToken Token uid
+   * @param {Object} walletData Wallet data in localStorage already loaded. This parameter is optional and if nothing is passed, the data will be loaded again. We expect this field to be the return of the method wallet.getWalletData()
    *
    * @return {boolean}
    *
    * @memberof Wallet
    * @inner
    */
-  hasTokenAndAddress(tx, selectedToken) {
-    const walletData = this.getWalletData();
+  hasTokenAndAddress(tx, selectedToken, walletData) {
+    if (walletData === undefined) {
+      walletData = this.getWalletData();
+    }
+
     if (walletData === null) {
       return false;
     }
 
     for (let txin of tx.inputs) {
+      if (this.isAuthorityOutput(txin)) {
+        continue;
+      }
+
       if (txin.token === selectedToken) {
-        if (this.isAddressMine(txin.decoded.address)) {
+        if (this.isAddressMine(txin.decoded.address, walletData)) {
           return true;
         }
       }
     }
     for (let txout of tx.outputs) {
+      if (this.isAuthorityOutput(txout)) {
+        continue;
+      }
+
       if (txout.token === selectedToken) {
-        if (this.isAddressMine(txout.decoded.address)) {
+        if (this.isAddressMine(txout.decoded.address, walletData)) {
           return true;
         }
       }
@@ -528,10 +545,11 @@ const wallet = {
    * @inner
    */
   filterHistoryTransactions(historyTransactions, selectedToken) {
+    const walletData = this.getWalletData();
     const data = [];
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id];
-      if (this.hasTokenAndAddress(tx, selectedToken)) {
+      if (this.hasTokenAndAddress(tx, selectedToken, walletData)) {
         data.push(tx);
       }
     }
@@ -568,7 +586,7 @@ const wallet = {
           // Ignore authority outputs.
           continue;
         }
-        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address)) {
+        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address, data)) {
           if (this.canUseUnspentTx(txout)) {
             balance.available += txout.value;
           } else {
@@ -841,7 +859,7 @@ const wallet = {
         if (ret.inputsAmount >= amount) {
           return ret;
         }
-        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address)) {
+        if (txout.spent_by === null && txout.token === selectedToken && this.isAddressMine(txout.decoded.address, data)) {
           if (this.canUseUnspentTx(txout)) {
             ret.inputsAmount += txout.value;
             ret.inputs.push({ tx_id: tx.tx_id, index, token: selectedToken, address: txout.decoded.address });
@@ -906,7 +924,7 @@ const wallet = {
         return {exists: false, message: `Output [${index}] of transaction [${txId}] is an authority output`};
       }
 
-      if (!(this.isAddressMine(txout.decoded.address))) {
+      if (!(this.isAddressMine(txout.decoded.address, data))) {
         return {exists: false, message: `Output [${index}] of transaction [${txId}] is not yours`};
       }
 
@@ -1060,6 +1078,7 @@ const wallet = {
     const walletData = this.getWalletData();
 
     // Clean all data in the wallet from the old server
+    store.dispatch(loadingAddresses(true));
     this.cleanWallet();
     // Restart websocket connection
     WebSocketHandler.setup();
@@ -1081,7 +1100,11 @@ const wallet = {
     localStorage.setItem('wallet:data', JSON.stringify(newWalletData));
 
     // Load history from new server
-    return this.loadAddressHistory(0, GAP_LIMIT);
+    const promise = this.loadAddressHistory(0, GAP_LIMIT);
+    promise.then(() => {
+      store.dispatch(loadingAddresses(false));
+    });
+    return promise;
   },
 
   /*
@@ -1238,7 +1261,7 @@ const wallet = {
    *
    * @throws {OutputValueError} Will throw an error if one of the output value is invalid
    *
-   * @return {Object} Return an object with {newSharedAddress, newSharedIndex}
+   * @return {Object} Return an object with {historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesFound}
    * @memberof Wallet
    * @inner
    */
@@ -1322,6 +1345,8 @@ const wallet = {
         }
       })
     } else {
+      // When it gets here, it means that already loaded all transactions
+      // so no need to load more
       if (resolve) {
         resolve();
       }
@@ -1329,20 +1354,24 @@ const wallet = {
 
     this.saveAddressHistory(historyTransactions, allTokens);
 
-    return {historyTransactions, allTokens, newSharedAddress, newSharedIndex};
+    return {historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesFound: lastGeneratedIndex + 1};
   },
 
   /**
    * Check if address is from the loaded wallet
    *
    * @param {string} address Address to check
+   * @param {Object} data Wallet data in localStorage already loaded. This parameter is optional and if nothing is passed, the data will be loaded again. We expect this field to be the return of the method wallet.getWalletData()
    *
    * @return {boolean}
    * @memberof Wallet
    * @inner
    */
-  isAddressMine(address) {
-    const data = this.getWalletData();
+  isAddressMine(address, data) {
+    if (data === undefined) {
+      data = this.getWalletData();
+    }
+
     if (data && address in data.keys) {
       return true;
     }

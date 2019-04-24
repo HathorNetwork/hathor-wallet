@@ -119,7 +119,7 @@ class Settings extends React.Component {
           <div className="d-flex flex-column align-items-start mt-4">
             <p><strong>Allow notifications:</strong> {this.state.isNotificationOn ? <span>Yes</span> : <span>No</span>} <a className='ml-3' href="true" onClick={this.toggleNotificationSettings}> Change </a></p>
             <p><strong>Automatically report bugs to Hathor:</strong> {wallet.isSentryAllowed() ? <span>Yes</span> : <span>No</span>} <Link className='ml-3' to='/permission/'> Change </Link></p>
-            <button className="btn btn-hathor" onClick={this.addPassphrase}>Add passphrase</button>
+            <button className="btn btn-hathor" onClick={this.addPassphrase}>Set a passphrase</button>
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>Reset all data</button>
           </div>
         </div>

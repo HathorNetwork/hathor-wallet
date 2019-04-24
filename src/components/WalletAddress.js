@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
+import ModalAddressQRCode from './ModalAddressQRCode';
 import wallet from '../utils/wallet';
+import $ from 'jquery';
 import { connect } from "react-redux";
 
 
@@ -44,13 +45,13 @@ class WalletAddress extends React.Component {
   }
 
   /**
-   * Called when user clicks to download the qrcode
+   * Called when user clicks to show the qrcode
    *
    * @param {Object} e Event emitted by the link clicked
    */
-  downloadQrCode = (e) => {
-    e.currentTarget.href = document.getElementsByTagName('canvas')[0].toDataURL();
-    e.currentTarget.download = "QrCode.png";
+  showQRCode = (e) => {
+    e.preventDefault();
+    $('#addressQRCodeModal').modal('show');
   }
 
   /**
@@ -70,16 +71,19 @@ class WalletAddress extends React.Component {
   render() {
     const renderAddress = () => {
       return (
-        <div className="d-flex flex-column align-items-center address-wrapper">
-          <QRCode onClick={this.openQrCode} size={200} value={`hathor:${this.props.lastSharedAddress}`} />
-          <span ref="address" className="mt-1">
+        <div className="d-flex flex-column align-items-center address-wrapper card">
+          <p><strong>Address to receive tokens</strong></p>
+          <span ref="address" className="mt-1 mb-2">
             {this.props.lastSharedAddress}
             <CopyToClipboard text={this.props.lastSharedAddress} onCopy={this.copied}>
               <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
             </CopyToClipboard>
           </span> 
-          <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">Generate new address</a>
-          <a className="download-qrcode" href="true" onClick={(e) => this.downloadQrCode(e)}>Download</a>
+          <div className="d-flex flex-row align-items-center">
+            <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">Generate new address <i className="fa fa-refresh ml-1" title="Get new address"></i></a>
+            <span className="ml-3 mr-3">|</span>
+            <a href="true" onClick={(e) => this.showQRCode(e)}>QR Code <i className="fa fa-qrcode ml-1" title="Get qrcode"></i></a>
+          </div>
         </div>
       );
     }
@@ -89,6 +93,7 @@ class WalletAddress extends React.Component {
         {renderAddress()}
         <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
         <HathorAlert ref="alertError" text="You must use an old address before generating new ones" type="danger" />
+        <ModalAddressQRCode  />
       </div>
     );
   }
