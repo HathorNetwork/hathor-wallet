@@ -23,7 +23,7 @@ import $ from 'jquery';
  * Create an axios instance to be used when sending requests
  *
  * @param {callback} resolve Callback to be stored and used in case of a retry after a fail
- * @param {number} timeout Timeout for the request
+ * @param {number} timeout Timeout in milliseconds for the request
  */
 const createRequestInstance = (resolve, timeout) => {
   if (timeout === undefined) {
