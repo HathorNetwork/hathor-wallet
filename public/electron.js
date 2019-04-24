@@ -6,7 +6,7 @@
  */
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Tray, Menu} = require('electron')
+const {app, BrowserWindow, Tray, Menu, dialog} = require('electron')
 const Sentry = require('@sentry/electron')
 const url = require('url');
 const path = require('path');
@@ -20,6 +20,7 @@ Sentry.init({
 let tray = null
 let iconOS = null;
 let trayIcon = null;
+let msgCheck = false;
 
 if (process.platform === 'darwin') {
   iconOS = 'icon.icns';
@@ -102,9 +103,25 @@ function createWindow () {
     mainWindow = null
   })
 
-  mainWindow.on("close", (e) => {
+  const optionsClose = {
+    type: 'info',
+    buttons: ['Ok, thanks'],
+    defaultId: 2,
+    icon: path.join(__dirname, trayIcon),
+    title: 'Attention',
+    message: 'Your Hathor Wallet has not been closed. It is only hidden, and you can access it through your systray.',    
+    checkboxLabel: 'Do not show this message again.',
+    checkboxChecked: msgCheck
+  };
+
+  mainWindow.on("close", (e) => {    
     if (tray !== null && !tray.isDestroyed()) {
       // In case the user is using systray we don't close the app, just hide it
+      if (!msgCheck){
+        dialog.showMessageBox(null, optionsClose, (response, checkboxChecked) => {
+          msgCheck = checkboxChecked;
+        });
+      }      
       e.preventDefault()
       mainWindow.hide()
     }
@@ -129,7 +146,7 @@ function startSystray() {
   tray = new Tray(path.join(__dirname, trayIcon));
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Show/Hide', 
+      label: 'Hide wallet/Show wallet', 
       type: 'normal',
       click() {  
         if (mainWindow.isVisible()) {
