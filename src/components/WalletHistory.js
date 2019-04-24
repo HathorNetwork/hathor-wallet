@@ -15,38 +15,15 @@ import { WALLET_HISTORY_COUNT } from '../constants';
  *
  * @memberof Components
  */
-class WalletHistory extends React.Component {
-
-  /**
-   * Get total pages of history list
-   */
-  getTotalPages = () => {
-    const historyTransactions = this.props.historyTransactions;
-    if (historyTransactions.length === 0) {
-      return;
-    }
-
-    let calcPages = Math.ceil(historyTransactions.length / WALLET_HISTORY_COUNT);
-    return calcPages;
-  }
-
-  render() {
-    const renderHistory = () => {
-      const totalPages = this.getTotalPages();
-      return (
-        <div className="d-flex flex-column mt-5">
-          <strong>Transaction history</strong>
-          <TokenHistory history={this.props.historyTransactions} totalPages={totalPages} count={WALLET_HISTORY_COUNT} selectedToken={this.props.selectedToken} />
-        </div>
-      );
-    }
-
-    return (
-      <div>
-        {renderHistory()}
+const WalletHistory = (props) => {
+  return (
+    <div>
+      <div className="d-flex flex-column mt-5">
+        <h4><strong>Transaction history</strong></h4>
+        <TokenHistory history={props.historyTransactions} count={WALLET_HISTORY_COUNT} selectedToken={props.selectedToken} showPage={true} />
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default WalletHistory;

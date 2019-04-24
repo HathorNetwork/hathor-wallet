@@ -54,7 +54,7 @@ class UnknownTokens extends React.Component {
    * Get all unknown tokens from the wallet  
    * Comparing `allTokens` and `tokens` in the Redux we get the ones that are unknown
    *
-   * @return {Array} Array with unknown tokens {uid, balance, history, totalPages}
+   * @return {Array} Array with unknown tokens {uid, balance, history}
    */
   getUnknownTokens = () => {
     let unknownTokens = [];
@@ -66,9 +66,7 @@ class UnknownTokens extends React.Component {
       if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
         const filteredHistoryTransactions = wallet.filterHistoryTransactions(this.props.historyTransactions, token);
         const balance = wallet.calculateBalance(filteredHistoryTransactions, token);
-
-        const calcPages = Math.ceil(filteredHistoryTransactions.length / WALLET_HISTORY_COUNT);
-        unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions, 'totalPages': calcPages});
+        unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions});
 
         this.historyRefs.push(React.createRef());
         this.anchorOpenRefs.push(React.createRef());
@@ -149,7 +147,7 @@ class UnknownTokens extends React.Component {
                 </div>
               </div>
               <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
-                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} totalPages={token.totalPages} selectedToken={token.uid} />
+                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
               </div>
             </div>
           );
