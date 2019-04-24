@@ -125,8 +125,7 @@ class Wallet extends React.Component {
           </div>
           <WalletHistory
             historyTransactions={this.props.historyTransactions}
-            selectedToken={this.props.selectedToken}
-            ref={(node) => { this.historyNode = node; }} />
+            selectedToken={this.props.selectedToken} />
         </div>
       );
     }
