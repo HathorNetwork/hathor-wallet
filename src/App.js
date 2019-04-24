@@ -110,7 +110,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/settings" component={Settings} loaded={true} />
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
         <StartedRoute exact path="/server" component={Server} loaded={true} />
-        <StartedRoute exact path="/transaction/:id" component={TransactionDetail} />
+        <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} />
         <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} />
         <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} />
         <StartedRoute exact path="/dashboard-tx" component={DashboardTx} loaded={true} />
