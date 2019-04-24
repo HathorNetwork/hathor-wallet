@@ -74,3 +74,13 @@ export const selectToken = data => ({ type: "select_token", payload: data });
  * Update selected token and all known tokens in the wallet
  */
 export const newTokens = data => ({ type: "new_tokens", payload: data });
+
+/**
+ * Set if addresses are being loaded
+ */
+export const loadingAddresses = data => ({ type: "loading_addresses_update", payload: data });
+
+/**
+ * Set quantity of addresses and transactions already loaded
+ */
+export const dataLoaded = data => ({ type: "data_loaded_update", payload: data });

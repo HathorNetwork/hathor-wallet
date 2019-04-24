@@ -59,7 +59,7 @@ class LoadWallet extends React.Component {
    * Checks if words are valid and, if true, show component to choose password
    */
   import = () => {
-    const words = this.refs.wordsInput.value;
+    const words = this.refs.wordsInput.value.trim();
     const ret = wallet.wordsValid(words);
     if (ret.valid) {
       this.setState({ words, askPassword: true });
@@ -108,8 +108,8 @@ class LoadWallet extends React.Component {
     const renderLoad = () => {
       return (
         <div>
-          <p className="mt-4 mb-4">Write the 24 words of your wallet (separated by space)</p>
-          <textarea className="form-control one-word-input mb-4" placeholder="Words separated by single space" ref="wordsInput" rows={4} />
+          <p className="mt-4 mb-4">Write the 24 words of your wallet (separated by space).</p>
+          <textarea className="form-control one-word-input mb-4" placeholder="Words separated by single space" ref="wordsInput" rows={5} />
           {this.state.errorMessage && <p className="mb-4 text-danger">{this.state.errorMessage}</p>}
           <div className="d-flex justify-content-between flex-row w-100">
             <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">Back</button>
@@ -121,7 +121,7 @@ class LoadWallet extends React.Component {
 
     return (
       <div className="outside-content-wrapper">
-        <div className="inside-white-wrapper col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+        <div className="inside-white-wrapper col-sm-12 col-md-8">
           <div className="d-flex align-items-center flex-column">
             <img className="hathor-logo" src={logo} alt="" />
             <div className="d-flex align-items-start flex-column">

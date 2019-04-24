@@ -36,7 +36,7 @@ class Welcome extends React.Component {
   render() {
     return (
       <div className="outside-content-wrapper">
-        <div className="inside-white-wrapper col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+        <div className="inside-white-wrapper col-sm-12 col-md-8">
           <div>
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
@@ -49,7 +49,7 @@ class Welcome extends React.Component {
           <form ref="agreeForm" className={`w-100 mb-4 ${this.state.formValidated ? 'was-validated' : ''}`}>
             <div className="form-check">
               <input required type="checkbox" className="form-check-input" id="confirmAgree" />
-              <label className="form-check-label" htmlFor="confirmAgree"> I agree to participate in the testnet of Hathor, and I acknowledge that the tokens are not for real</label>
+              <label className="form-check-label" htmlFor="confirmAgree"> I agree to participate in the testnet of Hathor, and I acknowledge that the tokens are not for real.</label>
             </div>
           </form>
             <div className="d-flex align-items-center flex-column">
