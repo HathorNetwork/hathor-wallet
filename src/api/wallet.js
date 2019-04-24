@@ -6,6 +6,7 @@
  */
 
 import createRequestInstance from './axiosInstance';
+import { SEND_TOKENS_TIMEOUT } from '../constants';
 
 /**
  * Api calls for wallet
@@ -45,7 +46,7 @@ const walletApi = {
    */
   sendTokens(txHex, resolve) {
     const postData = {tx_hex: txHex};
-    return createRequestInstance(resolve, 300000).post('thin_wallet/send_tokens', postData).then((res) => {
+    return createRequestInstance(resolve, SEND_TOKENS_TIMEOUT).post('thin_wallet/send_tokens', postData).then((res) => {
       resolve(res.data)
     }, (res) => {
       return Promise.reject(res);
