@@ -26,15 +26,15 @@ export const DECIMAL_PLACES = 2;
  * ID of the genesis block
  */
 export const GENESIS_BLOCK = [
-  '000000a0f82cfee5431e03b071364970861ffa1b0633f73ca7f462987ec34195'
+  '000164e1e7ec7700a18750f9f50a1a9b63f6c7268637c072ae9ee181e58eb01b'
 ]
 
 /**
  * ID of the genesis transactions
  */
 export const GENESIS_TX = [
-  '000000831cff82fa730cbdf8640fae6c130aab1681336e2f8574e314a5533849',
-  '0000001df6f77892cd562a2d7829bc17d0130546edfc6a81e0a431af4b8aa51e'
+  '00029b7f8051f6ebdc0338d02d4a8cfbd662500ee03224bbee75a6f2da0350b0',
+  '0001e887c7b5ec3b4e57033d849a80d8bccbe3a749abfa87cc31c663530f3f4e'
 ]
 
 /**
@@ -45,7 +45,7 @@ export const GAP_LIMIT = 20;
 /**
  * Wallet version
  */
-export const VERSION = '0.6.5-beta';
+export const VERSION = '0.7.0-beta';
 
 /**
  * Minimum expected API version
@@ -73,10 +73,10 @@ export const HATHOR_BIP44_CODE = 280;
  * Server options for the user to choose which one to connect
  */
 export const DEFAULT_SERVERS = [
+  'https://node1.testnet.hathor.network/api/',
   'https://node2.testnet.hathor.network/api/',
   'https://node3.testnet.hathor.network/api/',
-  'https://node17.testnet.hathor.network/api/',
-  'http://localhost:8080/',
+  'https://node4.testnet.hathor.network/api/',
 ];
 
 /**
@@ -243,7 +243,7 @@ const networks = {
   mainnet
 }
 
-const currentNetwork = process.env.HATHOR_WALLET_NETWORK || 'mainnet';
+const currentNetwork = process.env.HATHOR_WALLET_NETWORK || 'testnet';
 
 /**
  * Version byte for the P2PKH address
