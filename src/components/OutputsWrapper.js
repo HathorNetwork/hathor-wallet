@@ -52,7 +52,7 @@ class OutputsWrapper extends React.Component {
             Time lock
           </label>
         </div>
-        <input type="datetime-local" placeholder="Date and time in GMT" ref={this.timelock} step="1" className="form-control output-timelock col-3" style={{display: 'none'}}/>
+        <input type="datetime-local" placeholder="Date and time in GMT" ref={this.timelock} step="1" className="form-control output-timelock col-4" style={{display: 'none'}}/>
         {this.props.index === 0 ? <button type="button" className="btn btn-hathor" onClick={this.props.addOutput}>+</button> : null}
       </div>
     );
