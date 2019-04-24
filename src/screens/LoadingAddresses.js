@@ -8,6 +8,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import ReactLoading from 'react-loading';
+import RequestErrorModal from '../components/RequestError';
 import logo from '../assets/images/hathor-logo.png';
 import { dataLoaded } from "../actions/index";
 import { connect } from "react-redux";
@@ -71,6 +72,7 @@ class LoadingAddresses extends React.Component {
             <p><strong>Transactions found:</strong> {this.props.transactionsFound}</p>
           </div>
         </div>
+        <RequestErrorModal {...this.props} />
       </div>
     )
   }

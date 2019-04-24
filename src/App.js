@@ -121,7 +121,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/welcome" component={Welcome} />
-        <SimpleRoute exact path="/loading_addresses" component={LoadingAddresses} />
+        <Route exact path="/loading_addresses" component={LoadingAddresses} />
         <Route exact path="/permission" component={SentryPermission} />
         <StartedRoute exact path="" component={Wallet} loaded={true} />
         <Route path="" component={Page404} />
@@ -234,16 +234,6 @@ const returnDefaultComponent = (Component, props) => {
 const NavigationRoute = ({ component: Component, ...rest }) => (
   <Route {...rest} render={(props) => (
       returnDefaultComponent(Component, props)
-  )} />
-)
-
-
-/*
- * Return a component without the navigation component
- */
-const SimpleRoute = ({ component: Component, ...rest }) => (
-  <Route {...rest} render={(props) => (
-      <div className="component-div"><Component {...props} /><RequestErrorModal {...props} /></div>
   )} />
 )
 
