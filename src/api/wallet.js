@@ -45,7 +45,7 @@ const walletApi = {
    */
   sendTokens(txHex, resolve) {
     const postData = {tx_hex: txHex};
-    return createRequestInstance(resolve).post('thin_wallet/send_tokens', postData).then((res) => {
+    return createRequestInstance(resolve, 300000).post('thin_wallet/send_tokens', postData).then((res) => {
       resolve(res.data)
     }, (res) => {
       return Promise.reject(res);

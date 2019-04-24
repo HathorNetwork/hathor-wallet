@@ -17,10 +17,13 @@ import $ from 'jquery';
  *
  * @module Axios
  */
-const createRequestInstance = (resolve) => {
+const createRequestInstance = (resolve, timeout) => {
+  if (timeout === undefined) {
+    timeout = 10000;
+  }
   const defaultOptions = {
     baseURL: helpers.getServerURL(),
-    timeout: 10000,
+    timeout: timeout,
     headers: {
       'Content-Type': 'application/json',
     },
