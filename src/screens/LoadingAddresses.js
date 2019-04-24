@@ -56,7 +56,7 @@ class LoadingAddresses extends React.Component {
 
     return (
       <div className="outside-content-wrapper">
-        <div className="inside-white-wrapper col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+        <div className="inside-white-wrapper col-sm-12 col-md-8">
           <div>
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
