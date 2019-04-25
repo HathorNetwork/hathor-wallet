@@ -8,6 +8,7 @@
 import helpers from '../utils/helpers';
 import axios from 'axios';
 import store from '../store/index';
+import { TIMEOUT } from '../constants';
 import { lastFailedRequest } from '../actions/index';
 import $ from 'jquery';
 
@@ -17,9 +18,20 @@ import $ from 'jquery';
  *
  * @module Axios
  */
-const createRequestInstance = (resolve) => {
+
+/**
+ * Create an axios instance to be used when sending requests
+ *
+ * @param {callback} resolve Callback to be stored and used in case of a retry after a fail
+ * @param {number} timeout Timeout in milliseconds for the request
+ */
+const createRequestInstance = (resolve, timeout) => {
+  if (timeout === undefined) {
+    timeout = TIMEOUT;
+  }
   const defaultOptions = {
     baseURL: helpers.getServerURL(),
+    timeout: timeout,
     headers: {
       'Content-Type': 'application/json',
     },

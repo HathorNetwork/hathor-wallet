@@ -8,6 +8,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import ReactLoading from 'react-loading';
+import RequestErrorModal from '../components/RequestError';
 import logo from '../assets/images/hathor-logo.png';
 import { dataLoaded } from "../actions/index";
 import { connect } from "react-redux";
@@ -56,7 +57,7 @@ class LoadingAddresses extends React.Component {
 
     return (
       <div className="outside-content-wrapper">
-        <div className="inside-white-wrapper col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+        <div className="inside-white-wrapper col-sm-12 col-md-8">
           <div>
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
@@ -71,6 +72,7 @@ class LoadingAddresses extends React.Component {
             <p><strong>Transactions found:</strong> {this.props.transactionsFound}</p>
           </div>
         </div>
+        <RequestErrorModal {...this.props} />
       </div>
     )
   }
