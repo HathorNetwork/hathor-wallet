@@ -151,7 +151,7 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
     if (wallet.wasClosed()) {
       return <Redirect to={{ pathname: '/locked/' }} />;
     } else {
-      if (reduxState.loadingAddresses) {
+      if (reduxState.loadingAddresses && !isServerScreen) {
         // If wallet is still loading addresses we redirect to the loading screen
         return <Redirect to={{
           pathname: '/loading_addresses/',

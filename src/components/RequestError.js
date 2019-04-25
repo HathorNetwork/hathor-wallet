@@ -9,16 +9,8 @@ import React from 'react';
 import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
 import { connect } from 'react-redux';
-import { dataLoaded, loadingAddresses } from "../actions/index";
 import helpers from '../utils/helpers';
 
-
-const mapDispatchToProps = dispatch => {
-  return {
-    dataLoaded: (data) => dispatch(dataLoaded(data)),
-    loadingAddresses: (data) => dispatch(loadingAddresses(data)),
-  };
-};
 
 const mapStateToProps = (state) => {
   return { lastFailedRequest: state.lastFailedRequest };
@@ -56,9 +48,6 @@ class RequestErrorModal extends React.Component {
    */
   handleChangeServer = () => {
     $('#requestErrorModal').modal('hide');
-    // When user decides to change the server when an error happened, we must reset the loading information
-    this.props.dataLoaded({addressesFound: 0, transactionsFound: 0});
-    this.props.loadingAddresses(false);
     this.props.history.push('/server/');
   }
 
@@ -110,4 +99,4 @@ class RequestErrorModal extends React.Component {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(RequestErrorModal);
+export default connect(mapStateToProps)(RequestErrorModal);
