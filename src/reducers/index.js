@@ -40,6 +40,7 @@ const initialState = {
   // List of all tokens seen in transactions
   allTokens: new Set(),
   // If is in the proccess of loading addresses transactions from the full node
+  // When the request to load addresses fails this variable can continue true
   loadingAddresses: false,
   // Quantity of addresses already loaded to give a feedback to the user
   addressesFound: 0,
