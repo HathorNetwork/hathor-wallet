@@ -46,9 +46,9 @@ const createRequestInstance = (resolve, timeout) => {
     // headers, error.response will be undefined
     const statusCode = error.response ? error.response.status : -1;
     if (statusCode === 503) {
-      store.dispatch(updateRequestErrorMessage('Our server has reached its requests limit. You should wait a few seconds and try again.'));
+      store.dispatch(updateRequestErrorMessage('Rate limit exceeded. Sorry about that. You should wait a few seconds and try again. What do you want to do?'));
     } else {
-      store.dispatch(updateRequestErrorMessage('Your request failed to reach the server.'));
+      store.dispatch(updateRequestErrorMessage('Your request failed to reach the server. What do you want to do?'));
     }
     // Save request config in redux
     let config = error.config;

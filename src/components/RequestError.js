@@ -88,7 +88,7 @@ class RequestErrorModal extends React.Component {
               </button>
             </div>
             <div className="modal-body">
-              <p>{this.props.requestErrorMessage} What do you want to do?</p>
+              <p>{this.props.requestErrorMessage}</p>
               <p>You are connected to <strong>{helpers.getServerURL()}</strong></p>
             </div>
             <div className="modal-footer">
