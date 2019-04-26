@@ -1561,6 +1561,31 @@ const wallet = {
   },
 
   /**
+   * Check if all inputs from the txData are from this wallet
+   *
+   * @param {Object} txData Transaction data with a key 'inputs'
+   *
+   * @return {boolean} If all the inputs are from this wallet or not
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  areInputsMine(txData) {
+    // If is a block, the inputs are never from this wallet
+    if (helpers.isBlock(txData)) return false;
+
+    const data = this.getWalletData();
+    let mine = true;
+    for (const input of txData.inputs) {
+      if (!this.isAddressMine(input.decoded.address, data)) {
+        mine = false;
+        break;
+      }
+    }
+    return mine;
+  },
+
+  /**
    * Checks if the notification is turned on
    *
    * @return {boolean} If the notification is turned on
