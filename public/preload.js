@@ -8,6 +8,7 @@
 // This file is executed right before electron start loading the index
 const Sentry = require('@sentry/electron')
 const constants = require('./constants');
+const { ipcRenderer } = require('electron')
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
