@@ -42,7 +42,9 @@ const createRequestInstance = (resolve, timeout) => {
     return response;
   }, (error) => {
     // Update error message in redux depending on the status code
-    const statusCode = error.response.status;
+    // Adding conditional because if the server forgets to send back the CORS
+    // headers, error.response will be undefined
+    const statusCode = error.response ? error.response.status : -1;
     if (statusCode === 503) {
       store.dispatch(updateRequestErrorMessage('Our server has reached its requests limit. You should wait a few seconds and try again.'));
     } else {
