@@ -9,7 +9,7 @@ import helpers from '../utils/helpers';
 import axios from 'axios';
 import store from '../store/index';
 import { TIMEOUT } from '../constants';
-import { lastFailedRequest } from '../actions/index';
+import { lastFailedRequest, updateRequestErrorMessage } from '../actions/index';
 import $ from 'jquery';
 
 /**
@@ -41,6 +41,13 @@ const createRequestInstance = (resolve, timeout) => {
   instance.interceptors.response.use((response) => {
     return response;
   }, (error) => {
+    // Update error message in redux depending on the status code
+    const statusCode = error.response.status;
+    if (statusCode === 503) {
+      store.dispatch(updateRequestErrorMessage('Our server has reached its requests limit. You should wait a few seconds and try again.'));
+    } else {
+      store.dispatch(updateRequestErrorMessage('Your request failed to reach the server.'));
+    }
     // Save request config in redux
     let config = error.config;
     config.resolve = resolve;
