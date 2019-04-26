@@ -33,6 +33,7 @@ import WalletVersionError from './screens/WalletVersionError';
 import { historyUpdate } from "./actions/index";
 import version from './utils/version';
 import wallet from './utils/wallet';
+import helpers from './utils/helpers';
 import { connect } from "react-redux";
 import WebSocketHandler from './WebSocketHandler';
 import RequestErrorModal from './components/RequestError';
@@ -74,8 +75,14 @@ class Root extends React.Component {
       // TODO separate those messages
       if (wsData.type === 'wallet:address_history') {
         // If is a new transaction, we send a notification to the user, in case it's turned on
-        if (!wallet.txExists(wsData.history)) {
-          const message = 'You\'ve received a new transaction! Click to open it.'
+        // We only send the notification if the inputs are not generated from this wallet
+        if (!wallet.txExists(wsData.history) && !wallet.areInputsMine(wsData.history)) {
+          let message = '';
+          if (helpers.isBlock(wsData.history)) {
+            message = 'You\'ve found a new block! Click to open it.';
+          } else {
+            message = 'You\'ve received a new transaction! Click to open it.'
+          }
           const notification = wallet.sendNotification(message);
           // Set the notification click, in case we have sent one
           if (notification !== undefined) {
