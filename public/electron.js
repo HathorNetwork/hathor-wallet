@@ -6,7 +6,7 @@
  */
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Tray, Menu, dialog} = require('electron')
+const {app, BrowserWindow, Tray, Menu, dialog, ipcMain} = require('electron')
 const Sentry = require('@sentry/electron')
 const url = require('url');
 const path = require('path');
@@ -21,6 +21,9 @@ let tray = null
 let iconOS = null;
 let trayIcon = null;
 let msgCheck = false;
+// We need to save the event that brought the check message from the renderer process, in order to send back to it
+let msgCheckEvent = null;
+let systrayLabel = 'Hide Wallet';
 
 if (process.platform === 'darwin') {
   iconOS = 'icon.icns';
@@ -46,7 +49,13 @@ function createWindow () {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js')
     }
-  })  
+  })
+
+  // Waiting for message from preload.js script to get the saved information in localStorage, if the user already checked it
+  ipcMain.on('systray_message:check', (e, check) => {
+    msgCheck = check;
+    msgCheckEvent = e;
+  });
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -107,22 +116,28 @@ function createWindow () {
     type: 'info',
     buttons: ['Ok, thanks'],
     defaultId: 2,
-    icon: path.join(__dirname, trayIcon),
+    icon: path.join(__dirname, 'icon.png'),
     title: 'Attention',
     message: 'Your Hathor Wallet has not been closed. It is only hidden, and you can access it through your systray.',    
     checkboxLabel: 'Do not show this message again.',
     checkboxChecked: msgCheck
   };
 
-  mainWindow.on("close", (e) => {    
+  mainWindow.on('close', (e) => {
     if (tray !== null && !tray.isDestroyed()) {
+      e.preventDefault()
       // In case the user is using systray we don't close the app, just hide it
       if (!msgCheck){
         dialog.showMessageBox(null, optionsClose, (response, checkboxChecked) => {
           msgCheck = checkboxChecked;
+          if (msgCheckEvent) {
+            // Send to renderer process, so it can be saved in localStorage
+            msgCheckEvent.sender.send('systray_message:check', checkboxChecked);
+          }
         });
-      }      
-      e.preventDefault()
+      }
+      // Update systray menu and hide the window
+      updateSystrayMenu(systrayMenuItemShow);
       mainWindow.hide()
     }
   })
@@ -142,20 +157,40 @@ if (process.platform === 'darwin') {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
 
-function startSystray() {
-  tray = new Tray(path.join(__dirname, trayIcon));
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Hide wallet/Show wallet', 
-      type: 'normal',
-      click() {  
-        if (mainWindow.isVisible()) {
-          mainWindow.hide();
-        } else {
-          mainWindow.show();
-        }
-      }
-    },
+const updateSystrayMenu = (firstItem) => {
+  if (tray) {
+    tray.setContextMenu(getMenu(firstItem));
+  }
+}
+
+// Systray menu item to hide the window
+const systrayMenuItemHide = {
+  label: 'Hide Wallet',
+  type: 'normal',
+  click() {
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
+      updateSystrayMenu(systrayMenuItemShow);
+    }
+  }
+}
+
+// Systray menu item to show the window
+const systrayMenuItemShow = {
+  label: 'Show Wallet',
+  type: 'normal',
+  click() {
+    if (!mainWindow.isVisible()) {
+      mainWindow.show();
+      updateSystrayMenu(systrayMenuItemHide);
+    }
+  }
+}
+
+// Systray menu created with a first item and the exit label
+const getMenu = (firstItem) => {
+  return Menu.buildFromTemplate([
+    firstItem,
     { 
       label: 'Exit', 
       type: 'normal',
@@ -164,8 +199,11 @@ function startSystray() {
       }
     }
   ])
+}
 
-  tray.setContextMenu(contextMenu)
+function startSystray() {
+  tray = new Tray(path.join(__dirname, trayIcon));
+  tray.setContextMenu(getMenu(systrayMenuItemHide));
 }
 
 // Quit when all windows are closed.
