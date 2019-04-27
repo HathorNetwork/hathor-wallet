@@ -57,7 +57,7 @@ class TxData extends React.Component {
    * @param {string} type Type of graph to be returned (funds or verification)
    */
   graphURL = (hash, type) => {
-    return `${helpers.getServerURL()}graphviz/?format=dot&tx=${hash}&graph_type=${type}&max_level=${MAX_GRAPH_LEVEL}`;
+    return `${helpers.getServerURL()}graphviz/neighbours.dot/?tx=${hash}&graph_type=${type}&max_level=${MAX_GRAPH_LEVEL}`;
   }
 
   /**
