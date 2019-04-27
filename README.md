@@ -1,6 +1,6 @@
 # Hathor Wallet
 
-Welcome to Hathor Light Wallet. To view the source code of the project access [Github](https://github.com/HathorNetwork/hathor-wallet).
+Welcome to Hathor Light Wallet. To view the source code of the project access [Github](https://github.com/HathorNetwork/hathor-wallet). You can follow the progress of our next tasks in our [Trello board](https://trello.com/b/kNWB1v5e/hathor-wallet).
 
 ## Architecture
 
@@ -15,17 +15,9 @@ You can download the newest version of the wallet for each specific platform.
 - Download for [Linux (deb)](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.6.5-beta/hathor-wallet_0.6.5-beta_amd64.deb)
 - Download for [Linux (AppImage)](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.6.5-beta/Hathor.Wallet.0.6.5-beta.AppImage)
 
-### Warning Message
+### Warning Message for Windows:
 
-We are almost finishing the process of acquiring the certificates for macOS and Windows. While we don't get it you may see a warning message when opening the wallet.
-
-#### For macOS:
-
-![Warning macOS](https://drive.google.com/thumbnail?id=17gxGXmD1Zbd_uSsadnOem_i0tDR-Sdzh&sz=w500-h375)
-
-To be able to run you need to open Security & Privacy, click on the tab "General" and you will see a message "Hathor Wallet was blocked from opening because it is not from an identified developer.". So you just need to click on the button "Open Anyway" to use our wallet. For further information, see [macOS User Guide - Open a Mac app from an unidentified developer](https://support.apple.com/en-gb/guide/mac-help/mh40616/10.14/mac/10.14.3)
-
-#### For Windows:
+We are finishing the process of acquiring the certificates for Windows. While we don't get it you may see a warning message when opening the wallet.
 
 ![Warning Windows](https://drive.google.com/thumbnail?id=1B5kLAXUMj4wmrRfmVtiQyoNe6Q7r8s_h&sz=w500-h375)
 
@@ -34,7 +26,7 @@ This screen will show a warning, so you need to click on 'More info'. Another sc
 ## Screenshots
 
 The basic view of the wallet.  Note that different types of tokens are made possible in the Hathor Network.  On the left hand side we see both a HTR tab and a MTK tab, for the Hathor token, and a different, ERC-20 like, token.   
-![Wallet Home](https://drive.google.com/thumbnail?id=1_1-Xh_koKX6PhW6pWPDDFvuKHn-V4MyE&sz=w3000-h2250)
+![Wallet Home](https://drive.google.com/thumbnail?id=1pJ4JAxTXjMHW1Xuc4cCG0d0LKeVBGgM6&sz=w3000-h2250)
 
 Sending tokens.  
 ![Send Tokens](https://drive.google.com/thumbnail?id=1Lq6Q0j2J0989vfYzykVSpYjra3bLTI2u&sz=w3000-h2250)
