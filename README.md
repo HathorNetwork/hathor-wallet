@@ -17,7 +17,7 @@ You can download the newest version of the wallet for each specific platform.
 
 ### Warning Message for Windows:
 
-We are almost finishing the process of acquiring the certificates for Windows. While we don't get it you may see a warning message when opening the wallet.
+We are finishing the process of acquiring the certificates for Windows. While we don't get it you may see a warning message when opening the wallet.
 
 ![Warning Windows](https://drive.google.com/thumbnail?id=1B5kLAXUMj4wmrRfmVtiQyoNe6Q7r8s_h&sz=w500-h375)
 
