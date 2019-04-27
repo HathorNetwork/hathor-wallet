@@ -308,7 +308,7 @@ class TxData extends React.Component {
           // there are conflicts, but it is not voided
           return (
             <div className="alert alert-success">
-              <h4 className="alert-heading mb-0">This transaction is valid.</h4>
+              <h4 className="alert-heading mb-0">This {helpers.getTxType(this.props.transaction).toLowerCase()} is valid.</h4>
             </div>
           )
         }
@@ -317,7 +317,7 @@ class TxData extends React.Component {
           // there are conflicts, but it is not voided
           return (
             <div className="alert alert-success">
-              <h4 className="alert-heading">This transaction is valid.</h4>
+              <h4 className="alert-heading">This {helpers.getTxType(this.props.transaction).toLowerCase()} is valid.</h4>
               <p>
                 Although there is a double-spending transaction, this transaction has the highest accumulated weight and is valid.
               </p>
@@ -338,12 +338,12 @@ class TxData extends React.Component {
         // it is voided, but there is no conflict
         return (
           <div className="alert alert-danger">
-            <h4 className="alert-heading">This transaction is voided and <strong>NOT</strong> valid.</h4>
+            <h4 className="alert-heading">This {helpers.getTxType(this.props.transaction).toLowerCase()} is voided and <strong>NOT</strong> valid.</h4>
             <p>
-              This transaction is verifying (directly or indirectly) a voided double-spending transaction, hence it is voided as well.
+              This {helpers.getTxType(this.props.transaction).toLowerCase()} is verifying (directly or indirectly) a voided double-spending transaction, hence it is voided as well.
             </p>
             <div className="mb-0">
-              <span>This transaction is voided because of these transactions: </span>
+              <span>This {helpers.getTxType(this.props.transaction).toLowerCase()} is voided because of these transactions: </span>
               {renderListWithLinks(this.props.meta.voided_by, true)}
             </div>
           </div>
@@ -353,7 +353,7 @@ class TxData extends React.Component {
       // it is voided, and there is a conflict
       return (
         <div className="alert alert-danger">
-          <h4 className="alert-heading">This transaction is <strong>NOT</strong> valid.</h4>
+          <h4 className="alert-heading">This {helpers.getTxType(this.props.transaction).toLowerCase()} is <strong>NOT</strong> valid.</h4>
           <div>
             <span>It is voided by: </span>
             {renderListWithLinks(this.props.meta.voided_by, true)}
@@ -417,7 +417,7 @@ class TxData extends React.Component {
     const renderFirstBlock = () => {
       return (
          <Link to={`/transaction/${this.props.meta.first_block}`}> {helpers.getShortHash(this.props.meta.first_block)}</Link>
-      )
+      );
     }
 
     const renderAddressBadge = () => {
@@ -467,11 +467,38 @@ class TxData extends React.Component {
       );
     }
 
+    const renderFirstBlockDiv = () => {
+      return (
+        <div>
+          <label>First block:</label>
+          {this.props.meta.first_block && renderFirstBlock()}
+        </div>
+      );
+    }
+
+    const renderAccWeightDiv = () => {
+      return (
+        <div>
+          <label>Accumulated weight:</label>
+          {renderAccumulatedWeight()}
+        </div>
+      );
+    }
+
+    const renderConfirmationLevel = () => {
+      return (
+        <div>
+          <label>Confirmation level:</label>
+          {this.props.confirmationData ? `${helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%` : 'Retrieving confirmation level data...'}
+        </div>
+      );
+    }
+
     const loadTxData = () => {
       return (
         <div className="tx-data-wrapper">
           {this.props.showConflicts ? renderConflicts() : ''}
-          <div><label>Transaction ID:</label> {this.props.transaction.hash}</div>
+          <div><label>{helpers.isBlock(this.props.transaction) ? 'Block' : 'Transaction'} ID:</label> {this.props.transaction.hash}</div>
           {renderBalance()}
           <div className="d-flex flex-row align-items-start mt-3 mb-3">
             <div className="d-flex flex-column align-items-start common-div bordered-wrapper mr-3">
@@ -479,15 +506,12 @@ class TxData extends React.Component {
               <div><label>Time:</label> {dateFormatter.parseTimestamp(this.props.transaction.timestamp)}</div>
               <div><label>Nonce:</label> {this.props.transaction.nonce}</div>
               <div><label>Weight:</label> {helpers.roundFloat(this.props.transaction.weight)}</div>
-              {helpers.getTxType(this.props.transaction) === 'Block' && renderScore()}
-              <div>
-                <label>First block:</label>
-                {this.props.meta.first_block && renderFirstBlock()}
-              </div>
+              {!helpers.isBlock(this.props.transaction) && renderFirstBlockDiv()}
             </div>
             <div className="d-flex flex-column align-items-center important-div bordered-wrapper">
-              <div><label>Accumulated weight:</label> {renderAccumulatedWeight()}</div>
-              <div><label>Confirmation level:</label> {this.props.confirmationData ? `${helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%` : 'Retrieving confirmation level data...'}</div>
+              {helpers.isBlock(this.props.transaction) && renderScore()}
+              {!helpers.isBlock(this.props.transaction) && renderAccWeightDiv()}
+              {!helpers.isBlock(this.props.transaction) && renderConfirmationLevel()}
             </div>
           </div>
           <div className="d-flex flex-row align-items-start mb-3">
