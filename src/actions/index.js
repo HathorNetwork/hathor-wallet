@@ -84,3 +84,8 @@ export const loadingAddresses = data => ({ type: "loading_addresses_update", pay
  * Set quantity of addresses and transactions already loaded
  */
 export const dataLoaded = data => ({ type: "data_loaded_update", payload: data });
+
+/**
+ * Update message to be shown in request error modal
+ */
+export const updateRequestErrorMessage = data => ({ type: "update_request_error_message", payload: data });
