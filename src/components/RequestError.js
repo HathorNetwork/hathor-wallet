@@ -13,7 +13,10 @@ import helpers from '../utils/helpers';
 
 
 const mapStateToProps = (state) => {
-  return { lastFailedRequest: state.lastFailedRequest };
+  return {
+    lastFailedRequest: state.lastFailedRequest,
+    requestErrorMessage: state.requestErrorMessage,
+  };
 };
 
 
@@ -85,7 +88,7 @@ class RequestErrorModal extends React.Component {
               </button>
             </div>
             <div className="modal-body">
-              <p>Your request failed to reach the server. What do you want to do?</p>
+              <p>{this.props.requestErrorMessage}</p>
               <p>You are connected to <strong>{helpers.getServerURL()}</strong></p>
             </div>
             <div className="modal-footer">

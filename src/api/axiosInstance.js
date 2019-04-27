@@ -8,7 +8,8 @@
 import helpers from '../utils/helpers';
 import axios from 'axios';
 import store from '../store/index';
-import { lastFailedRequest } from '../actions/index';
+import { TIMEOUT } from '../constants';
+import { lastFailedRequest, updateRequestErrorMessage } from '../actions/index';
 import $ from 'jquery';
 
 /**
@@ -17,9 +18,20 @@ import $ from 'jquery';
  *
  * @module Axios
  */
-const createRequestInstance = (resolve) => {
+
+/**
+ * Create an axios instance to be used when sending requests
+ *
+ * @param {callback} resolve Callback to be stored and used in case of a retry after a fail
+ * @param {number} timeout Timeout in milliseconds for the request
+ */
+const createRequestInstance = (resolve, timeout) => {
+  if (timeout === undefined) {
+    timeout = TIMEOUT;
+  }
   const defaultOptions = {
     baseURL: helpers.getServerURL(),
+    timeout: timeout,
     headers: {
       'Content-Type': 'application/json',
     },
@@ -29,6 +41,15 @@ const createRequestInstance = (resolve) => {
   instance.interceptors.response.use((response) => {
     return response;
   }, (error) => {
+    // Update error message in redux depending on the status code
+    // Adding conditional because if the server forgets to send back the CORS
+    // headers, error.response will be undefined
+    const statusCode = error.response ? error.response.status : -1;
+    if (statusCode === 503) {
+      store.dispatch(updateRequestErrorMessage('Rate limit exceeded. Sorry about that. You should wait a few seconds and try again. What do you want to do?'));
+    } else {
+      store.dispatch(updateRequestErrorMessage('Your request failed to reach the server. What do you want to do?'));
+    }
     // Save request config in redux
     let config = error.config;
     config.resolve = resolve;

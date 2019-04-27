@@ -36,7 +36,7 @@ class ChoosePin extends React.Component {
 
   render() {
     const renderMessage = () => {
-      return <p className="mt-4 mb-4">The PIN is a 6-digit password requested to authorize actions in your wallet, such as generating new addresses and sending tokens</p>;
+      return <p className="mt-4 mb-4">The PIN is a 6-digit password requested to authorize actions in your wallet, such as generating new addresses and sending tokens.</p>;
     }
 
     return (

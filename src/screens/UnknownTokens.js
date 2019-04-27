@@ -10,11 +10,12 @@ import wallet from '../utils/wallet';
 import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
-import ModalAddToken from '../components/ModalAddToken';
+import TokenBar from '../components/TokenBar';
 import ModalAddManyTokens from '../components/ModalAddManyTokens';
 import helpers from '../utils/helpers';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import { connect } from "react-redux";
+import BackButton from '../components/BackButton';
 
 
 const mapStateToProps = (state) => {
@@ -53,7 +54,7 @@ class UnknownTokens extends React.Component {
    * Get all unknown tokens from the wallet  
    * Comparing `allTokens` and `tokens` in the Redux we get the ones that are unknown
    *
-   * @return {Array} Array with unknown tokens {uid, balance, history, totalPages}
+   * @return {Array} Array with unknown tokens {uid, balance, history}
    */
   getUnknownTokens = () => {
     let unknownTokens = [];
@@ -65,9 +66,7 @@ class UnknownTokens extends React.Component {
       if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
         const filteredHistoryTransactions = wallet.filterHistoryTransactions(this.props.historyTransactions, token);
         const balance = wallet.calculateBalance(filteredHistoryTransactions, token);
-
-        const calcPages = Math.ceil(filteredHistoryTransactions.length / WALLET_HISTORY_COUNT);
-        unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions, 'totalPages': calcPages});
+        unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions});
 
         this.historyRefs.push(React.createRef());
         this.anchorOpenRefs.push(React.createRef());
@@ -104,35 +103,9 @@ class UnknownTokens extends React.Component {
   }
 
   /**
-   * Triggered when user clicks to add the unknown token
-   *
-   * @param {Object} e Event emitted by the click
-   * @param {string} uid UID of the unknown token the user wants to add
-   */
-  addToken = (e, uid) => {
-    e.preventDefault();
-    this.setState({ uidSelected: uid }, () => {
-      $('#addTokenModal').modal('show');
-    });
-  }
-
-  /**
-   * Triggered when a new token is added, then show alert message
-   */
-  newTokenSuccess = () => {
-    $('#addTokenModal').modal('hide');
-    this.setState({ successMessage: 'Token added!'}, () => {
-      this.refs.alertSuccess.show(3000);
-    });
-  }
-
-  /**
    * Triggered when user clicks to do a bulk import
-   *
-   * @param {Object} e Event emitted by the click
    */
-  massiveImport = (e) => {
-    e.preventDefault();
+  massiveImport = () => {
     $('#addManyTokensModal').modal('show');
   }
 
@@ -169,13 +142,12 @@ class UnknownTokens extends React.Component {
                   </div>
                 </div>
                 <div className="d-flex flex-row align-items-center">
-                  <a href="true" className="mr-3" onClick={(e) => this.addToken(e, token.uid)}>Add token</a>
-                  <a onClick={(e) => this.openHistory(e, index)} ref={this.anchorOpenRefs[index]} href="true">See history</a>
+                  <a onClick={(e) => this.openHistory(e, index)} ref={this.anchorOpenRefs[index]} href="true">Show history</a>
                   <a onClick={(e) => this.hideHistory(e, index)} ref={this.anchorHideRefs[index]} href="true" style={{display: 'none'}}>Hide history</a>
                 </div>
               </div>
               <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
-                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} totalPages={token.totalPages} selectedToken={token.uid} />
+                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
               </div>
             </div>
           );
@@ -185,14 +157,17 @@ class UnknownTokens extends React.Component {
 
     return (
       <div className="content-wrapper">
-        <div className="d-flex flex-row align-items-center mb-5">
-          <h3 className="mr-4">Unknown tokens</h3>
-          <a onClick={(e) => this.massiveImport(e)} href="true">Bulk import</a>
+        <BackButton {...this.props} />
+        <div className="d-flex flex-row align-items-center mb-4 mt-4">
+          <h3 className="mr-4">Unknown Tokens</h3>
+          <button onClick={this.massiveImport} className="btn btn-hathor">Register Tokens</button>
         </div>
+        <p>Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.</p>
+        <p className="mb-5">If you have reset your wallet, you need to register your custom tokens again.</p>
         {unknownTokens && renderTokens()}
-        <ModalAddToken success={this.newTokenSuccess} uid={this.state.uidSelected} />
         <ModalAddManyTokens success={this.massiveImportSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
+        <TokenBar {...this.props}  />
       </div>
     );
   }

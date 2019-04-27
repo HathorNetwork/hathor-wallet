@@ -33,6 +33,7 @@ if (process.platform === 'darwin') {
 }
 
 const appName = 'Hathor Wallet';
+const walletVersion = '0.7.0-beta';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -56,6 +57,8 @@ function createWindow () {
     msgCheck = check;
     msgCheckEvent = e;
   });
+  // Adding wallet version to user agent, so we can get in all request headers
+  mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + ' HathorWallet/' + walletVersion);
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -147,7 +150,7 @@ if (process.platform === 'darwin') {
   // Set "About" options only on macOS
   app.setAboutPanelOptions({
     'applicationName': appName,
-    'applicationVersion': '0.6.5-beta',
+    'applicationVersion': walletVersion,
     'version': '',
   });
 }

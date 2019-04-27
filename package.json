@@ -21,7 +21,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Foundation <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.6.5-beta",
+  "version": "0.7.0-beta",
   "private": true,
   "dependencies": {
     "@sentry/electron": "^0.17.0",
@@ -42,11 +42,11 @@
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.2.0",
     "react-loading": "^1.0.3",
-    "react-paginate": "^5.0.0",
     "react-redux": "^5.0.7",
     "react-router-dom": "4.2.2",
     "react-scripts": "2.0.3",
-    "redux": "^4.0.0"
+    "redux": "^4.0.0",
+    "viz.js": "^2.1.2"
   },
   "main": "public/electron.js",
   "homepage": "./",

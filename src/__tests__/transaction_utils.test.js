@@ -88,7 +88,7 @@ test('Decode address', () => {
 });
 
 test('Validate address', () => {
-  let addressB58 = 'H8rodtbo5TcfUkRBs6ujQTg2u1Re3xVZ11';
+  let addressB58 = 'WgSpcCwYAbtt31S2cqU7hHJkUHdac2EPWG';
   let decoded = transaction.decodeAddress(addressB58);
   expect(transaction.validateAddress(addressB58, decoded)).toBeTruthy();
 
@@ -134,7 +134,7 @@ test('Push data', () => {
 });
 
 test('Create output script', () => {
-  let address = 'H8rodtbo5TcfUkRBs6ujQTg2u1Re3xVZ11';
+  let address = 'WR1i8USJWQuaU423fwuFQbezfevmT4vFWX';
   let expectedHex = '76a91419a8eb751eab5a13027e8cae215f6a5dafc1a8dd88ac';
   expect(transaction.createOutputScript(address).toString('hex')).toBe(expectedHex);
 
@@ -189,12 +189,12 @@ test('Prepare data to send tokens', () => {
     ],
     'outputs': [
       {
-        'address': 'H8rodtbo5TcfUkRBs6ujQTg2u1Re3xVZ11',
+        'address': 'WR1i8USJWQuaU423fwuFQbezfevmT4vFWX',
         'value': 1000,
         'timelock': null
       },
       {
-        'address': 'HQHv7d72jeby3hqAozUbh9Knhe8TCiTKnp',
+        'address': 'WgSpcCwYAbtt31S2cqU7hHJkUHdac2EPWG',
         'value': 1000,
         'timelock': 1550249803
       }

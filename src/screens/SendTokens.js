@@ -230,6 +230,7 @@ class SendTokens extends React.Component {
     return (
       <div className="content-wrapper flex align-items-center">
         <BackButton {...this.props} />
+        <h3 className="mt-4 mb-4">Send Tokens</h3>
         {renderPage()}
         {this.state.loading ? isLoading() : null}
         <ModalPin execute={this.send} handleChangePin={this.handleChangePin} />

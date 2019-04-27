@@ -15,8 +15,10 @@ import TransactionList from './screens/TransactionList';
 import Navigation from './components/Navigation';
 import WaitVersion from './components/WaitVersion';
 import TransactionDetail from './screens/TransactionDetail';
+import LoadingAddresses from './screens/LoadingAddresses';
 import Server from './screens/Server';
 import ChoosePassphrase from './screens/ChoosePassphrase';
+import CustomTokens from './screens/CustomTokens';
 import Welcome from './screens/Welcome';
 import SentryPermission from './screens/SentryPermission';
 import UnknownTokens from './screens/UnknownTokens';
@@ -31,12 +33,14 @@ import WalletVersionError from './screens/WalletVersionError';
 import { historyUpdate } from "./actions/index";
 import version from './utils/version';
 import wallet from './utils/wallet';
+import helpers from './utils/helpers';
 import { connect } from "react-redux";
 import WebSocketHandler from './WebSocketHandler';
 import RequestErrorModal from './components/RequestError';
 import DashboardTx from './screens/DashboardTx';
 import DecodeTx from './screens/DecodeTx';
 import PushTx from './screens/PushTx';
+import store from './store/index';
 
 
 const mapDispatchToProps = dispatch => {
@@ -47,7 +51,10 @@ const mapDispatchToProps = dispatch => {
 
 
 const mapStateToProps = (state) => {
-  return { isVersionAllowed: state.isVersionAllowed };
+  return {
+    isVersionAllowed: state.isVersionAllowed,
+    loadingAddresses: state.loadingAddresses,
+  };
 };
 
 class Root extends React.Component {
@@ -66,6 +73,23 @@ class Root extends React.Component {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
       if (wsData.type === 'wallet:address_history') {
+        // If is a new transaction, we send a notification to the user, in case it's turned on
+        // We only send the notification if the inputs are not generated from this wallet
+        if (!wallet.txExists(wsData.history) && !wallet.areInputsMine(wsData.history)) {
+          let message = '';
+          if (helpers.isBlock(wsData.history)) {
+            message = 'You\'ve found a new block! Click to open it.';
+          } else {
+            message = 'You\'ve received a new transaction! Click to open it.'
+          }
+          const notification = wallet.sendNotification(message);
+          // Set the notification click, in case we have sent one
+          if (notification !== undefined) {
+            notification.onclick = () => {
+              this.props.history.push(`/transaction/${wsData.history.tx_id}/`);
+            }
+          }
+        }
         this.props.historyUpdate({'data': [wsData.history]});
       } else {
         console.log('Websocket message not handled. Type:', wsData.type);
@@ -84,26 +108,28 @@ class Root extends React.Component {
   render() {
     return (
       <Switch>
-        <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        <StartedRoute exact path="/wallet" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        <StartedRoute exact path="/settings" component={Settings} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        <StartedRoute exact path="/server" component={Server} loaded={true} versionAllowed={true} />
-        <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} versionAllowed={this.props.isVersionAllowed} />
-        <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
-        <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
-        <StartedRoute exact path="/dashboard-tx" component={DashboardTx} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
-        <StartedRoute exact path="/transactions" component={TransactionList} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
-        <StartedRoute exact path="/blocks" component={BlockList} loaded={true} versionAllowed={this.props.isVersionAllowed}/>
+        <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
+        <StartedRoute exact path="/custom_tokens" component={CustomTokens} loaded={true} />
+        <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} />
+        <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} />
+        <StartedRoute exact path="/wallet" component={Wallet} loaded={true} />
+        <StartedRoute exact path="/settings" component={Settings} loaded={true} />
+        <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
+        <StartedRoute exact path="/server" component={Server} loaded={true} />
+        <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} />
+        <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} />
+        <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} />
+        <StartedRoute exact path="/dashboard-tx" component={DashboardTx} loaded={true} />
+        <StartedRoute exact path="/transactions" component={TransactionList} loaded={true} />
+        <StartedRoute exact path="/blocks" component={BlockList} loaded={true} />
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/welcome" component={Welcome} />
+        <Route exact path="/loading_addresses" component={LoadingAddresses} />
         <Route exact path="/permission" component={SentryPermission} />
-        <StartedRoute exact path="" component={Wallet} loaded={true} versionAllowed={this.props.isVersionAllowed} />
+        <StartedRoute exact path="" component={Wallet} loaded={true} />
         <Route path="" component={Page404} />
       </Switch>
     )
@@ -114,21 +140,32 @@ class Root extends React.Component {
  * Validate if version is allowed for the loaded wallet
  */
 const returnLoadedWalletComponent = (Component, props, rest) => {
+  // For server screen we don't need to check version
+  const isServerScreen = props.match.path === '/server';
+  const reduxState = store.getState();
   // Check version
-  if (rest.versionAllowed === undefined) {
+  if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
     const promise = version.checkApiVersion();
     promise.then(() => {
       wallet.localStorageToRedux();
     });
     return <WaitVersion {...props} />;
-  } else if (rest.versionAllowed === false) {
+  } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
     return <VersionError {...props} />;
   } else {
     // If was closed and is loaded we need to redirect to locked screen
     if (wallet.wasClosed()) {
-      return <Redirect to={{pathname: '/locked/'}} />;
+      return <Redirect to={{ pathname: '/locked/' }} />;
     } else {
-      return returnDefaultComponent(Component, props);
+      if (reduxState.loadingAddresses && !isServerScreen) {
+        // If wallet is still loading addresses we redirect to the loading screen
+        return <Redirect to={{
+          pathname: '/loading_addresses/',
+          state: {path: props.match.url}
+        }} />;
+      } else {
+        return returnDefaultComponent(Component, props);
+      }
     }
   }
 }
