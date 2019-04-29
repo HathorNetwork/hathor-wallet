@@ -7,6 +7,7 @@
 
 import React from 'react';
 import TxTextInput from '../components/TxTextInput';
+import helpers from '../utils/helpers';
 import TxData from '../components/TxData';
 import txApi from '../api/txApi';
 
@@ -51,7 +52,9 @@ class DecodeTx extends React.Component {
   txDecoded = (data) => {
     if (data.success) {
       this.setState({ transaction: data.tx, meta: data.meta, spentOutputs: data.spent_outputs, loaded: true, success: true });
-      this.getConfirmationData();
+      if (!helpers.isBlock(data.tx)) {
+        this.getConfirmationData();
+      }
     } else {
       this.setState({ success: false, transaction: null, confirmationData: null, meta: null, spentOutputs: null });
     }
