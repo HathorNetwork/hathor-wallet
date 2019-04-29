@@ -9,7 +9,7 @@ import helpers from '../utils/helpers';
 import axios from 'axios';
 import store from '../store/index';
 import { TIMEOUT } from '../constants';
-import { lastFailedRequest, updateRequestErrorMessage } from '../actions/index';
+import { lastFailedRequest, updateRequestErrorStatusCode } from '../actions/index';
 import $ from 'jquery';
 
 /**
@@ -41,15 +41,11 @@ const createRequestInstance = (resolve, timeout) => {
   instance.interceptors.response.use((response) => {
     return response;
   }, (error) => {
-    // Update error message in redux depending on the status code
+    // Update status code of the last failed request in redux
     // Adding conditional because if the server forgets to send back the CORS
     // headers, error.response will be undefined
     const statusCode = error.response ? error.response.status : -1;
-    if (statusCode === 503) {
-      store.dispatch(updateRequestErrorMessage('Rate limit exceeded. Sorry about that. You should wait a few seconds and try again. What do you want to do?'));
-    } else {
-      store.dispatch(updateRequestErrorMessage('Your request failed to reach the server. What do you want to do?'));
-    }
+    store.dispatch(updateRequestErrorStatusCode(statusCode));
     // Save request config in redux
     let config = error.config;
     config.resolve = resolve;
