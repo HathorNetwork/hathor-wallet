@@ -15,7 +15,7 @@ import helpers from '../utils/helpers';
 const mapStateToProps = (state) => {
   return {
     lastFailedRequest: state.lastFailedRequest,
-    requestErrorMessage: state.requestErrorMessage,
+    requestErrorStatusCode: state.requestErrorStatusCode,
   };
 };
 
@@ -76,6 +76,55 @@ class RequestErrorModal extends React.Component {
     this.setState({ retry: false });
   }
 
+  /**
+   * Returns the string to be shown as error message depending on the status code
+   */
+  getErrorMessage = () => {
+    if (this.props.requestErrorStatusCode === 503 || this.props.requestErrorStatusCode === 429) {
+      return 'Rate limit exceeded. Sorry about that. You should wait a few seconds and try again. What do you want to do?';
+    } else {
+      return 'Your request failed to reach the server. What do you want to do?';
+    }
+  }
+
+  /**
+   * Returns the advanced message htmk
+   */
+  getAdvancedMessage = () => {
+    if (this.props.lastFailedRequest === undefined) return null;
+    return (
+      <div>
+        <p><strong>URL: </strong>{this.props.lastFailedRequest.url}</p>
+        <p><strong>Method: </strong>{this.props.lastFailedRequest.method}</p>
+        <p><strong>Response status code: </strong>{this.props.requestErrorStatusCode}</p>
+      </div>
+    );
+  }
+
+  /**
+   * Triggered when user clicks to show advanced data
+   *
+   * @param {Object} e Event emitted by the click
+   */
+  showAdvanced = (e) => {
+    e.preventDefault();
+    $(this.refs.advancedData).show(300);
+    $(this.refs.showAdvancedLink).hide();
+    $(this.refs.hideAdvancedLink).show();
+  }
+
+  /**
+   * Triggered when user clicks to hide advanced data
+   *
+   * @param {Object} e Event emitted by the click
+   */
+  hideAdvanced = (e) => {
+    e.preventDefault();
+    $(this.refs.advancedData).hide(300);
+    $(this.refs.hideAdvancedLink).hide();
+    $(this.refs.showAdvancedLink).show();
+  }
+
   render() {
     return (
       <div className="modal fade" id="requestErrorModal" tabIndex="-1" role="dialog" aria-labelledby="requestErrorModal" aria-hidden="true">
@@ -88,8 +137,11 @@ class RequestErrorModal extends React.Component {
               </button>
             </div>
             <div className="modal-body">
-              <p>{this.props.requestErrorMessage}</p>
+              <p>{this.getErrorMessage()}</p>
               <p>You are connected to <strong>{helpers.getServerURL()}</strong></p>
+              <a onClick={(e) => this.showAdvanced(e)} ref="showAdvancedLink" href="true">Show advanced data</a>
+              <a onClick={(e) => this.hideAdvanced(e)} ref="hideAdvancedLink" href="true" style={{display: 'none'}}>Hide advanced data</a>
+              <div ref="advancedData" className="mt-3" style={{display: 'none'}}>{this.getAdvancedMessage()}</div>
             </div>
             <div className="modal-footer">
               <button onClick={this.handleChangeServer} type="button" className="btn btn-secondary">Change server</button>

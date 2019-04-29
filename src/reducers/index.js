@@ -26,6 +26,8 @@ const initialState = {
   network: undefined,
   // Config of the last request that failed
   lastFailedRequest: undefined,
+  // Status code of last failed response
+  requestErrorStatusCode: undefined,
   // Wallet password
   password: undefined,
   // Wallet pin
@@ -46,8 +48,6 @@ const initialState = {
   addressesFound: 0,
   // Quantity of transactions already loaded to give a feedback to the user
   transactionsFound: 0,
-  // Message to be shown in request error modal
-  requestErrorMessage: '',
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -89,8 +89,8 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {loadingAddresses: action.payload});
     case 'data_loaded_update':
       return Object.assign({}, state, {addressesFound: action.payload.addressesFound, transactionsFound: action.payload.transactionsFound});
-    case 'update_request_error_message':
-      return Object.assign({}, state, {requestErrorMessage: action.payload});
+    case 'update_request_error_status_code':
+      return Object.assign({}, state, {requestErrorStatusCode: action.payload});
     default:
       return state;
   }
