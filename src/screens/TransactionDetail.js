@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactLoading from 'react-loading';
 import txApi from '../api/txApi';
+import helpers from '../utils/helpers';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
 
@@ -41,7 +42,6 @@ class TransactionDetail extends React.Component {
 
   componentDidMount() {
     this.getTx();
-    this.getConfirmationData();
   }
 
   /**
@@ -73,6 +73,9 @@ class TransactionDetail extends React.Component {
   getTx() {
     txApi.getTransaction(this.props.match.params.id, (data) => {
       this.txReceived(data);
+      if (!helpers.isBlock(data.tx)) {
+        this.getConfirmationData();
+      }
     }, (e) => {
       // Error in request
       console.log(e);
@@ -85,7 +88,6 @@ class TransactionDetail extends React.Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.match.params.id !== prevProps.match.params.id) {
       this.getTx();
-      this.getConfirmationData();
     }
   }
 
