@@ -6,7 +6,7 @@
  */
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu} = require('electron')
+const {app, BrowserWindow, Tray, Menu, dialog, ipcMain} = require('electron')
 const Sentry = require('@sentry/electron')
 const url = require('url');
 const path = require('path');
@@ -16,6 +16,21 @@ Sentry.init({
   dsn: constants.SENTRY_DSN,
   release: process.env.npm_package_version
 })
+
+let tray = null
+let iconOS = null;
+let trayIcon = null;
+let msgCheck = false;
+// We need to save the event that brought the check message from the renderer process, in order to send back to it
+let msgCheckEvent = null;
+
+
+if (process.platform === 'darwin') {
+  iconOS = 'icon.icns';
+  trayIcon = 'icon_tray.png';
+} else {
+  trayIcon = iconOS = 'icon.png';
+}
 
 const appName = 'Hathor Wallet';
 const walletVersion = '0.7.0-beta';
@@ -30,12 +45,18 @@ function createWindow () {
     show: false,
     width: 1024,
     height: 768,
+    icon: path.join(__dirname, iconOS),
     webPreferences: {
       nodeIntegration: true,
       preload: path.join(__dirname, 'preload.js')
     }
   })
 
+  // Waiting for message from preload.js script to get the saved information in localStorage, if the user already checked it
+  ipcMain.on('systray_message:check', (e, check) => {
+    msgCheck = check;
+    msgCheckEvent = e;
+  });
   // Adding wallet version to user agent, so we can get in all request headers
   mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + ' HathorWallet/' + walletVersion);
 
@@ -58,6 +79,17 @@ function createWindow () {
       label: appName,
       submenu: [
           { label: `About ${appName}`, selector: 'orderFrontStandardAboutPanel:' },
+          { type: 'separator' },
+          { type: 'checkbox', label: 'Systray', checked: false, click: function(item) {
+            if (item.checked) {
+              if (tray === null) {
+                startSystray();
+              }
+            } else {
+              tray.destroy();
+              tray = null;
+            }
+          }},
           { type: 'separator' },
           { label: 'Quit', accelerator: 'Command+Q', click: function() { app.quit(); }}
       ]}, {
@@ -82,6 +114,36 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  const optionsClose = {
+    type: 'info',
+    buttons: ['Ok, thanks'],
+    defaultId: 2,
+    icon: path.join(__dirname, 'icon.png'),
+    title: 'Attention',
+    message: 'Your Hathor Wallet has not been closed. It is only hidden, and you can access it through your systray.',    
+    checkboxLabel: 'Do not show this message again.',
+    checkboxChecked: msgCheck
+  };
+
+  mainWindow.on('close', (e) => {
+    if (tray !== null && !tray.isDestroyed()) {
+      e.preventDefault()
+      // In case the user is using systray we don't close the app, just hide it
+      if (!msgCheck){
+        dialog.showMessageBox(null, optionsClose, (response, checkboxChecked) => {
+          msgCheck = checkboxChecked;
+          if (msgCheckEvent) {
+            // Send to renderer process, so it can be saved in localStorage
+            msgCheckEvent.sender.send('systray_message:check', checkboxChecked);
+          }
+        });
+      }
+      // Update systray menu and hide the window
+      updateSystrayMenu(systrayMenuItemShow);
+      mainWindow.hide()
+    }
+  })
 }
 
 if (process.platform === 'darwin') {
@@ -97,6 +159,55 @@ if (process.platform === 'darwin') {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
+
+const updateSystrayMenu = (firstItem) => {
+  if (tray) {
+    tray.setContextMenu(getMenu(firstItem));
+  }
+}
+
+// Systray menu item to hide the window
+const systrayMenuItemHide = {
+  label: 'Hide Wallet',
+  type: 'normal',
+  click() {
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
+      updateSystrayMenu(systrayMenuItemShow);
+    }
+  }
+}
+
+// Systray menu item to show the window
+const systrayMenuItemShow = {
+  label: 'Show Wallet',
+  type: 'normal',
+  click() {
+    if (!mainWindow.isVisible()) {
+      mainWindow.show();
+      updateSystrayMenu(systrayMenuItemHide);
+    }
+  }
+}
+
+// Systray menu created with a first item and the exit label
+const getMenu = (firstItem) => {
+  return Menu.buildFromTemplate([
+    firstItem,
+    { 
+      label: 'Exit', 
+      type: 'normal',
+      click() {
+        app.exit()
+      }
+    }
+  ])
+}
+
+function startSystray() {
+  tray = new Tray(path.join(__dirname, trayIcon));
+  tray.setContextMenu(getMenu(systrayMenuItemHide));
+}
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
