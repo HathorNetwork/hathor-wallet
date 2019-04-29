@@ -8,6 +8,7 @@
 // This file is executed right before electron start loading the index
 const Sentry = require('@sentry/electron')
 const constants = require('./constants');
+const { ipcRenderer } = require('electron')
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
@@ -17,4 +18,13 @@ Sentry.init({
 process.once('loaded', () => {
   // Set closed in localStorage, so user does not open in the wallet page
   localStorage.setItem('wallet:closed', true);
+
+  // Sending to main process the information about systray message
+  const systrayMessageChecked = JSON.parse(localStorage.getItem('wallet:systray_message_checked')) === true;
+  ipcRenderer.send('systray_message:check', systrayMessageChecked);
+
+  // Information about systray message changed, so we receive a message from the main process and save in localStorage
+  ipcRenderer.on('systray_message:check', (e, check) => {
+    localStorage.setItem('wallet:systray_message_checked', check);
+  });
 })
