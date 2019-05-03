@@ -14,6 +14,7 @@ import helpers from './helpers';
 import wallet from './wallet';
 import buffer from 'buffer';
 import Long from 'long';
+import walletApi from '../api/wallet';
 
 /**
  * Transaction utils with methods to serialize, create and handle transactions
@@ -501,6 +502,42 @@ const transaction = {
     } else {
       return this.signedIntToBytes(value, 4);
     }
+  },
+
+  /**
+   * Complete and send a transaction to the full node
+   *
+   * @param {Object} data Object with inputs and outputs
+   * {
+   *  'inputs': [{'tx_id', 'index', 'token'}],
+   *  'outputs': ['address', 'value', 'timelock', 'tokenData'],
+   * }
+   * @param {string} pin Pin to decrypt data
+   *
+   * @return {Promise}
+   * @memberof Transaction
+   * @inner
+   */
+  sendTransaction(data, pin) {
+    const dataToSign = transaction.dataToSign(data);
+    data = transaction.signTx(data, dataToSign, pin);
+    // Completing data in the same object
+    transaction.completeTx(data);
+    const txBytes = transaction.txToBytes(data);
+    const txHex = util.buffer.bufferToHex(txBytes);
+    const promise = new Promise((resolve, reject) => {
+      walletApi.sendTokens(txHex, (response) => {
+        if (response.success) {
+          resolve();
+        } else {
+          reject(response.message);
+        }
+      }, (e) => {
+        // Error in request
+        reject(e);
+      });
+    });
+    return promise;
   },
 
   /**

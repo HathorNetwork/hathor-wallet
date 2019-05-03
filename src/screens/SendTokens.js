@@ -7,8 +7,6 @@
 
 import React from 'react';
 import $ from 'jquery';
-import walletApi from '../api/wallet';
-import { util } from 'bitcore-lib';
 import transaction from '../utils/transaction';
 import { AddressError, OutputValueError } from '../utils/errors';
 import ReactLoading from 'react-loading';
@@ -51,7 +49,6 @@ class SendTokens extends React.Component {
       txTokens: [HATHOR_TOKEN_CONFIG]
     };
   }
-
 
   /**
    * Check if form is valid
@@ -99,33 +96,20 @@ class SendTokens extends React.Component {
     let data = this.getData();
     if (!data) return;
     data.tokens = tokens.filterTokens(this.state.txTokens, HATHOR_TOKEN_CONFIG).map((token) => token.uid);
-    if (data) {
-      this.setState({ errorMessage: '', loading: true });
-      try {
-        let dataToSign = transaction.dataToSign(data);
-        data = transaction.signTx(data, dataToSign, this.state.pin);
-        // Completing data in the same object
-        transaction.completeTx(data);
-        let txBytes = transaction.txToBytes(data);
-        let txHex = util.buffer.bufferToHex(txBytes);
-        walletApi.sendTokens(txHex, (response) => {
-          if (response.success) {
-            this.props.history.push('/wallet/');
-          } else {
-            this.setState({ errorMessage: response.message, loading: false });
-          }
-        }, (e) => {
-          // Error in request
-          console.log(e);
-          this.setState({ loading: false });
-        });
-      } catch(e) {
-        if (e instanceof AddressError || e instanceof OutputValueError) {
-          this.setState({ errorMessage: e.message, loading: false });
-        } else {
-          // Unhandled error
-          throw e;
-        }
+    this.setState({ errorMessage: '', loading: true });
+    try {
+      const promise = transaction.sendTransaction(data, this.state.pin);
+      promise.then(() => {
+        this.props.history.push('/wallet/');
+      }, (message) => {
+        this.setState({ errorMessage: message, loading: false });
+      });
+    } catch(e) {
+      if (e instanceof AddressError || e instanceof OutputValueError) {
+        this.setState({ errorMessage: e.message, loading: false });
+      } else {
+        // Unhandled error
+        throw e;
       }
     }
   }
