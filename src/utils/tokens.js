@@ -151,7 +151,7 @@ const tokens = {
   getTokens() {
     let dataToken = localStorage.getItem('wallet:tokens');
     if (dataToken) {
-      dataToken = JSON.parse(dataToken);
+      dataToken = localStorage.memory ? dataToken : JSON.parse(dataToken);
     } else {
       dataToken = [HATHOR_TOKEN_CONFIG];
     }
@@ -168,7 +168,8 @@ const tokens = {
    *
    */
   saveToStorage(newTokens) {
-    localStorage.setItem('wallet:tokens', JSON.stringify(newTokens));
+    const dataTokens = localStorage.memory ? newTokens : JSON.stringify(newTokens);
+    localStorage.setItem('wallet:tokens', dataTokens);
   },
 
   /**

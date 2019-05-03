@@ -197,7 +197,8 @@ const helpers = {
       // No ssl
       protocol = 'ws';
     }
-    serverURL = path.join(`${protocol}:${pieces.join(':')}`, 'ws/');
+    serverURL = path.join(`${pieces.join(':')}`, 'ws/');
+    serverURL = `${protocol}:/${serverURL}`;
     return serverURL;
   },
 

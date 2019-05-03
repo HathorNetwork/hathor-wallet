@@ -319,7 +319,8 @@ const transaction = {
    * @inner
    */
   getSignature(index, hash, pin) {
-    const encryptedPrivateKey = JSON.parse(localStorage.getItem('wallet:accessData')).mainKey;
+    const accessData = localStorage.getItem('wallet:accessData');
+    const encryptedPrivateKey = localStorage.memory ? accessData.mainKey : JSON.parse(accessData).mainKey;
     const privateKeyStr = wallet.decryptData(encryptedPrivateKey, pin);
     const key = HDPrivateKey(privateKeyStr)
     const derivedKey = key.derive(index);

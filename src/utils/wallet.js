@@ -153,8 +153,11 @@ const wallet = {
       xpubkey: privkey.xpubkey,
     }
 
-    localStorage.setItem('wallet:accessData', JSON.stringify(access));
-    localStorage.setItem('wallet:data', JSON.stringify(walletData));
+    access = localStorage.memory ? access : JSON.stringify(access);
+    walletData = localStorage.memory ? walletData : JSON.stringify(walletData);
+
+    localStorage.setItem('wallet:accessData', access);
+    localStorage.setItem('wallet:data', walletData);
 
     let promise = null;
     if (loadHistory) {
@@ -197,7 +200,7 @@ const wallet = {
     if (!data) {
       return null;
     }
-    return JSON.parse(data);
+    return localStorage.memory ? data : JSON.parse(data);
   },
 
   /**
@@ -242,7 +245,9 @@ const wallet = {
       if (lastGeneratedIndex < stopIndex - 1) {
         localStorage.setItem('wallet:lastGeneratedIndex', stopIndex - 1);
       }
-      localStorage.setItem('wallet:data', JSON.stringify(dataJson));
+
+      dataJson = localStorage.memory ? dataJson : JSON.stringify(dataJson);
+      localStorage.setItem('wallet:data', dataJson);
 
       walletApi.getAddressHistory(addresses, (response) => {
         // Save in redux
@@ -351,8 +356,9 @@ const wallet = {
    * @inner
    */
   isPinCorrect(pin) {
-    let data = JSON.parse(localStorage.getItem('wallet:accessData'));
-    let pinHash = this.hashPassword(pin).toString();
+    const accessData = localStorage.getItem('wallet:accessData');
+    const data = localStorage.memory ? accessData : JSON.parse(accessData);
+    const pinHash = this.hashPassword(pin).toString();
     return pinHash === data.hash;
   },
 
@@ -367,8 +373,9 @@ const wallet = {
    * @inner
    */
   isPasswordCorrect(password) {
-    let data = JSON.parse(localStorage.getItem('wallet:accessData'));
-    let passwordHash = this.hashPassword(password).toString();
+    const accessData = localStorage.getItem('wallet:accessData');
+    const data = localStorage.memory ? accessData : JSON.parse(accessData);
+    const passwordHash = this.hashPassword(password).toString();
     return passwordHash === data.hashPasswd;
   },
 
@@ -458,7 +465,8 @@ const wallet = {
     // Save new keys to local storage
     let data = this.getWalletData();
     data.keys[newAddress.toString()] = {privkey: null, index: newIndex};
-    localStorage.setItem('wallet:data', JSON.stringify(data));
+    data = localStorage.memory ? data : JSON.stringify(data);
+    localStorage.setItem('wallet:data', data);
 
     // Save in redux the new shared address
     store.dispatch(sharedAddressUpdate({lastSharedAddress: newAddress.toString(), lastSharedIndex: newIndex}));
@@ -660,7 +668,8 @@ const wallet = {
     let data = this.getWalletData();
     data['historyTransactions'] = historyTransactions;
     data['allTokens'] = [...allTokens];
-    localStorage.setItem('wallet:data', JSON.stringify(data));
+    data = localStorage.memory ? data : JSON.stringify(data);
+    localStorage.setItem('wallet:data', data);
   },
 
   /**
@@ -845,12 +854,14 @@ const wallet = {
     if (data === null) {
       return ret;
     }
+
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id];
       if (tx.is_voided) {
         // Ignore voided transactions.
         continue;
       }
+
       for (const [index, txout] of tx.outputs.entries()) {
         if (this.isAuthorityOutput(txout)) {
           // Ignore authority outputs.
@@ -955,7 +966,7 @@ const wallet = {
   checkAuthorityExists(key, tokenUID) {
     const data = this.getWalletData();
     if (data) {
-      const jsonData = JSON.parse(data);
+      const jsonData = localStorage.memory ? data : JSON.parse(data);
       const authorityOutputs = jsonData.authorityOutputs;
       if (tokenUID in authorityOutputs && key in authorityOutputs[tokenUID]) {
         return true;
@@ -1030,7 +1041,8 @@ const wallet = {
    * @inner
    */
   getWalletWords(password) {
-    const data = JSON.parse(localStorage.getItem('wallet:accessData'));
+    const accessData = localStorage.getItem('wallet:accessData');
+    const data = localStorage.memory ? accessData : JSON.parse(accessData);
     return this.decryptData(data.words, password);
   },
 
@@ -1074,7 +1086,8 @@ const wallet = {
    */
   reloadData() {
     // Get old access data
-    const accessData = JSON.parse(localStorage.getItem('wallet:accessData'));
+    const accessDataStorage = localStorage.getItem('wallet:accessData');
+    let accessData = localStorage.memory ? accessDataStorage : JSON.parse(accessDataStorage);
     const walletData = this.getWalletData();
 
     // Clean all data in the wallet from the old server
@@ -1090,14 +1103,17 @@ const wallet = {
       tokens: dataToken,
     }));
 
-    const newWalletData = {
+    let newWalletData = {
       keys: {},
       xpubkey: walletData.xpubkey,
     }
 
     // Prepare to save new data
-    localStorage.setItem('wallet:accessData', JSON.stringify(accessData));
-    localStorage.setItem('wallet:data', JSON.stringify(newWalletData));
+    accessData = localStorage.memory ? accessData : JSON.stringify(accessData);
+    newWalletData = localStorage.memory ? newWalletData : JSON.stringify(newWalletData);
+
+    localStorage.setItem('wallet:accessData', accessData);
+    localStorage.setItem('wallet:data', newWalletData);
 
     // Load history from new server
     const promise = this.loadAddressHistory(0, GAP_LIMIT);
@@ -1474,7 +1490,8 @@ const wallet = {
    * @inner
    */
   getSentryPermission() {
-    return JSON.parse(localStorage.getItem('wallet:sentry'));
+    const sentry = localStorage.getItem('wallet:sentry');
+    return localStorage.memory ? sentry : JSON.parse(sentry);
   },
 
   /**
@@ -1594,7 +1611,9 @@ const wallet = {
    * @inner
    */
   isNotificationOn() {
-    return JSON.parse(localStorage.getItem('wallet:notification')) !== false;
+    const notification = localStorage.getItem('wallet:notification');
+    const isNotification = localStorage.memory ? notification : JSON.parse(notification);
+    return isNotification !== false;
   },
 
   /**
