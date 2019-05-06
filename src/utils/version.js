@@ -5,12 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import versionApi from '../api/version';
 import store from '../store/index';
 import { isVersionAllowedUpdate, networkUpdate } from '../actions/index';
-import { MIN_API_VERSION, FIRST_WALLET_COMPATIBLE_VERSION } from '../constants';
-import helpers from './helpers';
-import transaction from './transaction';
+import hathorLib from 'hathor-wallet-utils';
 
 /**
  * Methods to validate version
@@ -28,12 +25,11 @@ const version = {
    * @inner
    */
   checkApiVersion() {
-    const promise = new Promise((resolve, reject) => {
-      versionApi.getVersion((data) => {
+    const newPromise = new Promise((resolve, reject) => {
+      const libPromise = hathorLib.version.checkApiVersion();
+      libPromise.then((data) => {
         // Update version allowed in redux
-        store.dispatch(isVersionAllowedUpdate({allowed: helpers.isVersionAllowed(data.version, MIN_API_VERSION)}));
-        // Update transaction weight constants
-        transaction.updateTransactionWeightConstants(data.min_tx_weight, data.min_tx_weight_coefficient, data.min_tx_weight_k);
+        store.dispatch(isVersionAllowedUpdate({allowed: hathorLib.helpers.isVersionAllowed(data.version, hathorLib.constants.MIN_API_VERSION)}));
         // Update network in redux
         store.dispatch(networkUpdate({network: data.network}));
         resolve();
@@ -41,25 +37,8 @@ const version = {
         reject();
       });
     });
-    return promise
+    return newPromise;
   },
-
-  /**
-   * Checks if the wallet version is allowed to continue using the wallet or needs a reset
-   *
-   * @return {boolean}
-   *
-   * @memberof Version
-   * @inner
-   */
-  checkWalletVersion() {
-    const version = localStorage.getItem('wallet:version');
-    if (version !== null && helpers.isVersionAllowed(version, FIRST_WALLET_COMPATIBLE_VERSION)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
 }
 
 export default version;

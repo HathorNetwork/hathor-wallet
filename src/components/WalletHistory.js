@@ -7,7 +7,7 @@
 
 import React from 'react';
 import TokenHistory from '../components/TokenHistory';
-import { WALLET_HISTORY_COUNT } from '../constants';
+import hathorLib from 'hathor-wallet-utils';
 
 
 /**
@@ -20,7 +20,7 @@ const WalletHistory = (props) => {
     <div>
       <div className="d-flex flex-column mt-5">
         <h4><strong>Transaction history</strong></h4>
-        <TokenHistory history={props.historyTransactions} count={WALLET_HISTORY_COUNT} selectedToken={props.selectedToken} showPage={true} />
+        <TokenHistory history={props.historyTransactions} count={hathorLib.constants.WALLET_HISTORY_COUNT} selectedToken={props.selectedToken} showPage={true} />
       </div>
     </div>
   );

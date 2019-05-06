@@ -10,6 +10,7 @@ import ModalConfirm from '../components/ModalConfirm';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
+import hathorLib from 'hathor-wallet-utils';
 
 
 /**
@@ -52,12 +53,12 @@ class ChoosePassphrase extends React.Component {
         return;
       }
 
-      if (!wallet.isPasswordCorrect(this.refs.password.value)) {
+      if (!hathorLib.wallet.isPasswordCorrect(this.refs.password.value)) {
         this.setState({ errorMessage: 'Invalid password' });
         return;
       }
 
-      if (!wallet.isPinCorrect(this.refs.pin.value)) {
+      if (!hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
         this.setState({ errorMessage: 'Invalid PIN' });
         return;
       }

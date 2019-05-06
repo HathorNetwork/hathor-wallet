@@ -7,9 +7,7 @@
 
 import React from 'react';
 import HathorAlert from '../components/HathorAlert';
-import walletApi from '../api/wallet';
-import transaction from '../utils/transaction';
-import { AddressError } from '../utils/errors';
+import hathorLib from 'hathor-wallet-utils';
 
 
 /**
@@ -47,12 +45,12 @@ class SearchTx extends React.Component {
       } else {
         // Search for address
         try {
-          const addressBytes = transaction.decodeAddress(text);
-          if (transaction.validateAddress(text, addressBytes)) {
+          const addressBytes = hathorLib.transaction.decodeAddress(text);
+          if (hathorLib.transaction.validateAddress(text, addressBytes)) {
             this.searchAddress(text);
           }
         } catch(e) {
-          if (e instanceof AddressError) {
+          if (e instanceof hathorLib.errors.AddressError) {
             this.showError();
           } else {
             // Unhandled error
@@ -75,7 +73,7 @@ class SearchTx extends React.Component {
    * @param {string} address Address to search for
    */
   searchAddress = (address) => {
-    walletApi.getAddressHistory([address], (response) => {
+    hathorLib.walletApi.getAddressHistory([address], (response) => {
       this.props.newData(response.history);
       this.setState({ filtered: true });
     });

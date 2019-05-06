@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { CONFIRM_RESET_MESSAGE } from '../constants';
-import wallet from '../utils/wallet';
+import hathorLib from 'hathor-wallet-utils';
 
 
 /**
@@ -36,12 +35,12 @@ class ModalResetAllData extends React.Component {
       this.refs.formConfirm.classList.remove('was-validated');
       const password = this.refs.password.value;
       const forgotPassword = this.refs.forgotPassword.checked;
-      if (password && !wallet.isPasswordCorrect(password)) {
+      if (password && !hathorLib.wallet.isPasswordCorrect(password)) {
         this.setState({errorMessage: 'Invalid password'})
       } else if (!password && !forgotPassword) {
         this.setState({errorMessage: 'You must write your password or check that you have forgotten it'});
       } else {
-        if (this.refs.confirmMessage.value.toLowerCase() === CONFIRM_RESET_MESSAGE.toLowerCase()) {
+        if (this.refs.confirmMessage.value.toLowerCase() === hathorLib.constants.CONFIRM_RESET_MESSAGE.toLowerCase()) {
           this.props.success();
         } else {
           this.setState({errorMessage: 'Confirm message does not match'})
@@ -53,7 +52,7 @@ class ModalResetAllData extends React.Component {
   render() {
     const getFirstMessage = () => {
       let firstMessage = 'If you reset your wallet, all data will be deleted, and you will lose access to your tokens. To recover access to your tokens, you will need to import your words again.';
-      if (!wallet.isBackupDone()) {
+      if (!hathorLib.wallet.isBackupDone()) {
         firstMessage = `${firstMessage} You still haven't done the backup of your words.`;
       }
       return firstMessage;
@@ -70,7 +69,7 @@ class ModalResetAllData extends React.Component {
             </div>
             <div className="modal-body">
               <p>{getFirstMessage()}</p>
-              <p>If you still wanna do it, we need your password and for you to write down <strong>'{CONFIRM_RESET_MESSAGE}'</strong> to confirm the operation.</p>
+              <p>If you still wanna do it, we need your password and for you to write down <strong>'{hathorLib.constants.CONFIRM_RESET_MESSAGE}'</strong> to confirm the operation.</p>
               <form ref="formConfirm">
                 <div className="form-group">
                   <label htmlFor="password">Password*</label>
@@ -78,7 +77,7 @@ class ModalResetAllData extends React.Component {
                 </div>
                 <div className="form-group">
                   <label htmlFor="confirmMessage">Confirm message*</label>
-                  <input type="text" ref="confirmMessage" placeholder={`Write '${CONFIRM_RESET_MESSAGE}'`} className="form-control" required />
+                  <input type="text" ref="confirmMessage" placeholder={`Write '${hathorLib.constants.CONFIRM_RESET_MESSAGE}'`} className="form-control" required />
                 </div>
                 <div className="form-check">
                   <input ref="forgotPassword" type="checkbox" className="form-check-input" id="forgotPassword" />

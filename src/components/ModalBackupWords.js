@@ -7,12 +7,10 @@
 
 import React from 'react';
 import $ from 'jquery';
-import wallet from '../utils/wallet';
-import helpers from '../utils/helpers';
 import _ from 'lodash';
-import { WORDS_VALIDATION } from '../constants';
 import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapDispatchToProps = dispatch => {
@@ -90,8 +88,8 @@ class ModalBackupWords extends React.Component {
     } else {
       this.setState({ passwordFormValidated: false });
       const password = this.refs.password.value;
-      if (wallet.isPasswordCorrect(password)) {
-        const words = wallet.getWalletWords(password);
+      if (hathorLib.wallet.isPasswordCorrect(password)) {
+        const words = hathorLib.wallet.getWalletWords(password);
         this.props.updateWords(words);
         this.setState({ passwordSuccess: true, errorMessage: '' });
       } else {
@@ -105,7 +103,7 @@ class ModalBackupWords extends React.Component {
    * So we select some words to do the validation and show validation component in the modal
    */
   handleWordsSaved = () => {
-    const wordsValidation = _.shuffle(this.props.words.split(' ')).slice(0, WORDS_VALIDATION);
+    const wordsValidation = _.shuffle(this.props.words.split(' ')).slice(0, hathorLib.constants.WORDS_VALIDATION);
     this.setState({ showValidation: true, wordsValidation });
   }
 
@@ -113,7 +111,7 @@ class ModalBackupWords extends React.Component {
    * Called when user finishes the backup. We validate the backup and shows a success message, in case of success
    */
   handleValidateBackup = () => {
-    if (this.state.chosenWords.length !== WORDS_VALIDATION) {
+    if (this.state.chosenWords.length !== hathorLib.constants.WORDS_VALIDATION) {
       this.setState({ errorMessage: 'Invalid number of words' });
       return;
     }
@@ -232,7 +230,7 @@ class ModalBackupWords extends React.Component {
         // The button will only be disabled when all instances of the words have been selected
         // Might have more than one instance of the same word
         return (
-          <button key={`${word}${idx}`} className="btn btn-dark mr-2 mt-3" disabled={helpers.elementCount(this.state.chosenWords, word) === helpers.elementCount(this.state.wordsValidation, word)} onClick={(e) => {this.validationWordClicked(word)}}>{word}</button>
+          <button key={`${word}${idx}`} className="btn btn-dark mr-2 mt-3" disabled={hathorLib.helpers.elementCount(this.state.chosenWords, word) === hathorLib.helpers.elementCount(this.state.wordsValidation, word)} onClick={(e) => {this.validationWordClicked(word)}}>{word}</button>
         )
       });
     }

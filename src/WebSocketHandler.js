@@ -6,10 +6,10 @@
  */
 
 import EventEmitter from 'events';
-import helpers from './utils/helpers';
 import wallet from './utils/wallet';
 import { isOnlineUpdate } from "./actions/index";
 import store from './store/index';
+import hathorLib from 'hathor-wallet-utils';
 
 const HEARTBEAT_TMO = 30000;     // 30s
 const WS_READYSTATE_READY = 1;
@@ -44,7 +44,7 @@ class WS extends EventEmitter {
     if (this.started) {
       return;
     }
-    let wsURL = helpers.getWSServerURL();
+    let wsURL = hathorLib.helpers.getWSServerURL();
     if (wsURL === null) {
       return;
     }
@@ -79,7 +79,7 @@ class WS extends EventEmitter {
     this.started = true;
     this.setIsOnline(true);
     this.heartbeat = setInterval(this.sendPing, HEARTBEAT_TMO);
-    wallet.subscribeAllAddresses();
+    hathorLib.wallet.subscribeAllAddresses();
   }
 
   /**

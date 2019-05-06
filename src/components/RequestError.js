@@ -9,7 +9,7 @@ import React from 'react';
 import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
 import { connect } from 'react-redux';
-import helpers from '../utils/helpers';
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapStateToProps = (state) => {
@@ -69,7 +69,7 @@ class RequestErrorModal extends React.Component {
   modalHiddenRetry = () => {
     let config = this.props.lastFailedRequest;
     let axios = createRequestInstance(config.resolve);
-    helpers.fixAxiosConfig(axios, config);
+    hathorLib.helpers.fixAxiosConfig(axios, config);
     axios(config).then((response) => {
       config.resolve(response.data);
     });
@@ -138,7 +138,7 @@ class RequestErrorModal extends React.Component {
             </div>
             <div className="modal-body">
               <p>{this.getErrorMessage()}</p>
-              <p>You are connected to <strong>{helpers.getServerURL()}</strong></p>
+              <p>You are connected to <strong>{hathorLib.helpers.getServerURL()}</strong></p>
               <a onClick={(e) => this.showAdvanced(e)} ref="showAdvancedLink" href="true">Show advanced data</a>
               <a onClick={(e) => this.hideAdvanced(e)} ref="hideAdvancedLink" href="true" style={{display: 'none'}}>Hide advanced data</a>
               <div ref="advancedData" className="mt-3" style={{display: 'none'}}>{this.getAdvancedMessage()}</div>

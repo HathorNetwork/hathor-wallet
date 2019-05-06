@@ -12,6 +12,7 @@ import ModalAddressQRCode from './ModalAddressQRCode';
 import wallet from '../utils/wallet';
 import $ from 'jquery';
 import { connect } from "react-redux";
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapStateToProps = (state) => {
@@ -33,10 +34,10 @@ class WalletAddress extends React.Component {
   generateNewAddress = (e) => {
     e.preventDefault();
     // We check if the next address was already generated, otherwise we generate, in case we can do it
-    if (wallet.hasNewAddress()) {
+    if (hathorLib.wallet.hasNewAddress()) {
       wallet.getNextAddress();
     } else {
-      if (wallet.canGenerateNewAddress()) {
+      if (hathorLib.wallet.canGenerateNewAddress()) {
         wallet.generateNewAddress();
       } else {
         this.refs.alertError.show(3000);

@@ -9,7 +9,7 @@ import React from 'react';
 import PinPasswordWrapper from '../components/PinPasswordWrapper'
 import { updatePassword } from '../actions/index';
 import { connect } from 'react-redux';
-import { PASSWORD_PATTERN } from '../constants';
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapDispatchToProps = dispatch => {
@@ -46,7 +46,7 @@ class ChoosePassword extends React.Component {
     }
 
     return (
-      <PinPasswordWrapper message={renderMessage()} success={this.props.success} back={this.props.back} handleChange={this.handleChange} field='Password' button='Next' pattern={PASSWORD_PATTERN} />
+      <PinPasswordWrapper message={renderMessage()} success={this.props.success} back={this.props.back} handleChange={this.handleChange} field='Password' button='Next' pattern={hathorLib.constants.PASSWORD_PATTERN} />
     )
   }
 }

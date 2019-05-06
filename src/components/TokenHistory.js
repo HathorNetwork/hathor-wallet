@@ -6,12 +6,10 @@
  */
 
 import React from 'react';
-import dateFormatter from '../utils/date';
 import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
-import helpers from '../utils/helpers';
-import wallet from '../utils/wallet';
+import hathorLib from 'hathor-wallet-utils';
 
 
 /**
@@ -172,7 +170,7 @@ class TokenHistory extends React.Component {
     let value = 0;
 
     for (let txin of tx.inputs) {
-      if (wallet.isAuthorityOutput(txin)) {
+      if (hathorLib.wallet.isAuthorityOutput(txin)) {
         continue;
       }
       if (txin.token === selectedToken && txin.decoded.address in keys) {
@@ -182,7 +180,7 @@ class TokenHistory extends React.Component {
     }
 
     for (let txout of tx.outputs) {
-      if (wallet.isAuthorityOutput(txout)) {
+      if (hathorLib.wallet.isAuthorityOutput(txout)) {
         continue;
       }
       if (txout.token === selectedToken && txout.decoded.address in keys) {
@@ -241,7 +239,7 @@ class TokenHistory extends React.Component {
     }
 
     const renderHistoryData = () => {
-      const keys = wallet.getWalletData().keys;
+      const keys = hathorLib.wallet.getWalletData().keys;
       return this.state.transactions.map((tx, idx) => {
         const extra = this.prepareTx(tx, keys);
         if (!extra.found) {
@@ -258,16 +256,16 @@ class TokenHistory extends React.Component {
         }
         return (
           <tr key={`${tx.tx_id}`} className={trClass}>
-            <td>{dateFormatter.parseTimestamp(tx.timestamp)}</td>
+            <td>{hathorLib.dateFormatter.parseTimestamp(tx.timestamp)}</td>
             <td>
-              <Link className={tx.is_voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>{helpers.getShortHash(tx.tx_id)}</Link>
+              <Link className={tx.is_voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>{hathorLib.helpers.getShortHash(tx.tx_id)}</Link>
               <CopyToClipboard text={tx.tx_id} onCopy={this.copied}>
                 <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
               </CopyToClipboard>
             </td>
             <td className={tx.is_voided ? 'voided state' : 'state'}>{statusElement}</td>
             <td>{tx.is_voided && renderVoidedElement()}</td>
-            <td className='value'><span className={tx.is_voided ? 'voided' : ''}>{helpers.prettyValue(extra.value)}</span></td>
+            <td className='value'><span className={tx.is_voided ? 'voided' : ''}>{hathorLib.helpers.prettyValue(extra.value)}</span></td>
           </tr>
         );
       });

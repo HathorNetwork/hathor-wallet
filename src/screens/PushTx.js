@@ -7,7 +7,7 @@
 
 import React from 'react';
 import TxTextInput from '../components/TxTextInput';
-import txApi from '../api/txApi';
+import hathorLib from 'hathor-wallet-utils';
 
 
 /**
@@ -30,7 +30,7 @@ class PushTx extends React.Component {
    */
   buttonClicked = () => {
     this.setState({ success: false });
-    txApi.pushTx(this.state.dataToPush, this.state.force, (data) => {
+    hathorLib.txApi.pushTx(this.state.dataToPush, this.state.force, (data) => {
       if (data.success) {
         this.setState({ success: true, errorMessage: null, canForce: false, force: false });
       } else {

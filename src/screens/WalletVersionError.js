@@ -15,6 +15,7 @@ import ModalBackupWords from '../components/ModalBackupWords';
 import HathorAlert from '../components/HathorAlert';
 import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapDispatchToProps = dispatch => {
@@ -46,7 +47,7 @@ class WalletVersionError extends React.Component {
    */
   backupSuccess = () => {
     $('#backupWordsModal').modal('hide');
-    wallet.markBackupAsDone();
+    hathorLib.wallet.markBackupAsDone();
     this.props.updateWords(null);
     this.refs.alertSuccess.show(2000);
   }

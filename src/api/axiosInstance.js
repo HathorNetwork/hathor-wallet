@@ -5,12 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import helpers from '../utils/helpers';
-import axios from 'axios';
 import store from '../store/index';
-import { TIMEOUT } from '../constants';
 import { lastFailedRequest, updateRequestErrorStatusCode } from '../actions/index';
 import $ from 'jquery';
+import hathorLib from 'hathor-wallet-utils';
 
 /**
  * Create axios instance settings base URL and content type  
@@ -26,18 +24,8 @@ import $ from 'jquery';
  * @param {number} timeout Timeout in milliseconds for the request
  */
 const createRequestInstance = (resolve, timeout) => {
-  if (timeout === undefined) {
-    timeout = TIMEOUT;
-  }
-  const defaultOptions = {
-    baseURL: helpers.getServerURL(),
-    timeout: timeout,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  }
+  const instance = hathorLib.axios.defaultCreateRequestInstance(resolve, timeout);
 
-  let instance = axios.create(defaultOptions);
   instance.interceptors.response.use((response) => {
     return response;
   }, (error) => {

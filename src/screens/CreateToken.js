@@ -7,17 +7,13 @@
 
 import React from 'react';
 import $ from 'jquery';
-import dateFormatter from '../utils/date';
-import helpers from '../utils/helpers';
 import wallet from '../utils/wallet';
-import { AddressError } from '../utils/errors';
 import ReactLoading from 'react-loading';
-import tokens from '../utils/tokens';
-import { HATHOR_TOKEN_CONFIG, HATHOR_TOKEN_INDEX, MAX_OUTPUT_VALUE, DECIMAL_PLACES } from '../constants';
 import ModalPin from '../components/ModalPin';
 import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
+import hathorLib from 'hathor-wallet-utils';
 
 const mapStateToProps = (state) => {
   return {
@@ -78,9 +74,9 @@ class CreateToken extends React.Component {
       }
 
       // Validating maximum amount
-      const tokensValue = this.refs.amount.value*(10**DECIMAL_PLACES);
-      if (tokensValue > MAX_OUTPUT_VALUE) {
-        this.setState({ errorMessage: `Maximum value to mint token is ${helpers.prettyValue(MAX_OUTPUT_VALUE)}` });
+      const tokensValue = this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES);
+      if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
+        this.setState({ errorMessage: `Maximum value to mint token is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
         return false;
       }
       return true;
@@ -97,7 +93,7 @@ class CreateToken extends React.Component {
     let amount = 0;
     if (this.inputCheckbox.current.checked) {
       // Select inputs automatically
-      const inputs = wallet.getInputsFromAmount(this.props.historyTransactions, helpers.minimumAmount(), HATHOR_TOKEN_CONFIG.uid);
+      const inputs = hathorLib.wallet.getInputsFromAmount(this.props.historyTransactions, hathorLib.helpers.minimumAmount(), hathorLib.constants.HATHOR_TOKEN_CONFIG.uid);
       if (inputs.inputs.length === 0) {
         this.setState({ errorMessage: 'You don\'t have any available hathor token to create a new token' });
         return null;
@@ -115,7 +111,7 @@ class CreateToken extends React.Component {
         return null;
       }
 
-      const utxo = wallet.checkUnspentTxExists(this.props.historyTransactions, txId, index, HATHOR_TOKEN_CONFIG.uid);
+      const utxo = hathorLib.wallet.checkUnspentTxExists(this.props.historyTransactions, txId, index, hathorLib.constants.HATHOR_TOKEN_CONFIG.uid);
       if (!utxo.exists) {
         // Input does not exist in unspent txs
         this.setState({ errorMessage: utxo.message });
@@ -123,16 +119,16 @@ class CreateToken extends React.Component {
       }
 
       const output = utxo.output;
-      if (!wallet.canUseUnspentTx(output)) {
-        this.setState({ errorMessage: `Output [${txId}, ${index}] is locked until ${dateFormatter.parseTimestamp(output.decoded.timelock)}` });
+      if (!hathorLib.wallet.canUseUnspentTx(output)) {
+        this.setState({ errorMessage: `Output [${txId}, ${index}] is locked until ${hathorLib.dateFormatter.parseTimestamp(output.decoded.timelock)}` });
         return null;
       }
 
-      input = {'tx_id': txId, 'index': index, 'token': HATHOR_TOKEN_CONFIG.uid, 'address': output.decoded.address};
+      input = {'tx_id': txId, 'index': index, 'token': hathorLib.constants.HATHOR_TOKEN_CONFIG.uid, 'address': output.decoded.address};
       amount = output.value;
     }
     // Change output for Hathor because the whole input will go as change
-    const outputChange = wallet.getOutputChange(amount, HATHOR_TOKEN_INDEX);
+    const outputChange = hathorLib.wallet.getOutputChange(amount, hathorLib.constants.HATHOR_TOKEN_INDEX);
     return {'input': input, 'output': outputChange};
   }
 
@@ -150,20 +146,20 @@ class CreateToken extends React.Component {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
-      address = wallet.getAddressToUse();
+      address = hathorLib.wallet.getAddressToUse();
     } else {
       address = this.refs.address.value;
     }
     const promise = new Promise((resolve, reject) => {
       try {
-        const retPromise = tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**DECIMAL_PLACES), 10), this.state.pin);
+        const retPromise = hathorLib.tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES), 10), this.state.pin);
         retPromise.then((token) => {
           resolve(token);
         }, (message) => {
           reject(message);
         });
       } catch(e) {
-        if (e instanceof AddressError) {
+        if (e instanceof hathorLib.errors.AddressError) {
           reject(e.message);
         } else {
           // Unhandled error
@@ -173,6 +169,8 @@ class CreateToken extends React.Component {
     });
 
     promise.then((token) => {
+      // Must update the shared address, in case we have used one for the change
+      wallet.updateSharedAddress();
       this.showAlert(token);
     }, (message) => {
       this.setState({ loading: false, errorMessage: message });
@@ -185,7 +183,7 @@ class CreateToken extends React.Component {
    * @param {Object} token Object with {uid, name, symbol}
    */
   showAlert = (token) => {
-    this.setState({ name: token.name, configurationString: tokens.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
+    this.setState({ name: token.name, configurationString: hathorLib.tokens.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
       $('#alertModal').modal('show');
     });
   }
@@ -272,7 +270,7 @@ class CreateToken extends React.Component {
           <div className="row">
             <div className="form-group col-4">
               <label>Amount</label>
-              <input required type="number" ref="amount" step={helpers.prettyValue(1)} min={helpers.prettyValue(1)} placeholder={helpers.prettyValue(0)} className="form-control" />
+              <input required type="number" ref="amount" step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control" />
             </div>
             <div className="form-group d-flex flex-row align-items-center address-checkbox">
               <div className="form-check">

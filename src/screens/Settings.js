@@ -8,11 +8,11 @@
 import React from 'react';
 import wallet from '../utils/wallet';
 import { Link } from 'react-router-dom';
-import helpers from '../utils/helpers';
 import ModalConfirm from '../components/ModalConfirm';
 import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
+import hathorLib from 'hathor-wallet-utils';
 
 
 /**
@@ -110,7 +110,7 @@ class Settings extends React.Component {
       <div className="content-wrapper settings">
         <BackButton {...this.props} />
         <div>
-          <p><strong>Server:</strong> You are connected to {helpers.getServerURL()}</p>
+          <p><strong>Server:</strong> You are connected to {hathorLib.helpers.getServerURL()}</p>
           <button className="btn btn-hathor" onClick={this.changeServer}>Change server</button>
         </div>
         <hr />

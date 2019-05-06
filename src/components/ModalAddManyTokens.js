@@ -8,6 +8,7 @@
 import React from 'react';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
+import hathorLib from 'hathor-wallet-utils';
 
 
 /**
@@ -57,7 +58,7 @@ class ModalAddManyTokens extends React.Component {
     for (const config of matches) {
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
-        const validation = tokens.validateTokenToAddByConfigurationString(config);
+        const validation = hathorLib.tokens.validateTokenToAddByConfigurationString(config);
         if (validation.success === false) {
           this.setState({ errorMessage: validation.message });
           return;

@@ -10,11 +10,10 @@ import 'jest-localstorage-mock';
 
 // Mocking WebSocket for tests
 import { Server, WebSocket } from 'mock-socket';
-import helpers from './utils/helpers';
 global.WebSocket = WebSocket;
 
 localStorage.setItem('wallet:server', 'http://localhost:8080/');
-let wsURL = helpers.getWSServerURL();
+let wsURL = hathorLib.helpers.getWSServerURL();
 
 // Creating a ws mock server
 const mockServer = new Server(wsURL);

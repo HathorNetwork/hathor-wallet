@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import tokens from '../utils/tokens';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { connect } from "react-redux";
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapStateToProps = (state) => {
@@ -79,7 +79,7 @@ class ModalTokenInfo extends React.Component {
    * Get configuration string for the token
    */
   getTokenConfigurationString = () => {
-    return tokens.getConfigurationString(this.state.token.uid, this.state.token.name, this.state.token.symbol);
+    return hathorLib.tokens.getConfigurationString(this.state.token.uid, this.state.token.name, this.state.token.symbol);
   }
 
   render = () => {

@@ -30,10 +30,8 @@ import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
 import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
-import { historyUpdate } from "./actions/index";
 import version from './utils/version';
 import wallet from './utils/wallet';
-import helpers from './utils/helpers';
 import { connect } from "react-redux";
 import WebSocketHandler from './WebSocketHandler';
 import RequestErrorModal from './components/RequestError';
@@ -41,13 +39,8 @@ import DashboardTx from './screens/DashboardTx';
 import DecodeTx from './screens/DecodeTx';
 import PushTx from './screens/PushTx';
 import store from './store/index';
-
-
-const mapDispatchToProps = dispatch => {
-  return {
-    historyUpdate: (data) => dispatch(historyUpdate(data)),
-  };
-};
+import createRequestInstance from './api/axiosInstance';
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapStateToProps = (state) => {
@@ -61,6 +54,8 @@ class Root extends React.Component {
   componentDidMount() {
     WebSocketHandler.on('wallet', this.handleWebsocket);
     WebSocketHandler.on('storage', this.handleWebsocketStorage);
+
+    hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
   }
 
   componentWillUnmount() {
@@ -69,15 +64,15 @@ class Root extends React.Component {
   }
 
   handleWebsocket = (wsData) => {
-    if (wallet.loaded()) {
+    if (hathorLib.wallet.loaded()) {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
       if (wsData.type === 'wallet:address_history') {
         // If is a new transaction, we send a notification to the user, in case it's turned on
         // We only send the notification if the inputs are not generated from this wallet
-        if (!wallet.txExists(wsData.history) && !wallet.areInputsMine(wsData.history)) {
+        if (!hathorLib.wallet.txExists(wsData.history) && !hathorLib.wallet.areInputsMine(wsData.history)) {
           let message = '';
-          if (helpers.isBlock(wsData.history)) {
+          if (hathorLib.helpers.isBlock(wsData.history)) {
             message = 'You\'ve found a new block! Click to open it.';
           } else {
             message = 'You\'ve received a new transaction! Click to open it.'
@@ -90,7 +85,7 @@ class Root extends React.Component {
             }
           }
         }
-        this.props.historyUpdate({'data': [wsData.history]});
+        wallet.newAddressHistory(wsData.history);
       } else {
         console.log('Websocket message not handled. Type:', wsData.type);
       }
@@ -98,7 +93,7 @@ class Root extends React.Component {
   }
 
   handleWebsocketStorage = (wsData) => {
-    if (wallet.loaded()) {
+    if (hathorLib.wallet.loaded()) {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
       console.log('Websocket message not handled. Type:', wsData.type);
@@ -154,7 +149,7 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
     return <VersionError {...props} />;
   } else {
     // If was closed and is loaded we need to redirect to locked screen
-    if (wallet.wasClosed()) {
+    if (hathorLib.wallet.wasClosed()) {
       return <Redirect to={{ pathname: '/locked/' }} />;
     } else {
       if (reduxState.loadingAddresses && !isServerScreen) {
@@ -191,9 +186,9 @@ const returnStartedRoute = (Component, props, rest) => {
     }
   }
 
-  if (wallet.started()) {
-    if (wallet.loaded()) {
-      if (wallet.isLocked()) {
+  if (hathorLib.wallet.started()) {
+    if (hathorLib.wallet.loaded()) {
+      if (hathorLib.wallet.isLocked()) {
         return <Redirect to={{pathname: '/locked/'}} />;
       } else if (rest.loaded) {
         return returnLoadedWalletComponent(Component, props, rest);
@@ -225,7 +220,7 @@ const StartedRoute = ({component: Component, ...rest}) => (
  * Return a div grouping the Navigation and the Component
  */
 const returnDefaultComponent = (Component, props) => {
-  if (version.checkWalletVersion()) {
+  if (hathorLib.version.checkWalletVersion()) {
     return (
       <div className="component-div"><Navigation {...props}/><Component {...props} /><RequestErrorModal {...props} /></div>
     );
@@ -243,4 +238,4 @@ const NavigationRoute = ({ component: Component, ...rest }) => (
   )} />
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(Root);
+export default connect(mapStateToProps)(Root);

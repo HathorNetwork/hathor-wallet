@@ -7,15 +7,13 @@
 
 import React from 'react';
 import $ from 'jquery';
-import transaction from '../utils/transaction';
-import { AddressError, OutputValueError } from '../utils/errors';
 import ReactLoading from 'react-loading';
 import ModalPin from '../components/ModalPin';
 import SendTokensOne from '../components/SendTokensOne';
-import tokens from '../utils/tokens';
-import { HATHOR_TOKEN_CONFIG } from '../constants';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
+import hathorLib from 'hathor-wallet-utils';
+import wallet from '../utils/wallet';
 
 
 const mapStateToProps = (state) => {
@@ -46,7 +44,7 @@ class SendTokens extends React.Component {
       errorMessage: '',
       loading: false,
       pin: '',
-      txTokens: [HATHOR_TOKEN_CONFIG]
+      txTokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG]
     };
   }
 
@@ -95,17 +93,19 @@ class SendTokens extends React.Component {
     if (!isValid) return;
     let data = this.getData();
     if (!data) return;
-    data.tokens = tokens.filterTokens(this.state.txTokens, HATHOR_TOKEN_CONFIG).map((token) => token.uid);
+    data.tokens = hathorLib.tokens.filterTokens(this.state.txTokens, hathorLib.constants.HATHOR_TOKEN_CONFIG).map((token) => token.uid);
     this.setState({ errorMessage: '', loading: true });
     try {
-      const promise = transaction.sendTransaction(data, this.state.pin);
+      const promise = hathorLib.transaction.sendTransaction(data, this.state.pin);
       promise.then(() => {
+        // Must update the shared address, in case we have used one for the change
+        wallet.updateSharedAddress();
         this.props.history.push('/wallet/');
       }, (message) => {
         this.setState({ errorMessage: message, loading: false });
       });
     } catch(e) {
-      if (e instanceof AddressError || e instanceof OutputValueError) {
+      if (e instanceof hathorLib.errors.AddressError || e instanceof hathorLib.errors.OutputValueError) {
         this.setState({ errorMessage: e.message, loading: false });
       } else {
         // Unhandled error

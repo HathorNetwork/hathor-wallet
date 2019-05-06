@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import helpers from '../utils/helpers';
-import wallet from '../utils/wallet';
 import { connect } from "react-redux";
 import { selectToken } from '../actions/index';
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapStateToProps = (state) => {
@@ -85,7 +84,7 @@ class TokenBar extends React.Component {
    * Called when user clicks to lock wallet, then redirects to locked screen
    */
   lockWallet = () => {
-    wallet.lock();
+    hathorLib.wallet.lock();
     this.props.history.push('/locked/');
   }
 
@@ -104,10 +103,10 @@ class TokenBar extends React.Component {
    * @return {string} Available balance of token formatted
    */
   getTokenBalance = (uid) => {
-    const filteredHistoryTransactions = wallet.filterHistoryTransactions(this.props.historyTransactions, uid);
-    const balance = wallet.calculateBalance(filteredHistoryTransactions, uid);
+    const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, uid);
+    const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, uid);
     const total = balance.available + balance.locked;
-    return helpers.prettyValue(total);
+    return hathorLib.helpers.prettyValue(total);
   }
 
   /**
@@ -141,9 +140,9 @@ class TokenBar extends React.Component {
 
     const renderUnknownTokens = () => {
       return (
-        <div title={`${unknownTokens} unknown ${helpers.plural(unknownTokens, 'token', 'tokens')}`} className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.unknownClicked}>
+        <div title={`${unknownTokens} unknown ${hathorLib.helpers.plural(unknownTokens, 'token', 'tokens')}`} className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.unknownClicked}>
           <div className="unknown-symbol d-flex flex-row align-items-center justify-content-center">{unknownTokens}</div>
-          {this.state.opened && <span className='ellipsis'>Unknown {helpers.plural(unknownTokens, 'token', 'tokens')}</span>}
+          {this.state.opened && <span className='ellipsis'>Unknown {hathorLib.helpers.plural(unknownTokens, 'token', 'tokens')}</span>}
         </div>
       );
     }

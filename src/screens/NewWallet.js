@@ -12,9 +12,9 @@ import NewWalletStep2 from '../components/NewWalletStep2';
 import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
-import { HD_WALLET_ENTROPY } from '../constants';
 import { updatePassword, updatePin, updateWords } from '../actions/index';
 import { connect } from "react-redux";
+import hathorLib from 'hathor-wallet-utils';
 
 
 const mapDispatchToProps = dispatch => {
@@ -58,14 +58,14 @@ class NewWallet extends React.Component {
   }
 
   componentDidMount = () => {
-    wallet.markBackupAsNotDone();
+    hathorLib.wallet.markBackupAsNotDone();
   }
 
   create = () => {
     let isValid = this.refs.confirmForm.checkValidity();
     if (isValid) {
       this.refs.confirmForm.classList.remove('was-validated')
-      const words = wallet.generateWalletWords(HD_WALLET_ENTROPY);
+      const words = hathorLib.wallet.generateWalletWords(hathorLib.constants.HD_WALLET_ENTROPY);
       this.props.updateWords(words);
       this.setState({ step2: true });
     } else {
@@ -107,7 +107,7 @@ class NewWallet extends React.Component {
    * After user backed up the words with success we mark it as done and show the component to Choose Password
    */
   validationSuccess = () => {
-    wallet.markBackupAsDone();
+    hathorLib.wallet.markBackupAsDone();
     this.refs.alertSuccess.show(1000);
     this.setState({ askPassword: true });
   }
