@@ -8,6 +8,7 @@
 import React from 'react';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
+import tokens from '../utils/tokens';
 import ReactLoading from 'react-loading';
 import ModalPin from '../components/ModalPin';
 import ModalAlert from '../components/ModalAlert';
@@ -154,6 +155,8 @@ class CreateToken extends React.Component {
       try {
         const retPromise = hathorLib.tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES), 10), this.state.pin);
         retPromise.then((token) => {
+          // Update redux with added token
+          tokens.saveTokenRedux(token.uid);
           resolve(token);
         }, (message) => {
           reject(message);

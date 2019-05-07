@@ -59,6 +59,20 @@ const tokens = {
     const tokens = hathorLib.tokens.unregisterToken(uid);
     store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
   },
+
+  /**
+   * Save new tokens array and selected token after a new one
+   *
+   * @param {string} uid Token uid added
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  saveTokenRedux(uid) {
+    const storageTokens = localStorage.getItem('wallet:tokens');
+    const tokens = localStorage.memory ? storageTokens : JSON.parse(storageTokens);
+    store.dispatch(newTokens({tokens, uid: uid}));
+  },
 }
 
 export default tokens;

@@ -116,6 +116,11 @@ class Root extends React.Component {
   addressesLoadedUpdate = (data) => {
     // Update the version of the wallet that the data was loaded
     localStorage.setItem('wallet:version', VERSION);
+
+    // Check api version everytime we load address history
+    version.checkApiVersion();
+
+    // Update redux with loaded data
     store.dispatch(dataLoaded({ addressesFound: data.addressesFound, transactionsFound: Object.keys(data.historyTransactions).length }));
   }
 
