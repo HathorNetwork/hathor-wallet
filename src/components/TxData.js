@@ -14,6 +14,7 @@ import { connect } from "react-redux";
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
 import hathorLib from 'hathor-wallet-utils';
+import { MAX_GRAPH_LEVEL } from '../contants';
 
 
 const mapStateToProps = (state) => {
@@ -53,7 +54,7 @@ class TxData extends React.Component {
    * @param {string} type Type of graph to be returned (funds or verification)
    */
   graphURL = (hash, type) => {
-    return `${hathorLib.helpers.getServerURL()}graphviz/neighbours.dot/?tx=${hash}&graph_type=${type}&max_level=${hathorLib.constants.MAX_GRAPH_LEVEL}`;
+    return `${hathorLib.helpers.getServerURL()}graphviz/neighbours.dot/?tx=${hash}&graph_type=${type}&max_level=${MAX_GRAPH_LEVEL}`;
   }
 
   /**

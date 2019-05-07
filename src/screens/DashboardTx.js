@@ -10,6 +10,7 @@ import TxRow from '../components/TxRow';
 import SearchTx from '../components/SearchTx';
 import BackButton from '../components/BackButton';
 import hathorLib from 'hathor-wallet-utils';
+import { DASHBOARD_TX_COUNT, DASHBOARD_BLOCKS_COUNT } from '../constants';
 
 
 /**
@@ -37,7 +38,7 @@ class DashboardTx extends React.Component {
    * Get initial data to fill the screen and update the state with this data
    */
   getInitialData = () => {
-    hathorLib.txApi.getDashboardTx(hathorLib.constants.DASHBOARD_BLOCKS_COUNT, hathorLib.constants.DASHBOARD_TX_COUNT, (data) => {
+    hathorLib.txApi.getDashboardTx(DASHBOARD_BLOCKS_COUNT, DASHBOARD_TX_COUNT, (data) => {
       this.updateData(data.transactions, data.blocks);
     }, (e) => {
       // Error in request
@@ -61,14 +62,14 @@ class DashboardTx extends React.Component {
     if (tx.is_block) {
       let blocks = this.state.blocks;
 
-      blocks = hathorLib.helpers.updateListWs(blocks, tx, hathorLib.constants.DASHBOARD_BLOCKS_COUNT);
+      blocks = hathorLib.helpers.updateListWs(blocks, tx, DASHBOARD_BLOCKS_COUNT);
 
       // Finally we update the state again
       this.setState({ blocks });
     } else {
       let transactions = this.state.transactions;
 
-      transactions = hathorLib.helpers.updateListWs(transactions, tx, hathorLib.constants.DASHBOARD_TX_COUNT);
+      transactions = hathorLib.helpers.updateListWs(transactions, tx, DASHBOARD_TX_COUNT);
 
       // Finally we update the state again
       this.setState({ transactions });

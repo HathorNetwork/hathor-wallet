@@ -14,6 +14,7 @@ import ModalAddManyTokens from '../components/ModalAddManyTokens';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from 'hathor-wallet-utils';
+import { WALLET_HISTORY_COUNT } from '../constants';
 
 
 const mapStateToProps = (state) => {
@@ -145,7 +146,7 @@ class UnknownTokens extends React.Component {
                 </div>
               </div>
               <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
-                <TokenHistory history={token.history} count={hathorLib.constants.WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
+                <TokenHistory history={token.history} count={WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
               </div>
             </div>
           );

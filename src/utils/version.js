@@ -7,6 +7,7 @@
 
 import store from '../store/index';
 import { isVersionAllowedUpdate, networkUpdate } from '../actions/index';
+import { FIRST_WALLET_COMPATIBLE_VERSION } from './constants';
 import hathorLib from 'hathor-wallet-utils';
 
 /**
@@ -39,6 +40,23 @@ const version = {
     });
     return newPromise;
   },
+
+  /**
+   * Checks if the wallet version is allowed to continue using the wallet or needs a reset
+   *
+   * @return {boolean}
+   *
+   * @memberof Version
+   * @inner
+   */
+  checkWalletVersion() {
+    const version = localStorage.getItem('wallet:version');
+    if (version !== null && helpers.isVersionAllowed(version, FIRST_WALLET_COMPATIBLE_VERSION)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 export default version;

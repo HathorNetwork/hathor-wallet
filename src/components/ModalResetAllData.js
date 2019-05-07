@@ -7,6 +7,7 @@
 
 import React from 'react';
 import hathorLib from 'hathor-wallet-utils';
+import { CONFIRM_RESET_MESSAGE } from '../constants';
 
 
 /**
@@ -40,7 +41,7 @@ class ModalResetAllData extends React.Component {
       } else if (!password && !forgotPassword) {
         this.setState({errorMessage: 'You must write your password or check that you have forgotten it'});
       } else {
-        if (this.refs.confirmMessage.value.toLowerCase() === hathorLib.constants.CONFIRM_RESET_MESSAGE.toLowerCase()) {
+        if (this.refs.confirmMessage.value.toLowerCase() === CONFIRM_RESET_MESSAGE.toLowerCase()) {
           this.props.success();
         } else {
           this.setState({errorMessage: 'Confirm message does not match'})
@@ -69,7 +70,7 @@ class ModalResetAllData extends React.Component {
             </div>
             <div className="modal-body">
               <p>{getFirstMessage()}</p>
-              <p>If you still wanna do it, we need your password and for you to write down <strong>'{hathorLib.constants.CONFIRM_RESET_MESSAGE}'</strong> to confirm the operation.</p>
+              <p>If you still wanna do it, we need your password and for you to write down <strong>'{CONFIRM_RESET_MESSAGE}'</strong> to confirm the operation.</p>
               <form ref="formConfirm">
                 <div className="form-group">
                   <label htmlFor="password">Password*</label>
@@ -77,7 +78,7 @@ class ModalResetAllData extends React.Component {
                 </div>
                 <div className="form-group">
                   <label htmlFor="confirmMessage">Confirm message*</label>
-                  <input type="text" ref="confirmMessage" placeholder={`Write '${hathorLib.constants.CONFIRM_RESET_MESSAGE}'`} className="form-control" required />
+                  <input type="text" ref="confirmMessage" placeholder={`Write '${CONFIRM_RESET_MESSAGE}'`} className="form-control" required />
                 </div>
                 <div className="form-check">
                   <input ref="forgotPassword" type="checkbox" className="form-check-input" id="forgotPassword" />

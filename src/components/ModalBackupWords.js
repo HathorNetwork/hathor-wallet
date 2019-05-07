@@ -11,6 +11,7 @@ import _ from 'lodash';
 import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from 'hathor-wallet-utils';
+import { WORDS_VALIDATION } from '../constants';
 
 
 const mapDispatchToProps = dispatch => {
@@ -103,7 +104,7 @@ class ModalBackupWords extends React.Component {
    * So we select some words to do the validation and show validation component in the modal
    */
   handleWordsSaved = () => {
-    const wordsValidation = _.shuffle(this.props.words.split(' ')).slice(0, hathorLib.constants.WORDS_VALIDATION);
+    const wordsValidation = _.shuffle(this.props.words.split(' ')).slice(0, WORDS_VALIDATION);
     this.setState({ showValidation: true, wordsValidation });
   }
 
@@ -111,7 +112,7 @@ class ModalBackupWords extends React.Component {
    * Called when user finishes the backup. We validate the backup and shows a success message, in case of success
    */
   handleValidateBackup = () => {
-    if (this.state.chosenWords.length !== hathorLib.constants.WORDS_VALIDATION) {
+    if (this.state.chosenWords.length !== WORDS_VALIDATION) {
       this.setState({ errorMessage: 'Invalid number of words' });
       return;
     }

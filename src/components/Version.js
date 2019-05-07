@@ -7,6 +7,7 @@
 
 import React from 'react';
 import hathorLib from 'hathor-wallet-utils';
+import { VERSION } from '../constants';
 
 
 /**
@@ -18,7 +19,7 @@ const Version = (props) => {
   return (
     <div className="d-flex flex-column version-wrapper align-items-center">
       <span>Version</span>
-      <span>{hathorLib.constants.VERSION}</span>
+      <span>{VERSION}</span>
     </div>
   );
 };
