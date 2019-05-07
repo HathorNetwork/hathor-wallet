@@ -33,14 +33,22 @@ import WalletVersionError from './screens/WalletVersionError';
 import version from './utils/version';
 import wallet from './utils/wallet';
 import { connect } from "react-redux";
-import WebSocketHandler from './WebSocketHandler';
 import RequestErrorModal from './components/RequestError';
 import DashboardTx from './screens/DashboardTx';
 import DecodeTx from './screens/DecodeTx';
 import PushTx from './screens/PushTx';
+import { dataLoaded, isOnlineUpdate } from "./actions/index";
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from 'hathor-wallet-utils';
+
+
+const mapDispatchToProps = dispatch => {
+  return {
+    dataLoaded: (data) => dispatch(dataLoaded(data)),
+    isOnlineUpdate: (data) => dispatch(isOnlineUpdate(data)),
+  };
+};
 
 
 const mapStateToProps = (state) => {
@@ -52,15 +60,19 @@ const mapStateToProps = (state) => {
 
 class Root extends React.Component {
   componentDidMount() {
-    WebSocketHandler.on('wallet', this.handleWebsocket);
-    WebSocketHandler.on('storage', this.handleWebsocketStorage);
+    hathorLib.WebSocketHandler.on('wallet', this.handleWebsocket);
+    hathorLib.WebSocketHandler.on('storage', this.handleWebsocketStorage);
 
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
+
+    hathorLib.WebSocketHandler.on('addresses_loaded', this.addressesLoadedUpdate);
+    hathorLib.WebSocketHandler.on('is_online', this.isOnlineUpdate);
+    hathorLib.WebSocketHandler.on('reload_data', this.reloadData);
   }
 
   componentWillUnmount() {
-    WebSocketHandler.removeListener('wallet', this.handleWebsocket);
-    WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
+    hathorLib.WebSocketHandler.removeListener('wallet', this.handleWebsocket);
+    hathorLib.WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
   }
 
   handleWebsocket = (wsData) => {
@@ -98,6 +110,18 @@ class Root extends React.Component {
       // TODO separate those messages
       console.log('Websocket message not handled. Type:', wsData.type);
     }
+  }
+
+  addressesLoadedUpdate = (data) => {
+    store.dispatch(dataLoaded({ addressesFound: data.addressesFound, transactionsFound: Object.keys(data.historyTransactions).length }));
+  }
+
+  isOnlineUpdate = (data) => {
+    store.dispatch(isOnlineUpdate({ isOnline: data }));
+  }
+
+  reloadData = (data) => {
+    wallet.reloadData();
   }
 
   render() {
@@ -238,4 +262,4 @@ const NavigationRoute = ({ component: Component, ...rest }) => (
   )} />
 )
 
-export default connect(mapStateToProps)(Root);
+export default connect(mapStateToProps, mapDispatchToProps)(Root);

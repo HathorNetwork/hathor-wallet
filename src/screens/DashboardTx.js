@@ -8,7 +8,6 @@
 import React from 'react';
 import TxRow from '../components/TxRow';
 import SearchTx from '../components/SearchTx';
-import WebSocketHandler from '../WebSocketHandler';
 import BackButton from '../components/BackButton';
 import hathorLib from 'hathor-wallet-utils';
 
@@ -27,11 +26,11 @@ class DashboardTx extends React.Component {
 
   componentDidMount = () => {
     this.getInitialData();
-    WebSocketHandler.on('network', this.handleWebsocket);
+    hathorLib.WebSocketHandler.on('network', this.handleWebsocket);
   }
 
   componentWillUnmount = () => {
-    WebSocketHandler.removeListener('network', this.handleWebsocket);
+    hathorLib.WebSocketHandler.removeListener('network', this.handleWebsocket);
   }
 
   /**

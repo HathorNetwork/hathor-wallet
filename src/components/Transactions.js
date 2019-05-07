@@ -9,7 +9,6 @@ import React from 'react';
 import ReactLoading from 'react-loading';
 import TxRow from './TxRow';
 import SearchTx from './SearchTx';
-import WebSocketHandler from '../WebSocketHandler';
 import BackButton from '../components/BackButton';
 import hathorLib from 'hathor-wallet-utils';
 
@@ -44,11 +43,11 @@ class Transactions extends React.Component {
   componentDidMount() {
     this.getData(true, null, null, '');
 
-    WebSocketHandler.on('network', this.handleWebsocket);
+    hathorLib.WebSocketHandler.on('network', this.handleWebsocket);
   }
 
   componentWillUnmount() {
-    WebSocketHandler.removeListener('network', this.handleWebsocket);
+    hathorLib.WebSocketHandler.removeListener('network', this.handleWebsocket);
   }
 
   /**
