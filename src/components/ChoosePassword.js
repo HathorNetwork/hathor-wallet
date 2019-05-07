@@ -9,7 +9,6 @@ import React from 'react';
 import PinPasswordWrapper from '../components/PinPasswordWrapper'
 import { updatePassword } from '../actions/index';
 import { connect } from 'react-redux';
-import hathorLib from 'hathor-wallet-utils';
 import { PASSWORD_PATTERN } from '../constants';
 
 

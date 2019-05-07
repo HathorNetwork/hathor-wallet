@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import hathorLib from 'hathor-wallet-utils';
 import { VERSION } from '../constants';
 
 

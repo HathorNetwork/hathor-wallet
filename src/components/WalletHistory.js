@@ -7,7 +7,6 @@
 
 import React from 'react';
 import TokenHistory from '../components/TokenHistory';
-import hathorLib from 'hathor-wallet-utils';
 import { WALLET_HISTORY_COUNT } from '../constants';
 
 

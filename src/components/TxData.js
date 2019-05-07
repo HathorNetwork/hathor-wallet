@@ -14,7 +14,7 @@ import { connect } from "react-redux";
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
 import hathorLib from 'hathor-wallet-utils';
-import { MAX_GRAPH_LEVEL } from '../contants';
+import { MAX_GRAPH_LEVEL } from '../constants';
 
 
 const mapStateToProps = (state) => {
