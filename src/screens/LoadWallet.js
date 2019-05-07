@@ -83,7 +83,7 @@ class LoadWallet extends React.Component {
   pinSuccess = () => {
     // First we clean what can still be there of a last wallet
     wallet.cleanWallet();
-    hathorLib.wallet.generateWallet(this.state.words, '', this.props.pin, this.props.password, true);
+    wallet.generateWallet(this.state.words, '', this.props.pin, this.props.password, true);
     hathorLib.wallet.markBackupAsDone();
     // Clean pin and password from redux
     this.props.updatePassword(null);

@@ -247,7 +247,7 @@ const StartedRoute = ({component: Component, ...rest}) => (
  * Return a div grouping the Navigation and the Component
  */
 const returnDefaultComponent = (Component, props) => {
-  if (hathorLib.version.checkWalletVersion()) {
+  if (version.checkWalletVersion()) {
     return (
       <div className="component-div"><Navigation {...props}/><Component {...props} /><RequestErrorModal {...props} /></div>
     );

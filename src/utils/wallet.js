@@ -48,6 +48,27 @@ if (window.require) {
  */
 const wallet = {
   /**
+   * Validate if can generate the wallet with those parameters and then, call to generate it
+   *
+   * @param {string} words Words to generate the HD Wallet seed,
+   * @param {string} passphrase
+   * @param {string} pin
+   * @param {string} password
+   * @param {boolean} loadHistory if should load history from generated addresses
+   *
+   * @return {string} words generated (null if words are not valid)
+   * @memberof Wallet
+   * @inner
+   */
+  generateWallet(words, passphrase, pin, password, loadHistory) {
+    if (hathorLib.wallet.wordsValid(words).valid) {
+      return this.executeGenerateWallet(words, passphrase, pin, password, loadHistory);
+    } else {
+      return null;
+    }
+  },
+
+  /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
@@ -126,8 +147,9 @@ const wallet = {
    * @inner
    */
   addPassphrase(passphrase, pin, password) {
-    this.cleanWalletRedux();
-    return hathorLib.wallet.addPassphrase(passphrase, pin, password);
+    const words = hathorLib.wallet.getWalletWords(password);
+    this.cleanWallet()
+    return this.generateWallet(words, passphrase, pin, password, true);
   },
 
   /**
@@ -140,7 +162,7 @@ const wallet = {
    * @inner
    */
   updateSharedAddressRedux(address, index) {
-    store.dispatch(sharedAddressUpdate({address, index}));
+    store.dispatch(sharedAddressUpdate({ lastSharedAddress: address, lastSharedIndex: index}));
   },
 
   /**
@@ -152,7 +174,7 @@ const wallet = {
   updateSharedAddress() {
     const lastSharedIndex = hathorLib.wallet.getLastSharedIndex();
     const lastSharedAddress = localStorage.getItem('wallet:address');
-    this.updateSharedAddress(lastSharedAddress, lastSharedIndex);
+    this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
   },
 
   /**
@@ -196,7 +218,6 @@ const wallet = {
     if (result) {
       const {address, index} = result;
       this.updateSharedAddressRedux(address, index);
-
     }
     return null;
   },
