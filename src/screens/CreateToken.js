@@ -14,7 +14,7 @@ import ModalPin from '../components/ModalPin';
 import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
   return {

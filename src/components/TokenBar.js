@@ -8,7 +8,7 @@
 import React from 'react';
 import { connect } from "react-redux";
 import { selectToken } from '../actions/index';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {

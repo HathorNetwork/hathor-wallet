@@ -10,7 +10,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 import { WORDS_VALIDATION } from '../constants';
 
 

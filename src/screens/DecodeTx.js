@@ -8,7 +8,7 @@
 import React from 'react';
 import TxTextInput from '../components/TxTextInput';
 import TxData from '../components/TxData';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

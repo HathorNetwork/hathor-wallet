@@ -8,7 +8,7 @@
 import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS } from '../constants';
 import store from '../store/index';
 import { loadingAddresses, historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)

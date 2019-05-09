@@ -7,7 +7,7 @@
 
 import store from '../store/index';
 import { newTokens } from '../actions/index';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

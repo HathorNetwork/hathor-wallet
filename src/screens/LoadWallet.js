@@ -12,7 +12,7 @@ import ChoosePin from '../components/ChoosePin';
 import logo from '../assets/images/hathor-logo.png';
 import { updatePassword, updatePin } from '../actions/index';
 import { connect } from "react-redux";
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {

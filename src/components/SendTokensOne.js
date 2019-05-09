@@ -11,7 +11,7 @@ import OutputsWrapper from '../components/OutputsWrapper'
 import InputsWrapper from '../components/InputsWrapper'
 import { connect } from "react-redux";
 import _ from 'lodash';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {

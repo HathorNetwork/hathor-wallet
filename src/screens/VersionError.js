@@ -9,7 +9,7 @@ import React from 'react';
 import version from '../utils/version';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from '../components/Version';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

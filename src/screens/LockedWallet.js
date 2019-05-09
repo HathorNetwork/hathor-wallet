@@ -10,7 +10,7 @@ import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

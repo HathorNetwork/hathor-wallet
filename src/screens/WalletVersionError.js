@@ -15,7 +15,7 @@ import ModalBackupWords from '../components/ModalBackupWords';
 import HathorAlert from '../components/HathorAlert';
 import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapDispatchToProps = dispatch => {

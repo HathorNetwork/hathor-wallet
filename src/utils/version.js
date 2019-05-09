@@ -8,7 +8,7 @@
 import store from '../store/index';
 import { isVersionAllowedUpdate, networkUpdate } from '../actions/index';
 import { FIRST_WALLET_COMPATIBLE_VERSION } from '../constants';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 /**
  * Methods to validate version

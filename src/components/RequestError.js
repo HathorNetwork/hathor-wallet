@@ -9,7 +9,7 @@ import React from 'react';
 import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
 import { connect } from 'react-redux';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {

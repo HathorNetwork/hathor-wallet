@@ -12,7 +12,7 @@ import ModalAddressQRCode from './ModalAddressQRCode';
 import wallet from '../utils/wallet';
 import $ from 'jquery';
 import { connect } from "react-redux";
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {

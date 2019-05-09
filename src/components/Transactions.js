@@ -10,7 +10,7 @@ import ReactLoading from 'react-loading';
 import TxRow from './TxRow';
 import SearchTx from './SearchTx';
 import BackButton from '../components/BackButton';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 import { TX_COUNT } from '../constants';
 
 

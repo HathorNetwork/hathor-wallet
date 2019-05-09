@@ -7,7 +7,7 @@
 
 import React from 'react';
 import HathorAlert from '../components/HathorAlert';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

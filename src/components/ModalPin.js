@@ -8,7 +8,7 @@
 import React from 'react';
 import $ from 'jquery';
 import PinInput from './PinInput';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

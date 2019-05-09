@@ -14,7 +14,7 @@ import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
 import { updatePassword, updatePin, updateWords } from '../actions/index';
 import { connect } from "react-redux";
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapDispatchToProps = dispatch => {

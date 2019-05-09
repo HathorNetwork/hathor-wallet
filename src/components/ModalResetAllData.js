@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 import { CONFIRM_RESET_MESSAGE } from '../constants';
 
 

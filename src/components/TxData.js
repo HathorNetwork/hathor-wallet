@@ -13,7 +13,7 @@ import HathorAlert from './HathorAlert';
 import { connect } from "react-redux";
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 import { MAX_GRAPH_LEVEL } from '../constants';
 
 

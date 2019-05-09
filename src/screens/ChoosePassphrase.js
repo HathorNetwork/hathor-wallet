@@ -10,7 +10,7 @@ import ModalConfirm from '../components/ModalConfirm';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

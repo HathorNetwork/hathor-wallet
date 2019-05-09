@@ -9,7 +9,7 @@ import React from 'react';
 import ReactLoading from 'react-loading';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

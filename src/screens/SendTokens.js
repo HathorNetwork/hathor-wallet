@@ -12,7 +12,7 @@ import ModalPin from '../components/ModalPin';
 import SendTokensOne from '../components/SendTokensOne';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
 
 

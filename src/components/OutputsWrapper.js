@@ -8,7 +8,7 @@
 import React from 'react';
 import $ from 'jquery';
 import _ from 'lodash';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

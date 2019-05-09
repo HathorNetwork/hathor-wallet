@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { withRouter } from "react-router-dom";
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

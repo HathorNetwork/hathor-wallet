@@ -8,7 +8,7 @@
 import store from '../store/index';
 import { lastFailedRequest, updateRequestErrorStatusCode } from '../actions/index';
 import $ from 'jquery';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 /**
  * Create axios instance settings base URL and content type  

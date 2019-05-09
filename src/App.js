@@ -40,7 +40,7 @@ import PushTx from './screens/PushTx';
 import { dataLoaded, isOnlineUpdate } from "./actions/index";
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 import { VERSION } from './constants';
 
 

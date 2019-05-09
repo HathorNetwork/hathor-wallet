@@ -10,7 +10,7 @@ import $ from 'jquery';
 import version from '../utils/version';
 import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**

@@ -12,7 +12,7 @@ import ModalConfirm from '../components/ModalConfirm';
 import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
-import hathorLib from 'hathor-wallet-utils';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
