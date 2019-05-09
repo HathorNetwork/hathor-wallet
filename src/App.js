@@ -113,6 +113,12 @@ class Root extends React.Component {
     }
   }
 
+  /**
+   * Method called when WebSocket receives a message after loading address history
+   * We just check and save the version that was loaded and update redux data
+   *
+   * @param {Object} data Object with {'historyTransactions', 'addressesFound'}
+   */
   addressesLoadedUpdate = (data) => {
     // Update the version of the wallet that the data was loaded
     localStorage.setItem('wallet:version', VERSION);
@@ -124,10 +130,18 @@ class Root extends React.Component {
     store.dispatch(dataLoaded({ addressesFound: data.addressesFound, transactionsFound: Object.keys(data.historyTransactions).length }));
   }
 
+  /**
+   * Method called when WebSocket updates isOnline attribute, so we update this parameter in redux
+   *
+   * @param {boolean} data Boolean if websocket is online
+   */
   isOnlineUpdate = (data) => {
     store.dispatch(isOnlineUpdate({ isOnline: data }));
   }
 
+  /**
+   * Method called when need to reload data when websocket reconnects
+   */
   reloadData = (data) => {
     wallet.reloadData();
   }
