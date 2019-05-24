@@ -10,6 +10,7 @@ import helpers from './utils/helpers';
 import wallet from './utils/wallet';
 import { isOnlineUpdate } from "./actions/index";
 import store from './store/index';
+import $ from 'jquery';
 
 const HEARTBEAT_TMO = 30000;     // 30s
 const WS_READYSTATE_READY = 1;
@@ -72,6 +73,10 @@ class WS extends EventEmitter {
    */
   onOpen = () => {
     if (this.connected === false) {
+      // Modal might be opened, then we need to close it when reloading data
+      // Sometimes when the error modal is openend, it leaves only the backdrop after the reload
+      // That's why we need to close it manually
+       $('#requestErrorModal').modal('hide');
       // If was not connected  we need to reload data
       wallet.reloadData();
     }
