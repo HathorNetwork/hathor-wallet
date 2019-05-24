@@ -42,6 +42,7 @@ import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { VERSION } from './constants';
+import $ from 'jquery';
 
 
 const mapDispatchToProps = dispatch => {
@@ -143,6 +144,10 @@ class Root extends React.Component {
    * Method called when need to reload data when websocket reconnects
    */
   reloadData = (data) => {
+    // Error modal might be opened, then we need to close it when reloading data
+    // Sometimes when the error modal is openend, it leaves only the backdrop after the reload
+    // That's why we need to close it manually
+    $('#requestErrorModal').modal('hide');
     wallet.reloadData();
   }
 
