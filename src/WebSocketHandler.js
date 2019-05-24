@@ -76,7 +76,7 @@ class WS extends EventEmitter {
       // Modal might be opened, then we need to close it when reloading data
       // Sometimes when the error modal is openend, it leaves only the backdrop after the reload
       // That's why we need to close it manually
-       $('#requestErrorModal').modal('hide');
+      $('#requestErrorModal').modal('hide');
       // If was not connected  we need to reload data
       wallet.reloadData();
     }
