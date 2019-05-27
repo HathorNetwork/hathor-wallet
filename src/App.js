@@ -74,6 +74,10 @@ class Root extends React.Component {
   componentWillUnmount() {
     hathorLib.WebSocketHandler.removeListener('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
+
+    hathorLib.WebSocketHandler.removeListener('addresses_loaded', this.addressesLoadedUpdate);
+    hathorLib.WebSocketHandler.removeListener('is_online', this.isOnlineUpdate);
+    hathorLib.WebSocketHandler.removeListener('reload_data', this.reloadData);
   }
 
   handleWebsocket = (wsData) => {
