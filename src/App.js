@@ -61,6 +61,7 @@ const mapStateToProps = (state) => {
 
 class Root extends React.Component {
   componentDidMount() {
+    hathorLib.WebSocketHandler.setup();
     hathorLib.WebSocketHandler.on('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.on('storage', this.handleWebsocketStorage);
 
