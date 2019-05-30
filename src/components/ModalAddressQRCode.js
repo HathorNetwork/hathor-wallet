@@ -43,22 +43,17 @@ class ModalAddressQRCode extends React.Component {
 
   /**
    * Called when user clicks to download the qrcode
+   * Add the href from the qrcode canvas and execute click
    *
    * @param {Object} e Event emitted by the link clicked
    */
   download = (e) => {
-    this.refs.downloadLink.click();
-  }
-
-  /**
-   * Returns the download href for the qrcode
-   */
-  getHref = () => {
     const elements = document.getElementsByTagName('canvas');
     if (elements.length > 0) {
-      return elements[0].toDataURL();
+      this.refs.downloadLink.href = elements[0].toDataURL();
     }
-    return '';
+
+    this.refs.downloadLink.click();
   }
 
   /**
@@ -90,14 +85,14 @@ class ModalAddressQRCode extends React.Component {
               </button>
             </div>
             <div className="modal-body d-flex flex-column align-items-center">
-              <QRCode onClick={this.openQrCode} size={200} value={`hathor:${this.props.lastSharedAddress}`} />
+              <QRCode size={200} value={`hathor:${this.props.lastSharedAddress}`} />
               <span ref="address" className="mt-3">
                 {this.props.lastSharedAddress}
                 <CopyToClipboard text={this.props.lastSharedAddress} onCopy={this.copied}>
                   <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
                 </CopyToClipboard>
               </span> 
-              <a href={this.getHref()} download={`Hathor address - ${this.props.lastSharedAddress}`} className="hidden" ref="downloadLink">Download</a>
+              <a href="true" download={`Hathor address - ${this.props.lastSharedAddress}`} className="hidden" ref="downloadLink">Download</a>
               <p className="text-success mt-4">{this.state.successMessage}</p>
             </div>
             <div className="modal-footer">
