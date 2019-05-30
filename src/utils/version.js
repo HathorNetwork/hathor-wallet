@@ -50,7 +50,7 @@ const version = {
    * @inner
    */
   checkWalletVersion() {
-    const version = localStorage.getItem('wallet:version');
+    const version = hathorLib.storage.getItem('wallet:version');
     if (version !== null && hathorLib.helpers.isVersionAllowed(version, FIRST_WALLET_COMPATIBLE_VERSION)) {
       return true;
     } else {

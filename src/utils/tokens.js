@@ -69,9 +69,8 @@ const tokens = {
    * @inner
    */
   saveTokenRedux(uid) {
-    const storageTokens = localStorage.getItem('wallet:tokens');
-    const tokens = localStorage.memory ? storageTokens : JSON.parse(storageTokens);
-    store.dispatch(newTokens({tokens, uid: uid}));
+    const storageTokens = hathorLib.storage.getItem('wallet:tokens');
+    store.dispatch(newTokens({tokens: storageTokens, uid: uid}));
   },
 }
 

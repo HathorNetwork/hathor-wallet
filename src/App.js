@@ -42,7 +42,10 @@ import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { VERSION } from './constants';
+import { storageFactory }  from './storage.js';
 
+
+hathorLib.storage.setStorage(storageFactory);
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -126,7 +129,7 @@ class Root extends React.Component {
    */
   addressesLoadedUpdate = (data) => {
     // Update the version of the wallet that the data was loaded
-    localStorage.setItem('wallet:version', VERSION);
+    hathorLib.storage.setItem('wallet:version', VERSION);
 
     // Check api version everytime we load address history
     version.checkApiVersion();
