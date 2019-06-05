@@ -8,6 +8,7 @@
 import React from 'react';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -49,7 +50,7 @@ class ModalAddToken extends React.Component {
       this.setState({ errorMessage: 'Must provide configuration string or uid, name, and symbol' });
       return;
     }
-    const validation = tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
+    const validation = hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
     if (validation.success === false) {
       this.setState({ errorMessage: validation.message });
       return;

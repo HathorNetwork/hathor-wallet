@@ -7,10 +7,9 @@
 
 import React from 'react';
 import ReactLoading from 'react-loading';
-import txApi from '../api/txApi';
-import helpers from '../utils/helpers';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -48,7 +47,7 @@ class TransactionDetail extends React.Component {
    * Get accumulated weight and confirmation level of the transaction
    */
   getConfirmationData = () => {
-    txApi.getConfirmationData(this.props.match.params.id, (data) => {
+    hathorLib.txApi.getConfirmationData(this.props.match.params.id, (data) => {
       this.setState({ confirmationData: data });
     }, (e) => {
       // Error in request
@@ -71,9 +70,9 @@ class TransactionDetail extends React.Component {
    * Get transaction in the server when mounting the page
    */
   getTx() {
-    txApi.getTransaction(this.props.match.params.id, (data) => {
+    hathorLib.txApi.getTransaction(this.props.match.params.id, (data) => {
       this.txReceived(data);
-      if (!helpers.isBlock(data.tx)) {
+      if (!hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();
       }
     }, (e) => {

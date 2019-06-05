@@ -5,8 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import wallet from '../utils/wallet';
-import { HATHOR_TOKEN_CONFIG } from '../constants';
+import hathorLib from '@hathor/wallet-lib';
 
 const initialState = {
 /*
@@ -36,9 +35,9 @@ const initialState = {
   words: undefined,
   // Tokens already saved: array of objects
   // {'name', 'symbol', 'uid'}
-  tokens: [HATHOR_TOKEN_CONFIG],
+  tokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
   // Token selected (by default is HATHOR)
-  selectedToken: HATHOR_TOKEN_CONFIG.uid,
+  selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
   // List of all tokens seen in transactions
   allTokens: new Set(),
   // If is in the proccess of loading addresses transactions from the full node
@@ -53,13 +52,14 @@ const initialState = {
 const rootReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'history_update':
-      const { historyTransactions, allTokens, newSharedAddress, newSharedIndex, addressesFound } = wallet.updateHistoryData(state.historyTransactions, state.allTokens, action.payload.data, action.payload.resolve);
-
-      const transactionsFound = Object.keys(historyTransactions).length;
-
-      const newLastSharedAddress = newSharedAddress === null ? state.lastSharedAddress : newSharedAddress;
-      const newLastSharedIndex = newSharedIndex === null ? state.lastSharedIndex : newSharedIndex;
-      return Object.assign({}, state, {historyTransactions, allTokens, lastSharedIndex: newLastSharedIndex, lastSharedAddress: newLastSharedAddress, addressesFound, transactionsFound});
+      return Object.assign({}, state, {
+        historyTransactions: action.payload.historyTransactions,
+        allTokens: action.payload.allTokens,
+        lastSharedIndex: action.payload.lastSharedIndex,
+        lastSharedAddress: action.payload.lastSharedAddress,
+        addressesFound: action.payload.addressesFound,
+        transactionsFound: action.payload.transactionsFound
+      });
 
     case 'shared_address':
       return Object.assign({}, state, {lastSharedAddress: action.payload.lastSharedAddress, lastSharedIndex: action.payload.lastSharedIndex});

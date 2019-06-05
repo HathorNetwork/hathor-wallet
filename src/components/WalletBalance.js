@@ -7,13 +7,12 @@
 
 import React from 'react';
 import $ from 'jquery';
-import helpers from '../utils/helpers';
 import tokens from '../utils/tokens';
 import ModalTokenInfo from './ModalTokenInfo';
 import ModalConfirm from './ModalConfirm';
 import ModalEditToken from './ModalEditToken';
 import { connect } from "react-redux";
-import { HATHOR_TOKEN_CONFIG } from '../constants';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {
@@ -84,11 +83,11 @@ class WalletBalance extends React.Component {
             <p className='token-name mb-0'>
               <strong>{token ? token.name : ''}</strong>
             </p>
-            {this.props.selectedToken !== HATHOR_TOKEN_CONFIG.uid && renderTokenButtons()}
+            {this.props.selectedToken !== hathorLib.constants.HATHOR_TOKEN_CONFIG.uid && renderTokenButtons()}
           </div>
-          <p><strong>Total:</strong> {helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
-          <p><strong>Available:</strong> {helpers.prettyValue(this.props.balance.available)} {symbol}</p>
-          <p><strong>Locked:</strong> {helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
+          <p><strong>Total:</strong> {hathorLib.helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
+          <p><strong>Available:</strong> {hathorLib.helpers.prettyValue(this.props.balance.available)} {symbol}</p>
+          <p><strong>Locked:</strong> {hathorLib.helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
         </div>
       );
     }

@@ -12,10 +12,10 @@ import WalletAddress from '../components/WalletAddress';
 import ModalBackupWords from '../components/ModalBackupWords';
 import TokenBar from '../components/TokenBar';
 import HathorAlert from '../components/HathorAlert';
-import wallet from '../utils/wallet';
 import $ from 'jquery';
 import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapDispatchToProps = dispatch => {
@@ -26,8 +26,8 @@ const mapDispatchToProps = dispatch => {
 
 
 const mapStateToProps = (state) => {
-  const filteredHistoryTransactions = wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken);
-  const balance = wallet.calculateBalance(filteredHistoryTransactions, state.selectedToken);
+  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken);
+  const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, state.selectedToken);
   return {
     balance: balance,
     historyTransactions: filteredHistoryTransactions,
@@ -50,7 +50,7 @@ class Wallet extends React.Component {
 
   componentDidMount = () => {
     this.setState({
-      backupDone: wallet.isBackupDone()
+      backupDone: hathorLib.wallet.isBackupDone()
     });
   }
 
@@ -69,7 +69,7 @@ class Wallet extends React.Component {
    */
   backupSuccess = () => {
     $('#backupWordsModal').modal('hide');
-    wallet.markBackupAsDone();
+    hathorLib.wallet.markBackupAsDone();
     this.props.updateWords(null);
     this.setState({ backupDone: true, successMessage: 'Backup completed!' }, () => {
       this.refs.alertSuccess.show(1000);

@@ -6,14 +6,12 @@
  */
 
 import React from 'react';
-import txApi from '../api/txApi';
 import ReactLoading from 'react-loading';
-import { TX_COUNT } from '../constants';
 import TxRow from './TxRow';
 import SearchTx from './SearchTx';
-import helpers from '../utils/helpers';
-import WebSocketHandler from '../WebSocketHandler';
 import BackButton from '../components/BackButton';
+import hathorLib from '@hathor/wallet-lib';
+import { TX_COUNT } from '../constants';
 
 
 /**
@@ -46,11 +44,11 @@ class Transactions extends React.Component {
   componentDidMount() {
     this.getData(true, null, null, '');
 
-    WebSocketHandler.on('network', this.handleWebsocket);
+    hathorLib.WebSocketHandler.on('network', this.handleWebsocket);
   }
 
   componentWillUnmount() {
-    WebSocketHandler.removeListener('network', this.handleWebsocket);
+    hathorLib.WebSocketHandler.removeListener('network', this.handleWebsocket);
   }
 
   /**
@@ -74,7 +72,7 @@ class Transactions extends React.Component {
     if (!this.state.hasBefore && ((tx.is_block && this.props.type === 'block') || (!tx.is_block && this.props.type === 'tx'))) {
       let transactions = this.state.transactions;
       let hasAfter = (this.state.hasAfter || (transactions.length === TX_COUNT && !this.state.hasAfter))
-      transactions = helpers.updateListWs(transactions, tx, TX_COUNT);
+      transactions = hathorLib.helpers.updateListWs(transactions, tx, TX_COUNT);
 
       let firstHash = transactions[0].tx_id;
       let firstTimestamp = transactions[0].timestamp;
@@ -135,7 +133,7 @@ class Transactions extends React.Component {
    * @param {string} page if was called 'previous' or 'next' page (can be '')
    */
   getData = (first, timestamp, hash, page) => {
-    txApi.getTransactions(this.props.type, TX_COUNT, timestamp, hash, page, (data) => {
+    hathorLib.txApi.getTransactions(this.props.type, TX_COUNT, timestamp, hash, page, (data) => {
       this.handleDataFetched(data, first, page);
     }, (e) => {
       // Error in request
@@ -172,12 +170,12 @@ class Transactions extends React.Component {
     // Data received from Search tx when searching by address
     const transactions = []
     for (const tx of data) {
-      if (helpers.isBlock(tx) && this.props.type === 'block') {
+      if (hathorLib.helpers.isBlock(tx) && this.props.type === 'block') {
         transactions.push(tx);
         continue;
       }
 
-      if (!helpers.isBlock(tx) && this.props.type === 'tx') {
+      if (!hathorLib.helpers.isBlock(tx) && this.props.type === 'tx') {
         transactions.push(tx);
         continue;
       }

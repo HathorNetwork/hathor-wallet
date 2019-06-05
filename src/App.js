@@ -30,22 +30,27 @@ import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
 import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
-import { historyUpdate } from "./actions/index";
 import version from './utils/version';
 import wallet from './utils/wallet';
-import helpers from './utils/helpers';
 import { connect } from "react-redux";
-import WebSocketHandler from './WebSocketHandler';
 import RequestErrorModal from './components/RequestError';
 import DashboardTx from './screens/DashboardTx';
 import DecodeTx from './screens/DecodeTx';
 import PushTx from './screens/PushTx';
+import { dataLoaded, isOnlineUpdate } from "./actions/index";
 import store from './store/index';
+import createRequestInstance from './api/axiosInstance';
+import hathorLib from '@hathor/wallet-lib';
+import { VERSION } from './constants';
+import LocalStorageStore  from './storage.js';
 
+
+hathorLib.storage.setStorage(new LocalStorageStore());
 
 const mapDispatchToProps = dispatch => {
   return {
-    historyUpdate: (data) => dispatch(historyUpdate(data)),
+    dataLoaded: (data) => dispatch(dataLoaded(data)),
+    isOnlineUpdate: (data) => dispatch(isOnlineUpdate(data)),
   };
 };
 
@@ -59,25 +64,36 @@ const mapStateToProps = (state) => {
 
 class Root extends React.Component {
   componentDidMount() {
-    WebSocketHandler.on('wallet', this.handleWebsocket);
-    WebSocketHandler.on('storage', this.handleWebsocketStorage);
+    hathorLib.WebSocketHandler.setup();
+    hathorLib.WebSocketHandler.on('wallet', this.handleWebsocket);
+    hathorLib.WebSocketHandler.on('storage', this.handleWebsocketStorage);
+
+    hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
+
+    hathorLib.WebSocketHandler.on('addresses_loaded', this.addressesLoadedUpdate);
+    hathorLib.WebSocketHandler.on('is_online', this.isOnlineUpdate);
+    hathorLib.WebSocketHandler.on('reload_data', this.reloadData);
   }
 
   componentWillUnmount() {
-    WebSocketHandler.removeListener('wallet', this.handleWebsocket);
-    WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
+    hathorLib.WebSocketHandler.removeListener('wallet', this.handleWebsocket);
+    hathorLib.WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
+
+    hathorLib.WebSocketHandler.removeListener('addresses_loaded', this.addressesLoadedUpdate);
+    hathorLib.WebSocketHandler.removeListener('is_online', this.isOnlineUpdate);
+    hathorLib.WebSocketHandler.removeListener('reload_data', this.reloadData);
   }
 
   handleWebsocket = (wsData) => {
-    if (wallet.loaded()) {
+    if (hathorLib.wallet.loaded()) {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
       if (wsData.type === 'wallet:address_history') {
         // If is a new transaction, we send a notification to the user, in case it's turned on
         // We only send the notification if the inputs are not generated from this wallet
-        if (!wallet.txExists(wsData.history) && !wallet.areInputsMine(wsData.history)) {
+        if (!hathorLib.wallet.txExists(wsData.history) && !hathorLib.wallet.areInputsMine(wsData.history)) {
           let message = '';
-          if (helpers.isBlock(wsData.history)) {
+          if (hathorLib.helpers.isBlock(wsData.history)) {
             message = 'You\'ve found a new block! Click to open it.';
           } else {
             message = 'You\'ve received a new transaction! Click to open it.'
@@ -90,7 +106,7 @@ class Root extends React.Component {
             }
           }
         }
-        this.props.historyUpdate({'data': [wsData.history]});
+        wallet.newAddressHistory(wsData.history);
       } else {
         console.log('Websocket message not handled. Type:', wsData.type);
       }
@@ -98,11 +114,44 @@ class Root extends React.Component {
   }
 
   handleWebsocketStorage = (wsData) => {
-    if (wallet.loaded()) {
+    if (hathorLib.wallet.loaded()) {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
       console.log('Websocket message not handled. Type:', wsData.type);
     }
+  }
+
+  /**
+   * Method called when WebSocket receives a message after loading address history
+   * We just check and save the version that was loaded and update redux data
+   *
+   * @param {Object} data Object with {'historyTransactions', 'addressesFound'}
+   */
+  addressesLoadedUpdate = (data) => {
+    // Update the version of the wallet that the data was loaded
+    hathorLib.storage.setItem('wallet:version', VERSION);
+
+    // Check api version everytime we load address history
+    version.checkApiVersion();
+
+    // Update redux with loaded data
+    store.dispatch(dataLoaded({ addressesFound: data.addressesFound, transactionsFound: Object.keys(data.historyTransactions).length }));
+  }
+
+  /**
+   * Method called when WebSocket updates isOnline attribute, so we update this parameter in redux
+   *
+   * @param {boolean} data Boolean if websocket is online
+   */
+  isOnlineUpdate = (data) => {
+    store.dispatch(isOnlineUpdate({ isOnline: data }));
+  }
+
+  /**
+   * Method called when need to reload data when websocket reconnects
+   */
+  reloadData = (data) => {
+    wallet.reloadData();
   }
 
   render() {
@@ -154,7 +203,7 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
     return <VersionError {...props} />;
   } else {
     // If was closed and is loaded we need to redirect to locked screen
-    if (wallet.wasClosed()) {
+    if (hathorLib.wallet.wasClosed()) {
       return <Redirect to={{ pathname: '/locked/' }} />;
     } else {
       if (reduxState.loadingAddresses && !isServerScreen) {
@@ -191,9 +240,9 @@ const returnStartedRoute = (Component, props, rest) => {
     }
   }
 
-  if (wallet.started()) {
-    if (wallet.loaded()) {
-      if (wallet.isLocked()) {
+  if (hathorLib.wallet.started()) {
+    if (hathorLib.wallet.loaded()) {
+      if (hathorLib.wallet.isLocked()) {
         return <Redirect to={{pathname: '/locked/'}} />;
       } else if (rest.loaded) {
         return returnLoadedWalletComponent(Component, props, rest);

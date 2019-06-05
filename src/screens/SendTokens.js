@@ -7,17 +7,13 @@
 
 import React from 'react';
 import $ from 'jquery';
-import walletApi from '../api/wallet';
-import { util } from 'bitcore-lib';
-import transaction from '../utils/transaction';
-import { AddressError, OutputValueError } from '../utils/errors';
 import ReactLoading from 'react-loading';
 import ModalPin from '../components/ModalPin';
 import SendTokensOne from '../components/SendTokensOne';
-import tokens from '../utils/tokens';
-import { HATHOR_TOKEN_CONFIG } from '../constants';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
+import hathorLib from '@hathor/wallet-lib';
+import wallet from '../utils/wallet';
 
 
 const mapStateToProps = (state) => {
@@ -48,10 +44,9 @@ class SendTokens extends React.Component {
       errorMessage: '',
       loading: false,
       pin: '',
-      txTokens: [HATHOR_TOKEN_CONFIG]
+      txTokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG]
     };
   }
-
 
   /**
    * Check if form is valid
@@ -98,34 +93,23 @@ class SendTokens extends React.Component {
     if (!isValid) return;
     let data = this.getData();
     if (!data) return;
-    data.tokens = tokens.filterTokens(this.state.txTokens, HATHOR_TOKEN_CONFIG).map((token) => token.uid);
-    if (data) {
-      this.setState({ errorMessage: '', loading: true });
-      try {
-        let dataToSign = transaction.dataToSign(data);
-        data = transaction.signTx(data, dataToSign, this.state.pin);
-        // Completing data in the same object
-        transaction.completeTx(data);
-        let txBytes = transaction.txToBytes(data);
-        let txHex = util.buffer.bufferToHex(txBytes);
-        walletApi.sendTokens(txHex, (response) => {
-          if (response.success) {
-            this.props.history.push('/wallet/');
-          } else {
-            this.setState({ errorMessage: response.message, loading: false });
-          }
-        }, (e) => {
-          // Error in request
-          console.log(e);
-          this.setState({ loading: false });
-        });
-      } catch(e) {
-        if (e instanceof AddressError || e instanceof OutputValueError) {
-          this.setState({ errorMessage: e.message, loading: false });
-        } else {
-          // Unhandled error
-          throw e;
-        }
+    data.tokens = hathorLib.tokens.filterTokens(this.state.txTokens, hathorLib.constants.HATHOR_TOKEN_CONFIG).map((token) => token.uid);
+    this.setState({ errorMessage: '', loading: true });
+    try {
+      const promise = hathorLib.transaction.sendTransaction(data, this.state.pin);
+      promise.then(() => {
+        // Must update the shared address, in case we have used one for the change
+        wallet.updateSharedAddress();
+        this.props.history.push('/wallet/');
+      }, (message) => {
+        this.setState({ errorMessage: message, loading: false });
+      });
+    } catch(e) {
+      if (e instanceof hathorLib.errors.AddressError || e instanceof hathorLib.errors.OutputValueError) {
+        this.setState({ errorMessage: e.message, loading: false });
+      } else {
+        // Unhandled error
+        throw e;
       }
     }
   }
