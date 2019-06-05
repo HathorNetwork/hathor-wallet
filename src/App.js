@@ -42,10 +42,10 @@ import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { VERSION } from './constants';
-import { storageFactory }  from './storage.js';
+import LocalStorageStore  from './storage.js';
 
 
-hathorLib.storage.setStorage(storageFactory);
+hathorLib.storage.setStorage(new LocalStorageStore());
 
 const mapDispatchToProps = dispatch => {
   return {
