@@ -128,8 +128,8 @@ const wallet = {
     const allTokens = 'allTokens' in data ? data['allTokens'] : [];
     const transactionsFound = Object.keys(historyTransactions).length;
 
-    const address = localStorage.getItem('wallet:address');
-    const lastSharedIndex = localStorage.getItem('wallet:lastSharedIndex');
+    const address = hathorLib.storage.getItem('wallet:address');
+    const lastSharedIndex = hathorLib.storage.getItem('wallet:lastSharedIndex');
     const lastGeneratedIndex = hathorLib.wallet.getLastGeneratedIndex();
 
     store.dispatch(historyUpdate({historyTransactions, allTokens, lastSharedIndex, lastSharedAddress: address, addressesFound: lastGeneratedIndex + 1, transactionsFound}));
@@ -173,7 +173,7 @@ const wallet = {
    */
   updateSharedAddress() {
     const lastSharedIndex = hathorLib.wallet.getLastSharedIndex();
-    const lastSharedAddress = localStorage.getItem('wallet:address');
+    const lastSharedAddress = hathorLib.storage.getItem('wallet:address');
     this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
   },
 
@@ -243,7 +243,7 @@ const wallet = {
 
       // Saving address data
       store.dispatch(sharedAddressUpdate({
-        lastSharedAddress: localStorage.getItem('wallet:address'),
+        lastSharedAddress: hathorLib.storage.getItem('wallet:address'),
         lastSharedIndex: hathorLib.wallet.getLastSharedIndex(),
       }));
       return true;
@@ -331,7 +331,7 @@ const wallet = {
    * @inner
    */
   allowSentry() {
-    localStorage.setItem('wallet:sentry', true);
+    hathorLib.storage.setItem('wallet:sentry', true);
     this.updateSentryState();
   },
 
@@ -342,7 +342,7 @@ const wallet = {
    * @inner
    */
   disallowSentry() {
-    localStorage.setItem('wallet:sentry', false);
+    hathorLib.storage.setItem('wallet:sentry', false);
     this.updateSentryState();
   },
 
@@ -355,8 +355,7 @@ const wallet = {
    * @inner
    */
   getSentryPermission() {
-    const sentry = localStorage.getItem('wallet:sentry');
-    return localStorage.memory ? sentry : JSON.parse(sentry);
+    return hathorLib.storage.getItem('wallet:sentry');
   },
 
   /**
@@ -405,7 +404,7 @@ const wallet = {
         ([key, item]) => scope.setExtra(key, item)
       );
       DEBUG_LOCAL_DATA_KEYS.forEach(
-        (key) => scope.setExtra(key, localStorage.getItem(key))
+        (key) => scope.setExtra(key, hathorLib.storage.getItem(key))
       )
       Sentry.captureException(error);
     });
@@ -436,9 +435,7 @@ const wallet = {
    * @inner
    */
   isNotificationOn() {
-    const notification = localStorage.getItem('wallet:notification');
-    const isNotification = localStorage.memory ? notification : JSON.parse(notification);
-    return isNotification !== false;
+    return hathorLib.storage.getItem('wallet:notification') !== false;
   },
 
   /**
@@ -448,7 +445,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOn() {
-    localStorage.setItem('wallet:notification', true);
+    hathorLib.storage.setItem('wallet:notification', true);
   },
 
   /**
@@ -458,7 +455,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOff() {
-    localStorage.setItem('wallet:notification', false);
+    hathorLib.storage.setItem('wallet:notification', false);
   },
 }
 
