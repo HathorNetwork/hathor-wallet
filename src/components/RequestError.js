@@ -46,6 +46,11 @@ class RequestErrorModal extends React.Component {
     });
   }
 
+  componentWillUnmount = () => {
+    // When unmounting this modal, we should hide it before
+    $('#requestErrorModal').modal('hide');
+  }
+
   /**
    * User clicked to change server, then push to choose server screen
    */

@@ -46,10 +46,10 @@ export const CONFIRM_RESET_MESSAGE = 'I want to reset my wallet';
  * - The string must contain at least 1 lowercase alphabetical character
  * - The string must contain at least 1 uppercase alphabetical character
  * - The string must contain at least 1 numeric character
- * - The string must contain at least one special character (!@#$%^&)
+ * - The string must contain at least one special character (not alphanumeric)
  * - The string must be eight characters or longer
  */
-export const PASSWORD_PATTERN = "(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$";
+export const PASSWORD_PATTERN = "(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^0-9a-zA-Z]).*$"
 
 /**
  * Quantity of blocks to show per page in the dashboard
