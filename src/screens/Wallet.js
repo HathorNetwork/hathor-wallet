@@ -90,7 +90,7 @@ class Wallet extends React.Component {
         <div>
           <div className="d-none d-sm-flex flex-row align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-start justify-content-between">
-              <WalletBalance balance={this.props.balance} />
+              <WalletBalance balance={this.props.balance} history={this.props.history} />
             </div>
             <WalletAddress goToSignin={this.goToSignin} />
           </div>

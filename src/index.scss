@@ -666,3 +666,22 @@ svg.svg-wrapper {
   color: #ce9c06 !important;
   text-decoration: underline;
 }
+
+.config-string-wrapper, .token-manage-wrapper {
+  padding: 1rem;
+  border: 1px solid #ddd;
+}
+
+.config-string-wrapper span {
+  width: 300px;
+  text-align: center;
+}
+
+.token-detail-top {
+  padding-bottom: 6rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.token-detail-bottom {
+  padding-top: 3rem;
+}

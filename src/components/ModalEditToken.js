@@ -62,8 +62,8 @@ class ModalEditToken extends React.Component {
     if (isValid) {
       const shortName = this.shortName.current.value;
       const symbol = this.symbol.current.value;
-      tokens.editToken(this.props.token.uid, shortName, symbol);
-      this.props.success();
+      const editedToken = tokens.editToken(this.props.token.uid, shortName, symbol);
+      this.props.success(editedToken);
     }
   }
 
