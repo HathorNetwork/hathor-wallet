@@ -46,7 +46,7 @@ import { VERSION } from './constants';
 import LocalStorageStore  from './storage.js';
 
 
-hathorLib.storage.setStorage(new LocalStorageStore());
+hathorLib.storage.setStore(new LocalStorageStore());
 
 const mapDispatchToProps = dispatch => {
   return {
