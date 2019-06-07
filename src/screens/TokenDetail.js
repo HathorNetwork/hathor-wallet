@@ -34,6 +34,19 @@ class TokenDetail extends React.Component {
   constructor(props) {
     super(props);
 
+    /**
+     * token {Object} selected token data
+     * mintOutputs {Object} array with outputs available to mint
+     * meltOutputs {Object} array with outputs available to melt
+     * walletAmount {number} amount available of this token on this wallet
+     * destroyQuantity {number} holds the destroy quantity typed in the input
+     * action {string} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
+     * successMessage {string} success message to show
+     * errorMessage {string} error message to show
+     * loading {boolean} if should show loading spinner
+     * pin {string} pin typed on input
+     * formValidated {boolean} if form was already validated
+     */
     this.state = {
       token: null,
       mintOutputs: [],
@@ -50,18 +63,19 @@ class TokenDetail extends React.Component {
 
     // Mint/melt refs
     this.amount = React.createRef();
+    this.createAnother = React.createRef();
     this.chooseAddress = React.createRef(); // Only for mint
     this.address = React.createRef(); // Only for mint
     this.addressWrapper = React.createRef(); // Only for mint
-    this.createAnother = React.createRef();
 
     // Delegate refs
     this.delegateAddress = React.createRef();
     this.delegateCreateAnother = React.createRef();
 
-    // Destroy refs
+    // Destroy quantity ref
     this.destroyQuantity = React.createRef();
 
+    // Form ref
     this.form = React.createRef();
   }
 
