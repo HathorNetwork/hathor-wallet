@@ -29,7 +29,7 @@
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-react": "^7.5.1",
     "font-awesome": "^4.7.0",
-    "@hathor/wallet-lib": "^0.2.0",
+    "@hathor/wallet-lib": "^0.3.0",
     "jquery": "^3.2.1",
     "node-sass-chokidar": "0.0.3",
     "npm-run-all": "^4.1.2",
