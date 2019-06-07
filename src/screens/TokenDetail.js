@@ -307,12 +307,17 @@ class TokenDetail extends React.Component {
     const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
     const output = this.state.meltOutputs[0];
     const promise = hathorLib.tokens.meltTokens(output.tx_id, output.index, output.decoded.address, this.state.token.uid, amountValue, this.state.pin, this.createAnother.current.checked);
-    this.handlePromise(promise, `${hathorLib.helpers.prettyValue(amountValue)} ${this.state.token.symbol} melted!`);
+    if (promise === null) {
+      this.setState({ errorMessage: 'Can\'t find outputs to melt the amount requested.', loading: false });
+    } else {
+      this.handlePromise(promise, `${hathorLib.helpers.prettyValue(amountValue)} ${this.state.token.symbol} melted!`);
+    }
   }
 
   melt = () => {
     // TODO validate form, validate amount valid, execute melt, set loading, show success message, and clean states
-    if (this.amount.current.value > this.state.walletAmount) {
+    const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
+    if (amountValue > this.state.walletAmount) {
       this.setState({ errorMessage: `The total amount you have is only ${hathorLib.helpers.prettyValue(this.state.walletAmount)}.` });
       return;
     }
