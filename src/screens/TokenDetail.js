@@ -86,8 +86,6 @@ class TokenDetail extends React.Component {
    * Update token state after didmount or props update
    */
   updateTokenData = () => {
-    console.log(this.state.token.uid);
-    console.log(this.props.historyTransactions['000045dffaa69f3353a2ded1948941c72cfee3e5241e333947bbf5f28b4cbd45']);
     const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, this.state.token.uid, true);
     const mintOutputs = [];
     const meltOutputs = [];
@@ -96,9 +94,6 @@ class TokenDetail extends React.Component {
     const walletData = hathorLib.wallet.getWalletData();
 
     for (const tx of filteredHistoryTransactions) {
-      if (tx.tx_id === '000045dffaa69f3353a2ded1948941c72cfee3e5241e333947bbf5f28b4cbd45') {
-        console.log('Ta aqui essa porra');
-      }
       for (const [index, output] of tx.outputs.entries()) {
         // This output is not mine
         if (!hathorLib.wallet.isAddressMine(output.decoded.address, walletData)) continue;
@@ -177,6 +172,11 @@ class TokenDetail extends React.Component {
     e.currentTarget.href = document.getElementsByTagName('canvas')[0].toDataURL();
   }
 
+  /**
+   * Show alert success message
+   *
+   * @param {string} message Success message
+   */
   showSuccess = (message) => {
     this.setState({ successMessage: message }, () => {
       this.refs.alertSuccess.show(3000);
@@ -216,24 +216,38 @@ class TokenDetail extends React.Component {
     this.cleanStates();
   }
 
+  /**
+   * Clean all states to its initial values
+   */
   cleanStates = () => {
     this.setState({ action: '', errorMessage: '', pin: '', formValidated: false, loading: false });
   }
 
+  /**
+   * Handle methods promise resolve and rejection
+   * Clean states, show messages of error/success
+   *
+   * @param {Promise} promise Promise returned from management method
+   * @param {string} successMessage Message to show in case of success
+   */
   handlePromise = (promise, successMessage) => {
-    console.log('Handle promiseeeee');
     promise.then(() => {
-      console.log('Promise then');
       this.cleanStates();
       this.showSuccess(successMessage);
     }, (message) => {
-      console.log('Promise catch', message);
       this.setState({ loading: false, errorMessage: message });
     });
   }
 
+  /**
+   * Execute destroy method
+   *
+   * @param {Object} array Array of outputs that we are destroying
+   * @param {string} label Label to show on the success message
+   */
   executeDestroy = (array, label) => {
     const data = [];
+    // Get the number of outputs the user requested to destroy in the expected format
     for (let i=0; i<this.destroyQuantity.current.value; i++) {
       data.push({
         'tx_id': array[i].tx_id,
@@ -242,46 +256,52 @@ class TokenDetail extends React.Component {
         'token': this.state.token.uid
       });
     }
-    console.log('Execute destroy', data);
     const promise = hathorLib.tokens.destroyAuthority(data, this.state.pin);
     this.handlePromise(promise, `${label} outputs destroyed!`);
   }
 
+  /**
+   * Execute destroy mint method
+   */
   executeDestroyMint = () => {
-    console.log('Execute destroy mint');
     this.executeDestroy(this.state.mintOutputs, 'Mint');
   }
   
+  /**
+   * Called when clicking to destroy mint outputs.
+   * Validate if we have the quantity of outputs requested to destroy and open the PIN modal
+   */
   destroyMint = () => {
-    console.log('Destroy mint');
     if (this.destroyQuantity.current.value > this.state.mintOutputs.length) {
       this.setState({ errorMessage: `You only have ${this.state.mintOutputs.length} mint ${hathorLib.helpers.plural(this.state.mintOutputs.length, 'output', 'outputs')} to destroy.` });
       return;
     }
-    console.log('Destroy mint');
-    console.log('Quantity', this.destroyQuantity.current.value);
-    $('#pinModal').modal('show');
+    this.openPinModal();
   }
 
+  /**
+   * Execute destroy melt method
+   */
   executeDestroyMelt = () => {
-    console.log('Execute destroy melt');
     this.executeDestroy(this.state.meltOutputs, 'Melt');
   }
 
+  /**
+   * Called when clicking to destroy melt outputs.
+   * Validate if we have the quantity of outputs requested to destroy and open the PIN modal
+   */
   destroyMelt = () => {
-    console.log('Destroy melt');
     if (this.destroyQuantity.current.value > this.state.meltOutputs.length) {
       this.setState({ errorMessage: `You only have ${this.state.meltOutputs.length} melt ${hathorLib.helpers.plural(this.state.meltOutputs.length, 'output', 'outputs')} to destroy.` });
       return;
     }
-    console.log('Destroy melt');
-    console.log('Quantity', this.destroyQuantity.current.value);
-    $('#pinModal').modal('show');
+    this.openPinModal();
   }
 
+  /**
+   * Execute mint method after form validation
+   */
   executeMint = () => {
-    // TODO validate form, validate amount and address valids, execute mint, set loading, show success message, and clean states
-    console.log('Execute mint');
     const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
     const output = this.state.mintOutputs[0];
     const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
@@ -289,21 +309,22 @@ class TokenDetail extends React.Component {
     this.handlePromise(promise, `${hathorLib.helpers.prettyValue(amountValue)} ${this.state.token.symbol} minted!`);
   }
 
+  /**
+   * Method executed after user clicks on mint button.
+   * Validates the form and then opens the PIN modal
+   */
   mint = () => {
     if (this.chooseAddress.current.checked === false && this.address.current.value === '') {
       this.setState({ errorMessage: 'Address is required when not selected automatically' });
       return;
     }
-    console.log('Mint');
-    console.log('Amount', this.amount.current.value);
-    console.log('Address', this.address.current.value);
-    console.log('Choose address', this.chooseAddress.current.checked);
-    console.log('Create another', this.createAnother.current.checked);
-    $('#pinModal').modal('show');
+    this.openPinModal();
   }
 
+  /**
+   * Execute melt method after form validation
+   */
   executeMelt = () => {
-    console.log('Execute melt');
     const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
     const output = this.state.meltOutputs[0];
     const promise = hathorLib.tokens.meltTokens(output.tx_id, output.index, output.decoded.address, this.state.token.uid, amountValue, this.state.pin, this.createAnother.current.checked);
@@ -314,49 +335,40 @@ class TokenDetail extends React.Component {
     }
   }
 
+  /**
+   * Method executed after user clicks on melt button.
+   * Validates the form and then opens the PIN modal
+   */
   melt = () => {
-    // TODO validate form, validate amount valid, execute melt, set loading, show success message, and clean states
     const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
     if (amountValue > this.state.walletAmount) {
       this.setState({ errorMessage: `The total amount you have is only ${hathorLib.helpers.prettyValue(this.state.walletAmount)}.` });
       return;
     }
-    console.log('Melt');
-    console.log('Amount', this.amount.current.value);
-    console.log('Create another', this.createAnother.current.checked);
-    $('#pinModal').modal('show');
+    this.openPinModal();
   }
 
+  /**
+   * Execute the delegate of melt outputs
+   */
   executeDelegateMelt = () => {
-    console.log('Execute delegate melt');
     const output = this.state.meltOutputs[0];
     const promise = hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.state.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, 'melt', this.state.pin);
     this.handlePromise(promise, 'Melt output delegated!');
   }
 
-  delegateMelt = () => {
-    // TODO validate form, validate address valid, execute delegate, set loading, show success message, and clean states
-    console.log('Delegate melt');
-    console.log('Delegate address', this.delegateAddress.current.value);
-    console.log('Delegate create another', this.delegateCreateAnother.current.value);
-    $('#pinModal').modal('show');
-  }
-
+  /**
+   * Execute the delegate of mint outputs
+   */
   executeDelegateMint = () => {
-    console.log('Execute delegate mint');
     const output = this.state.mintOutputs[0];
     const promise = hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.state.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, 'mint', this.state.pin);
     this.handlePromise(promise, 'Mint output delegated!');
   }
 
-  delegateMint = () => {
-    // TODO validate form, validate address valid, execute delegate, set loading, show success message, and clean states
-    console.log('Delegate mint');
-    console.log('Delegate address', this.delegateAddress.current.value);
-    console.log('Delegate create another', this.delegateCreateAnother.current.value);
-    $('#pinModal').modal('show');
-  }
-
+  /**
+   * Opens the PIN modal
+   */
   openPinModal = () => {
     $('#pinModal').modal('show');
   }
@@ -375,9 +387,11 @@ class TokenDetail extends React.Component {
     }
   }
 
+  /**
+   * Validate form being displayed, then execute the corresponding method, depending on the action selected
+   */
   validateForm = () => {
     const isValid = this.form.current.checkValidity();
-    console.log('Form validation', isValid);
     this.setState({ formValidated: true, errorMessage: '' });
     if (isValid) {
       switch (this.state.action) {
@@ -388,10 +402,10 @@ class TokenDetail extends React.Component {
           this.melt();
           break;
         case 'delegate-mint':
-          this.delegateMint();
+          this.openPinModal();
           break;
         case 'delegate-melt':
-          this.delegateMelt();
+          this.openPinModal();
           break;
         case 'destroy-mint':
           this.destroyMint();
@@ -405,6 +419,10 @@ class TokenDetail extends React.Component {
     }
   }
 
+  /**
+   * Method executed after the user types the PIN.
+   * We close the pin modal, start the loading and execute the method corresponding to the selected action
+   */
   pinSuccess = () => {
     $('#pinModal').modal('hide');
     this.setState({ loading: true });
