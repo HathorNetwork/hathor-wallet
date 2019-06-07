@@ -26,7 +26,7 @@ const mapDispatchToProps = dispatch => {
 
 
 const mapStateToProps = (state) => {
-  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken);
+  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken, false);
   const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, state.selectedToken);
   return {
     balance: balance,
