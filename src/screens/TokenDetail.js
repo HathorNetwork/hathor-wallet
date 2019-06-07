@@ -508,7 +508,7 @@ class TokenDetail extends React.Component {
       return (
         <div key={this.state.action}>
           <h2>{this.state.action === 'mint' ? 'Mint' : 'Melt'} tokens</h2>
-          <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form} >
+          <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form} onSubmit={(e) => e.preventDefault()}>
             <div className="row">
               <div className="form-group col-3">
                 <label>Amount</label>
@@ -534,7 +534,7 @@ class TokenDetail extends React.Component {
       return (
         <div key={this.state.action}>
           <h2>Delegate {this.state.action === 'delegate-mint' ? 'Mint' : 'Melt'}</h2>
-          <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form}>
+          <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form} onSubmit={(e) => e.preventDefault()}>
             <div className="row">
               <div className="form-group col-6">
                 <label>Address</label>
@@ -559,7 +559,7 @@ class TokenDetail extends React.Component {
       return (
         <div key={this.state.action}>
           <h2>Destroy {this.state.action === 'destroy-mint' ? 'Mint' : 'Melt'}</h2>
-          <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form}>
+          <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form} onSubmit={(e) => e.preventDefault()}>
             <div className="row">
               <div className="form-group col-6">
                 <label>How many {this.state.action === 'destroy-mint' ? 'mint' : 'melt'} outputs you want to destroy?</label>
