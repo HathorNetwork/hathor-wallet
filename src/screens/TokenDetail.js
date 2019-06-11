@@ -100,23 +100,29 @@ class TokenDetail extends React.Component {
    * Update token state after didmount or props update
    */
   updateTokenData = () => {
-    const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, this.state.token.uid, true);
     const mintOutputs = [];
     const meltOutputs = [];
     let walletAmount = 0;
 
     const walletData = hathorLib.wallet.getWalletData();
 
-    for (const tx of filteredHistoryTransactions) {
+    for (const tx_id in this.props.historyTransactions) {
+      const tx = this.props.historyTransactions[tx_id];
       for (const [index, output] of tx.outputs.entries()) {
         // This output is not mine
-        if (!hathorLib.wallet.isAddressMine(output.decoded.address, walletData)) continue;
+        if (!hathorLib.wallet.isAddressMine(output.decoded.address, walletData)) {
+          continue;
+        }
 
         // This token is not the one of this screen
-        if (output.token !== this.state.token.uid) continue;
+        if (output.token !== this.state.token.uid) {
+          continue;
+        }
 
         // If output was already used, we can't list it here
-        if (output.spent_by) continue;
+        if (output.spent_by) {
+          continue;
+        }
 
         output.tx_id = tx.tx_id;
         output.index = index;
@@ -631,6 +637,25 @@ class TokenDetail extends React.Component {
       )
     }
 
+    const renderMintMeltWrapper = () => {
+      if (this.state.mintOutputs.length === 0 && this.state.meltOutputs.length === 0) {
+        return null;
+      }
+
+      return (
+        <div className="d-flex align-items-center mt-3">
+          <div className="token-manage-wrapper d-flex flex-column align-items-center mr-4">
+            <p><strong>Mint: </strong>{this.state.mintOutputs.length} {hathorLib.helpers.plural(this.state.mintOutputs.length, 'output', 'outputs')} available</p>
+            {this.state.mintOutputs.length > 0 && renderMintLinks()}
+          </div>
+          <div className="token-manage-wrapper d-flex flex-column align-items-center">
+            <p><strong>Melt: </strong>{this.state.meltOutputs.length} {hathorLib.helpers.plural(this.state.meltOutputs.length, 'output', 'outputs')} available</p>
+            {this.state.meltOutputs.length > 0 && renderMeltLinks()}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="content-wrapper flex align-items-center">
         <div className='d-flex flex-row align-items-start justify-content-between token-detail-top'>
@@ -646,16 +671,7 @@ class TokenDetail extends React.Component {
             </div>
             <div>
               <p className="mt-3 mb-4"><strong>Total amount: </strong>{hathorLib.helpers.prettyValue(this.state.walletAmount)}</p>
-              <div className="d-flex align-items-center mt-3">
-                <div className="token-manage-wrapper d-flex flex-column align-items-center mr-4">
-                  <p><strong>Mint: </strong>{this.state.mintOutputs.length} {hathorLib.helpers.plural(this.state.mintOutputs.length, 'output', 'outputs')} available</p>
-                  {this.state.mintOutputs.length > 0 && renderMintLinks()}
-                </div>
-                <div className="token-manage-wrapper d-flex flex-column align-items-center">
-                  <p><strong>Melt: </strong>{this.state.meltOutputs.length} {hathorLib.helpers.plural(this.state.meltOutputs.length, 'output', 'outputs')} available</p>
-                  {this.state.meltOutputs.length > 0 && renderMeltLinks()}
-                </div>
-              </div>
+              {renderMintMeltWrapper()}
             </div>
           </div>
           <div className='d-flex flex-column align-items-center config-string-wrapper mt-4'>
