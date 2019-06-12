@@ -228,4 +228,4 @@ class SendTokensOne extends React.Component {
   }
 }
 
-export default connect(mapStateToProps, null, null, { withRef: true })(SendTokensOne);
+export default connect(mapStateToProps, null, null, { forwardRef: true })(SendTokensOne);
