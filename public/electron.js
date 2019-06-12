@@ -91,6 +91,10 @@ function createWindow () {
             }
           }},
           { type: 'separator' },
+          { label: 'Open dev tools', click: function() {
+            mainWindow.webContents.openDevTools();
+          }},
+          { type: 'separator' },
           { label: 'Quit', accelerator: 'Command+Q', click: function() { app.quit(); }}
       ]}, {
       label: 'Edit',

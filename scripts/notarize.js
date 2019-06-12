@@ -8,13 +8,18 @@ exports.default = async function notarizing(context) {
     return;
   }
 
+  const appId = 'network.hathor.macos.wallet';
   const appName = context.packager.appInfo.productFilename;
 
-  return await notarize({
-    appBundleId: 'network.hathor.macos.wallet',
+  console.log(`Notarizing ${appId} found at ${appName}`);
+
+  await notarize({
+    appBundleId: appId,
     appPath: `${appOutDir}/${appName}.app`,
     appleId: process.env.APPLEID,
     appleIdPassword: process.env.APPLEIDPASS,
     ascProvider: process.env.APPLETEAMID,
   });
+
+  console.log(`Done notarizing ${appId}`);
 };

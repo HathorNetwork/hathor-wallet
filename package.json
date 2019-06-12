@@ -87,6 +87,7 @@
       "target": "nsis"
     },
     "mac": {
+      "provisioningProfile": "./mac_production_developer_id.provisionprofile",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
