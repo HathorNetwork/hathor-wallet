@@ -13,7 +13,10 @@ import ModalEditToken from '../components/ModalEditToken';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from '../components/HathorAlert';
-import { TokenDestroy, TokenDelegate, TokenMint, TokenMelt } from '../components/TokenDetailAction';
+import TokenMint from '../components/tokens/TokenMint';
+import TokenMelt from '../components/tokens/TokenMelt';
+import TokenDelegate from '../components/tokens/TokenDelegate';
+import TokenDestroy from '../components/tokens/TokenDestroy';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 
