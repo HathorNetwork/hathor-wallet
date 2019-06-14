@@ -70,6 +70,7 @@ class ModalPin extends React.Component {
               </button>
             </div>
             <div className="modal-body">
+              {this.props.bodyTop}
               <form ref="formPin" onSubmit={this.handlePin} noValidate>
                 <div className="form-group">
                   <PinInput ref="pinInput" handleChangePin={this.props.handleChangePin} />

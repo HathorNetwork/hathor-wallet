@@ -152,23 +152,14 @@ class CreateToken extends React.Component {
       address = this.refs.address.value;
     }
     const promise = new Promise((resolve, reject) => {
-      try {
-        const retPromise = hathorLib.tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES), 10), this.state.pin);
-        retPromise.then((token) => {
-          // Update redux with added token
-          tokens.saveTokenRedux(token.uid);
-          resolve(token);
-        }, (message) => {
-          reject(message);
-        });
-      } catch(e) {
-        if (e instanceof hathorLib.errors.AddressError) {
-          reject(e.message);
-        } else {
-          // Unhandled error
-          throw e;
-        }
-      }
+      const retPromise = hathorLib.tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES), 10), this.state.pin);
+      retPromise.then((token) => {
+        // Update redux with added token
+        tokens.saveTokenRedux(token.uid);
+        resolve(token);
+      }, (message) => {
+        reject(message);
+      });
     });
 
     promise.then((token) => {

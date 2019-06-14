@@ -39,12 +39,15 @@ const tokens = {
    * @param {string} name New token name
    * @param {string} synbol New token symbol
    *
+   * @return {Object} edited token
+   *
    * @memberof Tokens
    * @inner
    */
   editToken(uid, name, symbol) {
     const tokens = hathorLib.tokens.editToken(uid, name, symbol);
     store.dispatch(newTokens({tokens, uid}));
+    return {uid, name, symbol};
   },
 
   /**

@@ -21,7 +21,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Foundation <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.8.0-beta",
+  "version": "0.9.0-beta",
   "private": true,
   "dependencies": {
     "@sentry/electron": "^0.17.0",
@@ -29,7 +29,7 @@
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-react": "^7.5.1",
     "font-awesome": "^4.7.0",
-    "@hathor/wallet-lib": "^0.2.0",
+    "@hathor/wallet-lib": "^0.3.0",
     "jquery": "^3.2.1",
     "node-sass-chokidar": "0.0.3",
     "npm-run-all": "^4.1.2",

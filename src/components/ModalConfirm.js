@@ -15,7 +15,7 @@ import React from 'react';
  */
 const ModalConfirm = (props) => {
   return (
-    <div className="modal fade" id="confirmModal" tabIndex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">
+    <div className="modal fade" id={props.modalID ? props.modalID : "confirmModal"} tabIndex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">

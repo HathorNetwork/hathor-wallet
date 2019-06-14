@@ -63,7 +63,7 @@ class UnknownTokens extends React.Component {
     for (const token of this.props.allTokens) {
       // If has balance but does not have token saved yet
       if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
-        const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, token);
+        const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, token, false);
         const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, token);
         unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions});
 
