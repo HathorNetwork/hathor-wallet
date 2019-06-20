@@ -9,6 +9,8 @@ Must use node v8.9.0
 
 ## macOS Sign & Notarize
 
+Since macOS 10.14.5, Apple has added new notarization requirements. For further information, [check here](https://developer.apple.com/news/?id=04102019a).
+
 We have followed the link from Valkhof. The runner have to export the following environment variables:
 
     export APPLEID=your_apple_id

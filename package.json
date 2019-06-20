@@ -84,7 +84,8 @@
     "afterSign": "scripts/notarize.js",
     "win": {
       "icon": "build/icon.png",
-      "target": "nsis"
+      "target": "nsis",
+      "publisherName": "Hathor Labs"
     },
     "mac": {
       "provisioningProfile": "./mac_production_developer_id.provisionprofile",
@@ -93,7 +94,7 @@
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "build/icon.icns",
-      "target": ["dmg", "pkg"]
+      "target": ["dmg", "mas"]
     },
     "linux": {
       "target": [
