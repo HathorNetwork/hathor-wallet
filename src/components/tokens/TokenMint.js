@@ -43,7 +43,18 @@ class TokenMint extends React.Component {
     const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
     const output = this.props.mintOutputs[0];
     const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
-    const promise = hathorLib.tokens.mintTokens(output.tx_id, output.index, output.decoded.address, this.props.token.uid, address, amountValue, pin, this.createAnother.current.checked, false);
+    const promise = hathorLib.tokens.mintTokens(
+      output.tx_id,
+      output.index,
+      output.decoded.address,
+      this.props.token.uid,
+      address,
+      amountValue,
+      pin,
+      {
+        createAnotherMint: this.createAnother.current.checked
+      }
+    );
     return { promise, message: `${hathorLib.helpers.prettyValue(amountValue)} ${this.props.token.symbol} minted!` };
   }
 
