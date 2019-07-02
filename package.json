@@ -88,13 +88,20 @@
       "publisherName": "Hathor Labs"
     },
     "mac": {
-      "provisioningProfile": "./mac_production_developer_id.provisionprofile",
+      "provisioningProfile": "mac_production.provisionprofile",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "build/icon.icns",
-      "target": ["dmg", "mas"]
+      "target": [
+        "dmg",
+        "mas"
+      ]
+    },
+    "mas": {
+      "entitlements": "build/entitlements.mas.plist",
+      "entitlementsInherit": "build/entitlements.mas.plist"
     },
     "linux": {
       "target": [
