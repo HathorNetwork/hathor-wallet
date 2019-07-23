@@ -7,15 +7,11 @@
 
 import React from 'react';
 import $ from 'jquery';
-import wallet from '../utils/wallet';
-import tokens from '../utils/tokens';
-import dateFormatter from '../utils/date';
-import helpers from '../utils/helpers';
 import OutputsWrapper from '../components/OutputsWrapper'
 import InputsWrapper from '../components/InputsWrapper'
-import { DECIMAL_PLACES, MAX_OUTPUT_VALUE } from '../constants';
 import { connect } from "react-redux";
 import _ from 'lodash';
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {
@@ -92,12 +88,12 @@ class SendTokensOne extends React.Component {
 
       if (address && valueStr) {
         // Doing the check here because need to validate before doing parseInt
-        const tokensValue = valueStr*(10**DECIMAL_PLACES);
-        if (tokensValue > MAX_OUTPUT_VALUE) {
-          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${helpers.prettyValue(MAX_OUTPUT_VALUE)}` });
+        const tokensValue = valueStr*(10**hathorLib.constants.DECIMAL_PLACES);
+        if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
           return null;
         }
-        let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'tokenData': tokens.getTokenIndex(this.state.selectedTokens, this.state.selected.uid)};
+        let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'tokenData': hathorLib.tokens.getTokenIndex(this.state.selectedTokens, this.state.selected.uid)};
 
         const hasTimelock = output.current.timelockCheckbox.current.checked;
         if (hasTimelock) {
@@ -106,7 +102,7 @@ class SendTokensOne extends React.Component {
             this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. You need to fill a complete date and time` });
             return null;
           }
-          const timestamp = dateFormatter.dateToTimestamp(new Date(timelock));
+          const timestamp = hathorLib.dateFormatter.dateToTimestamp(new Date(timelock));
           dataOutput['timelock'] = timestamp;
         }
 
@@ -137,7 +133,7 @@ class SendTokensOne extends React.Component {
    */
   handleInitialData = (data) => {
     const noInputs = this.noInputs.current.checked;
-    const result = wallet.prepareSendTokensData(data, this.state.selected, noInputs, this.props.historyTransactions, this.state.selectedTokens);
+    const result = hathorLib.wallet.prepareSendTokensData(data, this.state.selected, noInputs, this.props.historyTransactions, this.state.selectedTokens);
     if (result.success === false) {
       this.props.updateState({ errorMessage: result.message, loading: false });
       return null;

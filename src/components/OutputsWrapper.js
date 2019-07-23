@@ -7,8 +7,8 @@
 
 import React from 'react';
 import $ from 'jquery';
-import helpers from '../utils/helpers';
 import _ from 'lodash';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -45,7 +45,7 @@ class OutputsWrapper extends React.Component {
     return (
       <div className="input-group mb-3">
         <input type="text" ref={this.address} placeholder="Address" className="form-control output-address col-4" />
-        <input type="number" ref={this.value} step={helpers.prettyValue(1)} min={helpers.prettyValue(1)} placeholder={helpers.prettyValue(0)} className="form-control output-value col-2" />
+        <input type="number" ref={this.value} step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control output-value col-2" />
         <div className="form-check mr-3 d-flex flex-column justify-content-center">
           <input className="form-check-input mt-0 has-timelock" ref={this.timelockCheckbox} type="checkbox" onChange={this.handleCheckboxTimelockChange} id={this.uniqueID}/>
           <label className="form-check-label" htmlFor={this.uniqueID}>

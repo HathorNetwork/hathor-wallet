@@ -12,6 +12,7 @@ import ChoosePin from '../components/ChoosePin';
 import logo from '../assets/images/hathor-logo.png';
 import { updatePassword, updatePin } from '../actions/index';
 import { connect } from "react-redux";
+import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {
@@ -60,7 +61,7 @@ class LoadWallet extends React.Component {
    */
   import = () => {
     const words = this.refs.wordsInput.value.trim();
-    const ret = wallet.wordsValid(words);
+    const ret = hathorLib.wallet.wordsValid(words);
     if (ret.valid) {
       this.setState({ words, askPassword: true });
     } else {
@@ -83,7 +84,7 @@ class LoadWallet extends React.Component {
     // First we clean what can still be there of a last wallet
     wallet.cleanWallet();
     wallet.generateWallet(this.state.words, '', this.props.pin, this.props.password, true);
-    wallet.markBackupAsDone();
+    hathorLib.wallet.markBackupAsDone();
     // Clean pin and password from redux
     this.props.updatePassword(null);
     this.props.updatePin(null);

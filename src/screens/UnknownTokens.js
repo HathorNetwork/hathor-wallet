@@ -6,16 +6,15 @@
  */
 
 import React from 'react';
-import wallet from '../utils/wallet';
 import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
 import TokenBar from '../components/TokenBar';
 import ModalAddManyTokens from '../components/ModalAddManyTokens';
-import helpers from '../utils/helpers';
-import { WALLET_HISTORY_COUNT } from '../constants';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
+import hathorLib from '@hathor/wallet-lib';
+import { WALLET_HISTORY_COUNT } from '../constants';
 
 
 const mapStateToProps = (state) => {
@@ -64,8 +63,8 @@ class UnknownTokens extends React.Component {
     for (const token of this.props.allTokens) {
       // If has balance but does not have token saved yet
       if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
-        const filteredHistoryTransactions = wallet.filterHistoryTransactions(this.props.historyTransactions, token);
-        const balance = wallet.calculateBalance(filteredHistoryTransactions, token);
+        const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, token, false);
+        const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, token);
         unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions});
 
         this.historyRefs.push(React.createRef());
@@ -116,7 +115,7 @@ class UnknownTokens extends React.Component {
    */
   massiveImportSuccess = (count) => {
     $('#addManyTokensModal').modal('hide');
-    const message = `${count} ${helpers.plural(count, 'token was', 'tokens were')} added!`;
+    const message = `${count} ${hathorLib.helpers.plural(count, 'token was', 'tokens were')} added!`;
     this.setState({ successMessage: message }, () => {
       this.refs.alertSuccess.show(3000);
     });
@@ -136,9 +135,9 @@ class UnknownTokens extends React.Component {
                 <div className="d-flex flex-column align-items-center justify-content-center">
                   <p>{token.uid}</p>
                   <div className="d-flex flex-row align-items-center justify-content-start w-100">
-                    <span><strong>Total:</strong> {helpers.prettyValue(token.balance.available + token.balance.locked)}</span>
-                    <span className="ml-2"><strong>Available:</strong> {helpers.prettyValue(token.balance.available)}</span>
-                    <span className="ml-2"><strong>Locked:</strong> {helpers.prettyValue(token.balance.locked)}</span>
+                    <span><strong>Total:</strong> {hathorLib.helpers.prettyValue(token.balance.available + token.balance.locked)}</span>
+                    <span className="ml-2"><strong>Available:</strong> {hathorLib.helpers.prettyValue(token.balance.available)}</span>
+                    <span className="ml-2"><strong>Locked:</strong> {hathorLib.helpers.prettyValue(token.balance.locked)}</span>
                   </div>
                 </div>
                 <div className="d-flex flex-row align-items-center">

@@ -6,13 +6,11 @@
  */
 
 import React from 'react';
-import txApi from '../api/txApi';
-import { DASHBOARD_BLOCKS_COUNT, DASHBOARD_TX_COUNT } from '../constants';
 import TxRow from '../components/TxRow';
 import SearchTx from '../components/SearchTx';
-import helpers from '../utils/helpers';
-import WebSocketHandler from '../WebSocketHandler';
 import BackButton from '../components/BackButton';
+import hathorLib from '@hathor/wallet-lib';
+import { DASHBOARD_TX_COUNT, DASHBOARD_BLOCKS_COUNT } from '../constants';
 
 
 /**
@@ -29,18 +27,18 @@ class DashboardTx extends React.Component {
 
   componentDidMount = () => {
     this.getInitialData();
-    WebSocketHandler.on('network', this.handleWebsocket);
+    hathorLib.WebSocketHandler.on('network', this.handleWebsocket);
   }
 
   componentWillUnmount = () => {
-    WebSocketHandler.removeListener('network', this.handleWebsocket);
+    hathorLib.WebSocketHandler.removeListener('network', this.handleWebsocket);
   }
 
   /**
    * Get initial data to fill the screen and update the state with this data
    */
   getInitialData = () => {
-    txApi.getDashboardTx(DASHBOARD_BLOCKS_COUNT, DASHBOARD_TX_COUNT, (data) => {
+    hathorLib.txApi.getDashboardTx(DASHBOARD_BLOCKS_COUNT, DASHBOARD_TX_COUNT, (data) => {
       this.updateData(data.transactions, data.blocks);
     }, (e) => {
       // Error in request
@@ -64,14 +62,14 @@ class DashboardTx extends React.Component {
     if (tx.is_block) {
       let blocks = this.state.blocks;
 
-      blocks = helpers.updateListWs(blocks, tx, DASHBOARD_BLOCKS_COUNT);
+      blocks = hathorLib.helpers.updateListWs(blocks, tx, DASHBOARD_BLOCKS_COUNT);
 
       // Finally we update the state again
       this.setState({ blocks });
     } else {
       let transactions = this.state.transactions;
 
-      transactions = helpers.updateListWs(transactions, tx, DASHBOARD_TX_COUNT);
+      transactions = hathorLib.helpers.updateListWs(transactions, tx, DASHBOARD_TX_COUNT);
 
       // Finally we update the state again
       this.setState({ transactions });
@@ -101,7 +99,7 @@ class DashboardTx extends React.Component {
     const transactions = [];
     const blocks = [];
     for (const tx of data) {
-      if (helpers.isBlock(tx)) {
+      if (hathorLib.helpers.isBlock(tx)) {
         blocks.push(tx);
       } else {
         transactions.push(tx);

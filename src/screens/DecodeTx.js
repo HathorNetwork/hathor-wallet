@@ -7,9 +7,8 @@
 
 import React from 'react';
 import TxTextInput from '../components/TxTextInput';
-import helpers from '../utils/helpers';
 import TxData from '../components/TxData';
-import txApi from '../api/txApi';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -52,7 +51,7 @@ class DecodeTx extends React.Component {
   txDecoded = (data) => {
     if (data.success) {
       this.setState({ transaction: data.tx, meta: data.meta, spentOutputs: data.spent_outputs, loaded: true, success: true });
-      if (!helpers.isBlock(data.tx)) {
+      if (!hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();
       }
     } else {
@@ -64,7 +63,7 @@ class DecodeTx extends React.Component {
    * Get data from accumulated weight of the decoded transaction
    */
   getConfirmationData = () => {
-    txApi.getConfirmationData(this.state.transaction.hash, (data) => {
+    hathorLib.txApi.getConfirmationData(this.state.transaction.hash, (data) => {
       this.setState({ confirmationData: data });
     }, (e) => {
       // Error in request
@@ -77,7 +76,7 @@ class DecodeTx extends React.Component {
    * Called after the 'Decode' button is clicked, so sends hexadecimal to server to be decoded
    */
   buttonClicked = () => {
-    txApi.decodeTx(this.state.dataToDecode, (data) => {
+    hathorLib.txApi.decodeTx(this.state.dataToDecode, (data) => {
       this.txDecoded(data);
     }, (e) => {
       // Error in request

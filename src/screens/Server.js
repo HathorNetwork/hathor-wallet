@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { DEFAULT_SERVERS } from '../constants';
 import $ from 'jquery';
 import version from '../utils/version';
 import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -59,14 +59,14 @@ class Server extends React.Component {
       newServer = this.state.selectedValue;
     }
 
-    if (!wallet.isPinCorrect(this.refs.pin.value)) {
+    if (!hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
       this.setState({ errorMessage: 'Invalid PIN' });
       return;
     }
 
     this.setState({ loading: true, errorMessage: '' });
     // Update new server in local storage
-    wallet.changeServer(newServer)
+    hathorLib.wallet.changeServer(newServer)
     const promise = version.checkApiVersion();
     promise.then(() => {
       wallet.reloadData();
@@ -97,12 +97,12 @@ class Server extends React.Component {
    * @param {Object} e Event of select change
    */
   handleSelectChange = (e) => {
-    this.setState({ selectedValue: DEFAULT_SERVERS[e.target.value] });
+    this.setState({ selectedValue: hathorLib.constants.DEFAULT_SERVERS[e.target.value] });
   }
 
   render() {
     const renderServerOptions = () => {
-      return DEFAULT_SERVERS.map((server, idx) => {
+      return hathorLib.constants.DEFAULT_SERVERS.map((server, idx) => {
         return (
           <option key={idx} value={idx}>{server}</option>
         );

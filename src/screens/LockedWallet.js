@@ -10,6 +10,7 @@ import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -46,13 +47,13 @@ class LockedWallet extends React.Component {
     const isValid = this.refs.unlockForm.checkValidity();
     if (isValid) {
       this.refs.unlockForm.classList.remove('was-validated')
-      if (!wallet.isPinCorrect(this.refs.pin.value)) {
+      if (!hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
         this.setState({ errorMessage: 'Invalid PIN' });
         return;
       }
 
       // Everything is fine, so redirect to wallet
-      wallet.unlock();
+      hathorLib.wallet.unlock();
       // Reload wallet data
       wallet.reloadData();
       this.props.history.push('/wallet/');

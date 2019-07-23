@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { MIN_API_VERSION } from '../constants';
 import version from '../utils/version';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from '../components/Version';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -48,7 +48,7 @@ class VersionError extends React.Component {
           </nav>
         </div>
         <div className="content-wrapper">
-          <p>Your API backend version is not compatible with this admin. We expect at least the version {MIN_API_VERSION}</p>
+          <p>Your API backend version is not compatible with this admin. We expect at least the version {hathorLib.constants.MIN_API_VERSION}</p>
           <p>Please update you API version and try again</p>
           <button className="btn btn-hathor" onClick={this.versionUpdated}>Try again</button>
           <button className="btn btn-hathor ml-3" onClick={this.changeServer}>Change Server</button>

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import hathorLib from '@hathor/wallet-lib';
 import { CONFIRM_RESET_MESSAGE } from '../constants';
-import wallet from '../utils/wallet';
 
 
 /**
@@ -36,7 +36,7 @@ class ModalResetAllData extends React.Component {
       this.refs.formConfirm.classList.remove('was-validated');
       const password = this.refs.password.value;
       const forgotPassword = this.refs.forgotPassword.checked;
-      if (password && !wallet.isPasswordCorrect(password)) {
+      if (password && !hathorLib.wallet.isPasswordCorrect(password)) {
         this.setState({errorMessage: 'Invalid password'})
       } else if (!password && !forgotPassword) {
         this.setState({errorMessage: 'You must write your password or check that you have forgotten it'});
@@ -53,7 +53,7 @@ class ModalResetAllData extends React.Component {
   render() {
     const getFirstMessage = () => {
       let firstMessage = 'If you reset your wallet, all data will be deleted, and you will lose access to your tokens. To recover access to your tokens, you will need to import your words again.';
-      if (!wallet.isBackupDone()) {
+      if (!hathorLib.wallet.isBackupDone()) {
         firstMessage = `${firstMessage} You still haven't done the backup of your words.`;
       }
       return firstMessage;

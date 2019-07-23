@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -28,7 +28,7 @@ class Welcome extends React.Component {
     const isValid = this.refs.agreeForm.checkValidity();
     this.setState({ formValidated: !isValid });
     if (isValid) {
-      wallet.markWalletAsStarted();
+      hathorLib.wallet.markWalletAsStarted();
       this.props.history.push('/permission/');
     }
   }
