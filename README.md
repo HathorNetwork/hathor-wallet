@@ -123,6 +123,16 @@ The sentry release used is the `version` field in the `package.json` file.
 So in order to not break any released source maps, only run the script after bumping `package.json` to a new version.
 For test purposes use `*-beta` versions or identifiers that will not colide with semantic versioning.
 
+## Troubleshooting
+
+When building, if you get the following error message:
+
+    FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+
+Then, you can increase your memory limit running:
+
+    export NODE_OPTIONS=--max_old_space_size=4096
+
 ## TODO
 
 - The algorithm to automatically choose the unspent transactions when sending tokens is naive. For now we do not consider any anonymity factor.
