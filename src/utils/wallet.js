@@ -457,6 +457,18 @@ const wallet = {
   turnNotificationOff() {
     hathorLib.storage.setItem('wallet:notification', false);
   },
+
+  /**
+   * Get the server URL that the wallet will connect. Null if no URL is set
+   *
+   * @return {string} Server URL
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getServerURL() {
+    return hathorLib.storage.setItem('wallet:server');
+  }
 }
 
 export default wallet;

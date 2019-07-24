@@ -90,3 +90,18 @@ export const DEBUG_LOCAL_DATA_KEYS = [
  * Sentry connection DSN
  */
 export const SENTRY_DSN = process.env.SENTRY_DSN || 'https://69c067d1587c465cac836eaf25467ce1@sentry.io/1410476';
+
+/**
+ * Server options for the user to choose which one to connect
+ */
+export const DEFAULT_SERVERS = [
+  'https://node1.bravo.testnet.hathor.network/v1a/',
+  'https://node2.bravo.testnet.hathor.network/v1a/',
+  'https://node3.bravo.testnet.hathor.network/v1a/',
+  'https://node4.bravo.testnet.hathor.network/v1a/',
+];
+
+/**
+ * Default server user will connect when none has been chosen
+ */
+export const DEFAULT_SERVER = DEFAULT_SERVERS[0];
