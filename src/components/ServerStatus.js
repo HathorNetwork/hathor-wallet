@@ -23,6 +23,7 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 const ServerStatus = (props) => {
+  return null;
   return (
     props.isOnline !== undefined && 
     <div className="d-flex flex-column version-wrapper align-items-center">

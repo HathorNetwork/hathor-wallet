@@ -58,7 +58,7 @@
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 .",
     "preelectron-pack": "npm run build",
-    "electron-pack": "build --mac --win --linux -c.extraMetadata.main=build/electron.js"
+    "electron-pack": "electron-builder --mac --win --linux -c.extraMetadata.main=build/electron.js"
   },
   "devDependencies": {
     "@sentry/browser": "^5.0.5",
@@ -67,12 +67,12 @@
     "electron-builder": "^20.43.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-notarize": "^0.1.1",
-    "jsdoc": "^3.6.2"
+    "jsdoc": "^3.6.2",
+    "typescript": "^3.5.3"
   },
   "build": {
     "appId": "network.hathor.macos.wallet",
     "compression": "maximum",
-    "afterSign": "scripts/notarize.js",
     "win": {
       "icon": "build/icon.png",
       "target": "nsis",
@@ -82,17 +82,10 @@
       "provisioningProfile": "mac_production.provisionprofile",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
+      "entitlements": "public/entitlements.mac.plist",
+      "entitlementsInherit": "public/entitlements.mac.plist",
       "icon": "build/icon.icns",
-      "target": [
-        "dmg",
-        "mas"
-      ]
-    },
-    "mas": {
-      "entitlements": "build/entitlements.mas.plist",
-      "entitlementsInherit": "build/entitlements.mas.plist"
+      "target": "dmg"
     },
     "linux": {
       "target": [
