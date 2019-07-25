@@ -33,10 +33,6 @@ class CreateToken extends React.Component {
     super(props);
 
     this.address = React.createRef();
-    this.inputWrapper = React.createRef();
-    this.inputCheckbox = React.createRef();
-    this.txId = React.createRef();
-    this.index = React.createRef();
 
     /**
      * errorMessage {string} Message to show when error happens on the form
@@ -86,53 +82,6 @@ class CreateToken extends React.Component {
     }
   }
 
-  /*
-   * Getting Hathor input and output to generate the new token
-   */
-  getHathorData = () => {
-    let input = null;
-    let amount = 0;
-    if (this.inputCheckbox.current.checked) {
-      // Select inputs automatically
-      const inputs = hathorLib.wallet.getInputsFromAmount(this.props.historyTransactions, hathorLib.helpers.minimumAmount(), hathorLib.constants.HATHOR_TOKEN_CONFIG.uid);
-      if (inputs.inputs.length === 0) {
-        this.setState({ errorMessage: 'You don\'t have any available hathor token to create a new token' });
-        return null;
-      } else if (inputs.inputs.length > 1) {
-        this.setState({ errorMessage: 'Error getting inputs automatically' });
-        return null;
-      }
-      input = inputs.inputs[0];
-      amount = inputs.inputsAmount;
-    } else {
-      const txId = this.txId.current.value;
-      const index = this.index.current.value;
-      if (txId === '' || index === '') {
-        this.setState({ errorMessage: 'Tx id and index are required when manually choosing input' });
-        return null;
-      }
-
-      const utxo = hathorLib.wallet.checkUnspentTxExists(this.props.historyTransactions, txId, index, hathorLib.constants.HATHOR_TOKEN_CONFIG.uid);
-      if (!utxo.exists) {
-        // Input does not exist in unspent txs
-        this.setState({ errorMessage: utxo.message });
-        return null;
-      }
-
-      const output = utxo.output;
-      if (!hathorLib.wallet.canUseUnspentTx(output)) {
-        this.setState({ errorMessage: `Output [${txId}, ${index}] is locked until ${hathorLib.dateFormatter.parseTimestamp(output.decoded.timelock)}` });
-        return null;
-      }
-
-      input = {'tx_id': txId, 'index': index, 'token': hathorLib.constants.HATHOR_TOKEN_CONFIG.uid, 'address': output.decoded.address};
-      amount = output.value;
-    }
-    // Change output for Hathor because the whole input will go as change
-    const outputChange = hathorLib.wallet.getOutputChange(amount, hathorLib.constants.HATHOR_TOKEN_INDEX);
-    return {'input': input, 'output': outputChange};
-  }
-
   /**
    * Method execute after user verifies the action in the PIN modal and closes the modal and executes token creation
    */
@@ -141,8 +90,6 @@ class CreateToken extends React.Component {
     if (!this.formValid()) {
       return;
     }
-    const hathorData = this.getHathorData();
-    if (!hathorData) return;
     this.setState({ errorMessage: '', loading: true });
     // Get the address to send the created tokens
     let address = '';
@@ -152,7 +99,7 @@ class CreateToken extends React.Component {
       address = this.refs.address.value;
     }
     const promise = new Promise((resolve, reject) => {
-      const retPromise = hathorLib.tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES), 10), this.state.pin);
+      const retPromise = hathorLib.tokens.createToken(address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES), 10), this.state.pin);
       retPromise.then((token) => {
         // Update redux with added token
         tokens.saveTokenRedux(token.uid);
@@ -204,20 +151,6 @@ class CreateToken extends React.Component {
       $(this.address.current).hide(400);
     } else {
       $(this.address.current).show(400);
-    }
-  }
-
-  /**
-   * Shows/hides input field depending on the checkbox click
-   *
-   * @param {Object} e Event for the inputWrapper checkbox input change
-   */
-  handleCheckboxInput = (e) => {
-    const value = e.target.checked;
-    if (value) {
-      $(this.inputWrapper.current).hide(400);
-    } else {
-      $(this.inputWrapper.current).show(400);
     }
   }
 
@@ -278,18 +211,6 @@ class CreateToken extends React.Component {
               <label>Destination address</label>
               <input ref="address" type="text" placeholder="Address" className="form-control" />
             </div>
-            <div className="form-group d-flex flex-row align-items-center col-12">
-              <div className="form-check">
-                <input className="form-check-input" type="checkbox" ref={this.inputCheckbox} id="autoselectInput" defaultChecked={true} onChange={this.handleCheckboxInput} />
-                <label className="form-check-label" htmlFor="autoselectInput">
-                  Select input automatically
-                </label>
-              </div>
-            </div>
-          </div>
-          <div className="form-group input-group mb-3 inputs-wrapper" ref={this.inputWrapper} style={{display: 'none'}}>
-            <input type="text" placeholder="Tx id" ref={this.txId} className="form-control input-id col-6" />
-            <input type="text" placeholder="Index" ref={this.index} className="form-control input-index col-1 ml-3" />
           </div>
           <button type="button" disabled={this.state.loading} className="mt-3 btn btn-hathor" data-toggle="modal" data-target="#pinModal">Create</button>
         </form>
