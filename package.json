@@ -28,7 +28,7 @@
     "bootstrap": "^4.0.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-react": "^7.13.0",
-    "@hathor/wallet-lib": "^0.3.0",
+    "@hathor/wallet-lib": "^0.4.1",
     "font-awesome": "^4.7.0",
     "jquery": "^3.4.1",
     "node-sass-chokidar": "^1.3.5",
@@ -45,7 +45,7 @@
     "redux": "^4.0.0",
     "viz.js": "^2.1.2"
   },
-  "main": "public/electron.js",
+  "main": "build/electron.js",
   "homepage": "./",
   "scripts": {
     "build-css": "node-sass-chokidar src/ -o src/",
@@ -83,8 +83,8 @@
       "provisioningProfile": "mac_production.provisionprofile",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "entitlements": "public/entitlements.mac.plist",
-      "entitlementsInherit": "public/entitlements.mac.plist",
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "build/icon.icns",
       "target": "dmg"
     },
