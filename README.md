@@ -77,6 +77,21 @@ If you have an error building `Error: Python executable "/path/to/python" is v3.
 
 Just run `npm config set python /usr/bin/python` and try again
 
+### Building only for one platform
+
+You can use `--mac`, `--win`, or `--linux`. Then:
+
+    ./node_modules/.bin/build --win -c.extraMetadata.main=build/electron.js
+
+### Code Signing
+
+For Windows, you need to create the following environment variables:
+
+    export WIN_CSC_LINK=./your_certificate.pfx
+	export WIN_CSC_KEY_PASSWORD=your_certificate_password
+
+Then, just build it.
+
 ## Sentry
 
 Sentry is a error tracking tool, that allow us to receive error data from clients - it will be disabled on stable versions of the wallet.
@@ -107,6 +122,16 @@ After configuring it, just run the `upload_source_maps.sh` script to upload the 
 The sentry release used is the `version` field in the `package.json` file.
 So in order to not break any released source maps, only run the script after bumping `package.json` to a new version.
 For test purposes use `*-beta` versions or identifiers that will not colide with semantic versioning.
+
+## Troubleshooting
+
+When building, if you get the following error message:
+
+    FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+
+Then, you can increase your memory limit running:
+
+    export NODE_OPTIONS=--max_old_space_size=4096
 
 ## TODO
 
