@@ -48,10 +48,8 @@ import LocalStorageStore  from './storage.js';
 
 hathorLib.storage.setStore(new LocalStorageStore());
 
-// set default server if needed
-if (!wallet.getServerURL()) {
-  hathorLib.wallet.changeServer(DEFAULT_SERVER);
-}
+// set default server to bravo testnet
+hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -59,7 +57,6 @@ const mapDispatchToProps = dispatch => {
     isOnlineUpdate: (data) => dispatch(isOnlineUpdate(data)),
   };
 };
-
 
 const mapStateToProps = (state) => {
   return {
