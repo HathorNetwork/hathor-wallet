@@ -36,7 +36,7 @@ class Settings extends React.Component {
    */
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
-    wallet.resetAllData();
+    wallet.resetWalletData();
     this.props.history.push('/welcome/');
   }
 
