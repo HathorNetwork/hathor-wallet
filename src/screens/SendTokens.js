@@ -72,7 +72,7 @@ class SendTokens extends React.Component {
   getData = () => {
     let data = {'inputs': [], 'outputs': []};
     for (const ref of this.references) {
-      const instance = ref.current.getWrappedInstance();
+      const instance = ref.current;
       let dataOne = instance.getData();
       if (!dataOne) return;
       dataOne = instance.handleInitialData(dataOne);

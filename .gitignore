@@ -12,6 +12,7 @@ src/**/*.css
 
 # electron
 /dist
+mac_production.provisionprofile
 
 # misc
 .DS_Store
