@@ -28,7 +28,7 @@ class ModalUnhandledError extends React.Component {
    */
   handleConfirm = (e) => {
     e.preventDefault();
-    wallet.resetAllData();
+    wallet.resetWalletData();
     this.props.history.push('/welcome/');
   }
 

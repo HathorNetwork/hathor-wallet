@@ -281,9 +281,9 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  resetAllData() {
+  resetWalletData() {
     this.cleanWalletRedux();
-    hathorLib.wallet.resetAllData();
+    hathorLib.wallet.resetWalletData();
   },
 
   /*

@@ -11,6 +11,7 @@ import version from '../utils/version';
 import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
+import { DEFAULT_SERVERS } from '../constants';
 
 
 /**
@@ -97,12 +98,12 @@ class Server extends React.Component {
    * @param {Object} e Event of select change
    */
   handleSelectChange = (e) => {
-    this.setState({ selectedValue: hathorLib.constants.DEFAULT_SERVERS[e.target.value] });
+    this.setState({ selectedValue: DEFAULT_SERVERS[e.target.value] });
   }
 
   render() {
     const renderServerOptions = () => {
-      return hathorLib.constants.DEFAULT_SERVERS.map((server, idx) => {
+      return DEFAULT_SERVERS.map((server, idx) => {
         return (
           <option key={idx} value={idx}>{server}</option>
         );
