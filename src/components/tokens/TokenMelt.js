@@ -35,7 +35,13 @@ class TokenMelt extends React.Component {
   executeMelt = (pin) => {
     const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
     const output = this.props.meltOutputs[0];
-    const promise = hathorLib.tokens.meltTokens(output.tx_id, output.index, output.decoded.address, this.props.token.uid, amountValue, pin, this.createAnother.current.checked);
+    const promise = hathorLib.tokens.meltTokens(
+      {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
+      this.props.token.uid,
+      amountValue,
+      pin,
+      this.createAnother.current.checked
+    );
     if (promise === null) {
       return { promise: null, message: 'Can\'t find outputs to melt the amount requested.' };
     } else {
