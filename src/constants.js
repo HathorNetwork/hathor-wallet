@@ -18,7 +18,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.9.0-beta';
+export const VERSION = '0.8.0-beta';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
