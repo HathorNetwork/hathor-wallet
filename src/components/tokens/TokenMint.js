@@ -124,7 +124,17 @@ class TokenMint extends React.Component {
       )
     }
 
-    return <TokenAction renderForm={renderForm} title='Mint tokens' buttonName='Go' validateForm={this.mint} onPinSuccess={this.executeMint} {...this.props} />
+    return (
+      <TokenAction
+       renderForm={renderForm}
+       title='Mint tokens'
+       subtitle={`A deposit of ${hathorLib.tokens.depositPercentage * 100}% in HTR of the mint amount is required`}
+       buttonName='Go'
+       validateForm={this.mint}
+       onPinSuccess={this.executeMint}
+       {...this.props}
+      />
+    )
   }
 }
 

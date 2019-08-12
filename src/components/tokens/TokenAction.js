@@ -134,6 +134,7 @@ class TokenAction extends React.Component {
     return (
       <div key={this.props.action}>
         <h2>{this.props.title}</h2>
+        <p>{this.props.subtitle}</p>
         <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form} onSubmit={(e) => e.preventDefault()}>
           {this.props.renderForm()}
         </form>
