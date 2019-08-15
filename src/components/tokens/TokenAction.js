@@ -50,8 +50,8 @@ class TokenAction extends React.Component {
     promise.then(() => {
       this.props.cancelAction();
       this.props.showSuccess(successMessage);
-    }, (message) => {
-      this.setState({ loading: false, errorMessage: message });
+    }, (e) => {
+      this.setState({ loading: false, errorMessage: e.message });
     });
   }
 

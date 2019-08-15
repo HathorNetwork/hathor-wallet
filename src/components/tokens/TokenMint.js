@@ -9,6 +9,7 @@ import React from 'react';
 import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
+import tokens from '../../utils/tokens';
 
 
 /**
@@ -29,6 +30,9 @@ class TokenMint extends React.Component {
     // Reference to address input wrapper (to show/hide it)
     this.addressWrapper = React.createRef();
 
+    /**
+     * amount {number} Amount of tokens to create
+     */
     this.state = { amount: null };
   }
 
@@ -40,7 +44,7 @@ class TokenMint extends React.Component {
    * @return {Object} Object with promise and success message to be shown
    */
   executeMint = (pin) => {
-    const amountValue = this.state.value*(10**hathorLib.constants.DECIMAL_PLACES);
+    const amountValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
     const output = this.props.mintOutputs[0];
     const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
     const promise = hathorLib.tokens.mintTokens(
@@ -82,7 +86,10 @@ class TokenMint extends React.Component {
     }
   }
 
-  onChange = (e) => {
+  /**
+   * Handles amount input change
+   */
+  onAmountChange = (e) => {
     this.setState({amount: e.target.value});
   }
 
@@ -116,7 +123,7 @@ class TokenMint extends React.Component {
                required
                type="number"
                className="form-control"
-               onChange={this.onChange}
+               onChange={this.onAmountChange}
                value={this.state.amount || ''}
                step={hathorLib.helpers.prettyValue(1)}
                min={hathorLib.helpers.prettyValue(1)}
@@ -137,22 +144,12 @@ class TokenMint extends React.Component {
       )
     }
 
-    const getDepositAmount = () => {
-      if (this.state.amount) {
-        const amountValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
-        const deposit = hathorLib.helpers.getDepositAmount(amountValue);
-        return hathorLib.helpers.prettyValue(deposit);
-      } else {
-        return 0;
-      }
-    }
-
     return (
       <TokenAction
        renderForm={renderForm}
        title='Mint tokens'
        subtitle={`A deposit of ${hathorLib.tokens.depositPercentage * 100}% in HTR of the mint amount is required`}
-       deposit={`Deposit: ${getDepositAmount()} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
+       deposit={`Deposit: ${tokens.getDepositAmount(this.state.amount)} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
        buttonName='Go'
        validateForm={this.mint}
        onPinSuccess={this.executeMint}

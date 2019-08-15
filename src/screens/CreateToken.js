@@ -17,7 +17,13 @@ import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
+  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken,  false);
+  const balance = hathorLib.wallet.calculateBalance(
+    filteredHistoryTransactions,
+    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+  );
   return {
+    htrBalance: balance.available,
     historyTransactions: state.historyTransactions,
   };
 };
@@ -41,13 +47,15 @@ class CreateToken extends React.Component {
      * pin {string} PIN that user writes in the modal
      * name {string} Name of the created token
      * configurationString {string} Configuration string of the created token
+     * amount {number} Amount of tokens to create
      */
     this.state = {
       errorMessage: '',
       loading: false,
       pin: '',
       name: '',
-      configurationString: ''
+      configurationString: '',
+      amount: null,
     };
   }
 
@@ -72,7 +80,7 @@ class CreateToken extends React.Component {
       }
 
       // Validating maximum amount
-      const tokensValue = this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES);
+      const tokensValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
         this.setState({ errorMessage: `Maximum value to mint token is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
         return false;
@@ -104,7 +112,7 @@ class CreateToken extends React.Component {
       address,
       this.refs.shortName.value,
       this.refs.symbol.value,
-      parseInt(this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES), 10),
+      parseInt(this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES), 10),
       this.state.pin
     );
     retPromise.then((token) => {
@@ -113,8 +121,8 @@ class CreateToken extends React.Component {
       // Must update the shared address, in case we have used one for the change
       wallet.updateSharedAddress();
       this.showAlert(token);
-    }, (message) => {
-      this.setState({ loading: false, errorMessage: message });
+    }, (e) => {
+      this.setState({ loading: false, errorMessage: e.message });
     });
   }
 
@@ -168,6 +176,13 @@ class CreateToken extends React.Component {
     }
   }
 
+  /**
+   * Handles amount input change
+   */
+  onAmountChange = (e) => {
+    this.setState({amount: e.target.value});
+  }
+
   render = () => {
     const isLoading = () => {
       return (
@@ -212,7 +227,16 @@ class CreateToken extends React.Component {
           <div className="row">
             <div className="form-group col-4">
               <label>Amount</label>
-              <input required type="number" ref="amount" step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control" />
+              <input
+               required
+               type="number"
+               className="form-control"
+               onChange={this.onAmountChange}
+               value={this.state.amount || ''}
+               step={hathorLib.helpers.prettyValue(1)}
+               min={hathorLib.helpers.prettyValue(1)}
+               placeholder={hathorLib.helpers.prettyValue(0)}
+              />
             </div>
             <div className="form-group d-flex flex-row align-items-center address-checkbox">
               <div className="form-check">
@@ -227,6 +251,7 @@ class CreateToken extends React.Component {
               <input ref="address" type="text" placeholder="Address" className="form-control" />
             </div>
           </div>
+          <p>Deposit: {tokens.getDepositAmount(this.state.amount)} HTR ({hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)</p>
           <button type="button" disabled={this.state.loading} className="mt-3 btn btn-hathor" data-toggle="modal" data-target="#pinModal">Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>

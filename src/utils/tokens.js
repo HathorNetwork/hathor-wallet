@@ -75,6 +75,24 @@ const tokens = {
     const storageTokens = hathorLib.storage.getItem('wallet:tokens');
     store.dispatch(newTokens({tokens: storageTokens, uid: uid}));
   },
+
+  /**
+   * Returns the deposit amount in 'pretty' format
+   *
+   * @param {number} mintAmount Amount of tokens to mint
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  getDepositAmount(mintAmount) {
+    if (mintAmount) {
+      const amountValue = mintAmount*(10**hathorLib.constants.DECIMAL_PLACES);
+      const deposit = hathorLib.helpers.getDepositAmount(amountValue);
+      return hathorLib.helpers.prettyValue(deposit);
+    } else {
+      return 0;
+    }
+  },
 }
 
 export default tokens;
