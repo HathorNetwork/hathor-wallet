@@ -20,8 +20,6 @@ class TokenMint extends React.Component {
   constructor(props) {
     super(props);
 
-    // Reference to amount input
-    this.amount = React.createRef();
     // Reference to create another mint checkbox
     this.createAnother = React.createRef();
     // Reference to choose address automatically checkbox
@@ -30,6 +28,8 @@ class TokenMint extends React.Component {
     this.address = React.createRef();
     // Reference to address input wrapper (to show/hide it)
     this.addressWrapper = React.createRef();
+
+    this.state = { amount: null };
   }
 
   /**
@@ -40,7 +40,7 @@ class TokenMint extends React.Component {
    * @return {Object} Object with promise and success message to be shown
    */
   executeMint = (pin) => {
-    const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
+    const amountValue = this.state.value*(10**hathorLib.constants.DECIMAL_PLACES);
     const output = this.props.mintOutputs[0];
     const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
     const promise = hathorLib.tokens.mintTokens(
@@ -82,6 +82,10 @@ class TokenMint extends React.Component {
     }
   }
 
+  onChange = (e) => {
+    this.setState({amount: e.target.value});
+  }
+
   render() {
     const renderMintAddress = () => {
       return (
@@ -108,7 +112,16 @@ class TokenMint extends React.Component {
           <div className="row">
             <div className="form-group col-3">
               <label>Amount</label>
-              <input required type="number" ref={this.amount} step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control" />
+              <input
+               required
+               type="number"
+               className="form-control"
+               onChange={this.onChange}
+               value={this.state.amount || ''}
+               step={hathorLib.helpers.prettyValue(1)}
+               min={hathorLib.helpers.prettyValue(1)}
+               placeholder={hathorLib.helpers.prettyValue(0)}
+              />
             </div>
             {renderMintAddress()}
           </div>
@@ -124,11 +137,22 @@ class TokenMint extends React.Component {
       )
     }
 
+    const getDepositAmount = () => {
+      if (this.state.amount) {
+        const amountValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
+        const deposit = hathorLib.helpers.getDepositAmount(amountValue);
+        return hathorLib.helpers.prettyValue(deposit);
+      } else {
+        return 0;
+      }
+    }
+
     return (
       <TokenAction
        renderForm={renderForm}
        title='Mint tokens'
        subtitle={`A deposit of ${hathorLib.tokens.depositPercentage * 100}% in HTR of the mint amount is required`}
+       deposit={`Deposit: ${getDepositAmount()} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
        buttonName='Go'
        validateForm={this.mint}
        onPinSuccess={this.executeMint}

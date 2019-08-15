@@ -21,11 +21,16 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
+  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken,  false);
+  const balance = hathorLib.wallet.calculateBalance(
+    filteredHistoryTransactions,
+    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+  );
   return {
+    htrBalance: balance.available,
     historyTransactions: state.historyTransactions,
   };
 };
-
 
 /**
  * Screen to manage a token. Mint, melt, edit, unregister, configuration string.
@@ -227,7 +232,7 @@ class TokenDetail extends React.Component {
     const renderBottom = () => {
       switch (this.state.action) {
         case 'mint':
-          return <TokenMint action={this.state.action} cancelAction={this.cancelAction} token={this.state.token} mintOutputs={this.state.mintOutputs} showSuccess={this.showSuccess} />
+          return <TokenMint htrBalance={this.props.htrBalance} action={this.state.action} cancelAction={this.cancelAction} token={this.state.token} mintOutputs={this.state.mintOutputs} showSuccess={this.showSuccess} />
         case 'melt':
           return <TokenMelt action={this.state.action} cancelAction={this.cancelAction} token={this.state.token} meltOutputs={this.state.meltOutputs} showSuccess={this.showSuccess} walletAmount={this.state.walletAmount} />
         case 'delegate-mint':
