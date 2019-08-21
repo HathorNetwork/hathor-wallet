@@ -7,6 +7,7 @@
 
 import store from '../store/index';
 import { newTokens } from '../actions/index';
+import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 
 
@@ -86,7 +87,7 @@ const tokens = {
    */
   getDepositAmount(mintAmount) {
     if (mintAmount) {
-      const amountValue = mintAmount*(10**hathorLib.constants.DECIMAL_PLACES);
+      const amountValue = wallet.decimalToInteger(mintAmount);
       const deposit = hathorLib.helpers.getDepositAmount(amountValue);
       return hathorLib.helpers.prettyValue(deposit);
     } else {

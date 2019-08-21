@@ -148,7 +148,7 @@ class TokenMint extends React.Component {
       <TokenAction
        renderForm={renderForm}
        title='Mint tokens'
-       subtitle={`A deposit of ${hathorLib.tokens.depositPercentage * 100}% in HTR of the mint amount is required`}
+       subtitle={`A deposit of ${hathorLib.tokens.getDepositPercentage() * 100}% in HTR of the mint amount is required`}
        deposit={`Deposit: ${tokens.getDepositAmount(this.state.amount)} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
        buttonName='Go'
        validateForm={this.mint}

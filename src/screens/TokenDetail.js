@@ -21,9 +21,8 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
-  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken,  false);
   const balance = hathorLib.wallet.calculateBalance(
-    filteredHistoryTransactions,
+    Object.values(state.historyTransactions),
     hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
   );
   return {
