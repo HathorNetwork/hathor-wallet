@@ -210,7 +210,7 @@ class CreateToken extends React.Component {
         <p className="mt-5">Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.</p>
         <p>Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.</p>
         <p>Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.</p>
-        <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a target="_blank" rel="noopener noreferrer" href="https://gitlab.com/HathorNetwork/rfcs/blob/token-deposit/text/0000-token-deposit.md">here</a>.</p>
+        <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a target="_blank" rel="noopener noreferrer" href="https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md">here</a>.</p>
         <hr className="mb-5 mt-5"/>
         <form ref="formCreateToken" id="formCreateToken">
           <div className="row">
