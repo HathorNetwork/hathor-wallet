@@ -42,11 +42,14 @@ import { dataLoaded, isOnlineUpdate } from "./actions/index";
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import { VERSION } from './constants';
+import { DEFAULT_SERVER, VERSION } from './constants';
 import LocalStorageStore  from './storage.js';
 
 
 hathorLib.storage.setStore(new LocalStorageStore());
+
+// set default server to bravo testnet
+hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -54,7 +57,6 @@ const mapDispatchToProps = dispatch => {
     isOnlineUpdate: (data) => dispatch(isOnlineUpdate(data)),
   };
 };
-
 
 const mapStateToProps = (state) => {
   return {

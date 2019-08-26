@@ -10,10 +10,10 @@ The wallet is developed using Javascript with [React](https://reactjs.org/). We 
 
 You can download the newest version of the wallet for each specific platform.
 
-- Download for [macOS](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.7.0-beta/Hathor.Wallet-0.7.0-beta.dmg)
-- Download for [Windows](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.7.0-beta/Hathor.Wallet.Setup.0.7.0-beta.exe)
-- Download for [Linux (deb)](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.7.0-beta/hathor-wallet_0.7.0-beta_amd64.deb)
-- Download for [Linux (AppImage)](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.7.0-beta/Hathor.Wallet.0.7.0-beta.AppImage)
+- Download for [macOS](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.8.0-beta/Hathor.Wallet-0.8.0-beta.dmg)
+- Download for [Windows](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.8.0-beta/Hathor.Wallet.Setup.0.8.0-beta.exe)
+- Download for [Linux (deb)](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.8.0-beta/hathor-wallet_0.8.0-beta_amd64.deb)
+- Download for [Linux (AppImage)](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.8.0-beta/Hathor.Wallet.0.8.0-beta.AppImage)
 
 ### Warning Message for Windows:
 
