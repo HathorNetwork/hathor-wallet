@@ -7,6 +7,7 @@
 
 import store from '../store/index';
 import { newTokens } from '../actions/index';
+import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 
 
@@ -74,6 +75,24 @@ const tokens = {
   saveTokenRedux(uid) {
     const storageTokens = hathorLib.storage.getItem('wallet:tokens');
     store.dispatch(newTokens({tokens: storageTokens, uid: uid}));
+  },
+
+  /**
+   * Returns the deposit amount in 'pretty' format
+   *
+   * @param {number} mintAmount Amount of tokens to mint
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  getDepositAmount(mintAmount) {
+    if (mintAmount) {
+      const amountValue = wallet.decimalToInteger(mintAmount);
+      const deposit = hathorLib.helpers.getDepositAmount(amountValue);
+      return hathorLib.helpers.prettyValue(deposit);
+    } else {
+      return 0;
+    }
   },
 }
 

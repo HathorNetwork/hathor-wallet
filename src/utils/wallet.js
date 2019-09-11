@@ -457,6 +457,21 @@ const wallet = {
   turnNotificationOff() {
     hathorLib.storage.setItem('wallet:notification', false);
   },
+
+  /**
+   * Converts a decimal value to integer. On the full node and the wallet lib, we only deal with
+   * integer values for amount. So a value of 45.97 for the user is handled by them as 4597.
+   *
+   * @param {number} value The decimal amount
+   *
+   * @return {number} Value as an integer
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  decimalToInteger(value) {
+    return parseInt(value*(10**hathorLib.constants.DECIMAL_PLACES), 10)
+  },
 }
 
 export default wallet;
