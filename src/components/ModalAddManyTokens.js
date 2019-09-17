@@ -47,7 +47,6 @@ class ModalAddManyTokens extends React.Component {
   handleAdd = (e) => {
     e.preventDefault();
     const configs = this.refs.configs.value.trim();
-    let toAdd = [];
     if (configs === '') {
       this.setState({ errorMessage: 'Must provide configuration string' });
       return;
@@ -55,22 +54,25 @@ class ModalAddManyTokens extends React.Component {
 
     const regex = /\[[\w\s]+(:\w+){3}\]/g;
     const matches = configs.match(regex);
+    const validations = [];
     for (const config of matches) {
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
-        const validation = hathorLib.tokens.validateTokenToAddByConfigurationString(config);
-        if (validation.success === false) {
-          this.setState({ errorMessage: validation.message });
-          return;
-        }
-        const tokenData = validation.tokenData;
-        toAdd.push(tokenData);
+        // Getting all validation promises
+        validations.push(hathorLib.tokens.validateTokenToAddByConfigurationString(config));
       }
     }
-    for (const config of toAdd) {
-      tokens.addToken(config.uid, config.name, config.symbol);
-    }
-    this.props.success(toAdd.length);
+
+    Promise.all(validations).then((toAdd) => {
+      // If all promises succeed, we add the tokens and show success message
+      for (const config of toAdd) {
+        tokens.addToken(config.uid, config.name, config.symbol);
+      }
+      this.props.success(toAdd.length);
+    }, (message) => {
+      // If one fails, we show error message
+      this.setState({ errorMessage: message });
+    });
   }
 
   render() {
