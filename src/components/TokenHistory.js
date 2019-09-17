@@ -248,10 +248,18 @@ class TokenHistory extends React.Component {
         let statusElement = '';
         let trClass = '';
         if (extra.value > 0) {
-          statusElement = <span>Received <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          if (tx.version === 2) {
+            statusElement = <span>Token creation <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          } else {
+            statusElement = <span>Received <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          }
           trClass = 'output-tr';
         } else if (extra.value < 0) {
-          statusElement = <span>Sent <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          if (tx.version === 2) {
+            statusElement = <span>Token deposit <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          } else {
+            statusElement = <span>Sent <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          }
           trClass = 'input-tr';
         }
         return (
