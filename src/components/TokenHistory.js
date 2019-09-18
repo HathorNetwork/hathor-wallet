@@ -248,14 +248,14 @@ class TokenHistory extends React.Component {
         let statusElement = '';
         let trClass = '';
         if (extra.value > 0) {
-          if (tx.version === 2) {
+          if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
             statusElement = <span>Token creation <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
           } else {
             statusElement = <span>Received <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
           }
           trClass = 'output-tr';
         } else if (extra.value < 0) {
-          if (tx.version === 2) {
+          if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
             statusElement = <span>Token deposit <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
           } else {
             statusElement = <span>Sent <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
