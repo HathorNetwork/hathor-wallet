@@ -5,6 +5,7 @@ $fa-font-path: "~font-awesome/fonts";
 
 $darkBlue: #0273a0;
 $darkBlueHover: #0081af;
+$warning: #ce9c06;
 
 html, body, #root {
   height: 100%;
@@ -658,12 +659,12 @@ svg.svg-wrapper {
   float: right;
 }
 
-.page-text .text-warning {
-  color: #ce9c06 !important;
+.text-warning {
+  color: $warning !important;
 }
 
 .text-warning a {
-  color: #ce9c06 !important;
+  color: $warning !important;
   text-decoration: underline;
 }
 

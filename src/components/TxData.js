@@ -35,6 +35,12 @@ class TxData extends React.Component {
    */
   state = { raw: false, children: false, tokens: [] };
 
+  // Array of token uid that was already found to show the symbol
+  tokensFound = [];
+
+  // Boolean to prevent parallel state update
+  updatingToken = false;
+
   componentDidMount = () => {
     this.calculateTokens();
     this.updateGraphs();
@@ -82,53 +88,72 @@ class TxData extends React.Component {
    */
   calculateTokens = () => {
     // Adding transactions tokens to state
-    const tokens = [];
     for (const output of this.props.transaction.outputs) {
       if (hathorLib.wallet.isAuthorityOutput(output)) continue;
-      this.checkToken(tokens, output.decoded.token_data);
+      this.checkToken(output.decoded.token_data);
     }
 
     for (const input of this.props.transaction.inputs) {
       if (hathorLib.wallet.isAuthorityOutput(input)) continue;
-      this.checkToken(tokens, input.decoded.token_data);
+      this.checkToken(input.decoded.token_data);
     }
+  }
 
-    this.setState({ tokens });
+  /**
+   * Method called to update the tokens state with a new token presented in this tx
+   *
+   * @param {Object} config Token config object with {name, symbol, uid}
+   * @param {boolean} unknown If token is registered in this wallet or unknown
+   */
+  tokenFound = (config, unknown) => {
+    if (this.updatingToken) {
+      setTimeout(() => {
+        this.tokenFound(config, unknown);
+      }, 0);
+      return;
+    }
+    this.updatingToken = true;
+    const configToAdd = Object.assign({unknown}, config);
+    this.setState({ tokens: [...this.state.tokens, configToAdd] }, () => {
+      this.updatingToken = false;
+    });
+  }
+
+  /**
+   * Get token info from API
+   *
+   * @param {string} uid UID of the token to get info
+   */
+  getTokenInfo = (uid) => {
+    hathorLib.walletApi.getTokenInfo(uid, (response) => {
+      const config = {name: response.name, symbol: response.symbol, uid};
+      this.tokenFound(config, true);
+    });
   }
 
   /**
    * Checks if token was already added and if it's a known token, then add it
    *
-   * @param {Array} tokens Array of already added tokens
    * @param {number} tokenData Represents the index of the token in this transaction
    */
-  checkToken = (tokens, tokenData) => {
+  checkToken = (tokenData) => {
     if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
       return;
     }
 
     const tokenUID = this.props.transaction.tokens[tokenData - 1];
+
+    if (this.tokensFound.find((uid) => uid === tokenUID) !== undefined) {
+      // Already found this token
+      return;
+    }
+
     const tokenConfig = this.props.tokens.find((token) => token.uid === tokenUID);
+    this.tokensFound.push(tokenUID);
     if (tokenConfig === undefined) {
-      // Get token unknown index
-      let unknownCount = 1;
-      for (const token of tokens) {
-        if (token.uid === tokenUID) {
-          return;
-        }
-
-        if (token.unknown) {
-          unknownCount += 1;
-        }
-      }
-
-      const symbol = `UNK${unknownCount}`;
-      tokens.push({uid: tokenUID, name: `Unknown ${unknownCount}`, symbol, unknown: true});
+      this.getTokenInfo(tokenUID);
     } else {
-      const foundToken = tokens.find((token) => token.uid === tokenUID);
-      if (foundToken === undefined) {
-        tokens.push({uid: tokenUID, name: tokenConfig.name, symbol: tokenConfig.symbol, unknown: false});
-      }
+      this.tokenFound(tokenConfig, false);
     }
   }
 
@@ -204,14 +229,26 @@ class TxData extends React.Component {
   }
 
   render() {
+    const renderBlockOrTransaction = () => {
+      if (hathorLib.helpers.isBlock(this.props.transaction)) {
+        return 'block';
+      } else {
+        return 'transaction';
+      }
+    }
+
     const renderInputs = (inputs) => {
       return inputs.map((input, idx) => {
-        return (
-          <div key={`${input.tx_id}${input.index}`}>
-            <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && hathorLib.wallet.isAddressMine(input.decoded.address) && renderAddressBadge()}
-            {renderOutput(input, 0, false)}
-          </div>
-        );
+        if (!hathorLib.wallet.isAuthorityOutput(input)) {
+          return (
+            <div key={`${input.tx_id}${input.index}`}>
+              <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && hathorLib.wallet.isAddressMine(input.decoded.address) && renderAddressBadge()}
+              {renderOutput(input, 0, false)}
+            </div>
+          );
+        } else {
+          return null;
+        }
       });
     }
 
@@ -305,7 +342,7 @@ class TxData extends React.Component {
           // there are conflicts, but it is not voided
           return (
             <div className="alert alert-success">
-              <h4 className="alert-heading mb-0">This {hathorLib.helpers.getTxType(this.props.transaction).toLowerCase()} is valid.</h4>
+              <h4 className="alert-heading mb-0">This {renderBlockOrTransaction()} is valid.</h4>
             </div>
           )
         }
@@ -314,7 +351,7 @@ class TxData extends React.Component {
           // there are conflicts, but it is not voided
           return (
             <div className="alert alert-success">
-              <h4 className="alert-heading">This {hathorLib.helpers.getTxType(this.props.transaction).toLowerCase()} is valid.</h4>
+              <h4 className="alert-heading">This {renderBlockOrTransaction()} is valid.</h4>
               <p>
                 Although there is a double-spending transaction, this transaction has the highest accumulated weight and is valid.
               </p>
@@ -335,12 +372,12 @@ class TxData extends React.Component {
         // it is voided, but there is no conflict
         return (
           <div className="alert alert-danger">
-            <h4 className="alert-heading">This {hathorLib.helpers.getTxType(this.props.transaction).toLowerCase()} is voided and <strong>NOT</strong> valid.</h4>
+            <h4 className="alert-heading">This {renderBlockOrTransaction()} is voided and <strong>NOT</strong> valid.</h4>
             <p>
-              This {hathorLib.helpers.getTxType(this.props.transaction).toLowerCase()} is verifying (directly or indirectly) a voided double-spending transaction, hence it is voided as well.
+              This {renderBlockOrTransaction()} is verifying (directly or indirectly) a voided double-spending transaction, hence it is voided as well.
             </p>
             <div className="mb-0">
-              <span>This {hathorLib.helpers.getTxType(this.props.transaction).toLowerCase()} is voided because of these transactions: </span>
+              <span>This {renderBlockOrTransaction()} is voided because of these transactions: </span>
               {renderListWithLinks(this.props.meta.voided_by, true)}
             </div>
           </div>
@@ -350,7 +387,7 @@ class TxData extends React.Component {
       // it is voided, and there is a conflict
       return (
         <div className="alert alert-danger">
-          <h4 className="alert-heading">This {hathorLib.helpers.getTxType(this.props.transaction).toLowerCase()} is <strong>NOT</strong> valid.</h4>
+          <h4 className="alert-heading">This {renderBlockOrTransaction()} is <strong>NOT</strong> valid.</h4>
           <div>
             <span>It is voided by: </span>
             {renderListWithLinks(this.props.meta.voided_by, true)}
@@ -396,10 +433,17 @@ class TxData extends React.Component {
     }
 
     const renderTokenList = () => {
+      const renderTokenUID = (token) => {
+        if (token.uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+          return token.uid;
+        } else {
+          return <Link to={`/token_detail/${token.uid}`}>{token.uid}</Link>
+        }
+      }
       const tokens = this.state.tokens.map((token) => {
         return (
           <div key={token.uid}>
-            <span>{token.name} <strong>({token.symbol})</strong> | {token.uid}</span>
+            <span>{token.name} <strong>({token.symbol})</strong> {token.unknown && <i title='This token is not registered in your wallet.' className='fa text-warning fa-warning'></i>} | {renderTokenUID(token)}</span>
           </div>
         );
       });
