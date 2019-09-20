@@ -9,7 +9,6 @@ import React from 'react';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import ModalConfirm from '../components/ModalConfirm';
-import ModalEditToken from '../components/ModalEditToken';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from '../components/HathorAlert';
@@ -44,6 +43,11 @@ class TokenDetail extends React.Component {
    * walletAmount {number} amount available of this token on this wallet
    * action {string} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
    * successMessage {string} success message to show
+   * totalSupply {number} Token total supply
+   * canMint {boolean} If this token can still be minted
+   * canMelt {boolean} If this token can still be melted
+   * paramUID {string} UID of the token in the URL param (useful when we don't have the token registered)
+   * unknown {boolean} If this token is registered or not in the wallet
    */
   state = {
     token: null,
@@ -52,29 +56,67 @@ class TokenDetail extends React.Component {
     walletAmount: 0,
     action: '',
     successMessage: '',
+    totalSupply: 0,
+    canMint: null,
+    canMelt: null,
+    paramUID: null,
+    unknown: null,
   };
 
   componentDidMount() {
-    const { match: { params } } = this.props;
-
-    const allTokens = hathorLib.tokens.getTokens();
-    const token = allTokens.find((data) => data.uid === params.tokenUID);
-
-    this.setState({ token }, () => {
-      this.updateTokenData();
-    });
+    this.screenMounted();
   }
 
   componentDidUpdate = (prevProps) => {
     if (this.props.historyTransactions !== prevProps.historyTransactions) {
-      this.updateTokenData();
+      this.updateInfo();
     }
+  }
+
+  /**
+   * Called when the screen is mounted and after register the screen token
+   */
+  screenMounted = () => {
+    const { match: { params } } = this.props;
+
+    const allTokens = hathorLib.tokens.getTokens();
+    const token = allTokens.find((data) => data.uid === params.tokenUID);
+    const unknown = token === undefined;
+
+    this.setState({ token, unknown, paramUID: params.tokenUID }, () => {
+      this.updateInfo();
+    });
+  }
+
+  /**
+   * Update token info and wallet info
+   */
+  updateInfo = () => {
+    this.updateTokenInfo();
+    this.updateWalletInfo();
+  }
+
+  /**
+   * Upadte token info getting data from the full node (can mint, can melt, total supply)
+   */
+  updateTokenInfo = () => {
+    hathorLib.walletApi.getTokenInfo(this.state.paramUID, (response) => {
+      this.setState({
+        token: {uid: this.state.paramUID, name: response.name, symbol: response.symbol },
+        totalSupply: response.total,
+        canMint: response.mint.length > 0,
+        canMelt: response.melt.length > 0,
+      });
+    });
   }
 
   /**
    * Update token state after didmount or props update
    */
-  updateTokenData = () => {
+  updateWalletInfo = () => {
+    // We only update wallet info if we have this token registered
+    if (this.state.unknown) return;
+
     const mintOutputs = [];
     const meltOutputs = [];
     let walletAmount = 0;
@@ -120,32 +162,32 @@ class TokenDetail extends React.Component {
    * Called when user clicks to unregister the token, then opens the modal
    */
   unregisterClicked = () => {
-    $('#confirmModal').modal('show');
+    $('#unregisterModal').modal('show');
   }
 
   /**
    * When user confirms the unregister of the token, hide the modal and execute it
    */
   unregisterConfirmed = () => {
-    $('#confirmModal').modal('hide');
+    $('#unregisterModal').modal('hide');
     tokens.unregisterToken(this.state.token.uid);
-    this.props.history.push('/wallet/');
+    this.screenMounted();
   }
 
   /**
-   * Called when user clicks to edit the token, then  opens the modal
+   * Called when user clicks to register the token, then opens the modal
    */
-  editClicked = () => {
-    $('#editTokenModal').modal('show');
+  registerClicked = () => {
+    $('#registerModal').modal('show');
   }
 
   /**
-   * When user finish editing the token, closes the modal
+   * When user confirms the register of the token, hide the modal and execute it
    */
-  editSuccess = (token) => {
-    $('#editTokenModal').modal('hide');
-    this.setState({ token });
-    this.showSuccess('Token edited!');
+  registerConfirmed = () => {
+    $('#registerModal').modal('hide');
+    tokens.addToken(this.state.token.uid, this.state.token.name, this.state.token.symbol);
+    this.screenMounted();
   }
 
   /**
@@ -222,8 +264,16 @@ class TokenDetail extends React.Component {
     const getUnregisterBody = () => {
       return (
         <div>
-          <p>Are you sure you want to unregister the token <strong>{this.state.token.name} ({this.state.token.symbol})</strong></p>
-          <p>You won't lose your tokens, you just won't see this token on the side bar anymore</p>
+          <p>Are you sure you want to unregister the token <strong>{this.state.token.name} ({this.state.token.symbol})</strong>?</p>
+          <p>You won't lose your tokens, you just won't see this token on the side bar anymore.</p>
+        </div>
+      )
+    }
+
+    const getRegisterBody = () => {
+      return (
+        <div>
+          <p>Are you sure you want to register the token <strong>{this.state.token.name} ({this.state.token.symbol})</strong>?</p>
         </div>
       )
     }
@@ -286,6 +336,47 @@ class TokenDetail extends React.Component {
       );
     }
 
+    const renderIcons = () => {
+      if (this.state.unknown) {
+        return (
+          <div>
+            <i className="fa fa-warning text-warning ml-3" title="Token is not registered"></i>
+            <i className="fa fa-check pointer ml-3" title="Register token" onClick={this.registerClicked}></i>
+          </div>
+        );
+      } else {
+        return (
+          <div>
+            <i className="fa fa-trash pointer ml-3" title="Unregister token" onClick={this.unregisterClicked}></i>
+          </div>
+        );
+      }
+    }
+
+    const renderWalletInfo = () => {
+      if (this.state.unknown) {
+        return null;
+      } else {
+        return (
+          <div className="token-detail-wallet-info">
+            <h4 className="mt-3 mb-2"><strong>Wallet data</strong></h4>
+            <p className="mt-4 mb-4"><strong>Amount: </strong>{hathorLib.helpers.prettyValue(this.state.walletAmount)}</p>
+            {renderMintMeltWrapper()}
+          </div>
+        );
+      }
+    }
+
+    const renderTokenInfo = () => {
+      return (
+        <div>
+          <p className="mt-3 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)}</p>
+          <p className="mt-2 mb-2"><strong>Can mint: </strong>{this.state.canMint ? <i className="fa fa-check ml-1" title="Can mint"></i> : <i className="fa fa-close ml-1" title="Can't mint"></i>}</p>
+          <p className="mt-2 mb-4"><strong>Can melt: </strong>{this.state.canMelt ? <i className="fa fa-check ml-1" title="Can melt"></i> : <i className="fa fa-close ml-1" title="Can't melt"></i>}</p>
+        </div>
+      );
+    }
+
     return (
       <div className="content-wrapper flex align-items-center">
         <div className='d-flex flex-row align-items-start justify-content-between token-detail-top'>
@@ -294,15 +385,10 @@ class TokenDetail extends React.Component {
               <p className='token-name mb-0'>
                 <strong>{this.state.token.name} ({this.state.token.symbol})</strong>
               </p>
-              <div>
-                <i className="fa fa-pencil pointer ml-3" title="Edit token" onClick={this.editClicked}></i>
-                <i className="fa fa-trash pointer ml-3" title="Unregister token" onClick={this.unregisterClicked}></i>
-              </div>
+              {renderIcons()}
             </div>
-            <div>
-              <p className="mt-3 mb-4"><strong>Total amount: </strong>{hathorLib.helpers.prettyValue(this.state.walletAmount)}</p>
-              {renderMintMeltWrapper()}
-            </div>
+            {renderTokenInfo()}
+            {renderWalletInfo()}
           </div>
           <div className='d-flex flex-column align-items-center config-string-wrapper mt-4'>
             <p><strong>Configuration String</strong></p>
@@ -319,8 +405,8 @@ class TokenDetail extends React.Component {
         <div className='token-detail-bottom'>
           {renderBottom()}
         </div>
-        <ModalConfirm title="Unregister token" body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
-        <ModalEditToken token={this.state.token} success={this.editSuccess} />
+        <ModalConfirm modalID="unregisterModal" title="Unregister token" body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
+        <ModalConfirm modalID="registerModal" title="Register token" body={getRegisterBody()} handleYes={this.registerConfirmed} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
       </div>
     )
