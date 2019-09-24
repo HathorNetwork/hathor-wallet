@@ -54,8 +54,8 @@ class ModalAddToken extends React.Component {
     promise.then((tokenData) => {
       tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
       this.props.success();
-    }, (message) => {
-      this.setState({ errorMessage: message });
+    }, (e) => {
+      this.setState({ errorMessage: e.message });
       return;
     });
   }

@@ -69,9 +69,9 @@ class ModalAddManyTokens extends React.Component {
         tokens.addToken(config.uid, config.name, config.symbol);
       }
       this.props.success(toAdd.length);
-    }, (message) => {
+    }, (e) => {
       // If one fails, we show error message
-      this.setState({ errorMessage: message });
+      this.setState({ errorMessage: e.message });
     });
   }
 
