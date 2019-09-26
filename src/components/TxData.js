@@ -38,9 +38,6 @@ class TxData extends React.Component {
   // Array of token uid that was already found to show the symbol
   tokensFound = [];
 
-  // Boolean to prevent parallel state update
-  updatingToken = false;
-
   componentDidMount = () => {
     this.calculateTokens();
     this.updateGraphs();
@@ -88,73 +85,52 @@ class TxData extends React.Component {
    */
   calculateTokens = () => {
     // Adding transactions tokens to state
+
+    const tokens = [];
+
     for (const output of this.props.transaction.outputs) {
       if (hathorLib.wallet.isAuthorityOutput(output)) continue;
-      this.checkToken(output.decoded.token_data);
+      const tokenData = this.checkToken(output.decoded.token_data);
+
+      if (tokenData) {
+        tokens.push(tokenData);
+      }
     }
 
     for (const input of this.props.transaction.inputs) {
       if (hathorLib.wallet.isAuthorityOutput(input)) continue;
-      this.checkToken(input.decoded.token_data);
-    }
-  }
+      const tokenData = this.checkToken(input.decoded.token_data);
 
-  /**
-   * Method called to update the tokens state with a new token presented in this tx
-   *
-   * @param {Object} config Token config object with {name, symbol, uid}
-   * @param {boolean} unknown If token is registered in this wallet or unknown
-   */
-  tokenFound = (config, unknown) => {
-    if (this.updatingToken) {
-      setTimeout(() => {
-        this.tokenFound(config, unknown);
-      }, 0);
-      return;
+      if (tokenData) {
+        tokens.push(tokenData);
+      }
     }
-    this.updatingToken = true;
-    const configToAdd = Object.assign({unknown}, config);
-    this.setState({ tokens: [...this.state.tokens, configToAdd] }, () => {
-      this.updatingToken = false;
-    });
-  }
 
-  /**
-   * Get token info from API
-   *
-   * @param {string} uid UID of the token to get info
-   */
-  getTokenInfo = (uid) => {
-    hathorLib.walletApi.getTokenInfo(uid, (response) => {
-      const config = {name: response.name, symbol: response.symbol, uid};
-      this.tokenFound(config, true);
-    });
+    this.setState({ tokens });
   }
 
   /**
    * Checks if token was already added and if it's a known token, then add it
    *
    * @param {number} tokenData Represents the index of the token in this transaction
+   * @return {Object} Token config object with {uid, name, symbol, tokenUnknown}
    */
   checkToken = (tokenData) => {
     if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
       return;
     }
 
-    const tokenUID = this.props.transaction.tokens[tokenData - 1];
+    const tokenConfig = this.props.transaction.tokens[tokenData - 1];
 
-    if (this.tokensFound.find((uid) => uid === tokenUID) !== undefined) {
+    if (this.tokensFound.find((uid) => uid === tokenConfig.uid) !== undefined) {
       // Already found this token
       return;
     }
 
-    const tokenConfig = this.props.tokens.find((token) => token.uid === tokenUID);
-    this.tokensFound.push(tokenUID);
-    if (tokenConfig === undefined) {
-      this.getTokenInfo(tokenUID);
-    } else {
-      this.tokenFound(tokenConfig, false);
-    }
+    const tokenUnknown = this.props.tokens.find((token) => token.uid === tokenConfig.uid) === undefined;
+    this.tokensFound.push(tokenConfig.uid);
+    const configToAdd = Object.assign({ unknown: tokenUnknown }, tokenConfig);
+    return configToAdd;
   }
 
   /**
@@ -208,8 +184,8 @@ class TxData extends React.Component {
     if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
       return hathorLib.constants.HATHOR_TOKEN_CONFIG.symbol;
     }
-    const tokenUID = this.props.transaction.tokens[tokenData - 1];
-    return this.getSymbol(tokenUID);
+    const tokenConfig = this.props.transaction.tokens[tokenData - 1];
+    return tokenConfig.symbol;
   }
 
   /**
@@ -223,7 +199,7 @@ class TxData extends React.Component {
     if (uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
       return hathorLib.constants.HATHOR_TOKEN_CONFIG.symbol;
     }
-    const tokenConfig = this.state.tokens.find((token) => token.uid === uid);
+    const tokenConfig = this.props.transaction.tokens.find((token) => token.uid === uid);
     if (tokenConfig === undefined) return '';
     return tokenConfig.symbol;
   }
