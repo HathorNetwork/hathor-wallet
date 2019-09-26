@@ -43,6 +43,7 @@ class TokenDetail extends React.Component {
    * walletAmount {number} amount available of this token on this wallet
    * action {string} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
    * successMessage {string} success message to show
+   * errorMessage {string} error message to show
    * totalSupply {number} Token total supply
    * canMint {boolean} If this token can still be minted
    * canMelt {boolean} If this token can still be melted
@@ -56,6 +57,7 @@ class TokenDetail extends React.Component {
     walletAmount: 0,
     action: '',
     successMessage: '',
+    errorMessage: '',
     totalSupply: 0,
     canMint: null,
     canMelt: null,
@@ -101,12 +103,16 @@ class TokenDetail extends React.Component {
    */
   updateTokenInfo = () => {
     hathorLib.walletApi.getTokenInfo(this.state.paramUID, (response) => {
-      this.setState({
-        token: {uid: this.state.paramUID, name: response.name, symbol: response.symbol },
-        totalSupply: response.total,
-        canMint: response.mint.length > 0,
-        canMelt: response.melt.length > 0,
-      });
+      if (response.success) {
+        this.setState({
+          token: {uid: this.state.paramUID, name: response.name, symbol: response.symbol },
+          totalSupply: response.total,
+          canMint: response.mint.length > 0,
+          canMelt: response.melt.length > 0,
+        });
+      } else {
+        this.setState({ errorMessage: response.message });
+      }
     });
   }
 
@@ -252,6 +258,14 @@ class TokenDetail extends React.Component {
   }
 
   render() {
+    if (this.state.errorMessage) {
+      return (
+        <div className="content-wrapper flex align-items-start">
+          <p className="text-danger">{this.state.errorMessage}</p>
+        </div>
+      )
+    }
+
     if (!this.state.token) return null;
 
     const configurationString = hathorLib.tokens.getConfigurationString(this.state.token.uid, this.state.token.name, this.state.token.symbol);
@@ -370,7 +384,7 @@ class TokenDetail extends React.Component {
     const renderTokenInfo = () => {
       return (
         <div>
-          <p className="mt-3 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)}</p>
+          <p className="mt-3 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.state.token.symbol}</p>
           <p className="mt-2 mb-2"><strong>Can mint: </strong>{this.state.canMint ? <i className="fa fa-check ml-1" title="Can mint"></i> : <i className="fa fa-close ml-1" title="Can't mint"></i>}</p>
           <p className="mt-2 mb-4"><strong>Can melt: </strong>{this.state.canMelt ? <i className="fa fa-check ml-1" title="Can melt"></i> : <i className="fa fa-close ml-1" title="Can't melt"></i>}</p>
         </div>
