@@ -72,7 +72,7 @@ class TransactionDetail extends React.Component {
   getTx() {
     hathorLib.txApi.getTransaction(this.props.match.params.id, (data) => {
       this.txReceived(data);
-      if (!hathorLib.helpers.isBlock(data.tx)) {
+      if (data.success && !hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();
       }
     }, (e) => {
