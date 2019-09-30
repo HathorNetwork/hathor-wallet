@@ -48,7 +48,7 @@ class TokenDetail extends React.Component {
    * canMint {boolean} If this token can still be minted
    * canMelt {boolean} If this token can still be melted
    * paramUID {string} UID of the token in the URL param (useful when we don't have the token registered)
-   * unknown {boolean} If this token is registered or not in the wallet
+   * tokenUnknown {boolean} If this token is registered or not in the wallet
    */
   state = {
     token: null,
@@ -62,7 +62,7 @@ class TokenDetail extends React.Component {
     canMint: null,
     canMelt: null,
     paramUID: null,
-    unknown: null,
+    tokenUnknown: null,
   };
 
   componentDidMount() {
@@ -83,9 +83,9 @@ class TokenDetail extends React.Component {
 
     const allTokens = hathorLib.tokens.getTokens();
     const token = allTokens.find((data) => data.uid === params.tokenUID);
-    const unknown = token === undefined;
+    const tokenUnknown = token === undefined;
 
-    this.setState({ token, unknown, paramUID: params.tokenUID }, () => {
+    this.setState({ token, tokenUnknown, paramUID: params.tokenUID }, () => {
       this.updateInfo();
     });
   }
@@ -121,7 +121,7 @@ class TokenDetail extends React.Component {
    */
   updateWalletInfo = () => {
     // We only update wallet info if we have this token registered
-    if (this.state.unknown) return;
+    if (this.state.tokenUnknown) return;
 
     const mintOutputs = [];
     const meltOutputs = [];
@@ -351,7 +351,7 @@ class TokenDetail extends React.Component {
     }
 
     const renderIcons = () => {
-      if (this.state.unknown) {
+      if (this.state.tokenUnknown) {
         return (
           <div>
             <i className="fa fa-warning text-warning ml-3" title="Token is not registered"></i>
@@ -368,7 +368,7 @@ class TokenDetail extends React.Component {
     }
 
     const renderWalletInfo = () => {
-      if (this.state.unknown) {
+      if (this.state.tokenUnknown) {
         return null;
       } else {
         return (
