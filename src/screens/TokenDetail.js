@@ -47,6 +47,7 @@ class TokenDetail extends React.Component {
    * totalSupply {number} Token total supply
    * canMint {boolean} If this token can still be minted
    * canMelt {boolean} If this token can still be melted
+   * transactionsCount {number} Total number of transactions of this token
    * paramUID {string} UID of the token in the URL param (useful when we don't have the token registered)
    * tokenUnknown {boolean} If this token is registered or not in the wallet
    */
@@ -61,6 +62,7 @@ class TokenDetail extends React.Component {
     totalSupply: 0,
     canMint: null,
     canMelt: null,
+    transactionsCount: 0,
     paramUID: null,
     tokenUnknown: null,
   };
@@ -109,6 +111,7 @@ class TokenDetail extends React.Component {
           totalSupply: response.total,
           canMint: response.mint.length > 0,
           canMelt: response.melt.length > 0,
+          transactionsCount: response.transactions_count,
         });
       } else {
         this.setState({ errorMessage: response.message });
@@ -373,7 +376,7 @@ class TokenDetail extends React.Component {
       } else {
         return (
           <div className="token-detail-wallet-info">
-            <h4 className="mt-3 mb-2"><strong>Wallet data</strong></h4>
+            <h3 className="mt-4 mb-2"><strong>Your balance and administrative actions:</strong></h3>
             <p className="mt-4 mb-4"><strong>Amount: </strong>{hathorLib.helpers.prettyValue(this.state.walletAmount)}</p>
             {renderMintMeltWrapper()}
           </div>
@@ -384,9 +387,12 @@ class TokenDetail extends React.Component {
     const renderTokenInfo = () => {
       return (
         <div>
-          <p className="mt-3 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.state.token.symbol}</p>
+          <h3 className="mt-3 mb-2"><strong>About the token:</strong></h3>
+          <p className="mt-4 mb-2"><strong>UID: </strong>{this.state.paramUID}</p>
+          <p className="mt-2 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.state.token.symbol}</p>
           <p className="mt-2 mb-2"><strong>Can mint: </strong>{this.state.canMint ? <i className="fa fa-check ml-1" title="Can mint"></i> : <i className="fa fa-close ml-1" title="Can't mint"></i>}</p>
-          <p className="mt-2 mb-4"><strong>Can melt: </strong>{this.state.canMelt ? <i className="fa fa-check ml-1" title="Can melt"></i> : <i className="fa fa-close ml-1" title="Can't melt"></i>}</p>
+          <p className="mt-2 mb-2"><strong>Can melt: </strong>{this.state.canMelt ? <i className="fa fa-check ml-1" title="Can melt"></i> : <i className="fa fa-close ml-1" title="Can't melt"></i>}</p>
+          <p className="mt-2 mb-4"><strong>Total transactions: </strong>{this.state.transactionsCount}</p>
         </div>
       );
     }
