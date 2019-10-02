@@ -104,7 +104,7 @@ class TokenDetail extends React.Component {
    * Upadte token info getting data from the full node (can mint, can melt, total supply)
    */
   updateTokenInfo = () => {
-    hathorLib.walletApi.getTokenInfo(this.state.paramUID, (response) => {
+    hathorLib.walletApi.getGeneralTokenInfo(this.state.paramUID, (response) => {
       if (response.success) {
         this.setState({
           token: {uid: this.state.paramUID, name: response.name, symbol: response.symbol },
