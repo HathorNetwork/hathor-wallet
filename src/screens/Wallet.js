@@ -97,6 +97,37 @@ class Wallet extends React.Component {
     tokens.unregisterToken(this.props.selectedToken);
   }
 
+  /*
+   * We show the administrative tools tab only for the users that one day had an authority output, even if it was already spent
+   *
+   * @return {boolean} If should show administrative tab
+   */
+  shouldShowAdministrativeTab = () => {
+    const walletData = hathorLib.wallet.getWalletData();
+
+    for (const tx_id in this.props.historyTransactions) {
+      const tx = this.props.historyTransactions[tx_id];
+      for (const [_, output] of tx.outputs.entries()) {
+        // This output is not mine
+        if (!hathorLib.wallet.isAddressMine(output.decoded.address, walletData)) {
+          continue;
+        }
+
+        // This token is not the one of this screen
+        if (output.token !== this.props.selectedToken) {
+          continue;
+        }
+
+        if (hathorLib.wallet.isMintOutput(output) || hathorLib.wallet.isMeltOutput(output)) {
+          return true;
+        }
+
+      }
+    }
+
+    return false;
+  }
+
   render() {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
 
@@ -132,6 +163,30 @@ class Wallet extends React.Component {
       );
     }
 
+    const renderTabAdmin = () => {
+      if (this.shouldShowAdministrativeTab()) {
+        return (
+            <li className="nav-item">
+              <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">Administrative Tools</a>
+          </li>
+        );
+      } else {
+        return null;
+      }
+    }
+
+    const renderContentAdmin = () => {
+      if (this.shouldShowAdministrativeTab()) {
+        return (
+          <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
+            <TokenAdministrative token={token} />
+          </div>
+        );
+      } else {
+        return null;
+      }
+    }
+
     const renderTokenData = (token) => {
       if (this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
         return renderWallet();
@@ -145,9 +200,7 @@ class Wallet extends React.Component {
               <li className="nav-item">
                 <a className="nav-link" id="token-tab" data-toggle="tab" href="#token" role="tab" aria-controls="token" aria-selected="false">About token</a>
               </li>
-              <li className="nav-item">
-                <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">Administrative Tools</a>
-              </li>
+              {renderTabAdmin()}
             </ul>
             <div className="tab-content" id="tokenTabContent">
               <div className="tab-pane fade show active" id="wallet" role="tabpanel" aria-labelledby="wallet-tab">
@@ -156,9 +209,7 @@ class Wallet extends React.Component {
               <div className="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
                 <TokenGeneralInfo token={token} showConfigString={true} />
               </div>
-              <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-                <TokenAdministrative token={token} />
-              </div>
+              {renderContentAdmin()}
             </div>
           </div>
         );
