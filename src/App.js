@@ -25,7 +25,6 @@ import UnknownTokens from './screens/UnknownTokens';
 import Signin from './screens/Signin';
 import LockedWallet from './screens/LockedWallet';
 import NewWallet from './screens/NewWallet';
-import TokenDetail from './screens/TokenDetail';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
@@ -163,7 +162,6 @@ class Root extends React.Component {
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
         <StartedRoute exact path="/custom_tokens" component={CustomTokens} loaded={true} />
         <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} />
-        <StartedRoute exact path="/token_detail/:tokenUID" component={TokenDetail} loaded={true} />
         <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} />
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} />
         <StartedRoute exact path="/settings" component={Settings} loaded={true} />

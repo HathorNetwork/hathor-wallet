@@ -10,6 +10,8 @@ import $ from 'jquery';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom'
 import HathorAlert from './HathorAlert';
+import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
+import { selectToken } from '../actions/index';
 import { connect } from "react-redux";
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
@@ -19,6 +21,12 @@ import { MAX_GRAPH_LEVEL } from '../constants';
 
 const mapStateToProps = (state) => {
   return { tokens: state.tokens };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    selectToken: data => dispatch(selectToken(data)),
+  };
 };
 
 
@@ -32,8 +40,14 @@ class TxData extends React.Component {
    * raw {boolean} if should show raw transaction
    * children {boolean} if should show children (default is hidden but user can show with a click)
    * tokens {Array} tokens contained in this transaction
+   * tokenClicked {Object} token clicked to be sent as props to the modal of unregistered token info
    */
-  state = { raw: false, children: false, tokens: [] };
+  state = {
+    raw: false,
+    children: false,
+    tokens: [],
+    tokenClicked: null,
+  };
 
   // Array of token uid that was already found to show the symbol
   tokensFound = [];
@@ -174,18 +188,18 @@ class TxData extends React.Component {
   }
 
   /**
-   * Get symbol of token from an output gettings its UID from tokenData
+   * Get token config of token from an output gettings its UID from tokenData
    *
    * @param {number} tokenData
    *
-   * @return {string} Token symbol
+   * @return {Object} Token config data {name, symbol, uid}
    */
   getOutputToken = (tokenData) => {
     if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
-      return hathorLib.constants.HATHOR_TOKEN_CONFIG.symbol;
+      return hathorLib.constants.HATHOR_TOKEN_CONFIG;
     }
     const tokenConfig = this.props.transaction.tokens[tokenData - 1];
-    return tokenConfig.symbol;
+    return tokenConfig;
   }
 
   /**
@@ -202,6 +216,53 @@ class TxData extends React.Component {
     const tokenConfig = this.props.transaction.tokens.find((token) => token.uid === uid);
     if (tokenConfig === undefined) return '';
     return tokenConfig.symbol;
+  }
+
+  /**
+   * Returns if the token from uid in parameter is not registered in the wallet
+   *
+   * @param {string} uid UID of the token to check
+   *
+   * @return {boolean} If token is unknown (not registered)
+   */
+  isTokenUnknown = (uid) => {
+    const tokenConfig = this.state.tokens.find((token) => token.uid === uid);
+    if (tokenConfig === undefined) return false;
+    return tokenConfig.unknown;
+  }
+
+  /**
+   * Open modal to show unregistered token info
+   *
+   * @param {Object} e Event emitted when clicking link
+   * @param {Object} token Data of token to show info {name, symbol, uid}
+   */
+  showUnregisteredTokenInfo = (e, token) => {
+    e.preventDefault();
+    this.setState({ tokenClicked: token }, () => {
+      $('#unregisteredTokenInfoModal').modal('show');
+    });
+  }
+
+  /*
+   * Method executed when uid of registered token is clicked
+   *
+   * @param {Object} e Event emitted when clicking link
+   * @param {Object} token Data of token to show info {name, symbol, uid}
+   */
+  registeredTokenClicked = (e, token) => {
+    e.preventDefault();
+    this.tokenRegistered(token);
+  }
+
+  /*
+   * Set token as selected in redux and redirect to /wallet/
+   *
+   * @param {Object} token Data of token to show info {name, symbol, uid}
+   */
+  tokenRegistered = (token) => {
+    this.props.selectToken(token.uid);
+    this.props.history.push('/wallet/');
   }
 
   render() {
@@ -228,9 +289,14 @@ class TxData extends React.Component {
       });
     }
 
+    const renderUnregisteredIcon = () => {
+      return <i title='This token is not registered in your wallet.' className='fa text-warning fa-warning'></i>;
+    }
+
     const renderOutputToken = (output) => {
+      const tokenOutput = this.getOutputToken(output.decoded.token_data);
       return (
-        <strong>{this.getOutputToken(output.decoded.token_data)}</strong>
+        <strong>{tokenOutput.symbol} {this.isTokenUnknown(tokenOutput.uid) && renderUnregisteredIcon()}</strong>
       );
     }
 
@@ -412,14 +478,16 @@ class TxData extends React.Component {
       const renderTokenUID = (token) => {
         if (token.uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
           return token.uid;
+        } else if (token.unknown) {
+          return <a href="true" onClick={(e) => this.showUnregisteredTokenInfo(e, token)}>{token.uid}</a>
         } else {
-          return <Link to={`/token_detail/${token.uid}`}>{token.uid}</Link>
+          return <a href="true" onClick={(e) => this.registeredTokenClicked(e, token)}>{token.uid}</a>
         }
       }
       const tokens = this.state.tokens.map((token) => {
         return (
           <div key={token.uid}>
-            <span>{token.name} <strong>({token.symbol})</strong> {token.unknown && <i title='This token is not registered in your wallet.' className='fa text-warning fa-warning'></i>} | {renderTokenUID(token)}</span>
+            <span>{token.name} <strong>({token.symbol})</strong> {token.unknown && renderUnregisteredIcon()} | {renderTokenUID(token)}</span>
           </div>
         );
       });
@@ -583,9 +651,10 @@ class TxData extends React.Component {
       <div>
         {loadTxData()}
         <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
+        <ModalUnregisteredTokenInfo token={this.state.tokenClicked} tokenRegistered={this.tokenRegistered} />
       </div>
     );
   }
 }
 
-export default connect(mapStateToProps)(TxData);
+export default connect(mapStateToProps, mapDispatchToProps)(TxData);

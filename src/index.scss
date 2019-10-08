@@ -678,15 +678,17 @@ svg.svg-wrapper {
   text-align: center;
 }
 
-.token-detail-top {
-  padding-bottom: 6rem;
-  border-bottom: 1px solid #ddd;
-}
-
 .token-detail-bottom {
   padding-top: 3rem;
 }
 
-.token-detail-wallet-info {
-  border-top: 1px solid #ddd;
+.token-general-info {
+  word-break: break-all;
+}
+
+.unregistered-token-badge {
+  padding: 0.2rem 0.4rem;
+  border-radius: 1rem;
+  background-color: $warning;
+  color: white;
 }

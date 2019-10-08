@@ -10,12 +10,17 @@ import WalletHistory from '../components/WalletHistory';
 import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
 import ModalBackupWords from '../components/ModalBackupWords';
+import ModalConfirm from '../components/ModalConfirm';
 import TokenBar from '../components/TokenBar';
+import TokenGeneralInfo from '../components/TokenGeneralInfo';
+import TokenAdministrative from '../components/TokenAdministrative';
 import HathorAlert from '../components/HathorAlert';
 import $ from 'jquery';
 import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
+import tokens from '../utils/tokens';
+import BackButton from '../components/BackButton';
 
 
 const mapDispatchToProps = dispatch => {
@@ -32,6 +37,7 @@ const mapStateToProps = (state) => {
     balance: balance,
     historyTransactions: filteredHistoryTransactions,
     selectedToken: state.selectedToken,
+    tokens: state.tokens,
   };
 };
 
@@ -76,7 +82,24 @@ class Wallet extends React.Component {
     });
   }
 
+  /**
+   * Called when user clicks to unregister the token, then opens the modal
+   */
+  unregisterClicked = () => {
+    $('#unregisterModal').modal('show');
+  }
+
+  /**
+   * When user confirms the unregister of the token, hide the modal and execute it
+   */
+  unregisterConfirmed = () => {
+    $('#unregisterModal').modal('hide');
+    tokens.unregisterToken(this.props.selectedToken);
+  }
+
   render() {
+    const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
+
     const renderBackupAlert = () => {
       return (
         <div ref="backupAlert" className="alert alert-warning backup-alert" role="alert">
@@ -90,9 +113,9 @@ class Wallet extends React.Component {
         <div>
           <div className="d-none d-sm-flex flex-row align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-start justify-content-between">
-              <WalletBalance balance={this.props.balance} history={this.props.history} />
+              <WalletBalance balance={this.props.balance} />
             </div>
-            <WalletAddress goToSignin={this.goToSignin} />
+            <WalletAddress />
           </div>
           <div className="d-sm-none d-flex flex-column align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-center justify-content-between">
@@ -100,7 +123,7 @@ class Wallet extends React.Component {
               <div className="d-flex flex-row align-items-center">
               </div>
             </div>
-            <WalletAddress goToSignin={this.goToSignin} />
+            <WalletAddress />
           </div>
           <WalletHistory
             historyTransactions={this.props.historyTransactions}
@@ -109,10 +132,61 @@ class Wallet extends React.Component {
       );
     }
 
+    const renderTokenData = (token) => {
+      if (this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+        return renderWallet();
+      } else {
+        return (
+          <div>
+            <ul className="nav nav-tabs mb-4" id="tokenTab" role="tablist">
+              <li className="nav-item">
+                <a className="nav-link active" id="wallet-tab" data-toggle="tab" href="#wallet" role="tab" aria-controls="home" aria-selected="true">Balance & History</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" id="token-tab" data-toggle="tab" href="#token" role="tab" aria-controls="token" aria-selected="false">About token</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">Administrative Tools</a>
+              </li>
+            </ul>
+            <div className="tab-content" id="tokenTabContent">
+              <div className="tab-pane fade show active" id="wallet" role="tabpanel" aria-labelledby="wallet-tab">
+                {renderWallet()}
+              </div>
+              <div className="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
+                <TokenGeneralInfo token={token} showConfigString={true} />
+              </div>
+              <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
+                <TokenAdministrative token={token} />
+              </div>
+            </div>
+          </div>
+        );
+      }
+    }
+
+    const getUnregisterBody = () => {
+      if (token === undefined) return null;
+
+      return (
+        <div>
+          <p>Are you sure you want to unregister the token <strong>{token.name} ({token.symbol})</strong>?</p>
+          <p>You won't lose your tokens, you just won't see this token on the side bar anymore.</p>
+        </div>
+      )
+    }
+
     const renderUnlockedWallet = () => {
+      const isHathorToken = this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
       return (
         <div className='wallet-wrapper'>
-          {renderWallet()}
+          <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
+            <p className='token-name mb-0'>
+              <strong>{token ? token.name : ''}</strong>
+              {!isHathorToken && <i className="fa fa-trash pointer ml-3" title="Unregister token" onClick={this.unregisterClicked}></i>}
+            </p>
+          </div>
+          {renderTokenData(token)}
         </div>
       );
     }
@@ -121,10 +195,18 @@ class Wallet extends React.Component {
       <div>
         {!this.state.backupDone && renderBackupAlert()}
         <div className="content-wrapper">
+         {/* This back button is not 100% perfect because when the user has just unlocked the wallet, it would go back to it when clicked
+           * There is no easy way to get the previous path
+           * I could use a lib (https://github.com/hinok/react-router-last-location)
+           * Or handle it in our code, saving the last accessed screen
+           * XXX Is it worth it to do anything about it just to prevent this case?
+           */}
+          <BackButton {...this.props} />
           {renderUnlockedWallet()}
         </div>
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
+        <ModalConfirm modalID="unregisterModal" title="Unregister token" body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
         <TokenBar {...this.props} />
       </div>
     );
