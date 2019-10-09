@@ -104,7 +104,7 @@ class TxData extends React.Component {
 
     for (const output of this.props.transaction.outputs) {
       if (hathorLib.wallet.isAuthorityOutput(output)) continue;
-      const tokenData = this.checkToken(output.decoded.token_data);
+      const tokenData = this.checkToken(hathorLib.wallet.getTokenIndex(output.decoded.token_data));
 
       if (tokenData) {
         tokens.push(tokenData);
@@ -113,7 +113,7 @@ class TxData extends React.Component {
 
     for (const input of this.props.transaction.inputs) {
       if (hathorLib.wallet.isAuthorityOutput(input)) continue;
-      const tokenData = this.checkToken(input.decoded.token_data);
+      const tokenData = this.checkToken(hathorLib.wallet.getTokenIndex(input.decoded.token_data));
 
       if (tokenData) {
         tokens.push(tokenData);
@@ -276,17 +276,28 @@ class TxData extends React.Component {
 
     const renderInputs = (inputs) => {
       return inputs.map((input, idx) => {
-        if (!hathorLib.wallet.isAuthorityOutput(input)) {
-          return (
-            <div key={`${input.tx_id}${input.index}`}>
-              <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && hathorLib.wallet.isAddressMine(input.decoded.address) && renderAddressBadge()}
-              {renderOutput(input, 0, false)}
-            </div>
-          );
-        } else {
-          return null;
-        }
+        return (
+          <div key={`${input.tx_id}${input.index}`}>
+            <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && hathorLib.wallet.isAddressMine(input.decoded.address) && renderAddressBadge()}
+            {renderOutput(input, 0, false)}
+          </div>
+        );
       });
+    }
+
+    const outputValue = (output) => {
+      if (hathorLib.wallet.isAuthorityOutput(output)) {
+        if (hathorLib.wallet.isMintOutput(output)) {
+          return 'Mint authority';
+        } else if (hathorLib.wallet.isMeltOutput(output)) {
+          return 'Melt authority';
+        } else {
+          // Should never come here
+          return 'Unknown authority';
+        }
+      } else {
+        return hathorLib.helpers.prettyValue(output.value);
+      }
     }
 
     const renderUnregisteredIcon = () => {
@@ -294,26 +305,22 @@ class TxData extends React.Component {
     }
 
     const renderOutputToken = (output) => {
-      const tokenOutput = this.getOutputToken(output.decoded.token_data);
+      const tokenOutput = this.getOutputToken(hathorLib.wallet.getTokenIndex(output.decoded.token_data));
       return (
         <strong>{tokenOutput.symbol} {this.isTokenUnknown(tokenOutput.uid) && renderUnregisteredIcon()}</strong>
       );
     }
 
     const renderOutput = (output, idx, addBadge) => {
-      if (!hathorLib.wallet.isAuthorityOutput(output)) {
-        return (
-          <div key={idx}>
-            <div>{hathorLib.helpers.prettyValue(output.value)} {renderOutputToken(output)} {output.decoded && addBadge && hathorLib.wallet.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
-            <div>
-              {output.decoded ? renderDecodedScript(output.decoded) : `${output.script} (unknown script)` }
-              {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>Spent</Link>)</span> : ''}
-            </div>
+      return (
+        <div key={idx}>
+          <div>{outputValue(output)} {renderOutputToken(output)} {output.decoded && addBadge && hathorLib.wallet.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
+          <div>
+            {output.decoded ? renderDecodedScript(output.decoded) : `${output.script} (unknown script)` }
+            {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>Spent</Link>)</span> : ''}
           </div>
-        );
-      } else {
-        return null;
-      }
+        </div>
+      );
     }
 
     const renderOutputs = (outputs) => {
