@@ -31,7 +31,7 @@ const mapDispatchToProps = dispatch => {
 
 
 const mapStateToProps = (state) => {
-  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken, false);
+  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken, true);
   const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, state.selectedToken);
   return {
     balance: balance,
@@ -107,7 +107,7 @@ class Wallet extends React.Component {
 
     for (const tx_id in this.props.historyTransactions) {
       const tx = this.props.historyTransactions[tx_id];
-      for (const [_, output] of tx.outputs.entries()) {
+      for (const output of tx.outputs) {
         // This output is not mine
         if (!hathorLib.wallet.isAddressMine(output.decoded.address, walletData)) {
           continue;
