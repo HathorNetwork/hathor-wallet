@@ -65,6 +65,7 @@ class Wallet extends React.Component {
     this.setState({
       backupDone: hathorLib.wallet.isBackupDone()
     });
+    this.updateTokenInfo();
   }
 
   componentDidUpdate = (prevProps) => {
