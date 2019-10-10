@@ -22,12 +22,16 @@ class ModalUnregisteredTokenInfo extends React.Component {
   /**
    * token {Object} Token data to show info
    * errorMessage {String} Message to show in case of an error when registering the token
+   * formValidated {boolean} If register form was already validated
    */
-  state = { token: null, errorMessage: '' };
+  state = { token: null, errorMessage: '', formValidated: false };
+
+  // Reference to the form
+  form = React.createRef();
 
   componentDidMount() {
     $('#unregisteredTokenInfoModal').on('hidden.bs.modal', () => {
-      this.setState({ errorMessage: '' });
+      this.setState({ errorMessage: '', formValidated: false });
     });
   }
 
@@ -47,16 +51,20 @@ class ModalUnregisteredTokenInfo extends React.Component {
 
     e.preventDefault();
 
-    const configurationString = hathorLib.tokens.getConfigurationString(this.state.token.uid, this.state.token.name, this.state.token.symbol);
+    const isValid = this.form.current.checkValidity();
+    this.setState({ formValidated: true, errorMessage: '' });
+    if (isValid) {
+      const configurationString = hathorLib.tokens.getConfigurationString(this.state.token.uid, this.state.token.name, this.state.token.symbol);
 
-    const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(configurationString, null);
-    promise.then((tokenData) => {
-      tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
-      $('#unregisteredTokenInfoModal').modal('hide');
-      this.props.tokenRegistered(this.state.token);
-    }, (e) => {
-      this.setState({ errorMessage: e.message });
-    });
+      const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(configurationString, null);
+      promise.then((tokenData) => {
+        tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
+        $('#unregisteredTokenInfoModal').modal('hide');
+        this.props.tokenRegistered(this.state.token);
+      }, (e) => {
+        this.setState({ errorMessage: e.message });
+      });
+    }
   }
 
   render() {
@@ -78,7 +86,7 @@ class ModalUnregisteredTokenInfo extends React.Component {
 
     return (
       <div className="modal fade" id="unregisteredTokenInfoModal" tabIndex="-1" role="dialog" aria-labelledby="unregisteredTokenInfoModal" aria-hidden="true">
-        <div className="modal-dialog" role="document">
+        <div className="modal-dialog modal-lg" role="document">
           <div className="modal-content">
             <div className="modal-header">
               {this.state.token && renderHeader()}
@@ -88,14 +96,23 @@ class ModalUnregisteredTokenInfo extends React.Component {
             </div>
             <div className="modal-body">
               {renderModalBody()}
-              <p>This token is <strong>not registered</strong> in your wallet. You should <strong>always validate the token uid</strong>, to ensure you are registering the correct token.</p>
-              <p>There might be more than one token with the same name and symbol but the uid will always be unique.</p>
-              <p>If you decide to register this token, you will see it in your token bar and you be able to send it, if you have funds.</p>
-               <p className="text-danger">{this.state.errorMessage}</p>
+              <div className="mt-4">
+                <p>This token is <strong>not registered</strong> in your wallet. You must <strong>always validate the token uid</strong>, to ensure you are not being scammed.</p>
+                <p>The token uid is always unique, and your only trust point.</p>
+                <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form} onSubmit={(e) => e.preventDefault()}>
+                  <div className="form-check">
+                    <input className="form-check-input" type="checkbox" ref="iWantToRegister" id="iWantToRegister" required />
+                    <label className="form-check-label" htmlFor="iWantToRegister">
+                      I want to register this token
+                    </label>
+                  </div>
+                </form>
+                <p className="text-danger">{this.state.errorMessage}</p>
+              </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button onClick={this.register} type="button" className="btn btn-hathor">Register token</button>
+              <button onClick={this.register} type="button" className="btn btn-secondary">Register token</button>
+              <button type="button" className="btn btn-hathor" data-dismiss="modal">Cancel</button>
             </div>
           </div>
         </div>
