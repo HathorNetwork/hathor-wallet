@@ -38,6 +38,9 @@ class TokenAdministrative extends React.Component {
    * walletAmount {number} amount available of this token on this wallet
    * action {string} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
    * successMessage {string} success message to show
+   * errorMessage {String} Message to show in case of error getting token info
+   * totalSupply {number} Token total supply
+   * balance {number} Amount available of selected token
    */
   state = {
     mintOutputs: [],
@@ -45,17 +48,41 @@ class TokenAdministrative extends React.Component {
     walletAmount: 0,
     action: '',
     successMessage: '',
+    errorMessage: '',
+    totalSupply: 0,
+    balance: 0,
   };
 
   componentDidMount() {
-    this.updateWalletInfo();
+    this.updateData();
   }
 
   componentDidUpdate = (prevProps) => {
     if (this.props.historyTransactions !== prevProps.historyTransactions || this.props.token.uid !== prevProps.token.uid) {
       this.cleanStates();
-      this.updateWalletInfo();
+      this.updateData();
     }
+  }
+
+  updateData = () => {
+    this.updateTokenInfo();
+    this.updateWalletInfo();
+  }
+
+  /**
+   * Upadte token info getting data from the full node (can mint, can melt, total supply)
+   */
+  updateTokenInfo = () => {
+    this.setState({ errorMessage: '' });
+    hathorLib.walletApi.getGeneralTokenInfo(this.props.token.uid, (response) => {
+      if (response.success) {
+        this.setState({
+          totalSupply: response.total,
+        });
+      } else {
+        this.setState({ errorMessage: response.message });
+      }
+    });
   }
 
   /**
@@ -100,7 +127,13 @@ class TokenAdministrative extends React.Component {
       }
     }
 
-    this.setState({ mintOutputs, meltOutputs, walletAmount });
+    // Update user balance of this token
+    const balance = hathorLib.wallet.calculateBalance(
+      Object.values(this.props.historyTransactions),
+      this.props.token.uid
+    );
+
+    this.setState({ mintOutputs, meltOutputs, walletAmount, balance: balance.available });
   }
 
   /**
@@ -141,6 +174,14 @@ class TokenAdministrative extends React.Component {
   }
 
   render() {
+    if (this.state.errorMessage) {
+      return (
+        <div className="content-wrapper flex align-items-start">
+          <p className="text-danger">{this.state.errorMessage}</p>
+        </div>
+      )
+    }
+
     const renderBottom = () => {
       switch (this.state.action) {
         case 'mint':
@@ -205,7 +246,8 @@ class TokenAdministrative extends React.Component {
 
     return (
       <div className="flex align-items-center">
-        <p className="mt-2 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.props.token.total)} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>Your balance available: </strong>{hathorLib.helpers.prettyValue(this.state.balance)} {this.props.token.symbol}</p>
         <div className="token-detail-wallet-info">
           {renderMintMeltWrapper()}
         </div>
@@ -220,7 +262,7 @@ class TokenAdministrative extends React.Component {
 
 
 /*
- * token: Token to show administrative tools {name, symbol, uid, total}
+ * token: Token to show administrative tools {name, symbol, uid}
  */
 TokenAdministrative.propTypes = {
   token: PropTypes.object.isRequired
