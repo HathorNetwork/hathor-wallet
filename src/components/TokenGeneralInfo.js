@@ -9,13 +9,8 @@ import React from 'react';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import hathorLib from '@hathor/wallet-lib';
-import { connect } from "react-redux";
 import HathorAlert from '../components/HathorAlert';
 import PropTypes from 'prop-types';
-
-const mapStateToProps = (state) => {
-  return { historyTransactions: state.historyTransactions };
-};
 
 /**
  * Component to show a token general info
@@ -25,46 +20,17 @@ const mapStateToProps = (state) => {
 class TokenGeneralInfo extends React.Component {
   /**
    * errorMessage {String} Message to show in case of error getting token info
-   * totalSupply {number} Token total supply
-   * canMint {boolean} If this token can still be minted
-   * canMelt {boolean} If this token can still be melted
-   * transactionsCount {number} Total number of transactions of this token
+   * tokenInfo {Object} Token information from server with data about uid, name, symbol, mint, melt and total supply and txs
    */
   state = {
     errorMessage: '',
-    totalSupply: 0,
-    canMint: null,
-    canMelt: null,
-    transactionsCount: 0,
+    tokenInfo: null,
   };
 
-  componentDidMount() {
-    this.updateTokenInfo();
-  }
-
   componentDidUpdate = (prevProps) => {
-    if (this.props.historyTransactions !== prevProps.historyTransactions || this.props.token.uid !== prevProps.token.uid) {
-      this.updateTokenInfo();
+    if (this.props.tokenInfo !== prevProps.tokenInfo || this.props.errorMessage !== prevProps.errorMessage) {
+      this.setState({ tokenInfo: this.props.tokenInfo, errorMessage: this.props.errorMessage });
     }
-  }
-
-  /**
-   * Upadte token info getting data from the full node (can mint, can melt, total supply)
-   */
-  updateTokenInfo = () => {
-    this.setState({ errorMessage: '' });
-    hathorLib.walletApi.getGeneralTokenInfo(this.props.token.uid, (response) => {
-      if (response.success) {
-        this.setState({
-          totalSupply: response.total,
-          canMint: response.mint.length > 0,
-          canMelt: response.melt.length > 0,
-          transactionsCount: response.transactions_count,
-        });
-      } else {
-        this.setState({ errorMessage: response.message });
-      }
-    });
   }
 
   /**
@@ -111,9 +77,9 @@ class TokenGeneralInfo extends React.Component {
       )
     }
 
-    if (!this.props.token) return null;
+    if (!this.state.tokenInfo) return null;
 
-    const configurationString = hathorLib.tokens.getConfigurationString(this.props.token.uid, this.props.token.name, this.props.token.symbol);
+    const configurationString = hathorLib.tokens.getConfigurationString(this.state.tokenInfo.uid, this.state.tokenInfo.name, this.state.tokenInfo.symbol);
 
     const getShortConfigurationString = () => {
       const configArr = configurationString.split(':');
@@ -123,11 +89,15 @@ class TokenGeneralInfo extends React.Component {
     const renderTokenInfo = () => {
       return (
         <div className="token-general-info">
-          <p className="mb-2"><strong>UID: </strong>{this.props.token.uid}</p>
-          <p className="mt-2 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.props.token.symbol}</p>
-          <p className="mt-2 mb-2"><strong>Can mint new tokens: </strong>{this.state.canMint ? 'Yes' : 'No'}</p>
-          <p className="mt-2 mb-2"><strong>Can melt tokens: </strong>{this.state.canMelt ? 'Yes' : 'No'}</p>
-          <p className="mt-2 mb-4"><strong>Total number of transactions: </strong>{this.state.transactionsCount}</p>
+          <p className="mb-2"><strong>UID: </strong>{this.state.tokenInfo.uid}</p>
+          <p className="mt-2 mb-2"><strong>Name: </strong>{this.state.tokenInfo.name}</p>
+          <p className="mt-2 mb-2"><strong>Symbol: </strong>{this.state.tokenInfo.symbol}</p>
+          <p className="mt-2 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.tokenInfo.total)} {this.state.tokenInfo.symbol}</p>
+          <p className="mt-2 mb-0"><strong>Can mint new tokens: </strong>{this.state.tokenInfo.mint.length > 0 ? 'Yes' : 'No'}</p>
+          <p className="mb-2 subtitle">Indicates whether the token owner can create new tokens, increasing the total supply</p>
+          <p className="mt-2 mb-0"><strong>Can melt tokens: </strong>{this.state.tokenInfo.melt.length > 0 ? 'Yes' : 'No'}</p>
+          <p className="mb-2 subtitle">Indicates whether the token owner can destroy tokens, decreasing the total supply</p>
+          <p className="mt-2 mb-4"><strong>Total number of transactions: </strong>{this.state.tokenInfo.transactions_count}</p>
         </div>
       );
     }
@@ -144,7 +114,7 @@ class TokenGeneralInfo extends React.Component {
               </CopyToClipboard>
             </span> 
             <QRCode size={200} value={configurationString} />
-            <a className="mt-2" onClick={(e) => this.downloadQrCode(e)} download={`${this.props.token.name} (${this.props.token.symbol}) - ${configurationString}`} href="true" ref="downloadLink">Download <i className="fa fa-download ml-1" title="Download QRCode"></i></a>
+            <a className="mt-2" onClick={(e) => this.downloadQrCode(e)} download={`${this.state.tokenInfo.name} (${this.state.tokenInfo.symbol}) - ${configurationString}`} href="true" ref="downloadLink">Download <i className="fa fa-download ml-1" title="Download QRCode"></i></a>
           </div>
         </div>
       );
@@ -165,12 +135,14 @@ class TokenGeneralInfo extends React.Component {
 }
 
 /*
- * token: Token to show administrative tools {name, symbol, uid}
+ * tokenInfo: Token to show the information {name, symbol, uid, total, mint, melt, total_transactions}
  * showConfigString: If should show the configuration string of the token with the qrcode
+ * errorMessage: In case getting token info failed, this is the message to be shown
  */
 TokenGeneralInfo.propTypes = {
-  token: PropTypes.object.isRequired,
+  tokenInfo: PropTypes.object,
   showConfigString: PropTypes.bool.isRequired,
+  errorMessage: PropTypes.string,
 };
 
-export default connect(mapStateToProps)(TokenGeneralInfo);
+export default TokenGeneralInfo;

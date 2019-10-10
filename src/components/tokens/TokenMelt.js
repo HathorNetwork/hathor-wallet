@@ -78,6 +78,7 @@ class TokenMelt extends React.Component {
               <label className="form-check-label" htmlFor="keepMint">
                 Create another melt output for you?
               </label>
+              <p className="subtitle">Let it marked, unless you know what you are doing</p>
             </div>
           </div>
         </div>

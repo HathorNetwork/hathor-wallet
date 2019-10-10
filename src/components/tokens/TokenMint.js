@@ -96,16 +96,16 @@ class TokenMint extends React.Component {
   render() {
     const renderMintAddress = () => {
       return (
-        <div className="d-flex flex-row align-items-center justify-content-start col-9">
+        <div className="d-flex flex-row align-items-center justify-content-start col-12 mb-3">
           <div className="d-flex flex-row align-items-center address-checkbox">
             <div className="form-check">
               <input className="form-check-input" type="checkbox" ref={this.chooseAddress} id="autoselectAddress" defaultChecked={true} onChange={this.handleCheckboxAddress} />
               <label className="form-check-label" htmlFor="autoselectAddress">
-                Select address automatically
+                Automatically select address to receive new tokens
               </label>
             </div>
           </div>
-          <div className="form-group col-8" ref={this.addressWrapper} style={{display: 'none'}}>
+          <div className="form-group col-6" ref={this.addressWrapper} style={{display: 'none'}}>
             <label>Destination address</label>
             <input ref={this.address} type="text" placeholder="Address" className="form-control" />
           </div>
@@ -138,6 +138,7 @@ class TokenMint extends React.Component {
               <label className="form-check-label" htmlFor="keepMint">
                 Create another mint output for you?
               </label>
+              <p className="subtitle">Let it marked, unless you know what you are doing</p>
             </div>
           </div>
         </div>

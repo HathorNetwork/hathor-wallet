@@ -53,6 +53,7 @@ class TokenAdministrative extends React.Component {
 
   componentDidUpdate = (prevProps) => {
     if (this.props.historyTransactions !== prevProps.historyTransactions || this.props.token.uid !== prevProps.token.uid) {
+      this.cleanStates();
       this.updateWalletInfo();
     }
   }
@@ -162,6 +163,7 @@ class TokenAdministrative extends React.Component {
     const renderMeltLinks = () => {
       return (
         <div className="d-flex flex-column align-items-center">
+          <p><strong>Operations</strong></p>
           <a className={`${this.state.action === 'melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'melt')} href="true">Melt tokens <i className="fa fa-minus ml-1" title="Melt tokens"></i></a>
           <a className={`mt-1 mb-1 ${this.state.action === 'delegate-melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'delegate-melt')} href="true">Delegate melt <i className="fa fa-long-arrow-up ml-1" title="Delegate melt"></i></a>
           <a className={`${this.state.action === 'destroy-melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-melt')} href="true">Destroy melt <i className="fa fa-trash ml-1" title="Destroy melt"></i></a>
@@ -172,6 +174,7 @@ class TokenAdministrative extends React.Component {
     const renderMintLinks = () => {
       return (
         <div className="d-flex flex-column align-items-center">
+          <p><strong>Operations</strong></p>
           <a className={`${this.state.action === 'mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'mint')} href="true">Mint tokens <i className="fa fa-plus ml-1" title="Mint more tokens"></i></a>
           <a className={`mt-1 mb-1 ${this.state.action === 'delegate-mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'delegate-mint')} href="true">Delegate mint <i className="fa fa-long-arrow-up ml-1" title="Delegate mint"></i></a>
           <a className={`${this.state.action === 'destroy-mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-mint')} href="true">Destroy mint <i className="fa fa-trash ml-1" title="Destroy mint"></i></a>
@@ -187,11 +190,13 @@ class TokenAdministrative extends React.Component {
       return (
         <div className="d-flex align-items-center mt-3">
           <div className="token-manage-wrapper d-flex flex-column align-items-center mr-4">
-            <p><strong>Mint: </strong>{this.state.mintOutputs.length} {hathorLib.helpers.plural(this.state.mintOutputs.length, 'output', 'outputs')} available</p>
+            <p><strong>Mint authority management</strong></p>
+            <p>You are the owner of {this.state.mintOutputs.length} mint {hathorLib.helpers.plural(this.state.mintOutputs.length, 'output', 'outputs')}</p>
             {this.state.mintOutputs.length > 0 && renderMintLinks()}
           </div>
           <div className="token-manage-wrapper d-flex flex-column align-items-center">
-            <p><strong>Melt: </strong>{this.state.meltOutputs.length} {hathorLib.helpers.plural(this.state.meltOutputs.length, 'output', 'outputs')} available</p>
+            <p><strong>Melt authority management</strong></p>
+            <p>You are the owner of {this.state.meltOutputs.length} melt {hathorLib.helpers.plural(this.state.meltOutputs.length, 'output', 'outputs')}</p>
             {this.state.meltOutputs.length > 0 && renderMeltLinks()}
           </div>
         </div>
@@ -200,6 +205,7 @@ class TokenAdministrative extends React.Component {
 
     return (
       <div className="flex align-items-center">
+        <p className="mt-2 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.props.token.total)} {this.props.token.symbol}</p>
         <div className="token-detail-wallet-info">
           {renderMintMeltWrapper()}
         </div>
@@ -214,7 +220,7 @@ class TokenAdministrative extends React.Component {
 
 
 /*
- * token: Token to show administrative tools {name, symbol, uid}
+ * token: Token to show administrative tools {name, symbol, uid, total}
  */
 TokenAdministrative.propTypes = {
   token: PropTypes.object.isRequired

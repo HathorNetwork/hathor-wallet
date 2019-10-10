@@ -51,12 +51,42 @@ class Wallet extends React.Component {
   /**
    * backupDone {boolean} if words backup was already done
    * successMessage {string} Message to be shown on alert success
+   * errorMessage {string} Error message when getting token info from API
+   * tokenInfo {Object} Token information from server with data about uid, name, symbol, mint, melt and total supply and txs
    */
-  state = { backupDone: true, successMessage: '' };
+  state = {
+    backupDone: true,
+    successMessage: '',
+    errorMessage: '',
+    tokenInfo: null,
+  };
 
   componentDidMount = () => {
     this.setState({
       backupDone: hathorLib.wallet.isBackupDone()
+    });
+  }
+
+  componentDidUpdate = (prevProps) => {
+    if (this.props.selectedToken !== prevProps.selectedToken || this.props.historyTransactions !== prevProps.historyTransactions) {
+      this.updateTokenInfo();
+    }
+  }
+
+  /**
+   * Upadte token info getting data from the full node (can mint, can melt, total supply)
+   */
+  updateTokenInfo = () => {
+    hathorLib.walletApi.getGeneralTokenInfo(this.props.selectedToken, (response) => {
+      if (response.success) {
+        response['uid'] = this.props.selectedToken;
+        this.setState({
+          tokenInfo: response,
+          errorMessage: '',
+        });
+      } else {
+        this.setState({ errorMessage: response.message });
+      }
     });
   }
 
@@ -176,10 +206,12 @@ class Wallet extends React.Component {
     }
 
     const renderContentAdmin = () => {
+      if (!this.state.tokenInfo) return null;
+
       if (this.shouldShowAdministrativeTab()) {
         return (
           <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-            <TokenAdministrative token={token} />
+            <TokenAdministrative token={this.state.tokenInfo} />
           </div>
         );
       } else {
@@ -198,7 +230,7 @@ class Wallet extends React.Component {
                 <a className="nav-link active" id="wallet-tab" data-toggle="tab" href="#wallet" role="tab" aria-controls="home" aria-selected="true">Balance & History</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" id="token-tab" data-toggle="tab" href="#token" role="tab" aria-controls="token" aria-selected="false">About token</a>
+                <a className="nav-link" id="token-tab" data-toggle="tab" href="#token" role="tab" aria-controls="token" aria-selected="false">About {token.name}</a>
               </li>
               {renderTabAdmin()}
             </ul>
@@ -207,7 +239,7 @@ class Wallet extends React.Component {
                 {renderWallet()}
               </div>
               <div className="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
-                <TokenGeneralInfo token={token} showConfigString={true} />
+                <TokenGeneralInfo tokenInfo={this.state.tokenInfo} showConfigString={true} errorMessage={this.state.errorMessage} />
               </div>
               {renderContentAdmin()}
             </div>
