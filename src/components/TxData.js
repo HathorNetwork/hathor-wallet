@@ -103,7 +103,6 @@ class TxData extends React.Component {
     const tokens = [];
 
     for (const output of this.props.transaction.outputs) {
-      if (hathorLib.wallet.isAuthorityOutput(output)) continue;
       const tokenData = this.checkToken(hathorLib.wallet.getTokenIndex(output.decoded.token_data));
 
       if (tokenData) {
@@ -112,7 +111,6 @@ class TxData extends React.Component {
     }
 
     for (const input of this.props.transaction.inputs) {
-      if (hathorLib.wallet.isAuthorityOutput(input)) continue;
       const tokenData = this.checkToken(hathorLib.wallet.getTokenIndex(input.decoded.token_data));
 
       if (tokenData) {
