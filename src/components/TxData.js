@@ -129,14 +129,14 @@ class TxData extends React.Component {
    */
   checkToken = (tokenData) => {
     if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
-      return;
+      return null;
     }
 
     const tokenConfig = this.props.transaction.tokens[tokenData - 1];
 
     if (this.tokensFound.find((uid) => uid === tokenConfig.uid) !== undefined) {
       // Already found this token
-      return;
+      return null;
     }
 
     const tokenUnknown = this.props.tokens.find((token) => token.uid === tokenConfig.uid) === undefined;
