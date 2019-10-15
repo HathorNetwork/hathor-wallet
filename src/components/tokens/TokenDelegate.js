@@ -56,7 +56,7 @@ class TokenDelegate extends React.Component {
               <label className="form-check-label" htmlFor="keepAuthority">
                 Create another {type} output for you?
               </label>
-              <p className="subtitle">Let it marked, unless you know what you are doing</p>
+              <p className="subtitle">Leave it checked unless you know what you are doing</p>
             </div>
           </div>
         </div>
