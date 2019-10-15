@@ -9,13 +9,8 @@ import React from 'react';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import hathorLib from '@hathor/wallet-lib';
-import { connect } from "react-redux";
 import HathorAlert from '../components/HathorAlert';
 import PropTypes from 'prop-types';
-
-const mapStateToProps = (state) => {
-  return { historyTransactions: state.historyTransactions };
-};
 
 
 /**
@@ -45,7 +40,7 @@ class TokenGeneralInfo extends React.Component {
 
 
   componentDidUpdate = (prevProps) => {
-    if (this.props.historyTransactions !== prevProps.historyTransactions || this.props.token.uid !== prevProps.token.uid) {
+    if (this.props.token.uid !== prevProps.token.uid) {
       this.updateTokenInfo();
     }
   }
@@ -179,4 +174,4 @@ TokenGeneralInfo.propTypes = {
   showConfigString: PropTypes.bool.isRequired,
 };
 
-export default connect(mapStateToProps)(TokenGeneralInfo);
+export default TokenGeneralInfo;

@@ -268,4 +268,4 @@ TokenAdministrative.propTypes = {
   token: PropTypes.object.isRequired
 };
 
-export default connect(mapStateToProps)(TokenAdministrative);
+export default connect(mapStateToProps, null, null, {forwardRef: true})(TokenAdministrative);

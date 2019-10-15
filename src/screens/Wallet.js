@@ -57,9 +57,24 @@ class Wallet extends React.Component {
     successMessage: '',
   };
 
+  // Reference for the TokenGeneralInfo component
+  generalInfoRef = React.createRef();
+
+  // Reference for the TokenAdministrative component
+  administrativeRef = React.createRef();
+
   componentDidMount = () => {
     this.setState({
       backupDone: hathorLib.wallet.isBackupDone()
+    });
+
+    $('#wallet-div').on('show.bs.tab', 'a[data-toggle="tab"]', (e) => {
+      // On tab show we reload token data from the server for each component
+      if (e.target.id === 'token-tab') {
+        this.generalInfoRef.current.updateTokenInfo();
+      } else if (e.target.id === 'administrative-tab') {
+        this.administrativeRef.current.updateTokenInfo();
+      }
     });
   }
 
@@ -182,7 +197,7 @@ class Wallet extends React.Component {
       if (this.shouldShowAdministrativeTab()) {
         return (
           <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-            <TokenAdministrative token={token} />
+            <TokenAdministrative token={token} ref={this.administrativeRef} />
           </div>
         );
       } else {
@@ -210,7 +225,7 @@ class Wallet extends React.Component {
                 {renderWallet()}
               </div>
               <div className="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
-                <TokenGeneralInfo token={token} showConfigString={true} errorMessage={this.state.errorMessage} />
+                <TokenGeneralInfo token={token} showConfigString={true} errorMessage={this.state.errorMessage} ref={this.generalInfoRef} />
               </div>
               {renderContentAdmin()}
             </div>
@@ -246,7 +261,7 @@ class Wallet extends React.Component {
     }
 
     return (
-      <div>
+      <div id="wallet-div">
         {!this.state.backupDone && renderBackupAlert()}
         <div className="content-wrapper">
          {/* This back button is not 100% perfect because when the user has just unlocked the wallet, it would go back to it when clicked
