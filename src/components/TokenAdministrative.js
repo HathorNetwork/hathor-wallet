@@ -265,7 +265,11 @@ class TokenAdministrative extends React.Component {
  * token: Token to show administrative tools {name, symbol, uid}
  */
 TokenAdministrative.propTypes = {
-  token: PropTypes.object.isRequired
+  token: PropTypes.exact({
+    name: PropTypes.string,
+    symbol: PropTypes.string,
+    uid: PropTypes.string,
+  }),
 };
 
 export default connect(mapStateToProps, null, null, {forwardRef: true})(TokenAdministrative);

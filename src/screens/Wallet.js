@@ -206,7 +206,7 @@ class Wallet extends React.Component {
     }
 
     const renderTokenData = (token) => {
-      if (this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+      if (hathorLib.tokens.isHathorToken(this.props.selectedToken)) {
         return renderWallet();
       } else {
         return (
@@ -246,13 +246,12 @@ class Wallet extends React.Component {
     }
 
     const renderUnlockedWallet = () => {
-      const isHathorToken = this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
       return (
         <div className='wallet-wrapper'>
           <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
             <p className='token-name mb-0'>
               <strong>{token ? token.name : ''}</strong>
-              {!isHathorToken && <i className="fa fa-trash pointer ml-3" title="Unregister token" onClick={this.unregisterClicked}></i>}
+              {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title="Unregister token" onClick={this.unregisterClicked}></i>}
             </p>
           </div>
           {renderTokenData(token)}

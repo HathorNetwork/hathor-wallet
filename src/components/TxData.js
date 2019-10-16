@@ -482,7 +482,7 @@ class TxData extends React.Component {
     const renderTokenList = () => {
       const renderTokenUID = (token) => {
         if (token.uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
-          return token.uid;
+          return <span>token.uid</span>;
         } else if (token.unknown) {
           return <a href="true" onClick={(e) => this.showUnregisteredTokenInfo(e, token)}>{token.uid}</a>
         } else {

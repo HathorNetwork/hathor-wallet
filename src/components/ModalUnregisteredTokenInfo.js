@@ -68,34 +68,30 @@ class ModalUnregisteredTokenInfo extends React.Component {
   }
 
   render() {
-    const renderModalBody = () => {
-      if (!this.state.token) {
-        return null;
-      }
+    const renderTokenInfo = () => {
       return <TokenGeneralInfo token={this.state.token} showConfigString={false} />;
     }
 
     const renderHeader = () => {
       return (
-        <div className="d-flex flex-row">
-          <h5 className="modal-title" id="exampleModalLabel">{this.state.token.name} ({this.state.token.symbol})</h5>
-          <span className='ml-2 unregistered-token-badge'> Unregistered token </span>
+        <div className="modal-header">
+          <div className="d-flex flex-row">
+            <h5 className="modal-title">{this.state.token.name} ({this.state.token.symbol})</h5>
+            <span className='ml-2 unregistered-token-badge'> Unregistered token </span>
+          </div>
+          <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
       )
     }
 
-    return (
-      <div className="modal fade" id="unregisteredTokenInfoModal" tabIndex="-1" role="dialog" aria-labelledby="unregisteredTokenInfoModal" aria-hidden="true">
-        <div className="modal-dialog modal-lg" role="document">
+    const renderModalContent = () => {
+      return (
           <div className="modal-content">
-            <div className="modal-header">
-              {this.state.token && renderHeader()}
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
+            {renderHeader()}
             <div className="modal-body">
-              {renderModalBody()}
+              {renderTokenInfo()}
               <div className="mt-4">
                 <p>This token is <strong>not registered</strong> in your wallet. You must <strong>always validate the token uid</strong>, to ensure you are not being scammed.</p>
                 <p>The token uid is always unique, and your only trust point.</p>
@@ -115,6 +111,13 @@ class ModalUnregisteredTokenInfo extends React.Component {
               <button type="button" className="btn btn-hathor" data-dismiss="modal">Cancel</button>
             </div>
           </div>
+      );
+    }
+
+    return (
+      <div className="modal fade" id="unregisteredTokenInfoModal" tabIndex="-1" role="dialog" aria-labelledby="unregisteredTokenInfoModal" aria-hidden="true">
+        <div className="modal-dialog modal-lg" role="document">
+          {this.state.token && renderModalContent()}
         </div>
       </div>
     )
