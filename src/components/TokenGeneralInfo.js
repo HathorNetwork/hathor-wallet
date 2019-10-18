@@ -170,10 +170,10 @@ class TokenGeneralInfo extends React.Component {
  * showConfigString: If should show the configuration string of the token with the qrcode
  */
 TokenGeneralInfo.propTypes = {
-  token: PropTypes.exact({
-    name: PropTypes.string,
-    symbol: PropTypes.string,
-    uid: PropTypes.string,
+  token: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    symbol: PropTypes.string.isRequired,
+    uid: PropTypes.string.isRequired,
   }),
   showConfigString: PropTypes.bool.isRequired,
 };
