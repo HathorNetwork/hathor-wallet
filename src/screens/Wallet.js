@@ -63,6 +63,9 @@ class Wallet extends React.Component {
   // Reference for the TokenAdministrative component
   administrativeRef = React.createRef();
 
+  // Reference for the unregister confirm modal
+  unregisterModalRef = React.createRef();
+
   componentDidMount = () => {
     this.setState({
       backupDone: hathorLib.wallet.isBackupDone()
@@ -111,8 +114,12 @@ class Wallet extends React.Component {
    * When user confirms the unregister of the token, hide the modal and execute it
    */
   unregisterConfirmed = () => {
-    $('#unregisterModal').modal('hide');
-    tokens.unregisterToken(this.props.selectedToken);
+    const promise = tokens.unregisterToken(this.props.selectedToken);
+    promise.then(() => {
+      $('#unregisterModal').modal('hide');
+    }, (e) => {
+      this.unregisterModalRef.current.updateErrorMessage(e.message);
+    });
   }
 
   /*
@@ -274,7 +281,7 @@ class Wallet extends React.Component {
         </div>
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        <ModalConfirm modalID="unregisterModal" title="Unregister token" body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
+        <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title="Unregister token" body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
         <TokenBar {...this.props} />
       </div>
     );
