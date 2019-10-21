@@ -72,7 +72,7 @@ class TransactionDetail extends React.Component {
   getTx() {
     hathorLib.txApi.getTransaction(this.props.match.params.id, (data) => {
       this.txReceived(data);
-      if (!hathorLib.helpers.isBlock(data.tx)) {
+      if (data.success && !hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();
       }
     }, (e) => {
@@ -95,7 +95,7 @@ class TransactionDetail extends React.Component {
       return (
         <div>
           <BackButton {...this.props} />
-          {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} /> : <p className="text-danger">Transaction with hash {this.props.match.params.id} not found</p>}
+          {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} history={this.props.history} /> : <p className="text-danger">Transaction with hash {this.props.match.params.id} not found</p>}
         </div>
       );
     }

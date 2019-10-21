@@ -41,11 +41,12 @@ class TokenDelegate extends React.Component {
 
   render() {
     const renderForm = () => {
+      const type = this.props.action === 'delegate-mint' ? 'mint' : 'melt';
       return (
         <div>
           <div className="row">
             <div className="form-group col-6">
-              <label>Address</label>
+              <label>Address of the new {type} authority</label>
               <input required ref={this.delegateAddress} type="text" className="form-control" />
             </div>
           </div>
@@ -53,15 +54,16 @@ class TokenDelegate extends React.Component {
             <div className="form-check">
               <input className="form-check-input" type="checkbox" ref={this.delegateCreateAnother} id="keepAuthority" defaultChecked={true} />
               <label className="form-check-label" htmlFor="keepAuthority">
-                Create another {this.props.action === 'delegate-mint' ? 'mint' : 'melt'} output for you?
+                Create another {type} output for you?
               </label>
+              <p className="subtitle">Leave it checked unless you know what you are doing</p>
             </div>
           </div>
         </div>
       )
     }
 
-    const title = `Delegate ${this.props.action === 'destroy-mint' ? 'Mint' : 'Melt'}`;
+    const title = `Delegate ${this.props.action === 'delegate-mint' ? 'Mint' : 'Melt'}`;
 
     return <TokenAction renderForm={renderForm} title={title} buttonName='Delegate' onPinSuccess={this.executeDelegate} {...this.props} />
   }

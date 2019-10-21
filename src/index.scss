@@ -5,6 +5,7 @@ $fa-font-path: "~font-awesome/fonts";
 
 $darkBlue: #0273a0;
 $darkBlueHover: #0081af;
+$warning: #ce9c06;
 
 html, body, #root {
   height: 100%;
@@ -547,7 +548,7 @@ svg.svg-wrapper {
 }
 
 .token-name {
-  font-size: 1.5rem;
+  font-size: 2.25rem;
 }
 
 .token-wrapper i {
@@ -658,12 +659,12 @@ svg.svg-wrapper {
   float: right;
 }
 
-.page-text .text-warning {
-  color: #ce9c06 !important;
+.text-warning {
+  color: $warning !important;
 }
 
 .text-warning a {
-  color: #ce9c06 !important;
+  color: $warning !important;
   text-decoration: underline;
 }
 
@@ -677,11 +678,22 @@ svg.svg-wrapper {
   text-align: center;
 }
 
-.token-detail-top {
-  padding-bottom: 6rem;
-  border-bottom: 1px solid #ddd;
-}
-
 .token-detail-bottom {
   padding-top: 3rem;
+}
+
+.token-general-info {
+  word-break: break-all;
+}
+
+.unregistered-token-badge {
+  padding: 0.2rem 0.4rem;
+  border-radius: 1rem;
+  background-color: $warning;
+  color: white;
+}
+
+p.subtitle {
+  opacity: 0.7;
+  font-size: 0.85rem;
 }

@@ -170,26 +170,47 @@ class TokenHistory extends React.Component {
     let value = 0;
 
     for (let txin of tx.inputs) {
-      if (hathorLib.wallet.isAuthorityOutput(txin)) {
-        continue;
-      }
       if (txin.token === selectedToken && txin.decoded.address in keys) {
         found = true;
-        value -= txin.value;
+        if (!hathorLib.wallet.isAuthorityOutput(txin)) {
+          value -= txin.value;
+        }
       }
     }
 
     for (let txout of tx.outputs) {
-      if (hathorLib.wallet.isAuthorityOutput(txout)) {
-        continue;
-      }
       if (txout.token === selectedToken && txout.decoded.address in keys) {
         found = true;
-        value += txout.value;
+        if (!hathorLib.wallet.isAuthorityOutput(txout)) {
+          value += txout.value;
+        }
       }
     }
 
     return {found, value};
+  }
+
+  /**
+   * Check if the tx has only inputs and outputs that are authorities
+   *
+   * @param {Object} tx Transaction data
+   *
+   * @return {boolean} If the tx has only authority
+   */
+  isAllAuthority = (tx) => {
+    for (let txin of tx.inputs) {
+      if (!hathorLib.wallet.isAuthorityOutput(txin)) {
+        return false;
+      }
+    }
+
+    for (let txout of tx.outputs) {
+      if (!hathorLib.wallet.isAuthorityOutput(txout)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   render() {
@@ -247,12 +268,26 @@ class TokenHistory extends React.Component {
         }
         let statusElement = '';
         let trClass = '';
+        let value = hathorLib.helpers.prettyValue(extra.value);
         if (extra.value > 0) {
-          statusElement = <span>Received <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
+            statusElement = <span>Token creation <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          } else {
+            statusElement = <span>Received <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          }
           trClass = 'output-tr';
         } else if (extra.value < 0) {
-          statusElement = <span>Sent <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
+            statusElement = <span>Token deposit <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          } else {
+            statusElement = <span>Sent <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          }
           trClass = 'input-tr';
+        } else {
+          if (this.isAllAuthority(tx)) {
+            statusElement = <span>Authority</span>;
+            value = '--';
+          }
         }
         return (
           <tr key={`${tx.tx_id}`} className={trClass}>
@@ -265,7 +300,7 @@ class TokenHistory extends React.Component {
             </td>
             <td className={tx.is_voided ? 'voided state' : 'state'}>{statusElement}</td>
             <td>{tx.is_voided && renderVoidedElement()}</td>
-            <td className='value'><span className={tx.is_voided ? 'voided' : ''}>{hathorLib.helpers.prettyValue(extra.value)}</span></td>
+            <td className='value'><span className={tx.is_voided ? 'voided' : ''}>{value}</span></td>
           </tr>
         );
       });

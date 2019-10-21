@@ -50,14 +50,14 @@ class ModalAddToken extends React.Component {
       this.setState({ errorMessage: 'Must provide configuration string or uid, name, and symbol' });
       return;
     }
-    const validation = hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
-    if (validation.success === false) {
-      this.setState({ errorMessage: validation.message });
+    const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
+    promise.then((tokenData) => {
+      tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
+      this.props.success();
+    }, (e) => {
+      this.setState({ errorMessage: e.message });
       return;
-    }
-    const tokenData = validation.tokenData;
-    tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
-    this.props.success();
+    });
   }
 
   render() {
