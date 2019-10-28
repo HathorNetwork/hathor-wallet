@@ -95,10 +95,10 @@ export const SENTRY_DSN = process.env.SENTRY_DSN || 'https://69c067d1587c465cac8
  * Server options for the user to choose which one to connect
  */
 export const DEFAULT_SERVERS = [
-  'https://node1.bravo.testnet.hathor.network/v1a/',
-  'https://node2.bravo.testnet.hathor.network/v1a/',
-  'https://node3.bravo.testnet.hathor.network/v1a/',
-  'https://node4.bravo.testnet.hathor.network/v1a/',
+  'https://node1.charlie.testnet.hathor.network/v1a/',
+  'https://node2.charlie.testnet.hathor.network/v1a/',
+  'https://node3.charlie.testnet.hathor.network/v1a/',
+  'https://node4.charlie.testnet.hathor.network/v1a/',
 ];
 
 /**
