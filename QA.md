@@ -7,8 +7,8 @@
     1. Start new wallet.
     1. Try to click 'Create my words' without selecting checkbox (must show error).
     1. Select to do backup now. (Really save those words, we will load this wallet later with them).
-    1. Click 'Validate' before selecting all the words.
-    1. Click 'Validate' with all words selected but in the wrong order.
+    1. Click 'Validate' before selecting all the words, you must see an error message on the screen.
+    1. Click 'Validate' with all words selected but in the wrong order, you must see an error message on the screen.
     1. Validate with correct order.
     1. Try to select insecure password (like '123'). It must show error.
     1. Select password and PIN.
@@ -145,4 +145,4 @@
 
 1. **Late backup**
     1. Reset wallet and start a new one without doing backup. It must show a yellow warning saying a backup must be done.
-    1. Do the backup (following procedures in the 'Initialization' tests). The backup have to disappear.
+    1. Do the backup (following procedures in the 'Initialization' tests). The backup message has to disappear.
