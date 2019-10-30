@@ -28,7 +28,7 @@ class SentryPermission extends React.Component {
   }
 
   /**
-   * When user clicks the button to continue to the wallet, it saves the user preference and redirects to the signin
+   * When user clicks the button to continue to the wallet, it saves the user preference and redirects to the wallet type screen
    */
   goContinue = () => {
     // Set permission on localStorage
@@ -41,7 +41,7 @@ class SentryPermission extends React.Component {
     // If state permission is null, user is still starting the wallet
     // Otherwise, user is changing it in the settings
     if (this.state.savedPermission === null) {
-      this.props.history.push('/signin/');
+      this.props.history.push('/wallet_type/');
     } else {
       this.props.history.push('/settings/');
     }

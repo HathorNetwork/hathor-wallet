@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import $ from 'jquery';
 
 
 /**
@@ -13,24 +15,60 @@ import React from 'react';
  *
  * @memberof Components
  */
-const ModalAlert = (props) => {
-  return (
-    <div className="modal fade" id="alertModal" tabIndex="-1" role="dialog" aria-labelledby="alertModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-      <div className="modal-dialog" role="document">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title" id="exampleModalLabel">{props.title}</h5>
-          </div>
-          <div className="modal-body">
-            {props.body}
-          </div>
-          <div className="modal-footer">
-            <button onClick={props.handleButton} type="button" className="btn btn-hathor">{props.buttonName}</button>
+class ModalAlert extends React.Component {
+
+
+  static defaultProps = {
+    id: 'alertModal',
+  }
+
+  /**
+   * On modal button click
+   * Can't set this as default props because it depends on another props (and I don't have access to this.props in defaultProps)
+   * So, if handleButton was set on props, use it, otherwise call the default method
+   */
+  buttonClick = () => {
+    if (this.props.handleButton) {
+      this.props.handleButton();
+    } else {
+      $(`#${this.props.id}`).modal('hide');
+    }
+  }
+
+  render() {
+    return (
+      <div className="modal fade" id={this.props.id} tabIndex="-1" role="dialog" aria-labelledby="alertModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="exampleModalLabel">{this.props.title}</h5>
+            </div>
+            <div className="modal-body">
+              {this.props.body}
+            </div>
+            <div className="modal-footer">
+              <button onClick={this.buttonClick} type="button" className="btn btn-hathor">{this.props.buttonName}</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  )
+    );
+  }
 }
+
+/**
+ * id: modal element id
+ * buttonName: name of the modal button
+ * handleButton: method to be executed when button is clicked
+ * title: modal title
+ * body: modal body
+ */
+ModalAlert.propTypes = {
+  id: PropTypes.string,
+  buttonName: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  handleButton: PropTypes.func,
+  body: PropTypes.element.isRequired,
+};
 
 export default ModalAlert;

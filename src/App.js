@@ -25,6 +25,8 @@ import UnknownTokens from './screens/UnknownTokens';
 import Signin from './screens/Signin';
 import LockedWallet from './screens/LockedWallet';
 import NewWallet from './screens/NewWallet';
+import WalletType from './screens/WalletType';
+import SoftwareWalletWarning from './screens/SoftwareWalletWarning';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
@@ -43,11 +45,13 @@ import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVER, VERSION } from './constants';
 import LocalStorageStore  from './storage.js';
+import ModalAlert from './components/ModalAlert';
+import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 
 
 hathorLib.storage.setStore(new LocalStorageStore());
 
-// set default server to bravo testnet
+// set default server
 hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
 const mapDispatchToProps = dispatch => {
@@ -175,6 +179,8 @@ class Root extends React.Component {
         <StartedRoute exact path="/blocks" component={BlockList} loaded={true} />
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
+        <StartedRoute exact path="/wallet_type" component={WalletType} loaded={false} />
+        <StartedRoute exact path="/software_warning" component={SoftwareWalletWarning} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/welcome" component={Welcome} />
@@ -225,7 +231,7 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
  * If not started, go to welcome screen. If loaded and locked, go to locked screen. If started, we have some options:
  * - If wallet is already loaded and the component requires it's loaded, we show the component.
  * - If wallet is already loaded and the component requires it's not loaded, we go to the wallet detail screen.
- * - If wallet is not loaded and the component requires it's loaded, we go to the signin screen.
+ * - If wallet is not loaded and the component requires it's loaded, we go to the wallet type screen.
  * - If wallet is not loaded and the component requires it's not loaded, we show the component.
  */
 const returnStartedRoute = (Component, props, rest) => {
@@ -253,7 +259,7 @@ const returnStartedRoute = (Component, props, rest) => {
       }
     } else {
       if (rest.loaded) {
-        return <Redirect to={{pathname: '/signin/'}} />;
+        return <Redirect to={{pathname: '/wallet_type/'}} />;
       } else {
         return <Component {...props} />;
       }
@@ -278,7 +284,18 @@ const StartedRoute = ({component: Component, ...rest}) => (
 const returnDefaultComponent = (Component, props) => {
   if (version.checkWalletVersion()) {
     return (
-      <div className="component-div"><Navigation {...props}/><Component {...props} /><RequestErrorModal {...props} /></div>
+      <div className="component-div">
+        <Navigation {...props}/>
+        <Component {...props} />
+        <RequestErrorModal {...props} />
+         {/* At first I added this ModalAlert in the Version component (where I think it should be)
+           * however this component is inside the Navigation component, that has position fixed.
+           * The bootstrap modal does not work fine inside a wrapper with position fixed
+           * so the backdrop was being rendered above the modal.
+           * That's why the best solution was to add this modal here (so I can use in all screens that have the Navigation)
+           */}
+        <ModalAlert title='Software wallet warning' body={<SoftwareWalletWarningMessage />} buttonName='Ok' id='softwareWalletWarningModal' />
+      </div>
     );
   } else {
     return <WalletVersionError {...props} />;
