@@ -74,7 +74,7 @@
   "build": {
     "appId": "network.hathor.macos.wallet",
     "compression": "maximum",
-    "afterSign": "scripts/notarize.js",
+    "afterSign": "src/scripts/notarize.js",
     "win": {
       "icon": "build/icon.png",
       "target": "nsis",
