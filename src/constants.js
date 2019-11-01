@@ -107,3 +107,17 @@ export const DEFAULT_SERVERS = [
  * Default server user will connect when none has been chosen
  */
 export const DEFAULT_SERVER = DEFAULT_SERVERS[0];
+
+let ipcRenderer = null;
+
+if (window.require) {
+  // Requiring electron outside main thread must be done like that
+  // https://github.com/electron/electron/issues/7300
+  const electron = window.require('electron');
+  ipcRenderer = electron.ipcRenderer;
+}
+
+/**
+ * IPC renderer to communicate with electron main process
+ */
+export const IPC_RENDERER = ipcRenderer;

@@ -193,7 +193,9 @@ class SendTokensOne extends React.Component {
 
     const renderSelectToken = () => {
       return (
-        <select value={this.state.selected.uid} className="ml-3" onChange={this.changeSelect}>
+        <select className="ml-3" value={this.state.selected.uid} onChange={this.changeSelect}
+          title={hathorLib.wallet.isHardwareWallet() ? "This feature is disabled for hardware wallet" : "Select token"} 
+          disabled={hathorLib.wallet.isHardwareWallet() ? true : null}>
           {renderTokenOptions()}
         </select>
       );

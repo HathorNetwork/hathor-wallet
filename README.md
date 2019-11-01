@@ -47,9 +47,15 @@ A transaction is displayed.
 
 `npm start` and it will start running in the browser in http://localhost:3000
 
+### To Run in electron
+
+Before running using electron you have to execute `./node_modules/.bin/electron-builder install-app-deps`.
+
+Then `npm run electron`
+
 ### To Build
 
-`npm run buil` and it will create a folder build with the files to use
+`npm run build` and it will create a folder build with the files to use
 
 ## Server
 

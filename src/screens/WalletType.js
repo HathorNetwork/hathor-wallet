@@ -1,0 +1,232 @@
+/**
+ * Copyright (c) Hathor Labs and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import React from 'react';
+import logo from '../assets/images/hathor-logo.png';
+import wallet from '../utils/wallet';
+import ledger from '../utils/ledger';
+import hathorLib from '@hathor/wallet-lib';
+import { IPC_RENDERER } from '../constants';
+import InitialImages from '../components/InitialImages';
+
+
+/**
+ * Screen used to select between hardware wallet or software wallet
+ *
+ * @memberof Screens
+ */
+class WalletType extends React.Component {
+  // Attempt parameters when trying to connect to ledger
+  // attemptNumber: current attempt
+  // attemptLimit: maximum number of attempts
+  // attemptInterval: wait interval between attempts
+  attemptNumber = 0
+  attemptLimit = 100
+  attemptInterval = 3000
+
+  /**
+   * errorMessage {string} message to show in case of error connecting to ledger
+   * hardware {boolean} if hardware wallet was chosen
+   * waitAction {boolean} after connecting to ledger we need to wait for user action
+   */
+  state = {
+    errorMessage: '',
+    hardware: false,
+    waitAction: false,
+  }
+
+  componentDidMount() {
+    // Update Sentry when user started wallet now
+    wallet.updateSentryState();
+
+    if (IPC_RENDERER) {
+      IPC_RENDERER.on("ledger:version", this.handleVersion);
+      IPC_RENDERER.on("ledger:publicKeyData", this.handlePublicKeyData);
+    }
+  }
+
+  componentWillUnmount() {
+    if (IPC_RENDERER) {
+      // Remove listeners
+      IPC_RENDERER.removeAllListeners("ledger:version");
+      IPC_RENDERER.removeAllListeners("ledger:publicKeyData");
+    }
+  }
+
+  /**
+   * Handle the response of a get version call to Ledger.
+   *
+   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {Object} arg Data returned from the get version call
+   */
+  handleVersion = (event, arg) => {
+    if (arg.success) {
+      // We wait 2 seconds to update the message on the screen
+      // so the user don't see the screen updating fast
+      setTimeout(() => {
+        this.setState({ waitAction: true, errorMessage: '' }, () => {
+          ledger.getPublicKeyData();
+        })
+      }, 2000);
+    } else {
+      if (!this.state.hardware) {
+        // User clicked 'Back' button
+        this.attemptNumber = 0;
+        return;
+      }
+
+      if (this.attemptNumber < this.attemptLimit) {
+        setTimeout(() => {
+          this.attemptNumber += 1;
+          ledger.getVersion();
+        }, this.attemptInterval);
+      } else {
+        // Error
+        this.setState({ errorMessage: arg.error.message });
+      }
+    }
+  }
+
+  /**
+   * Handle the response of a get public key data call to Ledger.
+   *
+   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {Object} arg Data returned from the get public key data call
+   */
+  handlePublicKeyData = (event, arg) => {
+    if (!this.state.hardware) {
+      // User clicked 'Back' button
+      return;
+    }
+
+    if (arg.success) {
+      const data = arg.data;
+      const uncompressedPubkey = data.slice(0, 65);
+      const compressedPubkey = hathorLib.wallet.toPubkeyCompressed(uncompressedPubkey);
+      const chainCode = Buffer.from(data.slice(65, 97));
+      const fingerprint = Buffer.from(data.slice(97, 101));
+      const xpub = hathorLib.wallet.xpubFromData(compressedPubkey, chainCode, fingerprint);
+      // First we clean what can still be there of a last wallet
+      wallet.cleanWallet();
+      wallet.startHardwareWallet(xpub);
+      hathorLib.wallet.markBackupAsDone();
+      this.props.history.push('/wallet/');
+    } else {
+      // Error
+      this.setState({ errorMessage: arg.error.message });
+    }
+  }
+
+  /**
+   * Go to software wallet warning screen
+   */
+  goToSoftwareWallet = () => {
+    hathorLib.wallet.setWalletType('software');
+    this.props.history.push('/software_warning/');
+  }
+
+  /**
+   * Go to the hardware wallet screen
+   */
+  goToHardwareWallet = () => {
+    hathorLib.wallet.setWalletType('hardware');
+    this.setState({ hardware: true }, () => {
+      this.attemptNumber = 1;
+      ledger.getVersion();
+    });
+  }
+
+  /*
+   * Try getting user approval on Ledger again
+   */
+  tryAgain = () => {
+    // clear error
+    this.setState({ errorMessage: null, waitAction: false }, () => {
+      this.attemptNumber = 1;
+      ledger.getVersion();
+    });
+  }
+
+  render() {
+    const renderInitial  = () => {
+      return (
+        <div>
+          <p className="mt-4 mb-4">Do you want to connect to a hardware device or to start a software wallet?</p>
+          <p className="mt-4 mb-4">We curently support Ledger hardware wallet.</p>
+          <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
+            <button onClick={this.goToHardwareWallet} type="button" className="btn btn-hathor mr-3">Hardware wallet</button>
+            <button onClick={this.goToSoftwareWallet} type="button" className="btn btn-hathor">Software wallet</button>
+          </div>
+        </div>
+      );
+    }
+
+    const renderError = () => {
+      return (
+        <div className="d-flex align-items-center flex-column">
+          <p className="mt-4 mb-4 text-danger">{this.state.errorMessage}</p>
+          <button onClick={this.tryAgain} type="button" className="btn btn-hathor">Try again</button>
+        </div>
+      )
+    }
+
+    const renderText = () => {
+      if (this.state.waitAction) {
+        return "You need to authorize the operation on your Ledger.";
+      } else {
+        return "Please connect your Ledger device to the computer and open the Hathor app.";
+      }
+    }
+
+    const renderTextTitle = () => {
+      if (this.state.waitAction) {
+        return "Step 2/2";
+      } else {
+        return "Step 1/2";
+      }
+    }
+
+    const renderHardware = () => {
+      return (
+        <div>
+          <p className="mt-5 mb-2 text-center"><strong>Connecting to Ledger</strong></p>
+          <p className="mt-4 mb-2 text-center"><strong>{renderTextTitle()}</strong></p>
+          <p className="mt-4 mb-4">{renderText()}</p>
+          <div className="d-flex align-items-center flex-column w-100 mt-5">
+            <button onClick={() => this.setState({ hardware: false, waitAction: false })} type="button" className="btn btn-secondary">Back</button>
+          </div>
+        </div>
+      )
+    }
+
+    const renderBody = () => {
+      if (this.state.errorMessage) {
+        return renderError();
+      } else if (this.state.hardware) {
+        return renderHardware();
+      } else {
+        return renderInitial();
+      }
+    }
+
+    return (
+      <div className="outside-content-wrapper">
+        <div className="inside-white-wrapper col-sm-12 col-md-8">
+          <div className="inside-div">
+            <div className="d-flex align-items-center flex-column">
+              <img className="hathor-logo" src={logo} alt="" />
+              {renderBody()}
+            </div>
+          </div>
+          <InitialImages />
+        </div>
+      </div>
+    )
+  }
+}
+
+export default WalletType;

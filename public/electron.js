@@ -11,6 +11,7 @@ const Sentry = require('@sentry/electron')
 const url = require('url');
 const path = require('path');
 const constants = require('./constants');
+const Ledger = require('./ledger').instance;
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
@@ -60,6 +61,9 @@ function createWindow () {
   // Adding wallet version to user agent, so we can get in all request headers
   mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + ' HathorWallet/' + walletVersion);
 
+  // Uncomment this to start the app with developer tools. Useful for debugging
+  //mainWindow.webContents.openDevTools();
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })
@@ -67,41 +71,41 @@ function createWindow () {
   // and load the index.html of the app.
   mainWindow.loadURL(
     process.env.ELECTRON_START_URL ||
-      url.format({
-        pathname: path.join(__dirname, './../build/index.html'),
-        protocol: 'file:',
-        slashes: true
-      })
+    url.format({
+      pathname: path.join(__dirname, './../build/index.html'),
+      protocol: 'file:',
+      slashes: true
+    })
   )
 
   // Create the Application's main menu
   var template = [{
-      label: appName,
-      submenu: [
-          { label: `About ${appName}`, selector: 'orderFrontStandardAboutPanel:' },
-          { type: 'separator' },
-          { type: 'checkbox', label: 'Systray', checked: false, click: function(item) {
-            if (item.checked) {
-              if (tray === null) {
-                startSystray();
-              }
-            } else {
-              tray.destroy();
-              tray = null;
-            }
-          }},
-          { type: 'separator' },
-          { label: 'Quit', accelerator: 'Command+Q', click: function() { app.quit(); }}
-      ]}, {
+    label: appName,
+    submenu: [
+      { label: `About ${appName}`, selector: 'orderFrontStandardAboutPanel:' },
+      { type: 'separator' },
+      { type: 'checkbox', label: 'Systray', checked: false, click: function(item) {
+        if (item.checked) {
+          if (tray === null) {
+            startSystray();
+          }
+        } else {
+          tray.destroy();
+          tray = null;
+        }
+      }},
+      { type: 'separator' },
+      { label: 'Quit', accelerator: 'Command+Q', click: function() { app.quit(); }}
+    ]}, {
       label: 'Edit',
       submenu: [
-          { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
-          { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
-          { type: 'separator' },
-          { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
-          { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
-          { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
-          { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
+        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
+        { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
+        { type: 'separator' },
+        { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
+        { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
+        { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
+        { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
       ]}
   ];
 
@@ -143,7 +147,9 @@ function createWindow () {
       updateSystrayMenu(systrayMenuItemShow);
       mainWindow.hide()
     }
-  })
+  });
+
+  addLedgerListeners(mainWindow);
 }
 
 if (process.platform === 'darwin') {
@@ -225,3 +231,32 @@ app.on('activate', function () {
     createWindow()
   }
 })
+
+/**
+ * This dict contains all methods available on public/ledger.js and the corresponding event
+ * to be sent when we get a reply from ledger. Eg: we receive the event 'ledger:getVersion' and
+ * call Ledger.getVersion(). When we get the reply from ledger, we send the event 'ledger:version'
+ */
+const ledgerMethods = {
+  'getVersion': 'version',
+  'getPublicKeyData': 'publicKeyData',
+  'checkAddress': 'address',
+  'sendTx': 'txSent',
+  'getSignatures': 'signatures',
+}
+
+function addLedgerListeners(mainWindow) {
+  for (const method in ledgerMethods) {
+    ipcMain.on(`ledger:${method}`, (event, data) => {
+      const promise = Ledger[method](data);
+      const responseEvt = `ledger:${ledgerMethods[method]}`;
+      promise.then((response) => {
+        mainWindow.webContents.send(responseEvt, {success: true, data: response});
+      }, (e) => {
+        mainWindow.webContents.send(responseEvt, {success: false, error: e});
+      });
+    });
+  }
+
+  Ledger.mainWindow = mainWindow;
+}

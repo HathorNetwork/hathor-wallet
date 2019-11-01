@@ -16,6 +16,7 @@ import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
+import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 
 
 /**
@@ -54,7 +55,11 @@ class Settings extends React.Component {
    * When user clicks Add Passphrase button we redirect to Passphrase screen
    */
   addPassphrase = () => {
-    this.props.history.push('/wallet/passphrase/');
+    if (hathorLib.wallet.isHardwareWallet()) {
+      $('#notSupported').modal('show');
+    } else {
+      this.props.history.push('/wallet/passphrase/');
+    }
   }
 
   /**
@@ -129,6 +134,12 @@ class Settings extends React.Component {
         </div>
         <ModalResetAllData success={this.handleReset} />
         <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
+        <ModalAlertNotSupported>
+          <div>
+            <p>You can set your passphrase directly on your hardware wallet.</p>
+            <p><a target="_blank" rel="noopener noreferrer" href="https://support.ledger.com/hc/en-us/articles/115005214529-Advanced-passphrase-security">More info</a> about it on Ledger.</p>
+          </div>
+        </ModalAlertNotSupported>
       </div>
     );
   }
