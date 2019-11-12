@@ -36,7 +36,7 @@
     1. Unlock it and check that you transactions were loaded with correct balance.
 
 1. **Transaction detail**
-    1. Click on the last transaction in the list.
+    1. Click on the first transaction in the list.
     1. It should appear the transaction data with the output you received with the time until when it's locked.
     1. Click on the 'Back' link to go back to the main wallet screen.
 
@@ -70,7 +70,7 @@
     1. Click on the uid and register it. 
 
 1. **Register in the 'Custom tokens' screen**
-    1. Click on 'About TST' tab.
+    1. Click on 'About Test Token' tab.
     1. Validate that all informations are correct (name, symbol, supply) and copy the configuration string.
     1. Unregister the token TST.
     1. Click on 'Custom tokens', then 'Register token'.
@@ -96,7 +96,6 @@
     1. Click on 'Balance & History' and copy your address. Then go back to 'Administrative Tools' and click to delegate mint.
     1. Type your address and delegate. Now you must have 2 mint outputs.
     1. Get a random address and click to delegate melt. Deselect the option to 'Create another melt output for you?'. Delegate and now you must have no melt outputs.
-    1. Click on 'About TST' and you should see 'Can melt tokens: No'.
     1. Go back to the 'Administrative Tools', click to destroy mint and select 2. You must see a message saying 'You have no more authority outputs for this token'.
     1. Go to 'About TST' tab and must see 'Can mint new tokens: No'.
 
