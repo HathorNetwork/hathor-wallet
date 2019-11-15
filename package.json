@@ -21,7 +21,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.9.0-beta",
+  "version": "0.9.0",
   "private": true,
   "dependencies": {
     "@hathor/wallet-lib": "^0.7.0",
@@ -90,7 +90,10 @@
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "build/icon.icns",
-      "target": "dmg"
+      "target": [
+        "dmg",
+        "pkg"
+      ]
     },
     "linux": {
       "target": [
