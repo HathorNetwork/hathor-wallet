@@ -21,7 +21,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.9.0-beta",
+  "version": "0.10.0",
   "private": true,
   "dependencies": {
     "@hathor/wallet-lib": "^0.7.0",
@@ -59,13 +59,16 @@
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 .",
     "preelectron-pack": "npm run build",
-    "electron-pack": "electron-builder --mac --win --linux -c.extraMetadata.main=build/electron.js"
+    "electron-pack": "electron-builder --mac --win --linux -c.extraMetadata.main=build/electron.js",
+    "electron-pack-mac": "electron-builder --mac -c.extraMetadata.main=build/electron.js",
+    "electron-pack-linux": "electron-builder --linux -c.extraMetadata.main=build/electron.js",
+    "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js"
   },
   "devDependencies": {
     "@sentry/browser": "^5.0.5",
     "@sentry/cli": "^1.40.0",
     "electron": "^5.0.3",
-    "electron-builder": "^20.43.0",
+    "electron-builder": "^22.1.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-notarize": "^0.1.1",
     "jsdoc": "^3.6.2",
@@ -87,7 +90,10 @@
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "build/icon.icns",
-      "target": "dmg"
+      "target": [
+        "dmg",
+        "pkg"
+      ]
     },
     "linux": {
       "target": [
