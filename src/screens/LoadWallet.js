@@ -13,6 +13,7 @@ import logo from '../assets/images/hathor-logo.png';
 import { updatePassword, updatePin } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
+import InitialImages from '../components/InitialImages';
 
 
 const mapStateToProps = (state) => {
@@ -123,12 +124,13 @@ class LoadWallet extends React.Component {
     return (
       <div className="outside-content-wrapper">
         <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div className="d-flex align-items-center flex-column">
+          <div className="d-flex align-items-center flex-column inside-div">
             <img className="hathor-logo" src={logo} alt="" />
             <div className="d-flex align-items-start flex-column">
               {this.state.askPIN ? <ChoosePin back={this.pinBack} success={this.pinSuccess} /> : (this.state.askPassword ? <ChoosePassword back={this.passwordBack} success={this.passwordSuccess} /> : renderLoad())}
             </div>
           </div>
+          <InitialImages />
         </div>
       </div>
     )

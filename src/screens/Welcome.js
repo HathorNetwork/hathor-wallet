@@ -8,6 +8,7 @@
 import React from 'react';
 import logo from '../assets/images/hathor-logo.png';
 import hathorLib from '@hathor/wallet-lib';
+import InitialImages from '../components/InitialImages';
 
 
 /**
@@ -37,7 +38,7 @@ class Welcome extends React.Component {
     return (
       <div className="outside-content-wrapper">
         <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div>
+          <div className="inside-div">
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
               <p className="mt-4 mb-4">Welome to Hathor Wallet!</p>
@@ -56,6 +57,7 @@ class Welcome extends React.Component {
               <button onClick={this.getStarted} type="button" className="btn btn-hathor">Get started</button>
             </div>
           </div>
+          <InitialImages />
         </div>
       </div>
     )

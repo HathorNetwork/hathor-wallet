@@ -8,6 +8,7 @@
 import React from 'react';
 import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
+import InitialImages from '../components/InitialImages';
 
 
 /**
@@ -60,7 +61,7 @@ class SentryPermission extends React.Component {
     return (
       <div className="outside-content-wrapper">
         <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div>
+          <div className="inside-div">
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
               <p className="mt-5"><strong>Automatic bug report</strong></p>
@@ -84,6 +85,7 @@ class SentryPermission extends React.Component {
               <button onClick={this.goContinue} type="button" className="btn btn-hathor">Continue</button>
             </div>
           </div>
+          <InitialImages />
         </div>
       </div>
     )
