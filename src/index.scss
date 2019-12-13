@@ -407,10 +407,6 @@ svg.svg-wrapper {
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.3), 0 5px 5px 0 rgba(0, 0, 0, 0.34);
 }
 
-.inside-white-wrapper .hathor-logo {
-  width: 50%;
-}
-
 .btn-hathor {
   background-color: $purpleHathor;
   border-color: $purpleHathor;
@@ -703,4 +699,23 @@ svg.svg-wrapper {
 p.subtitle {
   opacity: 0.7;
   font-size: 0.85rem;
+}
+
+.scalability-img {
+  position: absolute;
+  bottom: 110px;
+  right: -110px;
+  z-index: 0;
+}
+
+.easy-img {
+  position: absolute;
+  top: 110px;
+  left: -110px;
+  z-index: 0;
+}
+
+.inside-div {
+  position: relative;
+  z-index: 1;
 }

@@ -8,13 +8,15 @@
 import React from 'react';
 import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
-import NewWalletStep2 from '../components/NewWalletStep2';
 import ChoosePassword from '../components/ChoosePassword';
+import ModalBackupWords from '../components/ModalBackupWords';
 import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
 import { updatePassword, updatePin, updateWords } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
+import InitialImages from '../components/InitialImages';
+import $ from 'jquery';
 
 
 const mapDispatchToProps = dispatch => {
@@ -81,6 +83,13 @@ class NewWallet extends React.Component {
   }
 
   /**
+   * When user decides to do the backup now (opens backup modal)
+   */
+  backupNow = () => {
+    $('#backupWordsModal').modal('show');
+  }
+
+  /**
    * User succeded on choosing a password, then show the Choose PIN component
    */
   passwordSuccess = () => {
@@ -107,9 +116,13 @@ class NewWallet extends React.Component {
    * After user backed up the words with success we mark it as done and show the component to Choose Password
    */
   validationSuccess = () => {
-    hathorLib.wallet.markBackupAsDone();
-    this.refs.alertSuccess.show(1000);
-    this.setState({ askPassword: true });
+    $('#backupWordsModal').on('hidden.bs.modal', (e) => {
+      this.props.validationSuccess();
+      hathorLib.wallet.markBackupAsDone();
+      this.refs.alertSuccess.show(1000);
+      this.setState({ askPassword: true });
+    });
+    $('#backupWordsModal').modal('hide');
   }
 
   /**
@@ -154,13 +167,27 @@ class NewWallet extends React.Component {
       )
     }
 
+    const renderNewWalletStep2 = () => {
+      return (
+        <div className="d-flex align-items-start flex-column">
+          <p className="mt-4">Your words have been created!</p>
+          <p className="mb-4">You should save them in a non-digital media, such as a piece of paper. We advise you to do it now, but you can do it later.</p>
+          <div className="d-flex justify-content-between flex-row w-100">
+            <button onClick={this.step2Back} type="button" className="btn btn-secondary">Back</button>
+            <button onClick={this.backupLater} type="button" className="btn btn-secondary">Do it later</button>
+            <button onClick={this.backupNow} type="button" className="btn btn-hathor">Backup now</button>
+          </div>
+        </div>
+      );
+    }
+
     const renderMainData = () => {
       if (this.state.askPIN) {
         return <ChoosePin back={this.pinBack} success={this.pinSuccess} />;
       } else if (this.state.askPassword) {
         return <ChoosePassword back={this.passwordBack} success={this.passwordSuccess} />;
       } else if (this.state.step2) {
-        return <NewWalletStep2 back={this.step2Back} backupLater={this.backupLater} validationSuccess={this.validationSuccess} />;
+        return renderNewWalletStep2();
       } else {
         return renderStep1();
       }
@@ -169,14 +196,16 @@ class NewWallet extends React.Component {
     return (
       <div className="outside-content-wrapper">
         <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div className="d-flex align-items-center flex-column">
+          <div className="d-flex align-items-center flex-column inside-div">
             <img className="hathor-logo" src={logo} alt="" />
             <div className="d-flex align-items-start flex-column">
               {renderMainData()}
             </div>
           </div>
+          <InitialImages />
         </div>
         <HathorAlert ref="alertSuccess" text="Backup completed!" type="success" />
+        <ModalBackupWords needPassword={false} validationSuccess={this.validationSuccess} />
       </div>
     )
   }
