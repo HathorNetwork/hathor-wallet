@@ -43,14 +43,14 @@ class Welcome extends React.Component {
               <img className="hathor-logo" src={logo} alt="" />
               <p className="mt-4 mb-4">Welome to Hathor Wallet!</p>
             </div>
-            <p className="mb-4">This wallet is connected to a <strong>testnet</strong>.</p>
-            <p>Your HTR and other tokens may be reset at any time.</p>
-            <p>If one offers to sell some tokens to you, one is a scammer.</p>
+            <p className="mb-4">This wallet is connected to the <strong>mainnet</strong>.</p>
+            <p>In this wallet you can send tokens and see the history of your transactions. Besides that, you can also create and manage new tokens.</p>
+            <p>You are responsible for your tokens and the safety of them.</p>
             <p>For further information, check our website (https://hathor.network/).</p>
           <form ref="agreeForm" className={`w-100 mb-4 ${this.state.formValidated ? 'was-validated' : ''}`}>
             <div className="form-check">
               <input required type="checkbox" className="form-check-input" id="confirmAgree" />
-              <label className="form-check-label" htmlFor="confirmAgree"> I agree to participate in the testnet of Hathor, and I acknowledge that the tokens are not for real.</label>
+              <label className="form-check-label" htmlFor="confirmAgree"> I understand that I am responsible for my wallet and the tokens.</label>
             </div>
           </form>
             <div className="d-flex align-items-center flex-column">

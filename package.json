@@ -24,7 +24,7 @@
   "version": "0.10.0",
   "private": true,
   "dependencies": {
-    "@hathor/wallet-lib": "^0.7.0",
+    "@hathor/wallet-lib": "^0.8.0",
     "@sentry/electron": "^0.17.0",
     "bootstrap": "^4.0.0",
     "eslint-config-airbnb": "^17.1.0",
