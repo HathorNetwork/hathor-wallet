@@ -44,7 +44,7 @@ import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVER, VERSION } from './constants';
 import LocalStorageStore  from './storage.js';
 
-
+hathorLib.network.setNetwork('mainnet');
 hathorLib.storage.setStore(new LocalStorageStore());
 
 // set default server to bravo testnet
