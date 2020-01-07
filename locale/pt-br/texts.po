@@ -1,0 +1,49 @@
+msgid ""
+msgstr ""
+"Language: pt-br\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals = 2; plural = (n != 1);\n"
+
+#: src/screens/Welcome.js:48
+msgid "Welcome to Hathor Wallet!"
+msgstr "Bem vindo à Hathor Wallet!"
+
+#: src/screens/Welcome.js:50
+msgid "This wallet is connected to the "
+msgstr "Esta wallet está conectada à "
+
+#: src/screens/Welcome.js:51
+msgid ""
+"Using this wallet you can (i) check your balance and history, (ii) send & "
+"receive HTR and other tokens running on Hathor, and (iii) create and manage "
+"your own tokens."
+msgstr ""
+"Essa wallet te permite (i) verificar seu saldo e histórico, (ii) enviar e "
+"receber HTR e outros tokens que rodam na Hathor, e (iii) criar e gerenciar "
+"seus próprios tokens."
+
+#: src/screens/Welcome.js:52
+msgid ""
+"You should never share any information besides your addresses to other "
+"people. You're fully responsible for keeping your tokens safe."
+msgstr ""
+"Você nunca deve compartilhar qualquer informação exceto seus endereços com "
+"outras pessoas. Você é o único responsável por guardar seus tokens com segurança."
+
+#: src/screens/Welcome.js:53
+msgid "For further information, check our website (https://hathor.network/)."
+msgstr "Para mais informação, veja nosso website (https://hathor.network/)."
+
+#: src/screens/Welcome.js:57
+msgid ""
+"I understand that I am fully responsible for keeping my tokens safe and that "
+"it is not possible to revert transactions after they are executed."
+msgstr ""
+"Eu entendo que sou totalmente responsável por guardar meus tokens de forma segura e "
+"que não é possível reverter uma transação depois que ela foi executada."
+
+#: src/screens/Welcome.js:61
+msgid "Get started"
+msgstr "Iniciar"

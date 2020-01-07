@@ -1,0 +1,39 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=utf-8\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: src/screens/Welcome.js:48
+msgid "Welcome to Hathor Wallet!"
+msgstr ""
+
+#: src/screens/Welcome.js:50
+msgid "This wallet is connected to the "
+msgstr ""
+
+#: src/screens/Welcome.js:51
+msgid ""
+"Using this wallet you can (i) check your balance and history, (ii) send & "
+"receive HTR and other tokens running on Hathor, and (iii) create and manage "
+"your own tokens."
+msgstr ""
+
+#: src/screens/Welcome.js:52
+msgid ""
+"You should never share any information besides your addresses to other "
+"people. You're fully responsible for keeping your tokens safe."
+msgstr ""
+
+#: src/screens/Welcome.js:53
+msgid "For further information, check our website (https://hathor.network/)."
+msgstr ""
+
+#: src/screens/Welcome.js:57
+msgid ""
+"I understand that I am fully responsible for keeping my tokens safe and "
+"that it is not possible to revert transactions after they are executed."
+msgstr ""
+
+#: src/screens/Welcome.js:61
+msgid "Get started"
+msgstr ""

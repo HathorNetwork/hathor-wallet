@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for locale in pt-br; do
+    for file in texts.po; do
+		OUTFILE=src/locale/$locale/${file}.json
+		echo $OUTFILE
+		./node_modules/.bin/ttag po2json locale/$locale/$file > $OUTFILE
+    done
+done
