@@ -7,6 +7,8 @@
 
 import React from 'react';
 import $ from 'jquery';
+import { t } from 'ttag'
+
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import ReactLoading from 'react-loading';
@@ -74,14 +76,15 @@ class CreateToken extends React.Component {
     const isValid = this.refs.formCreateToken.checkValidity();
     if (isValid) {
       if (this.refs.address.value === '' && !this.refs.autoselectAddress.checked) {
-        this.setState({ errorMessage: 'Must choose an address or auto select' });
+        this.setState({ errorMessage: t`Must choose an address or auto select` });
         return false;
       }
 
       // Validating maximum amount
       const tokensValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-        this.setState({ errorMessage: `Maximum value to mint token is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
+        const max_output_value_str = hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
+        this.setState({ errorMessage: t`Maximum value to mint token is ${max_output_value_str}` });
         return false;
       }
       return true;
@@ -186,7 +189,7 @@ class CreateToken extends React.Component {
     const isLoading = () => {
       return (
         <div className="d-flex flex-row">
-          <p className="mr-3">Please, wait while we create your token</p>
+          <p className="mr-3">{t`Please, wait while we create your token`}</p>
           <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />
         </div>
       )
@@ -195,9 +198,9 @@ class CreateToken extends React.Component {
     const getAlertBody = () => {
       return (
         <div>
-          <p>Your token has been successfully created!</p>
-          <p>You can share the following configuration string with other people to let them use your brand new token.</p>
-          <p>Remember to <strong>make a backup</strong> of this configuration string.</p>
+          <p>{t`Your token has been successfully created!`}</p>
+          <p>{t`You can share the following configuration string with other people to let them use your brand new token.`}</p>
+          <p>{t`Remember to <strong>make a backup</strong> of this configuration string.`}</p>
           <p><strong>{this.state.configurationString}</strong></p>
         </div>
       )
@@ -207,25 +210,25 @@ class CreateToken extends React.Component {
       <div className="content-wrapper">
         <BackButton {...this.props} />
         <h3 className="mt-4">Create Token</h3>
-        <p className="mt-5">Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.</p>
-        <p>Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.</p>
-        <p>Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.</p>
+        <p className="mt-5">{t`Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.`}</p>
+        <p>{t`Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>
+        <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.`}</p>
         <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a target="_blank" rel="noopener noreferrer" href="https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md">here</a>.</p>
         <hr className="mb-5 mt-5"/>
         <form ref="formCreateToken" id="formCreateToken">
           <div className="row">
             <div className="form-group col-6">
-              <label>Short name</label>
-              <input required ref="shortName" placeholder="MyCoin" type="text" className="form-control" />
+              <label>{t`Short name`}</label>
+              <input required ref="shortName" placeholder={t`MyCoin`} type="text" className="form-control" />
             </div>
             <div className="form-group col-3">
-              <label>Symbol</label>
-              <input required ref="symbol" placeholder="MYC (max 5 characters)" type="text" pattern="\w{1,5}" className="form-control" />
+              <label>{t`Symbol`}</label>
+              <input required ref="symbol" placeholder={t`MYC (max 5 characters)`} type="text" pattern="\w{1,5}" className="form-control" />
             </div>
           </div>
           <div className="row">
             <div className="form-group col-4">
-              <label>Amount</label>
+              <label>{t`Amount`}</label>
               <input
                required
                type="number"
@@ -241,13 +244,13 @@ class CreateToken extends React.Component {
               <div className="form-check">
                 <input className="form-check-input" type="checkbox" ref="autoselectAddress" id="autoselectAddress" defaultChecked={true} onChange={this.handleCheckboxAddress} />
                 <label className="form-check-label" htmlFor="autoselectAddress">
-                  Select address automatically
+                  {t`Select address automatically`}
                 </label>
               </div>
             </div>
             <div className="form-group col-5" ref={this.address} style={{display: 'none'}}>
-              <label>Destination address</label>
-              <input ref="address" type="text" placeholder="Address" className="form-control" />
+              <label>{t`Destination address`}</label>
+              <input ref="address" type="text" placeholder={t`Address`} className="form-control" />
             </div>
           </div>
           <p>Deposit: {tokens.getDepositAmount(this.state.amount)} HTR ({hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)</p>
@@ -256,7 +259,7 @@ class CreateToken extends React.Component {
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
         {this.state.loading ? isLoading() : null}
         <ModalPin execute={this.createToken} handleChangePin={this.handleChangePin} />
-        <ModalAlert title={`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
+        <ModalAlert title={t`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
       </div>
     );
   }

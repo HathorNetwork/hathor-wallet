@@ -8,6 +8,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import ReactLoading from 'react-loading';
+import { t } from 'ttag';
 import RequestErrorModal from '../components/RequestError';
 import logo from '../assets/images/hathor-logo.png';
 import { dataLoaded } from "../actions/index";
@@ -62,14 +63,14 @@ class LoadingAddresses extends React.Component {
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
               <div className="mt-5 mb-4 d-flex flex-row align-items-center">
-                <p className="mr-3 mb-0"><strong>Loading transactions...</strong></p>
+                <p className="mr-3 mb-0"><strong>{t`Loading transactions...`}</strong></p>
                 <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={0} />
               </div>
             </div>
-            <p>Please wait while we load the transactions of all your addresses.</p>
-            <p>You will be automatically redirected to the wallet when we finish loading them.</p>
-            <p><strong>Addresses found:</strong> {this.props.addressesFound}</p>
-            <p><strong>Transactions found:</strong> {this.props.transactionsFound}</p>
+            <p>{t`Please wait while we load the transactions of all your addresses.`}</p>
+            <p>{t`You will be automatically redirected to the wallet when we finish loading them.`}</p>
+            <p>{t`<strong>Addresses found:</strong> ${this.props.addressesFound}`}</p>
+            <p>{t`<strong>Transactions found:</strong> ${this.props.transactionsFound}`}</p>
           </div>
         </div>
         <RequestErrorModal {...this.props} />

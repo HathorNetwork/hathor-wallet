@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import { CONFIRM_RESET_MESSAGE } from '../constants';
 
@@ -37,14 +38,14 @@ class ModalResetAllData extends React.Component {
       const password = this.refs.password.value;
       const forgotPassword = this.refs.forgotPassword.checked;
       if (password && !hathorLib.wallet.isPasswordCorrect(password)) {
-        this.setState({errorMessage: 'Invalid password'})
+        this.setState({errorMessage: t`Invalid password`})
       } else if (!password && !forgotPassword) {
-        this.setState({errorMessage: 'You must write your password or check that you have forgotten it'});
+        this.setState({errorMessage: t`You must write your password or check that you have forgotten it`});
       } else {
         if (this.refs.confirmMessage.value.toLowerCase() === CONFIRM_RESET_MESSAGE.toLowerCase()) {
           this.props.success();
         } else {
-          this.setState({errorMessage: 'Confirm message does not match'})
+          this.setState({errorMessage: t`Confirm message does not match`})
         }
       }
     }
@@ -52,9 +53,9 @@ class ModalResetAllData extends React.Component {
 
   render() {
     const getFirstMessage = () => {
-      let firstMessage = 'If you reset your wallet, all data will be deleted, and you will lose access to your tokens. To recover access to your tokens, you will need to import your words again.';
+      let firstMessage = t`If you reset your wallet, all data will be deleted, and you will lose access to your tokens. To recover access to your tokens, you will need to import your words again.`;
       if (!hathorLib.wallet.isBackupDone()) {
-        firstMessage = `${firstMessage} You still haven't done the backup of your words.`;
+        firstMessage = t`${firstMessage} You still haven't done the backup of your words.`;
       }
       return firstMessage;
     }
@@ -63,26 +64,26 @@ class ModalResetAllData extends React.Component {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Reset all data</h5>
+              <h5 className="modal-title" id="exampleModalLabel">{t`Reset all data`}</h5>
               <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
               <p>{getFirstMessage()}</p>
-              <p>If you still wanna do it, we need your password and for you to write down <strong>'{CONFIRM_RESET_MESSAGE}'</strong> to confirm the operation.</p>
+              <p>{t`If you still wanna do it, we need your password and for you to write down <strong>'${CONFIRM_RESET_MESSAGE}'</strong> to confirm the operation.`}</p>
               <form ref="formConfirm">
                 <div className="form-group">
-                  <label htmlFor="password">Password*</label>
+                  <label htmlFor="password">{t`Password*`}</label>
                   <input type="password" ref="password" autoComplete="off" className="pin-input form-control" />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="confirmMessage">Confirm message*</label>
-                  <input type="text" ref="confirmMessage" placeholder={`Write '${CONFIRM_RESET_MESSAGE}'`} className="form-control" required />
+                  <label htmlFor="confirmMessage">{t`Confirm message*`}</label>
+                  <input type="text" ref="confirmMessage" placeholder={t`Write '${CONFIRM_RESET_MESSAGE}'`} className="form-control" required />
                 </div>
                 <div className="form-check">
                   <input ref="forgotPassword" type="checkbox" className="form-check-input" id="forgotPassword" />
-                  <label className="form-check-label" htmlFor="forgotPassword" >I forgot my password</label>
+                  <label className="form-check-label" htmlFor="forgotPassword">{t`I forgot my password`}</label>
                 </div>
               </form>
               <div className="row mt-3">
@@ -94,8 +95,8 @@ class ModalResetAllData extends React.Component {
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">No</button>
-              <button onClick={this.handleConfirm} type="button" className="btn btn-hathor">Yes</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`No`}</button>
+              <button onClick={this.handleConfirm} type="button" className="btn btn-hathor">{t`Yes`}</button>
             </div>
           </div>
         </div>

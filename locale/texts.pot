@@ -3,37 +3,1346 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
-#: src/screens/Welcome.js:48
+#: src/constants.js:44
+msgid "I want to reset my wallet"
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:48
+msgid "To set a blank passphrase mark the corresponding checkbox above."
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:54
+msgid "Passphrase and confirm passphrase must be equal"
+msgstr ""
+
+#: src/components/ModalBackupWords.js:99
+#: src/components/ModalResetAllData.js:41
+#: src/screens/ChoosePassphrase.js:59
+msgid "Invalid password"
+msgstr ""
+
+#: src/components/ModalPin.js:57
+#: src/screens/ChoosePassphrase.js:64
+#: src/screens/LockedWallet.js:52
+msgid "Invalid PIN"
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:105
+msgid "Are you sure you want to change your whole wallet setting this passphrase?"
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:115
+msgid "I understand the risks of adding a passphrase."
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:132
+msgid "I want to set a blank passphrase."
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:136
+msgid "Please, enter your password and PIN to confirm the operation."
+msgstr ""
+
+#: src/components/ChoosePassword.js:51
+#: src/screens/ChoosePassphrase.js:139
+msgid "Password"
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:140
+#: src/screens/LockedWallet.js:92
+msgid "PIN"
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:150
+msgid "Set Passphrase"
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:152
+msgid ""
+"Adding a passphrase is an advanced feature, and you should not use it "
+"unless you know what you are doing."
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:153
+msgid ""
+"It will change all your addresses, so it is like generating a completely "
+"new wallet."
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:154
+msgid ""
+"You should take note of your passphrase for future use. If you lose your "
+"passphrase, you will never have access to your tokens again."
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:158
+#: src/screens/SentryPermission.js:86
+msgid "Continue"
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:159
+msgid "Confirm"
+msgstr ""
+
+#: src/screens/ChoosePassphrase.js:161
+#: src/screens/Settings.js:124
+msgid "Set a passphrase"
+msgstr ""
+
+#: src/screens/CreateToken.js:79
+msgid "Must choose an address or auto select"
+msgstr ""
+
+#: src/screens/CreateToken.js:87
+#, javascript-format
+msgid "Maximum value to mint token is ${ max_output_value_str }"
+msgstr ""
+
+#: src/screens/CreateToken.js:192
+msgid "Please, wait while we create your token"
+msgstr ""
+
+#: src/screens/CreateToken.js:201
+msgid "Your token has been successfully created!"
+msgstr ""
+
+#: src/screens/CreateToken.js:202
+msgid ""
+"You can share the following configuration string with other people to let "
+"them use your brand new token."
+msgstr ""
+
+#: src/screens/CreateToken.js:203
+msgid "Remember to <strong>make a backup</strong> of this configuration string."
+msgstr ""
+
+#: src/screens/CreateToken.js:213
+msgid ""
+"Here you will create a new customized token. After the creation, you will "
+"be able to send this new token to other addresses."
+msgstr ""
+
+#: src/screens/CreateToken.js:214
+msgid ""
+"Custom tokens share the address space with all other tokens, including HTR. "
+"This means that you can send and receive tokens using any valid address."
+msgstr ""
+
+#: src/screens/CreateToken.js:215
+msgid ""
+"Remember to make a backup of your new token's configuration string. You "
+"will need to send it to other people to allow them to use your new token."
+msgstr ""
+
+#: src/components/ModalEditToken.js:86
+#: src/screens/CreateToken.js:221
+msgid "Short name"
+msgstr ""
+
+#: src/screens/CreateToken.js:222
+msgid "MyCoin"
+msgstr ""
+
+#: src/components/ModalEditToken.js:89
+#: src/screens/CreateToken.js:225
+msgid "Symbol"
+msgstr ""
+
+#: src/screens/CreateToken.js:226
+msgid "MYC (max 5 characters)"
+msgstr ""
+
+#: src/screens/CreateToken.js:231
+msgid "Amount"
+msgstr ""
+
+#: src/screens/CreateToken.js:247
+msgid "Select address automatically"
+msgstr ""
+
+#: src/screens/CreateToken.js:252
+msgid "Destination address"
+msgstr ""
+
+#: src/components/OutputsWrapper.js:48
+#: src/components/tokens/TokenMint.js:112
+#: src/screens/CreateToken.js:253
+msgid "Address"
+msgstr ""
+
+#: src/screens/CreateToken.js:262
+#, javascript-format
+msgid "Token ${ _this.state.name } created"
+msgstr ""
+
+#: src/screens/CustomTokens.js:50
+msgid "Custom Tokens"
+msgstr ""
+
+#: src/screens/CustomTokens.js:51
+msgid ""
+"You can create your own digital token with customized specifications on "
+"Hathor Network with only a few clicks. They will fully work under the same "
+"technical assumptions of high scalability and decentralized consensus of "
+"our native HTR tokens. Custom tokens will always work independently of the "
+"price of the native HTR token, and they can serve multiple purposes."
+msgstr ""
+
+#: src/screens/CustomTokens.js:52
+msgid ""
+"Every custom token has a unique <strong>Configuration String</strong> which "
+"must be shared with all other people that will use the custom token."
+msgstr ""
+
+#: src/screens/CustomTokens.js:53
+msgid ""
+"If you want to use a custom token that already exists, you need to register "
+"this token in your Hathor Wallet. For this, you will need the custom "
+"token's Configuration String, which you can get from the creators of the "
+"token."
+msgstr ""
+
+#: src/screens/CustomTokens.js:55
+msgid "Create a new token"
+msgstr ""
+
+#: src/screens/CustomTokens.js:56
+msgid "Register a token"
+msgstr ""
+
+#: src/screens/CustomTokens.js:59
+msgid "Token registered with success!"
+msgstr ""
+
+#: src/screens/DashboardTx.js:127
+msgid "Blocks |fn:(See all blocks)|"
+msgstr ""
+
+#: src/screens/DashboardTx.js:134
+msgid "Transactions |fn:(See all transactions)|"
+msgstr ""
+
+#: src/components/Navigation.js:47
+#: src/screens/DashboardTx.js:154
+msgid "Explorer"
+msgstr ""
+
+#: src/screens/DashboardTx.js:155
+msgid "Here you can see the most recent transactions and blocks of the network."
+msgstr ""
+
+#: src/components/TokenHistory.js:242
+#: src/screens/DashboardTx.js:161
+msgid "ID"
+msgstr ""
+
+#: src/screens/DashboardTx.js:162
+msgid "Timestamp"
+msgstr ""
+
+#: src/screens/DecodeTx.js:91
+msgid "Decode tx"
+msgstr ""
+
+#: src/screens/DecodeTx.js:91
+msgid "push"
+msgstr ""
+
+#: src/screens/DecodeTx.js:91
+msgid ""
+"Write your transaction in hex value and click the button to get a human "
+"value description"
+msgstr ""
+
+#: src/screens/DecodeTx.js:93
+msgid "Could not decode this data to a transaction"
+msgstr ""
+
+#: src/screens/LoadWallet.js:115
+msgid "Write the 24 words of your wallet (separated by space)."
+msgstr ""
+
+#: src/screens/LoadWallet.js:116
+msgid "Words separated by single space"
+msgstr ""
+
+#: src/components/BackButton.js:33
+#: src/components/PinPasswordWrapper.js:60
+#: src/screens/LoadWallet.js:119
+#: src/screens/NewWallet.js:164
+#: src/screens/NewWallet.js:177
+msgid "Back"
+msgstr ""
+
+#: src/screens/LoadWallet.js:120
+msgid "Import data"
+msgstr ""
+
+#: src/screens/LoadingAddresses.js:66
+msgid "Loading transactions..."
+msgstr ""
+
+#: src/screens/LoadingAddresses.js:70
+msgid "Please wait while we load the transactions of all your addresses."
+msgstr ""
+
+#: src/screens/LoadingAddresses.js:71
+msgid ""
+"You will be automatically redirected to the wallet when we finish loading "
+"them."
+msgstr ""
+
+#: src/screens/LoadingAddresses.js:72
+#, javascript-format
+msgid "<strong>Addresses found:</strong> ${ this.props.addressesFound }"
+msgstr ""
+
+#: src/screens/LoadingAddresses.js:73
+msgid "<strong>Transactions found:</strong> ${ this.props.transactionsFound }"
+msgstr ""
+
+#: src/screens/LockedWallet.js:90
+msgid "Your wallet is locked. Please write down your PIN to unlock it."
+msgstr ""
+
+#: src/components/ModalResetAllData.js:67
+#: src/screens/LockedWallet.js:96
+#: src/screens/Settings.js:125
+msgid "Reset all data"
+msgstr ""
+
+#: src/screens/LockedWallet.js:97
+msgid "Unlock"
+msgstr ""
+
+#: src/screens/NewWallet.js:154
+msgid ". A new wallet is generated by 24 words."
+msgstr ""
+
+#: src/screens/NewWallet.js:155
+msgid ""
+". To have access to this wallet you must have all the words saved in the "
+"same order we will show to you."
+msgstr ""
+
+#: src/screens/NewWallet.js:156
+msgid ""
+". If someone manages to discover your words they can steal your tokens, so "
+"we advise you to save your words physically and don't show them to anyone."
+msgstr ""
+
+#: src/screens/NewWallet.js:160
+msgid "Ok, I got it!"
+msgstr ""
+
+#: src/screens/NewWallet.js:165
+msgid "Create my words"
+msgstr ""
+
+#: src/screens/NewWallet.js:174
+msgid "Your words have been created!"
+msgstr ""
+
+#: src/screens/NewWallet.js:175
+msgid ""
+"You should save them in a non-digital media, such as a piece of paper. We "
+"advise you to do it now, but you can do it later."
+msgstr ""
+
+#: src/components/ModalBackupWords.js:225
+#: src/screens/NewWallet.js:178
+msgid "Do it later"
+msgstr ""
+
+#: src/screens/NewWallet.js:179
+msgid "Backup now"
+msgstr ""
+
+#: src/screens/NewWallet.js:208
+#: src/screens/Wallet.js:102
+msgid "Backup completed!"
+msgstr ""
+
+#: src/screens/Page404.js:27
+msgid "Page not found"
+msgstr ""
+
+#: src/screens/Page404.js:29
+msgid "You tried to access a page that does not exist in Hathor Wallet"
+msgstr ""
+
+#: src/screens/PushTx.js:70
+msgid "Force push"
+msgstr ""
+
+#: src/screens/PushTx.js:78
+msgid "Push tx"
+msgstr ""
+
+#: src/screens/PushTx.js:78
+msgid "decode"
+msgstr ""
+
+#: src/screens/PushTx.js:78
+msgid ""
+"Write your transaction in hex value and click the button to send it to the "
+"network. (We do not push blocks to the network, only transactions)"
+msgstr ""
+
+#: src/screens/PushTx.js:80
+msgid "Transaction pushed to the network with success!"
+msgstr ""
+
+#: src/screens/SendTokens.js:143
+msgid "All your tokens were already added"
+msgstr ""
+
+#: src/screens/SendTokens.js:197
+msgid "Add another token"
+msgstr ""
+
+#: src/screens/SendTokens.js:198
+#: src/screens/SendTokens.js:218
+msgid "Send Tokens"
+msgstr ""
+
+#: src/screens/SendTokens.js:209
+msgid "Please, wait while we solve the proof of work and propagate the transaction"
+msgstr ""
+
+#: src/screens/SentryPermission.js:68
+msgid "Automatic bug report"
+msgstr ""
+
+#: src/screens/SentryPermission.js:70
+msgid ""
+"We would like your permission to automatically report bugs to our "
+"development team. It really helps us to improve our Wallet faster for our "
+"community."
+msgstr ""
+
+#: src/screens/SentryPermission.js:71
+msgid "The report collects the following data:"
+msgstr ""
+
+#: src/screens/SentryPermission.js:73
+msgid "The server your wallet is connected to;"
+msgstr ""
+
+#: src/screens/SentryPermission.js:74
+msgid "The version of your wallet;"
+msgstr ""
+
+#: src/screens/SentryPermission.js:75
+msgid "The version of your operating system;"
+msgstr ""
+
+#: src/screens/SentryPermission.js:76
+msgid "The details of the bug, including the context it has happened."
+msgstr ""
+
+#: src/screens/SentryPermission.js:78
+msgid ""
+"The report NEVER collects any sensitive data, such as your seed, your "
+"private keys, your addresses, or your balances."
+msgstr ""
+
+#: src/screens/SentryPermission.js:82
+msgid "I allow Hathor Wallet to report error information to Hathor team."
+msgstr ""
+
+#: src/screens/Settings.js:76
+msgid "Turn notifications off"
+msgstr ""
+
+#: src/screens/Settings.js:77
+msgid "Are you sure you don't want to receive wallet notifications?"
+msgstr ""
+
+#: src/screens/Settings.js:84
+msgid "Turn notifications on"
+msgstr ""
+
+#: src/screens/Settings.js:85
+msgid "Are you sure you want to receive wallet notifications?"
+msgstr ""
+
+#: src/screens/Settings.js:115
+#, javascript-format
+msgid "<strong>Server:</strong> You are connected to ${ serverURL }"
+msgstr ""
+
+#: src/screens/Settings.js:116
+msgid "Change server"
+msgstr ""
+
+#: src/screens/Settings.js:120
+msgid "Advanced Settings"
+msgstr ""
+
+#: src/screens/Settings.js:122
+msgid "Allow notifications:"
+msgstr ""
+
+#: src/components/ModalResetAllData.js:99
+#: src/screens/Settings.js:122
+#: src/screens/Settings.js:123
+msgid "Yes"
+msgstr ""
+
+#: src/components/ModalResetAllData.js:98
+#: src/screens/Settings.js:122
+#: src/screens/Settings.js:123
+msgid "No"
+msgstr ""
+
+#: src/screens/Settings.js:122
+#: src/screens/Settings.js:123
+msgid "Change"
+msgstr ""
+
+#: src/screens/Settings.js:123
+msgid "Automatically report bugs to Hathor:"
+msgstr ""
+
+#: src/screens/Signin.js:47
+msgid "You can start a new wallet or import data from a wallet that already exists."
+msgstr ""
+
+#: src/screens/Signin.js:49
+msgid "New wallet"
+msgstr ""
+
+#: src/screens/Signin.js:50
+msgid "Import wallet"
+msgstr ""
+
+#: src/screens/TransactionDetail.js:99
+#, javascript-format
+msgid "Transaction with hash ${ _this3.props.match.params.id } not found"
+msgstr ""
+
+#: src/screens/VersionError.js:54
+msgid ""
+"Your API backend version is not compatible with this admin. We expect at "
+"least version "
+msgstr ""
+
+#: src/screens/VersionError.js:55
+msgid "Please update you API version and try again"
+msgstr ""
+
+#: src/screens/VersionError.js:56
+msgid "Try again"
+msgstr ""
+
+#: src/screens/VersionError.js:57
+msgid "Change Server"
+msgstr ""
+
+#: src/screens/Wallet.js:163
+msgid ""
+"You haven't done the backup of your wallet yet. You should do it as soon as "
+"possible for your own safety."
+msgstr ""
+
+#: src/screens/Wallet.js:163
+msgid "Do it now"
+msgstr ""
+
+#: src/screens/Wallet.js:196
+msgid "Administrative Tools"
+msgstr ""
+
+#: src/screens/Wallet.js:224
+msgid "Balance & History"
+msgstr ""
+
+#: src/screens/Wallet.js:227
+#, javascript-format
+msgid "About ${ token.name }"
+msgstr ""
+
+#: src/screens/Wallet.js:250
+#, javascript-format
+msgid ""
+"Are you sure you want to unregister the token <strong>${ token.name } (${ "
+"token.symbol })</strong>?"
+msgstr ""
+
+#: src/screens/Wallet.js:251
+msgid ""
+"You won't lose your tokens, you just won't see this token on the side bar "
+"anymore."
+msgstr ""
+
+#: src/screens/Wallet.js:262
+#: src/screens/Wallet.js:285
+msgid "Unregister token"
+msgstr ""
+
+#: src/screens/WalletVersionError.js:91
+msgid ""
+"You've recently updated your wallet, and this new version is not compatible "
+"with your local data."
+msgstr ""
+
+#: src/screens/WalletVersionError.js:92
+msgid "You have two alternatives:"
+msgstr ""
+
+#: src/screens/WalletVersionError.js:94
+msgid ""
+"Use this new wallet version. In this case, you must reset and import your "
+"wallet again."
+msgstr ""
+
+#: src/screens/WalletVersionError.js:95
+msgid "Go back to the previous installed version."
+msgstr ""
+
+#: src/screens/WalletVersionError.js:97
+msgid ""
+"If you are going to reset your wallet, please double-check your backup "
+"before doing so."
+msgstr ""
+
+#: src/components/ModalBackupWords.js:290
+#: src/screens/WalletVersionError.js:98
+msgid "Backup Words"
+msgstr ""
+
+#: src/screens/WalletVersionError.js:99
+msgid "Reset Wallet"
+msgstr ""
+
+#: src/screens/WalletVersionError.js:103
+msgid "Backup done with success!"
+msgstr ""
+
+#: src/screens/Welcome.js:49
 msgid "Welcome to Hathor Wallet!"
 msgstr ""
 
-#: src/screens/Welcome.js:50
+#: src/screens/Welcome.js:51
 msgid "This wallet is connected to the "
 msgstr ""
 
-#: src/screens/Welcome.js:51
+#: src/screens/Welcome.js:52
 msgid ""
 "Using this wallet you can (i) check your balance and history, (ii) send & "
 "receive HTR and other tokens running on Hathor, and (iii) create and manage "
 "your own tokens."
 msgstr ""
 
-#: src/screens/Welcome.js:52
+#: src/screens/Welcome.js:53
 msgid ""
 "You should never share any information besides your addresses to other "
 "people. You're fully responsible for keeping your tokens safe."
 msgstr ""
 
-#: src/screens/Welcome.js:53
+#: src/screens/Welcome.js:54
 msgid "For further information, check our website (https://hathor.network/)."
 msgstr ""
 
-#: src/screens/Welcome.js:57
+#: src/screens/Welcome.js:58
 msgid ""
 "I understand that I am fully responsible for keeping my tokens safe and "
 "that it is not possible to revert transactions after they are executed."
 msgstr ""
 
-#: src/screens/Welcome.js:61
+#: src/screens/Welcome.js:62
 msgid "Get started"
+msgstr ""
+
+#: src/components/ChoosePassword.js:44
+msgid ""
+"Please, choose a password to encrypt your sensitive data while using the "
+"wallet."
+msgstr ""
+
+#: src/components/ChoosePassword.js:45
+msgid ""
+"Your password must have at least 8 characters and at least one lower case "
+"character, one upper case character, one number, and one special character."
+msgstr ""
+
+#: src/components/ChoosePassword.js:51
+#: src/components/ChoosePin.js:45
+#: src/components/TokenHistory.js:228
+msgid "Next"
+msgstr ""
+
+#: src/components/ChoosePin.js:41
+msgid ""
+"The PIN is a 6-digit password requested to authorize actions in your "
+"wallet, such as generating new addresses and sending tokens."
+msgstr ""
+
+#: src/components/ModalAddManyTokens.js:52
+msgid "Must provide configuration string"
+msgstr ""
+
+#: src/components/ModalAddManyTokens.js:85
+msgid "Register Custom Tokens"
+msgstr ""
+
+#: src/components/ModalAddManyTokens.js:91
+msgid ""
+"You can register one or more tokens writing the configuration string of "
+"each one below."
+msgstr ""
+
+#: src/components/ModalAddManyTokens.js:94
+msgid "Configuration strings"
+msgstr ""
+
+#: src/components/ModalAddManyTokens.js:106
+#: src/components/ModalAddToken.js:91
+#: src/components/ModalBackupWords.js:171
+#: src/components/ModalBackupWords.js:269
+#: src/components/ModalEditToken.js:94
+#: src/components/ModalPin.js:89
+#: src/components/ModalUnregisteredTokenInfo.js:112
+#: src/components/tokens/TokenAction.js:127
+msgid "Cancel"
+msgstr ""
+
+#: src/components/ModalAddManyTokens.js:107
+#: src/components/ModalAddToken.js:92
+msgid "Register"
+msgstr ""
+
+#: src/components/ModalAddToken.js:51
+msgid "Must provide configuration string or uid, name, and symbol"
+msgstr ""
+
+#: src/components/ModalAddToken.js:70
+msgid "Register a new token"
+msgstr ""
+
+#: src/components/ModalAddToken.js:76
+msgid ""
+"To register a token that already exists, just write down its configuration "
+"string"
+msgstr ""
+
+#: src/components/ModalAddToken.js:79
+msgid "Configuration string"
+msgstr ""
+
+#: src/components/ModalAddressQRCode.js:70
+#.  If copied with success
+msgid "Address copied to clipboard!"
+msgstr ""
+
+#: src/components/ModalAddressQRCode.js:83
+#: src/components/WalletAddress.js:77
+msgid "Address to receive tokens"
+msgstr ""
+
+#: src/components/ModalAddressQRCode.js:93
+#: src/components/WalletAddress.js:81
+msgid "Copy to clipboard"
+msgstr ""
+
+#: src/components/ModalAddressQRCode.js:96
+#: src/components/ModalAddressQRCode.js:101
+msgid "Download"
+msgstr ""
+
+#: src/components/ModalAddressQRCode.js:100
+msgid "Close"
+msgstr ""
+
+#: src/components/ModalBackupWords.js:118
+msgid "Invalid number of words"
+msgstr ""
+
+#: src/components/ModalBackupWords.js:125
+msgid "Invalid sequence of words"
+msgstr ""
+
+#: src/components/ModalBackupWords.js:157
+msgid "We need your password to show the words"
+msgstr ""
+
+#: src/components/ModalBackupWords.js:160
+#: src/components/ModalResetAllData.js:77
+msgid "Password*"
+msgstr ""
+
+#: src/components/ModalBackupWords.js:172
+#: src/components/ModalPin.js:90
+#: src/components/tokens/TokenMelt.js:91
+msgid "Go"
+msgstr ""
+
+#: src/components/ModalBackupWords.js:212
+msgid ""
+"Save the words and never share them. Anyone who has access to them will "
+"control your tokens."
+msgstr ""
+
+#: src/components/ModalBackupWords.js:226
+msgid "Ok, I have saved them"
+msgstr ""
+
+#: src/components/ModalBackupWords.js:255
+msgid ""
+"Please, select the words below in the correct order. This is for your "
+"safety and to ensure you wrote them down correctly."
+msgstr ""
+
+#: src/components/ModalBackupWords.js:270
+msgid "Validate"
+msgstr ""
+
+#: src/components/ModalEditToken.js:95
+msgid "Save"
+msgstr ""
+
+#: src/components/ModalResetAllData.js:43
+msgid "You must write your password or check that you have forgotten it"
+msgstr ""
+
+#: src/components/ModalResetAllData.js:48
+msgid "Confirm message does not match"
+msgstr ""
+
+#: src/components/ModalResetAllData.js:56
+msgid ""
+"If you reset your wallet, all data will be deleted, and you will lose "
+"access to your tokens. To recover access to your tokens, you will need to "
+"import your words again."
+msgstr ""
+
+#: src/components/ModalResetAllData.js:58
+#, javascript-format
+msgid "${ firstMessage } You still haven't done the backup of your words."
+msgstr ""
+
+#: src/components/ModalResetAllData.js:74
+#, javascript-format
+msgid ""
+"If you still wanna do it, we need your password and for you to write down "
+"<strong>'${ CONFIRM_RESET_MESSAGE }'</strong> to confirm the operation."
+msgstr ""
+
+#: src/components/ModalResetAllData.js:81
+msgid "Confirm message*"
+msgstr ""
+
+#: src/components/ModalResetAllData.js:82
+#, javascript-format
+msgid "Write '${ CONFIRM_RESET_MESSAGE }'"
+msgstr ""
+
+#: src/components/ModalResetAllData.js:86
+msgid "I forgot my password"
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:51
+msgid "Report sent to Hathor Team! Thanks for the support!"
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:61
+#, javascript-format
+msgid ""
+"Error Message: ${ message }\n"
+"Stack trace: ${ stack }"
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:67
+msgid "Ooops... Something went wrong..."
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:70
+msgid "An unhandled exception occurred in your wallet."
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:71
+msgid ""
+"If you'd like to help us improve it, please click in the button bellow to "
+"copy the error details to your clipboard."
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:75
+msgid "Copy Error"
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:78
+msgid "Send error report to help the developers"
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:80
+msgid ""
+"Send it to us with all relevant information about the issues you are "
+"experiencing."
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:81
+msgid ""
+"If you are facing recurrent issues, resetting your wallet may solve your "
+"problem. Please, double-check your backup before doing it."
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:88
+msgid "Home"
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:89
+msgid "Dismiss"
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:90
+msgid "Reset wallet"
+msgstr ""
+
+#: src/components/ModalUnregisteredTokenInfo.js:81
+msgid "Unregistered token"
+msgstr ""
+
+#: src/components/ModalUnregisteredTokenInfo.js:97
+msgid ""
+"This token is <strong>not registered</strong> in your wallet. You must "
+"<strong>always validate the token uid</strong>, to ensure you are not being "
+"scammed."
+msgstr ""
+
+#: src/components/ModalUnregisteredTokenInfo.js:98
+msgid "The token uid is always unique, and your only trust point."
+msgstr ""
+
+#: src/components/ModalUnregisteredTokenInfo.js:103
+msgid "I want to register this token"
+msgstr ""
+
+#: src/components/ModalUnregisteredTokenInfo.js:111
+msgid "Register token"
+msgstr ""
+
+#: src/components/Navigation.js:37
+msgid "Wallet"
+msgstr ""
+
+#: src/components/Navigation.js:40
+msgid "Send tokens"
+msgstr ""
+
+#: src/components/Navigation.js:43
+msgid "Custom tokens"
+msgstr ""
+
+#: src/components/Navigation.js:50
+msgid "Transactions"
+msgstr ""
+
+#: src/components/Navigation.js:51
+msgid "Decode Tx"
+msgstr ""
+
+#: src/components/Navigation.js:52
+msgid "Push Tx"
+msgstr ""
+
+#: src/components/OutputsWrapper.js:53
+msgid "Time lock"
+msgstr ""
+
+#: src/components/OutputsWrapper.js:56
+msgid "Date and time in GMT"
+msgstr ""
+
+#: src/components/PinPasswordWrapper.js:41
+msgid "Both fields must be equal"
+msgstr ""
+
+#: src/components/SearchTx.js:93
+msgid "Find transaction/block by hash or address"
+msgstr ""
+
+#: src/components/SearchTx.js:95
+msgid "Invalid address and hash format"
+msgstr ""
+
+#: src/components/SendTokensOne.js:205
+msgid "Token:"
+msgstr ""
+
+#: src/components/SendTokensOne.js:207
+msgid "Remove"
+msgstr ""
+
+#: src/components/SendTokensOne.js:216
+msgid "Choose inputs automatically"
+msgstr ""
+
+#: src/components/SendTokensOne.js:220
+msgid "Inputs"
+msgstr ""
+
+#: src/components/ServerStatus.js:34
+msgid "Online"
+msgstr ""
+
+#: src/components/ServerStatus.js:34
+msgid "Offline"
+msgstr ""
+
+#: src/components/TokenBar.js:136
+msgid "Tokens"
+msgstr ""
+
+#: src/components/TokenBar.js:164
+#: src/components/TokenBar.js:165
+msgid "Lock wallet"
+msgstr ""
+
+#: src/components/TokenBar.js:168
+#: src/components/TokenBar.js:169
+msgid "Settings"
+msgstr ""
+
+#: src/components/TokenHistory.js:227
+msgid "Previous"
+msgstr ""
+
+#: src/components/TokenHistory.js:241
+msgid "Date"
+msgstr ""
+
+#: src/components/TokenHistory.js:243
+msgid "Type"
+msgstr ""
+
+#: src/components/TokenHistory.js:245
+msgid "Value"
+msgstr ""
+
+#: src/components/TokenHistory.js:259
+msgid "Voided"
+msgstr ""
+
+#: src/components/TokenHistory.js:275
+msgid "Token creation"
+msgstr ""
+
+#: src/components/TokenHistory.js:277
+#: src/components/TxData.js:526
+msgid "Received"
+msgstr ""
+
+#: src/components/TokenHistory.js:282
+msgid "Token deposit"
+msgstr ""
+
+#: src/components/TokenHistory.js:284
+#: src/components/TxData.js:532
+msgid "Sent"
+msgstr ""
+
+#: src/components/TokenHistory.js:314
+msgid "You are receiving transactions in real time."
+msgstr ""
+
+#: src/components/TokenHistory.js:319
+#, javascript-format
+msgid "Page ${ page }"
+msgstr ""
+
+#: src/components/TxData.js:290
+msgid "Mint authority"
+msgstr ""
+
+#: src/components/TxData.js:292
+msgid "Melt authority"
+msgstr ""
+
+#: src/components/TxData.js:295
+#.  Should never come here
+msgid "Unknown authority"
+msgstr ""
+
+#: src/components/TxData.js:303
+msgid "This token is not registered in your wallet."
+msgstr ""
+
+#: src/components/TxData.js:318
+#, javascript-format
+msgid "${ output.script } (unknown script)"
+msgstr ""
+
+#: src/components/TxData.js:319
+msgid "Spent"
+msgstr ""
+
+#: src/components/TxData.js:347
+#, javascript-format
+msgid "${ ret } | Locked until ${ parsedTimestamp }"
+msgstr ""
+
+#: src/components/TxData.js:354
+#, javascript-format
+msgid ""
+"Match values (nano contract), oracle id: ${ decoded.oracle_data_id } hash: "
+"${ decoded.oracle_pubkey_hash }"
+msgstr ""
+
+#: src/components/TxData.js:405
+#.  there are conflicts, but it is not voided
+msgid ""
+"Although there is a double-spending transaction, this transaction has the "
+"highest accumulated weight and is valid."
+msgstr ""
+
+#: src/components/TxData.js:410
+#.  there are conflicts, but it is not voided
+msgid "Transactions double spending the same outputs as this transaction:"
+msgstr ""
+
+#: src/components/TxData.js:467
+#, javascript-format
+msgid "Over ${ acc }"
+msgstr ""
+
+#: src/components/TxData.js:472
+msgid "Retrieving accumulated weight data..."
+msgstr ""
+
+#: src/components/TxData.js:503
+msgid "Tokens:"
+msgstr ""
+
+#: src/components/TxData.js:517
+msgid "Your address"
+msgstr ""
+
+#: src/components/TxData.js:556
+msgid "Balance:"
+msgstr ""
+
+#: src/components/TxData.js:565
+msgid "First block:"
+msgstr ""
+
+#: src/components/TxData.js:574
+msgid "Accumulated weight:"
+msgstr ""
+
+#: src/components/TxData.js:583
+msgid "Confirmation level:"
+msgstr ""
+
+#: src/components/TxData.js:593
+msgid "Block"
+msgstr ""
+
+#: src/components/TxData.js:593
+msgid "Transaction"
+msgstr ""
+
+#: src/components/TxData.js:597
+msgid "Type:"
+msgstr ""
+
+#: src/components/TxData.js:598
+msgid "Time:"
+msgstr ""
+
+#: src/components/TxData.js:599
+msgid "Nonce:"
+msgstr ""
+
+#: src/components/TxData.js:600
+msgid "Weight:"
+msgstr ""
+
+#: src/components/TxData.js:611
+msgid "Inputs:"
+msgstr ""
+
+#: src/components/TxData.js:615
+msgid "Outputs:"
+msgstr ""
+
+#: src/components/TxData.js:622
+msgid "Parents:"
+msgstr ""
+
+#: src/components/TxData.js:626
+msgid "Children:"
+msgstr ""
+
+#: src/components/TxData.js:626
+msgid "Click to hide"
+msgstr ""
+
+#: src/components/TxData.js:626
+msgid "Click to show"
+msgstr ""
+
+#: src/components/TxData.js:631
+msgid "Verification neighbors"
+msgstr ""
+
+#: src/components/TxData.js:634
+msgid "Funds neighbors"
+msgstr ""
+
+#: src/components/TxData.js:646
+msgid "Hide raw transaction"
+msgstr ""
+
+#: src/components/TxData.js:646
+msgid "Show raw transaction"
+msgstr ""
+
+#: src/components/TxData.js:649
+msgid "Copy raw tx to clipboard"
+msgstr ""
+
+#: src/components/TxData.js:660
+#: src/components/WalletAddress.js:96
+msgid "Copied to clipboard!"
+msgstr ""
+
+#: src/components/TxTextInput.js:25
+#, javascript-format
+msgid "Click |link:here| to ${ props.otherAction } this transaction"
+msgstr ""
+
+#: src/components/Version.js:21
+msgid "Version"
+msgstr ""
+
+#: src/components/WalletAddress.js:85
+msgid "Generate new address"
+msgstr ""
+
+#: src/components/WalletAddress.js:85
+msgid "Get new address"
+msgstr ""
+
+#: src/components/WalletAddress.js:87
+msgid "Get qrcode"
+msgstr ""
+
+#: src/components/WalletAddress.js:97
+msgid "You must use an old address before generating new ones"
+msgstr ""
+
+#: src/components/WalletBalance.js:32
+msgid "Total:"
+msgstr ""
+
+#: src/components/WalletBalance.js:33
+msgid "Available:"
+msgstr ""
+
+#: src/components/WalletBalance.js:34
+msgid "Locked:"
+msgstr ""
+
+#: src/components/WalletHistory.js:23
+msgid "Transaction history"
+msgstr ""
+
+#: src/components/tokens/TokenDelegate.js:38
+#: src/components/tokens/TokenDelegate.js:67
+#: src/components/tokens/TokenDestroy.js:35
+#: src/components/tokens/TokenDestroy.js:85
+msgid "Mint"
+msgstr ""
+
+#: src/components/tokens/TokenDelegate.js:38
+#: src/components/tokens/TokenDelegate.js:67
+#: src/components/tokens/TokenDestroy.js:35
+#: src/components/tokens/TokenDestroy.js:85
+msgid "Melt"
+msgstr ""
+
+#: src/components/tokens/TokenDelegate.js:40
+#, javascript-format
+msgid "${ type } output delegated!"
+msgstr ""
+
+#: src/components/tokens/TokenDelegate.js:45
+#: src/components/tokens/TokenDestroy.js:66
+msgid "mint"
+msgstr ""
+
+#: src/components/tokens/TokenDelegate.js:45
+#: src/components/tokens/TokenDestroy.js:66
+msgid "melt"
+msgstr ""
+
+#: src/components/tokens/TokenDelegate.js:50
+#, javascript-format
+msgid "Address of the new ${ type } authority"
+msgstr ""
+
+#: src/components/tokens/TokenDelegate.js:58
+msgid "Create another ${ type } output for you?"
+msgstr ""
+
+#: src/components/tokens/TokenDelegate.js:60
+#: src/components/tokens/TokenMelt.js:84
+#: src/components/tokens/TokenMint.js:143
+msgid "Leave it checked unless you know what you are doing"
+msgstr ""
+
+#: src/components/tokens/TokenDestroy.js:48
+#, javascript-format
+msgid "${ label } outputs destroyed!"
+msgstr ""
+
+#: src/components/tokens/TokenDestroy.js:70
+#, javascript-format
+msgid ""
+"Are you sure you want to destroy <strong>${ quantity } ${ type }</strong> "
+"authority ${ plural }?"
+msgstr ""
+
+#: src/components/tokens/TokenDestroy.js:87
+msgid "Destroy"
+msgstr ""
+
+#: src/components/tokens/TokenMelt.js:47
+msgid "Can't find outputs to melt the amount requested."
+msgstr ""
+
+#: src/components/tokens/TokenMelt.js:50
+#, javascript-format
+msgid "${ prettyAmountValue } ${ _this.props.token.symbol } melted!"
+msgstr ""
+
+#: src/components/tokens/TokenMelt.js:64
+#, javascript-format
+msgid "The total amount you have is only ${ prettyWalletAmount }."
+msgstr ""
+
+#: src/components/tokens/TokenMelt.js:82
+msgid "Create another melt output for you?"
+msgstr ""
+
+#: src/components/tokens/TokenMelt.js:91
+msgid "Melt tokens"
+msgstr ""
+
+#: src/components/tokens/TokenMint.js:63
+#, javascript-format
+msgid "${ prettyAmountValue } ${ _this.props.token.symbol } minted!"
+msgstr ""
+
+#: src/components/tokens/TokenMint.js:73
+msgid "Address is required when not selected automatically"
+msgstr ""
+
+#: src/components/tokens/TokenMint.js:106
+msgid "Automatically select address to receive new tokens"
+msgstr ""
+
+#: src/components/tokens/TokenMint.js:141
+msgid "Create another mint output for you?"
 msgstr ""

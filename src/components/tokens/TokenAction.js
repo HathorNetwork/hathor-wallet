@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import ModalPin from '../../components/ModalPin';
 import ReactLoading from 'react-loading';
@@ -123,7 +124,7 @@ class TokenAction extends React.Component {
         <div className='d-flex mt-4 flex-column'>
           {this.state.errorMessage && <p className='text-danger mb-4'>{this.state.errorMessage}</p>}
           <div className='d-flex align-items-center'>
-            <button className='btn btn-secondary mr-3' disabled={this.state.loading} onClick={this.props.cancelAction}>Cancel</button>
+            <button className='btn btn-secondary mr-3' disabled={this.state.loading} onClick={this.props.cancelAction}>{t`Cancel`}</button>
             <button className='btn btn-hathor mr-4' disabled={this.state.loading} onClick={this.validateForm}>{this.props.buttonName}</button>
             {this.state.loading && <ReactLoading type='spin' color='#0081af' width={32} height={32} delay={200} />}
           </div>

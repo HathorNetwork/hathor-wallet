@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { connect } from "react-redux";
+import { t } from 'ttag';
 
 
 const mapStateToProps = (state) => {
@@ -30,7 +31,7 @@ const ServerStatus = (props) => {
   return (
     <div className="d-flex flex-column version-wrapper align-items-center">
       <span className={props.network.startsWith("testnet") ? "text-testnet" : ""}>{props.network}</span>
-      <span className={props.isOnline ? "" : "text-danger"}>{props.isOnline ? 'Online' : 'Offline'}</span>
+      <span className={props.isOnline ? "" : "text-danger"}>{props.isOnline ? t`Online` : t`Offline`}</span>
     </div>
   );
 };

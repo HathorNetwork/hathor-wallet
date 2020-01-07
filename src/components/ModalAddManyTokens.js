@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
@@ -48,7 +49,7 @@ class ModalAddManyTokens extends React.Component {
     e.preventDefault();
     const configs = this.refs.configs.value.trim();
     if (configs === '') {
-      this.setState({ errorMessage: 'Must provide configuration string' });
+      this.setState({ errorMessage: t`Must provide configuration string` });
       return;
     }
 
@@ -81,16 +82,16 @@ class ModalAddManyTokens extends React.Component {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Register Custom Tokens</h5>
+              <h5 className="modal-title" id="exampleModalLabel">{t`Register Custom Tokens`}</h5>
               <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <p>You can register one or more tokens writing the configuration string of each one below.</p>
+              <p>{t`You can register one or more tokens writing the configuration string of each one below.`}</p>
               <form ref="formAddToken">
                 <div className="form-group">
-                  <textarea className="form-control" rows={8} ref="configs" placeholder="Configuration strings" />
+                  <textarea className="form-control" rows={8} ref="configs" placeholder={t`Configuration strings`} />
                 </div>
                 <div className="row">
                   <div className="col-12 col-sm-10">
@@ -102,8 +103,8 @@ class ModalAddManyTokens extends React.Component {
               </form>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button onClick={this.handleAdd} type="button" className="btn btn-hathor">Register</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`Cancel`}</button>
+              <button onClick={this.handleAdd} type="button" className="btn btn-hathor">{t`Register`}</button>
             </div>
           </div>
         </div>

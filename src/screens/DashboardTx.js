@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
+import { str2jsx } from '../utils/i18n';
 import TxRow from '../components/TxRow';
 import SearchTx from '../components/SearchTx';
 import BackButton from '../components/BackButton';
@@ -121,11 +123,17 @@ class DashboardTx extends React.Component {
       return (
         <tbody>
           {this.state.blocks.length ?
-              <tr className="tr-title"><td colSpan="2">Blocks <a href="true" onClick={(e) => this.goToList(e, '/blocks/')}>(See all blocks)</a></td></tr>
+              <tr className="tr-title"><td colSpan="2">
+                {str2jsx(t`Blocks |fn:(See all blocks)|`,
+                         {fn: (x) => <a href="true" onClick={(e) => this.goToList(e, '/blocks/')}>{x}</a>})}
+              </td></tr>
           : null}
           {renderRows(this.state.blocks)}
           {this.state.transactions.length ?
-              <tr className="tr-title"><td colSpan="2">Transactions <a href="true" onClick={(e) => this.goToList(e, '/transactions/')}>(See all transactions)</a></td></tr>
+              <tr className="tr-title"><td colSpan="2">
+                {str2jsx(t`Transactions |fn:(See all transactions)|`,
+                         {fn: (x) => <a href="true" onClick={(e) => this.goToList(e, '/transactions/')}>{x}</a>})}
+              </td></tr>
           : null}
           {renderRows(this.state.transactions)}
         </tbody>
@@ -143,15 +151,15 @@ class DashboardTx extends React.Component {
     return (
       <div className="content-wrapper">
         <BackButton {...this.props} />
-        <h3 className="mt-4">Explorer</h3>
-        <p className="mt-4">Here you can see the most recent transactions and blocks of the network.</p>
+        <h3 className="mt-4">{t`Explorer`}</h3>
+        <p className="mt-4">{t`Here you can see the most recent transactions and blocks of the network.`}</p>
         <SearchTx {...this.props} newData={this.newData} resetData={this.resetData} />
         <div className="table-responsive">
           <table className="table" id="tx-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Timestamp</th>
+                <th>{t`ID`}</th>
+                <th>{t`Timestamp`}</th>
               </tr>
             </thead>
             {renderTableBody()}

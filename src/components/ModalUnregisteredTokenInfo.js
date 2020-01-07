@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
@@ -77,7 +78,7 @@ class ModalUnregisteredTokenInfo extends React.Component {
         <div className="modal-header">
           <div className="d-flex flex-row">
             <h5 className="modal-title">{this.state.token.name} ({this.state.token.symbol})</h5>
-            <span className='ml-2 unregistered-token-badge'> Unregistered token </span>
+            <span className='ml-2 unregistered-token-badge'> {t`Unregistered token`} </span>
           </div>
           <button type="button" className="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
@@ -93,13 +94,13 @@ class ModalUnregisteredTokenInfo extends React.Component {
             <div className="modal-body">
               {renderTokenInfo()}
               <div className="mt-4">
-                <p>This token is <strong>not registered</strong> in your wallet. You must <strong>always validate the token uid</strong>, to ensure you are not being scammed.</p>
-                <p>The token uid is always unique, and your only trust point.</p>
+                <p>{t`This token is <strong>not registered</strong> in your wallet. You must <strong>always validate the token uid</strong>, to ensure you are not being scammed.`}</p>
+                <p>{t`The token uid is always unique, and your only trust point.`}</p>
                 <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form} onSubmit={(e) => e.preventDefault()}>
                   <div className="form-check">
                     <input className="form-check-input" type="checkbox" ref="iWantToRegister" id="iWantToRegister" required />
                     <label className="form-check-label" htmlFor="iWantToRegister">
-                      I want to register this token
+                      {t`I want to register this token`}
                     </label>
                   </div>
                 </form>
@@ -107,8 +108,8 @@ class ModalUnregisteredTokenInfo extends React.Component {
               </div>
             </div>
             <div className="modal-footer">
-              <button onClick={this.register} type="button" className="btn btn-secondary">Register token</button>
-              <button type="button" className="btn btn-hathor" data-dismiss="modal">Cancel</button>
+              <button onClick={this.register} type="button" className="btn btn-secondary">{t`Register token`}</button>
+              <button type="button" className="btn btn-hathor" data-dismiss="modal">{t`Cancel`}</button>
             </div>
           </div>
       );

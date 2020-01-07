@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import tokens from '../utils/tokens';
 
 
@@ -82,16 +83,16 @@ class ModalEditToken extends React.Component {
               <p>You are editing the token with uid <strong>({this.props.token.uid})</strong></p>
               <form ref="formEditToken" className={this.state.formValidated ? 'was-validated' : ''}>
                 <div className="form-group">
-                  <input type="text" required className="form-control" ref={this.shortName} placeholder="Short name" />
+                  <input type="text" required className="form-control" ref={this.shortName} placeholder={t`Short name`} />
                 </div>
                 <div className="form-group">
-                  <input type="text" required className="form-control" pattern="\w{1,5}" ref={this.symbol} placeholder="Symbol" />
+                  <input type="text" required className="form-control" pattern="\w{1,5}" ref={this.symbol} placeholder={t`Symbol`} />
                 </div>
               </form>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button onClick={this.handleSave} type="button" className="btn btn-hathor">Save</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`Cancel`}</button>
+              <button onClick={this.handleSave} type="button" className="btn btn-hathor">{t`Save`}</button>
             </div>
           </div>
         </div>

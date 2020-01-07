@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 
@@ -31,7 +32,7 @@ class TokenDestroy extends React.Component {
    * @return {Object} Object with promise and success message
    */
   executeDestroy = (pin) => {
-    const label = this.props.action === 'destroy-mint' ? 'Mint' : 'Melt';
+    const label = this.props.action === 'destroy-mint' ? t`Mint` : t`Melt`;
     const array = this.props.authorityOutputs;
     const data = [];
     // Get the number of outputs the user requested to destroy in the expected format
@@ -44,7 +45,7 @@ class TokenDestroy extends React.Component {
       });
     }
     const promise = hathorLib.tokens.destroyAuthority(data, pin);
-    return { promise, message: `${label} outputs destroyed!`};
+    return { promise, message: t`${label} outputs destroyed!`};
   }
 
   /**
@@ -62,11 +63,11 @@ class TokenDestroy extends React.Component {
   render() {
     const getDestroyBody = () => {
       const quantity = parseInt(this.state.destroyQuantity, 10);
-      const type = this.props.action === 'destroy-mint' ? 'mint' : 'melt';
+      const type = this.props.action === 'destroy-mint' ? t`mint` : t`melt`;
       const plural = hathorLib.helpers.plural(quantity, 'output', 'outputs');
 
       return (
-        <p>Are you sure you want to destroy <strong>{quantity} {type}</strong> authority {plural}?</p>
+        <p>{t`Are you sure you want to destroy <strong>${quantity} ${type}</strong> authority ${plural}?`}</p>
       )
     }
 
@@ -81,9 +82,9 @@ class TokenDestroy extends React.Component {
       );
     }
 
-    const title = `Destroy ${this.props.action === 'destroy-mint' ? 'Mint' : 'Melt'}`;
+    const title = `Destroy ${this.props.action === 'destroy-mint' ? t`Mint` : t`Melt`}`;
 
-    return <TokenAction renderForm={renderForm} validateForm={this.destroy} title={title} buttonName='Destroy' onPinSuccess={this.executeDestroy} pinBodyTop={getDestroyBody()} {...this.props} />
+    return <TokenAction renderForm={renderForm} validateForm={this.destroy} title={title} buttonName={t`Destroy`} onPinSuccess={this.executeDestroy} pinBodyTop={getDestroyBody()} {...this.props} />
   }
 }
 

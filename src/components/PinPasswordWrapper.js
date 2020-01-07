@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
 
 
 /**
@@ -37,7 +38,7 @@ class PinPasswordWrapper extends React.Component {
       const password = this.refs.password.value;
       const confirmPassword = this.refs.confirmPassword.value;
       if (password !== confirmPassword) {
-        this.setState({ errorMessage: 'Both fields must be equal' });
+        this.setState({ errorMessage: t`Both fields must be equal` });
       } else {
         this.props.success();
       }
@@ -56,7 +57,7 @@ class PinPasswordWrapper extends React.Component {
         </form>
         {this.state.errorMessage && <p className="mb-4 text-danger">{this.state.errorMessage}</p>}
         <div className="d-flex justify-content-between flex-row w-100">
-          <button onClick={this.props.back} type="button" className="btn btn-secondary">Back</button>
+          <button onClick={this.props.back} type="button" className="btn btn-secondary">{t`Back`}</button>
           <button onClick={this.next} type="button" className="btn btn-hathor">{this.props.button}</button>
         </div>
       </div>

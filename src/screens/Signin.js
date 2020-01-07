@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
+
 import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
 import InitialImages from '../components/InitialImages';
@@ -42,10 +44,10 @@ class Signin extends React.Component {
         <div className="inside-white-wrapper col-sm-12 col-md-8">
           <div className="d-flex align-items-center flex-column inside-div">
             <img className="hathor-logo" src={logo} alt="" />
-            <p className="mt-4 mb-4">You can start a new wallet or import data from a wallet that already exists.</p>
+            <p className="mt-4 mb-4">{t`You can start a new wallet or import data from a wallet that already exists.`}</p>
             <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
-              <button onClick={this.goToNewWallet} type="button" className="btn btn-hathor mr-3">New wallet</button>
-              <button onClick={this.goToLoadWallet} type="button" className="btn btn-hathor">Import wallet</button>
+              <button onClick={this.goToNewWallet} type="button" className="btn btn-hathor mr-3">{t`New wallet`}</button>
+              <button onClick={this.goToLoadWallet} type="button" className="btn btn-hathor">{t`Import wallet`}</button>
             </div>
           </div>
           <InitialImages />

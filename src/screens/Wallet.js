@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import WalletHistory from '../components/WalletHistory';
 import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
@@ -98,7 +99,7 @@ class Wallet extends React.Component {
     $('#backupWordsModal').modal('hide');
     hathorLib.wallet.markBackupAsDone();
     this.props.updateWords(null);
-    this.setState({ backupDone: true, successMessage: 'Backup completed!' }, () => {
+    this.setState({ backupDone: true, successMessage: t`Backup completed!` }, () => {
       this.refs.alertSuccess.show(1000);
     });
   }
@@ -159,7 +160,7 @@ class Wallet extends React.Component {
     const renderBackupAlert = () => {
       return (
         <div ref="backupAlert" className="alert alert-warning backup-alert" role="alert">
-          You haven't done the backup of your wallet yet. You should do it as soon as possible for your own safety. <a href="true" onClick={(e) => this.backupClicked(e)}>Do it now</a>
+          {t`You haven't done the backup of your wallet yet. You should do it as soon as possible for your own safety.`} <a href="true" onClick={(e) => this.backupClicked(e)}>{t`Do it now`}</a>
         </div>
       )
     }
@@ -192,7 +193,7 @@ class Wallet extends React.Component {
       if (this.shouldShowAdministrativeTab()) {
         return (
             <li className="nav-item">
-              <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">Administrative Tools</a>
+              <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">{t`Administrative Tools`}</a>
           </li>
         );
       } else {
@@ -220,10 +221,10 @@ class Wallet extends React.Component {
           <div>
             <ul className="nav nav-tabs mb-4" id="tokenTab" role="tablist">
               <li className="nav-item">
-                <a className="nav-link active" id="wallet-tab" data-toggle="tab" href="#wallet" role="tab" aria-controls="home" aria-selected="true">Balance & History</a>
+                <a className="nav-link active" id="wallet-tab" data-toggle="tab" href="#wallet" role="tab" aria-controls="home" aria-selected="true">{t`Balance & History`}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" id="token-tab" data-toggle="tab" href="#token" role="tab" aria-controls="token" aria-selected="false">About {token.name}</a>
+                <a className="nav-link" id="token-tab" data-toggle="tab" href="#token" role="tab" aria-controls="token" aria-selected="false">{t`About ${token.name}`}</a>
               </li>
               {renderTabAdmin()}
             </ul>
@@ -246,8 +247,8 @@ class Wallet extends React.Component {
 
       return (
         <div>
-          <p>Are you sure you want to unregister the token <strong>{token.name} ({token.symbol})</strong>?</p>
-          <p>You won't lose your tokens, you just won't see this token on the side bar anymore.</p>
+          <p>{t`Are you sure you want to unregister the token <strong>${token.name} (${token.symbol})</strong>?`}</p>
+          <p>{t`You won't lose your tokens, you just won't see this token on the side bar anymore.`}</p>
         </div>
       )
     }
@@ -258,7 +259,7 @@ class Wallet extends React.Component {
           <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
             <p className='token-name mb-0'>
               <strong>{token ? token.name : ''}</strong>
-              {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title="Unregister token" onClick={this.unregisterClicked}></i>}
+              {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>}
             </p>
           </div>
           {renderTokenData(token)}
@@ -281,7 +282,7 @@ class Wallet extends React.Component {
         </div>
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title="Unregister token" body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
+        <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title={t`Unregister token`} body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
         <TokenBar {...this.props} />
       </div>
     );

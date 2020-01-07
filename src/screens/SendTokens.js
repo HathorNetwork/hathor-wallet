@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import ReactLoading from 'react-loading';
 import ModalPin from '../components/ModalPin';
@@ -139,7 +140,7 @@ class SendTokens extends React.Component {
    */
   addAnotherToken = () => {
     if (this.state.txTokens.length === this.props.tokens.length) {
-      this.setState({ errorMessage: 'All your tokens were already added' });
+      this.setState({ errorMessage: t`All your tokens were already added` });
       return;
     }
 
@@ -193,8 +194,8 @@ class SendTokens extends React.Component {
           <form ref="formSendTokens" id="formSendTokens">
             {renderOnePage()}
             <div className="mt-5">
-              <button type="button" className="btn btn-secondary mr-4" onClick={this.addAnotherToken} disabled={this.state.loading}>Add another token</button>
-              <button type="button" className="btn btn-hathor" data-toggle="modal" disabled={this.state.loading} data-target="#pinModal">Send Tokens</button>
+              <button type="button" className="btn btn-secondary mr-4" onClick={this.addAnotherToken} disabled={this.state.loading}>{t`Add another token`}</button>
+              <button type="button" className="btn btn-hathor" data-toggle="modal" disabled={this.state.loading} data-target="#pinModal">{t`Send Tokens`}</button>
             </div>
           </form>
           <p className="text-danger mt-3">{this.state.errorMessage}</p>
@@ -205,7 +206,7 @@ class SendTokens extends React.Component {
     const isLoading = () => {
       return (
         <div className="d-flex flex-row">
-          <p className="mr-3">Please, wait while we solve the proof of work and propagate the transaction</p>
+          <p className="mr-3">{t`Please, wait while we solve the proof of work and propagate the transaction`}</p>
           <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />
         </div>
       )
@@ -214,7 +215,7 @@ class SendTokens extends React.Component {
     return (
       <div className="content-wrapper flex align-items-center">
         <BackButton {...this.props} />
-        <h3 className="mt-4 mb-4">Send Tokens</h3>
+        <h3 className="mt-4 mb-4">{t`Send Tokens`}</h3>
         {renderPage()}
         {this.state.loading ? isLoading() : null}
         <ModalPin execute={this.send} handleChangePin={this.handleChangePin} />

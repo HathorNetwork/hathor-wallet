@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import wallet from '../utils/wallet';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
@@ -47,7 +48,7 @@ class ModalUnhandledError extends React.Component {
     wallet.allowSentry();
     wallet.sentryWithScope(this.props.error, this.props.info);
     wallet.disallowSentry();
-    this.setState({ successMessage: 'Report sent to Hathor Team! Thanks for the support!' });
+    this.setState({ successMessage: t`Report sent to Hathor Team! Thanks for the support!` });
     // Hiding message after some time
     setTimeout(() => {
       this.setState({ successMessage: '' });
@@ -57,36 +58,36 @@ class ModalUnhandledError extends React.Component {
   render() {
     const { message = null, stack = null } = this.props.error || {}
     const { renderError } = this.props
-    const readableError = `Error Message: ${message}\nStack trace: ${stack}`
+    const readableError = t`Error Message: ${message}\nStack trace: ${stack}`
     return (
       <div className="modal fade" id="unhandledErrorModal" tabIndex="-1" role="dialog" aria-labelledby="unhandledErrorModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="errorModalLabel">Ooops... Something went wrong...</h5>
+              <h5 className="modal-title" id="errorModalLabel">{t`Ooops... Something went wrong...`}</h5>
             </div>
             <div className="modal-body">
-              <p>An unhandled exception occurred in your wallet.</p>
-              <p>If you'd like to help us improve it, please click in the button bellow to copy the error details to your clipboard.</p>
+              <p>{t`An unhandled exception occurred in your wallet.`}</p>
+              <p>{t`If you'd like to help us improve it, please click in the button bellow to copy the error details to your clipboard.`}</p>
               <div className="d-flex flex-row justify-content-between">
                 <div className="copy-error">
                   <CopyToClipboard text={readableError}>
-                    <button className="btn send-tokens btn-hathor">Copy Error</button>
+                    <button className="btn send-tokens btn-hathor">{t`Copy Error`}</button>
                   </CopyToClipboard>
                 </div>
-                {!wallet.isSentryAllowed() && <div><button className="btn send-tokens btn-hathor" onClick={this.onSendErrorToSentry}>Send error report to help the developers</button></div>}
+                {!wallet.isSentryAllowed() && <div><button className="btn send-tokens btn-hathor" onClick={this.onSendErrorToSentry}>{t`Send error report to help the developers`}</button></div>}
               </div>
-              <p>Send it to us with all relevant information about the issues you are experiencing.</p>
-              <p>If you are facing recurrent issues, resetting your wallet may solve your problem. Please, double-check your backup before doing it.</p>
+              <p>{t`Send it to us with all relevant information about the issues you are experiencing.`}</p>
+              <p>{t`If you are facing recurrent issues, resetting your wallet may solve your problem. Please, double-check your backup before doing it.`}</p>
             </div>
             <div className="modal-footer">
               <div className="d-flex flex-row align-items-center justify-content-between w-100">
                 <span className="text-success">{this.state.successMessage}</span>
                 <div>
                   {renderError
-                    ? <button onClick={this.handleGoToHome} type="button" className="btn btn-secondary mr-2" data-dismiss="modal">Home</button>
-                    : <button onClick={this.copyError} type="button" className="btn btn-secondary mr-2" data-dismiss="modal">Dismiss</button>}
-                  <button onClick={this.handleConfirm} type="button" className="btn btn-hathor" data-dismiss="modal">Reset wallet</button>
+                    ? <button onClick={this.handleGoToHome} type="button" className="btn btn-secondary mr-2" data-dismiss="modal">{t`Home`}</button>
+                    : <button onClick={this.copyError} type="button" className="btn btn-secondary mr-2" data-dismiss="modal">{t`Dismiss`}</button>}
+                  <button onClick={this.handleConfirm} type="button" className="btn btn-hathor" data-dismiss="modal">{t`Reset wallet`}</button>
                 </div>
               </div>
             </div>

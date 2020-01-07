@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import logo from '../assets/images/hathor-logo.png';
 import BackButton from '../components/BackButton';
 
@@ -23,9 +24,9 @@ const Page404 = (props) => {
         <div>
           <div className="d-flex align-items-center flex-column">
             <img className="hathor-logo" src={logo} alt="" />
-            <h2 className="mt-5 mb-4"><strong>Page not found</strong></h2>
+            <h2 className="mt-5 mb-4"><strong>{t`Page not found`}</strong></h2>
           </div>
-          <p className="mb-4">You tried to access a page that does not exist in Hathor Wallet</p>
+          <p className="mb-4">{t`You tried to access a page that does not exist in Hathor Wallet`}</p>
         </div>
       </div>
     </div>

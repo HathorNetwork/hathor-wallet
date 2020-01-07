@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import TokenHistory from '../components/TokenHistory';
 import { WALLET_HISTORY_COUNT } from '../constants';
 
@@ -19,7 +20,7 @@ const WalletHistory = (props) => {
   return (
     <div>
       <div className="d-flex flex-column mt-5">
-        <h4><strong>Transaction history</strong></h4>
+        <h4><strong>{t`Transaction history`}</strong></h4>
         <TokenHistory history={props.historyTransactions} count={WALLET_HISTORY_COUNT} selectedToken={props.selectedToken} showPage={true} />
       </div>
     </div>
