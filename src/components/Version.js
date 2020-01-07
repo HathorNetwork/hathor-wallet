@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import { VERSION } from '../constants';
 
 
@@ -17,7 +18,7 @@ import { VERSION } from '../constants';
 const Version = (props) => {
   return (
     <div className="d-flex flex-column version-wrapper align-items-center">
-      <span>Version</span>
+      <span>{t`Version`}</span>
       <span>{VERSION}</span>
     </div>
   );

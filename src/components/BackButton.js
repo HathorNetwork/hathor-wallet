@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 
 
 /**
@@ -29,7 +30,7 @@ class BackButton extends React.Component {
     return (
       <div className="d-flex flex-row align-items-center back-div mb-3">
         <i className="fa fa-long-arrow-left mr-2" />
-        <a href="true" onClick={(e) => this.goBack(e)}>Back</a>
+        <a href="true" onClick={(e) => this.goBack(e)}>{t`Back`}</a>
       </div>
     )
   }

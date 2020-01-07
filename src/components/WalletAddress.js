@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
 import ModalAddressQRCode from './ModalAddressQRCode';
@@ -73,17 +74,17 @@ class WalletAddress extends React.Component {
     const renderAddress = () => {
       return (
         <div className="d-flex flex-column align-items-center address-wrapper card">
-          <p><strong>Address to receive tokens</strong></p>
+          <p><strong>{t`Address to receive tokens`}</strong></p>
           <span ref="address" className="mt-1 mb-2">
             {this.props.lastSharedAddress}
             <CopyToClipboard text={this.props.lastSharedAddress} onCopy={this.copied}>
-              <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
+              <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i>
             </CopyToClipboard>
           </span> 
           <div className="d-flex flex-row align-items-center">
-            <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">Generate new address <i className="fa fa-refresh ml-1" title="Get new address"></i></a>
+            <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">{t`Generate new address`} <i className="fa fa-refresh ml-1" title={t`Get new address`}></i></a>
             <span className="ml-3 mr-3">|</span>
-            <a href="true" onClick={(e) => this.showQRCode(e)}>QR Code <i className="fa fa-qrcode ml-1" title="Get qrcode"></i></a>
+            <a href="true" onClick={(e) => this.showQRCode(e)}>QR Code <i className="fa fa-qrcode ml-1" title={t`Get qrcode`}></i></a>
           </div>
         </div>
       );
@@ -92,8 +93,8 @@ class WalletAddress extends React.Component {
     return (
       <div>
         {renderAddress()}
-        <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
-        <HathorAlert ref="alertError" text="You must use an old address before generating new ones" type="danger" />
+        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
+        <HathorAlert ref="alertError" text={t`You must use an old address before generating new ones`} type="danger" />
         <ModalAddressQRCode  />
       </div>
     );

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 
@@ -43,9 +44,10 @@ class TokenMelt extends React.Component {
       this.createAnother.current.checked
     );
     if (promise === null) {
-      return { promise: null, message: 'Can\'t find outputs to melt the amount requested.' };
+      return { promise: null, message: t`Can't find outputs to melt the amount requested.` };
     } else {
-      return { promise, message: `${hathorLib.helpers.prettyValue(amountValue)} ${this.props.token.symbol} melted!` };
+      const prettyAmountValue = hathorLib.helpers.prettyValue(amountValue);
+      return { promise, message: t`${prettyAmountValue} ${this.props.token.symbol} melted!` };
     }
   }
 
@@ -58,7 +60,8 @@ class TokenMelt extends React.Component {
   melt = () => {
     const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
     if (amountValue > this.props.walletAmount) {
-      return `The total amount you have is only ${hathorLib.helpers.prettyValue(this.props.walletAmount)}.`;
+      const prettyWalletAmount = hathorLib.helpers.prettyValue(this.props.walletAmount);
+      return t`The total amount you have is only ${prettyWalletAmount}.`;
     }
   }
 
@@ -76,16 +79,16 @@ class TokenMelt extends React.Component {
             <div className="form-check">
               <input className="form-check-input" type="checkbox" ref={this.createAnother} id="keepMint" defaultChecked={true} />
               <label className="form-check-label" htmlFor="keepMint">
-                Create another melt output for you?
+                {t`Create another melt output for you?`}
               </label>
-              <p className="subtitle">Leave it checked unless you know what you are doing</p>
+              <p className="subtitle">{t`Leave it checked unless you know what you are doing`}</p>
             </div>
           </div>
         </div>
       )
     }
 
-    return <TokenAction renderForm={renderForm} title='Melt tokens' buttonName='Go' validateForm={this.melt} onPinSuccess={this.executeMelt} {...this.props} />
+    return <TokenAction renderForm={renderForm} title={t`Melt tokens`} buttonName={t`Go`} validateForm={this.melt} onPinSuccess={this.executeMelt} {...this.props} />
   }
 }
 

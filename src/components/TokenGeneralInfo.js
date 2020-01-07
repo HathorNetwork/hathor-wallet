@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import hathorLib from '@hathor/wallet-lib';
@@ -95,7 +96,7 @@ class TokenGeneralInfo extends React.Component {
   copied = (text, result) => {
     if (result) {
       // If copied with success
-      this.showSuccess('Configuration string copied to clipboard!');
+      this.showSuccess(t`Configuration string copied to clipboard!`);
     }
   }
 
@@ -120,15 +121,15 @@ class TokenGeneralInfo extends React.Component {
     const renderTokenInfo = () => {
       return (
         <div className="token-general-info">
-          <p className="mb-2"><strong>UID: </strong>{this.props.token.uid}</p>
-          <p className="mt-2 mb-2"><strong>Name: </strong>{this.props.token.name}</p>
-          <p className="mt-2 mb-2"><strong>Symbol: </strong>{this.props.token.symbol}</p>
-          <p className="mt-2 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.props.token.symbol}</p>
-          <p className="mt-2 mb-0"><strong>Can mint new tokens: </strong>{this.state.canMint ? 'Yes' : 'No'}</p>
-          <p className="mb-2 subtitle">Indicates whether the token owner can create new tokens, increasing the total supply</p>
-          <p className="mt-2 mb-0"><strong>Can melt tokens: </strong>{this.state.canMelt ? 'Yes' : 'No'}</p>
-          <p className="mb-2 subtitle">Indicates whether the token owner can destroy tokens, decreasing the total supply</p>
-          <p className="mt-2 mb-4"><strong>Total number of transactions: </strong>{this.state.transactionsCount}</p>
+          <p className="mb-2"><strong>{t`UID:`} </strong>{this.props.token.uid}</p>
+          <p className="mt-2 mb-2"><strong>{t`Name:`} </strong>{this.props.token.name}</p>
+          <p className="mt-2 mb-2"><strong>{t`Symbol:`} </strong>{this.props.token.symbol}</p>
+          <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.props.token.symbol}</p>
+          <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{this.state.canMint ? 'Yes' : 'No'}</p>
+          <p className="mb-2 subtitle">{t`Indicates whether the token owner can create new tokens, increasing the total supply`}</p>
+          <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{this.state.canMelt ? 'Yes' : 'No'}</p>
+          <p className="mb-2 subtitle">{t`Indicates whether the token owner can destroy tokens, decreasing the total supply`}</p>
+          <p className="mt-2 mb-4"><strong>{t`Total number of transactions:`} </strong>{this.state.transactionsCount}</p>
         </div>
       );
     }
@@ -137,15 +138,15 @@ class TokenGeneralInfo extends React.Component {
       return (
         <div className='d-flex flex-row align-items-center justify-content-center mt-4 w-100'>
           <div className='d-flex flex-column align-items-center config-string-wrapper'>
-            <p><strong>Configuration String</strong></p>
+            <p><strong>{t`Configuration String`}</strong></p>
             <span ref="configurationString" className="mb-2">
               {getShortConfigurationString()}
               <CopyToClipboard text={configurationString} onCopy={this.copied}>
-                <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
+                <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i>
               </CopyToClipboard>
             </span> 
             <QRCode size={200} value={configurationString} />
-            <a className="mt-2" onClick={(e) => this.downloadQrCode(e)} download={`${this.props.token.name} (${this.props.token.symbol}) - ${configurationString}`} href="true" ref="downloadLink">Download <i className="fa fa-download ml-1" title="Download QRCode"></i></a>
+            <a className="mt-2" onClick={(e) => this.downloadQrCode(e)} download={`${this.props.token.name} (${this.props.token.symbol}) - ${configurationString}`} href="true" ref="downloadLink">{t`Download`} <i className="fa fa-download ml-1" title={t`Download QRCode`}></i></a>
           </div>
         </div>
       );

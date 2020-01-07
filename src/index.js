@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import './i18nInit';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ErrorWrapper from './ErrorWrapper';

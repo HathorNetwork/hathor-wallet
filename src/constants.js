@@ -10,6 +10,8 @@
  * @module Constants
  */
 
+import { t } from 'ttag';
+
 /**
  * Quantity of elements to show in the wallet history
  */
@@ -39,7 +41,7 @@ export const WORDS_VALIDATION = 6;
 /**
  * Message to be written when user wants to reset all wallet data
  */
-export const CONFIRM_RESET_MESSAGE = 'I want to reset my wallet';
+export const CONFIRM_RESET_MESSAGE = t`I want to reset my wallet`;
 
 /**
  * Password regex pattern for validation

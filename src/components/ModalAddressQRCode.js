@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { connect } from "react-redux";
@@ -66,7 +67,7 @@ class ModalAddressQRCode extends React.Component {
   copied = (text, result) => {
     if (result) {
       // If copied with success
-      this.setState({ successMessage: 'Address copied to clipboard!'});
+      this.setState({ successMessage: t`Address copied to clipboard!`});
       this.timer = setTimeout(() => {
         this.setState({ successMessage: '' });
       }, 2000);
@@ -79,7 +80,7 @@ class ModalAddressQRCode extends React.Component {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Address to receive tokens</h5>
+              <h5 className="modal-title" id="exampleModalLabel">{t`Address to receive tokens`}</h5>
               <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -89,15 +90,15 @@ class ModalAddressQRCode extends React.Component {
               <span ref="address" className="mt-3">
                 {this.props.lastSharedAddress}
                 <CopyToClipboard text={this.props.lastSharedAddress} onCopy={this.copied}>
-                  <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
+                  <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i>
                 </CopyToClipboard>
               </span> 
-              <a href="true" download={`Hathor address - ${this.props.lastSharedAddress}`} className="hidden" ref="downloadLink">Download</a>
+              <a href="true" download={`Hathor address - ${this.props.lastSharedAddress}`} className="hidden" ref="downloadLink">{t`Download`}</a>
               <p className="text-success mt-4">{this.state.successMessage}</p>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button onClick={this.download} type="button" className="btn btn-hathor">Download</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`Close`}</button>
+              <button onClick={this.download} type="button" className="btn btn-hathor">{t`Download`}</button>
             </div>
           </div>
         </div>

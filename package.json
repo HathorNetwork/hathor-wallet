@@ -44,6 +44,7 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "^3.0.1",
     "redux": "^4.0.0",
+    "ttag": "^1.7.22",
     "viz.js": "^2.1.2"
   },
   "main": "build/electron.js",
@@ -62,7 +63,8 @@
     "electron-pack": "electron-builder --mac --win --linux -c.extraMetadata.main=build/electron.js",
     "electron-pack-mac": "electron-builder --mac -c.extraMetadata.main=build/electron.js",
     "electron-pack-linux": "electron-builder --linux -c.extraMetadata.main=build/electron.js",
-    "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js"
+    "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js",
+    "locale-update-pot": "ttag extract -o ./locale/texts.pot ./src/"
   },
   "devDependencies": {
     "@sentry/browser": "^5.0.5",
@@ -72,6 +74,7 @@
     "electron-devtools-installer": "^2.2.4",
     "electron-notarize": "^0.1.1",
     "jsdoc": "^3.6.2",
+    "ttag-cli": "^1.7.27",
     "typescript": "^3.5.3"
   },
   "build": {

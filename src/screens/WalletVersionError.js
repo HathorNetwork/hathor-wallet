@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
 import wallet from '../utils/wallet';
 import ModalResetAllData from '../components/ModalResetAllData';
@@ -87,19 +88,19 @@ class WalletVersionError extends React.Component {
           </nav>
         </div>
         <div className="content-wrapper">
-          <p>You've recently updated your wallet, and this new version is not compatible with your local data.</p>
-          <p>You have two alternatives:</p>
+          <p>{t`You've recently updated your wallet, and this new version is not compatible with your local data.`}</p>
+          <p>{t`You have two alternatives:`}</p>
           <ol>
-            <li>Use this new wallet version. In this case, you must reset and import your wallet again.</li>
-            <li>Go back to the previous installed version.</li>
+            <li>{t`Use this new wallet version. In this case, you must reset and import your wallet again.`}</li>
+            <li>{t`Go back to the previous installed version.`}</li>
           </ol>
-          <p>If you are going to reset your wallet, please double-check your backup before doing so.</p>
-          <button className="btn btn-secondary" onClick={(e) => this.backupClicked(e)}>Backup Words</button>
-          <button className="btn btn-hathor ml-3" onClick={(e) => this.resetClicked(e)}>Reset Wallet</button>
+          <p>{t`If you are going to reset your wallet, please double-check your backup before doing so.`}</p>
+          <button className="btn btn-secondary" onClick={(e) => this.backupClicked(e)}>{t`Backup Words`}</button>
+          <button className="btn btn-hathor ml-3" onClick={(e) => this.resetClicked(e)}>{t`Reset Wallet`}</button>
         </div>
         <ModalResetAllData success={this.handleReset} />
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
-        <HathorAlert ref="alertSuccess" text="Backup done with success!" type="success" />
+        <HathorAlert ref="alertSuccess" text={t`Backup done with success!`} type="success" />
       </div>
     );
   }

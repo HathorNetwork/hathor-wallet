@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import TxTextInput from '../components/TxTextInput';
 import TxData from '../components/TxData';
 import hathorLib from '@hathor/wallet-lib';
@@ -87,9 +88,9 @@ class DecodeTx extends React.Component {
   render() {
     return (
       <div className="content-wrapper">
-        <TxTextInput onChange={this.handleChangeData} buttonClicked={this.buttonClicked} action='Decode tx' otherAction='push' link='/push-tx/' helpText='Write your transaction in hex value and click the button to get a human value description' />
+        <TxTextInput onChange={this.handleChangeData} buttonClicked={this.buttonClicked} action={t`Decode tx`} otherAction={t`push`} link='/push-tx/' helpText={t`Write your transaction in hex value and click the button to get a human value description`} />
         {this.state.transaction ? <TxData transaction={this.state.transaction} showRaw={false} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showConflicts={false} showGraphs={true} history={this.props.history} /> : null}
-        {this.state.success === false ? <p className="text-danger">Could not decode this data to a transaction</p> : null}
+        {this.state.success === false ? <p className="text-danger">{t`Could not decode this data to a transaction`}</p> : null}
       </div>
     );
   }

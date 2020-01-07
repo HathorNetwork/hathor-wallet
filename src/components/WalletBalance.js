@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 
@@ -28,9 +29,9 @@ class WalletBalance extends React.Component {
 
       return (
         <div>
-          <p><strong>Total:</strong> {hathorLib.helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
-          <p><strong>Available:</strong> {hathorLib.helpers.prettyValue(this.props.balance.available)} {symbol}</p>
-          <p><strong>Locked:</strong> {hathorLib.helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
+          <p><strong>{t`Total:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
+          <p><strong>{t`Available:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.available)} {symbol}</p>
+          <p><strong>{t`Locked:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
         </div>
       );
     }

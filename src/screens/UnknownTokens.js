@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
@@ -135,14 +136,14 @@ class UnknownTokens extends React.Component {
                 <div className="d-flex flex-column align-items-center justify-content-center">
                   <p>{token.uid}</p>
                   <div className="d-flex flex-row align-items-center justify-content-start w-100">
-                    <span><strong>Total:</strong> {hathorLib.helpers.prettyValue(token.balance.available + token.balance.locked)}</span>
-                    <span className="ml-2"><strong>Available:</strong> {hathorLib.helpers.prettyValue(token.balance.available)}</span>
-                    <span className="ml-2"><strong>Locked:</strong> {hathorLib.helpers.prettyValue(token.balance.locked)}</span>
+                    <span><strong>{t`Total:`}</strong> {hathorLib.helpers.prettyValue(token.balance.available + token.balance.locked)}</span>
+                    <span className="ml-2"><strong>{t`Available:`}</strong> {hathorLib.helpers.prettyValue(token.balance.available)}</span>
+                    <span className="ml-2"><strong>{t`Locked:`}</strong> {hathorLib.helpers.prettyValue(token.balance.locked)}</span>
                   </div>
                 </div>
                 <div className="d-flex flex-row align-items-center">
-                  <a onClick={(e) => this.openHistory(e, index)} ref={this.anchorOpenRefs[index]} href="true">Show history</a>
-                  <a onClick={(e) => this.hideHistory(e, index)} ref={this.anchorHideRefs[index]} href="true" style={{display: 'none'}}>Hide history</a>
+                  <a onClick={(e) => this.openHistory(e, index)} ref={this.anchorOpenRefs[index]} href="true">{t`Show history`}</a>
+                  <a onClick={(e) => this.hideHistory(e, index)} ref={this.anchorHideRefs[index]} href="true" style={{display: 'none'}}>{t`Hide history`}</a>
                 </div>
               </div>
               <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
@@ -158,11 +159,11 @@ class UnknownTokens extends React.Component {
       <div className="content-wrapper">
         <BackButton {...this.props} />
         <div className="d-flex flex-row align-items-center mb-4 mt-4">
-          <h3 className="mr-4">Unknown Tokens</h3>
-          <button onClick={this.massiveImport} className="btn btn-hathor">Register Tokens</button>
+          <h3 className="mr-4">{t`Unknown Tokens`}</h3>
+          <button onClick={this.massiveImport} className="btn btn-hathor">{t`Register Tokens`}</button>
         </div>
-        <p>Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.</p>
-        <p className="mb-5">If you have reset your wallet, you need to register your custom tokens again.</p>
+        <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
+        <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
         {unknownTokens && renderTokens()}
         <ModalAddManyTokens success={this.massiveImportSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />

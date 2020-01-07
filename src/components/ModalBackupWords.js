@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
+
 import $ from 'jquery';
 import _ from 'lodash';
 import { updateWords } from '../actions/index';
@@ -94,7 +96,7 @@ class ModalBackupWords extends React.Component {
         this.props.updateWords(words);
         this.setState({ passwordSuccess: true, errorMessage: '' });
       } else {
-        this.setState({errorMessage: 'Invalid password'})
+        this.setState({errorMessage: t`Invalid password`})
       }
     }
   }
@@ -113,14 +115,14 @@ class ModalBackupWords extends React.Component {
    */
   handleValidateBackup = () => {
     if (this.state.chosenWords.length !== WORDS_VALIDATION) {
-      this.setState({ errorMessage: 'Invalid number of words' });
+      this.setState({ errorMessage: t`Invalid number of words` });
       return;
     }
     let validationArray = this.props.words.split(' ');
     for (const word of this.state.chosenWords) {
       const wordIdx = validationArray.indexOf(word);
       if (wordIdx === -1) {
-        this.setState({ errorMessage: 'Invalid sequence of words' });
+        this.setState({ errorMessage: t`Invalid sequence of words` });
         return;
       }
       validationArray = validationArray.slice(wordIdx);
@@ -152,10 +154,10 @@ class ModalBackupWords extends React.Component {
     const renderAskPassword = () => {
       return (
         <div>
-          <p>We need your password to show the words</p>
+          <p>{t`We need your password to show the words`}</p>
           <form ref="formPassword" className={this.state.passwordFormValidated ? 'was-validated' : ''} onSubmit={this.handlePassword} noValidate>
             <div className="form-group">
-              <label htmlFor="password">Password*</label>
+              <label htmlFor="password">{t`Password*`}</label>
               <input type="password" ref="password" autoComplete="off" className="pin-input form-control" required />
             </div>
           </form>
@@ -166,8 +168,8 @@ class ModalBackupWords extends React.Component {
     const renderAskPasswordButtons = () => {
       return (
         <div>
-          <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">Cancel</button>
-          <button onClick={this.handlePassword} type="button" className="btn btn-hathor">Go</button>
+          <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Cancel`}</button>
+          <button onClick={this.handlePassword} type="button" className="btn btn-hathor">{t`Go`}</button>
         </div>
       )
     }
@@ -207,7 +209,7 @@ class ModalBackupWords extends React.Component {
     const renderShowWords = () => {
       return (
         <div>
-          <p>Save the words and never share them. Anyone who has access to them will control your tokens.</p>
+          <p>{t`Save the words and never share them. Anyone who has access to them will control your tokens.`}</p>
           <table className="w-100">
             <tbody>
               {renderWords(6)}
@@ -220,8 +222,8 @@ class ModalBackupWords extends React.Component {
     const renderShowWordsButtons = () => {
       return (
         <div>
-          <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">Do it later</button>
-          <button onClick={this.handleWordsSaved} type="button" className="btn btn-hathor">Ok, I have saved them</button>
+          <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Do it later`}</button>
+          <button onClick={this.handleWordsSaved} type="button" className="btn btn-hathor">{t`Ok, I have saved them`}</button>
         </div>
       )
     }
@@ -250,7 +252,7 @@ class ModalBackupWords extends React.Component {
     const renderValidateBackup = () => {
       return (
         <div>
-          <p>Please, select the words below in the correct order. This is for your safety and to ensure you wrote them down correctly.</p>
+          <p>{t`Please, select the words below in the correct order. This is for your safety and to ensure you wrote them down correctly.`}</p>
           <div className="chosen-words-wrapper w-100 d-flex flex-row flex-wrap align-items-start">
             {renderChosenWords()}
           </div>
@@ -264,8 +266,8 @@ class ModalBackupWords extends React.Component {
     const renderValidateBackupButtons = () => {
       return (
         <div>
-          <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">Cancel</button>
-          <button onClick={this.handleValidateBackup} type="button" className="btn btn-hathor">Validate</button>
+          <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Cancel`}</button>
+          <button onClick={this.handleValidateBackup} type="button" className="btn btn-hathor">{t`Validate`}</button>
         </div>
       )
     }
@@ -285,7 +287,7 @@ class ModalBackupWords extends React.Component {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Backup Words</h5>
+              <h5 className="modal-title" id="exampleModalLabel">{t`Backup Words`}</h5>
               <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>

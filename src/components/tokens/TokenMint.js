@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
@@ -58,7 +59,8 @@ class TokenMint extends React.Component {
         createAnotherMint: this.createAnother.current.checked
       }
     );
-    return { promise, message: `${hathorLib.helpers.prettyValue(amountValue)} ${this.props.token.symbol} minted!` };
+    const prettyAmountValue = hathorLib.helpers.prettyValue(amountValue);
+    return { promise, message: t`${prettyAmountValue} ${this.props.token.symbol} minted!` };
   }
 
   /**
@@ -68,7 +70,7 @@ class TokenMint extends React.Component {
    */
   mint = () => {
     if (this.chooseAddress.current.checked === false && this.address.current.value === '') {
-      return 'Address is required when not selected automatically';
+      return t`Address is required when not selected automatically`;
     }
   }
 
@@ -101,13 +103,13 @@ class TokenMint extends React.Component {
             <div className="form-check">
               <input className="form-check-input" type="checkbox" ref={this.chooseAddress} id="autoselectAddress" defaultChecked={true} onChange={this.handleCheckboxAddress} />
               <label className="form-check-label" htmlFor="autoselectAddress">
-                Automatically select address to receive new tokens
+                {t`Automatically select address to receive new tokens`}
               </label>
             </div>
           </div>
           <div className="form-group col-6" ref={this.addressWrapper} style={{display: 'none'}}>
             <label>Destination address</label>
-            <input ref={this.address} type="text" placeholder="Address" className="form-control" />
+            <input ref={this.address} type="text" placeholder={t`Address`} className="form-control" />
           </div>
         </div>
       );
@@ -136,9 +138,9 @@ class TokenMint extends React.Component {
             <div className="form-check">
               <input className="form-check-input" type="checkbox" ref={this.createAnother} id="keepMint" defaultChecked={true} />
               <label className="form-check-label" htmlFor="keepMint">
-                Create another mint output for you?
+                {t`Create another mint output for you?`}
               </label>
-              <p className="subtitle">Leave it checked unless you know what you are doing</p>
+              <p className="subtitle">{t`Leave it checked unless you know what you are doing`}</p>
             </div>
           </div>
         </div>
