@@ -67,15 +67,15 @@ class SendTokens extends React.Component {
    * Get inputs and outputs data from child components  
    * Each child component holds inputs/outputs for one token
    *
-   * @return {Object} Object holding all inputs and outputs {'inputs': [...], 'outputs': [...]}
+   * @return {Promise} Promise that resolves an object holding all inputs and outputs {'inputs': [...], 'outputs': [...]}
    */
-  getData = () => {
+  getData = async () => {
     let data = {'inputs': [], 'outputs': []};
     for (const ref of this.references) {
       const instance = ref.current;
       let dataOne = instance.getData();
       if (!dataOne) return;
-      dataOne = instance.handleInitialData(dataOne);
+      dataOne = await instance.handleInitialData(dataOne);
       if (!dataOne) return;
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
@@ -91,27 +91,33 @@ class SendTokens extends React.Component {
     $('#pinModal').modal('toggle');
     const isValid = this.validateData();
     if (!isValid) return;
-    let data = this.getData();
-    if (!data) return;
-    data.tokens = hathorLib.tokens.filterTokens(this.state.txTokens, hathorLib.constants.HATHOR_TOKEN_CONFIG).map((token) => token.uid);
-    this.setState({ errorMessage: '', loading: true });
-    try {
-      const promise = hathorLib.transaction.sendTransaction(data, this.state.pin);
-      promise.then(() => {
-        // Must update the shared address, in case we have used one for the change
-        wallet.updateSharedAddress();
-        this.props.history.push('/wallet/');
-      }, (message) => {
-        this.setState({ errorMessage: message, loading: false });
-      });
-    } catch(e) {
-      if (e instanceof hathorLib.errors.AddressError || e instanceof hathorLib.errors.OutputValueError) {
-        this.setState({ errorMessage: e.message, loading: false });
-      } else {
-        // Unhandled error
-        throw e;
+    const promiseData = this.getData();
+    promiseData.then((value) => {
+      let data = value;
+      if (!data) return;
+      data.tokens = hathorLib.tokens.filterTokens(this.state.txTokens, hathorLib.constants.HATHOR_TOKEN_CONFIG).map((token) => token.uid);
+      this.setState({ errorMessage: '', loading: true });
+      try {
+        const promise = hathorLib.transaction.sendTransaction(data, this.state.pin);
+        promise.then(() => {
+          // Must update the shared address, in case we have used one for the change
+          wallet.updateSharedAddress();
+          this.props.history.push('/wallet/');
+        }, (message) => {
+          this.setState({ errorMessage: message, loading: false });
+        });
+      } catch(e) {
+        if (e instanceof hathorLib.errors.AddressError || e instanceof hathorLib.errors.OutputValueError) {
+          this.setState({ errorMessage: e.message, loading: false });
+        } else {
+          // Unhandled error
+          throw e;
+        }
       }
-    }
+    }, (e) => {
+      // Unhandled error
+      throw e;
+    });
   }
 
   /**

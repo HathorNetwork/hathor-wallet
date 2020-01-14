@@ -130,10 +130,12 @@ class SendTokensOne extends React.Component {
    * 1. If inputs were not selected, select inputs from outputs amount
    * 2. If amount of selected inputs is larger than outputs amount, we create a change output
    * 3. If inputs were selected, check if they are valid
+   *
+   * @return {Promise} Promise that resolves with an object containing inputs and outputs of the tx
    */
-  handleInitialData = (data) => {
+  handleInitialData = async (data) => {
     const noInputs = this.noInputs.current.checked;
-    const result = hathorLib.wallet.prepareSendTokensData(data, this.state.selected, noInputs, this.props.historyTransactions, this.state.selectedTokens);
+    const result = await hathorLib.wallet.prepareSendTokensData(data, this.state.selected, noInputs, this.props.historyTransactions, this.state.selectedTokens);
     if (result.success === false) {
       this.props.updateState({ errorMessage: result.message, loading: false });
       return null;
