@@ -12,6 +12,7 @@ import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVERS } from '../constants';
+import colors from '../index.scss';
 
 
 /**
@@ -135,7 +136,7 @@ class Server extends React.Component {
         </form>
         <div className="d-flex flex-row align-items-center mt-3">
           <button onClick={this.serverSelected} type="button" className="btn btn-hathor mr-3">Connect to server</button>
-          {this.state.loading && <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />}
+          {this.state.loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
         </div>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
       </div>

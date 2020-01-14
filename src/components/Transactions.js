@@ -12,6 +12,7 @@ import SearchTx from './SearchTx';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import { TX_COUNT } from '../constants';
+import colors from '../index.scss';
 
 
 /**
@@ -238,7 +239,7 @@ class Transactions extends React.Component {
         <BackButton {...this.props} />
         <h1>{this.props.type === 'tx' ? 'Transactions' : 'Blocks'}</h1>
         <SearchTx {...this.props} newData={this.newData} resetData={this.resetData} />
-        {!this.state.loaded ? <ReactLoading type='spin' color='#0081af' delay={500} /> : loadTable()}
+        {!this.state.loaded ? <ReactLoading type='spin' color={colors.purpleHathor} delay={500} /> : loadTable()}
         {loadPagination()}
       </div>
     );
