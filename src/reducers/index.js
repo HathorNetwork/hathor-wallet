@@ -47,6 +47,8 @@ const initialState = {
   addressesFound: 0,
   // Quantity of transactions already loaded to give a feedback to the user
   transactionsFound: 0,
+  // Height of the network arrived from ws data
+  height: 0,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -91,6 +93,8 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {addressesFound: action.payload.addressesFound, transactionsFound: action.payload.transactionsFound});
     case 'update_request_error_status_code':
       return Object.assign({}, state, {requestErrorStatusCode: action.payload});
+    case 'update_height':
+      return Object.assign({}, state, {height: action.payload.height});
     default:
       return state;
   }

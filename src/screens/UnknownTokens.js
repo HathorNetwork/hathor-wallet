@@ -22,6 +22,7 @@ const mapStateToProps = (state) => {
     registeredTokens: state.tokens,
     allTokens: state.allTokens,
     historyTransactions: state.historyTransactions,
+    height: state.height,
   };
 };
 
@@ -64,7 +65,7 @@ class UnknownTokens extends React.Component {
       // If has balance but does not have token saved yet
       if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
         const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, token, false);
-        const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, token);
+        const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, token, this.props.height);
         unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions});
 
         this.historyRefs.push(React.createRef());

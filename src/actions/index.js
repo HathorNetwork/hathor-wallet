@@ -89,3 +89,8 @@ export const dataLoaded = data => ({ type: "data_loaded_update", payload: data }
  * Update status code of the last request that failed
  */
 export const updateRequestErrorStatusCode = data => ({ type: "update_request_error_status_code", payload: data });
+
+/**
+ * Set height
+ */
+export const updateHeight = data => ({ type: "update_height", payload: data });

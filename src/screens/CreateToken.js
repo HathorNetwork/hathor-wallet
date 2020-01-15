@@ -19,11 +19,13 @@ import hathorLib from '@hathor/wallet-lib';
 const mapStateToProps = (state) => {
   const balance = hathorLib.wallet.calculateBalance(
     Object.values(state.historyTransactions),
-    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
+    state.height
   );
   return {
     htrBalance: balance.available,
     historyTransactions: state.historyTransactions,
+    height: state.height,
   };
 };
 

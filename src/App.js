@@ -37,7 +37,7 @@ import RequestErrorModal from './components/RequestError';
 import DashboardTx from './screens/DashboardTx';
 import DecodeTx from './screens/DecodeTx';
 import PushTx from './screens/PushTx';
-import { dataLoaded, isOnlineUpdate } from "./actions/index";
+import { dataLoaded, isOnlineUpdate, updateHeight } from "./actions/index";
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
@@ -69,6 +69,7 @@ class Root extends React.Component {
     hathorLib.WebSocketHandler.setup();
     hathorLib.WebSocketHandler.on('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.on('storage', this.handleWebsocketStorage);
+    hathorLib.WebSocketHandler.on('dashboard', this.handleWebsocketDashboard);
 
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
 
@@ -80,6 +81,7 @@ class Root extends React.Component {
   componentWillUnmount() {
     hathorLib.WebSocketHandler.removeListener('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
+    hathorLib.WebSocketHandler.removeListener('dashboard', this.handleWebsocketDashboard);
 
     hathorLib.WebSocketHandler.removeListener('addresses_loaded', this.addressesLoadedUpdate);
     hathorLib.WebSocketHandler.removeListener('is_online', this.isOnlineUpdate);
@@ -121,6 +123,16 @@ class Root extends React.Component {
       // TODO separate those messages
       console.log('Websocket message not handled. Type:', wsData.type);
     }
+  }
+
+  /**
+   * Method called when WebSocket receives a metrics message
+   * We update the height of the network in redux
+   *
+   * @param {Object} data Object with all the metrics from full node
+   */
+  handleWebsocketDashboard = (wsData) => {
+    store.dispatch(updateHeight({ height: wsData.height }));
   }
 
   /**

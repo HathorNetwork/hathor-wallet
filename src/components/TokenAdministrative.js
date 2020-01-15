@@ -18,11 +18,13 @@ import PropTypes from 'prop-types';
 const mapStateToProps = (state) => {
   const balance = hathorLib.wallet.calculateBalance(
     Object.values(state.historyTransactions),
-    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
+    state.height
   );
   return {
     htrBalance: balance.available,
     historyTransactions: state.historyTransactions,
+    height: state.height,
   };
 };
 
@@ -130,7 +132,8 @@ class TokenAdministrative extends React.Component {
     // Update user balance of this token
     const balance = hathorLib.wallet.calculateBalance(
       Object.values(this.props.historyTransactions),
-      this.props.token.uid
+      this.props.token.uid,
+      this.props.height
     );
 
     this.setState({ mintOutputs, meltOutputs, walletAmount, balance: balance.available });
