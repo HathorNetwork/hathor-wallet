@@ -69,19 +69,19 @@ class Root extends React.Component {
     hathorLib.WebSocketHandler.setup();
     hathorLib.WebSocketHandler.on('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.on('storage', this.handleWebsocketStorage);
-    hathorLib.WebSocketHandler.on('dashboard', this.handleWebsocketDashboard);
 
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
 
     hathorLib.WebSocketHandler.on('addresses_loaded', this.addressesLoadedUpdate);
     hathorLib.WebSocketHandler.on('is_online', this.isOnlineUpdate);
     hathorLib.WebSocketHandler.on('reload_data', this.reloadData);
+    hathorLib.WebSocketHandler.on('height_updated', this.handleHeightUpdated);
   }
 
   componentWillUnmount() {
     hathorLib.WebSocketHandler.removeListener('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
-    hathorLib.WebSocketHandler.removeListener('dashboard', this.handleWebsocketDashboard);
+    hathorLib.WebSocketHandler.removeListener('height_updated', this.handleHeightUpdated);
 
     hathorLib.WebSocketHandler.removeListener('addresses_loaded', this.addressesLoadedUpdate);
     hathorLib.WebSocketHandler.removeListener('is_online', this.isOnlineUpdate);
@@ -126,13 +126,13 @@ class Root extends React.Component {
   }
 
   /**
-   * Method called when WebSocket receives a metrics message
+   * Method called when WebSocketHandler from lib emits a height_updated event
    * We update the height of the network in redux
    *
-   * @param {Object} data Object with all the metrics from full node
+   * @param {number} height New height of the network
    */
-  handleWebsocketDashboard = (wsData) => {
-    store.dispatch(updateHeight({ height: wsData.height }));
+  handleHeightUpdated = (height) => {
+    store.dispatch(updateHeight({ height }));
   }
 
   /**
