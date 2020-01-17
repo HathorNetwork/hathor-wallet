@@ -14,6 +14,7 @@ import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
+import colors from '../index.scss';
 
 
 const mapStateToProps = (state) => {
@@ -206,7 +207,7 @@ class SendTokens extends React.Component {
       return (
         <div className="d-flex flex-row">
           <p className="mr-3">Please, wait while we solve the proof of work and propagate the transaction</p>
-          <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />
+          <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
         </div>
       )
     }
