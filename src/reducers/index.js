@@ -47,7 +47,7 @@ const initialState = {
   addressesFound: 0,
   // Quantity of transactions already loaded to give a feedback to the user
   transactionsFound: 0,
-  // Height of the network arrived from ws data
+  // Height of the best chain of the network arrived from ws data
   height: 0,
 };
 
