@@ -27,6 +27,7 @@
     "@hathor/wallet-lib": "^0.8.2",
     "@sentry/electron": "^0.17.0",
     "bootstrap": "^4.0.0",
+    "emoji-regex": "^8.0.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-react": "^7.13.0",
     "font-awesome": "^4.7.0",

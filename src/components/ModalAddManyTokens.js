@@ -9,6 +9,7 @@ import React from 'react';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
+import emojiRegex from 'emoji-regex';
 
 
 /**
@@ -52,8 +53,15 @@ class ModalAddManyTokens extends React.Component {
       return;
     }
 
-    const regex = /\[[\w\s]+(:\w+){3}\]/g;
+    const emojiRegexString = emojiRegex().source;
+    const regex = new RegExp(`(\\w|\\s|${emojiRegexString})+:(\\w|${emojiRegexString})+(:\\w+){2}`, 'g');
     const matches = configs.match(regex);
+
+    if (matches === null) {
+      this.setState({ errorMessage: 'Invalid configuration string' });
+      return;
+    }
+
     const validations = [];
     for (const config of matches) {
       // Preventing when the user forgets a comma in the end
