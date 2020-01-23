@@ -12,6 +12,7 @@ import RequestErrorModal from '../components/RequestError';
 import logo from '../assets/images/hathor-logo.png';
 import { dataLoaded } from "../actions/index";
 import { connect } from "react-redux";
+import colors from '../index.scss';
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -63,7 +64,7 @@ class LoadingAddresses extends React.Component {
               <img className="hathor-logo" src={logo} alt="" />
               <div className="mt-5 mb-4 d-flex flex-row align-items-center">
                 <p className="mr-3 mb-0"><strong>Loading transactions...</strong></p>
-                <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={0} />
+                <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={0} />
               </div>
             </div>
             <p>Please wait while we load the transactions of all your addresses.</p>

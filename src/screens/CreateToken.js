@@ -15,6 +15,7 @@ import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
+import colors from '../index.scss';
 
 const mapStateToProps = (state) => {
   const balance = hathorLib.wallet.calculateBalance(
@@ -187,7 +188,7 @@ class CreateToken extends React.Component {
       return (
         <div className="d-flex flex-row">
           <p className="mr-3">Please, wait while we create your token</p>
-          <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />
+          <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
         </div>
       )
     }
@@ -220,7 +221,7 @@ class CreateToken extends React.Component {
             </div>
             <div className="form-group col-3">
               <label>Symbol</label>
-              <input required ref="symbol" placeholder="MYC (max 5 characters)" type="text" pattern="\w{1,5}" className="form-control" />
+              <input required ref="symbol" placeholder="MYC (2-5 characters)" type="text" minLength={2} maxLength={5} className="form-control" />
             </div>
           </div>
           <div className="row">
