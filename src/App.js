@@ -37,7 +37,7 @@ import RequestErrorModal from './components/RequestError';
 import DashboardTx from './screens/DashboardTx';
 import DecodeTx from './screens/DecodeTx';
 import PushTx from './screens/PushTx';
-import { dataLoaded, isOnlineUpdate } from "./actions/index";
+import { dataLoaded, isOnlineUpdate, updateHeight } from "./actions/index";
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
@@ -75,11 +75,13 @@ class Root extends React.Component {
     hathorLib.WebSocketHandler.on('addresses_loaded', this.addressesLoadedUpdate);
     hathorLib.WebSocketHandler.on('is_online', this.isOnlineUpdate);
     hathorLib.WebSocketHandler.on('reload_data', this.reloadData);
+    hathorLib.WebSocketHandler.on('height_updated', this.handleHeightUpdated);
   }
 
   componentWillUnmount() {
     hathorLib.WebSocketHandler.removeListener('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
+    hathorLib.WebSocketHandler.removeListener('height_updated', this.handleHeightUpdated);
 
     hathorLib.WebSocketHandler.removeListener('addresses_loaded', this.addressesLoadedUpdate);
     hathorLib.WebSocketHandler.removeListener('is_online', this.isOnlineUpdate);
@@ -121,6 +123,16 @@ class Root extends React.Component {
       // TODO separate those messages
       console.log('Websocket message not handled. Type:', wsData.type);
     }
+  }
+
+  /**
+   * Method called when WebSocketHandler from lib emits a height_updated event
+   * We update the height of the network in redux
+   *
+   * @param {number} height New height of the network
+   */
+  handleHeightUpdated = (height) => {
+    store.dispatch(updateHeight({ height }));
   }
 
   /**

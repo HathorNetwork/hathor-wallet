@@ -479,6 +479,14 @@ class TxData extends React.Component {
       );
     }
 
+    const renderHeight = () => {
+      return (
+        <div>
+          <label>Height:</label> {this.props.transaction.height}
+        </div>
+      );
+    }
+
     const renderTokenList = () => {
       const renderTokenUID = (token) => {
         if (token.uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
@@ -599,6 +607,7 @@ class TxData extends React.Component {
               {!hathorLib.helpers.isBlock(this.props.transaction) && renderFirstBlockDiv()}
             </div>
             <div className="d-flex flex-column align-items-center important-div bordered-wrapper">
+              {hathorLib.helpers.isBlock(this.props.transaction) && renderHeight()}
               {hathorLib.helpers.isBlock(this.props.transaction) && renderScore()}
               {!hathorLib.helpers.isBlock(this.props.transaction) && renderAccWeightDiv()}
               {!hathorLib.helpers.isBlock(this.props.transaction) && renderConfirmationLevel()}

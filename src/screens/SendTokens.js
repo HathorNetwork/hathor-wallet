@@ -106,7 +106,7 @@ class SendTokens extends React.Component {
         this.setState({ errorMessage: message, loading: false });
       });
     } catch(e) {
-      if (e instanceof hathorLib.errors.AddressError || e instanceof hathorLib.errors.OutputValueError) {
+      if (e instanceof hathorLib.errors.AddressError || e instanceof hathorLib.errors.OutputValueError || e instanceof hathorLib.errors.MaximumNumberOutputsError || e instanceof hathorLib.errors.MaximumNumberInputsError) {
         this.setState({ errorMessage: e.message, loading: false });
       } else {
         // Unhandled error
