@@ -221,7 +221,7 @@ class CreateToken extends React.Component {
             </div>
             <div className="form-group col-3">
               <label>Symbol</label>
-              <input required ref="symbol" placeholder="MYC (max 5 characters)" type="text" pattern="\w{1,5}" className="form-control" />
+              <input required ref="symbol" placeholder="MYC (2-5 characters)" type="text" minLength={2} maxLength={5} className="form-control" />
             </div>
           </div>
           <div className="row">
