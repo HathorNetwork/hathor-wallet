@@ -73,8 +73,8 @@ class SearchTx extends React.Component {
    * @param {string} address Address to search for
    */
   searchAddress = (address) => {
-    hathorLib.walletApi.getAddressHistory([address], (response) => {
-      this.props.newData(response.history);
+    hathorLib.wallet.getHistory([address]).then((history) => {
+      this.props.newData(history);
       this.setState({ filtered: true });
     });
   }
