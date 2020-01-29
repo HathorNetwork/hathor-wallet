@@ -8,6 +8,7 @@
 import { addLocale, useLocale } from 'ttag';
 
 const availableLocales = {
+  'pt-BR': () => require('./locale/pt-br/texts.po.json'),
 };
 
 const languages = [];
