@@ -7,9 +7,11 @@
 
 import React from 'react';
 import ReactLoading from 'react-loading';
+import { t } from 'ttag';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
+import colors from '../index.scss';
 
 
 /**
@@ -72,7 +74,7 @@ class TransactionDetail extends React.Component {
   getTx() {
     hathorLib.txApi.getTransaction(this.props.match.params.id, (data) => {
       this.txReceived(data);
-      if (!hathorLib.helpers.isBlock(data.tx)) {
+      if (data.success && !hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();
       }
     }, (e) => {
@@ -95,14 +97,14 @@ class TransactionDetail extends React.Component {
       return (
         <div>
           <BackButton {...this.props} />
-          {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} /> : <p className="text-danger">Transaction with hash {this.props.match.params.id} not found</p>}
+          {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} history={this.props.history} /> : <p className="text-danger">{t`Transaction with hash ${this.props.match.params.id} not found`}</p>}
         </div>
       );
     }
 
     return (
       <div className="flex align-items-center content-wrapper">
-        {!this.state.loaded ? <ReactLoading type='spin' color='#0081af' delay={500} /> : renderTx()}
+        {!this.state.loaded ? <ReactLoading type='spin' color={colors.purpleHathor} delay={500} /> : renderTx()}
       </div>
     );
   }

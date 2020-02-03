@@ -25,7 +25,6 @@ import UnknownTokens from './screens/UnknownTokens';
 import Signin from './screens/Signin';
 import LockedWallet from './screens/LockedWallet';
 import NewWallet from './screens/NewWallet';
-import TokenDetail from './screens/TokenDetail';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
@@ -38,15 +37,18 @@ import RequestErrorModal from './components/RequestError';
 import DashboardTx from './screens/DashboardTx';
 import DecodeTx from './screens/DecodeTx';
 import PushTx from './screens/PushTx';
-import { dataLoaded, isOnlineUpdate } from "./actions/index";
+import { dataLoaded, isOnlineUpdate, updateHeight } from "./actions/index";
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import { VERSION } from './constants';
+import { DEFAULT_SERVER, VERSION } from './constants';
 import LocalStorageStore  from './storage.js';
 
-
+hathorLib.network.setNetwork('mainnet');
 hathorLib.storage.setStore(new LocalStorageStore());
+
+// set default server to bravo testnet
+hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -54,7 +56,6 @@ const mapDispatchToProps = dispatch => {
     isOnlineUpdate: (data) => dispatch(isOnlineUpdate(data)),
   };
 };
-
 
 const mapStateToProps = (state) => {
   return {
@@ -74,11 +75,13 @@ class Root extends React.Component {
     hathorLib.WebSocketHandler.on('addresses_loaded', this.addressesLoadedUpdate);
     hathorLib.WebSocketHandler.on('is_online', this.isOnlineUpdate);
     hathorLib.WebSocketHandler.on('reload_data', this.reloadData);
+    hathorLib.WebSocketHandler.on('height_updated', this.handleHeightUpdated);
   }
 
   componentWillUnmount() {
     hathorLib.WebSocketHandler.removeListener('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
+    hathorLib.WebSocketHandler.removeListener('height_updated', this.handleHeightUpdated);
 
     hathorLib.WebSocketHandler.removeListener('addresses_loaded', this.addressesLoadedUpdate);
     hathorLib.WebSocketHandler.removeListener('is_online', this.isOnlineUpdate);
@@ -123,6 +126,16 @@ class Root extends React.Component {
   }
 
   /**
+   * Method called when WebSocketHandler from lib emits a height_updated event
+   * We update the height of the network in redux
+   *
+   * @param {number} height New height of the network
+   */
+  handleHeightUpdated = (height) => {
+    store.dispatch(updateHeight({ height }));
+  }
+
+  /**
    * Method called when WebSocket receives a message after loading address history
    * We just check and save the version that was loaded and update redux data
    *
@@ -161,7 +174,6 @@ class Root extends React.Component {
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
         <StartedRoute exact path="/custom_tokens" component={CustomTokens} loaded={true} />
         <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} />
-        <StartedRoute exact path="/token_detail/:tokenUID" component={TokenDetail} loaded={true} />
         <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} />
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} />
         <StartedRoute exact path="/settings" component={Settings} loaded={true} />

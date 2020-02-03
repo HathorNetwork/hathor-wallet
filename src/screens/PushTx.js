@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import TxTextInput from '../components/TxTextInput';
 import hathorLib from '@hathor/wallet-lib';
 
@@ -66,7 +67,7 @@ class PushTx extends React.Component {
         <div className="form-check checkbox-wrapper mb-3">
           <input className="form-check-input" type="checkbox" id="force" onChange={this.handleCheckboxChange} />
           <label className="form-check-label" htmlFor="force">
-            Force push
+            {t`Force push`}
           </label>
         </div>
       );
@@ -74,9 +75,9 @@ class PushTx extends React.Component {
 
     return (
       <div className="content-wrapper">
-        <TxTextInput buttonClicked={this.buttonClicked} action='Push tx' onChange={this.handleChangeData} otherAction='decode' link='/decode-tx/' helpText='Write your transaction in hex value and click the button to send it to the network. (We do not push blocks to the network, only transactions)' />
+        <TxTextInput buttonClicked={this.buttonClicked} action={t`Push tx`} onChange={this.handleChangeData} otherAction={t`decode`} link='/decode-tx/' helpText={t`Write your transaction in hex value and click the button to send it to the network. (We do not push blocks to the network, only transactions)`} />
         {this.state.canForce ? renderForceCheckbox() : null}
-        {this.state.success ? <span className="text-success">Transaction pushed to the network with success!</span> : null}
+        {this.state.success ? <span className="text-success">{t`Transaction pushed to the network with success!`}</span> : null}
         {this.state.errorMessage ? <span className="text-danger">{this.state.errorMessage}</span> : null}
       </div>
     );

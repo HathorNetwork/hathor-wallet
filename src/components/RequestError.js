@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
+import SpanFmt from './SpanFmt';
 import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 
@@ -86,9 +88,9 @@ class RequestErrorModal extends React.Component {
    */
   getErrorMessage = () => {
     if (this.props.requestErrorStatusCode === 503 || this.props.requestErrorStatusCode === 429) {
-      return 'Rate limit exceeded. Sorry about that. You should wait a few seconds and try again. What do you want to do?';
+      return t`Rate limit exceeded. Sorry about that. You should wait a few seconds and try again. What do you want to do?`;
     } else {
-      return 'Your request failed to reach the server. What do you want to do?';
+      return t`Your request failed to reach the server. What do you want to do?`;
     }
   }
 
@@ -99,9 +101,9 @@ class RequestErrorModal extends React.Component {
     if (this.props.lastFailedRequest === undefined) return null;
     return (
       <div>
-        <p><strong>URL: </strong>{this.props.lastFailedRequest.url}</p>
-        <p><strong>Method: </strong>{this.props.lastFailedRequest.method}</p>
-        <p><strong>Response status code: </strong>{this.props.requestErrorStatusCode}</p>
+        <p><strong>{t`URL:`} </strong>{this.props.lastFailedRequest.url}</p>
+        <p><strong>{t`Method:`} </strong>{this.props.lastFailedRequest.method}</p>
+        <p><strong>{t`Response status code:`} </strong>{this.props.requestErrorStatusCode}</p>
       </div>
     );
   }
@@ -131,26 +133,27 @@ class RequestErrorModal extends React.Component {
   }
 
   render() {
+    const serverURL = hathorLib.helpers.getServerURL();
     return (
       <div className="modal fade" id="requestErrorModal" tabIndex="-1" role="dialog" aria-labelledby="requestErrorModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Request failed</h5>
+              <h5 className="modal-title" id="exampleModalLabel">{t`Request failed`}</h5>
               <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
               <p>{this.getErrorMessage()}</p>
-              <p>You are connected to <strong>{hathorLib.helpers.getServerURL()}</strong></p>
-              <a onClick={(e) => this.showAdvanced(e)} ref="showAdvancedLink" href="true">Show advanced data</a>
-              <a onClick={(e) => this.hideAdvanced(e)} ref="hideAdvancedLink" href="true" style={{display: 'none'}}>Hide advanced data</a>
+              <p><SpanFmt>{t`You are connected to **${serverURL}**`}</SpanFmt></p>
+              <a onClick={(e) => this.showAdvanced(e)} ref="showAdvancedLink" href="true">{t`Show advanced data`}</a>
+              <a onClick={(e) => this.hideAdvanced(e)} ref="hideAdvancedLink" href="true" style={{display: 'none'}}>{t`Hide advanced data`}</a>
               <div ref="advancedData" className="mt-3" style={{display: 'none'}}>{this.getAdvancedMessage()}</div>
             </div>
             <div className="modal-footer">
-              <button onClick={this.handleChangeServer} type="button" className="btn btn-secondary">Change server</button>
-              <button onClick={this.handleRetryRequest} type="button" className="btn btn-hathor">Retry request</button>
+              <button onClick={this.handleChangeServer} type="button" className="btn btn-secondary">{t`Change server`}</button>
+              <button onClick={this.handleRetryRequest} type="button" className="btn btn-hathor">{t`Retry request`}</button>
             </div>
           </div>
         </div>

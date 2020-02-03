@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import version from '../utils/version';
 import wallet from '../utils/wallet';
 import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
+import { DEFAULT_SERVERS } from '../constants';
+import colors from '../index.scss';
 
 
 /**
@@ -49,7 +52,7 @@ class Server extends React.Component {
   serverSelected = () => {
     this.setState({ errorMessage: '' });
     if ((this.state.newServer && this.refs.newServer.value === '') || (!this.state.newServer && this.state.selectedValue === '')) {
-      this.setState({ errorMessage: 'New server is not valid' });
+      this.setState({ errorMessage: t`New server is not valid` });
       return;
     }
     let newServer = null;
@@ -60,7 +63,7 @@ class Server extends React.Component {
     }
 
     if (!hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
-      this.setState({ errorMessage: 'Invalid PIN' });
+      this.setState({ errorMessage: t`Invalid PIN` });
       return;
     }
 
@@ -97,12 +100,12 @@ class Server extends React.Component {
    * @param {Object} e Event of select change
    */
   handleSelectChange = (e) => {
-    this.setState({ selectedValue: hathorLib.constants.DEFAULT_SERVERS[e.target.value] });
+    this.setState({ selectedValue: DEFAULT_SERVERS[e.target.value] });
   }
 
   render() {
     const renderServerOptions = () => {
-      return hathorLib.constants.DEFAULT_SERVERS.map((server, idx) => {
+      return DEFAULT_SERVERS.map((server, idx) => {
         return (
           <option key={idx} value={idx}>{server}</option>
         );
@@ -111,7 +114,7 @@ class Server extends React.Component {
 
     return (
       <div className="content-wrapper">
-        <p><strong>Select one of the default servers to connect or choose a new one</strong></p>
+        <p><strong>{t`Select one of the default servers to connect or choose a new one`}</strong></p>
         <form id="formSelectServer">
           <div className="row mt-3">
             <div className="col-12">
@@ -124,17 +127,17 @@ class Server extends React.Component {
           <div className="form-check checkbox-wrapper mt-3">
             <input className="form-check-input" type="checkbox" id="newServerCheckbox" onChange={this.handleCheckboxChange} />
             <label className="form-check-label" htmlFor="newServerCheckbox">
-              Select a new server
+              {t`Select a new server`}
             </label>
           </div>
           <div ref="newServerWrapper" className="mt-3" style={{display: 'none'}}>
-            <input type="text" placeholder="New server" ref="newServer" className="form-control col-4" />
+            <input type="text" placeholder={t`New server`} ref="newServer" className="form-control col-4" />
           </div>
-          <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder="PIN" className="form-control col-4 mt-3" />
+          <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />
         </form>
         <div className="d-flex flex-row align-items-center mt-3">
-          <button onClick={this.serverSelected} type="button" className="btn btn-hathor mr-3">Connect to server</button>
-          {this.state.loading && <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />}
+          <button onClick={this.serverSelected} type="button" className="btn btn-hathor mr-3">{t`Connect to server`}</button>
+          {this.state.loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
         </div>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
       </div>

@@ -7,6 +7,7 @@
 
 import store from '../store/index';
 import { newTokens } from '../actions/index';
+import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 
 
@@ -55,12 +56,22 @@ const tokens = {
    *
    * @param {string} uid Token uid to be unregistered
    *
+   * @return {Promise} promise that will be resolved if succeds and will be rejected with the error in case of failure
+   *
    * @memberof Tokens
    * @inner
    */
   unregisterToken(uid) {
-    const tokens = hathorLib.tokens.unregisterToken(uid);
-    store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
+    const promise = new Promise((resolve, reject) => {
+      const libPromise = hathorLib.tokens.unregisterToken(uid);
+      libPromise.then((tokens) => {
+        store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
+        resolve();
+      }, (e) => {
+        reject(e);
+      });
+    });
+    return promise;
   },
 
   /**
@@ -74,6 +85,24 @@ const tokens = {
   saveTokenRedux(uid) {
     const storageTokens = hathorLib.storage.getItem('wallet:tokens');
     store.dispatch(newTokens({tokens: storageTokens, uid: uid}));
+  },
+
+  /**
+   * Returns the deposit amount in 'pretty' format
+   *
+   * @param {number} mintAmount Amount of tokens to mint
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  getDepositAmount(mintAmount) {
+    if (mintAmount) {
+      const amountValue = wallet.decimalToInteger(mintAmount);
+      const deposit = hathorLib.helpers.getDepositAmount(amountValue);
+      return hathorLib.helpers.prettyValue(deposit);
+    } else {
+      return 0;
+    }
   },
 }
 

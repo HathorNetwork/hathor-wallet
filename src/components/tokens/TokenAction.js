@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import ModalPin from '../../components/ModalPin';
 import ReactLoading from 'react-loading';
+import colors from '../../index.scss';
 
 
 /**
@@ -50,8 +52,8 @@ class TokenAction extends React.Component {
     promise.then(() => {
       this.props.cancelAction();
       this.props.showSuccess(successMessage);
-    }, (message) => {
-      this.setState({ loading: false, errorMessage: message });
+    }, (e) => {
+      this.setState({ loading: false, errorMessage: e.message });
     });
   }
 
@@ -123,9 +125,9 @@ class TokenAction extends React.Component {
         <div className='d-flex mt-4 flex-column'>
           {this.state.errorMessage && <p className='text-danger mb-4'>{this.state.errorMessage}</p>}
           <div className='d-flex align-items-center'>
-            <button className='btn btn-secondary mr-3' disabled={this.state.loading} onClick={this.props.cancelAction}>Cancel</button>
+            <button className='btn btn-secondary mr-3' disabled={this.state.loading} onClick={this.props.cancelAction}>{t`Cancel`}</button>
             <button className='btn btn-hathor mr-4' disabled={this.state.loading} onClick={this.validateForm}>{this.props.buttonName}</button>
-            {this.state.loading && <ReactLoading type='spin' color='#0081af' width={32} height={32} delay={200} />}
+            {this.state.loading && <ReactLoading type='spin' color={colors.purpleHathor} width={32} height={32} delay={200} />}
           </div>
         </div>
       )
@@ -134,6 +136,8 @@ class TokenAction extends React.Component {
     return (
       <div key={this.props.action}>
         <h2>{this.props.title}</h2>
+        <p>{this.props.subtitle}</p>
+        <p>{this.props.deposit}</p>
         <form className={`mt-4 mb-3 ${this.state.formValidated ? 'was-validated' : ''}`} ref={this.form} onSubmit={(e) => e.preventDefault()}>
           {this.props.renderForm()}
         </form>

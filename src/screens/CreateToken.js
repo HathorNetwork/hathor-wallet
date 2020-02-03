@@ -7,17 +7,26 @@
 
 import React from 'react';
 import $ from 'jquery';
+import { t } from 'ttag'
+
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import ReactLoading from 'react-loading';
+import SpanFmt from '../components/SpanFmt';
 import ModalPin from '../components/ModalPin';
 import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
+import colors from '../index.scss';
 
 const mapStateToProps = (state) => {
+  const balance = hathorLib.wallet.calculateBalance(
+    Object.values(state.historyTransactions),
+    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+  );
   return {
+    htrBalance: balance.available,
     historyTransactions: state.historyTransactions,
   };
 };
@@ -34,9 +43,6 @@ class CreateToken extends React.Component {
 
     this.address = React.createRef();
     this.inputWrapper = React.createRef();
-    this.inputCheckbox = React.createRef();
-    this.txId = React.createRef();
-    this.index = React.createRef();
 
     /**
      * errorMessage {string} Message to show when error happens on the form
@@ -44,13 +50,15 @@ class CreateToken extends React.Component {
      * pin {string} PIN that user writes in the modal
      * name {string} Name of the created token
      * configurationString {string} Configuration string of the created token
+     * amount {number} Amount of tokens to create
      */
     this.state = {
       errorMessage: '',
       loading: false,
       pin: '',
       name: '',
-      configurationString: ''
+      configurationString: '',
+      amount: null,
     };
   }
 
@@ -70,14 +78,15 @@ class CreateToken extends React.Component {
     const isValid = this.refs.formCreateToken.checkValidity();
     if (isValid) {
       if (this.refs.address.value === '' && !this.refs.autoselectAddress.checked) {
-        this.setState({ errorMessage: 'Must choose an address or auto select' });
+        this.setState({ errorMessage: t`Must choose an address or auto select` });
         return false;
       }
 
       // Validating maximum amount
-      const tokensValue = this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES);
+      const tokensValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-        this.setState({ errorMessage: `Maximum value to mint token is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
+        const max_output_value_str = hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
+        this.setState({ errorMessage: t`Maximum value to mint token is ${max_output_value_str}` });
         return false;
       }
       return true;
@@ -86,63 +95,14 @@ class CreateToken extends React.Component {
     }
   }
 
-  /*
-   * Getting Hathor input and output to generate the new token
-   */
-  getHathorData = () => {
-    let input = null;
-    let amount = 0;
-    if (this.inputCheckbox.current.checked) {
-      // Select inputs automatically
-      const inputs = hathorLib.wallet.getInputsFromAmount(this.props.historyTransactions, hathorLib.helpers.minimumAmount(), hathorLib.constants.HATHOR_TOKEN_CONFIG.uid);
-      if (inputs.inputs.length === 0) {
-        this.setState({ errorMessage: 'You don\'t have any available hathor token to create a new token' });
-        return null;
-      } else if (inputs.inputs.length > 1) {
-        this.setState({ errorMessage: 'Error getting inputs automatically' });
-        return null;
-      }
-      input = inputs.inputs[0];
-      amount = inputs.inputsAmount;
-    } else {
-      const txId = this.txId.current.value;
-      const index = this.index.current.value;
-      if (txId === '' || index === '') {
-        this.setState({ errorMessage: 'Tx id and index are required when manually choosing input' });
-        return null;
-      }
-
-      const utxo = hathorLib.wallet.checkUnspentTxExists(this.props.historyTransactions, txId, index, hathorLib.constants.HATHOR_TOKEN_CONFIG.uid);
-      if (!utxo.exists) {
-        // Input does not exist in unspent txs
-        this.setState({ errorMessage: utxo.message });
-        return null;
-      }
-
-      const output = utxo.output;
-      if (!hathorLib.wallet.canUseUnspentTx(output)) {
-        this.setState({ errorMessage: `Output [${txId}, ${index}] is locked until ${hathorLib.dateFormatter.parseTimestamp(output.decoded.timelock)}` });
-        return null;
-      }
-
-      input = {'tx_id': txId, 'index': index, 'token': hathorLib.constants.HATHOR_TOKEN_CONFIG.uid, 'address': output.decoded.address};
-      amount = output.value;
-    }
-    // Change output for Hathor because the whole input will go as change
-    const outputChange = hathorLib.wallet.getOutputChange(amount, hathorLib.constants.HATHOR_TOKEN_INDEX);
-    return {'input': input, 'output': outputChange};
-  }
-
   /**
-   * Method execute after user verifies the action in the PIN modal and closes the modal and executes token creation
+   * Executes tokens creation. Runs after user entered pin on the pin modal
    */
   createToken = () => {
     $('#pinModal').modal('hide');
     if (!this.formValid()) {
       return;
     }
-    const hathorData = this.getHathorData();
-    if (!hathorData) return;
     this.setState({ errorMessage: '', loading: true });
     // Get the address to send the created tokens
     let address = '';
@@ -151,23 +111,22 @@ class CreateToken extends React.Component {
     } else {
       address = this.refs.address.value;
     }
-    const promise = new Promise((resolve, reject) => {
-      const retPromise = hathorLib.tokens.createToken(hathorData.input, hathorData.output, address, this.refs.shortName.value, this.refs.symbol.value, parseInt(this.refs.amount.value*(10**hathorLib.constants.DECIMAL_PLACES), 10), this.state.pin);
-      retPromise.then((token) => {
-        // Update redux with added token
-        tokens.saveTokenRedux(token.uid);
-        resolve(token);
-      }, (message) => {
-        reject(message);
-      });
-    });
 
-    promise.then((token) => {
+    const retPromise = hathorLib.tokens.createToken(
+      address,
+      this.refs.shortName.value,
+      this.refs.symbol.value,
+      wallet.decimalToInteger(this.state.amount),
+      this.state.pin
+    );
+    retPromise.then((token) => {
+      // Update redux with added token
+      tokens.saveTokenRedux(token.uid);
       // Must update the shared address, in case we have used one for the change
       wallet.updateSharedAddress();
       this.showAlert(token);
-    }, (message) => {
-      this.setState({ loading: false, errorMessage: message });
+    }, (e) => {
+      this.setState({ loading: false, errorMessage: e.message });
     });
   }
 
@@ -221,12 +180,19 @@ class CreateToken extends React.Component {
     }
   }
 
+  /**
+   * Handles amount input change
+   */
+  onAmountChange = (e) => {
+    this.setState({amount: e.target.value});
+  }
+
   render = () => {
     const isLoading = () => {
       return (
         <div className="d-flex flex-row">
-          <p className="mr-3">Please, wait while we create your token</p>
-          <ReactLoading type='spin' color='#0081af' width={24} height={24} delay={200} />
+          <p className="mr-3">{t`Please, wait while we create your token`}</p>
+          <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
         </div>
       )
     }
@@ -234,9 +200,9 @@ class CreateToken extends React.Component {
     const getAlertBody = () => {
       return (
         <div>
-          <p>Your token has been successfully created!</p>
-          <p>You can share the following configuration string with other people to let them use your brand new token.</p>
-          <p>Remember to <strong>make a backup</strong> of this configuration string.</p>
+          <p>{t`Your token has been successfully created!`}</p>
+          <p>{t`You can share the following configuration string with other people to let them use your brand new token.`}</p>
+          <p><SpanFmt>{t`Remember to **make a backup** of this configuration string.`}</SpanFmt></p>
           <p><strong>{this.state.configurationString}</strong></p>
         </div>
       )
@@ -246,57 +212,56 @@ class CreateToken extends React.Component {
       <div className="content-wrapper">
         <BackButton {...this.props} />
         <h3 className="mt-4">Create Token</h3>
-        <p className="mt-5">Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.</p>
-        <p>Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.</p>
-        <p>Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.</p>
+        <p className="mt-5">{t`Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.`}</p>
+        <p>{t`Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>
+        <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.`}</p>
+        <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a target="_blank" rel="noopener noreferrer" href="https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md">here</a>.</p>
         <hr className="mb-5 mt-5"/>
         <form ref="formCreateToken" id="formCreateToken">
           <div className="row">
             <div className="form-group col-6">
-              <label>Short name</label>
-              <input required ref="shortName" placeholder="MyCoin" type="text" className="form-control" />
+              <label>{t`Short name`}</label>
+              <input required ref="shortName" placeholder={t`MyCoin`} type="text" className="form-control" />
             </div>
             <div className="form-group col-3">
-              <label>Symbol</label>
-              <input required ref="symbol" placeholder="MYC (max 5 characters)" type="text" pattern="\w{1,5}" className="form-control" />
+              <label>{t`Symbol`}</label>
+              <input required ref="symbol" placeholder={t`MYC (2-5 characters)`} type="text" minLength={2} maxLength={5} className="form-control" />
             </div>
           </div>
           <div className="row">
             <div className="form-group col-4">
-              <label>Amount</label>
-              <input required type="number" ref="amount" step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control" />
+              <label>{t`Amount`}</label>
+              <input
+               required
+               type="number"
+               className="form-control"
+               onChange={this.onAmountChange}
+               value={this.state.amount || ''}
+               step={hathorLib.helpers.prettyValue(1)}
+               min={hathorLib.helpers.prettyValue(1)}
+               placeholder={hathorLib.helpers.prettyValue(0)}
+              />
             </div>
             <div className="form-group d-flex flex-row align-items-center address-checkbox">
               <div className="form-check">
                 <input className="form-check-input" type="checkbox" ref="autoselectAddress" id="autoselectAddress" defaultChecked={true} onChange={this.handleCheckboxAddress} />
                 <label className="form-check-label" htmlFor="autoselectAddress">
-                  Select address automatically
+                  {t`Select address automatically`}
                 </label>
               </div>
             </div>
             <div className="form-group col-5" ref={this.address} style={{display: 'none'}}>
-              <label>Destination address</label>
-              <input ref="address" type="text" placeholder="Address" className="form-control" />
-            </div>
-            <div className="form-group d-flex flex-row align-items-center col-12">
-              <div className="form-check">
-                <input className="form-check-input" type="checkbox" ref={this.inputCheckbox} id="autoselectInput" defaultChecked={true} onChange={this.handleCheckboxInput} />
-                <label className="form-check-label" htmlFor="autoselectInput">
-                  Select input automatically
-                </label>
-              </div>
+              <label>{t`Destination address`}</label>
+              <input ref="address" type="text" placeholder={t`Address`} className="form-control" />
             </div>
           </div>
-          <div className="form-group input-group mb-3 inputs-wrapper" ref={this.inputWrapper} style={{display: 'none'}}>
-            <input type="text" placeholder="Tx id" ref={this.txId} className="form-control input-id col-6" />
-            <input type="text" placeholder="Index" ref={this.index} className="form-control input-index col-1 ml-3" />
-          </div>
+          <p>Deposit: {tokens.getDepositAmount(this.state.amount)} HTR ({hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)</p>
           <button type="button" disabled={this.state.loading} className="mt-3 btn btn-hathor" data-toggle="modal" data-target="#pinModal">Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
         {this.state.loading ? isLoading() : null}
         <ModalPin execute={this.createToken} handleChangePin={this.handleChangePin} />
-        <ModalAlert title={`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
+        <ModalAlert title={t`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
       </div>
     );
   }

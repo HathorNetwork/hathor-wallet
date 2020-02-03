@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import PinInput from './PinInput';
 import hathorLib from '@hathor/wallet-lib';
@@ -53,7 +54,7 @@ class ModalPin extends React.Component {
       if (hathorLib.wallet.isPinCorrect(this.refs.pinInput.refs.pin.value)) {
         this.props.execute();
       } else {
-        this.setState({errorMessage: 'Invalid PIN'})
+        this.setState({errorMessage: t`Invalid PIN`})
       }
     }
   }
@@ -85,8 +86,8 @@ class ModalPin extends React.Component {
               </form>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button onClick={this.handlePin} type="button" className="btn btn-hathor">Go</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`Cancel`}</button>
+              <button onClick={this.handlePin} type="button" className="btn btn-hathor">{t`Go`}</button>
             </div>
           </div>
         </div>

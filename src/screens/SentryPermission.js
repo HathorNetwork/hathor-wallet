@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
+import InitialImages from '../components/InitialImages';
 
 
 /**
@@ -60,30 +62,31 @@ class SentryPermission extends React.Component {
     return (
       <div className="outside-content-wrapper">
         <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div>
+          <div className="inside-div">
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
-              <p className="mt-5"><strong>Automatic bug report</strong></p>
+              <p className="mt-5"><strong>{t`Automatic bug report`}</strong></p>
             </div>
-            <p>We would like your permission to automatically report bugs to our development team. It really helps us to improve our Wallet faster for our community.</p>
-            <p>The report collects the following data:</p>
+            <p>{t`We would like your permission to automatically report bugs to our development team. It really helps us to improve our Wallet faster for our community.`}</p>
+            <p>{t`The report collects the following data:`}</p>
             <ul>
-              <li>The server your wallet is connected to;</li>
-              <li>The version of your wallet;</li>
-              <li>The version of your operating system;</li>
-              <li>The details of the bug, including the context it has happened.</li>
+              <li>{t`The server your wallet is connected to;`}</li>
+              <li>{t`The version of your wallet;`}</li>
+              <li>{t`The version of your operating system;`}</li>
+              <li>{t`The details of the bug, including the context it has happened.`}</li>
             </ul>
-            <p>The report NEVER collects any sensitive data, such as your seed, your private keys, your addresses, or your balances.</p>
+            <p>{t`The report NEVER collects any sensitive data, such as your seed, your private keys, your addresses, or your balances.`}</p>
           <form>
             <div className="form-check mt-4 mb-4">
               <input required type="checkbox" onChange={(e) => this.checkboxChanged(e)} checked={this.state.checkboxPermission} className="form-check-input" id="permission" ref="permission" />
-              <label className="form-check-label" htmlFor="permission"> I allow Hathor Wallet to report error information to Hathor team.</label>
+              <label className="form-check-label" htmlFor="permission"> {t`I allow Hathor Wallet to report error information to Hathor team.`}</label>
             </div>
           </form>
             <div className="d-flex align-items-center flex-column">
-              <button onClick={this.goContinue} type="button" className="btn btn-hathor">Continue</button>
+              <button onClick={this.goContinue} type="button" className="btn btn-hathor">{t`Continue`}</button>
             </div>
           </div>
+          <InitialImages />
         </div>
       </div>
     )

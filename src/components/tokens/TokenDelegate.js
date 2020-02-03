@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 
@@ -34,18 +35,19 @@ class TokenDelegate extends React.Component {
    */
   executeDelegate = (pin) => {
     const output = this.props.authorityOutputs[0];
-    const type = this.props.action === 'delegate-mint' ? 'Mint' : 'Melt';
+    const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
     const promise = hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.props.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, type.toLowerCase(), pin);
-    return { promise, message: `${type} output delegated!`};
+    return { promise, message: t`${type} output delegated!`};
   }
 
   render() {
     const renderForm = () => {
+      const type = this.props.action === 'delegate-mint' ? t`mint` : t`melt`;
       return (
         <div>
           <div className="row">
             <div className="form-group col-6">
-              <label>Address</label>
+              <label>{t`Address of the new ${type} authority`}</label>
               <input required ref={this.delegateAddress} type="text" className="form-control" />
             </div>
           </div>
@@ -53,15 +55,16 @@ class TokenDelegate extends React.Component {
             <div className="form-check">
               <input className="form-check-input" type="checkbox" ref={this.delegateCreateAnother} id="keepAuthority" defaultChecked={true} />
               <label className="form-check-label" htmlFor="keepAuthority">
-                Create another {this.props.action === 'delegate-mint' ? 'mint' : 'melt'} output for you?
+                {t`Create another ${type} output for you?`}
               </label>
+              <p className="subtitle">{t`Leave it checked unless you know what you are doing`}</p>
             </div>
           </div>
         </div>
       )
     }
 
-    const title = `Delegate ${this.props.action === 'destroy-mint' ? 'Mint' : 'Melt'}`;
+    const title = `Delegate ${this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`}`;
 
     return <TokenAction renderForm={renderForm} title={title} buttonName='Delegate' onPinSuccess={this.executeDelegate} {...this.props} />
   }

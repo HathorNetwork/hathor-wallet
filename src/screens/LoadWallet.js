@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
+
 import wallet from '../utils/wallet';
 import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
@@ -13,6 +15,7 @@ import logo from '../assets/images/hathor-logo.png';
 import { updatePassword, updatePin } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
+import InitialImages from '../components/InitialImages';
 
 
 const mapStateToProps = (state) => {
@@ -109,12 +112,12 @@ class LoadWallet extends React.Component {
     const renderLoad = () => {
       return (
         <div>
-          <p className="mt-4 mb-4">Write the 24 words of your wallet (separated by space).</p>
-          <textarea className="form-control one-word-input mb-4" placeholder="Words separated by single space" ref="wordsInput" rows={5} />
+          <p className="mt-4 mb-4">{t`Write the 24 words of your wallet (separated by space).`}</p>
+          <textarea className="form-control one-word-input mb-4" placeholder={t`Words separated by single space`} ref="wordsInput" rows={5} />
           {this.state.errorMessage && <p className="mb-4 text-danger">{this.state.errorMessage}</p>}
           <div className="d-flex justify-content-between flex-row w-100">
-            <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">Back</button>
-            <button onClick={this.import} type="button" className="btn btn-hathor">Import data</button>
+            <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
+            <button onClick={this.import} type="button" className="btn btn-hathor">{t`Import data`}</button>
           </div>
         </div>
       )
@@ -123,12 +126,13 @@ class LoadWallet extends React.Component {
     return (
       <div className="outside-content-wrapper">
         <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div className="d-flex align-items-center flex-column">
+          <div className="d-flex align-items-center flex-column inside-div">
             <img className="hathor-logo" src={logo} alt="" />
             <div className="d-flex align-items-start flex-column">
               {this.state.askPIN ? <ChoosePin back={this.pinBack} success={this.pinSuccess} /> : (this.state.askPassword ? <ChoosePassword back={this.passwordBack} success={this.passwordSuccess} /> : renderLoad())}
             </div>
           </div>
+          <InitialImages />
         </div>
       </div>
     )

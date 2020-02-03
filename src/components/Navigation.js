@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from './Version';
 import ServerStatus from './ServerStatus';
@@ -33,22 +34,22 @@ class Navigation extends React.Component {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav mr-auto">
               <li className="nav-item">
-                <NavLink to="/wallet/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Wallet</NavLink>
+                <NavLink to="/wallet/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Wallet`}</NavLink>
               </li>
               <li className="nav-item">
-                <NavLink to="/wallet/send_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Send tokens</NavLink>
+                <NavLink to="/wallet/send_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Send tokens`}</NavLink>
               </li>
               <li className="nav-item">
-                <NavLink to="/custom_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Custom tokens</NavLink>
+                <NavLink to="/custom_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Custom tokens`}</NavLink>
               </li>
               <li className="nav-item dropdown">
                 <a href="true" className="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Explorer
+                  {t`Explorer`}
                 </a>
                 <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <NavLink to="/dashboard-tx/" exact className="nav-link">Transactions</NavLink>
-                  <NavLink to="/decode-tx/" exact className="nav-link">Decode Tx</NavLink>
-                  <NavLink to="/push-tx/" exact className="nav-link">Push Tx</NavLink>
+                  <NavLink to="/dashboard-tx/" exact className="nav-link">{t`Transactions`}</NavLink>
+                  <NavLink to="/decode-tx/" exact className="nav-link">{t`Decode Tx`}</NavLink>
+                  <NavLink to="/push-tx/" exact className="nav-link">{t`Push Tx`}</NavLink>
                 </div>
               </li>
             </ul>

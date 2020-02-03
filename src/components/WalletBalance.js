@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 
@@ -25,25 +26,12 @@ class WalletBalance extends React.Component {
     const symbol = token ? token.symbol : '';
 
     const renderBalance = () => {
-      const renderTokenButtons = () => {
-        return (
-          <div className='ml-3'>
-            <i className="fa fa-info-circle pointer" title="Open token information" onClick={() => this.props.history.push(`/token_detail/${token.uid}`)}></i>
-          </div>
-        );
-      }
 
       return (
         <div>
-          <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
-            <p className='token-name mb-0'>
-              <strong>{token ? token.name : ''}</strong>
-            </p>
-            {this.props.selectedToken !== hathorLib.constants.HATHOR_TOKEN_CONFIG.uid && renderTokenButtons()}
-          </div>
-          <p><strong>Total:</strong> {hathorLib.helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
-          <p><strong>Available:</strong> {hathorLib.helpers.prettyValue(this.props.balance.available)} {symbol}</p>
-          <p><strong>Locked:</strong> {hathorLib.helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
+          <p><strong>{t`Total:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
+          <p><strong>{t`Available:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.available)} {symbol}</p>
+          <p><strong>{t`Locked:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
         </div>
       );
     }

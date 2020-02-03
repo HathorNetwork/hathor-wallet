@@ -3,8 +3,14 @@ $fa-font-path: "~font-awesome/fonts";
 @import "~font-awesome/scss/font-awesome.scss";
 */
 
-$darkBlue: #0273a0;
-$darkBlueHover: #0081af;
+$purpleHathor: #8C46FF;
+$purpleHathorHover: #5f2eaf;
+$greenHathor: #59D73C;
+$warning: #ce9c06;
+
+:export {
+  purpleHathor: $purpleHathor;
+}
 
 html, body, #root {
   height: 100%;
@@ -13,11 +19,11 @@ html, body, #root {
 }
 
 a {
-  color: $darkBlue;
+  color: $purpleHathor;
 }
 
 a:hover {
-  color: $darkBlueHover;
+  color: $purpleHathorHover;
 }
 
 #root {
@@ -56,12 +62,13 @@ a:hover {
 }
 
 .main-nav {
-  background-color: $darkBlue;
+  background-color: #000;
   position: fixed;
   top: 0;
   right: 0;
   left: 0;
   z-index: 1030;
+  height: 64px;
 }
 
 .main-nav nav {
@@ -79,7 +86,7 @@ a:hover {
 }
 
 .nav-tabs a, .nav-tabs a:hover {
-  color: $darkBlue;
+  color: $purpleHathor;
 }
 
 .dropdown-menu a.nav-link {
@@ -104,16 +111,16 @@ a:hover {
 }
 
 .page-item.active .page-link {
-  background-color: $darkBlue;
-  border-color: $darkBlue;
+  background-color: $purpleHathor;
+  border-color: $purpleHathor;
 }
 
 .page-link {
-  color: $darkBlue;
+  color: $purpleHathor;
 }
 
 .page-link:hover {
-  color: $darkBlueHover;
+  color: $purpleHathorHover;
   cursor: pointer;
 }
 
@@ -178,8 +185,13 @@ div.new-address-wrapper canvas {
   width: 160px;
 }
 
+.main-nav > nav .navbar-brand {
+  font-size: 1rem;
+  margin-right: 3rem;
+}
+
 .main-nav > nav .navbar-brand > img {
-  height: 38px;
+  height: 28px;
   width: auto;
 }
 
@@ -377,7 +389,7 @@ svg.svg-wrapper {
 }
 
 .outside-content-wrapper {
-  background-color: $darkBlue;
+  background-color: #000;
   width: 100%;
   height: 100%;
   overflow: auto;
@@ -399,19 +411,15 @@ svg.svg-wrapper {
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.3), 0 5px 5px 0 rgba(0, 0, 0, 0.34);
 }
 
-.inside-white-wrapper .hathor-logo {
-  width: 70%;
-}
-
 .btn-hathor {
-  background-color: $darkBlue;
-  border-color: $darkBlue;
+  background-color: $purpleHathor;
+  border-color: $purpleHathor;
   color: white;
 }
 
 .btn-hathor:hover, .btn-hathor:active, .btn-hathor:visited, .btn-hathor:not(:disabled):not(.disabled):active {
-  background-color: $darkBlueHover;
-  border-color: $darkBlueHover;
+  background-color: $purpleHathorHover;
+  border-color: $purpleHathorHover;
   color: white;
 }
 
@@ -547,7 +555,7 @@ svg.svg-wrapper {
 }
 
 .token-name {
-  font-size: 1.5rem;
+  font-size: 2.25rem;
 }
 
 .token-wrapper i {
@@ -574,7 +582,7 @@ svg.svg-wrapper {
 }
 
 .unknown-symbol {
-  background-color: $darkBlue;
+  background-color: $purpleHathor;
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 0.75rem;
@@ -600,7 +608,7 @@ svg.svg-wrapper {
 }
 
 .back-div i {
-  color: $darkBlue;
+  color: $purpleHathor;
   font-size: 1.5rem;
 }
 
@@ -652,18 +660,18 @@ svg.svg-wrapper {
 .address-badge {
   padding: 0.2rem 0.4rem;
   border-radius: 1rem;
-  background-color: #0273a0;
+  background-color: $purpleHathor;
   color: white;
   font-size: 0.7rem;
   float: right;
 }
 
-.page-text .text-warning {
-  color: #ce9c06 !important;
+.text-warning {
+  color: $warning !important;
 }
 
 .text-warning a {
-  color: #ce9c06 !important;
+  color: $warning !important;
   text-decoration: underline;
 }
 
@@ -677,11 +685,41 @@ svg.svg-wrapper {
   text-align: center;
 }
 
-.token-detail-top {
-  padding-bottom: 6rem;
-  border-bottom: 1px solid #ddd;
-}
-
 .token-detail-bottom {
   padding-top: 3rem;
+}
+
+.token-general-info {
+  word-break: break-all;
+}
+
+.unregistered-token-badge {
+  padding: 0.2rem 0.4rem;
+  border-radius: 1rem;
+  background-color: $warning;
+  color: white;
+}
+
+p.subtitle {
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
+
+.scalability-img {
+  position: absolute;
+  bottom: 110px;
+  right: -110px;
+  z-index: 0;
+}
+
+.easy-img {
+  position: absolute;
+  top: 110px;
+  left: -110px;
+  z-index: 0;
+}
+
+.inside-div {
+  position: relative;
+  z-index: 1;
 }

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import OutputsWrapper from '../components/OutputsWrapper'
 import InputsWrapper from '../components/InputsWrapper'
@@ -201,9 +202,9 @@ class SendTokensOne extends React.Component {
     return (
       <div className='send-tokens-wrapper card'>
         <div className="mb-3">
-          <label>Token:</label>
+          <label>{t`Token:`}</label>
           {this.state.selected && renderSelectToken()}
-          {this.state.selectedTokens.length !== 1 ? <button type="button" className="text-danger remove-token-btn ml-3" onClick={(e) => this.props.removeToken(this.props.index)}>Remove</button> : null}
+          {this.state.selectedTokens.length !== 1 ? <button type="button" className="text-danger remove-token-btn ml-3" onClick={(e) => this.props.removeToken(this.props.index)}>{t`Remove`}</button> : null}
         </div>
         <div className="outputs-wrapper">
           <label>Outputs</label>
@@ -212,11 +213,11 @@ class SendTokensOne extends React.Component {
         <div className="form-check checkbox-wrapper">
           <input className="form-check-input" type="checkbox" defaultChecked="true" ref={this.noInputs} id={this.uniqueID} onChange={this.handleCheckboxChange} />
           <label className="form-check-label" htmlFor={this.uniqueID}>
-            Choose inputs automatically
+            {t`Choose inputs automatically`}
           </label>
         </div>
         <div ref={this.inputsWrapper} className="inputs-wrapper" style={{display: 'none'}}>
-          <label htmlFor="inputs">Inputs</label>
+          <label htmlFor="inputs">{t`Inputs`}</label>
           {renderInputs()}
         </div>
       </div>

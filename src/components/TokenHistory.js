@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
@@ -170,26 +171,47 @@ class TokenHistory extends React.Component {
     let value = 0;
 
     for (let txin of tx.inputs) {
-      if (hathorLib.wallet.isAuthorityOutput(txin)) {
-        continue;
-      }
       if (txin.token === selectedToken && txin.decoded.address in keys) {
         found = true;
-        value -= txin.value;
+        if (!hathorLib.wallet.isAuthorityOutput(txin)) {
+          value -= txin.value;
+        }
       }
     }
 
     for (let txout of tx.outputs) {
-      if (hathorLib.wallet.isAuthorityOutput(txout)) {
-        continue;
-      }
       if (txout.token === selectedToken && txout.decoded.address in keys) {
         found = true;
-        value += txout.value;
+        if (!hathorLib.wallet.isAuthorityOutput(txout)) {
+          value += txout.value;
+        }
       }
     }
 
     return {found, value};
+  }
+
+  /**
+   * Check if the tx has only inputs and outputs that are authorities
+   *
+   * @param {Object} tx Transaction data
+   *
+   * @return {boolean} If the tx has only authority
+   */
+  isAllAuthority = (tx) => {
+    for (let txin of tx.inputs) {
+      if (!hathorLib.wallet.isAuthorityOutput(txin)) {
+        return false;
+      }
+    }
+
+    for (let txout of tx.outputs) {
+      if (!hathorLib.wallet.isAuthorityOutput(txout)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   render() {
@@ -202,8 +224,8 @@ class TokenHistory extends React.Component {
         return (
           <nav aria-label="Token pagination" className="d-flex justify-content-center">
             <ul className="pagination">
-              <li className={(!this.state.hasBefore || this.props.history.length === 0) ? "page-item mr-3 disabled" : "page-item mr-3"}><a className="page-link" onClick={(e) => this.previousClicked(e)} href="true">Previous</a></li>
-              <li className={(!this.state.hasAfter || this.props.history.length === 0) ? "page-item disabled" : "page-item"}><a className="page-link" href="true" onClick={(e) => this.nextClicked(e)}>Next</a></li>
+              <li className={(!this.state.hasBefore || this.props.history.length === 0) ? "page-item mr-3 disabled" : "page-item mr-3"}><a className="page-link" onClick={(e) => this.previousClicked(e)} href="true">{t`Previous`}</a></li>
+              <li className={(!this.state.hasAfter || this.props.history.length === 0) ? "page-item disabled" : "page-item"}><a className="page-link" href="true" onClick={(e) => this.nextClicked(e)}>{t`Next`}</a></li>
             </ul>
           </nav>
         );
@@ -216,11 +238,11 @@ class TokenHistory extends React.Component {
           <table className="mt-3 table table-striped" id="token-history">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>ID</th>
-                <th>Type</th>
+                <th>{t`Date`}</th>
+                <th>{t`ID`}</th>
+                <th>{t`Type`}</th>
                 <th></th>
-                <th>Value</th>
+                <th>{t`Value`}</th>
               </tr>
             </thead>
             <tbody>
@@ -234,7 +256,7 @@ class TokenHistory extends React.Component {
 
     const renderVoidedElement = () => {
       return (
-        <span className="voided-element">Voided</span>
+        <span className="voided-element">{t`Voided`}</span>
       );
     }
 
@@ -247,12 +269,26 @@ class TokenHistory extends React.Component {
         }
         let statusElement = '';
         let trClass = '';
+        let value = hathorLib.helpers.prettyValue(extra.value);
         if (extra.value > 0) {
-          statusElement = <span>Received <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
+            statusElement = <span>{t`Token creation`} <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          } else {
+            statusElement = <span>{t`Received`} <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
+          }
           trClass = 'output-tr';
         } else if (extra.value < 0) {
-          statusElement = <span>Sent <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
+            statusElement = <span>{t`Token deposit`} <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          } else {
+            statusElement = <span>{t`Sent`} <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
+          }
           trClass = 'input-tr';
+        } else {
+          if (this.isAllAuthority(tx)) {
+            statusElement = <span>{`Authority`}</span>;
+            value = '--';
+          }
         }
         return (
           <tr key={`${tx.tx_id}`} className={trClass}>
@@ -265,7 +301,7 @@ class TokenHistory extends React.Component {
             </td>
             <td className={tx.is_voided ? 'voided state' : 'state'}>{statusElement}</td>
             <td>{tx.is_voided && renderVoidedElement()}</td>
-            <td className='value'><span className={tx.is_voided ? 'voided' : ''}>{hathorLib.helpers.prettyValue(extra.value)}</span></td>
+            <td className='value'><span className={tx.is_voided ? 'voided' : ''}>{value}</span></td>
           </tr>
         );
       });
@@ -275,12 +311,12 @@ class TokenHistory extends React.Component {
       const page = this.getPageNumber();
       let span = null;
       if (page === 1) {
-        span = <span>You are receiving transactions in real time.</span>;
+        span = <span>{t`You are receiving transactions in real time.`}</span>;
       } else {
         span = <span className="text-warning">To receive transactions in real time, <a href="true" onClick={(e) => this.goToPage1(e)}>go to page 1</a>.</span>;
       }
       return (
-        <p className="mt-3 mb-0 page-text"><strong>Page {page}</strong> - {span}</p>
+        <p className="mt-3 mb-0 page-text"><strong>{t`Page ${page}`}</strong> - {span}</p>
       );
     }
 
