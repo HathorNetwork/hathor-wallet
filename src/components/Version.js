@@ -18,7 +18,6 @@ import $ from 'jquery';
  * @memberof Components
  */
 class Version extends React.Component {
-
   /**
    * If it's software wallet show modal warning
    */

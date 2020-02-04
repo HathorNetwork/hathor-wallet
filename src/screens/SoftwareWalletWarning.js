@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
+
 import logo from '../assets/images/hathor-logo.png';
 import SoftwareWalletWarningMessage from '../components/SoftwareWalletWarningMessage';
 
@@ -44,12 +46,12 @@ class SoftwareWalletWarning extends React.Component {
                 <form ref="confirmForm" className={`w-100 mb-4 ${this.state.formValidated && 'was-validated'}`}>
                   <div className="form-check">
                     <input required type="checkbox" className="form-check-input" id="confirmWallet" />
-                    <label className="form-check-label" htmlFor="confirmWallet" >Ok, I got it! I want to continue with a software wallet.</label>
+                    <label className="form-check-label" htmlFor="confirmWallet">{t`Ok, I got it! I want to continue using a software wallet.`}</label>
                   </div>
                 </form>
                 <div className="d-flex justify-content-between flex-row w-100">
-                  <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">Back</button>
-                  <button onClick={this.create} type="button" className="btn btn-hathor">Continue</button>
+                  <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
+                  <button onClick={this.create} type="button" className="btn btn-hathor">{t`Continue`}</button>
                 </div>
               </div>
             </div>

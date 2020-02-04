@@ -16,8 +16,6 @@ import $ from 'jquery';
  * @memberof Components
  */
 class ModalAlert extends React.Component {
-
-
   static defaultProps = {
     id: 'alertModal',
     showFooter: true,
