@@ -11,7 +11,7 @@ const Sentry = require('@sentry/electron')
 const url = require('url');
 const path = require('path');
 const constants = require('./constants');
-const Ledger = require('./ledger').instance;
+const { instance: Ledger } = require('./ledger');
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
