@@ -370,8 +370,8 @@ class SendTokens extends React.Component {
       if (this.state.ledgerStep === 0) {
         return (
           <div>
-            <p>Please go to you Ledger and validate each output of your transaction. Press both buttons in case the output is correct.</p>
-            <p>In the end, a final screen will ask you to confirm sending the transaction.</p>
+            <p>{t`Please go to you Ledger and validate each output of your transaction. Press both buttons in case the output is correct.`}</p>
+            <p>{t`In the end, a final screen will ask you to confirm sending the transaction.`}</p>
           </div>
         );
       } else {
@@ -387,7 +387,7 @@ class SendTokens extends React.Component {
         {(this.state.loading && hathorLib.wallet.isSoftwareWallet()) ? isLoading() : null}
         <ModalPin execute={this.send} handleChangePin={this.handleChangePin} />
         <ModalAlertNotSupported />
-        <ModalAlert title="Validate outputs on ledger" showFooter={false} body={renderAlertBody()} />
+        <ModalAlert title={t`Validate outputs on Ledger`} showFooter={false} body={renderAlertBody()} />
       </div>
     );
   }

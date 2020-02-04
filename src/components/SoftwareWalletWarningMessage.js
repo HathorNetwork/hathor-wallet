@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
 
 
 /**
@@ -16,8 +17,8 @@ import React from 'react';
 const SoftwareWalletWarningMessage = (props) => {
   return (
     <div>
-      <p className="mt-4">Using a software wallet is not the safest way to secure your tokens. As your seed phrase is stored in your computer and it is connected to the internet, your seed phrase may be stolen by a virus.</p>
-      <p className="mt-4">If you want a safer method, you can use a hardware wallet. We currently have support for Ledger.</p>
+      <p className="mt-4">{t`Using a software wallet is not the safest way to secure your tokens. As your seed phrase is stored in your computer and it is connected to the internet, your seed phrase may be stolen by a virus.`}</p>
+      <p className="mt-4">{t`If you want a safer method, you can use a hardware wallet. We currently have support for Ledger.`}</p>
     </div>
   )
 }

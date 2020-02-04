@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
+
 import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
 import ledger from '../utils/ledger';
-import hathorLib from '@hathor/wallet-lib';
 import { IPC_RENDERER } from '../constants';
 import InitialImages from '../components/InitialImages';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -155,11 +157,11 @@ class WalletType extends React.Component {
     const renderInitial  = () => {
       return (
         <div>
-          <p className="mt-4 mb-4">Do you want to connect to a hardware device or to start a software wallet?</p>
-          <p className="mt-4 mb-4">We curently support Ledger hardware wallet.</p>
+          <p className="mt-4 mb-4">{t`Do you want to connect to a hardware device or to start a software wallet?`}</p>
+          <p className="mt-4 mb-4">{t`We curently support Ledger hardware wallet.`}</p>
           <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
-            <button onClick={this.goToHardwareWallet} type="button" className="btn btn-hathor mr-3">Hardware wallet</button>
-            <button onClick={this.goToSoftwareWallet} type="button" className="btn btn-hathor">Software wallet</button>
+            <button onClick={this.goToHardwareWallet} type="button" className="btn btn-hathor mr-3">{t`Hardware wallet`}</button>
+            <button onClick={this.goToSoftwareWallet} type="button" className="btn btn-hathor">{t`Software wallet`}</button>
           </div>
         </div>
       );
@@ -169,31 +171,31 @@ class WalletType extends React.Component {
       return (
         <div className="d-flex align-items-center flex-column">
           <p className="mt-4 mb-4 text-danger">{this.state.errorMessage}</p>
-          <button onClick={this.tryAgain} type="button" className="btn btn-hathor">Try again</button>
+          <button onClick={this.tryAgain} type="button" className="btn btn-hathor">{t`Try again`}</button>
         </div>
       )
     }
 
     const renderText = () => {
       if (this.state.waitAction) {
-        return "You need to authorize the operation on your Ledger.";
+        return t`You need to authorize the operation on your Ledger.`;
       } else {
-        return "Please connect your Ledger device to the computer and open the Hathor app.";
+        return t`Please connect your Ledger device to the computer and open the Hathor app.`;
       }
     }
 
     const renderTextTitle = () => {
       if (this.state.waitAction) {
-        return "Step 2/2";
+        return t`Step 2/2`;
       } else {
-        return "Step 1/2";
+        return t`Step 1/2`;
       }
     }
 
     const renderHardware = () => {
       return (
         <div>
-          <p className="mt-5 mb-2 text-center"><strong>Connecting to Ledger</strong></p>
+          <p className="mt-5 mb-2 text-center"><strong>{t`Connecting to Ledger`}</strong></p>
           <p className="mt-4 mb-2 text-center"><strong>{renderTextTitle()}</strong></p>
           <p className="mt-4 mb-4">{renderText()}</p>
           <div className="d-flex align-items-center flex-column w-100 mt-5">

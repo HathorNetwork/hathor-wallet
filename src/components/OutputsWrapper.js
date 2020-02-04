@@ -50,7 +50,7 @@ class OutputsWrapper extends React.Component {
         <div className="form-check mr-3 d-flex flex-column justify-content-center">
           <input className="form-check-input mt-0 has-timelock" type="checkbox"
             ref={this.timelockCheckbox} onChange={this.handleCheckboxTimelockChange} id={this.uniqueID}
-            title={hathorLib.wallet.isHardwareWallet() ? "This feature is disabled for hardware wallet" : "Timelock"}
+            title={hathorLib.wallet.isHardwareWallet() ? t`This feature is disabled for hardware wallet` : t`Timelock`}
             disabled={hathorLib.wallet.isHardwareWallet() ? true : null}/>
           <label className="form-check-label" htmlFor={this.uniqueID}>
             {t`Time lock`}

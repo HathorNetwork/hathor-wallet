@@ -31,8 +31,8 @@ class Version extends React.Component {
   render() {
     return (
       <div className='d-flex flex-column version-wrapper align-items-center'>
-        <span className={`${hathorLib.wallet.isSoftwareWallet() ? 'software' : 'hardware'}`} onClick={this.walletTypeClicked}>
-          {hathorLib.wallet.getWalletTypePretty()}
+        <span className={hathorLib.wallet.isSoftwareWallet() ? 'software' : 'hardware'} onClick={this.walletTypeClicked}>
+          {hathorLib.wallet.isSoftwareWallet() ? t`Software Wallet` : t`Hardware Wallet`}
         </span>
         <span>{VERSION}</span>
       </div>

@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
+
 import ModalAlert from './ModalAlert.js';
 
 
@@ -19,8 +21,8 @@ class ModalAlertNotSupported extends React.Component {
     const renderBody = () => {
       return (
         <div>
-          <p>Unfortunately this feature is currently not supported when using a hardware wallet. If you need this feature, you can use it switching to a software wallet.</p>
-          <p>We are sorry for the inconvenience. We are still working to support all features in hardware wallets.</p>
+          <p>{t`Unfortunately this feature is currently not supported when using a hardware wallet. If you need this feature, you can use it switching to a software wallet.`}</p>
+          <p>{t`We are sorry for the inconvenience. We are still working to support all features in hardware wallets.`}</p>
         </div>
       );
     }
@@ -28,8 +30,8 @@ class ModalAlertNotSupported extends React.Component {
     return (
       <ModalAlert
         id="notSupported"
-        title="Action not supported"
-        buttonName="Close"
+        title={t`Action not supported`}
+        buttonName={t`Close`}
         body={this.props.children || renderBody()}
       />
     );

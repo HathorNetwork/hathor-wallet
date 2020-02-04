@@ -178,7 +178,7 @@ class TokenAdministrative extends React.Component {
     if (hathorLib.wallet.isHardwareWallet()) {
       return (
         <div className="content-wrapper flex align-items-start">
-          <p>This feature is not currently supported for a hardware wallet.</p>
+          <p>{t`This feature is not currently supported for a hardware wallet.`}</p>
         </div>
       )
     }

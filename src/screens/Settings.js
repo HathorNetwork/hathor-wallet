@@ -17,6 +17,7 @@ import $ from 'jquery';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
+import { str2jsx } from '../utils/i18n';
 
 
 /**
@@ -136,8 +137,11 @@ class Settings extends React.Component {
         <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
         <ModalAlertNotSupported>
           <div>
-            <p>You can set your passphrase directly on your hardware wallet.</p>
-            <p><a target="_blank" rel="noopener noreferrer" href="https://support.ledger.com/hc/en-us/articles/115005214529-Advanced-passphrase-security">More info</a> about it on Ledger.</p>
+            <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
+            <p>
+              {str2jsx(t`|fn:More info| about this on Ledger.`,
+                       {fn: (x) => <a target="_blank" href="https://support.ledger.com/hc/en-us/articles/115005214529-Advanced-passphrase-security">{x}</a>})}
+            </p>
           </div>
         </ModalAlertNotSupported>
       </div>
