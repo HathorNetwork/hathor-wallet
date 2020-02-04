@@ -8,12 +8,7 @@ The wallet is developed using Javascript with [React](https://reactjs.org/). We 
 
 ## Download
 
-You can download the newest version of the wallet for each specific platform.
-
-- Download for [macOS](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.8.0-beta/Hathor.Wallet-0.8.0-beta.dmg)
-- Download for [Windows](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.8.0-beta/Hathor.Wallet.Setup.0.8.0-beta.exe)
-- Download for [Linux (deb)](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.8.0-beta/hathor-wallet_0.8.0-beta_amd64.deb)
-- Download for [Linux (AppImage)](https://github.com/HathorNetwork/hathor-wallet/releases/download/v0.8.0-beta/Hathor.Wallet.0.8.0-beta.AppImage)
+You can download the newest version of the wallet for each specific platform [here](https://github.com/HathorNetwork/hathor-wallet/releases).
 
 ### Warning Message for Windows:
 
@@ -47,12 +42,6 @@ A transaction is displayed.
 
 `npm start` and it will start running in the browser in http://localhost:3000
 
-### To Run in electron
-
-Before running using electron you have to execute `./node_modules/.bin/electron-builder install-app-deps`.
-
-Then `npm run electron`
-
 ### To Build
 
 `npm run build` and it will create a folder build with the files to use
@@ -72,31 +61,7 @@ and it will generate a `index.html` file in `out/index.html`
 
 ## Run Electron
 
-`npm run build`
-`npm run electron`
-
-## Build package for Electron
-
-`npm run electron-pack`
-
-If you have an error building `Error: Python executable "/path/to/python" is v3.6.5, which is not supported by gyp.`
-
-Just run `npm config set python /usr/bin/python` and try again
-
-### Building only for one platform
-
-You can use `--mac`, `--win`, or `--linux`. Then:
-
-    ./node_modules/.bin/build --win -c.extraMetadata.main=build/electron.js
-
-### Code Signing
-
-For Windows, you need to create the following environment variables:
-
-    export WIN_CSC_LINK=./your_certificate.pfx
-	export WIN_CSC_KEY_PASSWORD=your_certificate_password
-
-Then, just build it.
+Refer to ELECTRON.md
 
 ## Sentry
 
