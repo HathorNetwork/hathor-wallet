@@ -20,6 +20,11 @@ import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
 
+let shell = null;
+if (window.require) {
+  shell = window.require('electron').shell;
+}
+
 const mapStateToProps = (state) => {
   const balance = hathorLib.wallet.calculateBalance(
     Object.values(state.historyTransactions),
@@ -187,6 +192,25 @@ class CreateToken extends React.Component {
     this.setState({amount: e.target.value});
   }
 
+  /**
+   * Method called when user clicked to see the token deposit RFC
+   *
+   * @param {Object} e Event for the click
+   */
+  goToRFC = (e) => {
+    e.preventDefault();
+    const url = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
+    // We use electron shell to open the user external default browser
+    // otherwise it would open another electron window and the user wouldn't be able to copy the URL
+    if (shell !== null) {
+      shell.openExternal(url);
+    } else {
+      // In case it's running on the browser it won't have electron shell
+      // This should be used only when testing
+      window.open(url, '_blank');
+    }
+  }
+
   render = () => {
     const isLoading = () => {
       return (
@@ -215,7 +239,7 @@ class CreateToken extends React.Component {
         <p className="mt-5">{t`Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.`}</p>
         <p>{t`Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>
         <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.`}</p>
-        <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a target="_blank" rel="noopener noreferrer" href="https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md">here</a>.</p>
+        <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a href="true" onClick={this.goToRFC}>here</a>.</p>
         <hr className="mb-5 mt-5"/>
         <form ref="formCreateToken" id="formCreateToken">
           <div className="row">
