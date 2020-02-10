@@ -124,7 +124,7 @@ class TokenBar extends React.Component {
       return this.props.registeredTokens.map((token) => {
         return (
           <div key={token.uid} className={`token-wrapper ${token.uid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(token.uid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` - ${this.getTokenBalance(token.uid)}`}</span>
+            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${this.getTokenBalance(token.uid)}`}</span>
           </div>
         )
       });
