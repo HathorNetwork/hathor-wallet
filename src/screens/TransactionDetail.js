@@ -13,6 +13,11 @@ import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
 
+let shell = null;
+if (window.require) {
+  shell = window.require('electron').shell;
+}
+
 
 /**
  * Shows the detail of a transaction or block
@@ -92,12 +97,49 @@ class TransactionDetail extends React.Component {
     }
   }
 
+  /**
+   * Method called when user clicked on 'See on explorer' link
+   *
+   * @param {Object} e Event for the click
+   */
+  goToExplorer = (e) => {
+    e.preventDefault();
+    const url = `https://explorer.hathor.network/transaction/${this.state.transaction.hash}`;
+    // We use electron shell to open the user external default browser
+    // otherwise it would open another electron window and the user wouldn't be able to copy the URL
+    if (shell !== null) {
+      shell.openExternal(url);
+    } else {
+      // In case it's running on the browser it won't have electron shell
+      // This should be used only when testing
+      window.open(url, '_blank');
+    }
+  }
+
   render() {
     const renderTx = () => {
       return (
         <div>
-          <BackButton {...this.props} />
+          {renderLinks()}
           {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} history={this.props.history} /> : <p className="text-danger">{t`Transaction with hash ${this.props.match.params.id} not found`}</p>}
+        </div>
+      );
+    }
+
+    const renderLinks = () => {
+      return (
+        <div className="d-flex flex-row justify-content-between">
+          <BackButton {...this.props} />
+          {renderExplorerLink()}
+        </div>
+      );
+    }
+
+    const renderExplorerLink = () => {
+      return (
+        <div className="d-flex flex-row align-items-center mb-3 back-div">
+          <a href="true" onClick={this.goToExplorer}>{t`See on explorer`}</a>
+          <i className="fa fa-long-arrow-right ml-2" />
         </div>
       );
     }
