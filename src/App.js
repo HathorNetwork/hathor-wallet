@@ -145,9 +145,6 @@ class Root extends React.Component {
     // Update the version of the wallet that the data was loaded
     hathorLib.storage.setItem('wallet:version', VERSION);
 
-    // Check api version everytime we load address history
-    version.checkApiVersion();
-
     // Update redux with loaded data
     store.dispatch(dataLoaded({ addressesFound: data.addressesFound, transactionsFound: Object.keys(data.historyTransactions).length }));
   }
@@ -158,6 +155,10 @@ class Root extends React.Component {
    * @param {boolean} data Boolean if websocket is online
    */
   isOnlineUpdate = (data) => {
+    if (data) {
+      // Check api version everytime we connect to the server
+      version.checkApiVersion();
+    }
     store.dispatch(isOnlineUpdate({ isOnline: data }));
   }
 
