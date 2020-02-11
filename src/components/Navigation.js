@@ -11,7 +11,12 @@ import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from './Version';
 import ServerStatus from './ServerStatus';
+import { EXPLORER_BASE_URL } from '../constants';
 
+let shell = null;
+if (window.require) {
+  shell = window.require('electron').shell;
+}
 
 /**
  * Component that shows a navigation bar with the menu options
@@ -19,6 +24,25 @@ import ServerStatus from './ServerStatus';
  * @memberof Components
  */
 class Navigation extends React.Component {
+
+  /**
+   * Method called when user clicked on Esxplorer menu
+   *
+   * @param {Object} e Event for the click
+   */
+  goToExplorer = (e) => {
+    e.preventDefault();
+    // We use electron shell to open the user external default browser
+    // otherwise it would open another electron window and the user wouldn't be able to copy the URL
+    if (shell !== null) {
+      shell.openExternal(EXPLORER_BASE_URL);
+    } else {
+      // In case it's running on the browser it won't have electron shell
+      // This should be used only when testing
+      window.open(EXPLORER_BASE_URL, '_blank');
+    }
+  }
+
   render() {
     return (
       <div className="main-nav">
@@ -42,15 +66,8 @@ class Navigation extends React.Component {
               <li className="nav-item">
                 <NavLink to="/custom_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Custom tokens`}</NavLink>
               </li>
-              <li className="nav-item dropdown">
-                <a href="true" className="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  {t`Explorer`}
-                </a>
-                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <NavLink to="/dashboard-tx/" exact className="nav-link">{t`Transactions`}</NavLink>
-                  <NavLink to="/decode-tx/" exact className="nav-link">{t`Decode Tx`}</NavLink>
-                  <NavLink to="/push-tx/" exact className="nav-link">{t`Push Tx`}</NavLink>
-                </div>
+              <li className="nav-item">
+                <a className="nav-link" href="true" onClick={this.goToExplorer}>{t`Public Explorer`}</a>
               </li>
             </ul>
             <div className="navbar-right d-flex flex-row align-items-center navigation-search">
