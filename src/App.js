@@ -42,12 +42,12 @@ import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVER, VERSION } from './constants';
-import LocalStorageStore  from './storage.js';
+import { HybridStore } from './storage.js';
 
 hathorLib.network.setNetwork('mainnet');
-hathorLib.storage.setStore(new LocalStorageStore());
+hathorLib.storage.setStore(new HybridStore());
 
-// set default server to bravo testnet
+// set default server
 hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
 const mapDispatchToProps = dispatch => {
