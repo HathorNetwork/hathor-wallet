@@ -125,14 +125,14 @@ class DashboardTx extends React.Component {
           {this.state.blocks.length ?
               <tr className="tr-title"><td colSpan="2">
                 {str2jsx(t`Blocks |fn:(See all blocks)|`,
-                         {fn: (x) => <a href="true" onClick={(e) => this.goToList(e, '/blocks/')}>{x}</a>})}
+                         {fn: (x, i) => <a key={i} href="true" onClick={(e) => this.goToList(e, '/blocks/')}>{x}</a>})}
               </td></tr>
           : null}
           {renderRows(this.state.blocks)}
           {this.state.transactions.length ?
               <tr className="tr-title"><td colSpan="2">
                 {str2jsx(t`Transactions |fn:(See all transactions)|`,
-                         {fn: (x) => <a href="true" onClick={(e) => this.goToList(e, '/transactions/')}>{x}</a>})}
+                         {fn: (x, i) => <a key={i} href="true" onClick={(e) => this.goToList(e, '/transactions/')}>{x}</a>})}
               </td></tr>
           : null}
           {renderRows(this.state.transactions)}
