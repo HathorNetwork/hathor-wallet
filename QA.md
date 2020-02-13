@@ -20,7 +20,6 @@
     1. Try to create the token and receive an error that you don't have enough HTR.
 
 1. **Wallet screen**
-    1. It shows a red label with the testnet name in the top right corner of the screen.
     1. Copy the address and send 10.00 HTR from another wallet to this address.
     1. Check that the transaction appears in the list, the balance was updated and the address also changed.
     1. Click on 'Generate new address' and validate it has changed.
@@ -33,6 +32,9 @@
 1. **Lock/Unlock**
     1. Click on the lock in the bottom left part of the screen, must go to the locked screen asking for the PIN.
     1. Try to unlock with a wrong PIN.
+    1. Unlock it and check that you transactions were loaded with correct balance.
+    1. Close Hathor Wallet.
+    1. Open again and you should be on the lock screen.
     1. Unlock it and check that you transactions were loaded with correct balance.
 
 1. **Transaction detail**

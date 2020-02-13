@@ -10,6 +10,8 @@ Must use node v8.9.0
 
 `npm run electron-pack`
 
+If you run into `Error: Unresolved node modules`, you just have to `export ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true`.
+
 ### Provisioning profile
 
 We use a Developer ID provisioning profile and expect it to be in the root directoy under the name `mac_production.provisionprofile` (it's referenced in package.json).
