@@ -54,22 +54,6 @@ export const CONFIRM_RESET_MESSAGE = t`I want to reset my wallet`;
 export const PASSWORD_PATTERN = "(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^0-9a-zA-Z]).*$"
 
 /**
- * Quantity of blocks to show per page in the dashboard
- */
-export const DASHBOARD_BLOCKS_COUNT = 6;
-
-/**
- * Quantity of transactions to show per page in the dashboard
- */
-export const DASHBOARD_TX_COUNT = 6;
-
-/**
- * Quantity of elements to show per page in the transactions/blocks list
- */
-export const TX_COUNT = 10;
-
-
-/**
  * Local storage data useful for debugging purposes.  
  * WARNING: we cannot include any arbitrarily large fields (e.g. wallet:data) on Sentry request.  
  * WARNING: the request has a max size of 200kb and if it is bigger than this it'll be denied by Sentry.
@@ -107,3 +91,8 @@ export const DEFAULT_SERVERS = [
  * Default server user will connect when none has been chosen
  */
 export const DEFAULT_SERVER = DEFAULT_SERVERS[0];
+
+/**
+ * Explorer vase url
+ */
+export const EXPLORER_BASE_URL = "https://explorer.hathor.network";

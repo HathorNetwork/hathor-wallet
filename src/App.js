@@ -10,8 +10,6 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
-import BlockList from './screens/BlockList';
-import TransactionList from './screens/TransactionList';
 import Navigation from './components/Navigation';
 import WaitVersion from './components/WaitVersion';
 import TransactionDetail from './screens/TransactionDetail';
@@ -34,9 +32,6 @@ import version from './utils/version';
 import wallet from './utils/wallet';
 import { connect } from "react-redux";
 import RequestErrorModal from './components/RequestError';
-import DashboardTx from './screens/DashboardTx';
-import DecodeTx from './screens/DecodeTx';
-import PushTx from './screens/PushTx';
 import { dataLoaded, isOnlineUpdate, updateHeight } from "./actions/index";
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
@@ -180,11 +175,6 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
         <StartedRoute exact path="/server" component={Server} loaded={true} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} />
-        <StartedRoute exact path="/push-tx" component={PushTx} loaded={true} />
-        <StartedRoute exact path="/decode-tx" component={DecodeTx} loaded={true} />
-        <StartedRoute exact path="/dashboard-tx" component={DashboardTx} loaded={true} />
-        <StartedRoute exact path="/transactions" component={TransactionList} loaded={true} />
-        <StartedRoute exact path="/blocks" component={BlockList} loaded={true} />
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
