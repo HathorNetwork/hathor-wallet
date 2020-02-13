@@ -12,11 +12,9 @@ import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
-
-let shell = null;
-if (window.require) {
-  shell = window.require('electron').shell;
-}
+import helpers from '../utils/helpers';
+import path from 'path';
+import { EXPLORER_BASE_URL } from '../constants';
 
 
 /**
@@ -104,16 +102,8 @@ class TransactionDetail extends React.Component {
    */
   goToExplorer = (e) => {
     e.preventDefault();
-    const url = `https://explorer.hathor.network/transaction/${this.state.transaction.hash}`;
-    // We use electron shell to open the user external default browser
-    // otherwise it would open another electron window and the user wouldn't be able to copy the URL
-    if (shell !== null) {
-      shell.openExternal(url);
-    } else {
-      // In case it's running on the browser it won't have electron shell
-      // This should be used only when testing
-      window.open(url, '_blank');
-    }
+    const url = path.join(EXPLORER_BASE_URL, `transaction/${this.state.transaction.hash}`);
+    helpers.openExternalURL(url);
   }
 
   render() {
@@ -130,7 +120,7 @@ class TransactionDetail extends React.Component {
       return (
         <div className="d-flex flex-row justify-content-between">
           <BackButton {...this.props} />
-          {renderExplorerLink()}
+          {this.state.transaction && renderExplorerLink()}
         </div>
       );
     }

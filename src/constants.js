@@ -96,3 +96,8 @@ export const DEFAULT_SERVER = DEFAULT_SERVERS[0];
  * Explorer vase url
  */
 export const EXPLORER_BASE_URL = "https://explorer.hathor.network";
+
+/**
+ * URL of token deposit RFC
+ */
+export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";

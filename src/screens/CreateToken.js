@@ -19,11 +19,9 @@ import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
+import helpers from '../utils/helpers';
+import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
 
-let shell = null;
-if (window.require) {
-  shell = window.require('electron').shell;
-}
 
 const mapStateToProps = (state) => {
   const balance = hathorLib.wallet.calculateBalance(
@@ -199,16 +197,7 @@ class CreateToken extends React.Component {
    */
   goToRFC = (e) => {
     e.preventDefault();
-    const url = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
-    // We use electron shell to open the user external default browser
-    // otherwise it would open another electron window and the user wouldn't be able to copy the URL
-    if (shell !== null) {
-      shell.openExternal(url);
-    } else {
-      // In case it's running on the browser it won't have electron shell
-      // This should be used only when testing
-      window.open(url, '_blank');
-    }
+    helpers.openExternalURL(TOKEN_DEPOSIT_RFC_URL);
   }
 
   render = () => {
