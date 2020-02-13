@@ -23,7 +23,7 @@ const TxTextInput = (props) => {
       <span>{props.helpText}</span>
       <textarea rows="5" onChange={props.onChange}></textarea>
       <span>{str2jsx(t`Click |link:here| to ${props.otherAction} this transaction`,
-                     {link: (x) => <Link to={props.link}>{x}</Link>})}
+                     {link: (x, i) => <Link key={i} to={props.link}>{x}</Link>})}
       </span>
       <button className="btn btn-hathor" onClick={props.buttonClicked}>{props.action}</button>
     </div>
