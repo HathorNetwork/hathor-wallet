@@ -12,11 +12,7 @@ import logo from '../assets/images/hathor-white-logo.png';
 import Version from './Version';
 import ServerStatus from './ServerStatus';
 import { EXPLORER_BASE_URL } from '../constants';
-
-let shell = null;
-if (window.require) {
-  shell = window.require('electron').shell;
-}
+import helpers from '../utils/helpers';
 
 /**
  * Component that shows a navigation bar with the menu options
@@ -32,15 +28,7 @@ class Navigation extends React.Component {
    */
   goToExplorer = (e) => {
     e.preventDefault();
-    // We use electron shell to open the user external default browser
-    // otherwise it would open another electron window and the user wouldn't be able to copy the URL
-    if (shell !== null) {
-      shell.openExternal(EXPLORER_BASE_URL);
-    } else {
-      // In case it's running on the browser it won't have electron shell
-      // This should be used only when testing
-      window.open(EXPLORER_BASE_URL, '_blank');
-    }
+    helpers.openExternalURL(EXPLORER_BASE_URL);
   }
 
   render() {
