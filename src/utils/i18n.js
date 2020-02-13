@@ -3,7 +3,7 @@
  * must be marked with |x| blocks. Each block will be used to call one of the functions.
  *
  * The content of the blocks must be in the following format: `|key:content|`. The key
- * will be used select which function will be called.
+ * will be used to select which function will be called.
  *
  * The functions will receive two parameters: `content` and `i`. The `i` is a unique value and
  * must be used for prop `key` to avoid warnings.
