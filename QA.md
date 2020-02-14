@@ -2,6 +2,14 @@
 
 ### These tests must be done in an Electron application. Some features might work on the web browser but show different behavior when using electron.
 
+1. **Wallet update**
+    1. [Using the old version of the wallet!] If your wallet is not initialized, initialize it.
+    1. Close the wallet.
+    1. Install the new version of Hathor Wallet.
+    1. Open Hathor Wallet. It should be on lock screen.
+    1. Unlock it and check that you transactions were loaded with correct balance.
+    1. You may know reset your wallet.
+
 1. **Initialization**
     1. Try to click 'Get started' without selecting checkbox (must show error).
     1. Start new wallet.
