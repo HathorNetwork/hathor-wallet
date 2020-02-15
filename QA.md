@@ -7,8 +7,8 @@
     1. Close the wallet.
     1. Install the new version of Hathor Wallet.
     1. Open Hathor Wallet. It should be on lock screen.
-    1. Unlock it and check that you transactions were loaded with correct balance.
-    1. You may know reset your wallet.
+    1. Unlock it and check that you transactions were loaded with correct balance (it's ok if there are no transactions).
+    1. You may now reset your wallet.
 
 1. **Initialization**
     1. Try to click 'Get started' without selecting checkbox (must show error).
