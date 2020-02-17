@@ -107,7 +107,10 @@ const wallet = {
    */
   startHardwareWallet(xpub) {
     store.dispatch(loadingAddresses(true));
-    const promise = hathorLib.wallet.startWallet({}, xpub, true);
+    const accessData = {
+      xpubkey: xpub,
+    }
+    const promise = hathorLib.wallet.startWallet(accessData, true);
     promise.then(() => {
       this.afterLoadAddressHistory();
     });
