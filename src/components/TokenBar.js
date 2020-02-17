@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import { connect } from "react-redux";
 import { selectToken } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
@@ -123,7 +124,7 @@ class TokenBar extends React.Component {
       return this.props.registeredTokens.map((token) => {
         return (
           <div key={token.uid} className={`token-wrapper ${token.uid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(token.uid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` - ${this.getTokenBalance(token.uid)}`}</span>
+            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${this.getTokenBalance(token.uid)}`}</span>
           </div>
         )
       });
@@ -132,7 +133,7 @@ class TokenBar extends React.Component {
     const renderExpandedHeader = () => {
       return (
         <div className='d-flex align-items-center justify-content-between flex-row w-100'>
-          <span>Tokens</span>
+          <span>{t`Tokens`}</span>
           <i className='fa fa-chevron-left' title='Close bar'></i>
         </div>
       )
@@ -160,12 +161,12 @@ class TokenBar extends React.Component {
         </div>
         <div className='footer d-flex align-items-center justify-content-center flex-column'>
           <div className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.lockWallet}>
-            <i className='fa fa-lock token-icon' title='Lock wallet'></i>
-            {this.state.opened && <span className='ellipsis'>Lock wallet</span>}
+            <i className='fa fa-lock token-icon' title={t`Lock wallet`}></i>
+            {this.state.opened && <span className='ellipsis'>{t`Lock wallet`}</span>}
           </div>
           <div className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.goToSettings}>
-            <i className='fa fa-cog token-icon' title='Settings'></i>
-            {this.state.opened && <span className='ellipsis'>Settings</span>}
+            <i className='fa fa-cog token-icon' title={t`Settings`}></i>
+            {this.state.opened && <span className='ellipsis'>{t`Settings`}</span>}
           </div>
         </div>
       </div>

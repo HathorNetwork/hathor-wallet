@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
+
 import PinPasswordWrapper from '../components/PinPasswordWrapper'
 import { updatePassword } from '../actions/index';
 import { connect } from 'react-redux';
@@ -39,14 +41,14 @@ class ChoosePassword extends React.Component {
     const renderMessage = () => {
       return (
         <div className="mt-4 mb-4">
-          <p>Please, choose a password to encrypt your sensitive data while using the wallet.</p>
-          <p className="mt-3">Your password must have at least 8 characters and at least one lower case character, one upper case character, one number, and one special character.</p>
+          <p>{t`Please, choose a password to encrypt your sensitive data while using the wallet.`}</p>
+          <p className="mt-3">{t`Your password must have at least 8 characters and at least one lower case character, one upper case character, one number, and one special character.`}</p>
         </div>
       );
     }
 
     return (
-      <PinPasswordWrapper message={renderMessage()} success={this.props.success} back={this.props.back} handleChange={this.handleChange} field='Password' button='Next' pattern={PASSWORD_PATTERN} />
+      <PinPasswordWrapper message={renderMessage()} success={this.props.success} back={this.props.back} handleChange={this.handleChange} field={t`Password`} button={t`Next`} pattern={PASSWORD_PATTERN} />
     )
   }
 }

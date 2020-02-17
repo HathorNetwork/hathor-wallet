@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import HathorAlert from '../components/HathorAlert';
 import TokenMint from '../components/tokens/TokenMint';
 import TokenMelt from '../components/tokens/TokenMelt';
@@ -204,10 +205,10 @@ class TokenAdministrative extends React.Component {
     const renderMeltLinks = () => {
       return (
         <div className="d-flex flex-column align-items-center">
-          <p><strong>Operations</strong></p>
-          <a className={`${this.state.action === 'melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'melt')} href="true">Melt tokens <i className="fa fa-minus ml-1" title="Melt tokens"></i></a>
-          <a className={`mt-1 mb-1 ${this.state.action === 'delegate-melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'delegate-melt')} href="true">Delegate melt <i className="fa fa-long-arrow-up ml-1" title="Delegate melt"></i></a>
-          <a className={`${this.state.action === 'destroy-melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-melt')} href="true">Destroy melt <i className="fa fa-trash ml-1" title="Destroy melt"></i></a>
+          <p><strong>{t`Operations`}</strong></p>
+          <a className={`${this.state.action === 'melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'melt')} href="true">{t`Melt tokens`} <i className="fa fa-minus ml-1" title={t`Melt tokens`}></i></a>
+          <a className={`mt-1 mb-1 ${this.state.action === 'delegate-melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'delegate-melt')} href="true">{t`Delegate melt`} <i className="fa fa-long-arrow-up ml-1" title={t`Delegate melt`}></i></a>
+          <a className={`${this.state.action === 'destroy-melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-melt')} href="true">{t`Destroy melt`} <i className="fa fa-trash ml-1" title={t`Destroy melt`}></i></a>
         </div>
       );
     }
@@ -215,28 +216,28 @@ class TokenAdministrative extends React.Component {
     const renderMintLinks = () => {
       return (
         <div className="d-flex flex-column align-items-center">
-          <p><strong>Operations</strong></p>
-          <a className={`${this.state.action === 'mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'mint')} href="true">Mint tokens <i className="fa fa-plus ml-1" title="Mint more tokens"></i></a>
-          <a className={`mt-1 mb-1 ${this.state.action === 'delegate-mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'delegate-mint')} href="true">Delegate mint <i className="fa fa-long-arrow-up ml-1" title="Delegate mint"></i></a>
-          <a className={`${this.state.action === 'destroy-mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-mint')} href="true">Destroy mint <i className="fa fa-trash ml-1" title="Destroy mint"></i></a>
+          <p><strong>{t`Operations`}</strong></p>
+          <a className={`${this.state.action === 'mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'mint')} href="true">{t`Mint tokens`} <i className="fa fa-plus ml-1" title={t`Mint more tokens`}></i></a>
+          <a className={`mt-1 mb-1 ${this.state.action === 'delegate-mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'delegate-mint')} href="true">{t`Delegate mint`} <i className="fa fa-long-arrow-up ml-1" title={t`Delegate mint`}></i></a>
+          <a className={`${this.state.action === 'destroy-mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-mint')} href="true">{t`Destroy mint`} <i className="fa fa-trash ml-1" title={t`Destroy mint`}></i></a>
         </div>
       );
     }
 
     const renderMintMeltWrapper = () => {
       if (this.state.mintOutputs.length === 0 && this.state.meltOutputs.length === 0) {
-        return <p>You have no more authority outputs for this token</p>;
+        return <p>{t`You have no more authority outputs for this token`}</p>;
       }
 
       return (
         <div className="d-flex align-items-center mt-3">
           <div className="token-manage-wrapper d-flex flex-column align-items-center mr-4">
-            <p><strong>Mint authority management</strong></p>
+            <p><strong>{t`Mint authority management`}</strong></p>
             <p>You are the owner of {this.state.mintOutputs.length} mint {hathorLib.helpers.plural(this.state.mintOutputs.length, 'output', 'outputs')}</p>
             {this.state.mintOutputs.length > 0 && renderMintLinks()}
           </div>
           <div className="token-manage-wrapper d-flex flex-column align-items-center">
-            <p><strong>Melt authority management</strong></p>
+            <p><strong>{t`Melt authority management`}</strong></p>
             <p>You are the owner of {this.state.meltOutputs.length} melt {hathorLib.helpers.plural(this.state.meltOutputs.length, 'output', 'outputs')}</p>
             {this.state.meltOutputs.length > 0 && renderMeltLinks()}
           </div>
@@ -246,8 +247,8 @@ class TokenAdministrative extends React.Component {
 
     return (
       <div className="flex align-items-center">
-        <p className="mt-2 mb-2"><strong>Total supply: </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.props.token.symbol}</p>
-        <p className="mt-2 mb-2"><strong>Your balance available: </strong>{hathorLib.helpers.prettyValue(this.state.balance)} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>{t`Your balance available:`} </strong>{hathorLib.helpers.prettyValue(this.state.balance)} {this.props.token.symbol}</p>
         <div className="token-detail-wallet-info">
           {renderMintMeltWrapper()}
         </div>

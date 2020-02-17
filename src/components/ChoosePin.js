@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
+
 import PinPasswordWrapper from '../components/PinPasswordWrapper'
 import { updatePin } from '../actions/index';
 import { connect } from "react-redux";
@@ -36,11 +38,11 @@ class ChoosePin extends React.Component {
 
   render() {
     const renderMessage = () => {
-      return <p className="mt-4 mb-4">The PIN is a 6-digit password requested to authorize actions in your wallet, such as generating new addresses and sending tokens.</p>;
+      return <p className="mt-4 mb-4">{t`The PIN is a 6-digit password requested to authorize actions in your wallet, such as generating new addresses and sending tokens.`}</p>;
     }
 
     return (
-      <PinPasswordWrapper ref="wrapper" message={renderMessage()} success={this.props.success} back={this.props.back} handleChange={this.handleChange} field='PIN' pattern='[0-9]{6}' inputMode='numeric' button='Next' />
+      <PinPasswordWrapper ref="wrapper" message={renderMessage()} success={this.props.success} back={this.props.back} handleChange={this.handleChange} field='PIN' pattern='[0-9]{6}' inputMode='numeric' button={t`Next`} />
     )
   }
 }

@@ -304,6 +304,18 @@ const wallet = {
       tokens: dataToken,
     }));
 
+    // before cleaning data, check if we need to transfer xpubkey to wallet:accessData
+    const accessData = hathorLib.wallet.getWalletAccessData();
+    if (accessData.xpubkey === undefined) {
+      // XXX from v0.12.0 to v0.13.0, xpubkey changes from wallet:data to access:data.
+      // That's not a problem if wallet is being initialized. However, if it's already
+      // initialized, we need to set the xpubkey in the correct place.
+      const oldData = JSON.parse(localStorage.getItem('wallet:data'));
+      accessData.xpubkey = oldData.xpubkey;
+      hathorLib.wallet.setWalletAccessData(accessData);
+      localStorage.removeItem('wallet:data');
+    }
+
     // Load history from new server
     const promise = hathorLib.wallet.reloadData();
     promise.then(() => {

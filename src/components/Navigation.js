@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from './Version';
 import ServerStatus from './ServerStatus';
-
+import { EXPLORER_BASE_URL } from '../constants';
+import helpers from '../utils/helpers';
 
 /**
  * Component that shows a navigation bar with the menu options
@@ -18,6 +20,17 @@ import ServerStatus from './ServerStatus';
  * @memberof Components
  */
 class Navigation extends React.Component {
+
+  /**
+   * Method called when user clicked on Esxplorer menu
+   *
+   * @param {Object} e Event for the click
+   */
+  goToExplorer = (e) => {
+    e.preventDefault();
+    helpers.openExternalURL(EXPLORER_BASE_URL);
+  }
+
   render() {
     return (
       <div className="main-nav">
@@ -33,23 +46,16 @@ class Navigation extends React.Component {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav mr-auto">
               <li className="nav-item">
-                <NavLink to="/wallet/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Wallet</NavLink>
+                <NavLink to="/wallet/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Wallet`}</NavLink>
               </li>
               <li className="nav-item">
-                <NavLink to="/wallet/send_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Send tokens</NavLink>
+                <NavLink to="/wallet/send_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Send tokens`}</NavLink>
               </li>
               <li className="nav-item">
-                <NavLink to="/custom_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>Custom tokens</NavLink>
+                <NavLink to="/custom_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Custom tokens`}</NavLink>
               </li>
-              <li className="nav-item dropdown">
-                <a href="true" className="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Explorer
-                </a>
-                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <NavLink to="/dashboard-tx/" exact className="nav-link">Transactions</NavLink>
-                  <NavLink to="/decode-tx/" exact className="nav-link">Decode Tx</NavLink>
-                  <NavLink to="/push-tx/" exact className="nav-link">Push Tx</NavLink>
-                </div>
+              <li className="nav-item">
+                <a className="nav-link" href="true" onClick={this.goToExplorer}>{t`Public Explorer`}</a>
               </li>
             </ul>
             <div className="navbar-right d-flex flex-row align-items-center navigation-search">

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 import $ from 'jquery';
 import OutputsWrapper from '../components/OutputsWrapper'
 import InputsWrapper from '../components/InputsWrapper'
@@ -15,7 +16,12 @@ import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {
-  return { historyTransactions: state.historyTransactions };
+  // We need the height on the props so it can update the balance
+  // when the network height updates and the wallet had a reward locked block
+  return {
+    historyTransactions: state.historyTransactions,
+    height: state.height,
+  };
 };
 
 
@@ -198,12 +204,18 @@ class SendTokensOne extends React.Component {
       );
     }
 
+    const renderBalance = () => {
+      const balance = hathorLib.wallet.calculateBalance(Object.values(this.props.historyTransactions), this.state.selected.uid);
+      return <span className="ml-3">({t`Balance available: `}{hathorLib.helpers.prettyValue(balance.available)})</span>;
+    }
+
     return (
       <div className='send-tokens-wrapper card'>
         <div className="mb-3">
-          <label>Token:</label>
+          <label><strong>{t`Token:`}</strong></label>
           {this.state.selected && renderSelectToken()}
-          {this.state.selectedTokens.length !== 1 ? <button type="button" className="text-danger remove-token-btn ml-3" onClick={(e) => this.props.removeToken(this.props.index)}>Remove</button> : null}
+          {this.state.selected && renderBalance()}
+          {this.state.selectedTokens.length !== 1 ? <button type="button" className="text-danger remove-token-btn ml-3" onClick={(e) => this.props.removeToken(this.props.index)}>{t`Remove`}</button> : null}
         </div>
         <div className="outputs-wrapper">
           <label>Outputs</label>
@@ -212,11 +224,11 @@ class SendTokensOne extends React.Component {
         <div className="form-check checkbox-wrapper">
           <input className="form-check-input" type="checkbox" defaultChecked="true" ref={this.noInputs} id={this.uniqueID} onChange={this.handleCheckboxChange} />
           <label className="form-check-label" htmlFor={this.uniqueID}>
-            Choose inputs automatically
+            {t`Choose inputs automatically`}
           </label>
         </div>
         <div ref={this.inputsWrapper} className="inputs-wrapper" style={{display: 'none'}}>
-          <label htmlFor="inputs">Inputs</label>
+          <label htmlFor="inputs">{t`Inputs`}</label>
           {renderInputs()}
         </div>
       </div>

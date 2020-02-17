@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { t } from 'ttag'
+
 import ModalConfirm from '../components/ModalConfirm';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
@@ -43,23 +45,23 @@ class ChoosePassphrase extends React.Component {
     if (isValid) {
       this.refs.passphraseForm.classList.remove('was-validated')
       if (this.refs.blankPassphrase.checked === false && this.refs.passphrase.value === '') {
-        this.setState({ errorMessage: 'To set a blank passphrase mark the corresponding checkbox above.' });
+        this.setState({ errorMessage: t`To set a blank passphrase mark the corresponding checkbox above.` });
         return;
       }
       const passphrase = this.refs.passphrase.value;
       const confirmPassphrase = this.refs.confirmPassphrase.value;
       if (passphrase !== confirmPassphrase) {
-        this.setState({ errorMessage: 'Passphrase and confirm passphrase must be equal' });
+        this.setState({ errorMessage: t`Passphrase and confirm passphrase must be equal` });
         return;
       }
 
       if (!hathorLib.wallet.isPasswordCorrect(this.refs.password.value)) {
-        this.setState({ errorMessage: 'Invalid password' });
+        this.setState({ errorMessage: t`Invalid password` });
         return;
       }
 
       if (!hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
-        this.setState({ errorMessage: 'Invalid PIN' });
+        this.setState({ errorMessage: t`Invalid PIN` });
         return;
       }
 
@@ -100,7 +102,7 @@ class ChoosePassphrase extends React.Component {
     const getModalBody = () => {
       return (
         <div>
-          <p>Are you sure you want to change your whole wallet setting this passphrase?</p>
+          <p>{t`Are you sure you want to change your whole wallet setting this passphrase?`}</p>
         </div>
       )
     }
@@ -110,7 +112,7 @@ class ChoosePassphrase extends React.Component {
         <form ref="confirmForm" className="w-100">
           <div className="form-check">
             <input required type="checkbox" className="form-check-input" id="confirmAgree" />
-            <label className="form-check-label" htmlFor="confirmAgree"> I understand the risks of adding a passphrase.</label>
+            <label className="form-check-label" htmlFor="confirmAgree"> {t`I understand the risks of adding a passphrase.`}</label>
           </div>
         </form>
       );
@@ -127,15 +129,15 @@ class ChoosePassphrase extends React.Component {
             <div className="col-7 mt-4">
               <div className="form-check">
                 <input type="checkbox" className="form-check-input" id="blankPassphrase" ref="blankPassphrase" onChange={this.checkboxChange} />
-                <label className="form-check-label" htmlFor="blankPassphrase"> I want to set a blank passphrase.</label>
+                <label className="form-check-label" htmlFor="blankPassphrase"> {t`I want to set a blank passphrase.`}</label>
               </div>
             </div>
           </div>
-          <p className="mt-4">Please, enter your password and PIN to confirm the operation.</p>
+          <p className="mt-4">{t`Please, enter your password and PIN to confirm the operation.`}</p>
           <div className="row">
             <div className="col-6">
-              <input required ref="password" type="password" autoComplete="off" placeholder="Password" className="form-control mt-4 mb-4" />
-              <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder="PIN" className="form-control" />
+              <input required ref="password" type="password" autoComplete="off" placeholder={t`Password`} className="form-control mt-4 mb-4" />
+              <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control" />
             </div>
           </div>
         </form>
@@ -145,18 +147,18 @@ class ChoosePassphrase extends React.Component {
     return (
       <div className="content-wrapper flex align-items-center">
         <BackButton {...this.props} />
-        <h3 className="mt-4 mb-5">Set Passphrase</h3>
+        <h3 className="mt-4 mb-5">{t`Set Passphrase`}</h3>
         <div className="d-flex align-items-start flex-column">
-          <p>Adding a passphrase is an advanced feature, and you should not use it unless you know what you are doing.</p>
-          <p>It will change all your addresses, so it is like generating a completely new wallet.</p>
-          <p>You should take note of your passphrase for future use. If you lose your passphrase, you will never have access to your tokens again.</p>
+          <p>{t`Adding a passphrase is an advanced feature, and you should not use it unless you know what you are doing.`}</p>
+          <p>{t`It will change all your addresses, so it is like generating a completely new wallet.`}</p>
+          <p>{t`You should take note of your passphrase for future use. If you lose your passphrase, you will never have access to your tokens again.`}</p>
           {this.state.firstStep ? renderFirstForm() : renderSecondForm()}
           {this.state.errorMessage && <p className="mt-4 text-danger">{this.state.errorMessage}</p>}
           {this.state.firstStep ?
-              <button onClick={this.continueClicked} type="button" className="btn btn-hathor mt-5">Continue</button> :
-              <button onClick={this.addClicked} type="button" className="btn btn-hathor mt-5">Confirm</button>}
+              <button onClick={this.continueClicked} type="button" className="btn btn-hathor mt-5">{t`Continue`}</button> :
+              <button onClick={this.addClicked} type="button" className="btn btn-hathor mt-5">{t`Confirm`}</button>}
         </div>
-        <ModalConfirm title="Set a passphrase" body={getModalBody()} handleYes={this.handlePassphrase} />
+        <ModalConfirm title={t`Set a passphrase`} body={getModalBody()} handleYes={this.handlePassphrase} />
       </div>
     )
   }

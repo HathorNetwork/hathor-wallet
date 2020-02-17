@@ -21,10 +21,10 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.12.0",
+  "version": "0.13.1",
   "private": true,
   "dependencies": {
-    "@hathor/wallet-lib": "^0.9.0",
+    "@hathor/wallet-lib": "^0.9.2",
     "@sentry/electron": "^0.17.0",
     "bootstrap": "^4.0.0",
     "eslint-config-airbnb": "^17.1.0",
@@ -44,6 +44,7 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "^3.0.1",
     "redux": "^4.0.0",
+    "ttag": "^1.7.22",
     "viz.js": "^2.1.2"
   },
   "main": "build/electron.js",
@@ -58,20 +59,21 @@
     "test": "react-scripts test --env=node",
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 .",
-    "preelectron-pack": "npm run build",
     "electron-pack": "electron-builder --mac --win --linux -c.extraMetadata.main=build/electron.js",
     "electron-pack-mac": "electron-builder --mac -c.extraMetadata.main=build/electron.js",
     "electron-pack-linux": "electron-builder --linux -c.extraMetadata.main=build/electron.js",
-    "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js"
+    "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js",
+    "locale-update-pot": "ttag extract -o ./locale/texts.pot ./src/"
   },
   "devDependencies": {
     "@sentry/browser": "^5.0.5",
     "@sentry/cli": "^1.40.0",
     "electron": "^5.0.3",
-    "electron-builder": "^22.1.0",
+    "electron-builder": "^20.43.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-notarize": "^0.1.1",
     "jsdoc": "^3.6.2",
+    "ttag-cli": "^1.7.27",
     "typescript": "^3.5.3"
   },
   "build": {
