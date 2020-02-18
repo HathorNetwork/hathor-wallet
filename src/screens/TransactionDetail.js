@@ -12,6 +12,9 @@ import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
+import helpers from '../utils/helpers';
+import path from 'path';
+import { EXPLORER_BASE_URL } from '../constants';
 
 
 /**
@@ -92,12 +95,41 @@ class TransactionDetail extends React.Component {
     }
   }
 
+  /**
+   * Method called when user clicked on 'See on explorer' link
+   *
+   * @param {Object} e Event for the click
+   */
+  goToExplorer = (e) => {
+    e.preventDefault();
+    const url = path.join(EXPLORER_BASE_URL, `transaction/${this.state.transaction.hash}`);
+    helpers.openExternalURL(url);
+  }
+
   render() {
     const renderTx = () => {
       return (
         <div>
-          <BackButton {...this.props} />
+          {renderLinks()}
           {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} history={this.props.history} /> : <p className="text-danger">{t`Transaction with hash ${this.props.match.params.id} not found`}</p>}
+        </div>
+      );
+    }
+
+    const renderLinks = () => {
+      return (
+        <div className="d-flex flex-row justify-content-between">
+          <BackButton {...this.props} />
+          {this.state.transaction && renderExplorerLink()}
+        </div>
+      );
+    }
+
+    const renderExplorerLink = () => {
+      return (
+        <div className="d-flex flex-row align-items-center mb-3 back-div">
+          <a href="true" onClick={this.goToExplorer}>{t`See on explorer`}</a>
+          <i className="fa fa-long-arrow-right ml-2" />
         </div>
       );
     }

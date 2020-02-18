@@ -8,7 +8,7 @@ The wallet is developed using Javascript with [React](https://reactjs.org/). We 
 
 ## Download
 
-You can download the newest version of the wallet for each specific platform [here](https://github.com/HathorNetwork/hathor-wallet/releases).
+You can download the newest version of the wallet for each specific platform from the [Releases page](https://github.com/HathorNetwork/hathor-wallet/releases).
 
 ### Warning Message for Windows:
 

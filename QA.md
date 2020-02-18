@@ -2,6 +2,14 @@
 
 ### These tests must be done in an Electron application. Some features might work on the web browser but show different behavior when using electron.
 
+1. **Wallet update**
+    1. [Using the old version of the wallet!] If your wallet is not initialized, initialize it.
+    1. Close the wallet.
+    1. Install the new version of Hathor Wallet.
+    1. Open Hathor Wallet. It should be on lock screen.
+    1. Unlock it and check that you transactions were loaded with correct balance (it's ok if there are no transactions).
+    1. You may now reset your wallet.
+
 1. **Initialization**
     1. Try to click 'Get started' without selecting checkbox (must show error).
     1. Choose Software Wallet.
@@ -21,7 +29,6 @@
     1. Try to create the token and receive an error that you don't have enough HTR.
 
 1. **Wallet screen**
-    1. It shows a red label with the testnet name in the top right corner of the screen.
     1. Copy the address and send 10.00 HTR from another wallet to this address.
     1. Check that the transaction appears in the list, the balance was updated and the address also changed.
     1. Click on 'Generate new address' and validate it has changed.
@@ -34,6 +41,9 @@
 1. **Lock/Unlock**
     1. Click on the lock in the bottom left part of the screen, must go to the locked screen asking for the PIN.
     1. Try to unlock with a wrong PIN.
+    1. Unlock it and check that you transactions were loaded with correct balance.
+    1. Close Hathor Wallet.
+    1. Open again and you should be on the lock screen.
     1. Unlock it and check that you transactions were loaded with correct balance.
 
 1. **Transaction detail**

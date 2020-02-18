@@ -19,6 +19,9 @@ import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
+import helpers from '../utils/helpers';
+import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
+
 
 const mapStateToProps = (state) => {
   const balance = hathorLib.wallet.calculateBalance(
@@ -187,6 +190,16 @@ class CreateToken extends React.Component {
     this.setState({amount: e.target.value});
   }
 
+  /**
+   * Method called when user clicked to see the token deposit RFC
+   *
+   * @param {Object} e Event for the click
+   */
+  goToRFC = (e) => {
+    e.preventDefault();
+    helpers.openExternalURL(TOKEN_DEPOSIT_RFC_URL);
+  }
+
   render = () => {
     const isLoading = () => {
       return (
@@ -215,7 +228,7 @@ class CreateToken extends React.Component {
         <p className="mt-5">{t`Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.`}</p>
         <p>{t`Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>
         <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.`}</p>
-        <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a target="_blank" rel="noopener noreferrer" href="https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md">here</a>.</p>
+        <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a href="true" onClick={this.goToRFC}>here</a>.</p>
         <hr className="mb-5 mt-5"/>
         <form ref="formCreateToken" id="formCreateToken">
           <div className="row">

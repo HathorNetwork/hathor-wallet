@@ -20,7 +20,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.12.0';
+export const VERSION = '0.13.1';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
@@ -52,22 +52,6 @@ export const CONFIRM_RESET_MESSAGE = t`I want to reset my wallet`;
  * - The string must be eight characters or longer
  */
 export const PASSWORD_PATTERN = "(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^0-9a-zA-Z]).*$"
-
-/**
- * Quantity of blocks to show per page in the dashboard
- */
-export const DASHBOARD_BLOCKS_COUNT = 6;
-
-/**
- * Quantity of transactions to show per page in the dashboard
- */
-export const DASHBOARD_TX_COUNT = 6;
-
-/**
- * Quantity of elements to show per page in the transactions/blocks list
- */
-export const TX_COUNT = 10;
-
 
 /**
  * Local storage data useful for debugging purposes.  
@@ -107,6 +91,16 @@ export const DEFAULT_SERVERS = [
  * Default server user will connect when none has been chosen
  */
 export const DEFAULT_SERVER = DEFAULT_SERVERS[0];
+
+/**
+ * Explorer vase url
+ */
+export const EXPLORER_BASE_URL = "https://explorer.hathor.network";
+
+/**
+ * URL of token deposit RFC
+ */
+export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
 
 let ipcRenderer = null;
 
