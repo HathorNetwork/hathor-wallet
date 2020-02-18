@@ -42,6 +42,8 @@ A transaction is displayed.
 
 `npm start` and it will start running in the browser in http://localhost:3000
 
+> **NOTE:** to use Hathor Wallet with Ledger, you need to run it in Electron.
+
 ### To Build
 
 `npm run build` and it will create a folder build with the files to use

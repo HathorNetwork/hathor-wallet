@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 
 import wallet from '../utils/wallet';
+import helpers from '../utils/helpers';
 import { Link } from 'react-router-dom';
 import SpanFmt from '../components/SpanFmt';
 import ModalConfirm from '../components/ModalConfirm';
@@ -112,7 +113,16 @@ class Settings extends React.Component {
     $('#confirmModal').modal('hide');
   }
 
-
+  /**
+   * Method called to open external Ledger page.
+   *
+   * @param {Object} e Event for the click
+   */
+  openLedgerLink = (e) => {
+    e.preventDefault();
+    const url = 'https://support.ledger.com/hc/en-us/articles/115005214529-Advanced-passphrase-security';
+    helpers.openExternalURL(url);
+  }
 
   render() {
     const serverURL = hathorLib.helpers.getServerURL();
@@ -140,7 +150,7 @@ class Settings extends React.Component {
             <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
             <p>
               {str2jsx(t`|fn:More info| about this on Ledger.`,
-                       {fn: (x) => <a target="_blank" href="https://support.ledger.com/hc/en-us/articles/115005214529-Advanced-passphrase-security">{x}</a>})}
+                       {fn: (x, i) => <a key={i} onClick={this.openLedgerLink} href="true">{x}</a>})}
             </p>
           </div>
         </ModalAlertNotSupported>

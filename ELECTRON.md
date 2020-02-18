@@ -8,6 +8,8 @@ Before running electron you have to execute `npm run electron-deps` to install d
 
 Then `npm run electron`
 
+If you run into `Error: Unresolved node modules`, you just have to `export ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true`.
+
 ## Build package for Electron
 
 To build the package for all platforms:
@@ -15,8 +17,6 @@ To build the package for all platforms:
 `npm run electron-pack`
 
 If you have an error building `Error: Python executable "/path/to/python" is v3.6.5, which is not supported by gyp.`, just run `npm config set python /usr/bin/python` and try again
-
-If you run into `Error: Unresolved node modules`, you just have to `export ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true`.
 
 ### Building only for one platform
 

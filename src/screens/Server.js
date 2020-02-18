@@ -70,7 +70,7 @@ class Server extends React.Component {
 
     this.setState({ loading: true, errorMessage: '' });
     // Update new server in local storage
-    hathorLib.wallet.changeServer(newServer)
+    hathorLib.wallet.changeServer(newServer);
     const promise = version.checkApiVersion();
     promise.then(() => {
       wallet.reloadData();
@@ -116,7 +116,7 @@ class Server extends React.Component {
     return (
       <div className="content-wrapper">
         <p><strong>{t`Select one of the default servers to connect or choose a new one`}</strong></p>
-        <form id="formSelectServer">
+        <form onSubmit={e => { e.preventDefault(); }}>
           <div className="row mt-3">
             <div className="col-12">
               <select onChange={this.handleSelectChange}>
