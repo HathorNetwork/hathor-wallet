@@ -30,7 +30,7 @@ class ModalAlertNotSupported extends React.Component {
     return (
       <ModalAlert
         id="notSupported"
-        title={t`Action not supported`}
+        title={this.props.title || t`Action not supported`}
         buttonName={t`Close`}
         body={this.props.children || renderBody()}
       />

@@ -145,7 +145,7 @@ class Settings extends React.Component {
         </div>
         <ModalResetAllData success={this.handleReset} />
         <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
-        <ModalAlertNotSupported>
+        <ModalAlertNotSupported title={t`Complete action on your hardware wallet`}>
           <div>
             <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
             <p>
