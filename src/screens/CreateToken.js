@@ -8,6 +8,7 @@
 import React from 'react';
 import $ from 'jquery';
 import { t } from 'ttag'
+import { str2jsx } from '../utils/i18n';
 
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
@@ -221,6 +222,8 @@ class CreateToken extends React.Component {
       )
     }
 
+    const htrDeposit = hathorLib.tokens.getDepositPercentage() * 100;
+
     return (
       <div className="content-wrapper">
         <BackButton {...this.props} />
@@ -228,7 +231,15 @@ class CreateToken extends React.Component {
         <p className="mt-5">{t`Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.`}</p>
         <p>{t`Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>
         <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.`}</p>
-        <p>When creating and minting tokens, a <strong>deposit of {hathorLib.tokens.getDepositPercentage() * 100}%</strong> in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it <a href="true" onClick={this.goToRFC}>here</a>.</p>
+        <p>
+          {str2jsx(
+            t`When creating and minting tokens, a |bold:deposit of ${htrDeposit}%| in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it |link:here|.`,
+            {
+              bold: (x, i) => <strong key={i}>{x}</strong>,
+              link: (x, i) => <a key={i} href="true" onClick={this.goToRFC}>{x}</a>,
+            }
+          )}
+        </p>
         <hr className="mb-5 mt-5"/>
         <form ref="formCreateToken" id="formCreateToken">
           <div className="row">
