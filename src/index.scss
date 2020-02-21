@@ -299,6 +299,18 @@ svg.svg-wrapper {
     padding: 0.5rem 1rem;
   }
 
+  .main-nav nav.navbar .navbar-brand {
+    padding-left: 1rem;
+  }
+
+  .main-nav nav.navbar {
+    background-color: #000;
+  }
+
+  .navigation-search .version-wrapper:first-child {
+    padding: 0;
+  }
+
   .wallet-wrapper {
     padding: 0 3rem;
   }
