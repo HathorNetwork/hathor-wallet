@@ -11,8 +11,11 @@ import { t } from 'ttag'
 import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
 import ledger from '../utils/ledger';
-import { IPC_RENDERER } from '../constants';
+import helpers from '../utils/helpers';
+import { IPC_RENDERER, HATHOR_WEBSITE_URL } from '../constants';
+import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
+import { str2jsx } from '../utils/i18n';
 import hathorLib from '@hathor/wallet-lib';
 
 
@@ -153,12 +156,27 @@ class WalletType extends React.Component {
     });
   }
 
+  /**
+   * Method called to open external website page.
+   *
+   * @param {Object} e Event for the click
+   */
+  openWebsiteLink = (e) => {
+    e.preventDefault();
+    const url = new URL('wallet-types/', HATHOR_WEBSITE_URL);
+    helpers.openExternalURL(url.href);
+  }
+
   render() {
     const renderInitial  = () => {
       return (
         <div>
-          <p className="mt-4 mb-4">{t`Do you want to connect to a hardware device or to start a software wallet?`}</p>
-          <p className="mt-4 mb-4">{t`We curently support Ledger hardware wallet.`}</p>
+          <p className="mt-4 mb-4">{t`Hathor Wallet supports two types of wallet: software and hardware.`}</p>
+          <p className="mt-4 mb-4"><SpanFmt>{t`**Hardware wallets** are dedicated external devices that store your private information. We currently support the Ledger hardware wallet. **Software wallets**, on the other hand, store the information on your computer.`}</SpanFmt></p>
+          <p className="mt-4 mb-4">
+            {str2jsx(t`For more information on different types of wallet, check out |fn:this page|.`,
+                     {fn: (x, i) => <a key={i} onClick={this.openWebsiteLink} href="true">{x}</a>})}
+          </p>
           <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
             <button onClick={this.goToHardwareWallet} type="button" className="btn btn-hathor mr-3">{t`Hardware wallet`}</button>
             <button onClick={this.goToSoftwareWallet} type="button" className="btn btn-hathor">{t`Software wallet`}</button>

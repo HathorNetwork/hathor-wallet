@@ -17,7 +17,7 @@ import { t } from 'ttag'
 const SoftwareWalletWarningMessage = (props) => {
   return (
     <div>
-      <p className="mt-4">{t`Using a software wallet is not the safest way to secure your tokens. As your seed phrase is stored in your computer and it is connected to the internet, your seed phrase may be stolen by a virus.`}</p>
+      <p className="mt-4">{t`Using a software wallet is not the safest way to secure your tokens. As your private information is stored in your computer that is connected to the internet, it may be stolen by a virus.`}</p>
       <p className="mt-4">{t`If you want a safer method, you can use a hardware wallet. We currently have support for Ledger.`}</p>
     </div>
   )

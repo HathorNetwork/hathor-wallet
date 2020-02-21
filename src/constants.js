@@ -102,6 +102,8 @@ export const EXPLORER_BASE_URL = "https://explorer.hathor.network";
  */
 export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
 
+export const HATHOR_WEBSITE_URL = "https://hathor.network/";
+
 let ipcRenderer = null;
 
 if (window.require) {
