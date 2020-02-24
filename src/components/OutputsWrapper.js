@@ -45,15 +45,15 @@ class OutputsWrapper extends React.Component {
   render = () => {
     return (
       <div className="input-group mb-3">
-        <input type="text" ref={this.address} placeholder={t`Address`} className="form-control output-address col-4" />
+        <input type="text" ref={this.address} placeholder={t`Address`} className="form-control output-address col-5" />
         <input type="number" ref={this.value} step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control output-value col-2" />
-        <div className="form-check mr-3 d-flex flex-column justify-content-center">
+        <div className="form-check mr-2 d-flex flex-column justify-content-center">
           <input className="form-check-input mt-0 has-timelock" ref={this.timelockCheckbox} type="checkbox" onChange={this.handleCheckboxTimelockChange} id={this.uniqueID}/>
           <label className="form-check-label" htmlFor={this.uniqueID}>
             {t`Time lock`}
           </label>
         </div>
-        <input type="datetime-local" placeholder={t`Date and time in GMT`} ref={this.timelock} step="1" className="form-control output-timelock col-4" style={{display: 'none'}}/>
+        <input type="datetime-local" placeholder={t`Date and time in GMT`} ref={this.timelock} step="1" className="form-control output-timelock col-3" style={{display: 'none'}}/>
         {this.props.index === 0 ? <button type="button" className="btn btn-hathor" onClick={this.props.addOutput}>+</button> : null}
       </div>
     );
