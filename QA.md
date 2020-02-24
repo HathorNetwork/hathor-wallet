@@ -12,6 +12,7 @@
 
 1. **Initialization**
     1. Try to click 'Get started' without selecting checkbox (must show error).
+    1. Choose Software Wallet.
     1. Start new wallet.
     1. Try to click 'Create my words' without selecting checkbox (must show error).
     1. Select to do backup now. (Really save those words, we will load this wallet later with them).
@@ -155,3 +156,54 @@
 1. **Late backup**
     1. Reset wallet and start a new one without doing backup. It must show a yellow warning saying a backup must be done.
     1. Do the backup (following procedures in the 'Initialization' tests). The backup message has to disappear.
+
+1. **Hardware wallet initialization**
+    1. Reset the wallet one more time.
+    1. Connect your Ledger device to the computer. The Ledger should be initialized already.
+    1. Open the Hathor app on Ledger.
+    1. On the desktop wallet, mark the checkbox and click 'Get Started'.
+    1. Choose 'Hardware Wallet'.
+    1. Wallet should go through both steps and show 'Step 1/2' and 'Step 2/2'.
+    1. On your Ledger, check it is requesting your authorization.
+    1. Deny the authorization request on Ledger (left button). It should show an error on the wallet.
+    1. Click 'Try again'. It goes through both steps and asks for authorization again.
+    1. Grant authorization request (right button). It will proceed to 'Loading transactions' screen.
+
+1. **Ledger wallet screen**
+    1. On the main wallet screen, confirm 'Address to receive tokens' is truncated (eg: 'HGZmqThwa6...'). There should be a 'Show full address' button next to it.
+    1. Confirm there's no QR Code button under the truncated address.
+    1. Click on 'Show full address'. A modal will display asking you to compare the address on the wallet and on Ledger.
+    1. Check that the modal cannot be closed, not even by clicking outside it.
+    1. Confirm that both addresses (on wallet and Ledger) are the same. Copy this address on the computed.
+    1. Click both buttons on Ledger. Modal should close.
+    1. Send 10.00 HTR from another wallet to the copied address.
+    1. Check that the transaction appears in the list, the balance was updated and the address also changed.
+    1. Click on 'Generate new address' and validate it has changed.
+    1. Confirm again address on the wallet and on Ledger (by clicking 'Show full address').
+
+1. **Ledger send tokens**
+    1. Copy 2 different addresses.
+    1. Click on 'Send tokens' on the top menu.
+    1. Confirm that the token dropdown list cannot be clicked. A message saying this feature is disabled for hardware wallet is displayed when hovering the dropdown.
+    1. Confirm the Timelock checkbox is also disabled.
+    1. Click on 'Add another token' button. A modal is displayed saying the action is not supported.
+    1. Try sending a transaction to an invalid address. An error message should show up on the wallet. Nothing should be displayed on Ledger.
+    1. Send tokens to both copied addresses in the same transaction (2 outputs). A modal will be displayed asking to confirm operation on Ledger.
+    1. On Ledger, it should show 'Output 1/2' on the first line and the address + amount on the second line. After clicking both buttons, it shows 'Output 2/2' and the other output (address + value).
+    1. Clicking both buttons one more time will display the confirmation screen. Deny the transaction (left button). The modal will hide and an error message should appear on the wallet.
+    1. Click to send the transaction again. This time, approve it on the confirmation screen (right button). Ledger screen will show 'Processing...' for a while and the desktop wallet will display the modal while solving proof of work.
+    1. After transaction is completed, it closes the modal and goes back to main wallet screen. The first transaction on the list must have amount 0.00.
+
+1. **Ledger misc**
+    1. Go to the settings screen.
+    1. Click on change server. The usual Change Server screen should show up, but with no PIN field. Change to a new server.
+    1. On the settings screen, click on 'Set a passphrase'. It should show a modal saying the action is not supported and it should be done directly on Ledger.
+    1. Go to Custom Tokens on the top navigation bar. Clicking 'Create a new token' should display a modal saying action is not supported.
+    1. Lock wallet. It should go the screen asking to select the wallet type (software or hardware).
+    1. Choose 'Hardware Wallet' and go through the same process again.
+    1. When finished loading the wallet, it should show the same balance and transactions as before locking.
+
+1. **Ledger connection**
+    1. On Ledger, quit the Hathor app. The desktop wallet should lock (go to wallet type screen). This *does not* happen instantly.
+    1. Without opening the Hathor app on Ledger, click 'Hardware wallet'. Desktop wallet will stay on 'Step 1/2'.
+    1. Open the Hathor app on Ledger. Wallet should go to 'Step 2/2' after a few seconds and ask for authorization on Ledger.

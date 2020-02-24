@@ -62,14 +62,15 @@ class Server extends React.Component {
       newServer = this.state.selectedValue;
     }
 
-    if (!hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
+    // we don't ask for the pin on the hardware wallet
+    if (hathorLib.wallet.isSoftwareWallet() && !hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
       this.setState({ errorMessage: t`Invalid PIN` });
       return;
     }
 
     this.setState({ loading: true, errorMessage: '' });
     // Update new server in local storage
-    hathorLib.wallet.changeServer(newServer)
+    hathorLib.wallet.changeServer(newServer);
     const promise = version.checkApiVersion();
     promise.then(() => {
       wallet.reloadData();
@@ -115,7 +116,7 @@ class Server extends React.Component {
     return (
       <div className="content-wrapper">
         <p><strong>{t`Select one of the default servers to connect or choose a new one`}</strong></p>
-        <form id="formSelectServer">
+        <form onSubmit={e => { e.preventDefault(); }}>
           <div className="row mt-3">
             <div className="col-12">
               <select onChange={this.handleSelectChange}>
@@ -133,7 +134,7 @@ class Server extends React.Component {
           <div ref="newServerWrapper" className="mt-3" style={{display: 'none'}}>
             <input type="text" placeholder={t`New server`} ref="newServer" className="form-control col-4" />
           </div>
-          <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />
+          {hathorLib.wallet.isSoftwareWallet() && <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />}
         </form>
         <div className="d-flex flex-row align-items-center mt-3">
           <button onClick={this.serverSelected} type="button" className="btn btn-hathor mr-3">{t`Connect to server`}</button>

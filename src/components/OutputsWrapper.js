@@ -48,12 +48,17 @@ class OutputsWrapper extends React.Component {
         <input type="text" ref={this.address} placeholder={t`Address`} className="form-control output-address col-5" />
         <input type="number" ref={this.value} step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control output-value col-2" />
         <div className="form-check mr-2 d-flex flex-column justify-content-center">
-          <input className="form-check-input mt-0 has-timelock" ref={this.timelockCheckbox} type="checkbox" onChange={this.handleCheckboxTimelockChange} id={this.uniqueID}/>
+          <input className="form-check-input mt-0 has-timelock" type="checkbox"
+            ref={this.timelockCheckbox} onChange={this.handleCheckboxTimelockChange} id={this.uniqueID}
+            title={hathorLib.wallet.isHardwareWallet() ? t`This feature is disabled for hardware wallet` : t`Timelock`}
+            disabled={hathorLib.wallet.isHardwareWallet() ? true : null}/>
           <label className="form-check-label" htmlFor={this.uniqueID}>
             {t`Time lock`}
           </label>
         </div>
-        <input type="datetime-local" placeholder={t`Date and time in GMT`} ref={this.timelock} step="1" className="form-control output-timelock col-3" style={{display: 'none'}}/>
+        <input type="datetime-local" placeholder={t`Date and time in GMT`} step="1"
+          className="form-control output-timelock col-3" style={{display: 'none'}} ref={this.timelock}
+          disabled={hathorLib.wallet.isHardwareWallet() ? true : null}/>
         {this.props.index === 0 ? <button type="button" className="btn btn-hathor" onClick={this.props.addOutput}>+</button> : null}
       </div>
     );

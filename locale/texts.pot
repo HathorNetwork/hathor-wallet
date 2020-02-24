@@ -24,7 +24,7 @@ msgstr ""
 #: src/components/ModalPin.js:57
 #: src/screens/ChoosePassphrase.js:64
 #: src/screens/LockedWallet.js:52
-#: src/screens/Server.js:66
+#: src/screens/Server.js:67
 msgid "Invalid PIN"
 msgstr ""
 
@@ -51,7 +51,7 @@ msgstr ""
 
 #: src/screens/ChoosePassphrase.js:140
 #: src/screens/LockedWallet.js:92
-#: src/screens/Server.js:136
+#: src/screens/Server.js:137
 msgid "PIN"
 msgstr ""
 
@@ -87,7 +87,7 @@ msgid "Confirm"
 msgstr ""
 
 #: src/screens/ChoosePassphrase.js:161
-#: src/screens/Settings.js:126
+#: src/screens/Settings.js:131
 msgid "Set a passphrase"
 msgstr ""
 
@@ -177,11 +177,11 @@ msgstr ""
 msgid "Token ${ _this.state.name } created"
 msgstr ""
 
-#: src/screens/CustomTokens.js:51
+#: src/screens/CustomTokens.js:57
 msgid "Custom Tokens"
 msgstr ""
 
-#: src/screens/CustomTokens.js:52
+#: src/screens/CustomTokens.js:58
 msgid ""
 "You can create your own digital token with customized specifications on "
 "Hathor Network with only a few clicks. They will fully work under the same "
@@ -190,13 +190,13 @@ msgid ""
 "price of the native HTR token, and they can serve multiple purposes."
 msgstr ""
 
-#: src/screens/CustomTokens.js:53
+#: src/screens/CustomTokens.js:59
 msgid ""
 "Every custom token has a unique **Configuration String** which must be "
 "shared with all other people that will use the custom token."
 msgstr ""
 
-#: src/screens/CustomTokens.js:54
+#: src/screens/CustomTokens.js:60
 msgid ""
 "If you want to use a custom token that already exists, you need to register "
 "this token in your Hathor Wallet. For this, you will need the custom "
@@ -204,15 +204,15 @@ msgid ""
 "token."
 msgstr ""
 
-#: src/screens/CustomTokens.js:56
+#: src/screens/CustomTokens.js:62
 msgid "Create a new token"
 msgstr ""
 
-#: src/screens/CustomTokens.js:57
+#: src/screens/CustomTokens.js:63
 msgid "Register a token"
 msgstr ""
 
-#: src/screens/CustomTokens.js:60
+#: src/screens/CustomTokens.js:66
 msgid "Token registered with success!"
 msgstr ""
 
@@ -273,6 +273,7 @@ msgstr ""
 #: src/screens/LoadWallet.js:119
 #: src/screens/NewWallet.js:164
 #: src/screens/NewWallet.js:177
+#: src/screens/Signin.js:44
 msgid "Back"
 msgstr ""
 
@@ -309,7 +310,7 @@ msgstr ""
 
 #: src/components/ModalResetAllData.js:68
 #: src/screens/LockedWallet.js:96
-#: src/screens/Settings.js:127
+#: src/screens/Settings.js:132
 msgid "Reset all data"
 msgstr ""
 
@@ -395,21 +396,35 @@ msgstr ""
 msgid "Transaction pushed to the network with success!"
 msgstr ""
 
-#: src/screens/SendTokens.js:144
+#: src/screens/SendTokens.js:285
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:198
+#: src/screens/SendTokens.js:351
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:199
-#: src/screens/SendTokens.js:219
+#: src/screens/SendTokens.js:352
+#: src/screens/SendTokens.js:385
 msgid "Send Tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:210
+#: src/screens/SendTokens.js:363
 msgid "Please, wait while we solve the proof of work and propagate the transaction"
+msgstr ""
+
+#: src/screens/SendTokens.js:373
+msgid ""
+"Please go to you Ledger and validate each output of your transaction. Press "
+"both buttons in case the output is correct."
+msgstr ""
+
+#: src/screens/SendTokens.js:374
+msgid "In the end, a final screen will ask you to confirm sending the transaction."
+msgstr ""
+
+#: src/screens/SendTokens.js:390
+msgid "Validate outputs on Ledger"
 msgstr ""
 
 #: src/screens/SentryPermission.js:68
@@ -457,86 +472,94 @@ msgstr ""
 msgid "New server is not valid"
 msgstr ""
 
-#: src/screens/Server.js:117
+#: src/screens/Server.js:118
 msgid "Select one of the default servers to connect or choose a new one"
 msgstr ""
 
-#: src/screens/Server.js:130
+#: src/screens/Server.js:131
 msgid "Select a new server"
 msgstr ""
 
-#: src/screens/Server.js:134
+#: src/screens/Server.js:135
 msgid "New server"
 msgstr ""
 
-#: src/screens/Server.js:139
+#: src/screens/Server.js:140
 msgid "Connect to server"
 msgstr ""
 
-#: src/screens/Settings.js:78
+#: src/screens/Settings.js:83
 msgid "Turn notifications off"
 msgstr ""
 
-#: src/screens/Settings.js:79
+#: src/screens/Settings.js:84
 msgid "Are you sure you don't want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:86
+#: src/screens/Settings.js:91
 msgid "Turn notifications on"
 msgstr ""
 
-#: src/screens/Settings.js:87
+#: src/screens/Settings.js:92
 msgid "Are you sure you want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:117
+#: src/screens/Settings.js:122
 #, javascript-format
 msgid "**Server:** You are connected to ${ serverURL }"
 msgstr ""
 
 #: src/components/RequestError.js:155
-#: src/screens/Settings.js:118
+#: src/screens/Settings.js:123
 msgid "Change server"
 msgstr ""
 
-#: src/screens/Settings.js:122
+#: src/screens/Settings.js:127
 msgid "Advanced Settings"
 msgstr ""
 
-#: src/screens/Settings.js:124
+#: src/screens/Settings.js:129
 msgid "Allow notifications:"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:100
-#: src/screens/Settings.js:124
-#: src/screens/Settings.js:125
+#: src/screens/Settings.js:129
+#: src/screens/Settings.js:130
 msgid "Yes"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:99
-#: src/screens/Settings.js:124
-#: src/screens/Settings.js:125
+#: src/screens/Settings.js:129
+#: src/screens/Settings.js:130
 msgid "No"
 msgstr ""
 
-#: src/screens/Settings.js:124
-#: src/screens/Settings.js:125
+#: src/screens/Settings.js:129
+#: src/screens/Settings.js:130
 msgid "Change"
 msgstr ""
 
-#: src/screens/Settings.js:125
+#: src/screens/Settings.js:130
 msgid "Automatically report bugs to Hathor:"
 msgstr ""
 
-#: src/screens/Signin.js:47
+#: src/screens/Settings.js:139
+msgid "You can set your passphrase directly on your hardware wallet."
+msgstr ""
+
+#: src/screens/Settings.js:141
+msgid "|fn:(More info)| about this on Ledger."
+msgstr ""
+
+#: src/screens/Signin.js:42
 msgid "You can start a new wallet or import data from a wallet that already exists."
 msgstr ""
 
-#: src/screens/Signin.js:49
+#: src/screens/Signin.js:45
 msgid "New wallet"
 msgstr ""
 
-#: src/screens/Signin.js:50
+#: src/screens/Signin.js:46
 msgid "Import wallet"
 msgstr ""
 
@@ -804,13 +827,13 @@ msgid "Address copied to clipboard!"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:83
-#: src/components/WalletAddress.js:77
+#: src/components/WalletAddress.js:111
 msgid "Address to receive tokens"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:93
 #: src/components/TokenGeneralInfo.js:145
-#: src/components/WalletAddress.js:81
+#: src/components/WalletAddress.js:128
 msgid "Copy to clipboard"
 msgstr ""
 
@@ -1024,10 +1047,19 @@ msgid "Push Tx"
 msgstr ""
 
 #: src/components/OutputsWrapper.js:53
-msgid "Time lock"
+#: src/components/SendTokensOne.js:197
+msgid "This feature is disabled for hardware wallet"
+msgstr ""
+
+#: src/components/OutputsWrapper.js:53
+msgid "Timelock"
 msgstr ""
 
 #: src/components/OutputsWrapper.js:56
+msgid "Time lock"
+msgstr ""
+
+#: src/components/OutputsWrapper.js:59
 msgid "Date and time in GMT"
 msgstr ""
 
@@ -1086,19 +1118,23 @@ msgstr ""
 msgid "Invalid address and hash format"
 msgstr ""
 
-#: src/components/SendTokensOne.js:205
-msgid "Token:"
+#: src/components/SendTokensOne.js:197
+msgid "Select token"
 msgstr ""
 
 #: src/components/SendTokensOne.js:207
+msgid "Token:"
+msgstr ""
+
+#: src/components/SendTokensOne.js:209
 msgid "Remove"
 msgstr ""
 
-#: src/components/SendTokensOne.js:216
+#: src/components/SendTokensOne.js:218
 msgid "Choose inputs automatically"
 msgstr ""
 
-#: src/components/SendTokensOne.js:220
+#: src/components/SendTokensOne.js:222
 msgid "Inputs"
 msgstr ""
 
@@ -1110,58 +1146,62 @@ msgstr ""
 msgid "Offline"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:208
-#: src/components/TokenAdministrative.js:219
+#: src/components/TokenAdministrative.js:181
+msgid "This feature is not currently supported for a hardware wallet."
+msgstr ""
+
+#: src/components/TokenAdministrative.js:216
+#: src/components/TokenAdministrative.js:227
 msgid "Operations"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:209
+#: src/components/TokenAdministrative.js:217
 #: src/components/tokens/TokenMelt.js:91
 msgid "Melt tokens"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:210
+#: src/components/TokenAdministrative.js:218
 msgid "Delegate melt"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:211
+#: src/components/TokenAdministrative.js:219
 msgid "Destroy melt"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:220
+#: src/components/TokenAdministrative.js:228
 msgid "Mint tokens"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:220
+#: src/components/TokenAdministrative.js:228
 msgid "Mint more tokens"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:221
+#: src/components/TokenAdministrative.js:229
 msgid "Delegate mint"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:222
+#: src/components/TokenAdministrative.js:230
 msgid "Destroy mint"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:229
+#: src/components/TokenAdministrative.js:237
 msgid "You have no more authority outputs for this token"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:235
+#: src/components/TokenAdministrative.js:243
 msgid "Mint authority management"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:240
+#: src/components/TokenAdministrative.js:248
 msgid "Melt authority management"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:250
+#: src/components/TokenAdministrative.js:258
 #: src/components/TokenGeneralInfo.js:127
 msgid "Total supply:"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:251
+#: src/components/TokenAdministrative.js:259
 msgid "Your balance available:"
 msgstr ""
 
@@ -1474,7 +1514,7 @@ msgid "Copy raw tx to clipboard"
 msgstr ""
 
 #: src/components/TxData.js:673
-#: src/components/WalletAddress.js:96
+#: src/components/WalletAddress.js:157
 msgid "Copied to clipboard!"
 msgstr ""
 
@@ -1483,24 +1523,48 @@ msgstr ""
 msgid "Click |link:here| to ${ props.otherAction } this transaction"
 msgstr ""
 
-#: src/components/Version.js:21
-msgid "Version"
+#: src/components/Version.js:35
+msgid "Software Wallet"
 msgstr ""
 
-#: src/components/WalletAddress.js:85
+#: src/components/Version.js:35
+msgid "Hardware Wallet"
+msgstr ""
+
+#: src/components/WalletAddress.js:114
 msgid "Generate new address"
 msgstr ""
 
-#: src/components/WalletAddress.js:85
+#: src/components/WalletAddress.js:114
 msgid "Get new address"
 msgstr ""
 
-#: src/components/WalletAddress.js:87
+#: src/components/WalletAddress.js:116
+msgid "QR Code"
+msgstr ""
+
+#: src/components/WalletAddress.js:116
 msgid "Get qrcode"
 msgstr ""
 
-#: src/components/WalletAddress.js:97
+#: src/components/WalletAddress.js:138
+msgid "Show full address"
+msgstr ""
+
+#: src/components/WalletAddress.js:147
+msgid "Validate that the address below is the same presented on the Ledger screen."
+msgstr ""
+
+#: src/components/WalletAddress.js:148
+msgid "Press both buttons on your Ledger in case the address is valid."
+msgstr ""
+
+#: src/components/WalletAddress.js:158
 msgid "You must use an old address before generating new ones"
+msgstr ""
+
+#: src/components/WalletAddress.js:160
+msgid "Validate address on Ledger"
 msgstr ""
 
 #: src/components/WalletHistory.js:23

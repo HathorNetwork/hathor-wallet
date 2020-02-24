@@ -36,6 +36,9 @@ class Welcome extends React.Component {
       hathorLib.wallet.markWalletAsStarted();
       // For the mainnet sentry will be disabled by default and the user can change this on Settings
       wallet.disallowSentry();
+      // XXX restore to wallet_type when we want to enable Ledger
+      //this.props.history.push('/wallet_type/');
+      hathorLib.wallet.setWalletType('software');
       this.props.history.push('/signin/');
     }
   }

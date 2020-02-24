@@ -14,6 +14,8 @@ import TokenBar from '../components/TokenBar';
 import HathorAlert from '../components/HathorAlert';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
+import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
+import hathorLib from '@hathor/wallet-lib';
 
 
 /**
@@ -41,7 +43,11 @@ class CustomTokens extends React.Component {
    * Triggered when user clicks to do the create a new token, then redirects to the screen
    */
   createTokenClicked = () => {
-    this.props.history.push('/create_token/');
+    if (hathorLib.wallet.isHardwareWallet()) {
+      $('#notSupported').modal('show');
+    } else {
+      this.props.history.push('/create_token/');
+    }
   }
 
   render() {
@@ -59,6 +65,7 @@ class CustomTokens extends React.Component {
         <ModalAddToken success={this.newTokenSuccess} />
         <HathorAlert ref="alertSuccess" text={t`Token registered with success!`} type="success" />
         <TokenBar {...this.props}  />
+        <ModalAlertNotSupported />
       </div>
     );
   }

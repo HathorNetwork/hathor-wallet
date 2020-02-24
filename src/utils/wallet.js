@@ -97,6 +97,27 @@ const wallet = {
   },
 
   /*
+   * Start the wallet and load its data from an xpub
+   *
+   * @param {String} xpub The xpub string from the wallet we're loading
+   *
+   * @return {Promise} Promise that resolves when finishes loading address history
+   * @memberof Wallet
+   * @inner
+   */
+  startHardwareWallet(xpub) {
+    store.dispatch(loadingAddresses(true));
+    const accessData = {
+      xpubkey: xpub,
+    }
+    const promise = hathorLib.wallet.startWallet(accessData, true);
+    promise.then(() => {
+      this.afterLoadAddressHistory();
+    });
+    return promise;
+  },
+
+  /*
    * Update localStorage and redux when a new tx arrive in the websocket
    *
    * @param {Object} data Object with data of the new tx
@@ -204,6 +225,8 @@ const wallet = {
 
     // Save in redux the new shared address
     this.updateSharedAddressRedux(newAddress.toString(), newIndex);
+
+    return {address: newAddress.toString(), index: newIndex};
   },
 
   /**
@@ -218,6 +241,7 @@ const wallet = {
     if (result) {
       const {address, index} = result;
       this.updateSharedAddressRedux(address, index);
+      return result;
     }
     return null;
   },

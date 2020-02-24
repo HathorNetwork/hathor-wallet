@@ -1,16 +1,28 @@
-## Configure
-
-Electron expects a node (in the branch `feat/thin-wallet`) running with `--status 8080` and `--wallet-index` parameter
-
 ## Install
 
 Must use node v8.9.0
 
+## Running on Electron
+
+Before running electron you have to execute `npm run electron-deps` to install dependencies.
+
+Then `npm run electron`
+
+If you run into `Error: Unresolved node modules`, you just have to `export ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true`.
+
 ## Build package for Electron
+
+To build the package for all platforms:
 
 `npm run electron-pack`
 
-If you run into `Error: Unresolved node modules`, you just have to `export ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true`.
+If you have an error building `Error: Python executable "/path/to/python" is v3.6.5, which is not supported by gyp.`, just run `npm config set python /usr/bin/python` and try again
+
+### Building only for one platform
+
+You can use `--mac`, `--win`, or `--linux`. Eg:
+
+`./node_modules/.bin/build --win -c.extraMetadata.main=build/electron.js`
 
 ### Provisioning profile
 
@@ -32,3 +44,12 @@ For safety information about your Apple ID Password, [check this out](https://gi
 
 - https://kilianvalkhof.com/2019/electron/notarizing-your-electron-application/
 - https://medium.com/@TwitterArchiveEraser/notarize-electron-apps-7a5f988406db
+
+### Windows Code Signing
+
+For Windows, you need to create the following environment variables:
+
+    export WIN_CSC_LINK=./your_certificate.pfx
+    export WIN_CSC_KEY_PASSWORD=your_certificate_password
+
+Then, just build it.

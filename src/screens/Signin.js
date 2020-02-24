@@ -19,11 +19,6 @@ import InitialImages from '../components/InitialImages';
  * @memberof Screens
  */
 class Signin extends React.Component {
-  componentDidMount() {
-    // Update Sentry when user started wallet now
-    wallet.updateSentryState();
-  }
-
   /**
    * Go to the new wallet screen
    */
@@ -46,6 +41,7 @@ class Signin extends React.Component {
             <img className="hathor-logo" src={logo} alt="" />
             <p className="mt-4 mb-4">{t`You can start a new wallet or import data from a wallet that already exists.`}</p>
             <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
+              <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
               <button onClick={this.goToNewWallet} type="button" className="btn btn-hathor mr-3">{t`New wallet`}</button>
               <button onClick={this.goToLoadWallet} type="button" className="btn btn-hathor">{t`Import wallet`}</button>
             </div>

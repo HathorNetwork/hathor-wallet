@@ -42,9 +42,11 @@ A transaction is displayed.
 
 `npm start` and it will start running in the browser in http://localhost:3000
 
+> **NOTE:** to use Hathor Wallet with Ledger, you need to run it in Electron.
+
 ### To Build
 
-`npm run buil` and it will create a folder build with the files to use
+`npm run build` and it will create a folder build with the files to use
 
 ## Server
 
@@ -61,31 +63,7 @@ and it will generate a `index.html` file in `out/index.html`
 
 ## Run Electron
 
-`npm run build`
-`npm run electron`
-
-## Build package for Electron
-
-`npm run electron-pack`
-
-If you have an error building `Error: Python executable "/path/to/python" is v3.6.5, which is not supported by gyp.`
-
-Just run `npm config set python /usr/bin/python` and try again
-
-### Building only for one platform
-
-You can use `--mac`, `--win`, or `--linux`. Then:
-
-    ./node_modules/.bin/build --win -c.extraMetadata.main=build/electron.js
-
-### Code Signing
-
-For Windows, you need to create the following environment variables:
-
-    export WIN_CSC_LINK=./your_certificate.pfx
-	export WIN_CSC_KEY_PASSWORD=your_certificate_password
-
-Then, just build it.
+Refer to ELECTRON.md
 
 ## Sentry
 

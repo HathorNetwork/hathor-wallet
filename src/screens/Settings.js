@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 
 import wallet from '../utils/wallet';
+import helpers from '../utils/helpers';
 import { Link } from 'react-router-dom';
 import SpanFmt from '../components/SpanFmt';
 import ModalConfirm from '../components/ModalConfirm';
@@ -16,6 +17,8 @@ import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
+import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
+import { str2jsx } from '../utils/i18n';
 
 
 /**
@@ -54,7 +57,11 @@ class Settings extends React.Component {
    * When user clicks Add Passphrase button we redirect to Passphrase screen
    */
   addPassphrase = () => {
-    this.props.history.push('/wallet/passphrase/');
+    if (hathorLib.wallet.isHardwareWallet()) {
+      $('#notSupported').modal('show');
+    } else {
+      this.props.history.push('/wallet/passphrase/');
+    }
   }
 
   /**
@@ -106,7 +113,16 @@ class Settings extends React.Component {
     $('#confirmModal').modal('hide');
   }
 
-
+  /**
+   * Method called to open external Ledger page.
+   *
+   * @param {Object} e Event for the click
+   */
+  openLedgerLink = (e) => {
+    e.preventDefault();
+    const url = 'https://support.ledger.com/hc/en-us/articles/115005214529-Advanced-passphrase-security';
+    helpers.openExternalURL(url);
+  }
 
   render() {
     const serverURL = hathorLib.helpers.getServerURL();
@@ -129,6 +145,15 @@ class Settings extends React.Component {
         </div>
         <ModalResetAllData success={this.handleReset} />
         <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
+        <ModalAlertNotSupported title={t`Complete action on your hardware wallet`}>
+          <div>
+            <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
+            <p>
+              {str2jsx(t`|fn:More info| about this on Ledger.`,
+                       {fn: (x, i) => <a key={i} onClick={this.openLedgerLink} href="true">{x}</a>})}
+            </p>
+          </div>
+        </ModalAlertNotSupported>
       </div>
     );
   }
