@@ -11,6 +11,7 @@ all:
 	@echo Available make targets:
 	@echo - i18n
 	@echo - check_po
+	@echo - check_pot
 	@echo - update_pot
 	@echo
 
@@ -30,6 +31,10 @@ $(locale_out)/%/texts.po.json: $(locale_src)/%/texts.po
 
 .PHONY: check_po
 check_po: _touch_pot $(src_files)
+
+.PHONY: check_pot
+check_pot:
+	./scripts/check_pot
 
 .PHONY: _touch_pot
 _touch_pot:

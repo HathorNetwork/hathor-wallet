@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# This script checks whether the pot file is outdated or not.
+# It runs successfully if the pot file is not outdated.
+#
+# The verification is done generating an updated pot file (ttag extract),
+# then creating a po file that assigns translations idential to the msgid (msgen),
+# and finally comparing if the generated po file matches with the current pot file (msgcmp).
+
+SRCDIR=./src/
+LOCALE=./locale/
+
+if [[ ! -d "$SRCDIR" ]]
+then
+	SRCDIR=../src/
+	LOCALE=../locale/
+fi
+
+if [[ ! -d "$SRCDIR" ]]
+then
+	echo "check_pot: Cannot find source code directory" >&2
+	exit -1
+fi
+
+echo "check_pot: Checking pot file..."
+
+MYTMPDIR=$(mktemp -d)
+trap 'rm -rf "$MYTMPDIR"' EXIT
+
+npx ttag extract -o "$MYTMPDIR/pot" "$SRCDIR"
+msgen -o "$MYTMPDIR/po" "$MYTMPDIR/pot"
+msgcmp "$MYTMPDIR/po" "$LOCALE/texts.pot"
+exit $?
