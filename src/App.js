@@ -42,6 +42,7 @@ import { DEFAULT_SERVER, IPC_RENDERER, VERSION } from './constants';
 import { HybridStore } from './storage.js';
 import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
+import AddressList from './screens/AddressList';
 
 hathorLib.network.setNetwork('mainnet');
 hathorLib.storage.setStore(new HybridStore());
@@ -96,7 +97,9 @@ class Root extends React.Component {
     hathorLib.WebSocketHandler.removeListener('is_online', this.isOnlineUpdate);
     hathorLib.WebSocketHandler.removeListener('reload_data', this.reloadData);
 
-    IPC_RENDERER.removeAllListeners("ledger:closed");
+    if (IPC_RENDERER) {
+      IPC_RENDERER.removeAllListeners("ledger:closed");
+    }
   }
 
   handleWebsocket = (wsData) => {
@@ -192,6 +195,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
         <StartedRoute exact path="/server" component={Server} loaded={true} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} />
+        <StartedRoute exact path="/addresses" component={AddressList} loaded={true} />
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
         <StartedRoute exact path="/wallet_type" component={WalletType} loaded={false} />
