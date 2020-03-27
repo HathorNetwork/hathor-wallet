@@ -8,6 +8,7 @@
 import React from 'react';
 import { t } from 'ttag'
 import HathorPaginate from '../components/HathorPaginate';
+import HathorAlert from '../components/HathorAlert';
 import { WALLET_HISTORY_COUNT } from '../constants';
 
 import hathorLib from '@hathor/wallet-lib';
@@ -20,8 +21,10 @@ import hathorLib from '@hathor/wallet-lib';
 class AddressList extends React.Component {
   state = {
     addresses: [],
+    filteredAddresses: [],
     page: 1,
     totalPages: 0,
+    filtered: false,
   }
 
   componentDidMount = () => {
@@ -38,9 +41,11 @@ class AddressList extends React.Component {
       addresses.push(addressData);
     }
 
-    const totalPages = Math.ceil(addresses.length / WALLET_HISTORY_COUNT);
+    this.setState({ addresses, filteredAddresses: addresses, totalPages: this.getTotalPages(addresses) });
+  }
 
-    this.setState({ addresses, totalPages });
+  getTotalPages = (array) => {
+    return Math.ceil(array.length / WALLET_HISTORY_COUNT);
   }
 
   addressUsed = (address, historyTransactions) => {
@@ -59,6 +64,47 @@ class AddressList extends React.Component {
     this.setState({ page });
   }
 
+  /**
+   * Called when user types something, so we can capture the 'Enter' and execute search
+   *
+   * @param {Object} e Event emitted when typing
+   */
+  handleKeyUp = (e) => {
+    if (e.key === 'Enter') {
+      this.search();
+    }
+  }
+
+  /**
+   * Called to execute search when user typed 'Enter' or clicked the icon
+   */
+  search = () => {
+    const text = this.refs.txSearch.value;
+    console.log('WAT')
+    if (text) {
+      console.log(text)
+      if (hathorLib.transaction.isAddressValid(text)) {
+        console.log('Yes')
+        for (const addr of this.state.addresses) {
+          if (addr.address === text) {
+            console.log('found');
+            this.setState({ filtered: true, filteredAddresses: [addr], totalPages: 1, page: 1 });
+            return
+          }
+        }
+        this.setState({ filtered: true, filteredAddresses: [], totalPages: 1, page: 1 });
+      } else {
+        // Invalid address
+        this.refs.alertError.show(3000);
+      }
+    } else {
+      if (this.state.filtered) {
+        // Was filtered, so now we need to reset data
+        this.setState({ filtered: false, filteredAddresses: this.state.addresses, totalPages: this.getTotalPages(this.state.addresses), page: 1 });
+      }
+    }
+  }
+
   render() {
     const loadPagination = () => {
       if (this.state.addresses.length === 0 || this.state.totalPages === 1) {
@@ -71,10 +117,19 @@ class AddressList extends React.Component {
       }
     }
 
+    const renderSearch = () => {
+      return (
+        <div className="d-flex flex-row align-items-center col-12 col-md-6">
+          <input className="form-control mr-2" type="search" placeholder={t`Search address`} aria-label="Search" ref="txSearch" onKeyUp={this.handleKeyUp} />
+          <i className="fa fa-search pointer" onClick={this.search}></i>
+        </div>
+      );
+    }
+
     const renderData = () => {
       const startIndex = (this.state.page - 1) * WALLET_HISTORY_COUNT;
       const endIndex = startIndex + WALLET_HISTORY_COUNT;
-      return this.state.addresses.slice(startIndex, endIndex).map((data) => {
+      return this.state.filteredAddresses.slice(startIndex, endIndex).map((data) => {
         return (
           <tr key={data.address}>
             <td>{data.address}</td>
@@ -88,7 +143,10 @@ class AddressList extends React.Component {
     return (
       <div className="content-wrapper">
         <div className="d-flex flex-column">
-          <h2>Addresses</h2>
+          <div className="d-flex flex-row justify-content-between">
+            <h2>Addresses</h2>
+            {renderSearch()}
+          </div>
           <div className="table-responsive">
             <table className="mt-3 table table-striped" id="wallet-history">
               <thead>
@@ -105,6 +163,7 @@ class AddressList extends React.Component {
           </div>
           {loadPagination()}
         </div>
+        <HathorAlert ref="alertError" text="Invalid address" type="danger" />
       </div>
     )
   }
