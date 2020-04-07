@@ -19,6 +19,13 @@ import hathorLib from '@hathor/wallet-lib';
  * @memberof Screens
  */
 class AddressList extends React.Component {
+  /**
+   * addresses {Array} All wallet addresses data {'address', 'index', 'used'}
+   * filteredAddresses {Array} addresses state after search
+   * page: {Number} Current page of the list
+   * totalPages: {Number} Total number of pages of the list
+   * filtered: {Boolean} If the list is filtered
+   */
   state = {
     addresses: [],
     filteredAddresses: [],
@@ -44,6 +51,13 @@ class AddressList extends React.Component {
     this.setState({ addresses, filteredAddresses: addresses, totalPages: this.getTotalPages(addresses) });
   }
 
+  /**
+   * Return total number of pages of the list
+   *
+   * @param {Array} Array of addresses of the list
+   *
+   * @return {Number} Total number of pages of the list
+   */
   getTotalPages = (array) => {
     return Math.ceil(array.length / WALLET_HISTORY_COUNT);
   }
@@ -59,6 +73,11 @@ class AddressList extends React.Component {
     return false;
   }
 
+  /**
+   * Event received from pagination component after a page button in clicked
+   *
+   * @param data {Object} Data with clicked page {'selected'}
+   */
   handlePageClick = (data) => {
     const page = data.selected + 1;
     this.setState({ page });
@@ -80,14 +99,10 @@ class AddressList extends React.Component {
    */
   search = () => {
     const text = this.refs.txSearch.value;
-    console.log('WAT')
     if (text) {
-      console.log(text)
       if (hathorLib.transaction.isAddressValid(text)) {
-        console.log('Yes')
         for (const addr of this.state.addresses) {
           if (addr.address === text) {
-            console.log('found');
             this.setState({ filtered: true, filteredAddresses: [addr], totalPages: 1, page: 1 });
             return
           }

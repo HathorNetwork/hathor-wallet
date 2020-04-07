@@ -1,7 +1,20 @@
+/**
+ * Copyright (c) Hathor Labs and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from 'react';
 import ReactPaginate from 'react-paginate';
+import PropTypes from 'prop-types';
 
 
+/**
+ * Component to add pagination buttons of a list
+ *
+ * @memberof Components
+ */
 class HathorPaginate extends React.Component {
   render() {
     return (
@@ -25,5 +38,14 @@ class HathorPaginate extends React.Component {
     );
   }
 }
+
+/*
+ * pageCount: Total number of pages of the list being paginated
+ * onPageChange: Method to be executed when the page changes
+ */
+HathorPaginate.propTypes = {
+  pageCount: PropTypes.number.isRequired,
+  onPageChange: PropTypes.function.isRequired,
+};
 
 export default HathorPaginate;
