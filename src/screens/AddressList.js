@@ -185,16 +185,16 @@ class AddressList extends React.Component {
       <div className="content-wrapper">
         <div className="d-flex flex-column">
           <div className="d-flex flex-row justify-content-between">
-            <h2>Addresses</h2>
+            <h2>{t`Addresses`}</h2>
             {renderSearch()}
           </div>
           <div className="table-responsive">
             <table className="mt-3 table table-striped" id="address-list">
               <thead>
                 <tr>
-                  <th>Address</th>
-                  <th>Index</th>
-                  <th>Number of transactions</th>
+                  <th>{t`Address`}</th>
+                  <th>{t`Index`}</th>
+                  <th className="number">{t`Number of transactions`}</th>
                 </tr>
               </thead>
               <tbody>

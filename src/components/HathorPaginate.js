@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactPaginate from 'react-paginate';
 import PropTypes from 'prop-types';
+import { t } from 'ttag'
 
 
 /**
@@ -18,8 +19,8 @@ import PropTypes from 'prop-types';
 class HathorPaginate extends React.Component {
   render() {
     return (
-      <ReactPaginate previousLabel={"Previous"}
-         nextLabel={"Next"}
+      <ReactPaginate previousLabel={t`Previous`}
+         nextLabel={t`Next`}
          pageCount={this.props.pageCount}
          marginPagesDisplayed={1}
          pageRangeDisplayed={2}
