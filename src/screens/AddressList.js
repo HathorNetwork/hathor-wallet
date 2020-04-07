@@ -9,7 +9,9 @@ import React from 'react';
 import { t } from 'ttag'
 import HathorPaginate from '../components/HathorPaginate';
 import HathorAlert from '../components/HathorAlert';
-import { WALLET_HISTORY_COUNT } from '../constants';
+import { EXPLORER_BASE_URL, WALLET_HISTORY_COUNT } from '../constants';
+import helpers from '../utils/helpers';
+import path from 'path';
 
 import hathorLib from '@hathor/wallet-lib';
 
@@ -20,7 +22,7 @@ import hathorLib from '@hathor/wallet-lib';
  */
 class AddressList extends React.Component {
   /**
-   * addresses {Array} All wallet addresses data {'address', 'index', 'used'}
+   * addresses {Array} All wallet addresses data {'address', 'index', 'numberOfTransactions'}
    * filteredAddresses {Array} addresses state after search
    * page: {Number} Current page of the list
    * totalPages: {Number} Total number of pages of the list
@@ -42,7 +44,7 @@ class AddressList extends React.Component {
       const addressData = {
         address: key,
         index: addressKeys[key].index,
-        used: this.addressUsed(key, walletData.historyTransactions)
+        numberOfTransactions: this.getNumberOfTransactions(key, walletData.historyTransactions)
       };
 
       addresses.push(addressData);
@@ -54,7 +56,7 @@ class AddressList extends React.Component {
   /**
    * Return total number of pages of the list
    *
-   * @param {Array} Array of addresses of the list
+   * @param {Array} array Array of addresses of the list
    *
    * @return {Number} Total number of pages of the list
    */
@@ -62,15 +64,26 @@ class AddressList extends React.Component {
     return Math.ceil(array.length / WALLET_HISTORY_COUNT);
   }
 
-  addressUsed = (address, historyTransactions) => {
+  /**
+   * Return total number of transactions using an address
+   *
+   * @param {String} address Address to get the total number of transactions
+   * @param {Object} historyTransactions History of transactions from the wallet data storage
+   *
+   * @return {Number} Total number of transactions using this address
+   */
+  getNumberOfTransactions = (address, historyTransactions) => {
+    let total = 0;
     for (const tx_id in historyTransactions) {
-      for (const output of historyTransactions[tx_id].outputs) {
-        if (output.decoded.address === address) {
-          return true;
+      const tx = historyTransactions[tx_id];
+      for (const el of [...tx.outputs, ...tx.inputs]) {
+        if (el.decoded.address === address) {
+          total += 1;
+          break;
         }
       }
     }
-    return false;
+    return total;
   }
 
   /**
@@ -120,6 +133,19 @@ class AddressList extends React.Component {
     }
   }
 
+  /**
+   * Method called when user clicked on address in the list
+   * Go to explorer address search page
+   *
+   * @param {Object} e Event for the click
+   * @param {String} address Address to see page on explorer
+   */
+  goToAddressSearch = (e, address) => {
+    e.preventDefault();
+    const url = path.join(EXPLORER_BASE_URL, `address/${address}`);
+    helpers.openExternalURL(url);
+  }
+
   render() {
     const loadPagination = () => {
       if (this.state.addresses.length === 0 || this.state.totalPages === 1) {
@@ -147,9 +173,9 @@ class AddressList extends React.Component {
       return this.state.filteredAddresses.slice(startIndex, endIndex).map((data) => {
         return (
           <tr key={data.address}>
-            <td>{data.address}</td>
+            <td><a href="true" onClick={(e) => this.goToAddressSearch(e, data.address)}>{data.address}</a></td>
             <td>{data.index}</td>
-            <td>{data.used ? 'Yes' : ''}</td>
+            <td className="number">{data.numberOfTransactions}</td>
           </tr>
         )
       });
@@ -163,12 +189,12 @@ class AddressList extends React.Component {
             {renderSearch()}
           </div>
           <div className="table-responsive">
-            <table className="mt-3 table table-striped" id="wallet-history">
+            <table className="mt-3 table table-striped" id="address-list">
               <thead>
                 <tr>
                   <th>Address</th>
                   <th>Index</th>
-                  <th>Used</th>
+                  <th>Number of transactions</th>
                 </tr>
               </thead>
               <tbody>

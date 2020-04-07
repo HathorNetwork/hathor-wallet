@@ -45,7 +45,7 @@ class HathorPaginate extends React.Component {
  */
 HathorPaginate.propTypes = {
   pageCount: PropTypes.number.isRequired,
-  onPageChange: PropTypes.function.isRequired,
+  onPageChange: PropTypes.func.isRequired,
 };
 
 export default HathorPaginate;
