@@ -119,6 +119,7 @@ class WalletAddress extends React.Component {
               </div>
             }
           </div>
+          <button type="button" className="mt-3 btn btn-hathor">{t`See all addresses`}</button>
         </div>
       );
     }
