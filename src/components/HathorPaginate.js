@@ -28,8 +28,8 @@ class HathorPaginate extends React.Component {
          containerClassName={"pagination justify-content-center"}
          subContainerClassName={"pages pagination"}
          activeClassName={"active"}
-         breakClassName="page-item"
-         breakLabel={<a  href="true" className="page-link">...</a>}
+         breakClassName="page-item page-link"
+         breakLabel={"..."}
          pageClassName="page-item"
          previousClassName="page-item"
          nextClassName="page-item"
