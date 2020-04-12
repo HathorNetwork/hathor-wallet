@@ -27,6 +27,7 @@ class AddressList extends React.Component {
    * page: {Number} Current page of the list
    * totalPages: {Number} Total number of pages of the list
    * filtered: {Boolean} If the list is filtered
+   * transactionsByAddress: {Object} Object with number of transactions for each address
    */
   state = {
     addresses: [],
@@ -34,23 +35,27 @@ class AddressList extends React.Component {
     page: 1,
     totalPages: 0,
     filtered: false,
+    transactionsByAddress: null,
   }
 
   componentDidMount = () => {
     const walletData = hathorLib.wallet.getWalletData();
     const addressKeys = walletData.keys;
     const addresses = [];
+    const transactionsByAddress = {};
     for (const key in addressKeys) {
       const addressData = {
         address: key,
         index: addressKeys[key].index,
-        numberOfTransactions: this.getNumberOfTransactions(key, walletData.historyTransactions)
       };
 
       addresses.push(addressData);
+      transactionsByAddress[key] = 0;
     }
 
-    this.setState({ addresses, filteredAddresses: addresses, totalPages: this.getTotalPages(addresses) });
+    this.updateNumberOfTransactions(transactionsByAddress, walletData.historyTransactions);
+
+    this.setState({ addresses, filteredAddresses: addresses, totalPages: this.getTotalPages(addresses), transactionsByAddress });
   }
 
   /**
@@ -65,25 +70,25 @@ class AddressList extends React.Component {
   }
 
   /**
-   * Return total number of transactions using an address
+   * Update number of transactions for each address
    *
-   * @param {String} address Address to get the total number of transactions
+   * @param {Object} addressData Transactions by address object {'address': 0}
    * @param {Object} historyTransactions History of transactions from the wallet data storage
    *
    * @return {Number} Total number of transactions using this address
    */
-  getNumberOfTransactions = (address, historyTransactions) => {
-    let total = 0;
+  updateNumberOfTransactions = (addressData, historyTransactions) => {
     for (const tx_id in historyTransactions) {
       const tx = historyTransactions[tx_id];
+      let foundAddresses = [];
       for (const el of [...tx.outputs, ...tx.inputs]) {
-        if (el.decoded.address === address) {
-          total += 1;
-          break;
+        const address = el.decoded.address;
+        if (address in addressData && !(address in foundAddresses)) {
+          addressData[address] += 1;
+          foundAddresses.push(address);
         }
       }
     }
-    return total;
   }
 
   /**
@@ -175,7 +180,7 @@ class AddressList extends React.Component {
           <tr key={data.address}>
             <td><a href="true" onClick={(e) => this.goToAddressSearch(e, data.address)}>{data.address}</a></td>
             <td>{data.index}</td>
-            <td className="number">{data.numberOfTransactions}</td>
+            <td className="number">{this.state.transactionsByAddress && this.state.transactionsByAddress[data.address]}</td>
           </tr>
         )
       });
