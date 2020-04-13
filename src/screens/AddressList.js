@@ -72,7 +72,7 @@ class AddressList extends React.Component {
   /**
    * Update number of transactions for each address
    *
-   * @param {Object} addressData Transactions by address object {'address': 0}
+   * @param {Object} addressData Transactions by address object {address1: 0, address2: 0}
    * @param {Object} historyTransactions History of transactions from the wallet data storage
    *
    * @return {Number} Total number of transactions using this address
