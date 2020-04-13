@@ -104,6 +104,17 @@ class WalletAddress extends React.Component {
     }
   }
 
+  /**
+   * Method executed when link to See all addresses is clicked
+   * Redirect to address list screen
+   *
+   * @param {Object} e Event emitted by the link clicked
+   */
+  seeAllAddresses = (e) => {
+    e.preventDefault();
+    this.props.history.push('/addresses/');
+  }
+
   render() {
     const renderAddress = () => {
       return (
@@ -119,6 +130,7 @@ class WalletAddress extends React.Component {
               </div>
             }
           </div>
+          <a href="true" onClick={this.seeAllAddresses} className="mt-3 ">{t`See all addresses`}</a>
         </div>
       );
     }

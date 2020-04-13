@@ -132,7 +132,7 @@ a:hover {
   cursor: pointer;
 }
 
-#peer-table tbody td, #peer-table thead th, #tx-table tbody td, #tx-table thead th, #token-history tbody td, #token-history thead th {
+#peer-table tbody td, #peer-table thead th, #tx-table tbody td, #tx-table thead th, #token-history tbody td, #token-history thead th, #address-list tbody td, #address-list thead th {
   text-align: center;
 }
 
@@ -249,6 +249,10 @@ i.pointer {
   border-radius: 0.75rem;
   color: white;
   margin-left: 1rem;
+}
+
+#address-list .number {
+  text-align: right;
 }
 
 tr.tr-title {

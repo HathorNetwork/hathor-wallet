@@ -174,7 +174,7 @@ class Wallet extends React.Component {
             <div className="d-flex flex-column align-items-start justify-content-between">
               <WalletBalance balance={this.props.balance} />
             </div>
-            <WalletAddress />
+            <WalletAddress history={this.props.history} />
           </div>
           <div className="d-sm-none d-flex flex-column align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-center justify-content-between">
@@ -182,7 +182,7 @@ class Wallet extends React.Component {
               <div className="d-flex flex-row align-items-center">
               </div>
             </div>
-            <WalletAddress />
+            <WalletAddress history={this.props.history} />
           </div>
           <WalletHistory
             historyTransactions={this.props.historyTransactions}
