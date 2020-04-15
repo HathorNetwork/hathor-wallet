@@ -102,7 +102,7 @@ class Root extends React.Component {
   }
 
   handleWebsocket = (wsData) => {
-    if (hathorLib.wallet.loaded() && !this.props.loadingAddresses) {
+    if (hathorLib.wallet.loaded()) {
       // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
       // TODO separate those messages
       if (wsData.type === 'wallet:address_history') {
