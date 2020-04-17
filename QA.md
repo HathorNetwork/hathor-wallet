@@ -35,7 +35,7 @@
     1. Click on the 'QR Code', and copy the address to validate it really copied.
     1. Read the QRCode and validate it's the same as the written text.
     1. Download the QRCode and execute the same validation.
-    1. Send another transaction to you address but with timelock.
+    1. Send another transaction to your address but with timelock.
     1. Validate that your balance is updated but the new tokens are locked.
 
 1. **Lock/Unlock**
@@ -90,7 +90,7 @@
 
 1. **Register in the 'number' in the token bar**
     1. Unregister the token again.
-    1. Click on the blue circle on the token token bar with the number 1.
+    1. Click on the purple circle on the token token bar with the number 1.
     1. Click on the 'Show history' and see the transactions of the TST token.
     1. Click on 'Register tokens' and register it again with the copied configuration string.
 
@@ -110,14 +110,6 @@
     1. Go back to the 'Administrative Tools', click to destroy mint and select 2. You must see a message saying 'You have no more authority outputs for this token'.
     1. Go to 'About TST' tab and must see 'Can mint new tokens: No'.
 
-1. **Explorer**
-    1. Click on 'Explorer' -> 'Transactions'. And then click on the first transaction.
-    1. Copy the transaction ID and click on the 'Back' link.
-    1. Type this transaction ID on the search field and press 'Enter'. It should go to the transaction detail screen.
-    1. Go to the bottom part of the screen, click on 'Show raw transaction' and copy it.
-    1. Click on 'Explorer' -> 'Decode Tx'.
-    1. Type this raw transaction copied and click on 'Decode tx'. Check if it's the same transaction.
-
 1. **Change server**
     1. Click on the 'Wallet' navigation link, then on the settings icon and the on 'Change server'.
     1. Select one of the default servers and connect.
@@ -133,7 +125,9 @@
     1. Click on the settings icon and 'Change' link on the 'Allow notifications' option. Click to change and see that now it's 'No'.
     1. Do the same with the bug report to validate it's changing.
 
-1. **Load wallet**
+1. **Reload wallet**
+    1. Turn wifi off until the status change to 'Offline'.
+    1. Turn on wifi and check if status change to 'Online' again and the wallet reload the transactions.
     1. Click on 'Reset all data' and confirm it.
     1. Now load the wallet with the saved words. All transactions must appear normally.
 
