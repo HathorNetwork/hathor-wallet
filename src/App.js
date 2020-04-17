@@ -66,7 +66,6 @@ const mapStateToProps = (state) => {
 
 class Root extends React.Component {
   componentDidMount() {
-    hathorLib.WebSocketHandler.setup();
     hathorLib.WebSocketHandler.on('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.on('storage', this.handleWebsocketStorage);
 
@@ -180,7 +179,9 @@ class Root extends React.Component {
    * Method called when need to reload data when websocket reconnects
    */
   reloadData = (data) => {
-    wallet.reloadData();
+    if (hathorLib.wallet.loaded() && !this.props.loadingAddresses) {
+      wallet.reloadData();
+    }
   }
 
   render() {
