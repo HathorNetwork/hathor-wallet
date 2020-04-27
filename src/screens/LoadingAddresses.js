@@ -16,6 +16,7 @@ import logo from '../assets/images/hathor-logo.png';
 import { dataLoaded } from "../actions/index";
 import { connect } from "react-redux";
 import colors from '../index.scss';
+import InitialImages from '../components/InitialImages';
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -62,7 +63,7 @@ class LoadingAddresses extends React.Component {
     return (
       <div className="outside-content-wrapper">
         <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div>
+          <div className="inside-div">
             <div className="d-flex align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
               <div className="mt-5 mb-4 d-flex flex-row align-items-center">
@@ -75,6 +76,7 @@ class LoadingAddresses extends React.Component {
             <p><SpanFmt>{t`**Addresses found:** ${this.props.addressesFound}`}</SpanFmt></p>
             <p><SpanFmt>{t`**Transactions found:** ${this.props.transactionsFound}`}</SpanFmt></p>
           </div>
+          <InitialImages />
         </div>
         <RequestErrorModal {...this.props} />
       </div>
