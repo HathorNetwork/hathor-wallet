@@ -251,19 +251,18 @@ class SendTokens extends React.Component {
     promise.then(() => {
       // Must update the shared address, in case we have used one for the change
       wallet.updateSharedAddress();
-      $('#alertModal').modal('hide');
       this.setState({ loadingMessage: this.propagatingMessage }, () => {
         // Update the loading message to the user, for a better ux
         // The user now understands we are resolving the pow and propagating the tx
         setTimeout(() => {
+          $('#alertModal').modal('hide');
           this.props.history.push('/wallet/');
         }, 800);
       });
     }, (message) => {
       this.setState({ errorMessage: message, loading: false, ledgerStep: 0 });
-    }).finally(() => {
       $('#alertModal').modal('hide');
-    });
+    })
   }
 
   /**
