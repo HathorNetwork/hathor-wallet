@@ -12,6 +12,8 @@ import createRequestInstance from '../api/axiosInstance';
 import SpanFmt from './SpanFmt';
 import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
+import url from 'url';
+import wallet from '../utils/wallet';
 
 
 const mapStateToProps = (state) => {
@@ -71,15 +73,38 @@ class RequestErrorModal extends React.Component {
   }
 
   /**
+   * Check if the request error was an address history request
+   *
+   * @return {boolean} true if was address history request, false otherwise
+   */
+  isAddressHistoryRequest = () => {
+    const serverURL = hathorLib.helpers.getServerURL();
+    const addressHistoryURL = url.resolve(serverURL, 'thin_wallet/address_history');
+    if (this.props.lastFailedRequest && addressHistoryURL === this.props.lastFailedRequest.url) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * When modal is hidden and user selected to retry we get data from last request from Redux and execute again
    */
   modalHiddenRetry = () => {
-    let config = this.props.lastFailedRequest;
-    let axios = createRequestInstance(config.resolve);
-    hathorLib.helpers.fixAxiosConfig(axios, config);
-    axios(config).then((response) => {
-      config.resolve(response.data);
-    });
+    if (this.isAddressHistoryRequest()) {
+      // The address history request is different from the others, so the retry does not work
+      // it's paginated with async/await and does not use promise resolve/reject like the others
+      // We already have an issue on the lib to track this (https://github.com/HathorNetwork/hathor-wallet-lib/issues/59)
+      // So we handle here this retry manually with a reload (like the one when the connection is lost)
+      wallet.reloadData();
+    } else {
+      let config = this.props.lastFailedRequest;
+      let axios = createRequestInstance(config.resolve);
+      hathorLib.helpers.fixAxiosConfig(axios, config);
+      axios(config).then((response) => {
+        config.resolve(response.data);
+      });
+    }
     this.setState({ retry: false });
   }
 
@@ -87,10 +112,14 @@ class RequestErrorModal extends React.Component {
    * Returns the string to be shown as error message depending on the status code
    */
   getErrorMessage = () => {
-    if (this.props.requestErrorStatusCode === 503 || this.props.requestErrorStatusCode === 429) {
-      return t`Rate limit exceeded. Sorry about that. You should wait a few seconds and try again. What do you want to do?`;
+    if (this.isAddressHistoryRequest()) {
+      return t`There was an error fetching your transactions from the server.\nThis might be caused by some reasons: (i) the server may be fully loaded, or (ii) you could be having internet problems.\n\nWe advise you to wait a few seconds and retry your request.`;
     } else {
-      return t`Your request failed to reach the server. What do you want to do?`;
+      if (this.props.requestErrorStatusCode === 503 || this.props.requestErrorStatusCode === 429) {
+        return t`Rate limit exceeded. Sorry about that. You should wait a few seconds and try again. What do you want to do?`;
+      } else {
+        return t`Your request failed to reach the server. What do you want to do?`;
+      }
     }
   }
 
@@ -145,7 +174,7 @@ class RequestErrorModal extends React.Component {
               </button>
             </div>
             <div className="modal-body">
-              <p>{this.getErrorMessage()}</p>
+              <p className="white-space-pre-wrap">{this.getErrorMessage()}</p>
               <p><SpanFmt>{t`You are connected to **${serverURL}**`}</SpanFmt></p>
               <a onClick={(e) => this.showAdvanced(e)} ref="showAdvancedLink" href="true">{t`Show advanced data`}</a>
               <a onClick={(e) => this.hideAdvanced(e)} ref="hideAdvancedLink" href="true" style={{display: 'none'}}>{t`Hide advanced data`}</a>
