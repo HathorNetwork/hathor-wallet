@@ -43,12 +43,19 @@ class SendTokens extends React.Component {
     // Data pending to be sent while waiting ledger signatures
     this.pendingData = null;
 
+    // Loading message to be shown while server does not return a response
+    this.powMessage = t`Resolving proof of work of your transaction...`
+
+    // Loading message to be shown after return from the server
+    this.propagatingMessage = t`Propagating transaction to the network...`
+
     /**
      * errorMessage {string} Message to be shown in case of error in form
      * loading {boolean} If should show spinner while waiting for server response
      * pin {string} PIN that user writes in the modal
      * txTokens {Array} Array of tokens configs already added by the user (start with only hathor)
      * ledgerStep {number} When sending tx with ledger we have a step that needs user physical input, then we move to next step
+     * loadingMessage {string} Message to be shown while sending transaction
      */
     this.state = {
       errorMessage: '',
@@ -56,6 +63,7 @@ class SendTokens extends React.Component {
       pin: '',
       txTokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
       ledgerStep: 0,
+      loadingMessage: '',
     };
   }
 
@@ -210,7 +218,7 @@ class SendTokens extends React.Component {
     let data = this.getData();
     if (!data) return;
     data.tokens = hathorLib.tokens.filterTokens(this.state.txTokens, hathorLib.constants.HATHOR_TOKEN_CONFIG).map((token) => token.uid);
-    this.setState({ errorMessage: '', loading: true });
+    this.setState({ errorMessage: '', loading: true, loadingMessage: this.powMessage });
     try {
       const promise = this.executeSend(data);
       if (promise) {
@@ -243,13 +251,18 @@ class SendTokens extends React.Component {
     promise.then(() => {
       // Must update the shared address, in case we have used one for the change
       wallet.updateSharedAddress();
-      $('#alertModal').modal('hide');
-      this.props.history.push('/wallet/');
+      this.setState({ loadingMessage: this.propagatingMessage }, () => {
+        // Update the loading message to the user, for a better ux
+        // The user now understands we are resolving the pow and propagating the tx
+        setTimeout(() => {
+          $('#alertModal').modal('hide');
+          this.props.history.push('/wallet/');
+        }, 800);
+      });
     }, (message) => {
       this.setState({ errorMessage: message, loading: false, ledgerStep: 0 });
-    }).finally(() => {
       $('#alertModal').modal('hide');
-    });
+    })
   }
 
   /**
@@ -352,7 +365,7 @@ class SendTokens extends React.Component {
               <button type="button" className="btn btn-hathor" disabled={this.state.loading} onClick={this.onSendTokensClicked}>{t`Send Tokens`}</button>
             </div>
           </form>
-          <p className="text-danger mt-3">{this.state.errorMessage}</p>
+          <p className="text-danger mt-3 white-space-pre-wrap">{this.state.errorMessage}</p>
         </div>
       );
     }
@@ -360,7 +373,7 @@ class SendTokens extends React.Component {
     const isLoading = () => {
       return (
         <div className="d-flex flex-row">
-          <p className="mr-3">{t`Please, wait while we solve the proof of work and propagate the transaction`}</p>
+          <p className="mr-3">{this.state.loadingMessage}</p>
           <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
         </div>
       )
