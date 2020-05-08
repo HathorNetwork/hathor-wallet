@@ -279,7 +279,9 @@ const returnStartedRoute = (Component, props, rest) => {
       }
     } else {
       if (rest.loaded) {
-        return <Redirect to={{pathname: '/wallet_type/'}} />;
+        // When the wallet is opened, the path that is called is '/', which currenctly redirects to the Wallet component
+        // in that case, if the wallet is not loaded but it's started, it should redirect to the signin/wallet type screen
+        return <Redirect to={{pathname: '/signin/'}} />;
       } else {
         return <Component {...props} />;
       }

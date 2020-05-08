@@ -10,11 +10,13 @@
     1. Unlock it and check that you transactions were loaded with correct balance (it's ok if there are no transactions).
     1. You may now reset your wallet.
 
-1. **Initialization**
+1. **Initialization (you must be on Welcome screen)**
+    1. Close and open your wallet. You must still be on the Welcome screen.
     1. Try to click 'Get started' without selecting checkbox (must show error).
     1. Choose Software Wallet.
     1. Start new wallet.
     1. Try to click 'Create my words' without selecting checkbox (must show error).
+    1. Close and open your wallet. You must see the screen to select 'New wallet' or 'Import wallet'. Select 'new wallet' and then 'create my words'.
     1. Select to do backup now. (Really save those words, we will load this wallet later with them).
     1. Click 'Validate' before selecting all the words, you must see an error message on the screen.
     1. Click 'Validate' with all words selected but in the wrong order, you must see an error message on the screen.
