@@ -33,11 +33,15 @@ class TokenDelegate extends React.Component {
    *
    * @return {Object} Object with promise and success message
    */
-  executeDelegate = (pin) => {
+  prepareSendTransaction = (pin) => {
     const output = this.props.authorityOutputs[0];
     const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
-    const promise = hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.props.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, type.toLowerCase(), pin);
-    return { promise, message: t`${type} output delegated!`};
+    return hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.props.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, type.toLowerCase(), pin);
+  }
+
+  getSuccessMessage = () => {
+    const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
+    return t`${type} output delegated!`;
   }
 
   render() {
@@ -66,7 +70,17 @@ class TokenDelegate extends React.Component {
 
     const title = `Delegate ${this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`}`;
 
-    return <TokenAction renderForm={renderForm} title={title} buttonName='Delegate' onPinSuccess={this.executeDelegate} {...this.props} />
+    return (
+      <TokenAction
+        renderForm={renderForm}
+        title={title}
+        buttonName={t`Delegate`}
+        getSuccessMessage={this.getSuccessMessage}
+        prepareSendTransaction={this.prepareSendTransaction}
+        modalTitle={t`Delegating authority`}
+        {...this.props}
+      />
+    );
   }
 }
 

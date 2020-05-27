@@ -26,6 +26,10 @@ class TokenMelt extends React.Component {
     this.createAnother = React.createRef();
   }
 
+  getAmountValue = () => {
+    return this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
+  }
+
   /**
    * Execute melt method after form validation
    *
@@ -33,22 +37,21 @@ class TokenMelt extends React.Component {
    *
    * @return {Object} Object with promise (can be null in case of error) and message (success or error message)
    */
-  executeMelt = (pin) => {
-    const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
+  prepareSendTransaction = (pin) => {
+    const amountValue = this.getAmountValue();
     const output = this.props.meltOutputs[0];
-    const promise = hathorLib.tokens.meltTokens(
+    return hathorLib.tokens.meltTokens(
       {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
       this.props.token.uid,
       amountValue,
       pin,
       this.createAnother.current.checked
     );
-    if (promise === null) {
-      return { promise: null, message: t`Can't find outputs to melt the amount requested.` };
-    } else {
-      const prettyAmountValue = hathorLib.helpers.prettyValue(amountValue);
-      return { promise, message: t`${prettyAmountValue} ${this.props.token.symbol} melted!` };
-    }
+  }
+
+  getSuccessMessage = () => {
+    const prettyAmountValue = hathorLib.helpers.prettyValue(this.getAmountValue());
+    return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;
   }
 
   /**
@@ -88,7 +91,18 @@ class TokenMelt extends React.Component {
       )
     }
 
-    return <TokenAction renderForm={renderForm} title={t`Melt tokens`} buttonName={t`Go`} validateForm={this.melt} onPinSuccess={this.executeMelt} {...this.props} />
+    return (
+      <TokenAction
+        renderForm={renderForm}
+        title={t`Melt tokens`}
+        buttonName={t`Go`}
+        validateForm={this.melt}
+        getSuccessMessage={this.getSuccessMessage}
+        prepareSendTransaction={this.prepareSendTransaction}
+        modalTitle={t`Melting tokens`}
+        {...this.props}
+      />
+    );
   }
 }
 

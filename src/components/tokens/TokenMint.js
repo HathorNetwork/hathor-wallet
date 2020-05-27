@@ -37,6 +37,10 @@ class TokenMint extends React.Component {
     this.state = { amount: null };
   }
 
+  getAmountValue = () => {
+    return this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
+  }
+
   /**
    * Execute mint method after form validation
    *
@@ -44,11 +48,11 @@ class TokenMint extends React.Component {
    *
    * @return {Object} Object with promise and success message to be shown
    */
-  executeMint = (pin) => {
-    const amountValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
+  prepareSendTransaction = (pin) => {
+    const amountValue = this.getAmountValue();
     const output = this.props.mintOutputs[0];
     const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
-    const promise = hathorLib.tokens.mintTokens(
+    return hathorLib.tokens.mintTokens(
       {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
       this.props.token.uid,
       address,
@@ -59,8 +63,11 @@ class TokenMint extends React.Component {
         createAnotherMint: this.createAnother.current.checked
       }
     );
-    const prettyAmountValue = hathorLib.helpers.prettyValue(amountValue);
-    return { promise, message: t`${prettyAmountValue} ${this.props.token.symbol} minted!` };
+  }
+
+  getSuccessMessage = () => {
+    const prettyAmountValue = hathorLib.helpers.prettyValue(this.getAmountValue());
+    return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;
   }
 
   /**
@@ -150,12 +157,14 @@ class TokenMint extends React.Component {
     return (
       <TokenAction
        renderForm={renderForm}
-       title='Mint tokens'
+       title={t`Mint tokens`}
        subtitle={`A deposit of ${hathorLib.tokens.getDepositPercentage() * 100}% in HTR of the mint amount is required`}
        deposit={`Deposit: ${tokens.getDepositAmount(this.state.amount)} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
-       buttonName='Go'
+       buttonName={t`Go`}
        validateForm={this.mint}
-       onPinSuccess={this.executeMint}
+       getSuccessMessage={this.getSuccessMessage}
+       prepareSendTransaction={this.prepareSendTransaction}
+       modalTitle={t`Minting tokens`}
        {...this.props}
       />
     )
