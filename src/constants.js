@@ -81,6 +81,7 @@ export const SENTRY_DSN = process.env.SENTRY_DSN || 'https://69c067d1587c465cac8
  * Server options for the user to choose which one to connect
  */
 export const DEFAULT_SERVERS = [
+  'http://localhost:8083/v1a/',
   'https://node1.mainnet.hathor.network/v1a/',
   'https://node2.mainnet.hathor.network/v1a/',
 ];
@@ -101,6 +102,11 @@ export const EXPLORER_BASE_URL = "https://explorer.hathor.network";
 export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
 
 export const HATHOR_WEBSITE_URL = "https://hathor.network/";
+
+/**
+ * Minimum job estimation to show to the user in seconds when mining a tx
+ */
+export const MIN_JOB_ESTIMATION = 1;
 
 let ipcRenderer = null;
 
