@@ -14,7 +14,7 @@ import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import ReactLoading from 'react-loading';
 import SpanFmt from '../components/SpanFmt';
-import ModalPin from '../components/ModalPin';
+import ModalSendTx from '../components/ModalSendTx';
 import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
@@ -51,7 +51,6 @@ class CreateToken extends React.Component {
     /**
      * errorMessage {string} Message to show when error happens on the form
      * loading {boolean} While waiting for server response, loading is true and show a spinner
-     * pin {string} PIN that user writes in the modal
      * name {string} Name of the created token
      * configurationString {string} Configuration string of the created token
      * amount {number} Amount of tokens to create
@@ -59,20 +58,10 @@ class CreateToken extends React.Component {
     this.state = {
       errorMessage: '',
       loading: false,
-      pin: '',
       name: '',
       configurationString: '',
       amount: null,
     };
-  }
-
-  /**
-   * Method used to save what user wrote on PIN input in the modal
-   *
-   * @param {Object} e Event for the PIN input change
-   */
-  handleChangePin = (e) => {
-    this.setState({ pin: e.target.value });
   }
 
   /**
@@ -102,12 +91,16 @@ class CreateToken extends React.Component {
   /**
    * Executes tokens creation. Runs after user entered pin on the pin modal
    */
-  createToken = () => {
-    $('#pinModal').modal('hide');
+  onClickCreate = () => {
     if (!this.formValid()) {
       return;
     }
-    this.setState({ errorMessage: '', loading: true });
+
+    this.setState({ errorMessage: '' });
+    $('#pinModal').modal('show');
+  }
+
+  prepareSendTransaction = (pin) => {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
@@ -116,22 +109,33 @@ class CreateToken extends React.Component {
       address = this.refs.address.value;
     }
 
-    const retPromise = hathorLib.tokens.createToken(
+    const sendTransaction = hathorLib.tokens.createToken(
       address,
       this.refs.shortName.value,
       this.refs.symbol.value,
       wallet.decimalToInteger(this.state.amount),
-      this.state.pin
+      pin
     );
-    retPromise.then((token) => {
+
+    return sendTransaction;
+  }
+
+  onTokenCreated = (response) => {
+    if (response.success) {
+      const token = {
+        uid: response.tx.hash,
+        name: this.refs.shortName.value,
+        symbol: this.refs.symbol.value
+      };
+
       // Update redux with added token
       tokens.saveTokenRedux(token.uid);
       // Must update the shared address, in case we have used one for the change
       wallet.updateSharedAddress();
       this.showAlert(token);
-    }, (e) => {
-      this.setState({ loading: false, errorMessage: e.message });
-    });
+    } else {
+      this.setState({ loading: false, errorMessage: response.message });
+    }
   }
 
   /**
@@ -280,11 +284,11 @@ class CreateToken extends React.Component {
             </div>
           </div>
           <p>Deposit: {tokens.getDepositAmount(this.state.amount)} HTR ({hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)</p>
-          <button type="button" disabled={this.state.loading} className="mt-3 btn btn-hathor" data-toggle="modal" data-target="#pinModal">Create</button>
+          <button type="button" disabled={this.state.loading} className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
         {this.state.loading ? isLoading() : null}
-        <ModalPin execute={this.createToken} handleChangePin={this.handleChangePin} />
+        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onTxSent={this.onTokenCreated} title="Creating token" />
         <ModalAlert title={t`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
       </div>
     );
