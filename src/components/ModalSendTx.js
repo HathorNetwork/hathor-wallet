@@ -35,6 +35,9 @@ class ModalSendTx extends React.Component {
     loading: false,
   }
 
+  // SendTransaction object to handle send events
+  sendTransaction = null;
+
   // Tx send data, if succeeded
   tx = null;
 
@@ -85,10 +88,10 @@ class ModalSendTx extends React.Component {
       if (hathorLib.wallet.isPinCorrect(pin)) {
         $('#pinModal').data('bs.modal')._config.backdrop = 'static';
         $('#pinModal').data('bs.modal')._config.keyboard = false;
-        const sendTransaction = this.props.prepareSendTransaction(pin);
-        if (sendTransaction) {
+        this.sendTransaction = this.props.prepareSendTransaction(pin);
+        if (this.sendTransaction) {
           // Show send tx handler component and start sending
-          this.setState({ step: 1, loading: true, sendTransaction });
+          this.setState({ step: 1, loading: true });
         } else {
           // Close modal and show error
           $('#pinModal').modal('hide');
@@ -148,7 +151,7 @@ class ModalSendTx extends React.Component {
         );
       } else {
         return <SendTxHandler
-                sendTransaction={this.state.sendTransaction}
+                sendTransaction={this.sendTransaction}
                 onSendSuccess={this.onSendSuccess}
                 onSendError={this.onSendError} />
       }
