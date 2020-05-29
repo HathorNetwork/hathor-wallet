@@ -37,16 +37,21 @@ class TokenMint extends React.Component {
     this.state = { amount: null };
   }
 
+  /**
+   * Return the amount value to be minted
+   */
   getAmountValue = () => {
     return this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
   }
 
   /**
-   * Execute mint method after form validation
+   * Prepare transaction to execute mint method after form validation
    *
    * @param {string} pin PIN user wrote on modal
    *
-   * @return {Object} Object with promise and success message to be shown
+   * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
+   * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
+   * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = (pin) => {
     const amountValue = this.getAmountValue();
@@ -65,6 +70,9 @@ class TokenMint extends React.Component {
     );
   }
 
+  /**
+   * Return a message to be shown in case of success
+   */
   getSuccessMessage = () => {
     const prettyAmountValue = hathorLib.helpers.prettyValue(this.getAmountValue());
     return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;

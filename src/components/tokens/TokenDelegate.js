@@ -27,11 +27,13 @@ class TokenDelegate extends React.Component {
   }
 
   /**
-   * Execute the delegate of outputs
+   * Prepare transaction to execute the delegate of outputs
    *
    * @param {string} pin PIN user wrote on modal
    *
-   * @return {Object} Object with promise and success message
+   * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
+   * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
+   * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = (pin) => {
     const output = this.props.authorityOutputs[0];
@@ -39,6 +41,9 @@ class TokenDelegate extends React.Component {
     return hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.props.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, type.toLowerCase(), pin);
   }
 
+  /**
+   * Return a message to be shown in case of success
+   */
   getSuccessMessage = () => {
     const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
     return t`${type} output delegated!`;

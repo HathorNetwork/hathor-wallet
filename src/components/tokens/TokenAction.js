@@ -89,8 +89,9 @@ class TokenAction extends React.Component {
   }
 
   /**
-   * Method executed after user writes the PIN on the modal.
-   * It closes the modal, update the state to loading and execute the action requested.
+   * Method executed when transaction is sent and the action is done
+   *
+   * @param {Object} tx Transaction data object
    */
   onSendSuccess = (tx) => {
     const successMessage = this.props.getSuccessMessage();
@@ -98,10 +99,22 @@ class TokenAction extends React.Component {
     this.props.showSuccess(successMessage);
   }
 
+  /**
+   * Method executed when there is an error sending the action transaction
+   *
+   * @param {String} message Error message
+   */
   onSendError = (message) => {
     this.setState({ errorMessage: message, loading: false });
   }
 
+  /**
+   * Method executed after PIN is written
+   * If success when preparing the tx, return the send tx object
+   * Otherwise, show error message
+   *
+   * @param {String} pin PIN written by the user
+   */
   onPrepareSendTransaction = (pin) => {
     const ret = this.props.prepareSendTransaction(pin);
 

@@ -12,7 +12,6 @@ import { str2jsx } from '../utils/i18n';
 
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
-import ReactLoading from 'react-loading';
 import SpanFmt from '../components/SpanFmt';
 import ModalSendTx from '../components/ModalSendTx';
 import ModalAlert from '../components/ModalAlert';
@@ -50,14 +49,12 @@ class CreateToken extends React.Component {
 
     /**
      * errorMessage {string} Message to show when error happens on the form
-     * loading {boolean} While waiting for server response, loading is true and show a spinner
      * name {string} Name of the created token
      * configurationString {string} Configuration string of the created token
      * amount {number} Amount of tokens to create
      */
     this.state = {
       errorMessage: '',
-      loading: false,
       name: '',
       configurationString: '',
       amount: null,
@@ -89,7 +86,7 @@ class CreateToken extends React.Component {
   }
 
   /**
-   * Executes tokens creation. Runs after user entered pin on the pin modal
+   * Opens PIN modal if form is valid
    */
   onClickCreate = () => {
     if (!this.formValid()) {
@@ -100,6 +97,13 @@ class CreateToken extends React.Component {
     $('#pinModal').modal('show');
   }
 
+  /**
+   * Prepare create token transaction data after PIN is validated
+   *
+   * @param {String} pin PIN written
+   *
+   * @return {hathorLib.SendTransaction} SendTransaction object
+   */
   prepareSendTransaction = (pin) => {
     // Get the address to send the created tokens
     let address = '';
@@ -122,9 +126,13 @@ class CreateToken extends React.Component {
     } else {
       this.setState({ errorMessage: ret.message });
     }
-
   }
 
+  /**
+   * Method executed if token is created with success
+   *
+   * @param {Object} tx Create token transaction data
+   */
   onTokenCreateSuccess = (tx) => {
     const token = {
       uid: tx.hash,
@@ -139,9 +147,6 @@ class CreateToken extends React.Component {
     this.showAlert(token);
   }
 
-  onTokenCreateError = (message) => {
-    this.setState({ loading: false });
-  }
 
   /**
    * Method called after creating a token, then show an alert with explanation of the token
@@ -159,7 +164,6 @@ class CreateToken extends React.Component {
    */
   alertButtonClick = () => {
     $('#alertModal').on('hidden.bs.modal', (e) => {
-      this.setState({ loading: false });
       this.props.history.push('/wallet/');
     });
     $('#alertModal').modal('hide');
@@ -211,15 +215,6 @@ class CreateToken extends React.Component {
   }
 
   render = () => {
-    const isLoading = () => {
-      return (
-        <div className="d-flex flex-row">
-          <p className="mr-3">{t`Please, wait while we create your token`}</p>
-          <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
-        </div>
-      )
-    }
-
     const getAlertBody = () => {
       return (
         <div>
@@ -289,11 +284,10 @@ class CreateToken extends React.Component {
             </div>
           </div>
           <p>Deposit: {tokens.getDepositAmount(this.state.amount)} HTR ({hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)</p>
-          <button type="button" disabled={this.state.loading} className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
+          <button type="button" className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
-        {this.state.loading ? isLoading() : null}
-        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onTokenCreateSuccess} onSendError={this.onTokenCreateError} title="Creating token" />
+        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onTokenCreateSuccess} title="Creating token" />
         <ModalAlert title={t`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
       </div>
     );

@@ -8,11 +8,12 @@
 import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
-import { LedgerError } from '../utils/ledger';
-import { MIN_JOB_ESTIMATION, MIN_POLL, IPC_RENDERER } from '../constants';
+import { MIN_JOB_ESTIMATION } from '../constants';
+import PropTypes from 'prop-types';
 
 
 /**
+ * Component responsible for managing the tx mining and propagation
  *
  * @memberof Components
  */
@@ -27,7 +28,9 @@ class SendTxHandler extends React.Component {
   successMessage = t`Your transaction was sent successfully!`
 
   /**
-   * errorMessage {string} Message to be shown to the user in case of error in the form
+   * miningEstimation {Number} Estimated seconds to complete the job
+   * jobID {String} Mining job ID
+   * loadingMessage {string} Message to be shown to the user while executing the requests
    */
   state = {
     miningEstimation: null,
@@ -36,10 +39,15 @@ class SendTxHandler extends React.Component {
   }
 
   componentDidMount = () => {
+    // Start listening for events
     this.addSendTxEventHandlers();
+    // Start sendTransaction object (submit job)
     this.props.sendTransaction.start();
   }
 
+  /**
+   * Create event listeners for all sendTransaction events
+   */
   addSendTxEventHandlers = () => {
     this.props.sendTransaction.on('job-submitted', this.updateEstimation);
     this.props.sendTransaction.on('estimation-updated', this.updateEstimation);
@@ -48,6 +56,11 @@ class SendTxHandler extends React.Component {
     this.props.sendTransaction.on('send-error', this.sendError);
   }
 
+  /**
+   * Method executed after the tx send succeeds
+   *
+   * @param {Object} tx Transaction data
+   */
   sendSuccess = (tx) => {
     this.setState({ loadingMessage: this.successMessage });
     if (this.props.onSendSuccess) {
@@ -55,6 +68,11 @@ class SendTxHandler extends React.Component {
     }
   }
 
+  /**
+   * Method executed after the tx send fails
+   *
+   * @param {String} message Error message
+   */
   sendError = (message) => {
     this.setState({ errorMessage: `Error: ${message}`});
     if (this.props.onSendError) {
@@ -62,10 +80,21 @@ class SendTxHandler extends React.Component {
     }
   }
 
+  /**
+   * Method executed after the mining job is done
+   *
+   * @param {Object} data Object with jobID
+   */
   jobDone = (data) => {
     this.setState({ miningEstimation: null, loadingMessage: this.propagatingMessage });
   }
 
+  /**
+   * Method executed when the estimation-updated event is received
+   * Update the state with the new estimation
+   *
+   * @param {Object} data Object with jobID and estimation
+   */
   updateEstimation = (data) => {
     this.setState({ miningEstimation: data.estimation });
   }
@@ -94,5 +123,16 @@ class SendTxHandler extends React.Component {
     return renderBody();
   }
 }
+
+/*
+ * sendTransaction: lib object that handles the mining/propagation requests and emit events
+ * onSendSuccess: optional method to be executed when the tx is mined and propagated with success
+ * onSendError: optional method to be executed when an error happens while sending the tx
+ */
+SendTxHandler.propTypes = {
+  sendTransaction: PropTypes.instanceOf(hathorLib.SendTransaction).isRequired,
+  onSendSuccess: PropTypes.func,
+  onSendError: PropTypes.func,
+};
 
 export default SendTxHandler;

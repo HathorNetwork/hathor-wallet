@@ -26,16 +26,21 @@ class TokenMelt extends React.Component {
     this.createAnother = React.createRef();
   }
 
+  /**
+   * Return the amount value to be melted
+   */
   getAmountValue = () => {
     return this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
   }
 
   /**
-   * Execute melt method after form validation
+   * Prepare transaction to execute melt method after form validation
    *
    * @param {string} pin PIN user wrote on modal
    *
-   * @return {Object} Object with promise (can be null in case of error) and message (success or error message)
+   * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
+   * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
+   * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = (pin) => {
     const amountValue = this.getAmountValue();
@@ -49,6 +54,9 @@ class TokenMelt extends React.Component {
     );
   }
 
+  /**
+   * Return a message to be shown in case of success
+   */
   getSuccessMessage = () => {
     const prettyAmountValue = hathorLib.helpers.prettyValue(this.getAmountValue());
     return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;

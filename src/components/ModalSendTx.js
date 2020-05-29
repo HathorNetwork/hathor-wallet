@@ -24,25 +24,34 @@ import colors from '../index.scss';
 class ModalSendTx extends React.Component {
   /**
    * errorMessage {string} Message to be shown to the user in case of error in the form
+   * step {Number} 0 if asking PIN and 1 if sending tx
+   * loading {Boolean} If it's executing a sending tx request
+   * errorMessage {string} Message to be shown to the user in case of error in the form
+   * errorMessage {string} Message to be shown to the user in case of error in the form
    */
   state = {
     errorMessage: '',
     step: 0,
     loading: false,
-    tx: null,
-    sendErrorMessage: '',
-    pin: '',
   }
+
+  // Tx send data, if succeeded
+  tx = null;
+
+  // Error message when sending
+  sendErrorMessage = '';
 
   componentDidMount = () => {
     $('#pinModal').on('hidden.bs.modal', (e) => {
-      if (this.state.tx && this.props.onSendSuccess) {
-        this.props.onSendSuccess(this.state.tx);
+      if (this.tx && this.props.onSendSuccess) {
+        // If succeeded to send tx and has method to execute
+        this.props.onSendSuccess(this.tx);
         return;
       }
 
-      if (this.state.sendErrorMessage && this.props.onSendError) {
-        this.props.onSendError(this.state.sendErrorMessage);
+      if (this.sendErrorMessage && this.props.onSendError) {
+        // If had an error sending and have an error method
+        this.props.onSendError(this.sendErrorMessage);
         return;
       }
 
@@ -90,16 +99,31 @@ class ModalSendTx extends React.Component {
     }
   }
 
+  /**
+   * Executed when used clicked ok after tx is sent (or an error happened)
+   */
   onClickOk = () => {
     $('#pinModal').modal('hide');
   }
 
+  /**
+   * Executed when tx was sent with success
+   *
+   * @param {Object} tx Transaction data
+   */
   onSendSuccess = (tx) => {
-    this.setState({ loading: false, tx });
+    this.tx = tx;
+    this.setState({ loading: false });
   }
 
+  /**
+   * Executed when there is an error while sending the tx
+   *
+   * @param {String} message Error message
+   */
   onSendError = (message) => {
-    this.setState({ loading: false, sendErrorMessage: message });
+    this.sendErrorMessage = message;
+    this.setState({ loading: false });
   }
 
   render() {

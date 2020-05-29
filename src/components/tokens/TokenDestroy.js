@@ -26,11 +26,13 @@ class TokenDestroy extends React.Component {
   }
 
   /**
-   * Execute destroy method
+   * Prepare transaction to execute the destroy method
    *
    * @param {string} pin PIN user wrote on modal
    *
-   * @return {Object} Object with promise and success message
+   * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
+   * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
+   * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = (pin) => {
     const array = this.props.authorityOutputs;
@@ -47,6 +49,9 @@ class TokenDestroy extends React.Component {
     return hathorLib.tokens.destroyAuthority(data, pin);
   }
 
+  /**
+   * Return a message to be shown in case of success
+   */
   getSuccessMessage = () => {
     const label = this.props.action === 'destroy-mint' ? t`Mint` : t`Melt`;
     return t`${label} outputs destroyed!`;

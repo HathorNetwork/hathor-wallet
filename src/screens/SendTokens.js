@@ -17,7 +17,7 @@ import wallet from '../utils/wallet';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import ModalAlert from '../components/ModalAlert';
 import ledger, { LedgerError } from '../utils/ledger';
-import { MIN_JOB_ESTIMATION, MIN_POLL, IPC_RENDERER } from '../constants';
+import { IPC_RENDERER } from '../constants';
 
 
 const mapStateToProps = (state) => {
@@ -41,18 +41,16 @@ class SendTokens extends React.Component {
     // Data pending to be sent while waiting ledger signatures
     this.pendingData = null;
 
-    // Save prepared data while tx is being mined, so we can update with nonce and parents later
+    // Partial data while waiting tx mining to add nonce and parents
     this.data = null;
 
     /**
      * errorMessage {string} Message to be shown in case of error in form
-     * pin {string} PIN that user writes in the modal
      * txTokens {Array} Array of tokens configs already added by the user (start with only hathor)
      * ledgerStep {number} When sending tx with ledger we have a step that needs user physical input, then we move to next step
      */
     this.state = {
       errorMessage: '',
-      pin: '',
       txTokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
       ledgerStep: 0,
       data: null,
@@ -150,6 +148,7 @@ class SendTokens extends React.Component {
     }
     try {
       // Prepare data and submit job to tx mining API
+      // TODO Refactor ledger send
       this.data = hathorLib.transaction.prepareData(data, null, {getSignature: false, completeTx: false});
       this.handleJobSubmit();
     } catch(e) {
@@ -166,6 +165,11 @@ class SendTokens extends React.Component {
     ledger.getSignatures(Object.assign({}, this.pendingData), keys);
   }
 
+  /**
+   * Method executed when tx is sent with success
+   *
+   * @param {Object} tx Transaction sent data
+   */
   onSendSuccess = (tx) => {
     $('#alertModal').modal('hide');
     // Must update the shared address, in case we have used one for the change
@@ -173,12 +177,23 @@ class SendTokens extends React.Component {
     this.props.history.push('/wallet/');
   }
 
+  /**
+   * Method executed when there is an error sending the tx
+   *
+   * @param {String} message Error message
+   */
   onSendError = (message) => {
     $('#alertModal').modal('hide');
     this.setState({ errorMessage: '', loading: false, ledgerStep: 0 });
   }
 
-  showLedgerModal = () => {
+  /**
+   * Method executed to send transaction on ledger
+   * It opens the ledger modal to wait for user action on the device
+   *
+   * @param {Object} data Transaction data
+   */
+  executeSendLedger = (data) => {
     // Complete data with default values
     hathorLib.transaction.completeTx(data);
 
@@ -210,20 +225,26 @@ class SendTokens extends React.Component {
     this.setState({ errorMessage: '' });
     try {
       if (hathorLib.wallet.isSoftwareWallet()) {
-        this.setState({ data }, () => {
-          $('#pinModal').modal('show');
-        });
+        this.data = data;
+        $('#pinModal').modal('show');
       } else {
-        this.executeSend(data);
+        this.executeSendLedger(data);
       }
     } catch(e) {
       this.handleSendError(e);
     }
   }
 
+  /**
+   * Prepare data before sending tx to be mined and after user writes PIN
+   *
+   * @param {String} pin PIN written by the user
+   *
+   * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
+   */
   prepareSendTransaction = (pin) => {
     try {
-      const data = hathorLib.transaction.prepareData(this.state.data, pin);
+      const data = hathorLib.transaction.prepareData(this.data, pin);
       return new hathorLib.SendTransaction({data});
     } catch(e) {
       this.handleSendError(e);
