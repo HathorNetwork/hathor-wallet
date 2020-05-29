@@ -166,15 +166,16 @@ class SendTokens extends React.Component {
     ledger.getSignatures(Object.assign({}, this.pendingData), keys);
   }
 
-  onTxSent = (response) => {
+  onSendSuccess = (tx) => {
     $('#alertModal').modal('hide');
-    if (response.success) {
-      // Must update the shared address, in case we have used one for the change
-      wallet.updateSharedAddress();
-      this.props.history.push('/wallet/');
-    } else {
-      this.setState({ errorMessage: response.message, loading: false, ledgerStep: 0 });
-    }
+    // Must update the shared address, in case we have used one for the change
+    wallet.updateSharedAddress();
+    this.props.history.push('/wallet/');
+  }
+
+  onSendError = (message) => {
+    $('#alertModal').modal('hide');
+    this.setState({ errorMessage: '', loading: false, ledgerStep: 0 });
   }
 
   showLedgerModal = () => {
@@ -359,7 +360,7 @@ class SendTokens extends React.Component {
         <BackButton {...this.props} />
         <h3 className="mt-4 mb-4">{t`Send Tokens`}</h3>
         {renderPage()}
-        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onTxSent={this.onTxSent} title={t`Sending transaction`} />
+        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} title={t`Sending transaction`} />
         <ModalAlertNotSupported />
         <ModalAlert title={t`Validate outputs on Ledger`} showFooter={false} body={renderAlertBody()} />
       </div>

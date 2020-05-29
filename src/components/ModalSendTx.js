@@ -29,19 +29,26 @@ class ModalSendTx extends React.Component {
     errorMessage: '',
     step: 0,
     loading: false,
-    response: null,
+    tx: null,
+    sendErrorMessage: '',
     pin: '',
   }
 
   componentDidMount = () => {
     $('#pinModal').on('hidden.bs.modal', (e) => {
-      if (this.state.response && this.state.response.success) {
-        this.props.onTxSent(this.state.response);
-      } else {
-        this.setState({ errorMessage: '', step: 0 }, () => {
-          this.refs.pinInput.refs.pin.value = '';
-        });
+      if (this.state.tx && this.props.onSendSuccess) {
+        this.props.onSendSuccess(this.state.tx);
+        return;
       }
+
+      if (this.state.sendErrorMessage && this.props.onSendError) {
+        this.props.onSendError(this.state.sendErrorMessage);
+        return;
+      }
+
+      this.setState({ errorMessage: '', step: 0 }, () => {
+        this.refs.pinInput.refs.pin.value = '';
+      });
     })
 
     $('#pinModal').on('shown.bs.modal', (e) => {
@@ -87,8 +94,12 @@ class ModalSendTx extends React.Component {
     $('#pinModal').modal('hide');
   }
 
-  onTxSent = (response) => {
-    this.setState({ loading: false, response });
+  onSendSuccess = (tx) => {
+    this.setState({ loading: false, tx });
+  }
+
+  onSendError = (message) => {
+    this.setState({ loading: false, sendErrorMessage: message });
   }
 
   render() {
@@ -112,7 +123,10 @@ class ModalSendTx extends React.Component {
           </div>
         );
       } else {
-        return <SendTxHandler sendTransaction={this.state.sendTransaction} onTxSent={this.onTxSent} />
+        return <SendTxHandler
+                sendTransaction={this.state.sendTransaction}
+                onSendSuccess={this.onSendSuccess}
+                onSendError={this.onSendError} />
       }
     }
 

@@ -109,7 +109,7 @@ class CreateToken extends React.Component {
       address = this.refs.address.value;
     }
 
-    const sendTransaction = hathorLib.tokens.createToken(
+    const ret = hathorLib.tokens.createToken(
       address,
       this.refs.shortName.value,
       this.refs.symbol.value,
@@ -117,25 +117,30 @@ class CreateToken extends React.Component {
       pin
     );
 
-    return sendTransaction;
+    if (ret.success) {
+      return ret.sendTransaction;
+    } else {
+      this.setState({ errorMessage: ret.message });
+    }
+
   }
 
-  onTokenCreated = (response) => {
-    if (response.success) {
-      const token = {
-        uid: response.tx.hash,
-        name: this.refs.shortName.value,
-        symbol: this.refs.symbol.value
-      };
+  onTokenCreateSuccess = (tx) => {
+    const token = {
+      uid: tx.hash,
+      name: this.refs.shortName.value,
+      symbol: this.refs.symbol.value
+    };
 
-      // Update redux with added token
-      tokens.saveTokenRedux(token.uid);
-      // Must update the shared address, in case we have used one for the change
-      wallet.updateSharedAddress();
-      this.showAlert(token);
-    } else {
-      this.setState({ loading: false, errorMessage: response.message });
-    }
+    // Update redux with added token
+    tokens.saveTokenRedux(token.uid);
+    // Must update the shared address, in case we have used one for the change
+    wallet.updateSharedAddress();
+    this.showAlert(token);
+  }
+
+  onTokenCreateError = (message) => {
+    this.setState({ loading: false });
   }
 
   /**
@@ -288,7 +293,7 @@ class CreateToken extends React.Component {
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
         {this.state.loading ? isLoading() : null}
-        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onTxSent={this.onTokenCreated} title="Creating token" />
+        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onTokenCreateSuccess} onSendError={this.onTokenCreateError} title="Creating token" />
         <ModalAlert title={t`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
       </div>
     );

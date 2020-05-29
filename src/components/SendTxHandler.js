@@ -44,16 +44,22 @@ class SendTxHandler extends React.Component {
     this.props.sendTransaction.on('job-submitted', this.updateEstimation);
     this.props.sendTransaction.on('estimation-updated', this.updateEstimation);
     this.props.sendTransaction.on('job-done', this.jobDone);
-    this.props.sendTransaction.on('tx-sent', this.txSent);
+    this.props.sendTransaction.on('send-success', this.sendSuccess);
+    this.props.sendTransaction.on('send-error', this.sendError);
   }
 
-  txSent = (response) => {
-    if (response.success) {
-      this.setState({ loadingMessage: this.successMessage });
-    } else {
-      this.setState({ errorMessage: `Error: ${response.message}`});
+  sendSuccess = (tx) => {
+    this.setState({ loadingMessage: this.successMessage });
+    if (this.props.onSendSuccess) {
+      this.props.onSendSuccess(tx);
     }
-    this.props.onTxSent(response);
+  }
+
+  sendError = (message) => {
+    this.setState({ errorMessage: `Error: ${message}`});
+    if (this.props.onSendError) {
+      this.props.onSendError(message);
+    }
   }
 
   jobDone = (data) => {

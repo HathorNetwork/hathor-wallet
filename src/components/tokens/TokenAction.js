@@ -92,13 +92,23 @@ class TokenAction extends React.Component {
    * Method executed after user writes the PIN on the modal.
    * It closes the modal, update the state to loading and execute the action requested.
    */
-  onTxSent = (response) => {
-    if (response.success) {
-      const successMessage = this.props.getSuccessMessage();
-      this.props.cancelAction();
-      this.props.showSuccess(successMessage);
+  onSendSuccess = (tx) => {
+    const successMessage = this.props.getSuccessMessage();
+    this.props.cancelAction();
+    this.props.showSuccess(successMessage);
+  }
+
+  onSendError = (message) => {
+    this.setState({ errorMessage: message, loading: false });
+  }
+
+  onPrepareSendTransaction = (pin) => {
+    const ret = this.props.prepareSendTransaction(pin);
+
+    if (ret.success) {
+      return ret.sendTransaction;
     } else {
-      this.setState({ errorMessage: response.message, loading: false });
+      this.onSendError(ret.message);
     }
   }
 
@@ -125,7 +135,13 @@ class TokenAction extends React.Component {
           {this.props.renderForm()}
         </form>
         {renderButtons(this.props.validateForm, this.props.buttonName)}
-        <ModalSendTx title={this.props.modalTitle} prepareSendTransaction={this.props.prepareSendTransaction} onTxSent={this.onTxSent} bodyTop={this.props.pinBodyTop} />
+        <ModalSendTx
+         title={this.props.modalTitle}
+         prepareSendTransaction={this.onPrepareSendTransaction}
+         onSendSuccess={this.onSendSuccess}
+         onSendError={this.onSendError}
+         bodyTop={this.props.pinBodyTop}
+        />
       </div>
     )
   }
