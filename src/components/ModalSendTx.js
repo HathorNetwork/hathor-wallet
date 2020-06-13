@@ -55,6 +55,7 @@ class ModalSendTx extends React.Component {
       if (this.sendErrorMessage && this.props.onSendError) {
         // If had an error sending and have an error method
         this.props.onSendError(this.sendErrorMessage);
+        this.setState({ step: 0 });
         return;
       }
 
