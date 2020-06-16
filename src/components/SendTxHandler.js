@@ -54,6 +54,7 @@ class SendTxHandler extends React.Component {
     this.props.sendTransaction.on('job-done', this.jobDone);
     this.props.sendTransaction.on('send-success', this.sendSuccess);
     this.props.sendTransaction.on('send-error', this.sendError);
+    this.props.sendTransaction.on('unexpected-error', this.sendError);
   }
 
   /**
