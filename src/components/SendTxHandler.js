@@ -115,7 +115,6 @@ class SendTxHandler extends React.Component {
         return (
           <div className="d-flex flex-column">
             <p>{this.state.loadingMessage}</p>
-            <p>{this.state.miningEstimation && renderMiningEstimation()}</p>
           </div>
         );
       }
