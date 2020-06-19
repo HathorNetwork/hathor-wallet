@@ -16,8 +16,11 @@ import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import ModalAlert from '../components/ModalAlert';
+import SendTxHandler from '../components/SendTxHandler';
 import ledger, { LedgerError } from '../utils/ledger';
 import { IPC_RENDERER } from '../constants';
+import ReactLoading from 'react-loading';
+import colors from '../index.scss';
 
 
 const mapStateToProps = (state) => {
@@ -44,6 +47,9 @@ class SendTokens extends React.Component {
     // Partial data while waiting tx mining to add nonce and parents
     this.data = null;
 
+    // Send transaction object used when sending tx with ledger
+    this.sendTransaction = null;
+
     /**
      * errorMessage {string} Message to be shown in case of error in form
      * txTokens {Array} Array of tokens configs already added by the user (start with only hathor)
@@ -53,6 +59,7 @@ class SendTokens extends React.Component {
       errorMessage: '',
       txTokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
       ledgerStep: 0,
+      ledgerModalTitle: t`Validate outputs on Ledger`,
       data: null,
     };
   }
@@ -148,9 +155,9 @@ class SendTokens extends React.Component {
     }
     try {
       // Prepare data and submit job to tx mining API
-      // TODO Refactor ledger send
       this.data = hathorLib.transaction.prepareData(data, null, {getSignature: false, completeTx: false});
-      this.handleJobSubmit();
+      this.sendTransaction = new hathorLib.SendTransaction({data: this.data});
+      this.setState({ ledgerStep: 1, ledgerModalTitle: t`Sending transaction` });
     } catch(e) {
       this.handleSendError(e);
     }
@@ -160,7 +167,6 @@ class SendTokens extends React.Component {
    * Execute ledger get signatures
    */
   getSignatures = () => {
-    this.setState({ ledgerStep: 1 });
     const keys = hathorLib.wallet.getWalletData().keys;
     ledger.getSignatures(Object.assign({}, this.pendingData), keys);
   }
@@ -184,7 +190,7 @@ class SendTokens extends React.Component {
    */
   onSendError = (message) => {
     $('#alertModal').modal('hide');
-    this.setState({ errorMessage: '', loading: false, ledgerStep: 0 });
+    this.setState({ errorMessage: message, ledgerStep: 0 });
   }
 
   /**
@@ -263,7 +269,7 @@ class SendTokens extends React.Component {
         e instanceof hathorLib.errors.MaximumNumberInputsError ||
         e instanceof LedgerError) {
       $('#alertModal').modal('hide');
-      this.setState({ errorMessage: e.message, loading: false, ledgerStep: 0 });
+      this.setState({ errorMessage: e.message, ledgerStep: 0 });
     } else {
       // Unhandled error
       throw e;
@@ -353,8 +359,8 @@ class SendTokens extends React.Component {
           <form ref="formSendTokens" id="formSendTokens">
             {renderOnePage()}
             <div className="mt-5">
-              <button type="button" className="btn btn-secondary mr-4" onClick={this.addAnotherToken} disabled={this.state.loading}>{t`Add another token`}</button>
-              <button type="button" className="btn btn-hathor" disabled={this.state.loading} onClick={this.onSendTokensClicked}>{t`Send Tokens`}</button>
+              <button type="button" className="btn btn-secondary mr-4" onClick={this.addAnotherToken}>{t`Add another token`}</button>
+              <button type="button" className="btn btn-hathor" onClick={this.onSendTokensClicked}>{t`Send Tokens`}</button>
             </div>
           </form>
           <p className="text-danger mt-3 white-space-pre-wrap">{this.state.errorMessage}</p>
@@ -371,8 +377,12 @@ class SendTokens extends React.Component {
           </div>
         );
       } else {
-        // TODO add send tx handler here
-        return null;
+        return (
+          <div className="d-flex flex-row">
+            <SendTxHandler sendTransaction={this.sendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} />
+            <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
+          </div>
+        )
       }
     }
 
@@ -383,7 +393,7 @@ class SendTokens extends React.Component {
         {renderPage()}
         <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} title={t`Sending transaction`} />
         <ModalAlertNotSupported />
-        <ModalAlert title={t`Validate outputs on Ledger`} showFooter={false} body={renderAlertBody()} />
+        <ModalAlert title={this.state.ledgerModalTitle} showFooter={false} body={renderAlertBody()} />
       </div>
     );
   }
