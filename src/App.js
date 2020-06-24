@@ -36,7 +36,6 @@ import { connect } from "react-redux";
 import RequestErrorModal from './components/RequestError';
 import { dataLoaded, isOnlineUpdate, updateHeight } from "./actions/index";
 import store from './store/index';
-import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVER, IPC_RENDERER, VERSION } from './constants';
 import { HybridStore } from './storage.js';
@@ -68,8 +67,6 @@ class Root extends React.Component {
   componentDidMount() {
     hathorLib.WebSocketHandler.on('wallet', this.handleWebsocket);
     hathorLib.WebSocketHandler.on('storage', this.handleWebsocketStorage);
-
-    hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
 
     hathorLib.WebSocketHandler.on('addresses_loaded', this.addressesLoadedUpdate);
     hathorLib.WebSocketHandler.on('is_online', this.isOnlineUpdate);
@@ -232,7 +229,13 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
   } else {
     // If was closed and is loaded we need to redirect to locked screen
     if (hathorLib.wallet.wasClosed()) {
-      return <Redirect to={{ pathname: '/locked/' }} />;
+      if (isServerScreen) {
+        // If there is a server problem before the wallet is unlocked
+        // the server screen must be the priority over the locked screen
+        return returnDefaultComponent(Component, props);
+      } else {
+        return <Redirect to={{ pathname: '/locked/' }} />;
+      }
     } else {
       if (reduxState.loadingAddresses && !isServerScreen) {
         // If wallet is still loading addresses we redirect to the loading screen

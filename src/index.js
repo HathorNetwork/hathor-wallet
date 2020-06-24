@@ -19,6 +19,14 @@ import './index.css';
 import store from "./store/index";
 import { Provider } from "react-redux";
 
+import hathorLib from '@hathor/wallet-lib';
+import createRequestInstance from './api/axiosInstance';
+// This code used to be on the componentDidMount of App.js file
+// However there is a checkVersion request that is executed before the screen is mounted for the first time
+// This request was being called using the default axios instance, so I need to register the custom axios instance
+// here, where the code is executed before anything
+hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
+
 ReactDOM.render(
   <Provider store={store}>
     <Router>
