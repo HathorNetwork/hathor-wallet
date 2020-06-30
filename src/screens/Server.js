@@ -73,9 +73,6 @@ class Server extends React.Component {
     hathorLib.wallet.changeServer(newServer);
     const promise = version.checkApiVersion();
     promise.then(() => {
-      // The user might need to change the server before unlocking the wallet when the server he was connected to is down
-      // So after change we unlock the wallet because the PIN was already requested and validated
-      hathorLib.wallet.unlock();
       wallet.reloadData();
       this.props.history.push('/wallet/');
     }, () => {
