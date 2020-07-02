@@ -217,6 +217,11 @@ class Root extends React.Component {
  * Validate if version is allowed for the loaded wallet
  */
 const returnLoadedWalletComponent = (Component, props, rest) => {
+  // If was closed and is loaded we need to redirect to locked screen
+  if (hathorLib.wallet.wasClosed()) {
+    return <Redirect to={{ pathname: '/locked/' }} />;
+  }
+
   // For server screen we don't need to check version
   const isServerScreen = props.match.path === '/server';
   const reduxState = store.getState();
@@ -230,19 +235,14 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
   } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
     return <VersionError {...props} />;
   } else {
-    // If was closed and is loaded we need to redirect to locked screen
-    if (hathorLib.wallet.wasClosed()) {
-      return <Redirect to={{ pathname: '/locked/' }} />;
+    if (reduxState.loadingAddresses && !isServerScreen) {
+      // If wallet is still loading addresses we redirect to the loading screen
+      return <Redirect to={{
+        pathname: '/loading_addresses/',
+        state: {path: props.match.url}
+      }} />;
     } else {
-      if (reduxState.loadingAddresses && !isServerScreen) {
-        // If wallet is still loading addresses we redirect to the loading screen
-        return <Redirect to={{
-          pathname: '/loading_addresses/',
-          state: {path: props.match.url}
-        }} />;
-      } else {
-        return returnDefaultComponent(Component, props);
-      }
+      return returnDefaultComponent(Component, props);
     }
   }
 }

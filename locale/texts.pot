@@ -7,6 +7,29 @@ msgstr ""
 msgid "I want to reset my wallet"
 msgstr ""
 
+#: src/screens/AddressList.js:169
+msgid "Search address"
+msgstr ""
+
+#: src/screens/AddressList.js:193
+msgid "Addresses"
+msgstr ""
+
+#: src/components/OutputsWrapper.js:48
+#: src/components/tokens/TokenMint.js:112
+#: src/screens/AddressList.js:200
+#: src/screens/CreateToken.js:279
+msgid "Address"
+msgstr ""
+
+#: src/screens/AddressList.js:201
+msgid "Index"
+msgstr ""
+
+#: src/screens/AddressList.js:202
+msgid "Number of transactions"
+msgstr ""
+
 #: src/screens/ChoosePassphrase.js:48
 msgid "To set a blank passphrase mark the corresponding checkbox above."
 msgstr ""
@@ -51,7 +74,7 @@ msgstr ""
 
 #: src/screens/ChoosePassphrase.js:140
 #: src/screens/LockedWallet.js:92
-#: src/screens/Server.js:137
+#: src/screens/Server.js:140
 msgid "PIN"
 msgstr ""
 
@@ -175,12 +198,6 @@ msgstr ""
 msgid "Destination address"
 msgstr ""
 
-#: src/components/OutputsWrapper.js:48
-#: src/components/tokens/TokenMint.js:112
-#: src/screens/CreateToken.js:279
-msgid "Address"
-msgstr ""
-
 #: src/screens/CreateToken.js:288
 #, javascript-format
 msgid "Token ${ _this.state.name } created"
@@ -247,26 +264,26 @@ msgstr ""
 msgid "Import data"
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:69
+#: src/screens/LoadingAddresses.js:70
 msgid "Loading transactions..."
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:73
+#: src/screens/LoadingAddresses.js:74
 msgid "Please wait while we load the transactions of all your addresses."
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:74
+#: src/screens/LoadingAddresses.js:75
 msgid ""
 "You will be automatically redirected to the wallet when we finish loading "
 "them."
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:75
+#: src/screens/LoadingAddresses.js:76
 #, javascript-format
 msgid "**Addresses found:** ${ this.props.addressesFound }"
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:76
+#: src/screens/LoadingAddresses.js:77
 msgid "**Transactions found:** ${ this.props.transactionsFound }"
 msgstr ""
 
@@ -340,35 +357,41 @@ msgstr ""
 msgid "You tried to access a page that does not exist in Hathor Wallet"
 msgstr ""
 
-#: src/screens/SendTokens.js:285
+#: src/screens/SendTokens.js:298
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:351
+#: src/screens/SendTokens.js:364
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:352
-#: src/screens/SendTokens.js:385
+#: src/screens/SendTokens.js:365
+#: src/screens/SendTokens.js:398
 msgid "Send Tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:363
-msgid "Please, wait while we solve the proof of work and propagate the transaction"
-msgstr ""
-
-#: src/screens/SendTokens.js:373
+#: src/screens/SendTokens.js:386
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:374
+#: src/screens/SendTokens.js:387
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:390
+#: src/screens/SendTokens.js:403
 msgid "Validate outputs on Ledger"
+msgstr ""
+
+#: src/screens/SendTokens.js:47
+#.  Loading message to be shown while server does not return a response
+msgid "Resolving proof of work of your transaction..."
+msgstr ""
+
+#: src/screens/SendTokens.js:50
+#.  Loading message to be shown after return from the server
+msgid "Propagating transaction to the network..."
 msgstr ""
 
 #: src/screens/SentryPermission.js:68
@@ -416,19 +439,19 @@ msgstr ""
 msgid "New server is not valid"
 msgstr ""
 
-#: src/screens/Server.js:118
+#: src/screens/Server.js:121
 msgid "Select one of the default servers to connect or choose a new one"
 msgstr ""
 
-#: src/screens/Server.js:131
+#: src/screens/Server.js:134
 msgid "Select a new server"
 msgstr ""
 
-#: src/screens/Server.js:135
+#: src/screens/Server.js:138
 msgid "New server"
 msgstr ""
 
-#: src/screens/Server.js:140
+#: src/screens/Server.js:143
 msgid "Connect to server"
 msgstr ""
 
@@ -453,7 +476,7 @@ msgstr ""
 msgid "**Server:** You are connected to ${ serverURL }"
 msgstr ""
 
-#: src/components/RequestError.js:155
+#: src/components/RequestError.js:184
 #: src/screens/Settings.js:134
 msgid "Change server"
 msgstr ""
@@ -759,6 +782,7 @@ msgstr ""
 
 #: src/components/ChoosePassword.js:51
 #: src/components/ChoosePin.js:45
+#: src/components/HathorPaginate.js:23
 #: src/components/TokenHistory.js:228
 msgid "Next"
 msgstr ""
@@ -767,6 +791,11 @@ msgstr ""
 msgid ""
 "The PIN is a 6-digit password requested to authorize actions in your "
 "wallet, such as generating new addresses and sending tokens."
+msgstr ""
+
+#: src/components/HathorPaginate.js:22
+#: src/components/TokenHistory.js:227
+msgid "Previous"
 msgstr ""
 
 #: src/components/ModalAddManyTokens.js:52
@@ -827,13 +856,13 @@ msgid "Address copied to clipboard!"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:83
-#: src/components/WalletAddress.js:111
+#: src/components/WalletAddress.js:122
 msgid "Address to receive tokens"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:93
 #: src/components/TokenGeneralInfo.js:145
-#: src/components/WalletAddress.js:132
+#: src/components/WalletAddress.js:144
 msgid "Copy to clipboard"
 msgstr ""
 
@@ -1077,46 +1106,55 @@ msgstr ""
 msgid "Both fields must be equal"
 msgstr ""
 
-#: src/components/RequestError.js:91
+#: src/components/RequestError.js:116
+msgid ""
+"There was an error fetching your transactions from the server.\n"
+"This might be caused by some reasons: (i) the server may be fully loaded, "
+"or (ii) you could be having internet problems.\n"
+"\n"
+"We advise you to wait a few seconds and retry your request."
+msgstr ""
+
+#: src/components/RequestError.js:119
 msgid ""
 "Rate limit exceeded. Sorry about that. You should wait a few seconds and "
 "try again. What do you want to do?"
 msgstr ""
 
-#: src/components/RequestError.js:93
+#: src/components/RequestError.js:121
 msgid "Your request failed to reach the server. What do you want to do?"
 msgstr ""
 
-#: src/components/RequestError.js:104
+#: src/components/RequestError.js:133
 msgid "URL:"
 msgstr ""
 
-#: src/components/RequestError.js:105
+#: src/components/RequestError.js:134
 msgid "Method:"
 msgstr ""
 
-#: src/components/RequestError.js:106
+#: src/components/RequestError.js:135
 msgid "Response status code:"
 msgstr ""
 
-#: src/components/RequestError.js:142
+#: src/components/RequestError.js:171
 msgid "Request failed"
 msgstr ""
 
-#: src/components/RequestError.js:149
+#: src/components/RequestError.js:178
 #, javascript-format
 msgid "You are connected to **${ serverURL }**"
 msgstr ""
 
-#: src/components/RequestError.js:150
+#: src/components/RequestError.js:179
 msgid "Show advanced data"
 msgstr ""
 
-#: src/components/RequestError.js:151
+#: src/components/RequestError.js:180
 msgid "Hide advanced data"
 msgstr ""
 
-#: src/components/RequestError.js:156
+#: src/components/RequestError.js:185
 msgid "Retry request"
 msgstr ""
 
@@ -1285,10 +1323,6 @@ msgstr ""
 
 #: src/components/TokenGeneralInfo.js:149
 msgid "Download QRCode"
-msgstr ""
-
-#: src/components/TokenHistory.js:227
-msgid "Previous"
 msgstr ""
 
 #: src/components/TokenHistory.js:241
@@ -1537,7 +1571,7 @@ msgid "Copy raw tx to clipboard"
 msgstr ""
 
 #: src/components/TxData.js:673
-#: src/components/WalletAddress.js:161
+#: src/components/WalletAddress.js:173
 msgid "Copied to clipboard!"
 msgstr ""
 
@@ -1554,41 +1588,45 @@ msgstr ""
 msgid "Hardware Wallet"
 msgstr ""
 
-#: src/components/WalletAddress.js:114
+#: src/components/WalletAddress.js:125
 msgid "Generate new address"
 msgstr ""
 
-#: src/components/WalletAddress.js:114
+#: src/components/WalletAddress.js:125
 msgid "Get new address"
 msgstr ""
 
-#: src/components/WalletAddress.js:118
+#: src/components/WalletAddress.js:129
 #.  hide the QR code for hardware wallet 
 msgid "QR Code"
 msgstr ""
 
-#: src/components/WalletAddress.js:118
+#: src/components/WalletAddress.js:129
 #.  hide the QR code for hardware wallet 
 msgid "Get qrcode"
 msgstr ""
 
-#: src/components/WalletAddress.js:142
+#: src/components/WalletAddress.js:133
+msgid "See all addresses"
+msgstr ""
+
+#: src/components/WalletAddress.js:154
 msgid "Show full address"
 msgstr ""
 
-#: src/components/WalletAddress.js:151
+#: src/components/WalletAddress.js:163
 msgid "Validate that the address below is the same presented on the Ledger screen."
 msgstr ""
 
-#: src/components/WalletAddress.js:152
+#: src/components/WalletAddress.js:164
 msgid "Press both buttons on your Ledger in case the address is valid."
 msgstr ""
 
-#: src/components/WalletAddress.js:162
+#: src/components/WalletAddress.js:174
 msgid "You must use an old address before generating new ones"
 msgstr ""
 
-#: src/components/WalletAddress.js:164
+#: src/components/WalletAddress.js:176
 msgid "Validate address on Ledger"
 msgstr ""
 
