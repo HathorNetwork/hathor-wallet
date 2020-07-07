@@ -44,7 +44,7 @@ msgstr ""
 msgid "Invalid password"
 msgstr ""
 
-#: src/components/ModalSendTx.js:97
+#: src/components/ModalSendTx.js:101
 #: src/screens/ChoosePassphrase.js:64
 #: src/screens/LockedWallet.js:52
 #: src/screens/Server.js:67
@@ -353,34 +353,40 @@ msgstr ""
 msgid "You tried to access a page that does not exist in Hathor Wallet"
 msgstr ""
 
-#: src/screens/SendTokens.js:294
+#: src/screens/SendTokens.js:160
+#: src/screens/SendTokens.js:394
+msgid "Sending transaction"
+msgstr ""
+
+#: src/screens/SendTokens.js:300
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:356
+#: src/screens/SendTokens.js:362
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:357
-#: src/screens/SendTokens.js:382
+#: src/screens/SendTokens.js:363
+#: src/screens/SendTokens.js:392
 msgid "Send Tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:369
+#: src/screens/SendTokens.js:375
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:370
+#: src/screens/SendTokens.js:376
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:384
-msgid "Sending transaction"
-msgstr ""
-
-#: src/screens/SendTokens.js:386
+#: src/screens/SendTokens.js:62
+#. *
+#.      * errorMessage {string} Message to be shown in case of error in form
+#.      * txTokens {Array} Array of tokens configs already added by the user (start with only hathor)
+#.      * ledgerStep {number} When sending tx with ledger we have a step that needs user physical input, then we move to next step
+#.      
 msgid "Validate outputs on Ledger"
 msgstr ""
 
@@ -811,7 +817,7 @@ msgstr ""
 #: src/components/ModalBackupWords.js:171
 #: src/components/ModalBackupWords.js:269
 #: src/components/ModalEditToken.js:95
-#: src/components/ModalSendTx.js:177
+#: src/components/ModalSendTx.js:181
 #: src/components/ModalUnregisteredTokenInfo.js:113
 #: src/components/tokens/TokenAction.js:134
 msgid "Cancel"
@@ -902,7 +908,7 @@ msgid "Password*"
 msgstr ""
 
 #: src/components/ModalBackupWords.js:172
-#: src/components/ModalSendTx.js:178
+#: src/components/ModalSendTx.js:182
 #: src/components/tokens/TokenMelt.js:106
 #: src/components/tokens/TokenMint.js:171
 msgid "Go"
@@ -981,7 +987,7 @@ msgstr ""
 msgid "I forgot my password"
 msgstr ""
 
-#: src/components/ModalSendTx.js:185
+#: src/components/ModalSendTx.js:189
 msgid "Ok"
 msgstr ""
 
@@ -1189,7 +1195,7 @@ msgstr ""
 msgid "Your transaction was sent successfully!"
 msgstr ""
 
-#: src/components/SendTxHandler.js:105
+#: src/components/SendTxHandler.js:106
 #, javascript-format
 msgid "Estimated time: ${ estimation }s"
 msgstr ""
