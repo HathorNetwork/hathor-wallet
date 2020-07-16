@@ -11,6 +11,7 @@ import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import tokens from '../../utils/tokens';
+import wallet from '../../utils/wallet';
 
 
 /**
@@ -45,7 +46,7 @@ class TokenMint extends React.Component {
    * @return {Object} Object with promise and success message to be shown
    */
   executeMint = (pin) => {
-    const amountValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
+    const amountValue = wallet.decimalToInteger(this.state.amount);
     const output = this.props.mintOutputs[0];
     const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
     const promise = hathorLib.tokens.mintTokens(

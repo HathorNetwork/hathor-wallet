@@ -87,7 +87,7 @@ class CreateToken extends React.Component {
       }
 
       // Validating maximum amount
-      const tokensValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
+      const tokensValue = wallet.decimalToInteger(this.state.amount)
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
         const max_output_value_str = hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
         this.setState({ errorMessage: t`Maximum value to mint token is ${max_output_value_str}` });

@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
+import wallet from '../../utils/wallet';
 
 
 /**
@@ -34,7 +35,7 @@ class TokenMelt extends React.Component {
    * @return {Object} Object with promise (can be null in case of error) and message (success or error message)
    */
   executeMelt = (pin) => {
-    const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
+    const amountValue = wallet.decimalToInteger(this.amount.current.value);
     const output = this.props.meltOutputs[0];
     const promise = hathorLib.tokens.meltTokens(
       {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
@@ -58,7 +59,7 @@ class TokenMelt extends React.Component {
    * @return {string} Error message, in case of form invalid. Nothing, otherwise.
    */
   melt = () => {
-    const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
+    const amountValue = wallet.decimalToInteger(this.amount.current.value);
     if (amountValue > this.props.walletAmount) {
       const prettyWalletAmount = hathorLib.helpers.prettyValue(this.props.walletAmount);
       return t`The total amount you have is only ${prettyWalletAmount}.`;
