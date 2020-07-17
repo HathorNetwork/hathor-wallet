@@ -497,6 +497,9 @@ const wallet = {
   /**
    * Converts a decimal value to integer. On the full node and the wallet lib, we only deal with
    * integer values for amount. So a value of 45.97 for the user is handled by them as 4597.
+   * We need the Math.round because of some precision errors in js
+   * 35.05*100 = 3504.9999999999995 Precision error
+   * Math.round(35.05*100) = 3505
    *
    * @param {number} value The decimal amount
    *
@@ -506,7 +509,7 @@ const wallet = {
    * @inner
    */
   decimalToInteger(value) {
-    return parseInt(value*(10**hathorLib.constants.DECIMAL_PLACES), 10)
+    return Math.round(value*(10**hathorLib.constants.DECIMAL_PLACES));
   },
 }
 
