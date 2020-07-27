@@ -13,6 +13,7 @@ import InputsWrapper from '../components/InputsWrapper'
 import { connect } from "react-redux";
 import _ from 'lodash';
 import hathorLib from '@hathor/wallet-lib';
+import wallet from '../utils/wallet';
 
 
 const mapStateToProps = (state) => {
@@ -94,7 +95,7 @@ class SendTokensOne extends React.Component {
 
       if (address && valueStr) {
         // Doing the check here because need to validate before doing parseInt
-        const tokensValue = valueStr*(10**hathorLib.constants.DECIMAL_PLACES);
+        const tokensValue = wallet.decimalToInteger(valueStr);
         if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
           this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
           return null;

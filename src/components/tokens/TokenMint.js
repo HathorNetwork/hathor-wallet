@@ -11,6 +11,7 @@ import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import tokens from '../../utils/tokens';
+import wallet from '../../utils/wallet';
 
 
 /**
@@ -38,13 +39,6 @@ class TokenMint extends React.Component {
   }
 
   /**
-   * Return the amount value to be minted
-   */
-  getAmountValue = () => {
-    return this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
-  }
-
-  /**
    * Prepare transaction to execute mint method after form validation
    *
    * @param {string} pin PIN user wrote on modal
@@ -54,7 +48,7 @@ class TokenMint extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = (pin) => {
-    const amountValue = this.getAmountValue();
+    const amountValue = wallet.decimalToInteger(this.state.amount);
     const output = this.props.mintOutputs[0];
     const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
     return hathorLib.tokens.mintTokens(
@@ -74,7 +68,7 @@ class TokenMint extends React.Component {
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const prettyAmountValue = hathorLib.helpers.prettyValue(this.getAmountValue());
+    const prettyAmountValue = hathorLib.helpers.prettyValue(wallet.decimalToInteger(this.state.amount));
     return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;
   }
 
