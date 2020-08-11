@@ -749,3 +749,11 @@ span.software {
 .white-space-pre-wrap {
   white-space: pre-wrap;
 }
+
+.modal-backdrop ~ .modal-backdrop {
+  opacity: 0,
+}
+
+.modal-body-pin {
+  min-height: 120px;
+}

@@ -102,6 +102,11 @@ export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob
 
 export const HATHOR_WEBSITE_URL = "https://hathor.network/";
 
+/**
+ * Minimum job estimation to show to the user in seconds when mining a tx
+ */
+export const MIN_JOB_ESTIMATION = 1;
+
 let ipcRenderer = null;
 
 if (window.require) {

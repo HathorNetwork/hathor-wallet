@@ -59,8 +59,10 @@ class TokenAdministrative extends React.Component {
   }
 
   componentDidUpdate = (prevProps) => {
-    if (this.props.historyTransactions !== prevProps.historyTransactions || this.props.token.uid !== prevProps.token.uid) {
-      this.cleanStates();
+    if (this.props.historyTransactions !== prevProps.historyTransactions) {
+      if (this.props.token.uid !== prevProps.token.uid) {
+        this.cleanStates();
+      }
       this.updateData();
     }
   }
