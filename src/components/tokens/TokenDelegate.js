@@ -27,17 +27,26 @@ class TokenDelegate extends React.Component {
   }
 
   /**
-   * Execute the delegate of outputs
+   * Prepare transaction to execute the delegate of outputs
    *
    * @param {string} pin PIN user wrote on modal
    *
-   * @return {Object} Object with promise and success message
+   * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
+   * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
+   * In case of error, an object with {success: false, message}
    */
-  executeDelegate = (pin) => {
+  prepareSendTransaction = (pin) => {
     const output = this.props.authorityOutputs[0];
     const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
-    const promise = hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.props.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, type.toLowerCase(), pin);
-    return { promise, message: t`${type} output delegated!`};
+    return hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.props.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, type.toLowerCase(), pin);
+  }
+
+  /**
+   * Return a message to be shown in case of success
+   */
+  getSuccessMessage = () => {
+    const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
+    return t`${type} output delegated!`;
   }
 
   render() {
@@ -66,7 +75,17 @@ class TokenDelegate extends React.Component {
 
     const title = `Delegate ${this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`}`;
 
-    return <TokenAction renderForm={renderForm} title={title} buttonName='Delegate' onPinSuccess={this.executeDelegate} {...this.props} />
+    return (
+      <TokenAction
+        renderForm={renderForm}
+        title={title}
+        buttonName={t`Delegate`}
+        getSuccessMessage={this.getSuccessMessage}
+        prepareSendTransaction={this.prepareSendTransaction}
+        modalTitle={t`Delegating authority`}
+        {...this.props}
+      />
+    );
   }
 }
 

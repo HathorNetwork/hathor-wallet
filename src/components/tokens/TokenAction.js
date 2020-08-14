@@ -8,7 +8,7 @@
 import React from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
-import ModalPin from '../../components/ModalPin';
+import ModalSendTx from '../../components/ModalSendTx';
 import ReactLoading from 'react-loading';
 import colors from '../../index.scss';
 
@@ -39,22 +39,6 @@ class TokenAction extends React.Component {
 
     // Reference to the form
     this.form = React.createRef();
-  }
-
-  /**
-   * Handle methods promise resolve and rejection
-   * Clean states, show messages of error/success
-   *
-   * @param {Promise} promise Promise returned from management method
-   * @param {string} successMessage Message to show in case of success
-   */
-  handlePromise = (promise, successMessage) => {
-    promise.then(() => {
-      this.props.cancelAction();
-      this.props.showSuccess(successMessage);
-    }, (e) => {
-      this.setState({ loading: false, errorMessage: e.message });
-    });
   }
 
   /**
@@ -105,17 +89,39 @@ class TokenAction extends React.Component {
   }
 
   /**
-   * Method executed after user writes the PIN on the modal.
-   * It closes the modal, update the state to loading and execute the action requested.
+   * Method executed when transaction is sent and the action is done
+   *
+   * @param {Object} tx Transaction data object
    */
-  onPinSuccess = () => {
-    $('#pinModal').modal('hide');
-    this.setState({ loading: true });
-    const { promise, message } = this.props.onPinSuccess(this.state.pin);
-    if (promise === null) {
-      this.setState({ errorMessage: message, loading: false });
+  onSendSuccess = (tx) => {
+    const successMessage = this.props.getSuccessMessage();
+    this.props.cancelAction();
+    this.props.showSuccess(successMessage);
+  }
+
+  /**
+   * Method executed when there is an error sending the action transaction
+   *
+   * @param {String} message Error message
+   */
+  onSendError = (message) => {
+    this.setState({ errorMessage: message, loading: false });
+  }
+
+  /**
+   * Method executed after PIN is written
+   * If success when preparing the tx, return the send tx object
+   * Otherwise, show error message
+   *
+   * @param {String} pin PIN written by the user
+   */
+  onPrepareSendTransaction = (pin) => {
+    const ret = this.props.prepareSendTransaction(pin);
+
+    if (ret.success) {
+      return ret.sendTransaction;
     } else {
-      this.handlePromise(promise, message);
+      this.onSendError(ret.message);
     }
   }
 
@@ -142,7 +148,13 @@ class TokenAction extends React.Component {
           {this.props.renderForm()}
         </form>
         {renderButtons(this.props.validateForm, this.props.buttonName)}
-        <ModalPin execute={this.onPinSuccess} handleChangePin={this.handleChangePin} bodyTop={this.props.pinBodyTop} />
+        <ModalSendTx
+         title={this.props.modalTitle}
+         prepareSendTransaction={this.onPrepareSendTransaction}
+         onSendSuccess={this.onSendSuccess}
+         onSendError={this.onSendError}
+         bodyTop={this.props.pinBodyTop}
+        />
       </div>
     )
   }

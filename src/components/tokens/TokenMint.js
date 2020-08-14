@@ -11,6 +11,7 @@ import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import tokens from '../../utils/tokens';
+import wallet from '../../utils/wallet';
 
 
 /**
@@ -38,17 +39,19 @@ class TokenMint extends React.Component {
   }
 
   /**
-   * Execute mint method after form validation
+   * Prepare transaction to execute mint method after form validation
    *
    * @param {string} pin PIN user wrote on modal
    *
-   * @return {Object} Object with promise and success message to be shown
+   * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
+   * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
+   * In case of error, an object with {success: false, message}
    */
-  executeMint = (pin) => {
-    const amountValue = this.state.amount*(10**hathorLib.constants.DECIMAL_PLACES);
+  prepareSendTransaction = (pin) => {
+    const amountValue = wallet.decimalToInteger(this.state.amount);
     const output = this.props.mintOutputs[0];
     const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
-    const promise = hathorLib.tokens.mintTokens(
+    return hathorLib.tokens.mintTokens(
       {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
       this.props.token.uid,
       address,
@@ -59,8 +62,14 @@ class TokenMint extends React.Component {
         createAnotherMint: this.createAnother.current.checked
       }
     );
-    const prettyAmountValue = hathorLib.helpers.prettyValue(amountValue);
-    return { promise, message: t`${prettyAmountValue} ${this.props.token.symbol} minted!` };
+  }
+
+  /**
+   * Return a message to be shown in case of success
+   */
+  getSuccessMessage = () => {
+    const prettyAmountValue = hathorLib.helpers.prettyValue(wallet.decimalToInteger(this.state.amount));
+    return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;
   }
 
   /**
@@ -150,12 +159,14 @@ class TokenMint extends React.Component {
     return (
       <TokenAction
        renderForm={renderForm}
-       title='Mint tokens'
+       title={t`Mint tokens`}
        subtitle={`A deposit of ${hathorLib.tokens.getDepositPercentage() * 100}% in HTR of the mint amount is required`}
        deposit={`Deposit: ${tokens.getDepositAmount(this.state.amount)} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
-       buttonName='Go'
+       buttonName={t`Go`}
        validateForm={this.mint}
-       onPinSuccess={this.executeMint}
+       getSuccessMessage={this.getSuccessMessage}
+       prepareSendTransaction={this.prepareSendTransaction}
+       modalTitle={t`Minting tokens`}
        {...this.props}
       />
     )

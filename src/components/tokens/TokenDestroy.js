@@ -26,14 +26,15 @@ class TokenDestroy extends React.Component {
   }
 
   /**
-   * Execute destroy method
+   * Prepare transaction to execute the destroy method
    *
    * @param {string} pin PIN user wrote on modal
    *
-   * @return {Object} Object with promise and success message
+   * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
+   * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
+   * In case of error, an object with {success: false, message}
    */
-  executeDestroy = (pin) => {
-    const label = this.props.action === 'destroy-mint' ? t`Mint` : t`Melt`;
+  prepareSendTransaction = (pin) => {
     const array = this.props.authorityOutputs;
     const data = [];
     // Get the number of outputs the user requested to destroy in the expected format
@@ -45,8 +46,15 @@ class TokenDestroy extends React.Component {
         'token': this.props.token.uid
       });
     }
-    const promise = hathorLib.tokens.destroyAuthority(data, pin);
-    return { promise, message: t`${label} outputs destroyed!`};
+    return hathorLib.tokens.destroyAuthority(data, pin);
+  }
+
+  /**
+   * Return a message to be shown in case of success
+   */
+  getSuccessMessage = () => {
+    const label = this.props.action === 'destroy-mint' ? t`Mint` : t`Melt`;
+    return t`${label} outputs destroyed!`;
   }
 
   /**
@@ -57,7 +65,8 @@ class TokenDestroy extends React.Component {
    */
   destroy = () => {
     if (this.state.destroyQuantity > this.props.authorityOutputs.length) {
-      return `You only have ${this.props.authorityOutputs.length} mint ${hathorLib.helpers.plural(this.props.authorityOutputs.length, 'output', 'outputs')} to destroy.`;
+      const type = this.props.action === 'destroy-mint' ? t`mint` : t`melt`;
+      return `You only have ${this.props.authorityOutputs.length} ${type} ${hathorLib.helpers.plural(this.props.authorityOutputs.length, 'output', 'outputs')} to destroy.`;
     }
   }
 
@@ -85,7 +94,19 @@ class TokenDestroy extends React.Component {
 
     const title = `Destroy ${this.props.action === 'destroy-mint' ? t`Mint` : t`Melt`}`;
 
-    return <TokenAction renderForm={renderForm} validateForm={this.destroy} title={title} buttonName={t`Destroy`} onPinSuccess={this.executeDestroy} pinBodyTop={getDestroyBody()} {...this.props} />
+    return (
+      <TokenAction
+        renderForm={renderForm}
+        validateForm={this.destroy}
+        title={title}
+        buttonName={t`Destroy`}
+        pinBodyTop={getDestroyBody()}
+        getSuccessMessage={this.getSuccessMessage}
+        prepareSendTransaction={this.prepareSendTransaction}
+        modalTitle={t`Destroying authorities`}
+        {...this.props}
+      />
+    );
   }
 }
 

@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
+import wallet from '../../utils/wallet';
 
 
 /**
@@ -27,28 +28,32 @@ class TokenMelt extends React.Component {
   }
 
   /**
-   * Execute melt method after form validation
+   * Prepare transaction to execute melt method after form validation
    *
    * @param {string} pin PIN user wrote on modal
    *
-   * @return {Object} Object with promise (can be null in case of error) and message (success or error message)
+   * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
+   * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
+   * In case of error, an object with {success: false, message}
    */
-  executeMelt = (pin) => {
-    const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
+  prepareSendTransaction = (pin) => {
+    const amountValue = wallet.decimalToInteger(this.amount.current.value);
     const output = this.props.meltOutputs[0];
-    const promise = hathorLib.tokens.meltTokens(
+    return hathorLib.tokens.meltTokens(
       {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
       this.props.token.uid,
       amountValue,
       pin,
       this.createAnother.current.checked
     );
-    if (promise === null) {
-      return { promise: null, message: t`Can't find outputs to melt the amount requested.` };
-    } else {
-      const prettyAmountValue = hathorLib.helpers.prettyValue(amountValue);
-      return { promise, message: t`${prettyAmountValue} ${this.props.token.symbol} melted!` };
-    }
+  }
+
+  /**
+   * Return a message to be shown in case of success
+   */
+  getSuccessMessage = () => {
+    const prettyAmountValue = hathorLib.helpers.prettyValue(wallet.decimalToInteger(this.amount.current.value));
+    return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;
   }
 
   /**
@@ -58,7 +63,7 @@ class TokenMelt extends React.Component {
    * @return {string} Error message, in case of form invalid. Nothing, otherwise.
    */
   melt = () => {
-    const amountValue = this.amount.current.value*(10**hathorLib.constants.DECIMAL_PLACES);
+    const amountValue = wallet.decimalToInteger(this.amount.current.value);
     if (amountValue > this.props.walletAmount) {
       const prettyWalletAmount = hathorLib.helpers.prettyValue(this.props.walletAmount);
       return t`The total amount you have is only ${prettyWalletAmount}.`;
@@ -88,7 +93,18 @@ class TokenMelt extends React.Component {
       )
     }
 
-    return <TokenAction renderForm={renderForm} title={t`Melt tokens`} buttonName={t`Go`} validateForm={this.melt} onPinSuccess={this.executeMelt} {...this.props} />
+    return (
+      <TokenAction
+        renderForm={renderForm}
+        title={t`Melt tokens`}
+        buttonName={t`Go`}
+        validateForm={this.melt}
+        getSuccessMessage={this.getSuccessMessage}
+        prepareSendTransaction={this.prepareSendTransaction}
+        modalTitle={t`Melting tokens`}
+        {...this.props}
+      />
+    );
   }
 }
 
