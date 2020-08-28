@@ -66,7 +66,9 @@ class LoadWallet extends React.Component {
     const words = this.refs.wordsInput.value.trim();
     const ret = hathorLib.wallet.wordsValid(words);
     if (ret.valid) {
-      this.setState({ words, askPassword: true });
+      // Using ret.works because this method returns a string with all words
+      // separated by a single space, after removing duplicate spaces and possible break lines
+      this.setState({ words: ret.words, askPassword: true });
     } else {
       this.setState({ errorMessage: ret.message });
     }
