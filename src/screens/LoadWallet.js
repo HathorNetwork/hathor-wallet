@@ -68,7 +68,7 @@ class LoadWallet extends React.Component {
     if (ret.valid) {
       // Using ret.words because this method returns a string with all words
       // separated by a single space, after removing duplicate spaces and possible break lines
-      this.setState({ words: ret.words, askPassword: true });
+      this.setState({ words: ret.words, errorMessage: '', askPassword: true });
     } else {
       this.setState({ errorMessage: ret.message });
     }
