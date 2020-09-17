@@ -49,12 +49,14 @@ class LoadWallet extends React.Component {
      * words {string} Text of words input
      * askPassword {boolean} If should show password component
      * askPIN {boolean} If should show PIN component
+     * wordsCount {number} Number of words written on words input
      */
     this.state = {
       errorMessage: '',
       words: '',
       askPassword: false,
       askPIN: false,
+      wordsCount: 0,
     }
   }
 
@@ -68,7 +70,7 @@ class LoadWallet extends React.Component {
     if (ret.valid) {
       // Using ret.words because this method returns a string with all words
       // separated by a single space, after removing duplicate spaces and possible break lines
-      this.setState({ words: ret.words, errorMessage: '', askPassword: true });
+      this.setState({ words: ret.words, errorMessage: '', askPassword: true, wordsCount: 0 });
     } else {
       this.setState({ errorMessage: ret.message });
     }
@@ -110,12 +112,46 @@ class LoadWallet extends React.Component {
     this.setState({ askPassword: false });
   }
 
+  /**
+   * Calculate number of words written in the input
+   *
+   * @param {Event} e Input change event
+   */
+  onWordsChange = (e) => {
+    const trimValue = e.target.value.trim(/\s+/);
+    let wordsCount = 0;
+    if (trimValue !== '') {
+      wordsCount = trimValue.replace(/\s+/g, ' ').split(' ').length;
+    }
+    this.setState({ wordsCount });
+  }
+
+  /**
+   * Get css class for the words count.
+   *
+   * If number of words is correct, returns text-success.
+   * If number of words is more than 24, returns text-danger.
+   * Otherwise returns empty string.
+   *
+   * @return {String} CSS class to add in <p> tag
+   */
+  getWordsCountClassName = () => {
+    if (this.state.wordsCount > 24) {
+      return 'text-danger';
+    } else if (this.state.wordsCount === 24) {
+      return 'text-success';
+    } else {
+      return '';
+    }
+  }
+
   render() {
     const renderLoad = () => {
       return (
         <div>
           <p className="mt-4 mb-4">{t`Write the 24 words of your wallet (separated by space).`}</p>
-          <textarea className="form-control one-word-input mb-4" placeholder={t`Words separated by single space`} ref="wordsInput" rows={5} />
+          <textarea className="form-control one-word-input mb-4" placeholder={t`Words separated by single space`} ref="wordsInput" rows={5} onChange={this.onWordsChange} />
+          <p className={`mb-4 ${this.getWordsCountClassName()}`}>{this.state.wordsCount}/24 words</p>
           {this.state.errorMessage && <p className="mb-4 text-danger">{this.state.errorMessage}</p>}
           <div className="d-flex justify-content-between flex-row w-100">
             <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
