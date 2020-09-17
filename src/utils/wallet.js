@@ -316,7 +316,7 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  reloadData() {
+  reloadData({endConnection = false} = {}) {
     store.dispatch(loadingAddresses(true));
 
     this.cleanWalletRedux();
@@ -341,7 +341,7 @@ const wallet = {
     }
 
     // Load history from new server
-    const promise = hathorLib.wallet.reloadData();
+    const promise = hathorLib.wallet.reloadData({endConnection});
     promise.then(() => {
       this.afterLoadAddressHistory();
     });
