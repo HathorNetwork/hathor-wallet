@@ -41,8 +41,23 @@ a:hover {
   max-height: 100%;
 }
 
+#wallet-div {
+  @media (max-width: calc(1200px)) {
+    .content-wrapper {
+      padding-left: 7rem;
+    }
+
+    .backup-alert {
+      padding-left: 5rem;
+    }
+  }
+}
+
 .content-wrapper {
-  margin: 6rem auto 2rem auto; // Top is the fixed navigation bar plus the content margin
+  margin: 2rem auto;
+  max-width: 988px;
+  padding: 0 1rem;
+  box-sizing: content-box;
 }
 
 .content-signin-wrapper {
@@ -63,12 +78,10 @@ a:hover {
 
 .main-nav {
   background-color: #000;
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
   z-index: 1030;
   height: 64px;
+  position: sticky;
+  top: 0;
 }
 
 .main-nav nav {
@@ -291,10 +304,6 @@ svg.svg-wrapper {
 }
 
 @media (max-width: 992px) {
-  .content-wrapper {
-    margin: 6rem 2rem 2rem 2rem;
-  }
-
   .navbar-nav li.nav-item {
     padding: 0rem 1rem;
   }
@@ -313,10 +322,6 @@ svg.svg-wrapper {
 
   .navigation-search .version-wrapper:first-child {
     padding: 0;
-  }
-
-  .wallet-wrapper {
-    padding: 0 3rem;
   }
 }
 
@@ -444,13 +449,16 @@ svg.svg-wrapper {
 }
 
 .backup-alert {
-  top: 4rem;
   text-align: center;
-}
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 0;
 
-.backup-alert a {
-  color: #856404;
-  text-decoration: underline;
+  a {
+    color: #856404;
+    text-decoration: underline;
+  }
 }
 
 .chosen-words-wrapper {
@@ -482,14 +490,25 @@ svg.svg-wrapper {
   border-radius: 16px;
 }
 
+.no-gutters {
+  margin-right: 0;
+  margin-left: 0;
+
+  > .col,
+  > [class*="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
 .token-bar {
-  position: fixed;
-  top: 4rem;
-  left: 0;
   z-index: 1000;
-  background-color: #ececec;
   color: #2c2c2c;
-  height: calc(100% - 4rem);
+  background-color: #ececec;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  bottom: 0;
 }
 
 .token-bar .header {
@@ -560,10 +579,6 @@ svg.svg-wrapper {
 .token-bar.opened {
   transition: width 0.4s linear;
   width: 13rem;
-}
-
-.wallet-wrapper {
-  padding: 0 4rem;
 }
 
 #formCreateToken .address-checkbox {

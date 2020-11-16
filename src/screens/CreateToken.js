@@ -18,7 +18,6 @@ import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
-import colors from '../index.scss';
 import helpers from '../utils/helpers';
 import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
 
