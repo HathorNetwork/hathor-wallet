@@ -16,6 +16,7 @@ html, body, #root {
   height: 100%;
   width: 100%;
   word-wrap: break-word;
+  scrollbar-width: thin;
 }
 
 a {
@@ -44,7 +45,7 @@ a:hover {
 #wallet-div {
   @media (max-width: calc(1200px)) {
     .content-wrapper {
-      padding-left: 7rem;
+      padding-left: 6rem;
     }
 
     .backup-alert {
@@ -54,10 +55,9 @@ a:hover {
 }
 
 .content-wrapper {
-  margin: 2rem auto;
+  margin: 64px auto;
   max-width: 988px;
-  padding: 0 1rem;
-  box-sizing: content-box;
+  padding: 2rem 1rem;
 }
 
 .content-signin-wrapper {
@@ -80,14 +80,16 @@ a:hover {
   background-color: #000;
   z-index: 1030;
   height: 64px;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
 }
 
 .main-nav nav {
   max-width: 988px;
   margin: 0 auto;
-  padding: 0.5rem 0;
+  padding: 0.5rem 1rem;
 }
 
 .main-nav > nav a {
@@ -451,7 +453,7 @@ svg.svg-wrapper {
 .backup-alert {
   text-align: center;
   position: sticky;
-  top: 0;
+  top: 64px;
   z-index: 2;
   margin-bottom: 0;
 

@@ -62,7 +62,7 @@ function createWindow () {
   mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + ' HathorWallet/' + walletVersion);
 
   // Uncomment this to start the app with developer tools. Useful for debugging
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
