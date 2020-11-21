@@ -12,6 +12,7 @@ import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import tokens from '../../utils/tokens';
 import wallet from '../../utils/wallet';
+import InputNumber from '../InputNumber';
 
 
 /**
@@ -100,8 +101,8 @@ class TokenMint extends React.Component {
   /**
    * Handles amount input change
    */
-  onAmountChange = (e) => {
-    this.setState({amount: e.target.value});
+  onAmountChange = (amount) => {
+    this.setState({amount});
   }
 
   render() {
@@ -130,14 +131,10 @@ class TokenMint extends React.Component {
           <div className="row">
             <div className="form-group col-3">
               <label>Amount</label>
-              <input
+              <InputNumber
                required
-               type="number"
                className="form-control"
-               onChange={this.onAmountChange}
-               value={this.state.amount || ''}
-               step={hathorLib.helpers.prettyValue(1)}
-               min={hathorLib.helpers.prettyValue(1)}
+               onValueChange={this.onAmountChange}
                placeholder={hathorLib.helpers.prettyValue(0)}
               />
             </div>
