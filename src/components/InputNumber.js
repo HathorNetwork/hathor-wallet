@@ -7,6 +7,7 @@
 
 import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
+import hathorLib from "@hathor/wallet-lib";
 
 /**
  * Component that enhances typing numbers
@@ -54,7 +55,7 @@ const InputNumber = React.forwardRef(
     };
 
     /**
-     * Listen keydown events while this component is focused overring the default native input behavior.
+     * Listen keydown events while this component is focused overriding the default native input behavior.
      * Only digits and backspace are allowed.
      *
      * @param  {KeyboardEvent} evt Event carrying the keyboard key
@@ -62,7 +63,7 @@ const InputNumber = React.forwardRef(
     const onKeyDown = (evt) =>
       setValue((value) => {
         const isNumberChar = /\d/.test(evt.key);
-        const isBackspace = evt.key === "Backspace";
+        const isBackspace = evt.key === "Backspace" || evt.key === "Delete";
         if (isNumberChar) {
           return value.concat(evt.key);
         }
@@ -146,7 +147,7 @@ InputNumber.propTypes = {
 
 InputNumber.defaultProps = {
   defaultValue: "",
-  precision: 2,
+  precision: hathorLib.constants.DECIMAL_PLACES,
   separator: ".",
   locale: "en-US",
   onValueChange: () => {},
