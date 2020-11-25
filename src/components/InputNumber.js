@@ -35,9 +35,6 @@ const InputNumber = React.forwardRef(
     },
     ref
   ) => {
-    const innerRef = ref || useRef();
-    const [value, setValue] = useState(String(defaultValue));
-
     /**
      * Formats a string following the pattern 9,999.99. It decomposes rawValue into decimal and fractional parts, mainly to add the thousands separator.
      *
@@ -46,13 +43,18 @@ const InputNumber = React.forwardRef(
      * @return {string} Formatted string
      */
     const format = (rawValue = "") => {
-      const value = rawValue.replace(/[^\d]/g, "").padStart(precision + 1, "0");
+      const value = String(rawValue)
+        .replace(/[^\d]/g, "")
+        .padStart(precision + 1, "0");
       const decimalPart = Intl.NumberFormat(locale).format(
         value.substr(0, value.length - precision)
       );
       const fractionalPart = value.substr(value.length - precision);
       return `${decimalPart}${separator}${fractionalPart}`;
     };
+
+    const innerRef = ref || useRef();
+    const [value, setValue] = useState(format(defaultValue));
 
     /**
      * Listen keydown events while this component is focused overriding the default native input behavior.
@@ -64,14 +66,51 @@ const InputNumber = React.forwardRef(
       setValue((value) => {
         const isNumberChar = /\d/.test(evt.key);
         const isBackspace = evt.key === "Backspace" || evt.key === "Delete";
-        if (isNumberChar) {
-          return value.concat(evt.key);
+        const isDeleteAll =
+          isBackspace &&
+          evt.target.selectionEnd - evt.target.selectionStart >= value.length;
+        const isCtrlOrMeta = evt.ctrlKey || evt.metaKey;
+
+        // Do not handle keyboard events when ctrlKey or metaKey are present
+        if (isCtrlOrMeta) {
+          return value;
         }
-        if (isBackspace) {
-          return value.slice(0, -1);
+
+        let newValue = value;
+        if (isDeleteAll) {
+          newValue = "";
+        } else if (isNumberChar) {
+          newValue = value.concat(evt.key);
+        } else if (isBackspace) {
+          newValue = value.slice(0, -1);
         }
-        return value;
+        newValue = format(newValue);
+        updateCaretPosition(newValue);
+        return newValue;
       });
+
+    /**
+     * Handle onClick events just to update the caret position.
+     *
+     * @param  {MouseEvent} evt MouseEvent triggered when the input or its inner content is clicked
+     */
+    const onClick = (evt) => {
+      updateCaretPosition(format(evt.target.value));
+    };
+
+    /**
+     * Put the caret always at the end.
+     *
+     * @param  {string} value Current input value
+     */
+    const updateCaretPosition = (value) => {
+      setTimeout(() => {
+        const { current } = innerRef;
+        if (current) {
+          current.selectionStart = value.length;
+        }
+      });
+    };
 
     /**
      * Listen paste events as the default behavior of inputs is overrided.
@@ -82,9 +121,10 @@ const InputNumber = React.forwardRef(
      */
     const onPaste = (evt) =>
       setValue(() => {
-        const paste = (evt.clipboardData || window.clipboardData).getData(
-          "text"
+        const paste = format(
+          (evt.clipboardData || window.clipboardData).getData("text")
         );
+        updateCaretPosition(paste);
         return paste;
       });
 
@@ -96,9 +136,11 @@ const InputNumber = React.forwardRef(
       if (current) {
         current.addEventListener("keydown", onKeyDown);
         current.addEventListener("paste", onPaste);
+        current.addEventListener("click", onClick);
         return () => {
           current.removeEventListener("keydown", onKeyDown);
           current.removeEventListener("paste", onPaste);
+          current.removeEventListener("click", onClick);
         };
       }
     }, []);
@@ -112,9 +154,7 @@ const InputNumber = React.forwardRef(
       onValueChange(parsedValue);
     }, [value]);
 
-    return (
-      <input ref={innerRef} value={format(value)} {...otherProps} type="text" />
-    );
+    return <input ref={innerRef} value={value} {...otherProps} type="text" />;
   }
 );
 
