@@ -56,13 +56,13 @@ class TxData extends React.Component {
 
   componentDidMount = () => {
     this.calculateTokens();
-    this.updateGraphs();
+    //this.updateGraphs();
   }
 
   componentDidUpdate = (prevProps) => {
     if (prevProps.transaction !== this.props.transaction) {
       this.calculateTokens();
-      this.updateGraphs();
+      //this.updateGraphs();
     }
   }
 
