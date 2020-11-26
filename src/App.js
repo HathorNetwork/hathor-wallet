@@ -44,7 +44,7 @@ import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
 
-hathorLib.network.setNetwork('mainnet');
+hathorLib.network.setNetwork('testnet');
 hathorLib.storage.setStore(new HybridStore());
 
 // set default server
