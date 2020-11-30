@@ -453,33 +453,77 @@ svg.svg-wrapper {
   text-decoration: underline;
 }
 
-.chosen-words-wrapper {
-  border: 1px solid #888;
-  height: 112px;
-  padding-right: 8px;
-  padding-left: 8px;
-}
+#backupWordsModal {
+  .modal-dialog.show-validation {
+    max-width: 670px;
 
-.chosen-words-wrapper div {
-  margin-top: 0.75rem;
-}
+    .validation-step-index {
+      margin-bottom: 32px;
+    }
 
-.chosen-words-wrapper i {
-  background-color: #888;
-  color: white;
-  padding: 4px;
-  border-radius: 12px;
-  top: -11px;
-  position: relative;
-  right: 9px;
-  cursor: pointer;
-}
+    .validation-step-words {
+      padding: 0 64px;
 
-.word-chosen {
-  padding: 10px;
-  background-color: #888;
-  color: white;
-  border-radius: 16px;
+      > * {
+        position: relative;
+        flex: 1 1 0px;
+
+        &:not(:first-child){
+          margin-left: 16px;
+        }
+
+        .validate-step-option {
+          &[disabled] {
+            cursor: auto;
+            opacity: 1;
+
+            &.chosen-option {
+              background: #dc3545;;
+              border: #dc3545;;
+            }
+          }
+        }
+      }
+    }
+
+    .validation-progress {
+      margin: 32px 0 0 0;
+
+      &-step {
+        display: block;
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+        background: $purpleHathor;
+        opacity: 0.5;
+
+        &-done {
+          opacity: 1;
+        }
+
+        &:not(:first-child) {
+          margin-left: 8px;
+        }
+      }
+    }
+
+    .error-message {
+      padding: 0 64px;
+      margin: 32px 0 0 0;
+      display: flex;
+      align-items: center;
+
+      strong {
+        display: block;
+        cursor: pointer;
+      }
+
+      i {
+        font-size: 32px;
+        margin-right: 16px;
+      }
+    }
+  }
 }
 
 .token-bar {

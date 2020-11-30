@@ -36,7 +36,7 @@ export const MAX_GRAPH_LEVEL = 1;
 /**
  * How many words will be used to validate the backup
  */
-export const WORDS_VALIDATION = 6;
+export const WORDS_VALIDATION = 5;
 
 /**
  * Message to be written when user wants to reset all wallet data

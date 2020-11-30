@@ -16,7 +16,7 @@ msgid "Addresses"
 msgstr ""
 
 #: src/components/OutputsWrapper.js:48
-#: src/components/tokens/TokenMint.js:127
+#: src/components/tokens/TokenMint.js:121
 #: src/screens/AddressList.js:200
 #: src/screens/CreateToken.js:283
 msgid "Address"
@@ -38,7 +38,7 @@ msgstr ""
 msgid "Passphrase and confirm passphrase must be equal"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:99
+#: src/components/ModalBackupWords.js:103
 #: src/components/ModalResetAllData.js:42
 #: src/screens/ChoosePassphrase.js:59
 msgid "Invalid password"
@@ -238,17 +238,17 @@ msgstr ""
 msgid "Token registered with success!"
 msgstr ""
 
-#: src/screens/LoadWallet.js:115
+#: src/screens/LoadWallet.js:152
 msgid "Write the 24 words of your wallet (separated by space)."
 msgstr ""
 
-#: src/screens/LoadWallet.js:116
+#: src/screens/LoadWallet.js:153
 msgid "Words separated by single space"
 msgstr ""
 
 #: src/components/BackButton.js:33
 #: src/components/PinPasswordWrapper.js:60
-#: src/screens/LoadWallet.js:119
+#: src/screens/LoadWallet.js:157
 #: src/screens/NewWallet.js:164
 #: src/screens/NewWallet.js:177
 #: src/screens/Signin.js:44
@@ -256,7 +256,7 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: src/screens/LoadWallet.js:120
+#: src/screens/LoadWallet.js:158
 msgid "Import data"
 msgstr ""
 
@@ -331,7 +331,7 @@ msgid ""
 "advise you to do it now, but you can do it later."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:225
+#: src/components/ModalBackupWords.js:275
 #: src/screens/NewWallet.js:178
 msgid "Do it later"
 msgstr ""
@@ -716,7 +716,7 @@ msgid ""
 "before doing so."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:290
+#: src/components/ModalBackupWords.js:373
 #: src/screens/WalletVersionError.js:98
 msgid "Backup Words"
 msgstr ""
@@ -814,8 +814,7 @@ msgstr ""
 
 #: src/components/ModalAddManyTokens.js:112
 #: src/components/ModalAddToken.js:91
-#: src/components/ModalBackupWords.js:171
-#: src/components/ModalBackupWords.js:269
+#: src/components/ModalBackupWords.js:217
 #: src/components/ModalEditToken.js:95
 #: src/components/ModalSendTx.js:181
 #: src/components/ModalUnregisteredTokenInfo.js:113
@@ -890,48 +889,40 @@ msgstr ""
 msgid "Action not supported"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:118
-msgid "Invalid number of words"
+#: src/components/ModalBackupWords.js:161
+msgid "Wrong word. Please double check the words you saved."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:125
-msgid "Invalid sequence of words"
-msgstr ""
-
-#: src/components/ModalBackupWords.js:157
+#: src/components/ModalBackupWords.js:188
 msgid "We need your password to show the words"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:160
+#: src/components/ModalBackupWords.js:196
 #: src/components/ModalResetAllData.js:78
 msgid "Password*"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:172
+#: src/components/ModalBackupWords.js:222
 #: src/components/ModalSendTx.js:182
-#: src/components/tokens/TokenMelt.js:106
-#: src/components/tokens/TokenMint.js:171
+#: src/components/tokens/TokenMelt.js:100
+#: src/components/tokens/TokenMint.js:165
 msgid "Go"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:212
+#: src/components/ModalBackupWords.js:260
 msgid ""
 "Save the words and never share them. Anyone who has access to them will "
 "control your tokens."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:226
+#: src/components/ModalBackupWords.js:280
 msgid "Ok, I have saved them"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:255
+#: src/components/ModalBackupWords.js:340
 msgid ""
-"Please, select the words below in the correct order. This is for your "
-"safety and to ensure you wrote them down correctly."
-msgstr ""
-
-#: src/components/ModalBackupWords.js:270
-msgid "Validate"
+"To make sure you saved, please select the word that corresponds to the "
+"number below."
 msgstr ""
 
 #: src/components/ModalEditToken.js:78
@@ -1087,7 +1078,7 @@ msgid "Public Explorer"
 msgstr ""
 
 #: src/components/OutputsWrapper.js:53
-#: src/components/SendTokensOne.js:202
+#: src/components/SendTokensOne.js:203
 msgid "This feature is disabled for hardware wallet"
 msgstr ""
 
@@ -1159,27 +1150,27 @@ msgstr ""
 msgid "Retry request"
 msgstr ""
 
-#: src/components/SendTokensOne.js:202
+#: src/components/SendTokensOne.js:203
 msgid "Select token"
 msgstr ""
 
-#: src/components/SendTokensOne.js:211
+#: src/components/SendTokensOne.js:212
 msgid "Balance available: "
 msgstr ""
 
-#: src/components/SendTokensOne.js:217
+#: src/components/SendTokensOne.js:218
 msgid "Token:"
 msgstr ""
 
-#: src/components/SendTokensOne.js:220
+#: src/components/SendTokensOne.js:221
 msgid "Remove"
 msgstr ""
 
-#: src/components/SendTokensOne.js:229
+#: src/components/SendTokensOne.js:230
 msgid "Choose inputs automatically"
 msgstr ""
 
-#: src/components/SendTokensOne.js:233
+#: src/components/SendTokensOne.js:234
 msgid "Inputs"
 msgstr ""
 
@@ -1231,7 +1222,7 @@ msgid "Operations"
 msgstr ""
 
 #: src/components/TokenAdministrative.js:219
-#: src/components/tokens/TokenMelt.js:105
+#: src/components/tokens/TokenMelt.js:99
 msgid "Melt tokens"
 msgstr ""
 
@@ -1244,7 +1235,7 @@ msgid "Destroy melt"
 msgstr ""
 
 #: src/components/TokenAdministrative.js:230
-#: src/components/tokens/TokenMint.js:168
+#: src/components/tokens/TokenMint.js:162
 msgid "Mint tokens"
 msgstr ""
 
@@ -1696,8 +1687,8 @@ msgid "Create another ${ type } output for you?"
 msgstr ""
 
 #: src/components/tokens/TokenDelegate.js:69
-#: src/components/tokens/TokenMelt.js:95
-#: src/components/tokens/TokenMint.js:158
+#: src/components/tokens/TokenMelt.js:89
+#: src/components/tokens/TokenMint.js:152
 msgid "Leave it checked unless you know what you are doing"
 msgstr ""
 
@@ -1729,41 +1720,41 @@ msgstr ""
 msgid "Destroying authorities"
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:62
+#: src/components/tokens/TokenMelt.js:56
 #, javascript-format
 msgid "${ prettyAmountValue } ${ _this.props.token.symbol } melted!"
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:75
+#: src/components/tokens/TokenMelt.js:69
 #, javascript-format
 msgid "The total amount you have is only ${ prettyWalletAmount }."
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:93
+#: src/components/tokens/TokenMelt.js:87
 msgid "Create another melt output for you?"
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:110
+#: src/components/tokens/TokenMelt.js:104
 msgid "Melting tokens"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:78
+#: src/components/tokens/TokenMint.js:72
 #, javascript-format
 msgid "${ prettyAmountValue } ${ _this.props.token.symbol } minted!"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:88
+#: src/components/tokens/TokenMint.js:82
 msgid "Address is required when not selected automatically"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:121
+#: src/components/tokens/TokenMint.js:115
 msgid "Automatically select address to receive new tokens"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:156
+#: src/components/tokens/TokenMint.js:150
 msgid "Create another mint output for you?"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:175
+#: src/components/tokens/TokenMint.js:169
 msgid "Minting tokens"
 msgstr ""
