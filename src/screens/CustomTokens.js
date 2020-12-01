@@ -10,7 +10,6 @@ import { t } from 'ttag'
 
 import SpanFmt from '../components/SpanFmt';
 import ModalAddToken from '../components/ModalAddToken';
-import TokenBar from '../components/TokenBar';
 import HathorAlert from '../components/HathorAlert';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
@@ -64,7 +63,6 @@ class CustomTokens extends React.Component {
         </div>
         <ModalAddToken success={this.newTokenSuccess} />
         <HathorAlert ref="alertSuccess" text={t`Token registered with success!`} type="success" />
-        <TokenBar {...this.props}  />
         <ModalAlertNotSupported />
       </div>
     );

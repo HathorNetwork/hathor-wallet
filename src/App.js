@@ -312,7 +312,7 @@ const returnDefaultComponent = (Component, props) => {
       return <Redirect to={{ pathname: '/wallet_type/' }} />;
     } else {
       return (
-        <div className="component-div">
+        <div className="component-div h-100">
           <Navigation {...props}/>
           <Component {...props} />
           <RequestErrorModal {...props} />

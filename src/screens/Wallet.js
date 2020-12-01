@@ -273,19 +273,19 @@ class Wallet extends React.Component {
       <div id="wallet-div">
         {!this.state.backupDone && renderBackupAlert()}
         <div className="content-wrapper">
-         {/* This back button is not 100% perfect because when the user has just unlocked the wallet, it would go back to it when clicked
-           * There is no easy way to get the previous path
-           * I could use a lib (https://github.com/hinok/react-router-last-location)
-           * Or handle it in our code, saving the last accessed screen
-           * XXX Is it worth it to do anything about it just to prevent this case?
-           */}
+        {/* This back button is not 100% perfect because when the user has just unlocked the wallet, it would go back to it when clicked
+          * There is no easy way to get the previous path
+          * I could use a lib (https://github.com/hinok/react-router-last-location)
+          * Or handle it in our code, saving the last accessed screen
+          * XXX Is it worth it to do anything about it just to prevent this case?
+          */}
           <BackButton {...this.props} />
           {renderUnlockedWallet()}
         </div>
+        <TokenBar {...this.props} />
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title={t`Unregister token`} body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
-        <TokenBar {...this.props} />
       </div>
     );
   }

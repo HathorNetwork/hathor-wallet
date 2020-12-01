@@ -9,7 +9,6 @@ import React from 'react';
 import { t } from 'ttag'
 
 import logo from '../assets/images/hathor-logo.png';
-import wallet from '../utils/wallet';
 import InitialImages from '../components/InitialImages';
 
 
