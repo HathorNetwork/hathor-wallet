@@ -21,6 +21,7 @@ import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
 import helpers from '../utils/helpers';
 import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
+import InputNumber from '../components/InputNumber';
 
 
 const mapStateToProps = (state) => {
@@ -200,8 +201,8 @@ class CreateToken extends React.Component {
   /**
    * Handles amount input change
    */
-  onAmountChange = (e) => {
-    this.setState({amount: e.target.value});
+  onAmountChange = (amount) => {
+    this.setState({amount});
   }
 
   /**
@@ -259,14 +260,10 @@ class CreateToken extends React.Component {
           <div className="row">
             <div className="form-group col-4">
               <label>{t`Amount`}</label>
-              <input
+              <InputNumber
                required
-               type="number"
                className="form-control"
-               onChange={this.onAmountChange}
-               value={this.state.amount || ''}
-               step={hathorLib.helpers.prettyValue(1)}
-               min={hathorLib.helpers.prettyValue(1)}
+               onValueChange={this.onAmountChange}
                placeholder={hathorLib.helpers.prettyValue(0)}
               />
             </div>

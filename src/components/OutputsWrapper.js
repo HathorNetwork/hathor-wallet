@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import _ from 'lodash';
 import hathorLib from '@hathor/wallet-lib';
+import InputNumber from './InputNumber';
 
 
 /**
@@ -46,7 +47,7 @@ class OutputsWrapper extends React.Component {
     return (
       <div className="input-group mb-3">
         <input type="text" ref={this.address} placeholder={t`Address`} className="form-control output-address col-5" />
-        <input type="number" ref={this.value} step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control output-value col-2" />
+        <InputNumber ref={this.value} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control output-value col-2" />
         <div className="form-check mr-2 d-flex flex-column justify-content-center">
           <input className="form-check-input mt-0 has-timelock" type="checkbox"
             ref={this.timelockCheckbox} onChange={this.handleCheckboxTimelockChange} id={this.uniqueID}
