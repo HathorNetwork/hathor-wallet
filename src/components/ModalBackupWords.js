@@ -43,8 +43,13 @@ class ModalBackupWords extends React.Component {
      * passwordSuccess {boolean} If user wrote the correct password
      * showValidation {boolean} If should show validation component
      * passwordFormValidated {boolean} If password form is valid or not
-     * wordsValidation {Array} Array of selected words to be used to validate the backup
-     * chosenWords {Array} Array of words that user selected in the order he selected
+     * validationSteps {{backupIndex: Number, correctWord: String, options: string[], done: boolean, last: boolean}[]}
+     *    Array of objects, which each object represents a validation step.
+     *    validationStep.backupIndex keeps the original index of the correctWord.
+     *    validationStep.correctWord keeps the string value of the correctWord.
+     *    validationStep.options array of strings composed by the correctWord and four wrong options.
+     *    validationStep.done if true the step was correctly completed.
+     *    validationStep.last if true it is the last step of the array
      */
     this.state = {
       errorMessage: '',
@@ -158,8 +163,8 @@ class ModalBackupWords extends React.Component {
         validationStep,
         errorMessage: (
           <span>
-            {t`Wrong word. Please double check the words you saved.`}
-            <strong onClick={() => this.setState({ showValidation: false, errorMessage: '' })}>Click here to start the process again.</strong>
+            <span>{t`Wrong word. Please double check the words you saved.`}</span>
+            <strong onClick={() => this.setState({ showValidation: false, errorMessage: '' })}>{t`Click here to start the process again.`}</strong>
           </span>
         ),
       });
@@ -173,9 +178,12 @@ class ModalBackupWords extends React.Component {
     this.setState({ validationStep });
   };
 
+  /**
+   * Called when user clicks on the close button.
+   */
   handleClose = () => {
     if (this.state.showValidation) {
-      return this.setState({ showValidation: false, errorMessage: '' });
+      this.setState({ showValidation: false, errorMessage: '' });
     }
 
     return $('#backupWordsModal').modal('hide');
@@ -291,13 +299,17 @@ class ModalBackupWords extends React.Component {
     };
 
     const renderValidationProgress = () => {
+      const activeIndex = this.state.validationSteps.findIndex(
+        (step) => !step.done
+      )
+
       return (
         <div className='validation-progress d-flex flex-row justify-content-center'>
-          {this.state.validationSteps.map((validationStep) => (
+          {this.state.validationSteps.map((validationStep, index) => (
             <div
-              key={validationStep.correctWord}
+              key={index}
               className={`validation-progress-step ${
-                validationStep.done ? 'validation-progress-step-done' : ''
+                index <= activeIndex ? 'validation-progress-step-active' : ''
               }`}
             />
           ))}

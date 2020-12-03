@@ -455,15 +455,11 @@ svg.svg-wrapper {
 
 #backupWordsModal {
   .modal-dialog.show-validation {
-    max-width: 670px;
-
     .validation-step-index {
       margin-bottom: 32px;
     }
 
     .validation-step-words {
-      padding: 0 64px;
-
       > * {
         position: relative;
         flex: 1 1 0px;
@@ -497,7 +493,7 @@ svg.svg-wrapper {
         background: $purpleHathor;
         opacity: 0.5;
 
-        &-done {
+        &-active {
           opacity: 1;
         }
 
@@ -508,7 +504,6 @@ svg.svg-wrapper {
     }
 
     .error-message {
-      padding: 0 64px;
       margin: 32px 0 0 0;
       display: flex;
       align-items: center;
