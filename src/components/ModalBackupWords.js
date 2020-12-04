@@ -160,7 +160,7 @@ class ModalBackupWords extends React.Component {
     validationStep.chosenOption = option;
     if (option !== validationStep.correctWord) {
       this.setState({
-        validationStep,
+        validationSteps: this.state.validationSteps,
         errorMessage: (
           <span>
             <span>{t`Wrong word. Please double check the words you saved.`}</span>
@@ -175,19 +175,8 @@ class ModalBackupWords extends React.Component {
       return;
     }
     validationStep.done = true;
-    this.setState({ validationStep });
+    this.setState({ validationSteps: this.state.validationSteps });
   };
-
-  /**
-   * Called when user clicks on the close button.
-   */
-  handleClose = () => {
-    if (this.state.showValidation) {
-      this.setState({ showValidation: false, errorMessage: '' });
-    }
-
-    return $('#backupWordsModal').modal('hide');
-  }
 
   render() {
     const renderAskPassword = () => {
@@ -362,7 +351,7 @@ class ModalBackupWords extends React.Component {
                 type='button'
                 className='close'
                 aria-label='Close'
-                onClick={this.handleClose}
+                data-dismiss="modal"
               >
                 <span aria-hidden='true'>&times;</span>
               </button>
