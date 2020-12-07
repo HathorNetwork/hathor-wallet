@@ -156,11 +156,13 @@ class ModalBackupWords extends React.Component {
   /**
    * Called when user finishes the backup. We validate the backup and shows a success message, in case of success
    */
-  handleValidationStepOption = (option, validationStep) => {
+  handleValidationStepOption = (option, validationStepIndex) => {
+    const validationSteps = [ ...this.state.validationSteps ];
+    const validationStep = validationSteps[validationStepIndex];
     validationStep.chosenOption = option;
     if (option !== validationStep.correctWord) {
       this.setState({
-        validationSteps: this.state.validationSteps,
+        validationSteps,
         errorMessage: (
           <span>
             <span>{t`Wrong word. Please double check the words you saved.`}</span>
@@ -175,7 +177,7 @@ class ModalBackupWords extends React.Component {
       return;
     }
     validationStep.done = true;
-    this.setState({ validationSteps: this.state.validationSteps });
+    this.setState({ validationSteps });
   };
 
   render() {
@@ -265,8 +267,8 @@ class ModalBackupWords extends React.Component {
             role='list'
             aria-label='Backup Validation Options'
           >
-            {validationStep.options.map((option) => (
-              <div key={option} role='listitem'>
+            {validationStep.options.map((option, index) => (
+              <div key={index} role='listitem'>
                 <button
                   className={`btn btn-dark btn-block validate-step-option ${
                     validationStep.chosenOption === option
@@ -274,7 +276,7 @@ class ModalBackupWords extends React.Component {
                       : ''
                   }`}
                   onClick={() =>
-                    this.handleValidationStepOption(option, validationStep)
+                    this.handleValidationStepOption(option, this.state.validationSteps.indexOf(validationStep))
                   }
                   disabled={this.state.errorMessage}
                 >
