@@ -38,7 +38,7 @@ msgstr ""
 msgid "Passphrase and confirm passphrase must be equal"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:99
+#: src/components/ModalBackupWords.js:108
 #: src/components/ModalResetAllData.js:42
 #: src/screens/ChoosePassphrase.js:59
 msgid "Invalid password"
@@ -331,7 +331,7 @@ msgid ""
 "advise you to do it now, but you can do it later."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:225
+#: src/components/ModalBackupWords.js:262
 #: src/screens/NewWallet.js:178
 msgid "Do it later"
 msgstr ""
@@ -716,7 +716,7 @@ msgid ""
 "before doing so."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:290
+#: src/components/ModalBackupWords.js:360
 #: src/screens/WalletVersionError.js:98
 msgid "Backup Words"
 msgstr ""
@@ -814,8 +814,7 @@ msgstr ""
 
 #: src/components/ModalAddManyTokens.js:112
 #: src/components/ModalAddToken.js:91
-#: src/components/ModalBackupWords.js:171
-#: src/components/ModalBackupWords.js:269
+#: src/components/ModalBackupWords.js:210
 #: src/components/ModalEditToken.js:95
 #: src/components/ModalSendTx.js:181
 #: src/components/ModalUnregisteredTokenInfo.js:113
@@ -890,48 +889,44 @@ msgstr ""
 msgid "Action not supported"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:118
-msgid "Invalid number of words"
+#: src/components/ModalBackupWords.js:166
+msgid "Wrong word. Please double check the words you saved."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:125
-msgid "Invalid sequence of words"
+#: src/components/ModalBackupWords.js:167
+msgid "Click here to start the process again."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:157
+#: src/components/ModalBackupWords.js:196
 msgid "We need your password to show the words"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:160
+#: src/components/ModalBackupWords.js:199
 #: src/components/ModalResetAllData.js:78
 msgid "Password*"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:172
+#: src/components/ModalBackupWords.js:211
 #: src/components/ModalSendTx.js:182
 #: src/components/tokens/TokenMelt.js:100
 #: src/components/tokens/TokenMint.js:165
 msgid "Go"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:212
+#: src/components/ModalBackupWords.js:249
 msgid ""
 "Save the words and never share them. Anyone who has access to them will "
 "control your tokens."
 msgstr ""
 
-#: src/components/ModalBackupWords.js:226
+#: src/components/ModalBackupWords.js:263
 msgid "Ok, I have saved them"
 msgstr ""
 
-#: src/components/ModalBackupWords.js:255
+#: src/components/ModalBackupWords.js:327
 msgid ""
-"Please, select the words below in the correct order. This is for your "
-"safety and to ensure you wrote them down correctly."
-msgstr ""
-
-#: src/components/ModalBackupWords.js:270
-msgid "Validate"
+"To make sure you saved, please select the word that corresponds to the "
+"number below."
 msgstr ""
 
 #: src/components/ModalEditToken.js:78

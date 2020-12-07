@@ -102,7 +102,7 @@ class Wallet extends React.Component {
     hathorLib.wallet.markBackupAsDone();
     this.props.updateWords(null);
     this.setState({ backupDone: true, successMessage: t`Backup completed!` }, () => {
-      this.refs.alertSuccess.show(1000);
+      this.refs.alertSuccess.show(3000);
     });
   }
 

@@ -120,7 +120,7 @@ class NewWallet extends React.Component {
   validationSuccess = () => {
     $('#backupWordsModal').on('hidden.bs.modal', (e) => {
       hathorLib.wallet.markBackupAsDone();
-      this.refs.alertSuccess.show(1000);
+      this.refs.alertSuccess.show(3000);
       this.setState({ askPassword: true });
     });
     $('#backupWordsModal').modal('hide');

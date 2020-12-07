@@ -11,7 +11,7 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import _ from 'lodash';
 import { updateWords } from '../actions/index';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import { WORDS_VALIDATION } from '../constants';
 
@@ -43,41 +43,50 @@ class ModalBackupWords extends React.Component {
      * passwordSuccess {boolean} If user wrote the correct password
      * showValidation {boolean} If should show validation component
      * passwordFormValidated {boolean} If password form is valid or not
-     * wordsValidation {Array} Array of selected words to be used to validate the backup
-     * chosenWords {Array} Array of words that user selected in the order he selected
+     * validationSteps {{backupIndex: Number, correctWord: String, options: string[], done: boolean, last: boolean}[]}
+     *    Array of objects, which each object represents a validation step.
+     *    validationStep.backupIndex keeps the original index of the correctWord.
+     *    validationStep.correctWord keeps the string value of the correctWord.
+     *    validationStep.options array of strings composed by the correctWord and four wrong options.
+     *    validationStep.done if true the step was correctly completed.
+     *    validationStep.last if true it is the last step of the array
      */
     this.state = {
       errorMessage: '',
       passwordSuccess: false,
       showValidation: false,
       passwordFormValidated: false,
-      wordsValidation: [],
-      chosenWords: [],
-    }
+      validationSteps: [],
+    };
   }
 
   componentDidMount = () => {
     $('#backupWordsModal').on('hide.bs.modal', (e) => {
-      this.setState({ errorMessage: '', passwordSuccess: false, showValidation: false, wordsValidation: [], chosenWords: [] });
+      this.setState({
+        errorMessage: '',
+        passwordSuccess: false,
+        showValidation: false,
+        validationSteps: [],
+      });
       if (this.props.needPassword) {
         this.props.updateWords(null);
       }
       if (this.refs.password) {
         this.refs.password.value = '';
       }
-    })
+    });
 
     $('#backupWordsModal').on('shown.bs.modal', (e) => {
       if (this.refs.password) {
         this.refs.password.focus();
       }
-    })
-  }
+    });
+  };
 
   componentWillUnmount = () => {
     // Removing all event listeners
     $('#backupWordsModal').off();
-  }
+  };
 
   /**
    * Called when the user writes the password, so we can decrypt the saved words and show to him
@@ -96,59 +105,80 @@ class ModalBackupWords extends React.Component {
         this.props.updateWords(words);
         this.setState({ passwordSuccess: true, errorMessage: '' });
       } else {
-        this.setState({errorMessage: t`Invalid password`})
+        this.setState({ errorMessage: t`Invalid password` });
       }
     }
-  }
+  };
 
   /**
-   * Called when user clicks the button saying that he has saved the words already  
-   * So we select some words to do the validation and show validation component in the modal
+   * Called when user clicks the button saying that he has saved the words already
+   * Then, validation steps will ask the right word given an index between [1,24].
+   * As the words were shown previosly, the user should be able to find any word given an index.
    */
   handleWordsSaved = () => {
-    const wordsValidation = _.shuffle(this.props.words.split(' ')).slice(0, WORDS_VALIDATION);
-    this.setState({ showValidation: true, wordsValidation });
-  }
+    const wordsArray = this.props.words.split(' ');
+    const wordsToValidate = _.shuffle(wordsArray).slice(0, WORDS_VALIDATION);
+    const validationSteps = wordsToValidate.map((word, index) => {
+      const backupIndex = wordsArray.indexOf(word);
+      let optionsStartIndex = backupIndex - 2;
+      let optionsEndIndex = backupIndex + 2;
+
+      // If index is 0 or 1, startIndex would be negative
+      // So we set start to 0 and end to 4
+      if (optionsStartIndex < 0) {
+        optionsStartIndex = 0;
+        optionsEndIndex = optionsStartIndex + 4;
+      }
+
+      // If index is 22 or 23, endIndex would be greater than the max
+      // So we set to the max and decrease the startIndex
+      const maxIndex = wordsArray.length - 1;
+      if (optionsEndIndex > maxIndex) {
+        optionsEndIndex = maxIndex;
+        optionsStartIndex = maxIndex - 4;
+      }
+
+      const options = _.shuffle(
+        wordsArray.slice(optionsStartIndex, optionsEndIndex + 1)
+      );
+
+      return {
+        backupIndex: backupIndex + 1,
+        correctWord: word,
+        options,
+        done: false,
+        last: index === wordsToValidate.length - 1,
+      };
+    });
+    this.setState({ showValidation: true, validationSteps });
+  };
 
   /**
    * Called when user finishes the backup. We validate the backup and shows a success message, in case of success
    */
-  handleValidateBackup = () => {
-    if (this.state.chosenWords.length !== WORDS_VALIDATION) {
-      this.setState({ errorMessage: t`Invalid number of words` });
+  handleValidationStepOption = (option, validationStepIndex) => {
+    const validationSteps = [ ...this.state.validationSteps ];
+    const validationStep = validationSteps[validationStepIndex];
+    validationStep.chosenOption = option;
+    if (option !== validationStep.correctWord) {
+      this.setState({
+        validationSteps,
+        errorMessage: (
+          <span>
+            <span>{t`Wrong word. Please double check the words you saved.`}</span>
+            <strong onClick={() => this.setState({ showValidation: false, errorMessage: '' })}>{t`Click here to start the process again.`}</strong>
+          </span>
+        ),
+      });
       return;
     }
-    let validationArray = this.props.words.split(' ');
-    for (const word of this.state.chosenWords) {
-      const wordIdx = validationArray.indexOf(word);
-      if (wordIdx === -1) {
-        this.setState({ errorMessage: t`Invalid sequence of words` });
-        return;
-      }
-      validationArray = validationArray.slice(wordIdx);
+    if (validationStep.last) {
+      this.props.validationSuccess();
+      return;
     }
-    this.setState({ errorMessage: '' });
-    this.props.validationSuccess();
-  }
-
-  /**
-   * Called when user removes an already chosen word from the backup validation (just remove the word from the array)
-   */
-  chosenWordRemoved = (word) => {
-    let chosenWords = this.state.chosenWords;
-    const idx = chosenWords.indexOf(word);
-    chosenWords.splice(idx, 1);
-    this.setState({ chosenWords });
-  }
-
-  /**
-   * Called when user clicks in a word on the backup validation (just add the word in the array)
-   */
-  validationWordClicked = (word) => {
-    let chosenWords = this.state.chosenWords;
-    chosenWords.push(word);
-    this.setState({ chosenWords });
-  }
+    validationStep.done = true;
+    this.setState({ validationSteps });
+  };
 
   render() {
     const renderAskPassword = () => {
@@ -179,10 +209,8 @@ class ModalBackupWords extends React.Component {
         return renderAskPasswordButtons();
       } else if (this.props.words && !this.state.showValidation) {
         return renderShowWordsButtons();
-      } else if (this.state.showValidation) {
-        return renderValidateBackupButtons();
       }
-    }
+    };
 
     const renderWordsTd = (start, end) => {
       return this.props.words.split(' ').slice(start, end).map((word, idx) => {
@@ -228,49 +256,72 @@ class ModalBackupWords extends React.Component {
       )
     }
 
-    const renderWordsValidation = () => {
-      return this.state.wordsValidation.map((word, idx) => {
-        // The button will only be disabled when all instances of the words have been selected
-        // Might have more than one instance of the same word
-        return (
-          <button key={`${word}${idx}`} className="btn btn-dark mr-2 mt-3" disabled={hathorLib.helpers.elementCount(this.state.chosenWords, word) === hathorLib.helpers.elementCount(this.state.wordsValidation, word)} onClick={(e) => {this.validationWordClicked(word)}}>{word}</button>
-        )
-      });
-    }
+    const renderValidationStep = (validationStep) => {
+      return (
+        <article className='w-100'>
+          <h2 className='validation-step-index d-flex flex-row justify-content-center btn-block mb-16'>
+            {validationStep.backupIndex}
+          </h2>
+          <section
+            className='validation-step-words btn-group d-flex flex-row justify-content-center'
+            role='list'
+            aria-label='Backup Validation Options'
+          >
+            {validationStep.options.map((option, index) => (
+              <div key={index} role='listitem'>
+                <button
+                  className={`btn btn-dark btn-block validate-step-option ${
+                    validationStep.chosenOption === option
+                      ? 'chosen-option'
+                      : ''
+                  }`}
+                  onClick={() =>
+                    this.handleValidationStepOption(option, this.state.validationSteps.indexOf(validationStep))
+                  }
+                  disabled={this.state.errorMessage}
+                >
+                  {option}
+                </button>
+              </div>
+            ))}
+          </section>
+        </article>
+      );
+    };
 
-    const renderChosenWords = () => {
-      return this.state.chosenWords.map((word, idx) => {
-        return (
-          <div key={`${word}${idx}`}>
-            <span className="word-chosen">{word}</span>
-            <i className="fa fa-close" onClick={(e) => {this.chosenWordRemoved(word)}} />
-          </div>
-        )
-      });
-    }
+    const renderValidationProgress = () => {
+      const activeIndex = this.state.validationSteps.findIndex(
+        (step) => !step.done
+      )
 
-    const renderValidateBackup = () => {
+      return (
+        <div className='validation-progress d-flex flex-row justify-content-center'>
+          {this.state.validationSteps.map((validationStep, index) => (
+            <div
+              key={index}
+              className={`validation-progress-step ${
+                index <= activeIndex ? 'validation-progress-step-active' : ''
+              }`}
+            />
+          ))}
+        </div>
+      );
+    };
+
+    const renderValidation = () => {
+      const validationStep = this.state.validationSteps.find(
+        (step) => !step.done
+      );
+
       return (
         <div>
-          <p>{t`Please, select the words below in the correct order. This is for your safety and to ensure you wrote them down correctly.`}</p>
-          <div className="chosen-words-wrapper w-100 d-flex flex-row flex-wrap align-items-start">
-            {renderChosenWords()}
-          </div>
-          <div className="words-validation d-flex flex-row align-items-start flex-wrap">
-            {renderWordsValidation()}
+          <p>{t`To make sure you saved, please select the word that corresponds to the number below.`}</p>
+          <div className='w-100 d-flex flex-row flex-wrap align-items-start'>
+            {renderValidationStep(validationStep)}
           </div>
         </div>
-      )
-    }
-
-    const renderValidateBackupButtons = () => {
-      return (
-        <div>
-          <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Cancel`}</button>
-          <button onClick={this.handleValidateBackup} type="button" className="btn btn-hathor">{t`Validate`}</button>
-        </div>
-      )
-    }
+      );
+    };
 
     const renderBody = () => {
       if (this.props.needPassword && !this.state.passwordSuccess) {
@@ -278,37 +329,57 @@ class ModalBackupWords extends React.Component {
       } else if (this.props.words && !this.state.showValidation) {
         return renderShowWords();
       } else if (this.state.showValidation) {
-        return renderValidateBackup();
+        return renderValidation();
       }
-    }
+    };
 
     return (
-      <div className="modal fade" id="backupWordsModal" tabIndex="-1" role="dialog" aria-labelledby="backupWordsModal" aria-hidden="true">
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">{t`Backup Words`}</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+      <div
+        className='modal fade'
+        id='backupWordsModal'
+        tabIndex='-1'
+        role='dialog'
+        aria-labelledby='backupWordsModal'
+        aria-hidden='true'
+      >
+        <div className={`modal-dialog ${this.state.showValidation ? 'show-validation' : ''}`} role='document'>
+          <div className='modal-content'>
+            <div className='modal-header'>
+              <h5
+                className='modal-title'
+                id='exampleModalLabel'
+              >{t`Backup Words`}</h5>
+              <button
+                type='button'
+                className='close'
+                aria-label='Close'
+                data-dismiss="modal"
+              >
+                <span aria-hidden='true'>&times;</span>
               </button>
             </div>
-            <div className="modal-body">
+            <div className='modal-body'>
               {renderBody()}
-              <div className="row mt-3">
-                <div className="col-12 col-sm-10">
-                    <p className="error-message text-danger">
-                      {this.state.errorMessage}
+              <div className='row'>
+                <div className='col-12'>
+                  {this.state.errorMessage && (
+                    <p className='error-message text-danger'>
+                      <i className='fa fa-times-circle'/> {this.state.errorMessage}
                     </p>
+                  )}
                 </div>
               </div>
+              {this.state.showValidation && (
+                renderValidationProgress()
+              )}
             </div>
-            <div className="modal-footer">
-              {renderButtons()}
-            </div>
+            {!this.state.showValidation && (
+              <div className='modal-footer'>{renderButtons()}</div>
+            )}
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
 
