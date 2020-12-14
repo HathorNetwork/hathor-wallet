@@ -20,7 +20,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.17.2';
+export const VERSION = '0.18.0';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
@@ -36,7 +36,7 @@ export const MAX_GRAPH_LEVEL = 1;
 /**
  * How many words will be used to validate the backup
  */
-export const WORDS_VALIDATION = 6;
+export const WORDS_VALIDATION = 5;
 
 /**
  * Message to be written when user wants to reset all wallet data

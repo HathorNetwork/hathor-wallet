@@ -73,7 +73,7 @@ class Server extends React.Component {
     hathorLib.wallet.changeServer(newServer);
     const promise = version.checkApiVersion();
     promise.then(() => {
-      wallet.reloadData();
+      wallet.reloadData({endConnection: true});
       this.props.history.push('/wallet/');
     }, () => {
       this.setState({ loading: false });

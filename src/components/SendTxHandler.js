@@ -8,7 +8,6 @@
 import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
-import { MIN_JOB_ESTIMATION } from '../constants';
 import PropTypes from 'prop-types';
 
 
@@ -101,11 +100,6 @@ class SendTxHandler extends React.Component {
   }
 
   render() {
-    const renderMiningEstimation = () => {
-      const estimation = Math.max(Math.ceil(this.state.miningEstimation), MIN_JOB_ESTIMATION);
-      return t`Estimated time: ${estimation}s`;
-    }
-
     const renderBody = () => {
       if (this.state.errorMessage) {
         return (

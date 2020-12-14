@@ -21,10 +21,10 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.17.2",
+  "version": "0.18.0",
   "private": true,
   "dependencies": {
-    "@hathor/wallet-lib": "^0.16.3",
+    "@hathor/wallet-lib": "^0.16.5",
     "@ledgerhq/hw-transport-node-hid": "^4.73.4",
     "@sentry/electron": "^0.17.0",
     "babel-polyfill": "^6.26.0",
@@ -68,8 +68,9 @@
     "electron-pack-linux": "electron-builder --linux -c.extraMetadata.main=build/electron.js",
     "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js",
     "watch-electron": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev nodemon --watch ./public/**/* --watch . --exec 'npm run electron'",
-    "electron-dev": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .",
-    "locale-update-pot": "ttag extract -o ./locale/texts.pot ./src/"
+    "electron-dev": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .'",
+    "locale-update-pot": "ttag extract -o ./locale/texts.pot ./src/",
+    "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps"
   },
   "devDependencies": {
     "@sentry/browser": "^5.0.5",

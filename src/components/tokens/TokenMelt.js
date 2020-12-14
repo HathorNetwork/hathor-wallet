@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import wallet from '../../utils/wallet';
+import InputNumber from '../InputNumber';
 
 
 /**
@@ -37,7 +38,8 @@ class TokenMelt extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = (pin) => {
-    const amountValue = wallet.decimalToInteger(this.amount.current.value);
+    const sanitizedValue = (this.amount.current.value || "").replace(/,/g, '');
+    const amountValue = wallet.decimalToInteger(sanitizedValue);
     const output = this.props.meltOutputs[0];
     return hathorLib.tokens.meltTokens(
       {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
@@ -77,7 +79,7 @@ class TokenMelt extends React.Component {
           <div className="row">
             <div className="form-group col-3">
               <label>Amount</label>
-              <input required type="number" ref={this.amount} step={hathorLib.helpers.prettyValue(1)} min={hathorLib.helpers.prettyValue(1)} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control" />
+              <InputNumber required ref={this.amount} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control" />
             </div>
           </div>
           <div className="form-group d-flex flex-row align-items-center">
