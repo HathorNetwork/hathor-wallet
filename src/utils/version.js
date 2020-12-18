@@ -33,7 +33,7 @@ const version = {
         store.dispatch(isVersionAllowedUpdate({allowed: hathorLib.helpers.isVersionAllowed(data.version, hathorLib.constants.MIN_API_VERSION)}));
         // Update network in redux
         store.dispatch(networkUpdate({network: data.network}));
-        resolve();
+        resolve(data);
       }, (error) => {
         reject();
       });

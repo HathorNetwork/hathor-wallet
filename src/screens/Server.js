@@ -72,7 +72,13 @@ class Server extends React.Component {
     // Update new server in local storage
     hathorLib.wallet.changeServer(newServer);
     const promise = version.checkApiVersion();
-    promise.then(() => {
+    promise.then((data) => {
+      if (data.network === 'mainnet') {
+        hathorLib.network.setNetwork('mainnet');
+      } else {
+        // Can we assume it will be testnet? I think it's safe
+        hathorLib.network.setNetwork('testnet');
+      }
       wallet.reloadData({endConnection: true});
       this.props.history.push('/wallet/');
     }, () => {
