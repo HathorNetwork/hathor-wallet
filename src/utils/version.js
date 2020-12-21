@@ -33,6 +33,16 @@ const version = {
         store.dispatch(isVersionAllowedUpdate({allowed: hathorLib.helpers.isVersionAllowed(data.version, hathorLib.constants.MIN_API_VERSION)}));
         // Update network in redux
         store.dispatch(networkUpdate({network: data.network}));
+        // Set network in lib to use the correct address byte
+        let network;
+        if (data.network === 'mainnet') {
+          network = 'mainnet';
+        } else {
+          // Can we assume it will be testnet? I think it's safe
+          network = 'testnet';
+        }
+        hathorLib.storage.setItem('wallet:network', network);
+        hathorLib.network.setNetwork(network);
         resolve(data);
       }, (error) => {
         reject();
