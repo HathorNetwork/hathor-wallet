@@ -45,14 +45,11 @@ import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMess
 import AddressList from './screens/AddressList';
 
 hathorLib.storage.setStore(new HybridStore());
-const currentNetwork = hathorLib.storage.getItem('wallet:network');
-if (currentNetwork === 'testnet') {
-  hathorLib.network.setNetwork('testnet');
-} else {
-  // Default if data on storage is null is mainnet
-  // because we currently support only mainnet
-  hathorLib.network.setNetwork('mainnet');
-}
+
+// Default if data on storage is null is mainnet
+// because we currently support only mainnet
+const currentNetwork = hathorLib.storage.getItem('wallet:network') || 'mainnet';
+hathorLib.network.setNetwork(currentNetwork);
 
 // set default server
 hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
