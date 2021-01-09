@@ -5,6 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import store from '../store/index';
+import { networkUpdate } from '../actions/index';
+import hathorLib from '@hathor/wallet-lib';
+
 let shell = null;
 if (window.require) {
   shell = window.require('electron').shell;
@@ -30,6 +34,21 @@ const helpers = {
       // This should be used only when testing
       window.open(url, '_blank');
     }
+  },
+
+  /**
+   * Update network variables in redux, storage and lib
+   *
+   * @params {String} network Network name
+   *
+   * @memberof Version
+   * @inner
+   */
+  updateNetwork(network) {
+    // Update network in redux
+    store.dispatch(networkUpdate({network}));
+    hathorLib.storage.setItem('wallet:network', network);
+    hathorLib.network.setNetwork(network);
   },
 }
 

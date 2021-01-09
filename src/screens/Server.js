@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import version from '../utils/version';
 import wallet from '../utils/wallet';
+import helpers from '../utils/helpers';
 import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVERS } from '../constants';
@@ -30,12 +31,14 @@ class Server extends React.Component {
      * loading {boolean} If should show spinner while waiting for server response
      * newServer {boolean} If user selected checkbox that he wants to set a new server
      * selectedValue {string} Server selected from the user
+     * testnetServer {boolean} If user selected checkbox that he wants to connect to the testnet
      */
     this.state = {
       newServer: false,
       errorMessage: '',
       selectedValue: '',
       loading: false,
+      testnetServer: false,
     }
   }
 
@@ -69,10 +72,20 @@ class Server extends React.Component {
     }
 
     this.setState({ loading: true, errorMessage: '' });
+    const currentNetwork = hathorLib.network.getNetwork().name;
+    const currentServer = hathorLib.helpers.getServerURL();
     // Update new server in local storage
     hathorLib.wallet.changeServer(newServer);
     const promise = version.checkApiVersion();
-    promise.then(() => {
+    promise.then((data) => {
+      // If the user has not explicitly said that he wants to connect to a testnet but end up connecting to one, we show error and don't continue
+      if (!this.state.testnetServer && data.network !== 'mainnet') {
+        this.setState({ errorMessage: t`You tried to connect to a testnet server and did not select that. Beware if someone asked you to do it, the tokens from testnet have no value.`, loading: false });
+        // Go back to the previous network and server
+        helpers.updateNetwork(currentNetwork);
+        hathorLib.wallet.changeServer(currentServer);
+        return;
+      }
       wallet.reloadData({endConnection: true});
       this.props.history.push('/wallet/');
     }, () => {
@@ -93,6 +106,16 @@ class Server extends React.Component {
     } else {
       $(this.refs.newServerWrapper).hide(400);
     }
+  }
+
+  /**
+   * Update testnet checkbox state
+   *
+   * @param {Object} e Event of checkbox change
+   */
+  handleTestnetChange = (e) => {
+    const value = e.target.checked;
+    this.setState({ testnetServer: value });
   }
 
   /**
@@ -133,6 +156,12 @@ class Server extends React.Component {
           </div>
           <div ref="newServerWrapper" className="mt-3" style={{display: 'none'}}>
             <input type="text" placeholder={t`New server`} ref="newServer" className="form-control col-4" />
+            <div className="form-check checkbox-wrapper mt-3">
+              <input className="form-check-input" type="checkbox" id="testnetCheckbox" onChange={this.handleTestnetChange} />
+              <label className="form-check-label" htmlFor="testnetCheckbox">
+                {t`I want to connect to a testnet full node. I understand that tokens from testnet have no value and are useful only for testing.`}
+              </label>
+            </div>
           </div>
           {hathorLib.wallet.isSoftwareWallet() && <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />}
         </form>

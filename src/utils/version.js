@@ -6,8 +6,9 @@
  */
 
 import store from '../store/index';
-import { isVersionAllowedUpdate, networkUpdate } from '../actions/index';
+import { isVersionAllowedUpdate } from '../actions/index';
 import { FIRST_WALLET_COMPATIBLE_VERSION } from '../constants';
+import helpers from './helpers';
 import hathorLib from '@hathor/wallet-lib';
 
 /**
@@ -31,8 +32,6 @@ const version = {
       libPromise.then((data) => {
         // Update version allowed in redux
         store.dispatch(isVersionAllowedUpdate({allowed: hathorLib.helpers.isVersionAllowed(data.version, hathorLib.constants.MIN_API_VERSION)}));
-        // Update network in redux
-        store.dispatch(networkUpdate({network: data.network}));
         // Set network in lib to use the correct address byte
         let network;
         if (data.network === 'mainnet') {
@@ -41,8 +40,7 @@ const version = {
           // Can we assume it will be testnet? I think it's safe
           network = 'testnet';
         }
-        hathorLib.storage.setItem('wallet:network', network);
-        hathorLib.network.setNetwork(network);
+        helpers.updateNetwork(network);
         resolve(data);
       }, (error) => {
         reject();
