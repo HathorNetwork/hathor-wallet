@@ -91,9 +91,14 @@ export const DEFAULT_SERVERS = [
 export const DEFAULT_SERVER = DEFAULT_SERVERS[0];
 
 /**
- * Explorer vase url
+ * Explorer base url
  */
 export const EXPLORER_BASE_URL = "https://explorer.hathor.network";
+
+/**
+ * Testnet explorer base url
+ */
+export const TESTNET_EXPLORER_BASE_URL = "https://explorer.testnet.hathor.network";
 
 /**
  * URL of token deposit RFC

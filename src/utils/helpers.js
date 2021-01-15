@@ -8,6 +8,7 @@
 import store from '../store/index';
 import { networkUpdate } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
+import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
 
 let shell = null;
 if (window.require) {
@@ -49,6 +50,24 @@ const helpers = {
     store.dispatch(networkUpdate({network}));
     hathorLib.storage.setItem('wallet:network', network);
     hathorLib.network.setNetwork(network);
+  },
+
+  /**
+   * Return the URL for the testnet or mainnet
+   * depending on the one from the full node connected
+   *
+   * @return {String} Explorer URL
+   *
+   * @memberof Version
+   * @inner
+   */
+  getExplorerURL() {
+    const currentNetwork = hathorLib.storage.getItem('wallet:network') || 'mainnet';
+    if (currentNetwork === 'mainnet') {
+      return EXPLORER_BASE_URL;
+    } else {
+      return TESTNET_EXPLORER_BASE_URL;
+    }
   },
 }
 

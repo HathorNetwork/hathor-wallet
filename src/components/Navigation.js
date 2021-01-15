@@ -11,7 +11,6 @@ import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from './Version';
 import ServerStatus from './ServerStatus';
-import { EXPLORER_BASE_URL } from '../constants';
 import helpers from '../utils/helpers';
 
 /**
@@ -22,13 +21,13 @@ import helpers from '../utils/helpers';
 class Navigation extends React.Component {
 
   /**
-   * Method called when user clicked on Esxplorer menu
+   * Method called when user clicked on Explorer menu
    *
    * @param {Object} e Event for the click
    */
   goToExplorer = (e) => {
     e.preventDefault();
-    helpers.openExternalURL(EXPLORER_BASE_URL);
+    helpers.openExternalURL(helpers.getExplorerURL());
   }
 
   render() {
