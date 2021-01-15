@@ -46,7 +46,7 @@ msgstr ""
 
 #: src/components/ModalSendTx.js:101
 #: src/screens/ChoosePassphrase.js:64
-#: src/screens/LockedWallet.js:52
+#: src/screens/LockedWallet.js:53
 #: src/screens/Server.js:70
 msgid "Invalid PIN"
 msgstr ""
@@ -73,7 +73,7 @@ msgid "Password"
 msgstr ""
 
 #: src/screens/ChoosePassphrase.js:140
-#: src/screens/LockedWallet.js:92
+#: src/screens/LockedWallet.js:99
 #: src/screens/Server.js:166
 msgid "PIN"
 msgstr ""
@@ -283,17 +283,21 @@ msgstr ""
 msgid "**Transactions found:** ${ this.props.transactionsFound }"
 msgstr ""
 
-#: src/screens/LockedWallet.js:90
+#: src/screens/LockedWallet.js:65
+msgid "Invalid server version."
+msgstr ""
+
+#: src/screens/LockedWallet.js:97
 msgid "Your wallet is locked. Please write down your PIN to unlock it."
 msgstr ""
 
 #: src/components/ModalResetAllData.js:68
-#: src/screens/LockedWallet.js:96
+#: src/screens/LockedWallet.js:103
 #: src/screens/Settings.js:143
 msgid "Reset all data"
 msgstr ""
 
-#: src/screens/LockedWallet.js:97
+#: src/screens/LockedWallet.js:104
 msgid "Unlock"
 msgstr ""
 
@@ -546,12 +550,12 @@ msgstr ""
 msgid "Ok, I got it! I want to continue using a software wallet."
 msgstr ""
 
-#: src/screens/TransactionDetail.js:114
+#: src/screens/TransactionDetail.js:113
 #, javascript-format
 msgid "Transaction with hash ${ _this3.props.match.params.id } not found"
 msgstr ""
 
-#: src/screens/TransactionDetail.js:131
+#: src/screens/TransactionDetail.js:130
 msgid "See on explorer"
 msgstr ""
 
@@ -1077,19 +1081,19 @@ msgstr ""
 msgid "Register token"
 msgstr ""
 
-#: src/components/Navigation.js:49
+#: src/components/Navigation.js:48
 msgid "Wallet"
 msgstr ""
 
-#: src/components/Navigation.js:52
+#: src/components/Navigation.js:51
 msgid "Send tokens"
 msgstr ""
 
-#: src/components/Navigation.js:55
+#: src/components/Navigation.js:54
 msgid "Custom tokens"
 msgstr ""
 
-#: src/components/Navigation.js:58
+#: src/components/Navigation.js:57
 msgid "Public Explorer"
 msgstr ""
 
