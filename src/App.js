@@ -45,17 +45,6 @@ import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMess
 import AddressList from './screens/AddressList';
 
 hathorLib.storage.setStore(new HybridStore());
-
-// Default if data on storage is null is mainnet
-// because we currently support only mainnet
-const currentNetwork = hathorLib.storage.getItem('wallet:network') || 'mainnet';
-// We always set the network in the version.js utils file when we receive the /version/ from the full node
-// however when we first start the app we also need to set it because this /version/ request is async
-// and we might start loading the transactions before we receive it.
-// It would be better if we load the transactions only after the /version/ response
-// but while we don't refactor this, we have to save the network in the storage to set here
-hathorLib.network.setNetwork(currentNetwork);
-
 // set default server
 hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
@@ -240,7 +229,10 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
     promise.then(() => {
       wallet.localStorageToRedux();
     });
-    return <WaitVersion {...props} />;
+    return <Redirect to={{
+      pathname: '/loading_addresses/',
+      state: {path: props.match.url}
+    }} />;
   } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
     return <VersionError {...props} />;
   } else {
