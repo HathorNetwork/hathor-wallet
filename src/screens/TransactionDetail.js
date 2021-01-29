@@ -14,7 +14,6 @@ import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
 import helpers from '../utils/helpers';
 import path from 'path';
-import { EXPLORER_BASE_URL } from '../constants';
 
 
 /**
@@ -102,7 +101,7 @@ class TransactionDetail extends React.Component {
    */
   goToExplorer = (e) => {
     e.preventDefault();
-    const url = path.join(EXPLORER_BASE_URL, `transaction/${this.state.transaction.hash}`);
+    const url = path.join(helpers.getExplorerURL(), `transaction/${this.state.transaction.hash}`);
     helpers.openExternalURL(url);
   }
 

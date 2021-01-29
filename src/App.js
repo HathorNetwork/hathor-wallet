@@ -44,9 +44,7 @@ import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
 
-hathorLib.network.setNetwork('mainnet');
 hathorLib.storage.setStore(new HybridStore());
-
 // set default server
 hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
@@ -231,7 +229,10 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
     promise.then(() => {
       wallet.localStorageToRedux();
     });
-    return <WaitVersion {...props} />;
+    return <Redirect to={{
+      pathname: '/loading_addresses/',
+      state: {path: props.match.url}
+    }} />;
   } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
     return <VersionError {...props} />;
   } else {

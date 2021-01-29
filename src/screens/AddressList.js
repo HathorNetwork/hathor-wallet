@@ -9,7 +9,7 @@ import React from 'react';
 import { t } from 'ttag'
 import HathorPaginate from '../components/HathorPaginate';
 import HathorAlert from '../components/HathorAlert';
-import { EXPLORER_BASE_URL, WALLET_HISTORY_COUNT } from '../constants';
+import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
 import path from 'path';
 
@@ -147,7 +147,7 @@ class AddressList extends React.Component {
    */
   goToAddressSearch = (e, address) => {
     e.preventDefault();
-    const url = path.join(EXPLORER_BASE_URL, `address/${address}`);
+    const url = path.join(helpers.getExplorerURL(), `address/${address}`);
     helpers.openExternalURL(url);
   }
 

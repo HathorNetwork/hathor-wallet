@@ -5,6 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import store from '../store/index';
+import { networkUpdate } from '../actions/index';
+import hathorLib from '@hathor/wallet-lib';
+import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
+
 let shell = null;
 if (window.require) {
   shell = window.require('electron').shell;
@@ -29,6 +34,39 @@ const helpers = {
       // In case it's running on the browser it won't have electron shell
       // This should be used only when testing
       window.open(url, '_blank');
+    }
+  },
+
+  /**
+   * Update network variables in redux, storage and lib
+   *
+   * @params {String} network Network name
+   *
+   * @memberof Version
+   * @inner
+   */
+  updateNetwork(network) {
+    // Update network in redux
+    store.dispatch(networkUpdate({network}));
+    hathorLib.storage.setItem('wallet:network', network);
+    hathorLib.network.setNetwork(network);
+  },
+
+  /**
+   * Return the URL for the testnet or mainnet
+   * depending on the one from the full node connected
+   *
+   * @return {String} Explorer URL
+   *
+   * @memberof Version
+   * @inner
+   */
+  getExplorerURL() {
+    const currentNetwork = hathorLib.storage.getItem('wallet:network') || 'mainnet';
+    if (currentNetwork === 'mainnet') {
+      return EXPLORER_BASE_URL;
+    } else {
+      return TESTNET_EXPLORER_BASE_URL;
     }
   },
 }
