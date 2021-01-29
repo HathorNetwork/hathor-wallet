@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import SpanFmt from '../components/SpanFmt';
 import $ from 'jquery';
 import version from '../utils/version';
 import wallet from '../utils/wallet';
@@ -169,8 +170,8 @@ class Server extends React.Component {
     const renderConfirmBody = () => {
       return (
         <div>
-          <p>The selected server connects you to a testnet. Beware if someone asked you to do it, the <strong>tokens from testnet have no value</strong>. Only continue if you know what you are doing.</p>
-          <p>To continue with the server change you must type 'testnet' in the box below and click on 'Connect to testnet' button.</p>
+          <p><SpanFmt>{t`The selected server connects you to a testnet. Beware if someone asked you to do it, the **tokens from testnet have no value**. Only continue if you know what you are doing.`}</SpanFmt></p>
+          <p>{t`To continue with the server change you must type 'testnet' in the box below and click on 'Connect to testnet' button.`}</p>
           <div ref="testnetWrapper" className="mt-2 d-flex flex-row align-items-center">
             <input type="text" ref="testnetTest" className="form-control col-4" />
             <span className="text-danger ml-2">{this.state.testnetError}</span>
@@ -181,7 +182,7 @@ class Server extends React.Component {
 
     const renderSecondaryModalButton = () => {
       return (
-        <button onClick={this.confirmTestnetServer} type="button" className="btn btn-secondary">Connect to testnet</button>
+        <button onClick={this.confirmTestnetServer} type="button" className="btn btn-secondary">{t`Connect to testnet`}</button>
       );
     }
 
@@ -213,7 +214,7 @@ class Server extends React.Component {
           {this.state.loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
         </div>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
-        <ModalAlert title="Confirm testnet server" body={renderConfirmBody()} buttonName="Cancel change" handleButton={() => $('#alertModal').modal('hide')} secondaryButton={renderSecondaryModalButton()} />
+        <ModalAlert title={t`Confirm testnet server`} body={renderConfirmBody()} buttonName={t`Cancel change`} handleButton={() => $('#alertModal').modal('hide')} secondaryButton={renderSecondaryModalButton()} />
       </div>
     )
   }

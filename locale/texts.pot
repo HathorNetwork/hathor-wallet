@@ -47,7 +47,7 @@ msgstr ""
 #: src/components/ModalSendTx.js:101
 #: src/screens/ChoosePassphrase.js:64
 #: src/screens/LockedWallet.js:53
-#: src/screens/Server.js:70
+#: src/screens/Server.js:79
 msgid "Invalid PIN"
 msgstr ""
 
@@ -74,7 +74,7 @@ msgstr ""
 
 #: src/screens/ChoosePassphrase.js:140
 #: src/screens/LockedWallet.js:99
-#: src/screens/Server.js:166
+#: src/screens/Server.js:210
 msgid "PIN"
 msgstr ""
 
@@ -435,36 +435,53 @@ msgstr ""
 msgid "I allow Hathor Wallet to report error information to Hathor team."
 msgstr ""
 
-#: src/screens/Server.js:58
+#: src/screens/Server.js:67
 msgid "New server is not valid"
 msgstr ""
 
-#: src/screens/Server.js:83
-msgid ""
-"You tried to connect to a testnet server and did not select that. Beware if "
-"someone asked you to do it, the tokens from testnet have no value."
+#: src/screens/Server.js:112
+msgid "Invalid value."
 msgstr ""
 
-#: src/screens/Server.js:141
+#: src/screens/Server.js:173
+msgid ""
+"The selected server connects you to a testnet. Beware if someone asked you "
+"to do it, the **tokens from testnet have no value**. Only continue if you "
+"know what you are doing."
+msgstr ""
+
+#: src/screens/Server.js:174
+msgid ""
+"To continue with the server change you must type 'testnet' in the box below "
+"and click on 'Connect to testnet' button."
+msgstr ""
+
+#: src/screens/Server.js:185
+msgid "Connect to testnet"
+msgstr ""
+
+#: src/screens/Server.js:191
 msgid "Select one of the default servers to connect or choose a new one"
 msgstr ""
 
-#: src/screens/Server.js:154
+#: src/screens/Server.js:204
 msgid "Select a new server"
 msgstr ""
 
-#: src/screens/Server.js:158
+#: src/screens/Server.js:208
 msgid "New server"
 msgstr ""
 
-#: src/screens/Server.js:162
-msgid ""
-"I want to connect to a testnet full node. I understand that tokens from "
-"testnet have no value and are useful only for testing."
+#: src/screens/Server.js:213
+msgid "Connect to server"
 msgstr ""
 
-#: src/screens/Server.js:169
-msgid "Connect to server"
+#: src/screens/Server.js:217
+msgid "Confirm testnet server"
+msgstr ""
+
+#: src/screens/Server.js:217
+msgid "Cancel change"
 msgstr ""
 
 #: src/screens/Settings.js:85
