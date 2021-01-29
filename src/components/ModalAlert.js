@@ -39,6 +39,7 @@ class ModalAlert extends React.Component {
       if (this.props.showFooter) {
         return (
           <div className="modal-footer">
+            {this.props.secondaryButton}
             <button onClick={this.buttonClick} type="button" className="btn btn-hathor">{this.props.buttonName}</button>
           </div>
         );
@@ -76,6 +77,7 @@ ModalAlert.propTypes = {
   buttonName: PropTypes.string,
   title: PropTypes.string.isRequired,
   handleButton: PropTypes.func,
+  secondaryButton: PropTypes.element,
   body: PropTypes.element.isRequired,
   showFooter: PropTypes.bool,
 };

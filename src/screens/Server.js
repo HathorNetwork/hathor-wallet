@@ -15,6 +15,7 @@ import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVERS } from '../constants';
 import colors from '../index.scss';
+import ModalAlert from '../components/ModalAlert';
 
 
 /**
@@ -31,20 +32,27 @@ class Server extends React.Component {
      * loading {boolean} If should show spinner while waiting for server response
      * newServer {boolean} If user selected checkbox that he wants to set a new server
      * selectedValue {string} Server selected from the user
-     * testnetServer {boolean} If user selected checkbox that he wants to connect to the testnet
+     * selectedServer {string} Server that the user wants to connect
+     * testnetError {string} Message to be shown in case of error when changing to a testnet server.
      */
     this.state = {
       newServer: false,
       errorMessage: '',
       selectedValue: '',
       loading: false,
-      testnetServer: false,
+      selectedServer: '',
+      testnetError: '',
     }
   }
 
   componentDidMount = () => {
     $('#requestErrorModal').on('hidden.bs.modal', (e) => {
       this.setState({ loading: false });
+    });
+
+    $('#alertModal').on('hidden.bs.modal', (e) => {
+      this.setState({ testnetError: '' });
+      this.refs.testnetTest.value = '';
     });
   }
 
@@ -71,21 +79,53 @@ class Server extends React.Component {
       return;
     }
 
-    this.setState({ loading: true, errorMessage: '' });
+    this.setState({ loading: true, errorMessage: '', selectedServer: newServer });
     const currentNetwork = hathorLib.network.getNetwork().name;
     const currentServer = hathorLib.helpers.getServerURL();
     // Update new server in local storage
     hathorLib.wallet.changeServer(newServer);
-    const promise = version.checkApiVersion();
-    promise.then((data) => {
-      // If the user has not explicitly said that he wants to connect to a testnet but end up connecting to one, we show error and don't continue
-      if (!this.state.testnetServer && data.network !== 'mainnet') {
-        this.setState({ errorMessage: t`You tried to connect to a testnet server and did not select that. Beware if someone asked you to do it, the tokens from testnet have no value.`, loading: false });
-        // Go back to the previous network and server
-        helpers.updateNetwork(currentNetwork);
+    hathorLib.versionApi.getVersion((data) => {
+      // If the user selected a testnet server, we show a modal to confirm the operation
+      if (data.network !== 'mainnet') {
+        // Go back to the previous server
+        // If the user decides to continue with this change, we will update again
         hathorLib.wallet.changeServer(currentServer);
-        return;
+        $('#alertModal').modal('show');
+        this.setState({ loading: false });
+      } else {
+        this.executeServerChange();
       }
+    }, () => {
+      // Go back to the previous server
+      hathorLib.wallet.changeServer(currentServer);
+      this.setState({ loading: false });
+    });
+  }
+
+  /**
+   * Method called when user confirms that wants to connect to a testnet server
+   * Validate that the user has written 'testnet' on the input and then execute the change
+   */
+  confirmTestnetServer = () => {
+    if (this.refs.testnetTest.value.toLowerCase() !== 'testnet') {
+      this.setState({ testnetError: t`Invalid value.` });
+      return;
+    }
+    hathorLib.wallet.changeServer(this.state.selectedServer);
+    $('#alertModal').on('hidden.bs.modal', (e) => {
+      this.setState({ loading: true });
+      this.executeServerChange();
+    });
+    $('#alertModal').modal('hide');
+  }
+
+  /**
+   * Execute server change checking server API and, in case of success
+   * reloads data and redirects to wallet screen
+   */
+  executeServerChange = () => {
+    const promise = version.checkApiVersion();
+    promise.then(() => {
       wallet.reloadData({endConnection: true});
       this.props.history.push('/wallet/');
     }, () => {
@@ -109,16 +149,6 @@ class Server extends React.Component {
   }
 
   /**
-   * Update testnet checkbox state
-   *
-   * @param {Object} e Event of checkbox change
-   */
-  handleTestnetChange = (e) => {
-    const value = e.target.checked;
-    this.setState({ testnetServer: value });
-  }
-
-  /**
    * Update state of the selected server
    *
    * @param {Object} e Event of select change
@@ -134,6 +164,25 @@ class Server extends React.Component {
           <option key={idx} value={idx}>{server}</option>
         );
       });
+    }
+
+    const renderConfirmBody = () => {
+      return (
+        <div>
+          <p>The selected server connects you to a testnet. Beware if someone asked you to do it, the <strong>tokens from testnet have no value</strong>. Only continue if you know what you are doing.</p>
+          <p>To continue with the server change you must type 'testnet' in the box below and click on 'Connect to testnet' button.</p>
+          <div ref="testnetWrapper" className="mt-2 d-flex flex-row align-items-center">
+            <input type="text" ref="testnetTest" className="form-control col-4" />
+            <span className="text-danger ml-2">{this.state.testnetError}</span>
+          </div>
+        </div>
+      );
+    }
+
+    const renderSecondaryModalButton = () => {
+      return (
+        <button onClick={this.confirmTestnetServer} type="button" className="btn btn-secondary">Connect to testnet</button>
+      );
     }
 
     return (
@@ -156,12 +205,6 @@ class Server extends React.Component {
           </div>
           <div ref="newServerWrapper" className="mt-3" style={{display: 'none'}}>
             <input type="text" placeholder={t`New server`} ref="newServer" className="form-control col-4" />
-            <div className="form-check checkbox-wrapper mt-3">
-              <input className="form-check-input" type="checkbox" id="testnetCheckbox" onChange={this.handleTestnetChange} />
-              <label className="form-check-label" htmlFor="testnetCheckbox">
-                {t`I want to connect to a testnet full node. I understand that tokens from testnet have no value and are useful only for testing.`}
-              </label>
-            </div>
           </div>
           {hathorLib.wallet.isSoftwareWallet() && <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />}
         </form>
@@ -170,6 +213,7 @@ class Server extends React.Component {
           {this.state.loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
         </div>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
+        <ModalAlert title="Confirm testnet server" body={renderConfirmBody()} buttonName="Cancel change" handleButton={() => $('#alertModal').modal('hide')} secondaryButton={renderSecondaryModalButton()} />
       </div>
     )
   }
