@@ -88,9 +88,11 @@ class LoadWallet extends React.Component {
    * This method is called after the ChoosePin component has a valid PIN and succeeds
    */
   pinSuccess = () => {
+    // Getting redux variables before cleaning all data
+    const { pin, password } = this.props;
     // First we clean what can still be there of a last wallet
     wallet.cleanWallet();
-    wallet.generateWallet(this.state.words, '', this.props.pin, this.props.password, true);
+    wallet.generateWallet(this.state.words, '', pin, password, true);
     hathorLib.wallet.markBackupAsDone();
     // Clean pin and password from redux
     this.props.updatePassword(null);
