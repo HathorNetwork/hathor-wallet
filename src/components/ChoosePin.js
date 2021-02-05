@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { t } from 'ttag'
-import version from '../utils/version';
 
 import PinPasswordWrapper from '../components/PinPasswordWrapper'
 import { updatePin } from '../actions/index';
@@ -37,23 +36,13 @@ class ChoosePin extends React.Component {
     this.props.updatePin(value);
   }
 
-  /**
-   * Check API version and update server network before loading data
-   */
-  handleSuccess = () => {
-    const promise = version.checkApiVersion();
-    promise.then(() => {
-      this.props.success();
-    });
-  }
-
   render() {
     const renderMessage = () => {
       return <p className="mt-4 mb-4">{t`The PIN is a 6-digit password requested to authorize actions in your wallet, such as generating new addresses and sending tokens.`}</p>;
     }
 
     return (
-      <PinPasswordWrapper ref="wrapper" message={renderMessage()} success={this.handleSuccess} back={this.props.back} handleChange={this.handleChange} field='PIN' pattern='[0-9]{6}' inputMode='numeric' button={t`Next`} />
+      <PinPasswordWrapper ref="wrapper" message={renderMessage()} success={this.props.success} back={this.props.back} handleChange={this.handleChange} field='PIN' pattern='[0-9]{6}' inputMode='numeric' button={t`Next`} />
     )
   }
 }
