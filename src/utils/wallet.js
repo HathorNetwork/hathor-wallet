@@ -9,6 +9,7 @@ import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS } from '../constants';
 import store from '../store/index';
 import { loadingAddresses, historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
+import version from './version';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
@@ -84,13 +85,19 @@ const wallet = {
    */
   executeGenerateWallet(words, passphrase, pin, password, loadHistory) {
     if (loadHistory) {
-      // Load history from address
       store.dispatch(loadingAddresses(true));
-      const promise = hathorLib.wallet.executeGenerateWallet(words, passphrase, pin, password, loadHistory);
-      promise.then(() => {
-        this.afterLoadAddressHistory();
+      const fullPromise = new Promise((resolve, reject) => {
+        const versionPromise = version.checkApiVersion();
+        versionPromise.then(() => {
+          // Load history from address
+          const promise = hathorLib.wallet.executeGenerateWallet(words, passphrase, pin, password, loadHistory);
+          promise.then(() => {
+            this.afterLoadAddressHistory();
+            resolve();
+          });
+        });
       });
-      return promise;
+      return fullPromise;
     } else {
       return hathorLib.wallet.executeGenerateWallet(words, passphrase, pin, password, loadHistory);
     }
