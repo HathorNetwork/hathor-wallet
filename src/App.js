@@ -44,9 +44,7 @@ import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
 
-hathorLib.network.setNetwork('mainnet');
 hathorLib.storage.setStore(new HybridStore());
-
 // set default server
 hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
@@ -225,13 +223,17 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
   // For server screen we don't need to check version
   const isServerScreen = props.match.path === '/server';
   const reduxState = store.getState();
+
   // Check version
   if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
     const promise = version.checkApiVersion();
     promise.then(() => {
       wallet.localStorageToRedux();
     });
-    return <WaitVersion {...props} />;
+    return <Redirect to={{
+      pathname: '/loading_addresses/',
+      state: {path: props.match.url}
+    }} />;
   } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
     return <VersionError {...props} />;
   } else {
@@ -278,6 +280,15 @@ const returnStartedRoute = (Component, props, rest) => {
         return <Redirect to={{pathname: '/wallet/'}} />;
       }
     } else {
+      const reduxState = store.getState();
+      if (reduxState.loadingAddresses) {
+        // If wallet is still loading addresses we redirect to the loading screen
+        return <Redirect to={{
+          pathname: '/loading_addresses/',
+          state: {path: props.match.url}
+        }} />;
+      }
+
       if (rest.loaded) {
         // When the wallet is opened, the path that is called is '/', which currenctly redirects to the Wallet component
         // in that case, if the wallet is not loaded but it's started, it should redirect to the signin/wallet type screen

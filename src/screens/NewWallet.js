@@ -102,10 +102,12 @@ class NewWallet extends React.Component {
    * After choosing a new PIN with success, executes the wallet creation and redirect to the wallet
    */
   pinSuccess = () => {
+    // Getting redux variables before cleaning all data
+    const { words, pin, password } = this.props;
     // First we clean what can still be there of a last wallet
     wallet.cleanWallet();
     // Generate addresses and load data
-    wallet.executeGenerateWallet(this.props.words, '', this.props.pin, this.props.password, true);
+    wallet.executeGenerateWallet(words, '', pin, password, true);
     // Clean pin, password and words from redux
     this.props.updatePassword(null);
     this.props.updatePin(null);

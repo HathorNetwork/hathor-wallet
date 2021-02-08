@@ -12,6 +12,7 @@ import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
+import version from '../utils/version';
 
 
 /**
@@ -53,11 +54,17 @@ class LockedWallet extends React.Component {
         return;
       }
 
-      // Everything is fine, so redirect to wallet
-      hathorLib.wallet.unlock();
-      // Reload wallet data
-      wallet.reloadData();
-      this.props.history.push('/wallet/');
+      const promise = version.checkApiVersion();
+      promise.then((data) => {
+        // Everything is fine, so redirect to wallet
+        hathorLib.wallet.unlock();
+        // Reload wallet data
+        wallet.reloadData();
+        this.props.history.push('/wallet/');
+      }, () => {
+        this.setState({ errorMessage: t`Invalid server version.` });
+        return;
+      });
     } else {
       this.refs.unlockForm.classList.add('was-validated')
     }

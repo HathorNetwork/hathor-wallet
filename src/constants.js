@@ -20,7 +20,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.18.0';
+export const VERSION = '0.18.1';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
@@ -91,9 +91,14 @@ export const DEFAULT_SERVERS = [
 export const DEFAULT_SERVER = DEFAULT_SERVERS[0];
 
 /**
- * Explorer vase url
+ * Explorer base url
  */
 export const EXPLORER_BASE_URL = "https://explorer.hathor.network";
+
+/**
+ * Testnet explorer base url
+ */
+export const TESTNET_EXPLORER_BASE_URL = "https://explorer.testnet.hathor.network";
 
 /**
  * URL of token deposit RFC
