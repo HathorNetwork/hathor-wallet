@@ -44,14 +44,12 @@ class TxData extends React.Component {
    * tokens {Array} tokens contained in this transaction
    * tokenClicked {Object} token clicked to be sent as props to the modal of unregistered token info
    */
-  defaultState = {
+  state = {
     raw: false,
     children: false,
     tokens: [],
     tokenClicked: null,
   };
-
-  state = Object.assign({}, this.defaultState);
 
   // Array of token uid that was already found to show the symbol
   tokensFound = [];
@@ -59,21 +57,6 @@ class TxData extends React.Component {
   componentDidMount = () => {
     this.calculateTokens();
     this.updateGraphs();
-  }
-
-  componentDidUpdate = (prevProps) => {
-    if (prevProps.transaction !== this.props.transaction) {
-      // When we are changing the transaction but keeping the same component
-      // we must clean the state
-      this.tokensFound = [];
-      if (this.state.raw) {
-        // XXX Show raw transaction should come directly from state, we should refactor this later
-        this.toggleRaw();
-      }
-      this.setState(this.defaultState);
-      this.calculateTokens();
-      this.updateGraphs();
-    }
   }
 
   /**
@@ -159,8 +142,11 @@ class TxData extends React.Component {
 
   /**
    * Show/hide raw transaction in hexadecimal
+   *
+   * @param {Object} e Event emitted when clicking link
    */
-  toggleRaw = () => {
+  toggleRaw = (e) => {
+    e.preventDefault();
     this.setState({ raw: !this.state.raw }, () => {
       if (this.state.raw) {
         $(this.refs.rawTx).show(300);
@@ -663,7 +649,7 @@ class TxData extends React.Component {
     const showRawWrapper = () => {
       return (
         <div className="mt-3 mb-3">
-          <a href="true" onClick={(e) => {e.preventDefault(); this.toggleRaw()}}>{this.state.raw ? t`Hide raw transaction` : t`Show raw transaction`}</a>
+          <a href="true" onClick={(e) => this.toggleRaw(e)}>{this.state.raw ? t`Hide raw transaction` : t`Show raw transaction`}</a>
           {this.state.raw ?
             <CopyToClipboard text={this.props.transaction.raw} onCopy={this.copied}>
               <i className="fa fa-clone pointer ml-1" title={t`Copy raw tx to clipboard`}></i>

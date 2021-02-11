@@ -110,7 +110,7 @@ class TransactionDetail extends React.Component {
       return (
         <div>
           {renderLinks()}
-          {this.state.transaction ? <TxData transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} history={this.props.history} /> : <p className="text-danger">{t`Transaction with hash ${this.props.match.params.id} not found`}</p>}
+          {this.state.transaction ? <TxData key={this.state.transaction.hash} transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} history={this.props.history} /> : <p className="text-danger">{t`Transaction with hash ${this.props.match.params.id} not found`}</p>}
         </div>
       );
     }
