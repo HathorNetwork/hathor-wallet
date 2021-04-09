@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { VERSION } from '../constants';
+import { VERSION, LEDGER_ENABLED } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
 import $ from 'jquery';
 
@@ -22,19 +22,17 @@ class Version extends React.Component {
    * If it's software wallet show modal warning
    */
   walletTypeClicked = () => {
-    // XXX We currently do not support ledger.
-    // After we start supporting it we should
-    // 1. Add onClick={this.walletTypeClicked} in the span below
-    // 2. Add cursor: pointer in css in 'span.software'
-    if (hathorLib.wallet.isSoftwareWallet()) {
-      $('#softwareWalletWarningModal').modal('show');
+    if (LEDGER_ENABLED) {
+      if (hathorLib.wallet.isSoftwareWallet()) {
+        $('#softwareWalletWarningModal').modal('show');
+      }
     }
   }
 
   render() {
     return (
       <div className='d-flex flex-column version-wrapper align-items-center'>
-        <span className={hathorLib.wallet.isSoftwareWallet() ? 'software' : 'hardware'}>
+        <span className={hathorLib.wallet.isSoftwareWallet() ? 'software' : 'hardware'} onClick={this.walletTypeClicked}>
           {hathorLib.wallet.isSoftwareWallet() ? t`Software Wallet` : t`Hardware Wallet`}
         </span>
         <span>{VERSION}</span>

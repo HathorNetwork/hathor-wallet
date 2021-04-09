@@ -125,3 +125,8 @@ if (window.require) {
  * IPC renderer to communicate with electron main process
  */
 export const IPC_RENDERER = ipcRenderer;
+
+/**
+ * Flag to hide/show elements after ledger integration is done
+ */
+export const LEDGER_ENABLED = false;
