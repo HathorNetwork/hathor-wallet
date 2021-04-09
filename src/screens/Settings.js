@@ -131,7 +131,7 @@ class Settings extends React.Component {
       <div className="content-wrapper settings">
         <BackButton {...this.props} />
         <div>
-          <p><strong>{t`Date and time:`}</strong> {now.toString()}</p>
+          <p><strong>{t`Date and time:`}</strong> {now.toString()} <span title={`Timestamp: ${hathorLib.dateFormatter.dateToTimestamp(now)}`}> <i class="fa fa-exclamation-circle"></i></span></p>
         </div>
         <div>
           <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
