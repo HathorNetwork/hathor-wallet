@@ -126,9 +126,13 @@ class Settings extends React.Component {
 
   render() {
     const serverURL = hathorLib.helpers.getServerURL();
+    const now = new Date();
     return (
       <div className="content-wrapper settings">
         <BackButton {...this.props} />
+        <div>
+          <p><strong>{t`Date and time:`}</strong> {now.toString()}</p>
+        </div>
         <div>
           <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
           <button className="btn btn-hathor" onClick={this.changeServer}>{t`Change server`}</button>
