@@ -30,11 +30,23 @@ class Settings extends React.Component {
   /**
    * confirmData {Object} data for the notification confirm modal (title, body and handleYes)
    * isNotificationOne {boolean} state to update if notification is turned on or off
+   * now {Date} state to store the date which is updated every second
    */
-  state = { confirmData: {}, isNotificationOn: null }
+  state = { confirmData: {}, isNotificationOn: null, now: new Date() }
+
+  // Stores the setTimeout interval of the date update
+  dateSetTimeoutInterval = null
 
   componentDidMount() {
     this.setState({ isNotificationOn: wallet.isNotificationOn() });
+
+    this.dateSetTimeoutInterval = setInterval(() => {
+      this.setState({ now: new Date() });
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.dateSetTimeoutInterval);
   }
 
   /**
@@ -126,12 +138,11 @@ class Settings extends React.Component {
 
   render() {
     const serverURL = hathorLib.helpers.getServerURL();
-    const now = new Date();
     return (
       <div className="content-wrapper settings">
         <BackButton {...this.props} />
         <div>
-          <p><strong>{t`Date and time:`}</strong> {now.toString()} <span title={`Timestamp: ${hathorLib.dateFormatter.dateToTimestamp(now)}`}> <i class="fa fa-exclamation-circle"></i></span></p>
+          <p><strong>{t`Date and time:`}</strong> {this.state.now.toString()} <span title={`Timestamp: ${hathorLib.dateFormatter.dateToTimestamp(this.state.now)}`}> <i className="fa fa-exclamation-circle"></i></span></p>
         </div>
         <div>
           <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
