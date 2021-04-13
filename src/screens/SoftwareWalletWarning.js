@@ -10,6 +10,7 @@ import { t } from 'ttag';
 
 import logo from '../assets/images/hathor-logo.png';
 import SoftwareWalletWarningMessage from '../components/SoftwareWalletWarningMessage';
+import InitialImages from '../components/InitialImages';
 
 
 /**
@@ -38,7 +39,7 @@ class SoftwareWalletWarning extends React.Component {
     return (
       <div className="outside-content-wrapper">
         <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div className="d-flex align-items-center flex-column">
+          <div className="d-flex align-items-center flex-column inside-div">
             <img className="hathor-logo" src={logo} alt="" />
             <div className="d-flex align-items-start flex-column">
               <div>
@@ -56,6 +57,7 @@ class SoftwareWalletWarning extends React.Component {
               </div>
             </div>
           </div>
+          <InitialImages />
         </div>
       </div>
     )

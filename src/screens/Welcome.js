@@ -13,6 +13,7 @@ import logo from '../assets/images/hathor-logo.png';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
 import InitialImages from '../components/InitialImages';
+import { LEDGER_ENABLED } from '../constants';
 
 
 /**
@@ -36,10 +37,12 @@ class Welcome extends React.Component {
       hathorLib.wallet.markWalletAsStarted();
       // For the mainnet sentry will be disabled by default and the user can change this on Settings
       wallet.disallowSentry();
-      // XXX restore to wallet_type when we want to enable Ledger
-      //this.props.history.push('/wallet_type/');
-      hathorLib.wallet.setWalletType('software');
-      this.props.history.push('/signin/');
+      if (LEDGER_ENABLED) {
+        this.props.history.push('/wallet_type/');
+      } else {
+        hathorLib.wallet.setWalletType('software');
+        this.props.history.push('/signin/');
+      }
     }
   }
 
