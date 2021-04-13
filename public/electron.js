@@ -36,6 +36,11 @@ if (process.platform === 'darwin') {
 const appName = 'Hathor Wallet';
 const walletVersion = '0.18.1';
 
+const debugMode = (
+  process.argv.indexOf('--unsafe-mode') >= 0 &&
+  process.argv.indexOf('--debug') >= 0
+);
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
@@ -60,9 +65,6 @@ function createWindow () {
   });
   // Adding wallet version to user agent, so we can get in all request headers
   mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + ' HathorWallet/' + walletVersion);
-
-  // Uncomment this to start the app with developer tools. Useful for debugging
-  //mainWindow.webContents.openDevTools();
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -108,6 +110,15 @@ function createWindow () {
         { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
       ]}
   ];
+
+  if (debugMode) {
+    template.push({
+      label: 'Debug',
+      submenu: [
+        { label: `Open DevTools`, click: function() { mainWindow.webContents.openDevTools(); }}
+      ]
+    });
+  };
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
