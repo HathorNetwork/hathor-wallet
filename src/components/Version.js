@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { VERSION } from '../constants';
+import { VERSION, LEDGER_ENABLED } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
 import $ from 'jquery';
 
@@ -22,8 +22,10 @@ class Version extends React.Component {
    * If it's software wallet show modal warning
    */
   walletTypeClicked = () => {
-    if (hathorLib.wallet.isSoftwareWallet()) {
-      $('#softwareWalletWarningModal').modal('show');
+    if (LEDGER_ENABLED) {
+      if (hathorLib.wallet.isSoftwareWallet()) {
+        $('#softwareWalletWarningModal').modal('show');
+      }
     }
   }
 

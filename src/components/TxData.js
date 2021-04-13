@@ -59,13 +59,6 @@ class TxData extends React.Component {
     this.updateGraphs();
   }
 
-  componentDidUpdate = (prevProps) => {
-    if (prevProps.transaction !== this.props.transaction) {
-      this.calculateTokens();
-      this.updateGraphs();
-    }
-  }
-
   /**
    * Returns the url to get the graph for each type
    *

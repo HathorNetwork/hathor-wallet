@@ -20,7 +20,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.18.1';
+export const VERSION = '0.18.2';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
@@ -125,3 +125,8 @@ if (window.require) {
  * IPC renderer to communicate with electron main process
  */
 export const IPC_RENDERER = ipcRenderer;
+
+/**
+ * Flag to hide/show elements after ledger integration is done
+ */
+export const LEDGER_ENABLED = false;

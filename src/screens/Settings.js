@@ -30,11 +30,29 @@ class Settings extends React.Component {
   /**
    * confirmData {Object} data for the notification confirm modal (title, body and handleYes)
    * isNotificationOne {boolean} state to update if notification is turned on or off
+   * now {Date} state to store the date which is updated every second
+   * showTimestamp {boolean} If should show timestamp or full date in date and time
    */
-  state = { confirmData: {}, isNotificationOn: null }
+  state = {
+    confirmData: {},
+    isNotificationOn: null,
+    now: new Date(),
+    showTimestamp: false,
+  }
+
+  // Stores the setTimeout interval of the date update
+  dateSetTimeoutInterval = null
 
   componentDidMount() {
     this.setState({ isNotificationOn: wallet.isNotificationOn() });
+
+    this.dateSetTimeoutInterval = setInterval(() => {
+      this.setState({ now: new Date() });
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.dateSetTimeoutInterval);
   }
 
   /**
@@ -129,6 +147,9 @@ class Settings extends React.Component {
     return (
       <div className="content-wrapper settings">
         <BackButton {...this.props} />
+        <div>
+          <p onDoubleClick={() => this.setState({ showTimestamp: !this.state.showTimestamp })}><strong>{t`Date and time:`}</strong> {this.state.showTimestamp ? hathorLib.dateFormatter.dateToTimestamp(this.state.now) : this.state.now.toString()}</p>
+        </div>
         <div>
           <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
           <button className="btn btn-hathor" onClick={this.changeServer}>{t`Change server`}</button>
