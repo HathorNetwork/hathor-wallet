@@ -12,7 +12,11 @@ import hathorLib from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {
-  return { selectedToken: state.selectedToken, tokens: state.tokens };
+  return { 
+    selectedToken: state.selectedToken,
+    tokens: state.tokens,
+    tokensBalance: state.tokensBalance,
+  };
 };
 
 /**
@@ -24,21 +28,25 @@ class WalletBalance extends React.Component {
   render = () => {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
     const symbol = token ? token.symbol : '';
+    const balance = {
+      available: token.uid in this.props.tokensBalance ? this.props.tokensBalance[token.uid].available : 0,
+      locked: token.uid in this.props.tokensBalance ? this.props.tokensBalance[token.uid].locked : 0,
+    }
 
     const renderBalance = () => {
 
       return (
         <div>
-          <p><strong>{t`Total:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.available + this.props.balance.locked)} {symbol}</p>
-          <p><strong>{t`Available:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.available)} {symbol}</p>
-          <p><strong>{t`Locked:`}</strong> {hathorLib.helpers.prettyValue(this.props.balance.locked)} {symbol}</p>
+          <p><strong>{t`Total:`}</strong> {hathorLib.helpers.prettyValue(balance.available + balance.locked)} {symbol}</p>
+          <p><strong>{t`Available:`}</strong> {hathorLib.helpers.prettyValue(balance.available)} {symbol}</p>
+          <p><strong>{t`Locked:`}</strong> {hathorLib.helpers.prettyValue(balance.locked)} {symbol}</p>
         </div>
       );
     }
 
     return (
       <div>
-        {this.props.balance && renderBalance()}
+        {balance && renderBalance()}
       </div>
     );
   }

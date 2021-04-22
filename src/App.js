@@ -34,26 +34,16 @@ import version from './utils/version';
 import wallet from './utils/wallet';
 import { connect } from "react-redux";
 import RequestErrorModal from './components/RequestError';
-import { dataLoaded, isOnlineUpdate, updateHeight } from "./actions/index";
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import { DEFAULT_SERVER, IPC_RENDERER, VERSION } from './constants';
-import { HybridStore } from './storage.js';
+import { DEFAULT_SERVER, IPC_RENDERER, VERSION, STORE } from './constants';
 import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
 
-hathorLib.storage.setStore(new HybridStore());
-// set default server
-hathorLib.wallet.setDefaultServer(DEFAULT_SERVER);
 
-const mapDispatchToProps = dispatch => {
-  return {
-    dataLoaded: (data) => dispatch(dataLoaded(data)),
-    isOnlineUpdate: (data) => dispatch(isOnlineUpdate(data)),
-  };
-};
+hathorLib.storage.setStore(STORE);
 
 const mapStateToProps = (state) => {
   return {
@@ -64,15 +54,7 @@ const mapStateToProps = (state) => {
 
 class Root extends React.Component {
   componentDidMount() {
-    hathorLib.WebSocketHandler.on('wallet', this.handleWebsocket);
-    hathorLib.WebSocketHandler.on('storage', this.handleWebsocketStorage);
-
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
-
-    hathorLib.WebSocketHandler.on('addresses_loaded', this.addressesLoadedUpdate);
-    hathorLib.WebSocketHandler.on('is_online', this.isOnlineUpdate);
-    hathorLib.WebSocketHandler.on('reload_data', this.reloadData);
-    hathorLib.WebSocketHandler.on('height_updated', this.handleHeightUpdated);
 
     if (IPC_RENDERER) {
       // Event called when user quits hathor app
@@ -86,99 +68,8 @@ class Root extends React.Component {
   }
 
   componentWillUnmount() {
-    hathorLib.WebSocketHandler.removeListener('wallet', this.handleWebsocket);
-    hathorLib.WebSocketHandler.removeListener('storage', this.handleWebsocketStorage);
-    hathorLib.WebSocketHandler.removeListener('height_updated', this.handleHeightUpdated);
-
-    hathorLib.WebSocketHandler.removeListener('addresses_loaded', this.addressesLoadedUpdate);
-    hathorLib.WebSocketHandler.removeListener('is_online', this.isOnlineUpdate);
-    hathorLib.WebSocketHandler.removeListener('reload_data', this.reloadData);
-
     if (IPC_RENDERER) {
       IPC_RENDERER.removeAllListeners("ledger:closed");
-    }
-  }
-
-  handleWebsocket = (wsData) => {
-    if (hathorLib.wallet.loaded()) {
-      // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
-      // TODO separate those messages
-      if (wsData.type === 'wallet:address_history') {
-        // If is a new transaction, we send a notification to the user, in case it's turned on
-        // We only send the notification if the inputs are not generated from this wallet
-        if (!hathorLib.wallet.txExists(wsData.history) && !hathorLib.wallet.areInputsMine(wsData.history)) {
-          let message = '';
-          if (hathorLib.helpers.isBlock(wsData.history)) {
-            message = 'You\'ve found a new block! Click to open it.';
-          } else {
-            message = 'You\'ve received a new transaction! Click to open it.'
-          }
-          const notification = wallet.sendNotification(message);
-          // Set the notification click, in case we have sent one
-          if (notification !== undefined) {
-            notification.onclick = () => {
-              this.props.history.push(`/transaction/${wsData.history.tx_id}/`);
-            }
-          }
-        }
-        wallet.newAddressHistory(wsData.history);
-      } else {
-        console.log('Websocket message not handled. Type:', wsData.type);
-      }
-    }
-  }
-
-  handleWebsocketStorage = (wsData) => {
-    if (hathorLib.wallet.loaded()) {
-      // We are still receiving lot of ws messages that are destined to the admin-frontend and not this wallet
-      // TODO separate those messages
-      console.log('Websocket message not handled. Type:', wsData.type);
-    }
-  }
-
-  /**
-   * Method called when WebSocketHandler from lib emits a height_updated event
-   * We update the height of the network in redux
-   *
-   * @param {number} height New height of the network
-   */
-  handleHeightUpdated = (height) => {
-    store.dispatch(updateHeight({ height }));
-  }
-
-  /**
-   * Method called when WebSocket receives a message after loading address history
-   * We just check and save the version that was loaded and update redux data
-   *
-   * @param {Object} data Object with {'historyTransactions', 'addressesFound'}
-   */
-  addressesLoadedUpdate = (data) => {
-    // Update the version of the wallet that the data was loaded
-    hathorLib.storage.setItem('wallet:version', VERSION);
-
-    // Update redux with loaded data
-    store.dispatch(dataLoaded({ addressesFound: data.addressesFound, transactionsFound: Object.keys(data.historyTransactions).length }));
-  }
-
-  /**
-   * Method called when WebSocket updates isOnline attribute, so we update this parameter in redux
-   *
-   * @param {boolean} data Boolean if websocket is online
-   */
-  isOnlineUpdate = (data) => {
-    if (data) {
-      // Check api version everytime we connect to the server
-      version.checkApiVersion();
-    }
-    store.dispatch(isOnlineUpdate({ isOnline: data }));
-  }
-
-  /**
-   * Method called when need to reload data when websocket reconnects
-   */
-  reloadData = (data) => {
-    if (hathorLib.wallet.loaded() && !this.props.loadingAddresses) {
-      wallet.reloadData();
     }
   }
 
@@ -351,4 +242,4 @@ const NavigationRoute = ({ component: Component, ...rest }) => (
   )} />
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(Root);
+export default connect(mapStateToProps)(Root);

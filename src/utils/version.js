@@ -41,7 +41,7 @@ const version = {
           network = 'testnet';
         }
         helpers.updateNetwork(network);
-        resolve(data);
+        resolve({...data, network});
       }, (error) => {
         reject();
       });

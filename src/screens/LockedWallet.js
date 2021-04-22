@@ -48,22 +48,16 @@ class LockedWallet extends React.Component {
     e.preventDefault();
     const isValid = this.refs.unlockForm.checkValidity();
     if (isValid) {
+      const pin = this.refs.pin.value;
       this.refs.unlockForm.classList.remove('was-validated')
-      if (!hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
+      if (!hathorLib.wallet.isPinCorrect(pin)) {
         this.setState({ errorMessage: t`Invalid PIN` });
         return;
       }
 
-      const promise = version.checkApiVersion();
-      promise.then((data) => {
-        // Everything is fine, so redirect to wallet
-        hathorLib.wallet.unlock();
-        // Reload wallet data
-        wallet.reloadData();
+      const promise = wallet.startWallet(null, '', pin, '', this.props.history, true);
+      promise.then(() => {
         this.props.history.push('/wallet/');
-      }, () => {
-        this.setState({ errorMessage: t`Invalid server version.` });
-        return;
       });
     } else {
       this.refs.unlockForm.classList.add('was-validated')

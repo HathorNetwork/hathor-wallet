@@ -17,6 +17,13 @@ import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVERS } from '../constants';
 import colors from '../index.scss';
 import ModalAlert from '../components/ModalAlert';
+import { connect } from "react-redux";
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet
+  };
+};
 
 
 /**
@@ -81,7 +88,6 @@ class Server extends React.Component {
     }
 
     this.setState({ loading: true, errorMessage: '', selectedServer: newServer });
-    const currentNetwork = hathorLib.network.getNetwork().name;
     const currentServer = hathorLib.helpers.getServerURL();
     // Update new server in local storage
     hathorLib.wallet.changeServer(newServer);
@@ -125,9 +131,8 @@ class Server extends React.Component {
    * reloads data and redirects to wallet screen
    */
   executeServerChange = () => {
-    const promise = version.checkApiVersion();
+    const promise = wallet.changeServer(this.props.wallet);
     promise.then(() => {
-      wallet.reloadData({endConnection: true});
       this.props.history.push('/wallet/');
     }, () => {
       this.setState({ loading: false });
@@ -220,4 +225,4 @@ class Server extends React.Component {
   }
 }
 
-export default Server;
+export default connect(mapStateToProps)(Server);

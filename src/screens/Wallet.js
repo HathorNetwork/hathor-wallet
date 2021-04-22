@@ -34,11 +34,7 @@ const mapDispatchToProps = dispatch => {
 
 
 const mapStateToProps = (state) => {
-  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken, true);
-  const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, state.selectedToken);
   return {
-    balance: balance,
-    historyTransactions: filteredHistoryTransactions,
     selectedToken: state.selectedToken,
     tokens: state.tokens,
   };
@@ -133,7 +129,8 @@ class Wallet extends React.Component {
   shouldShowAdministrativeTab = () => {
     const walletData = hathorLib.wallet.getWalletData();
 
-    for (const tx_id in this.props.historyTransactions) {
+    // TODO
+    /*for (const tx_id in this.props.historyTransactions) {
       const tx = this.props.historyTransactions[tx_id];
       for (const output of tx.outputs) {
         // This output is not mine
@@ -151,9 +148,13 @@ class Wallet extends React.Component {
         }
 
       }
-    }
+    }*/
 
     return false;
+  }
+
+  goToAllAddresses = () => {
+    this.props.history.push('/addresses/');
   }
 
   render() {
@@ -172,20 +173,20 @@ class Wallet extends React.Component {
         <div>
           <div className="d-none d-sm-flex flex-row align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-start justify-content-between">
-              <WalletBalance balance={this.props.balance} />
+              <WalletBalance key={this.props.selectedToken} />
             </div>
-            <WalletAddress history={this.props.history} />
+            <WalletAddress goToAllAddresses={this.goToAllAddresses} />
           </div>
           <div className="d-sm-none d-flex flex-column align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-center justify-content-between">
-              <WalletBalance balance={this.props.balance} />
+              <WalletBalance key={this.props.selectedToken} />
               <div className="d-flex flex-row align-items-center">
               </div>
             </div>
-            <WalletAddress history={this.props.history} />
+            <WalletAddress goToAllAddresses={this.goToAllAddresses} />
           </div>
           <WalletHistory
-            historyTransactions={this.props.historyTransactions}
+            key={this.props.selectedToken}
             selectedToken={this.props.selectedToken} />
         </div>
       );

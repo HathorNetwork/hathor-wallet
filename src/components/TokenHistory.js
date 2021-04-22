@@ -11,6 +11,13 @@ import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
 import hathorLib from '@hathor/wallet-lib';
+import { connect } from "react-redux";
+
+const mapStateToProps = (state) => {
+  return { 
+    tokensHistory: state.tokensHistory,
+  };
+};
 
 
 /**
@@ -43,7 +50,9 @@ class TokenHistory extends React.Component {
   }
 
   componentDidUpdate = (prevProps) => {
-    if (this.props.history !== prevProps.history) {
+    if (this.props.tokensHistory && this.props.tokensHistory[this.props.selectedToken] &&
+        (!prevProps.tokensHistory[this.props.selectedToken] ||
+        (this.props.tokensHistory[this.props.selectedToken].length !== prevProps.tokensHistory[this.props.selectedToken].length))) {
       this.handleHistoryUpdate();
     }
   }
@@ -76,9 +85,10 @@ class TokenHistory extends React.Component {
    * Calculates the transactions that will be shown in the list, besides the pagination data
    */
   handleHistoryUpdate = () => {
-    if (this.props.history.length > 0) {
+    const history = this.props.tokensHistory[this.props.selectedToken];
+    if (history && history.length > 0) {
       let startIndex = 0;
-      let endIndex = this.props.count;;
+      let endIndex = this.props.count;
       if (this.state.reference !== null) {
         // If has a reference, a pagination button was clicked, so we need to find the index
         // to calculate the slice to be done in the history
@@ -91,9 +101,9 @@ class TokenHistory extends React.Component {
           endIndex = startIndex + this.props.count
         }
       }
-      const hasAfter = this.props.history.length > endIndex;
+      const hasAfter = history.length > endIndex;
       const hasBefore = startIndex > 0;
-      const transactions = this.props.history.slice(startIndex, endIndex);
+      const transactions = history.slice(startIndex, endIndex);
       const firstHash = transactions.length > 0 ? transactions[0].tx_id : null;
       const lastHash = transactions.length > 0 ? transactions[transactions.length - 1].tx_id : null;
       let reference = this.state.reference;
@@ -107,7 +117,8 @@ class TokenHistory extends React.Component {
    * Calculates the index of the reference hash in the history list
    */
   getReferenceIndex = () => {
-    const idxReference = this.props.history.findIndex((tx) =>
+    const history = this.props.tokensHistory[this.props.selectedToken];
+    const idxReference = history.findIndex((tx) =>
       tx.tx_id === this.state.reference
     )
     return idxReference;
@@ -158,74 +169,20 @@ class TokenHistory extends React.Component {
     });
   }
 
-  /**
-   * For each transaction we calculate the final balance for the user and the selected token
-   *
-   * @param {Object} tx Transaction data
-   *
-   * @return {Object} {found, value} where 'found' is a boolean that shows if any of the addresses is of this user and 'value' is the final value of the transaction
-   */
-  prepareTx = (tx, keys) => {
-    const selectedToken = this.props.selectedToken;
-    let found = false;
-    let value = 0;
-
-    for (let txin of tx.inputs) {
-      if (txin.token === selectedToken && txin.decoded.address in keys) {
-        found = true;
-        if (!hathorLib.wallet.isAuthorityOutput(txin)) {
-          value -= txin.value;
-        }
-      }
-    }
-
-    for (let txout of tx.outputs) {
-      if (txout.token === selectedToken && txout.decoded.address in keys) {
-        found = true;
-        if (!hathorLib.wallet.isAuthorityOutput(txout)) {
-          value += txout.value;
-        }
-      }
-    }
-
-    return {found, value};
-  }
-
-  /**
-   * Check if the tx has only inputs and outputs that are authorities
-   *
-   * @param {Object} tx Transaction data
-   *
-   * @return {boolean} If the tx has only authority
-   */
-  isAllAuthority = (tx) => {
-    for (let txin of tx.inputs) {
-      if (!hathorLib.wallet.isAuthorityOutput(txin)) {
-        return false;
-      }
-    }
-
-    for (let txout of tx.outputs) {
-      if (!hathorLib.wallet.isAuthorityOutput(txout)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   render() {
+    const history = this.props.tokensHistory[this.props.selectedToken];
     const loadPagination = () => {
-      if (this.props.history === null ||
-          this.props.history.length === 0 ||
+      if (history === null ||
+          history === undefined ||
+          history.length === 0 ||
           (this.state.hasBefore === false && this.state.hasAfter === false)) {
         return null;
       } else {
         return (
           <nav aria-label="Token pagination" className="d-flex justify-content-center">
             <ul className="pagination">
-              <li className={(!this.state.hasBefore || this.props.history.length === 0) ? "page-item mr-3 disabled" : "page-item mr-3"}><a className="page-link" onClick={(e) => this.previousClicked(e)} href="true">{t`Previous`}</a></li>
-              <li className={(!this.state.hasAfter || this.props.history.length === 0) ? "page-item disabled" : "page-item"}><a className="page-link" href="true" onClick={(e) => this.nextClicked(e)}>{t`Next`}</a></li>
+              <li className={(!this.state.hasBefore || history.length === 0) ? "page-item mr-3 disabled" : "page-item mr-3"}><a className="page-link" onClick={(e) => this.previousClicked(e)} href="true">{t`Previous`}</a></li>
+              <li className={(!this.state.hasAfter || history.length === 0) ? "page-item disabled" : "page-item"}><a className="page-link" href="true" onClick={(e) => this.nextClicked(e)}>{t`Next`}</a></li>
             </ul>
           </nav>
         );
@@ -263,21 +220,17 @@ class TokenHistory extends React.Component {
     const renderHistoryData = () => {
       const keys = hathorLib.wallet.getWalletData().keys;
       return this.state.transactions.map((tx, idx) => {
-        const extra = this.prepareTx(tx, keys);
-        if (!extra.found) {
-          return null;
-        }
         let statusElement = '';
         let trClass = '';
-        let value = hathorLib.helpers.prettyValue(extra.value);
-        if (extra.value > 0) {
+        let value = hathorLib.helpers.prettyValue(tx.balance);
+        if (tx.balance > 0) {
           if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
             statusElement = <span>{t`Token creation`} <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
           } else {
             statusElement = <span>{t`Received`} <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;
           }
           trClass = 'output-tr';
-        } else if (extra.value < 0) {
+        } else if (tx.balance < 0) {
           if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
             statusElement = <span>{t`Token deposit`} <i className={`fa ml-3 fa-long-arrow-up`}></i></span>
           } else {
@@ -285,7 +238,7 @@ class TokenHistory extends React.Component {
           }
           trClass = 'input-tr';
         } else {
-          if (this.isAllAuthority(tx)) {
+          if (tx.isAllAuthority) {
             statusElement = <span>{`Authority`}</span>;
             value = '--';
           }
@@ -330,4 +283,4 @@ class TokenHistory extends React.Component {
   }
 }
 
-export default TokenHistory;
+export default connect(mapStateToProps)(TokenHistory);

@@ -17,12 +17,20 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import ledger from '../utils/ledger';
 import { IPC_RENDERER } from '../constants';
+import { sharedAddressUpdate } from '../actions/index';
+
+const mapDispatchToProps = dispatch => {
+  return {
+    sharedAddressUpdate: (data) => dispatch(sharedAddressUpdate(data)),
+  };
+};
 
 
 const mapStateToProps = (state) => {
   return {
     lastSharedAddress: state.lastSharedAddress,
     lastSharedIndex: state.lastSharedIndex,
+    wallet: state.wallet,
   };
 };
 
@@ -58,6 +66,14 @@ class WalletAddress extends React.Component {
    */
   generateNewAddress = (e) => {
     e.preventDefault();
+    const address = this.props.wallet.getNextAddress();
+
+    if (address === this.props.lastSharedAddress) {
+      this.refs.alertError.show(3000);
+    } else {
+      const addressIndex = this.props.wallet.getAddressIndex(address);
+      this.props.sharedAddressUpdate({ lastSharedAddress: address, lastSharedIndex: addressIndex});
+    }
 
     // We check if the next address was already generated, otherwise we generate, in case we can do it
     if (hathorLib.wallet.hasNewAddress()) {
@@ -66,7 +82,6 @@ class WalletAddress extends React.Component {
       if (hathorLib.wallet.canGenerateNewAddress()) {
         wallet.generateNewAddress();
       } else {
-        this.refs.alertError.show(3000);
       }
     }
   }
@@ -112,7 +127,7 @@ class WalletAddress extends React.Component {
    */
   seeAllAddresses = (e) => {
     e.preventDefault();
-    this.props.history.push('/addresses/');
+    this.props.goToAllAddresses();
   }
 
   render() {
@@ -179,4 +194,4 @@ class WalletAddress extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(WalletAddress);
+export default connect(mapStateToProps, mapDispatchToProps)(WalletAddress);

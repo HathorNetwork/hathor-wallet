@@ -5,10 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS } from '../constants';
+import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, STORE } from '../constants';
 import store from '../store/index';
-import { loadingAddresses, historyUpdate, sharedAddressUpdate, reloadData, cleanData } from '../actions/index';
-import hathorLib from '@hathor/wallet-lib';
+import { setWallet, updateLoadedData, isOnlineUpdate, updateHeight, newTx, updateTx, loadingAddresses, loadWalletSuccess, historyUpdate, sharedAddressUpdate, reloadData, cleanData, changeServer } from '../actions/index';
+import { helpers, constants as hathorConstants, errors as hathorErrors, HathorWallet, Connection, wallet as oldWalletUtil, walletUtils, storage, tokens } from '@hathor/wallet-lib';
 import version from './version';
 
 let Sentry = null;
@@ -55,17 +55,21 @@ const wallet = {
    * @param {string} passphrase
    * @param {string} pin
    * @param {string} password
-   * @param {boolean} loadHistory if should load history from generated addresses
    *
-   * @return {string} words generated (null if words are not valid)
    * @memberof Wallet
    * @inner
    */
-  generateWallet(words, passphrase, pin, password, loadHistory) {
-    if (hathorLib.wallet.wordsValid(words).valid) {
-      return this.executeGenerateWallet(words, passphrase, pin, password, loadHistory);
-    } else {
-      return null;
+  generateWallet(words, passphrase, pin, password, routerHistory) {
+    try {
+      walletUtils.wordsValid(words);
+      return this.startWallet(words, passphrase, pin, password, routerHistory);
+    } catch(e) {
+      if (e instanceof hathorErrors.InvalidWords) {
+        return null;
+      } else {
+        // Unhandled error
+        throw e;
+      }
     }
   },
 
@@ -77,30 +81,135 @@ const wallet = {
    * @param {string} passphrase
    * @param {string} pin
    * @param {string} password
-   * @param {boolean} loadHistory if should load the history from the generated addresses
+   * @param {Object} routerHistory History to push new path in case of notification click
+   * @param {boolean} fromXpriv If should start the wallet from xpriv already in storage
    *
-   * @return {Promise} Promise that resolves when finishes loading address history, in case loadHistory = true, else returns null
    * @memberof Wallet
    * @inner
    */
-  executeGenerateWallet(words, passphrase, pin, password, loadHistory) {
-    if (loadHistory) {
-      store.dispatch(loadingAddresses(true));
-      const fullPromise = new Promise((resolve, reject) => {
-        const versionPromise = version.checkApiVersion();
-        versionPromise.then(() => {
-          // Load history from address
-          const promise = hathorLib.wallet.executeGenerateWallet(words, passphrase, pin, password, loadHistory);
-          promise.then(() => {
-            this.afterLoadAddressHistory();
-            resolve();
-          });
-        });
+  startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false) {
+    // Set loading addresses screen to show
+    store.dispatch(loadingAddresses(true));
+    // When we start a wallet from the locked screen, we need to unlock it in the storage
+    oldWalletUtil.unlock();
+
+    // This check is important to set the correct network on storage and redux
+    const promise = version.checkApiVersion();
+    promise.then((data) => {
+      // If we've lost redux data, we could not properly stop the wallet object
+      // then we don't know if we've cleaned up the wallet data in the storage
+      // If it's fromXpriv, then we can't clean access data because we need that
+      oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
+
+      const connection = new Connection({
+        network: data.network,
+        servers: [helpers.getServerURL()],
       });
-      return fullPromise;
-    } else {
-      return hathorLib.wallet.executeGenerateWallet(words, passphrase, pin, password, loadHistory);
-    }
+
+      const beforeReloadCallback = () => {
+        store.dispatch(loadingAddresses(true));
+      };
+
+      let xpriv = null;
+      if (fromXpriv) {
+        xpriv = oldWalletUtil.getXprivKey(pin);
+      }
+
+      const walletConfig = {
+        seed: words,
+        xpriv,
+        store: STORE,
+        passphrase,
+        connection,
+        password,
+        pinCode: pin,
+        beforeReloadCallback
+      };
+
+      const wallet = new HathorWallet(walletConfig);
+
+      store.dispatch(setWallet(wallet));
+
+      wallet.start().then((serverInfo) => {
+        // TODO should we save server info?
+        //store.dispatch(setServerInfo(serverInfo));
+        wallet.on('state', (state) => {
+          if (state === HathorWallet.ERROR) {
+            // ERROR
+            // TODO Should we show an error screen and try to restart the wallet?
+          } else if (state === HathorWallet.READY) {
+            // READY
+            const historyTransactions = wallet.getTxHistory();
+            store.dispatch(loadWalletSuccess(historyTransactions));
+          }
+        });
+
+        wallet.on('new-tx', (tx) => {
+          let message = '';
+          if (helpers.isBlock(tx)) {
+            message = 'You\'ve found a new block! Click to open it.';
+          } else {
+            message = 'You\'ve received a new transaction! Click to open it.'
+          }
+          const notification = this.sendNotification(message);
+          // Set the notification click, in case we have sent one
+          if (notification !== undefined) {
+            notification.onclick = () => {
+              routerHistory.push(`/transaction/${tx.tx_id}/`);
+            }
+          }
+          store.dispatch(newTx(tx));
+        });
+
+        wallet.on('update-tx', (tx) => {
+          store.dispatch(updateTx(tx));
+        });
+
+        this.setConnectionEvents(connection);
+      });
+    });
+    return promise;
+  },
+
+  setConnectionEvents(connection) {
+    connection.on('best-block-update', (height) => {
+      store.dispatch(updateHeight({ height }));
+    });
+
+    connection.on('state', (state) => {
+      let isOnline;
+      if (state === Connection.CONNECTED) {
+        isOnline = true;
+      } else {
+        isOnline = false;
+      }
+      store.dispatch(isOnlineUpdate({ isOnline }));
+    });
+
+    connection.on('wallet-load-partial-update', (data) => {
+      const transactions = Object.keys(data.historyTransactions).length;
+      const addresses = data.addressesFound;
+      store.dispatch(updateLoadedData({ transactions, addresses }));
+    });
+  },
+
+  changeServer(wallet) {
+    // This call is important to update the network on storage and redux
+    const promise = version.checkApiVersion();
+    promise.then((data) => {
+      store.dispatch(loadingAddresses(true));
+      // Create new connection for the new server and update in the HathorWallet object saved in redux
+      const connection = new Connection({
+        network: data.network,
+        servers: [helpers.getServerURL()],
+      });
+
+      this.setConnectionEvents(connection);
+
+      wallet.changeConnection(connection);
+    });
+
+    return promise;
   },
 
   /*
@@ -117,7 +226,7 @@ const wallet = {
     const accessData = {
       xpubkey: xpub,
     }
-    const promise = hathorLib.wallet.startWallet(accessData, true);
+    const promise = oldWalletUtil.startWallet(accessData, true);
     promise.then(() => {
       this.afterLoadAddressHistory();
     });
@@ -133,11 +242,11 @@ const wallet = {
    * @inner
    */
   newAddressHistory(data) {
-    const walletData = hathorLib.wallet.getWalletData();
+    const walletData = oldWalletUtil.getWalletData();
     // Update historyTransactions with new one
     const historyTransactions = 'historyTransactions' in walletData ? walletData['historyTransactions'] : {};
     const allTokens = 'allTokens' in walletData ? walletData['allTokens'] : [];
-    hathorLib.wallet.updateHistoryData(historyTransactions, allTokens, [data], null, walletData);
+    oldWalletUtil.updateHistoryData(historyTransactions, allTokens, [data], null, walletData);
 
     this.afterLoadAddressHistory();
   },
@@ -150,15 +259,15 @@ const wallet = {
    */
   afterLoadAddressHistory() {
     store.dispatch(loadingAddresses(false));
-    const data = hathorLib.wallet.getWalletData();
+    const data = oldWalletUtil.getWalletData();
     // Update historyTransactions with new one
     const historyTransactions = 'historyTransactions' in data ? data['historyTransactions'] : {};
     const allTokens = 'allTokens' in data ? data['allTokens'] : [];
     const transactionsFound = Object.keys(historyTransactions).length;
 
-    const address = hathorLib.storage.getItem('wallet:address');
-    const lastSharedIndex = hathorLib.storage.getItem('wallet:lastSharedIndex');
-    const lastGeneratedIndex = hathorLib.wallet.getLastGeneratedIndex();
+    const address = storage.getItem('wallet:address');
+    const lastSharedIndex = storage.getItem('wallet:lastSharedIndex');
+    const lastGeneratedIndex = wallet.getLastGeneratedIndex();
 
     store.dispatch(historyUpdate({historyTransactions, allTokens, lastSharedIndex, lastSharedAddress: address, addressesFound: lastGeneratedIndex + 1, transactionsFound}));
   },
@@ -174,10 +283,10 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  addPassphrase(passphrase, pin, password) {
-    const words = hathorLib.wallet.getWalletWords(password);
+  addPassphrase(passphrase, pin, password, routerHistory) {
+    const words = oldWalletUtil.getWalletWords(password);
     this.cleanWallet()
-    return this.generateWallet(words, passphrase, pin, password, true);
+    return this.generateWallet(words, passphrase, pin, password, routerHistory);
   },
 
   /**
@@ -200,8 +309,8 @@ const wallet = {
    * @inner
    */
   updateSharedAddress() {
-    const lastSharedIndex = hathorLib.wallet.getLastSharedIndex();
-    const lastSharedAddress = hathorLib.storage.getItem('wallet:address');
+    const lastSharedIndex = oldWalletUtil.getLastSharedIndex();
+    const lastSharedAddress = storage.getItem('wallet:address');
     this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
   },
 
@@ -214,7 +323,7 @@ const wallet = {
    * @inner
    */
   updateAddress(lastSharedAddress, lastSharedIndex, updateRedux) {
-    hathorLib.wallet.updateAddress(lastSharedAddress, lastSharedIndex);
+    oldWalletUtil.updateAddress(lastSharedAddress, lastSharedIndex);
     if (updateRedux) {
       this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
     }
@@ -228,7 +337,7 @@ const wallet = {
    * @inner
    */
   generateNewAddress() {
-    const { newAddress, newIndex } = hathorLib.wallet.generateNewAddress();
+    const { newAddress, newIndex } = oldWalletUtil.generateNewAddress();
 
     // Save in redux the new shared address
     this.updateSharedAddressRedux(newAddress.toString(), newIndex);
@@ -244,7 +353,7 @@ const wallet = {
    * @inner
    */
   getNextAddress() {
-    const result = hathorLib.wallet.getNextAddress();
+    const result = oldWalletUtil.getNextAddress();
     if (result) {
       const {address, index} = result;
       this.updateSharedAddressRedux(address, index);
@@ -262,9 +371,9 @@ const wallet = {
    * @inner
    */
   localStorageToRedux() {
-    let data = hathorLib.wallet.getWalletData();
+    let data = oldWalletUtil.getWalletData();
     if (data) {
-      const dataToken = hathorLib.tokens.getTokens();
+      const dataToken = tokens.getTokens();
       // Saving wallet data
       store.dispatch(reloadData({
         historyTransactions: data.historyTransactions || {},
@@ -274,8 +383,8 @@ const wallet = {
 
       // Saving address data
       store.dispatch(sharedAddressUpdate({
-        lastSharedAddress: hathorLib.storage.getItem('wallet:address'),
-        lastSharedIndex: hathorLib.wallet.getLastSharedIndex(),
+        lastSharedAddress: storage.getItem('wallet:address'),
+        lastSharedIndex: oldWalletUtil.getLastSharedIndex(),
       }));
       return true;
     } else {
@@ -292,7 +401,7 @@ const wallet = {
    * @inner
    */
   cleanWallet() {
-    hathorLib.wallet.cleanWallet();
+    oldWalletUtil.cleanWallet();
     this.cleanWalletRedux();
   },
 
@@ -314,7 +423,7 @@ const wallet = {
    */
   resetWalletData() {
     this.cleanWalletRedux();
-    hathorLib.wallet.resetWalletData();
+    oldWalletUtil.resetWalletData();
   },
 
   /*
@@ -326,29 +435,27 @@ const wallet = {
   reloadData({endConnection = false} = {}) {
     store.dispatch(loadingAddresses(true));
 
-    this.cleanWalletRedux();
-
     // Cleaning redux and leaving only tokens data
-    const dataToken = hathorLib.tokens.getTokens();
     store.dispatch(reloadData({
-      historyTransactions: {},
+      tokensHistory: {},
+      tokensBalance: {},
       tokens: dataToken,
     }));
 
     // before cleaning data, check if we need to transfer xpubkey to wallet:accessData
-    const accessData = hathorLib.wallet.getWalletAccessData();
+    const accessData = oldWalletUtil.getWalletAccessData();
     if (accessData.xpubkey === undefined) {
       // XXX from v0.12.0 to v0.13.0, xpubkey changes from wallet:data to access:data.
       // That's not a problem if wallet is being initialized. However, if it's already
       // initialized, we need to set the xpubkey in the correct place.
       const oldData = JSON.parse(localStorage.getItem('wallet:data'));
       accessData.xpubkey = oldData.xpubkey;
-      hathorLib.wallet.setWalletAccessData(accessData);
+      oldWalletUtil.setWalletAccessData(accessData);
       localStorage.removeItem('wallet:data');
     }
 
     // Load history from new server
-    const promise = hathorLib.wallet.reloadData({endConnection});
+    const promise = oldWalletUtil.reloadData({endConnection});
     promise.then(() => {
       this.afterLoadAddressHistory();
     });
@@ -374,7 +481,7 @@ const wallet = {
    * @inner
    */
   allowSentry() {
-    hathorLib.storage.setItem('wallet:sentry', true);
+    storage.setItem('wallet:sentry', true);
     this.updateSentryState();
   },
 
@@ -385,7 +492,7 @@ const wallet = {
    * @inner
    */
   disallowSentry() {
-    hathorLib.storage.setItem('wallet:sentry', false);
+    storage.setItem('wallet:sentry', false);
     this.updateSentryState();
   },
 
@@ -398,7 +505,7 @@ const wallet = {
    * @inner
    */
   getSentryPermission() {
-    return hathorLib.storage.getItem('wallet:sentry');
+    return storage.getItem('wallet:sentry');
   },
 
   /**
@@ -447,7 +554,7 @@ const wallet = {
         ([key, item]) => scope.setExtra(key, item)
       );
       DEBUG_LOCAL_DATA_KEYS.forEach(
-        (key) => scope.setExtra(key, hathorLib.storage.getItem(key))
+        (key) => scope.setExtra(key, storage.getItem(key))
       )
       Sentry.captureException(error);
     });
@@ -478,7 +585,7 @@ const wallet = {
    * @inner
    */
   isNotificationOn() {
-    return hathorLib.storage.getItem('wallet:notification') !== false;
+    return storage.getItem('wallet:notification') !== false;
   },
 
   /**
@@ -488,7 +595,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOn() {
-    hathorLib.storage.setItem('wallet:notification', true);
+    storage.setItem('wallet:notification', true);
   },
 
   /**
@@ -498,7 +605,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOff() {
-    hathorLib.storage.setItem('wallet:notification', false);
+    storage.setItem('wallet:notification', false);
   },
 
   /**
@@ -516,7 +623,7 @@ const wallet = {
    * @inner
    */
   decimalToInteger(value) {
-    return Math.round(value*(10**hathorLib.constants.DECIMAL_PLACES));
+    return Math.round(value*(10**constants.DECIMAL_PLACES));
   },
 }
 

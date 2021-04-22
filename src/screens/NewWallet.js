@@ -104,10 +104,8 @@ class NewWallet extends React.Component {
   pinSuccess = () => {
     // Getting redux variables before cleaning all data
     const { words, pin, password } = this.props;
-    // First we clean what can still be there of a last wallet
-    wallet.cleanWallet();
     // Generate addresses and load data
-    wallet.executeGenerateWallet(words, '', pin, password, true);
+    wallet.generateWallet(words, '', pin, password, this.props.history);
     // Clean pin, password and words from redux
     this.props.updatePassword(null);
     this.props.updatePin(null);
