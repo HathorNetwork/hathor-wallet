@@ -24,7 +24,10 @@ import colors from '../index.scss';
 
 
 const mapStateToProps = (state) => {
-  return { tokens: state.tokens };
+  return {
+    tokens: state.tokens,
+    wallet: state.wallet,
+  };
 };
 
 
@@ -131,9 +134,7 @@ class SendTokens extends React.Component {
     let data = {'inputs': [], 'outputs': []};
     for (const ref of this.references) {
       const instance = ref.current;
-      let dataOne = instance.getData();
-      if (!dataOne) return;
-      dataOne = instance.handleInitialData(dataOne);
+      const dataOne = instance.getData();
       if (!dataOne) return;
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
@@ -227,7 +228,6 @@ class SendTokens extends React.Component {
     if (!isValid) return;
     let data = this.getData();
     if (!data) return;
-    data.tokens = hathorLib.tokens.filterTokens(this.state.txTokens, hathorLib.constants.HATHOR_TOKEN_CONFIG).map((token) => token.uid);
     this.setState({ errorMessage: '' });
     try {
       if (hathorLib.wallet.isSoftwareWallet()) {
@@ -244,17 +244,14 @@ class SendTokens extends React.Component {
   /**
    * Prepare data before sending tx to be mined and after user writes PIN
    *
-   * @param {String} pin PIN written by the user
-   *
    * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
    */
-  prepareSendTransaction = (pin) => {
-    try {
-      const data = hathorLib.transaction.prepareData(this.data, pin);
-      return new hathorLib.SendTransaction({data});
-    } catch(e) {
-      this.handleSendError(e);
-      return null;
+  prepareSendTransaction = () => {
+    const ret = this.props.wallet.sendManyOutputsTransaction(this.data.outputs, this.data.inputs, null, { startMiningTx: false });
+    if (ret.success) {
+      return ret.sendTransaction;
+    } else {
+      this.setState({ errorMessage: ret.message, ledgerStep: 0 });
     }
   }
 

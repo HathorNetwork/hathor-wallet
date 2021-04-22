@@ -623,7 +623,7 @@ const wallet = {
    * @inner
    */
   decimalToInteger(value) {
-    return Math.round(value*(10**constants.DECIMAL_PLACES));
+    return Math.round(value*(10**hathorConstants.DECIMAL_PLACES));
   },
 }
 
