@@ -11,6 +11,13 @@ import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import wallet from '../../utils/wallet';
 import InputNumber from '../InputNumber';
+import { connect } from "react-redux";
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+  };
+};
 
 
 /**
@@ -31,22 +38,20 @@ class TokenMelt extends React.Component {
   /**
    * Prepare transaction to execute melt method after form validation
    *
-   * @param {string} pin PIN user wrote on modal
-   *
    * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = (pin) => {
+  prepareSendTransaction = () => {
     const sanitizedValue = (this.amount.current.value || "").replace(/,/g, '');
     const amountValue = wallet.decimalToInteger(sanitizedValue);
-    const output = this.props.meltOutputs[0];
-    return hathorLib.tokens.meltTokens(
-      {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
+    return this.props.wallet.meltTokens(
       this.props.token.uid,
       amountValue,
-      pin,
-      this.createAnother.current.checked
+      {
+        createAnotherMelt: this.createAnother.current.checked,
+        startMiningTx: false,
+      }
     );
   }
 
@@ -110,4 +115,4 @@ class TokenMelt extends React.Component {
   }
 }
 
-export default TokenMelt;
+export default connect(mapStateToProps)(TokenMelt);

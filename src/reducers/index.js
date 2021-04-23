@@ -173,13 +173,15 @@ const onLoadWalletSuccess = (state, action) => {
   const { history } = action.payload;
   const tokensHistory = {};
   const newAddressesTxs = {};
+  const allTokens = new Set();
   // iterate through all txs received and map all tokens this wallet has, with
   // its history and balance
   for (const tx of Object.values(history)) {
     // we first get all tokens present in this tx (that belong to the user) and
     // the corresponding balances
-    const balances = state.wallet.getTxBalance(tx);
+    const balances = state.wallet.getTxBalance(tx, { includeAuthorities: true });
     for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
+      allTokens.add(tokenUid);
       let tokenHistory = tokensHistory[tokenUid];
       if (tokenHistory === undefined) {
         tokenHistory = [];
@@ -223,6 +225,7 @@ const onLoadWalletSuccess = (state, action) => {
     lastSharedAddress: address,
     lastSharedIndex: addressIndex,
     addressesTxs: newAddressesTxs,
+    allTokens,
   };
 };
 
@@ -276,7 +279,7 @@ const onUpdateTx = (state, action) => {
 
   const updatedHistoryMap = {};
   const updatedBalanceMap = {};
-  const balances = state.wallet.getTxBalance(tx);
+  const balances = state.wallet.getTxBalance(tx, { includeAuthorities: true });
 
   for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
     // The only tx information that might have changed is the 'isVoided'
@@ -284,35 +287,26 @@ const onUpdateTx = (state, action) => {
     // data and the balance, otherwise everything is fine
 
     const currentHistory = state.tokensHistory[tokenUid] || [];
-    const oldTxIndex = currentHistory.findIndex((el) => {
+    const txIndex = currentHistory.findIndex((el) => {
       return el.tx_id === tx.tx_id;
     });
 
-    if (oldTxIndex !== -1 && currentHistory[oldTxIndex].is_voided !== tx.is_voided) {
-      // If is_voided attribute changed, we must update tx data in history and balance
-      const newHistory = [...currentHistory];
-      newHistory[oldTxIndex].is_voided = tx.is_voided;
-      updatedHistoryMap[tokenUid] = newHistory;
-      const totalBalance = state.wallet.getBalance(tokenUid);
-      updatedBalanceMap[tokenUid] = totalBalance;
+    // We update the balance and the history
+    const totalBalance = state.wallet.getBalance(tokenUid);
+    updatedBalanceMap[tokenUid] = totalBalance;
 
-      // Set flag to true because we will need to update state
-      changed = true;
-    }
+    const newHistory = [...currentHistory];
+    newHistory[txIndex] = getTxHistoryFromTx(tx, tokenUid, tokenTxBalance)
+    updatedHistoryMap[tokenUid] = newHistory;
   }
 
-  if (changed) {
-    const newTokensHistory = Object.assign({}, state.tokensHistory, updatedHistoryMap);
-    const newTokensBalance = Object.assign({}, state.tokensBalance, updatedBalanceMap);
+  const newTokensHistory = Object.assign({}, state.tokensHistory, updatedHistoryMap);
+  const newTokensBalance = Object.assign({}, state.tokensBalance, updatedBalanceMap);
 
-    return {
-      ...state,
-      tokensHistory: newTokensHistory,
-      tokensBalance: newTokensBalance,
-    };
-  } else {
-    return {...state};
-  }
+  return Object.assign({}, state,{
+    tokensHistory: newTokensHistory,
+    tokensBalance: newTokensBalance,
+  });
 };
 
 /**
@@ -321,12 +315,14 @@ const onUpdateTx = (state, action) => {
 const onNewTx = (state, action) => {
   const { tx } = action.payload;
 
+  const allTokens = state.allTokens;
   const updatedHistoryMap = {};
   const updatedBalanceMap = {};
-  const balances = state.wallet.getTxBalance(tx);
+  const balances = state.wallet.getTxBalance(tx, { includeAuthorities: true });
 
   // we now loop through all tokens present in the new tx to get the new history and balance
   for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
+    allTokens.add(tokenUid);
     // we may not have this token yet, so state.tokensHistory[tokenUid] would return undefined
     const currentHistory = state.tokensHistory[tokenUid] || [];
     const newTokenHistory = addTxToSortedList(tokenUid, tx, tokenTxBalance, currentHistory);
@@ -352,14 +348,14 @@ const onNewTx = (state, action) => {
     }
   }
 
-  return {
-    ...state,
+  return Object.assign({}, state, {
     tokensHistory: newTokensHistory,
     tokensBalance: newTokensBalance,
     lastSharedAddress: address,
     lastSharedIndex: addressIndex,
     addressesTxs: newAddressesTxs,
-  };
+    allTokens,
+  });
 };
 
 const onUpdateLoadedData = (state, action) => ({

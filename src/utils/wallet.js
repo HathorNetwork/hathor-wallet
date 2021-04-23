@@ -96,6 +96,10 @@ const wallet = {
     // This check is important to set the correct network on storage and redux
     const promise = version.checkApiVersion();
     promise.then((data) => {
+      // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
+      const dataToken = tokens.getTokens();
+      store.dispatch(reloadData({ tokens: dataToken }));
+
       // If we've lost redux data, we could not properly stop the wallet object
       // then we don't know if we've cleaned up the wallet data in the storage
       // If it's fromXpriv, then we can't clean access data because we need that

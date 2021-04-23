@@ -37,6 +37,7 @@ const mapStateToProps = (state) => {
   return {
     selectedToken: state.selectedToken,
     tokens: state.tokens,
+    wallet: state.wallet,
   };
 };
 
@@ -127,30 +128,7 @@ class Wallet extends React.Component {
    * @return {boolean} If should show administrative tab
    */
   shouldShowAdministrativeTab = () => {
-    const walletData = hathorLib.wallet.getWalletData();
-
-    // TODO
-    /*for (const tx_id in this.props.historyTransactions) {
-      const tx = this.props.historyTransactions[tx_id];
-      for (const output of tx.outputs) {
-        // This output is not mine
-        if (!hathorLib.wallet.isAddressMine(output.decoded.address, walletData)) {
-          continue;
-        }
-
-        // This token is not the one of this screen
-        if (output.token !== this.props.selectedToken) {
-          continue;
-        }
-
-        if (hathorLib.wallet.isMintOutput(output) || hathorLib.wallet.isMeltOutput(output)) {
-          return true;
-        }
-
-      }
-    }*/
-
-    return false;
+    return this.props.wallet.getMintAuthority(this.props.selectedToken, { skipSpent: false }) || this.props.wallet.getMeltAuthority(this.props.selectedToken, { skipSpent: false })
   }
 
   goToAllAddresses = () => {
@@ -208,7 +186,7 @@ class Wallet extends React.Component {
       if (this.shouldShowAdministrativeTab()) {
         return (
           <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-            <TokenAdministrative token={token} ref={this.administrativeRef} />
+            <TokenAdministrative key={this.props.selectedToken} token={token} ref={this.administrativeRef} />
           </div>
         );
       } else {

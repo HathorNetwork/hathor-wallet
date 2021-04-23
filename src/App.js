@@ -118,9 +118,6 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
   // Check version
   if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
     const promise = version.checkApiVersion();
-    promise.then(() => {
-      wallet.localStorageToRedux();
-    });
     return <Redirect to={{
       pathname: '/loading_addresses/',
       state: {path: props.match.url}

@@ -24,13 +24,11 @@ import InputNumber from '../components/InputNumber';
 
 
 const mapStateToProps = (state) => {
-  const balance = hathorLib.wallet.calculateBalance(
-    Object.values(state.historyTransactions),
-    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
-  );
+  const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+  const htrBalance = HTR_UID in state.tokensBalance ? state.tokensBalance[HTR_UID].available : 0;
   return {
-    htrBalance: balance.available,
-    historyTransactions: state.historyTransactions,
+    htrBalance,
+    wallet: state.wallet,
   };
 };
 
@@ -100,11 +98,9 @@ class CreateToken extends React.Component {
   /**
    * Prepare create token transaction data after PIN is validated
    *
-   * @param {String} pin PIN written
-   *
    * @return {hathorLib.SendTransaction} SendTransaction object
    */
-  prepareSendTransaction = (pin) => {
+  prepareSendTransaction = () => {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
@@ -113,13 +109,13 @@ class CreateToken extends React.Component {
       address = this.refs.address.value;
     }
 
-    const ret = hathorLib.tokens.createToken(
-      address,
+    const ret = this.props.wallet.createNewToken(
       this.refs.shortName.value,
       this.refs.symbol.value,
       wallet.decimalToInteger(this.state.amount),
-      pin
-    );
+      address,
+      { startMiningTx: false }
+    )
 
     if (ret.success) {
       return ret.sendTransaction;

@@ -13,7 +13,13 @@ import TokenAction from './TokenAction';
 import tokens from '../../utils/tokens';
 import wallet from '../../utils/wallet';
 import InputNumber from '../InputNumber';
+import { connect } from "react-redux";
 
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+  };
+};
 
 /**
  * Component that renders the mint form in the token detail screen
@@ -42,25 +48,20 @@ class TokenMint extends React.Component {
   /**
    * Prepare transaction to execute mint method after form validation
    *
-   * @param {string} pin PIN user wrote on modal
-   *
    * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = (pin) => {
+  prepareSendTransaction = () => {
     const amountValue = wallet.decimalToInteger(this.state.amount);
-    const output = this.props.mintOutputs[0];
-    const address = this.chooseAddress.current.checked ? hathorLib.wallet.getAddressToUse() : this.address.current.value;
-    return hathorLib.tokens.mintTokens(
-      {tx_id: output.tx_id, index: output.index, address: output.decoded.address},
+    const address = this.chooseAddress.current.checked ? null : this.address.current.value;
+    return this.props.wallet.mintTokens(
       this.props.token.uid,
-      address,
       amountValue,
-      null,
-      pin,
+      address,
       {
-        createAnotherMint: this.createAnother.current.checked
+        createAnotherMint: this.createAnother.current.checked,
+        startMiningTx: false
       }
     );
   }
@@ -170,4 +171,4 @@ class TokenMint extends React.Component {
   }
 }
 
-export default TokenMint;
+export default connect(mapStateToProps)(TokenMint);

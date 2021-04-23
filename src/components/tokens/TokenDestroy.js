@@ -10,6 +10,13 @@ import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import SpanFmt from '../SpanFmt';
+import { connect } from "react-redux";
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+  };
+};
 
 
 /**
@@ -28,25 +35,18 @@ class TokenDestroy extends React.Component {
   /**
    * Prepare transaction to execute the destroy method
    *
-   * @param {string} pin PIN user wrote on modal
-   *
    * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = (pin) => {
-    const array = this.props.authorityOutputs;
-    const data = [];
-    // Get the number of outputs the user requested to destroy in the expected format
-    for (let i=0; i<this.state.destroyQuantity; i++) {
-      data.push({
-        'tx_id': array[i].tx_id,
-        'index': array[i].index,
-        'address': array[i].decoded.address,
-        'token': this.props.token.uid
-      });
-    }
-    return hathorLib.tokens.destroyAuthority(data, pin);
+  prepareSendTransaction = () => {
+    const type = this.props.action === 'destroy-mint' ? t`Mint` : t`Melt`;
+    return this.props.wallet.destroyAuthority(
+      this.props.token.uid,
+      type.toLowerCase(),
+      this.state.destroyQuantity,
+      { startMiningTx: false },
+    );
   }
 
   /**
@@ -64,9 +64,9 @@ class TokenDestroy extends React.Component {
    * @return {string} Error message, in case of form invalid. Nothing, otherwise.
    */
   destroy = () => {
-    if (this.state.destroyQuantity > this.props.authorityOutputs.length) {
+    if (this.state.destroyQuantity > this.props.authoritiesLength) {
       const type = this.props.action === 'destroy-mint' ? t`mint` : t`melt`;
-      return `You only have ${this.props.authorityOutputs.length} ${type} ${hathorLib.helpers.plural(this.props.authorityOutputs.length, 'output', 'outputs')} to destroy.`;
+      return `You only have ${this.props.authoritiesLength} ${type} ${hathorLib.helpers.plural(this.props.authoritiesLength, 'output', 'outputs')} to destroy.`;
     }
   }
 
@@ -110,4 +110,4 @@ class TokenDestroy extends React.Component {
   }
 }
 
-export default TokenDestroy;
+export default connect(mapStateToProps)(TokenDestroy);

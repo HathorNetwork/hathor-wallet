@@ -112,11 +112,9 @@ class TokenAction extends React.Component {
    * Method executed after PIN is written
    * If success when preparing the tx, return the send tx object
    * Otherwise, show error message
-   *
-   * @param {String} pin PIN written by the user
    */
-  onPrepareSendTransaction = (pin) => {
-    const ret = this.props.prepareSendTransaction(pin);
+  onPrepareSendTransaction = () => {
+    const ret = this.props.prepareSendTransaction();
 
     if (ret.success) {
       return ret.sendTransaction;
