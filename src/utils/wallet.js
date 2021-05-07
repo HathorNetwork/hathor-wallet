@@ -87,92 +87,89 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false) {
+  async startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false) {
     // Set loading addresses screen to show
     store.dispatch(loadingAddresses(true));
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
 
     // This check is important to set the correct network on storage and redux
-    const promise = version.checkApiVersion();
-    promise.then((data) => {
-      // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
-      const dataToken = tokens.getTokens();
-      store.dispatch(reloadData({ tokens: dataToken }));
+    const data = await version.checkApiVersion();
 
-      // If we've lost redux data, we could not properly stop the wallet object
-      // then we don't know if we've cleaned up the wallet data in the storage
-      // If it's fromXpriv, then we can't clean access data because we need that
-      oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
+    // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
+    const dataToken = tokens.getTokens();
+    store.dispatch(reloadData({ tokens: dataToken }));
 
-      const connection = new Connection({
-        network: data.network,
-        servers: [helpers.getServerURL()],
-      });
+    // If we've lost redux data, we could not properly stop the wallet object
+    // then we don't know if we've cleaned up the wallet data in the storage
+    // If it's fromXpriv, then we can't clean access data because we need that
+    oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
 
-      const beforeReloadCallback = () => {
-        store.dispatch(loadingAddresses(true));
-      };
-
-      let xpriv = null;
-      if (fromXpriv) {
-        xpriv = oldWalletUtil.getXprivKey(pin);
-      }
-
-      const walletConfig = {
-        seed: words,
-        xpriv,
-        store: STORE,
-        passphrase,
-        connection,
-        password,
-        pinCode: pin,
-        beforeReloadCallback
-      };
-
-      const wallet = new HathorWallet(walletConfig);
-
-      store.dispatch(setWallet(wallet));
-
-      wallet.start().then((serverInfo) => {
-        // TODO should we save server info?
-        //store.dispatch(setServerInfo(serverInfo));
-        wallet.on('state', (state) => {
-          if (state === HathorWallet.ERROR) {
-            // ERROR
-            // TODO Should we show an error screen and try to restart the wallet?
-          } else if (state === HathorWallet.READY) {
-            // READY
-            const historyTransactions = wallet.getTxHistory();
-            store.dispatch(loadWalletSuccess(historyTransactions));
-          }
-        });
-
-        wallet.on('new-tx', (tx) => {
-          let message = '';
-          if (helpers.isBlock(tx)) {
-            message = 'You\'ve found a new block! Click to open it.';
-          } else {
-            message = 'You\'ve received a new transaction! Click to open it.'
-          }
-          const notification = this.sendNotification(message);
-          // Set the notification click, in case we have sent one
-          if (notification !== undefined) {
-            notification.onclick = () => {
-              routerHistory.push(`/transaction/${tx.tx_id}/`);
-            }
-          }
-          store.dispatch(newTx(tx));
-        });
-
-        wallet.on('update-tx', (tx) => {
-          store.dispatch(updateTx(tx));
-        });
-
-        this.setConnectionEvents(connection);
-      });
+    const connection = new Connection({
+      network: data.network,
+      servers: [helpers.getServerURL()],
     });
-    return promise;
+
+    const beforeReloadCallback = () => {
+      store.dispatch(loadingAddresses(true));
+    };
+
+    let xpriv = null;
+    if (fromXpriv) {
+      xpriv = oldWalletUtil.getXprivKey(pin);
+    }
+
+    const walletConfig = {
+      seed: words,
+      xpriv,
+      store: STORE,
+      passphrase,
+      connection,
+      password,
+      pinCode: pin,
+      beforeReloadCallback
+    };
+
+    const wallet = new HathorWallet(walletConfig);
+
+    store.dispatch(setWallet(wallet));
+
+    const serverInfo = await wallet.start()
+    // TODO should we save server info?
+    //store.dispatch(setServerInfo(serverInfo));
+    wallet.on('state', (state) => {
+      if (state === HathorWallet.ERROR) {
+        // ERROR
+        // TODO Should we show an error screen and try to restart the wallet?
+      } else if (state === HathorWallet.READY) {
+        // READY
+        const historyTransactions = wallet.getTxHistory();
+        store.dispatch(loadWalletSuccess(historyTransactions));
+      }
+    });
+
+    wallet.on('new-tx', (tx) => {
+      let message = '';
+      if (helpers.isBlock(tx)) {
+        message = 'You\'ve found a new block! Click to open it.';
+      } else {
+        message = 'You\'ve received a new transaction! Click to open it.'
+      }
+      const notification = this.sendNotification(message);
+      // Set the notification click, in case we have sent one
+      if (notification !== undefined) {
+        notification.onclick = () => {
+          routerHistory.push(`/transaction/${tx.tx_id}/`);
+        }
+      }
+      store.dispatch(newTx(tx));
+    });
+
+    wallet.on('update-tx', (tx) => {
+      store.dispatch(updateTx(tx));
+    });
+
+    this.setConnectionEvents(connection);
   },
 
   setConnectionEvents(connection) {
@@ -197,23 +194,9 @@ const wallet = {
     });
   },
 
-  changeServer(wallet) {
-    // This call is important to update the network on storage and redux
-    const promise = version.checkApiVersion();
-    promise.then((data) => {
-      store.dispatch(loadingAddresses(true));
-      // Create new connection for the new server and update in the HathorWallet object saved in redux
-      const connection = new Connection({
-        network: data.network,
-        servers: [helpers.getServerURL()],
-      });
-
-      this.setConnectionEvents(connection);
-
-      wallet.changeConnection(connection);
-    });
-
-    return promise;
+  async changeServer(wallet, pin, routerHistory) {
+    wallet.stop({ cleanStorage: false });
+    await this.startWallet(null, '', pin, '', routerHistory, true);
   },
 
   /*
