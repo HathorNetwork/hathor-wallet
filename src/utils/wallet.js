@@ -422,7 +422,7 @@ const wallet = {
   reloadData({endConnection = false} = {}) {
     store.dispatch(loadingAddresses(true));
 
-    const dataToken = hathorLib.tokens.getTokens();
+    const dataToken = tokens.getTokens();
     // Cleaning redux and leaving only tokens data
     store.dispatch(reloadData({
       tokensHistory: {},
