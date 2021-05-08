@@ -26,4 +26,6 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Start
-      run: export NODE_OPTIONS=--max_old_space_size=2048; npm start
+      run: npm start & npx wait-on http://localhost:3000
+      env:
+        CI: true
