@@ -124,7 +124,7 @@ class SendTokensOne extends React.Component {
         const index = input.current.index.current.value;
 
         if (txId && index) {
-          data['inputs'].push({'hash': txId, 'index': index, 'token': this.state.selected.uid });
+          data['inputs'].push({'tx_id': txId, 'index': index, 'token': this.state.selected.uid });
         }
       }
     }

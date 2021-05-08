@@ -74,16 +74,6 @@ class WalletAddress extends React.Component {
       const addressIndex = this.props.wallet.getAddressIndex(address);
       this.props.sharedAddressUpdate({ lastSharedAddress: address, lastSharedIndex: addressIndex});
     }
-
-    // We check if the next address was already generated, otherwise we generate, in case we can do it
-    if (hathorLib.wallet.hasNewAddress()) {
-      wallet.getNextAddress();
-    } else {
-      if (hathorLib.wallet.canGenerateNewAddress()) {
-        wallet.generateNewAddress();
-      } else {
-      }
-    }
   }
 
   openAddressModal = (e) => {

@@ -40,10 +40,10 @@ class TokenDestroy extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = () => {
-    const type = this.props.action === 'destroy-mint' ? t`Mint` : t`Melt`;
+    const type = this.props.action === 'destroy-mint' ? 'mint' : 'melt';
     return this.props.wallet.destroyAuthority(
       this.props.token.uid,
-      type.toLowerCase(),
+      type,
       this.state.destroyQuantity,
       { startMiningTx: false },
     );
