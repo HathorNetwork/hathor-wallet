@@ -89,7 +89,7 @@ class ModalSendTx extends React.Component {
       if (hathorLib.wallet.isPinCorrect(pin)) {
         $('#pinModal').data('bs.modal')._config.backdrop = 'static';
         $('#pinModal').data('bs.modal')._config.keyboard = false;
-        this.sendTransaction = this.props.prepareSendTransaction();
+        this.sendTransaction = this.props.prepareSendTransaction(pin);
         if (this.sendTransaction) {
           // Show send tx handler component and start sending
           this.setState({ step: 1, loading: true });

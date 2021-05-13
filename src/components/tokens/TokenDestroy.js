@@ -35,17 +35,19 @@ class TokenDestroy extends React.Component {
   /**
    * Prepare transaction to execute the destroy method
    *
+   * @param {String} pin PIN written by the user
+   *
    * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = () => {
+  prepareSendTransaction = (pin) => {
     const type = this.props.action === 'destroy-mint' ? 'mint' : 'melt';
     return this.props.wallet.destroyAuthority(
       this.props.token.uid,
       type,
       this.state.destroyQuantity,
-      { startMiningTx: false },
+      { startMiningTx: false, pinCode: pin },
     );
   }
 

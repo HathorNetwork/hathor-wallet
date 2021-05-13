@@ -98,9 +98,11 @@ class CreateToken extends React.Component {
   /**
    * Prepare create token transaction data after PIN is validated
    *
+   * @param {String} pin PIN written by the user
+   *
    * @return {hathorLib.SendTransaction} SendTransaction object
    */
-  prepareSendTransaction = () => {
+  prepareSendTransaction = (pin) => {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
@@ -114,7 +116,7 @@ class CreateToken extends React.Component {
       this.refs.symbol.value,
       wallet.decimalToInteger(this.state.amount),
       address,
-      { startMiningTx: false }
+      { startMiningTx: false, pinCode: pin }
     )
 
     if (ret.success) {

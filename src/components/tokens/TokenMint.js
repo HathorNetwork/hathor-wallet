@@ -48,11 +48,13 @@ class TokenMint extends React.Component {
   /**
    * Prepare transaction to execute mint method after form validation
    *
+   * @param {String} pin PIN written by the user
+   *
    * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = () => {
+  prepareSendTransaction = (pin) => {
     const amountValue = wallet.decimalToInteger(this.state.amount);
     const address = this.chooseAddress.current.checked ? null : this.address.current.value;
     return this.props.wallet.mintTokens(
@@ -61,7 +63,8 @@ class TokenMint extends React.Component {
       address,
       {
         createAnotherMint: this.createAnother.current.checked,
-        startMiningTx: false
+        startMiningTx: false,
+        pinCode: pin
       }
     );
   }

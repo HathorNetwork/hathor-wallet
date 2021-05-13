@@ -36,11 +36,13 @@ class TokenDelegate extends React.Component {
   /**
    * Prepare transaction to execute the delegate of outputs
    *
+   * @param {String} pin PIN written by the user
+   *
    * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = () => {
+  prepareSendTransaction = (pin) => {
     const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
     return this.props.wallet.delegateAuthority(
       this.props.token.uid,
@@ -49,6 +51,7 @@ class TokenDelegate extends React.Component {
       {
         createAnother: this.delegateCreateAnother.current.checked,
         startMiningTx: false,
+        pinCode: pin,
       }
     );
   }

@@ -244,10 +244,12 @@ class SendTokens extends React.Component {
   /**
    * Prepare data before sending tx to be mined and after user writes PIN
    *
+   * @param {String} pin PIN written by the user
+   *
    * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
    */
-  prepareSendTransaction = () => {
-    const ret = this.props.wallet.sendManyOutputsTransaction(this.data.outputs, this.data.inputs, null, { startMiningTx: false });
+  prepareSendTransaction = (pin) => {
+    const ret = this.props.wallet.sendManyOutputsTransaction(this.data.outputs, this.data.inputs, null, { startMiningTx: false, pinCode: pin });
     if (ret.success) {
       return ret.sendTransaction;
     } else {

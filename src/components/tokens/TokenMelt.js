@@ -38,11 +38,13 @@ class TokenMelt extends React.Component {
   /**
    * Prepare transaction to execute melt method after form validation
    *
+   * @param {String} pin PIN written by the user
+   *
    * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = () => {
+  prepareSendTransaction = (pin) => {
     const sanitizedValue = (this.amount.current.value || "").replace(/,/g, '');
     const amountValue = wallet.decimalToInteger(sanitizedValue);
     return this.props.wallet.meltTokens(
@@ -51,6 +53,7 @@ class TokenMelt extends React.Component {
       {
         createAnotherMelt: this.createAnother.current.checked,
         startMiningTx: false,
+        pinCode: pin,
       }
     );
   }

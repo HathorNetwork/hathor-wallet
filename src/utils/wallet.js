@@ -127,7 +127,8 @@ const wallet = {
       connection,
       password,
       pinCode: pin,
-      beforeReloadCallback
+      beforeReloadCallback,
+      storeSensitiveData: false,
     };
 
     const wallet = new HathorWallet(walletConfig);
