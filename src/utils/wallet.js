@@ -125,17 +125,14 @@ const wallet = {
       store: STORE,
       passphrase,
       connection,
-      password,
-      pinCode: pin,
       beforeReloadCallback,
-      storeSensitiveData: false,
     };
 
     const wallet = new HathorWallet(walletConfig);
 
     store.dispatch(setWallet(wallet));
 
-    const serverInfo = await wallet.start()
+    const serverInfo = await wallet.start({ pinCode: pin, password });
     // TODO should we save server info?
     //store.dispatch(setServerInfo(serverInfo));
     wallet.on('state', (state) => {
