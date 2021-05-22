@@ -10,12 +10,17 @@ import { t } from 'ttag';
 import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
+import TokenPagination from './TokenPagination';
 import hathorLib from '@hathor/wallet-lib';
 import { connect } from "react-redux";
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, props) => {
+  let history = [];
+  if (props.selectedToken) {
+    history = state.tokensHistory[props.selectedToken];
+  }
   return { 
-    tokensHistory: state.tokensHistory,
+    tokensHistory: history,
   };
 };
 
@@ -50,9 +55,7 @@ class TokenHistory extends React.Component {
   }
 
   componentDidUpdate = (prevProps) => {
-    if (this.props.tokensHistory && this.props.tokensHistory[this.props.selectedToken] &&
-        (!prevProps.tokensHistory[this.props.selectedToken] ||
-        (this.props.tokensHistory[this.props.selectedToken].length !== prevProps.tokensHistory[this.props.selectedToken].length))) {
+    if (prevProps.tokensHistory !== this.props.tokensHistory) {
       this.handleHistoryUpdate();
     }
   }
@@ -85,7 +88,7 @@ class TokenHistory extends React.Component {
    * Calculates the transactions that will be shown in the list, besides the pagination data
    */
   handleHistoryUpdate = () => {
-    const history = this.props.tokensHistory[this.props.selectedToken];
+    const history = this.props.tokensHistory;
     if (history && history.length > 0) {
       let startIndex = 0;
       let endIndex = this.props.count;
@@ -117,7 +120,7 @@ class TokenHistory extends React.Component {
    * Calculates the index of the reference hash in the history list
    */
   getReferenceIndex = () => {
-    const history = this.props.tokensHistory[this.props.selectedToken];
+    const history = this.props.tokensHistory;
     const idxReference = history.findIndex((tx) =>
       tx.tx_id === this.state.reference
     )
@@ -170,25 +173,6 @@ class TokenHistory extends React.Component {
   }
 
   render() {
-    const history = this.props.tokensHistory[this.props.selectedToken];
-    const loadPagination = () => {
-      if (history === null ||
-          history === undefined ||
-          history.length === 0 ||
-          (this.state.hasBefore === false && this.state.hasAfter === false)) {
-        return null;
-      } else {
-        return (
-          <nav aria-label="Token pagination" className="d-flex justify-content-center">
-            <ul className="pagination">
-              <li className={(!this.state.hasBefore || history.length === 0) ? "page-item mr-3 disabled" : "page-item mr-3"}><a className="page-link" onClick={(e) => this.previousClicked(e)} href="true">{t`Previous`}</a></li>
-              <li className={(!this.state.hasAfter || history.length === 0) ? "page-item disabled" : "page-item"}><a className="page-link" href="true" onClick={(e) => this.nextClicked(e)}>{t`Next`}</a></li>
-            </ul>
-          </nav>
-        );
-      }
-    }
-
     const renderHistory = () => {
       return (
         <div className="table-responsive">
@@ -206,7 +190,13 @@ class TokenHistory extends React.Component {
               {renderHistoryData()}
             </tbody>
           </table>
-          {loadPagination()}
+          <TokenPagination
+            history={this.props.tokensHistory}
+            hasBefore={this.state.hasBefore}
+            hasAfter={this.state.hasAfter}
+            nextClicked={this.nextClicked}
+            previousClicked={this.previousClicked}
+          />
         </div>
       );
     }
