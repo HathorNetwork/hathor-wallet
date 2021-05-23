@@ -37,7 +37,8 @@ import RequestErrorModal from './components/RequestError';
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import { DEFAULT_SERVER, IPC_RENDERER, VERSION, STORE } from './constants';
+import { DEFAULT_SERVER, IPC_RENDERER, VERSION } from './constants';
+import STORE from './storageInstance';
 import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
@@ -117,7 +118,7 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
 
   // Check version
   if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
-    const promise = version.checkApiVersion();
+    version.checkApiVersion();
     return <Redirect to={{
       pathname: '/loading_addresses/',
       state: {path: props.match.url}

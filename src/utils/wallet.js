@@ -5,10 +5,35 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, STORE } from '../constants';
+import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS } from '../constants';
+import STORE from '../storageInstance';
 import store from '../store/index';
-import { setWallet, updateLoadedData, isOnlineUpdate, updateHeight, newTx, updateTx, loadingAddresses, loadWalletSuccess, historyUpdate, sharedAddressUpdate, reloadData, cleanData, changeServer } from '../actions/index';
-import { helpers, constants as hathorConstants, errors as hathorErrors, HathorWallet, Connection, wallet as oldWalletUtil, walletUtils, storage, tokens } from '@hathor/wallet-lib';
+import {
+  setWallet,
+  updateLoadedData,
+  isOnlineUpdate,
+  updateHeight,
+  newTx,
+  updateTx,
+  loadingAddresses,
+  loadWalletSuccess,
+  historyUpdate,
+  sharedAddressUpdate,
+  reloadData,
+  cleanData,
+  changeServer
+} from '../actions/index';
+import {
+  helpers,
+  constants as hathorConstants,
+  errors as hathorErrors,
+  HathorWallet,
+  Connection,
+  wallet as oldWalletUtil,
+  walletUtils,
+  storage,
+  tokens
+} from '@hathor/wallet-lib';
 import version from './version';
 
 let Sentry = null;
@@ -55,6 +80,7 @@ const wallet = {
    * @param {string} passphrase
    * @param {string} pin
    * @param {string} password
+   * @param {Object} routerHistory History to push new path in case of notification click
    *
    * @memberof Wallet
    * @inner
@@ -62,7 +88,6 @@ const wallet = {
   generateWallet(words, passphrase, pin, password, routerHistory) {
     try {
       walletUtils.wordsValid(words);
-      return this.startWallet(words, passphrase, pin, password, routerHistory);
     } catch(e) {
       if (e instanceof hathorErrors.InvalidWords) {
         return null;
@@ -71,6 +96,8 @@ const wallet = {
         throw e;
       }
     }
+
+    return this.startWallet(words, passphrase, pin, password, routerHistory);
   },
 
   /**
