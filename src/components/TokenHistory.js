@@ -120,6 +120,9 @@ class TokenHistory extends React.Component {
    * Calculates the index of the reference hash in the history list
    */
   getReferenceIndex = () => {
+    if (this.state.reference === null) {
+      throw new Error('State reference cannot be null calling this method.');
+    }
     const history = this.props.tokensHistory;
     const idxReference = history.findIndex((tx) =>
       tx.tx_id === this.state.reference

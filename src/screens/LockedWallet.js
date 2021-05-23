@@ -55,6 +55,9 @@ class LockedWallet extends React.Component {
         return;
       }
 
+      // The last parameter being true means that we are going to start the wallet from an xpriv
+      // that's already in localStorage encrypted. Because of that we don't need to send the
+      // seed (first parameter) neither the password (second parameter).
       const promise = wallet.startWallet(null, '', pin, '', this.props.history, true);
       promise.then(() => {
         this.props.history.push('/wallet/');

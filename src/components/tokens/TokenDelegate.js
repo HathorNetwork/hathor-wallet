@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import { connect } from "react-redux";
 

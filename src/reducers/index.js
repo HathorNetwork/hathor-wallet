@@ -51,7 +51,6 @@ const rootReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'history_update':
       return Object.assign({}, state, {
-        historyTransactions: action.payload.historyTransactions,
         allTokens: action.payload.allTokens,
         lastSharedIndex: action.payload.lastSharedIndex,
         lastSharedAddress: action.payload.lastSharedAddress,
@@ -303,7 +302,7 @@ const onUpdateTx = (state, action) => {
   const newTokensHistory = Object.assign({}, state.tokensHistory, updatedHistoryMap);
   const newTokensBalance = Object.assign({}, state.tokensBalance, updatedBalanceMap);
 
-  return Object.assign({}, state,{
+  return Object.assign({}, state, {
     tokensHistory: newTokensHistory,
     tokensBalance: newTokensBalance,
   });

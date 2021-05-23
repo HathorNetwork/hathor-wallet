@@ -191,7 +191,10 @@ class SendTokensOne extends React.Component {
     }
 
     const renderBalance = () => {
-      const availableBalance = this.state.selected.uid in this.props.tokensBalance ? this.props.tokensBalance[this.state.selected.uid].available : 0;
+      let availableBalance = 0;
+      if (this.state.selected.uid in this.props.tokensBalance) {
+        availableBalance = this.props.tokensBalance[this.state.selected.uid].available;
+      }
       return <span className="ml-3">({t`Balance available: `}{hathorLib.helpers.prettyValue(availableBalance)})</span>;
     }
 

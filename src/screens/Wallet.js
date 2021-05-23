@@ -38,6 +38,7 @@ const mapStateToProps = (state) => {
     selectedToken: state.selectedToken,
     tokens: state.tokens,
     wallet: state.wallet,
+    tokenHistory: state.tokensHistory[state.selectedToken] || [],
   };
 };
 
@@ -128,7 +129,15 @@ class Wallet extends React.Component {
    * @return {boolean} If should show administrative tab
    */
   shouldShowAdministrativeTab = () => {
-    return this.props.wallet.getMintAuthority(this.props.selectedToken, { skipSpent: false }) || this.props.wallet.getMeltAuthority(this.props.selectedToken, { skipSpent: false })
+    if (this.props.wallet.getMintAuthority(this.props.selectedToken, { skipSpent: false })) {
+      return true;
+    }
+
+    if (this.props.wallet.getMeltAuthority(this.props.selectedToken, { skipSpent: false })) {
+      return true;
+    }
+
+    return false;
   }
 
   goToAllAddresses = () => {
@@ -186,7 +195,7 @@ class Wallet extends React.Component {
       if (this.shouldShowAdministrativeTab()) {
         return (
           <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-            <TokenAdministrative key={this.props.selectedToken} token={token} ref={this.administrativeRef} />
+            <TokenAdministrative key={`${this.props.selectedToken}-${this.props.tokenHistory.length}`} token={token} ref={this.administrativeRef} />
           </div>
         );
       } else {

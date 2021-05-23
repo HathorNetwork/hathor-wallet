@@ -16,9 +16,17 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, props) => {
   const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
-  const htrBalance = HTR_UID in state.tokensBalance ? state.tokensBalance[HTR_UID].available : 0;
+  let htrBalance = 0;
+  if (HTR_UID in state.tokensBalance) {
+    htrBalance = state.tokensBalance[HTR_UID].available;
+  }
+
+  let history = [];
+  if (props.selectedToken) {
+    history = state.tokensHistory[props.selectedToken];
+  }
   return {
     htrBalance,
     tokensHistory: state.tokensHistory,
@@ -54,13 +62,6 @@ class TokenAdministrative extends React.Component {
 
   componentDidMount() {
     this.updateData();
-  }
-
-  componentDidUpdate = (prevProps) => {
-    if ((this.props.tokensHistory && !prevProps.tokensHistory) ||
-        (this.props.tokensHistory[this.props.token.uid].length !== prevProps.tokensHistory[this.props.token.uid].length)) {
-      this.updateData();
-    }
   }
 
   updateData = () => {

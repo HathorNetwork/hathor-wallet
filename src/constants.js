@@ -11,7 +11,6 @@
  */
 
 import { t } from 'ttag';
-import { HybridStore } from './storage.js';
 
 /**
  * Quantity of elements to show in the wallet history
@@ -131,8 +130,3 @@ export const IPC_RENDERER = ipcRenderer;
  * Flag to hide/show elements after ledger integration is done
  */
 export const LEDGER_ENABLED = false;
-
-/**
- * Store to be used in the wallet and all HathorWallet objects created
- */
-export const STORE = new HybridStore();
