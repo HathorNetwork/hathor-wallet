@@ -32,7 +32,7 @@ class ChoosePassphrase extends React.Component {
    */
   handlePassphrase = () => {
     $('#confirmModal').modal('hide');
-    wallet.addPassphrase(this.refs.passphrase.value, this.refs.pin.value, this.refs.password.value);
+    wallet.addPassphrase(this.refs.passphrase.value, this.refs.pin.value, this.refs.password.value, this.props.history);
     this.props.history.push('/wallet/');
   }
 

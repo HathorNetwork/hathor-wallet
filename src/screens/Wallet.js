@@ -34,13 +34,11 @@ const mapDispatchToProps = dispatch => {
 
 
 const mapStateToProps = (state) => {
-  const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(state.historyTransactions, state.selectedToken, true);
-  const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, state.selectedToken);
   return {
-    balance: balance,
-    historyTransactions: filteredHistoryTransactions,
     selectedToken: state.selectedToken,
     tokens: state.tokens,
+    wallet: state.wallet,
+    tokenHistory: state.tokensHistory[state.selectedToken] || [],
   };
 };
 
@@ -131,29 +129,19 @@ class Wallet extends React.Component {
    * @return {boolean} If should show administrative tab
    */
   shouldShowAdministrativeTab = () => {
-    const walletData = hathorLib.wallet.getWalletData();
+    if (this.props.wallet.getMintAuthority(this.props.selectedToken, { skipSpent: false })) {
+      return true;
+    }
 
-    for (const tx_id in this.props.historyTransactions) {
-      const tx = this.props.historyTransactions[tx_id];
-      for (const output of tx.outputs) {
-        // This output is not mine
-        if (!hathorLib.wallet.isAddressMine(output.decoded.address, walletData)) {
-          continue;
-        }
-
-        // This token is not the one of this screen
-        if (output.token !== this.props.selectedToken) {
-          continue;
-        }
-
-        if (hathorLib.wallet.isMintOutput(output) || hathorLib.wallet.isMeltOutput(output)) {
-          return true;
-        }
-
-      }
+    if (this.props.wallet.getMeltAuthority(this.props.selectedToken, { skipSpent: false })) {
+      return true;
     }
 
     return false;
+  }
+
+  goToAllAddresses = () => {
+    this.props.history.push('/addresses/');
   }
 
   render() {
@@ -172,20 +160,20 @@ class Wallet extends React.Component {
         <div>
           <div className="d-none d-sm-flex flex-row align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-start justify-content-between">
-              <WalletBalance balance={this.props.balance} />
+              <WalletBalance key={this.props.selectedToken} />
             </div>
-            <WalletAddress history={this.props.history} />
+            <WalletAddress goToAllAddresses={this.goToAllAddresses} />
           </div>
           <div className="d-sm-none d-flex flex-column align-items-center justify-content-between">
             <div className="d-flex flex-column align-items-center justify-content-between">
-              <WalletBalance balance={this.props.balance} />
+              <WalletBalance key={this.props.selectedToken} />
               <div className="d-flex flex-row align-items-center">
               </div>
             </div>
-            <WalletAddress history={this.props.history} />
+            <WalletAddress goToAllAddresses={this.goToAllAddresses} />
           </div>
           <WalletHistory
-            historyTransactions={this.props.historyTransactions}
+            key={this.props.selectedToken}
             selectedToken={this.props.selectedToken} />
         </div>
       );
@@ -207,7 +195,7 @@ class Wallet extends React.Component {
       if (this.shouldShowAdministrativeTab()) {
         return (
           <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-            <TokenAdministrative token={token} ref={this.administrativeRef} />
+            <TokenAdministrative key={this.props.selectedToken} token={token} ref={this.administrativeRef} />
           </div>
         );
       } else {

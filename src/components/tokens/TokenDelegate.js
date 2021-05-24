@@ -7,8 +7,14 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
+import { connect } from "react-redux";
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+  };
+};
 
 
 /**
@@ -29,16 +35,24 @@ class TokenDelegate extends React.Component {
   /**
    * Prepare transaction to execute the delegate of outputs
    *
-   * @param {string} pin PIN user wrote on modal
+   * @param {String} pin PIN written by the user
    *
    * @return {Object} In case of success, an object with {success: true, sendTransaction, promise}, where sendTransaction is a
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = (pin) => {
-    const output = this.props.authorityOutputs[0];
     const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
-    return hathorLib.tokens.delegateAuthority(output.tx_id, output.index, output.decoded.address, this.props.token.uid, this.delegateAddress.current.value, this.delegateCreateAnother.current.checked, type.toLowerCase(), pin);
+    return this.props.wallet.delegateAuthority(
+      this.props.token.uid,
+      type.toLowerCase(),
+      this.delegateAddress.current.value,
+      {
+        createAnother: this.delegateCreateAnother.current.checked,
+        startMiningTx: false,
+        pinCode: pin,
+      }
+    );
   }
 
   /**
@@ -89,4 +103,4 @@ class TokenDelegate extends React.Component {
   }
 }
 
-export default TokenDelegate;
+export default connect(mapStateToProps)(TokenDelegate);

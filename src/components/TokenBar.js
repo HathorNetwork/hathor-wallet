@@ -17,7 +17,7 @@ const mapStateToProps = (state) => {
     registeredTokens: state.tokens,
     allTokens: state.allTokens,
     selectedToken: state.selectedToken,
-    historyTransactions: state.historyTransactions,
+    tokensBalance: state.tokensBalance,
   };
 };
 
@@ -104,8 +104,7 @@ class TokenBar extends React.Component {
    * @return {string} Available balance of token formatted
    */
   getTokenBalance = (uid) => {
-    const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, uid, false);
-    const balance = hathorLib.wallet.calculateBalance(filteredHistoryTransactions, uid);
+    const balance = this.props.tokensBalance[uid];
     const total = balance.available + balance.locked;
     return hathorLib.helpers.prettyValue(total);
   }

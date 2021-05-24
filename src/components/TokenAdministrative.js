@@ -16,14 +16,22 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
 
-const mapStateToProps = (state) => {
-  const balance = hathorLib.wallet.calculateBalance(
-    Object.values(state.historyTransactions),
-    hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
-  );
+const mapStateToProps = (state, props) => {
+  const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+  let htrBalance = 0;
+  if (HTR_UID in state.tokensBalance) {
+    htrBalance = state.tokensBalance[HTR_UID].available;
+  }
+
+  let history = [];
+  if (props.selectedToken) {
+    history = state.tokensHistory[props.selectedToken];
+  }
   return {
-    htrBalance: balance.available,
-    historyTransactions: state.historyTransactions,
+    htrBalance,
+    tokensHistory: state.tokensHistory,
+    tokensBalance: state.tokensBalance,
+    wallet: state.wallet,
   };
 };
 
@@ -34,9 +42,8 @@ const mapStateToProps = (state) => {
  */
 class TokenAdministrative extends React.Component {
   /**
-   * mintOutputs {Object} array with outputs available to mint
-   * meltOutputs {Object} array with outputs available to melt
-   * walletAmount {number} amount available of this token on this wallet
+   * mintCount {number} Quantity of mint authorities available
+   * meltCount {number} Quantity of melt authorities available
    * action {string} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
    * successMessage {string} success message to show
    * errorMessage {String} Message to show in case of error getting token info
@@ -44,13 +51,12 @@ class TokenAdministrative extends React.Component {
    * balance {number} Amount available of selected token
    */
   state = {
-    mintOutputs: [],
-    meltOutputs: [],
-    walletAmount: 0,
+    mintCount: 0,
+    meltCount: 0,
     action: '',
     successMessage: '',
     errorMessage: '',
-    totalSupply: 0,
+    totalSupply: null,
     balance: 0,
   };
 
@@ -58,11 +64,8 @@ class TokenAdministrative extends React.Component {
     this.updateData();
   }
 
-  componentDidUpdate = (prevProps) => {
-    if (this.props.historyTransactions !== prevProps.historyTransactions) {
-      if (this.props.token.uid !== prevProps.token.uid) {
-        this.cleanStates();
-      }
+  componentDidUpdate(prevProps) {
+    if (prevProps.tokensHistory !== this.props.tokensHistory) {
       this.updateData();
     }
   }
@@ -92,51 +95,15 @@ class TokenAdministrative extends React.Component {
    * Update token state after didmount or props update
    */
   updateWalletInfo = () => {
-    const mintOutputs = [];
-    const meltOutputs = [];
-    let walletAmount = 0;
+    const mintUtxos = this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
+    const mintCount = mintUtxos ? mintUtxos.length : 0;
 
-    const walletData = hathorLib.wallet.getWalletData();
+    const meltUtxos = this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
+    const meltCount = meltUtxos ? meltUtxos.length : 0;
 
-    for (const tx_id in this.props.historyTransactions) {
-      const tx = this.props.historyTransactions[tx_id];
-      for (const [index, output] of tx.outputs.entries()) {
-        // This output is not mine
-        if (!hathorLib.wallet.isAddressMine(output.decoded.address, walletData)) {
-          continue;
-        }
+    const tokenBalance = this.props.token.uid in this.props.tokensBalance ? this.props.tokensBalance[this.props.token.uid].available : 0;
 
-        // This token is not the one of this screen
-        if (output.token !== this.props.token.uid) {
-          continue;
-        }
-
-        // If output was already used, we can't list it here
-        if (output.spent_by) {
-          continue;
-        }
-
-        output.tx_id = tx.tx_id;
-        output.index = index;
-
-        if (hathorLib.wallet.isMintOutput(output)) {
-          mintOutputs.push(output);
-        } else if (hathorLib.wallet.isMeltOutput(output)) {
-          meltOutputs.push(output);
-        } else if (!hathorLib.wallet.isAuthorityOutput(output)) {
-          walletAmount += output.value;
-        }
-
-      }
-    }
-
-    // Update user balance of this token
-    const balance = hathorLib.wallet.calculateBalance(
-      Object.values(this.props.historyTransactions),
-      this.props.token.uid
-    );
-
-    this.setState({ mintOutputs, meltOutputs, walletAmount, balance: balance.available });
+    this.setState({ mintCount, meltCount, balance: tokenBalance });
   }
 
   /**
@@ -196,17 +163,17 @@ class TokenAdministrative extends React.Component {
     const renderBottom = () => {
       switch (this.state.action) {
         case 'mint':
-          return <TokenMint htrBalance={this.props.htrBalance} action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} mintOutputs={this.state.mintOutputs} showSuccess={this.showSuccess} />
+          return <TokenMint htrBalance={this.props.htrBalance} action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} />
         case 'melt':
-          return <TokenMelt action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} meltOutputs={this.state.meltOutputs} showSuccess={this.showSuccess} walletAmount={this.state.walletAmount} />
+          return <TokenMelt action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} walletAmount={this.state.balance} />
         case 'delegate-mint':
-          return <TokenDelegate action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} authorityOutputs={this.state.mintOutputs} showSuccess={this.showSuccess} />
+          return <TokenDelegate action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} />
         case 'delegate-melt':
-          return <TokenDelegate action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} authorityOutputs={this.state.meltOutputs} showSuccess={this.showSuccess} />
+          return <TokenDelegate action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} />
         case 'destroy-mint':
-          return <TokenDestroy action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} authorityOutputs={this.state.mintOutputs} showSuccess={this.showSuccess} />
+          return <TokenDestroy action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} authoritiesLength={this.state.mintCount} showSuccess={this.showSuccess} />
         case 'destroy-melt':
-          return <TokenDestroy action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} authorityOutputs={this.state.meltOutputs} showSuccess={this.showSuccess} />
+          return <TokenDestroy action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} authoritiesLength={this.state.meltCount} showSuccess={this.showSuccess} />
         default:
           return null;
       }
@@ -235,7 +202,7 @@ class TokenAdministrative extends React.Component {
     }
 
     const renderMintMeltWrapper = () => {
-      if (this.state.mintOutputs.length === 0 && this.state.meltOutputs.length === 0) {
+      if (this.state.mintCount === 0 && this.state.meltCount === 0) {
         return <p>{t`You have no more authority outputs for this token`}</p>;
       }
 
@@ -243,13 +210,13 @@ class TokenAdministrative extends React.Component {
         <div className="d-flex align-items-center mt-3">
           <div className="token-manage-wrapper d-flex flex-column align-items-center mr-4">
             <p><strong>{t`Mint authority management`}</strong></p>
-            <p>You are the owner of {this.state.mintOutputs.length} mint {hathorLib.helpers.plural(this.state.mintOutputs.length, 'output', 'outputs')}</p>
-            {this.state.mintOutputs.length > 0 && renderMintLinks()}
+            <p>You are the owner of {this.state.mintCount} mint {hathorLib.helpers.plural(this.state.mintCount, 'output', 'outputs')}</p>
+            {this.state.mintCount > 0 && renderMintLinks()}
           </div>
           <div className="token-manage-wrapper d-flex flex-column align-items-center">
             <p><strong>{t`Melt authority management`}</strong></p>
-            <p>You are the owner of {this.state.meltOutputs.length} melt {hathorLib.helpers.plural(this.state.meltOutputs.length, 'output', 'outputs')}</p>
-            {this.state.meltOutputs.length > 0 && renderMeltLinks()}
+            <p>You are the owner of {this.state.meltCount} melt {hathorLib.helpers.plural(this.state.meltCount, 'output', 'outputs')}</p>
+            {this.state.meltCount > 0 && renderMeltLinks()}
           </div>
         </div>
       );
@@ -257,7 +224,7 @@ class TokenAdministrative extends React.Component {
 
     return (
       <div className="flex align-items-center">
-        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.state.totalSupply ? hathorLib.helpers.prettyValue(this.state.totalSupply) : '-'} {this.props.token.symbol}</p>
         <p className="mt-2 mb-2"><strong>{t`Your balance available:`} </strong>{hathorLib.helpers.prettyValue(this.state.balance)} {this.props.token.symbol}</p>
         <div className="token-detail-wallet-info">
           {renderMintMeltWrapper()}

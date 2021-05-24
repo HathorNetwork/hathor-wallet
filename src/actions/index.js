@@ -83,7 +83,7 @@ export const loadingAddresses = data => ({ type: "loading_addresses_update", pay
 /**
  * Set quantity of addresses and transactions already loaded
  */
-export const dataLoaded = data => ({ type: "data_loaded_update", payload: data });
+export const updateLoadedData = data => ({ type: "update_loaded_data", payload: data });
 
 /**
  * Update status code of the last request that failed
@@ -94,3 +94,28 @@ export const updateRequestErrorStatusCode = data => ({ type: "update_request_err
  * Set height
  */
 export const updateHeight = data => ({ type: "update_height", payload: data });
+
+/**
+ * wallet {HathorWallet} wallet object
+ */
+export const setWallet = (wallet) => ({ type: "set_wallet", payload: wallet });
+
+/**
+ * Stop and clean wallet redux state
+ */
+export const resetWallet = () => ({ type: "reset_wallet" });
+
+/**
+ * history {Object} history of this wallet (including txs from all tokens)
+ */
+export const loadWalletSuccess = (history) => ({ type: "load_wallet_success", payload: { history } });
+
+/**
+ * tx {Object} the new transaction
+ */
+export const newTx = (tx) => ({ type: "new_tx", payload: { tx } });
+
+/**
+ * tx {Object} the new transaction
+ */
+export const updateTx = (tx) => ({ type: "update_tx", payload: { tx } });

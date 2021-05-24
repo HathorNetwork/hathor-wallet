@@ -20,7 +20,7 @@ const mapStateToProps = (state) => {
   // We need the height on the props so it can update the balance
   // when the network height updates and the wallet had a reward locked block
   return {
-    historyTransactions: state.historyTransactions,
+    tokensBalance: state.tokensBalance,
     height: state.height,
   };
 };
@@ -100,7 +100,7 @@ class SendTokensOne extends React.Component {
           this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
           return null;
         }
-        let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'tokenData': hathorLib.tokens.getTokenIndex(this.state.selectedTokens, this.state.selected.uid)};
+        let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'token': this.state.selected.uid};
 
         const hasTimelock = output.current.timelockCheckbox.current.checked;
         if (hasTimelock) {
@@ -130,23 +130,6 @@ class SendTokensOne extends React.Component {
     }
 
     return data;
-  }
-
-  /**
-   * Validate inputs and outpus
-   * 1. If inputs were not selected, select inputs from outputs amount
-   * 2. If amount of selected inputs is larger than outputs amount, we create a change output
-   * 3. If inputs were selected, check if they are valid
-   */
-  handleInitialData = (data) => {
-    const noInputs = this.noInputs.current.checked;
-    const result = hathorLib.wallet.prepareSendTokensData(data, this.state.selected, noInputs, this.props.historyTransactions, this.state.selectedTokens);
-    if (result.success === false) {
-      this.props.updateState({ errorMessage: result.message, loading: false });
-      return null;
-    }
-
-    return result.data;
   }
 
   /**
@@ -208,8 +191,11 @@ class SendTokensOne extends React.Component {
     }
 
     const renderBalance = () => {
-      const balance = hathorLib.wallet.calculateBalance(Object.values(this.props.historyTransactions), this.state.selected.uid);
-      return <span className="ml-3">({t`Balance available: `}{hathorLib.helpers.prettyValue(balance.available)})</span>;
+      let availableBalance = 0;
+      if (this.state.selected.uid in this.props.tokensBalance) {
+        availableBalance = this.props.tokensBalance[this.state.selected.uid].available;
+      }
+      return <span className="ml-3">({t`Balance available: `}{hathorLib.helpers.prettyValue(availableBalance)})</span>;
     }
 
     return (
