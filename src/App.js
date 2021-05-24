@@ -118,6 +118,8 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
 
   // Check version
   if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
+    // We already handle all js errors in general and open an error modal to the user
+    // so there is no need to catch the promise error below
     version.checkApiVersion();
     return <Redirect to={{
       pathname: '/loading_addresses/',
