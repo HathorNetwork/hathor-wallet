@@ -108,7 +108,7 @@ const rootReducer = (state = initialState, action) => {
 const onSetWallet = (state, action) => {
   if (state.wallet && state.wallet.state !== hathorLib.HathorWallet.CLOSED) {
     // Wallet was not closed
-    state.wallet.stop();
+    state.wallet.stop({ cleanStorage: false });
   }
 
   return {
