@@ -195,7 +195,7 @@ class Wallet extends React.Component {
       if (this.shouldShowAdministrativeTab()) {
         return (
           <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-            <TokenAdministrative key={`${this.props.selectedToken}-${this.props.tokenHistory.length}`} token={token} ref={this.administrativeRef} />
+            <TokenAdministrative key={this.props.selectedToken} token={token} ref={this.administrativeRef} />
           </div>
         );
       } else {

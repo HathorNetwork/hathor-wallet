@@ -64,6 +64,12 @@ class TokenAdministrative extends React.Component {
     this.updateData();
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.tokensHistory !== this.props.tokensHistory) {
+      this.updateData();
+    }
+  }
+
   updateData = () => {
     this.updateTokenInfo();
     this.updateWalletInfo();
