@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This script checks whether the pot file is outdated or not.
 # It runs successfully if the pot file is not outdated.

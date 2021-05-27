@@ -25,6 +25,16 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
       run: npm install
+    - name: Install gettext
+      run: sudo apt-get install gettext
+    - name: Check version
+      run: make check_version
+    - name: Pot file
+      run: make check_pot
+    - name: Po file
+      run: make check_po
+    - name: i18n
+      run: make i18n
     - name: Start
       run: npm start & npx wait-on http://localhost:3000
       env:
