@@ -67,8 +67,10 @@ class TokenDestroy extends React.Component {
    */
   destroy = () => {
     if (this.state.destroyQuantity > this.props.authoritiesLength) {
+      const authoritiesLength = this.props.authoritiesLength;
       const type = this.props.action === 'destroy-mint' ? t`mint` : t`melt`;
-      return t`You only have ${this.props.authoritiesLength} ${type} ${hathorLib.helpers.plural(this.props.authoritiesLength, 'output', 'outputs')} to destroy.`;
+      const plural = hathorLib.helpers.plural(this.props.authoritiesLength, 'output', 'outputs');
+      return t`You only have ${authoritiesLength} ${type} ${plural} to destroy.`;
     }
   }
 
