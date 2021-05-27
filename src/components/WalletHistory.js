@@ -21,7 +21,7 @@ const WalletHistory = (props) => {
     <div>
       <div className="d-flex flex-column mt-5">
         <h4><strong>{t`Transaction history`}</strong></h4>
-        <TokenHistory history={props.historyTransactions} count={WALLET_HISTORY_COUNT} selectedToken={props.selectedToken} showPage={true} />
+        <TokenHistory count={WALLET_HISTORY_COUNT} selectedToken={props.selectedToken} showPage={true} />
       </div>
     </div>
   );

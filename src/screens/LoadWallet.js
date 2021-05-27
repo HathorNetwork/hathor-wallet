@@ -91,8 +91,7 @@ class LoadWallet extends React.Component {
     // Getting redux variables before cleaning all data
     const { pin, password } = this.props;
     // First we clean what can still be there of a last wallet
-    wallet.cleanWallet();
-    wallet.generateWallet(this.state.words, '', pin, password, true);
+    wallet.generateWallet(this.state.words, '', pin, password, this.props.history);
     hathorLib.wallet.markBackupAsDone();
     // Clean pin and password from redux
     this.props.updatePassword(null);

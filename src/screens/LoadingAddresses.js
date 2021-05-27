@@ -13,22 +13,22 @@ import { t } from 'ttag';
 import SpanFmt from '../components/SpanFmt';
 import RequestErrorModal from '../components/RequestError';
 import logo from '../assets/images/hathor-logo.png';
-import { dataLoaded } from "../actions/index";
+import { updateLoadedData } from "../actions/index";
 import { connect } from "react-redux";
 import colors from '../index.scss';
 import InitialImages from '../components/InitialImages';
 
 const mapDispatchToProps = dispatch => {
   return {
-    dataLoaded: (data) => dispatch(dataLoaded(data)),
+    updateLoadedData: (data) => dispatch(updateLoadedData(data)),
   };
 };
 
 
 const mapStateToProps = (state) => {
   return {
-    addressesFound: state.addressesFound,
-    transactionsFound: state.transactionsFound,
+    addressesFound: state.loadedData.addresses,
+    transactionsFound: state.loadedData.transactions,
     loadingAddresses: state.loadingAddresses
   };
 };
@@ -46,7 +46,7 @@ class LoadingAddresses extends React.Component {
   state = { canRedirect: false };
 
   componentDidMount = () => {
-    this.props.dataLoaded({addressesFound: 0, transactionsFound: 0});
+    this.props.updateLoadedData({addresses: 0, transactions: 0});
     // To prevent only a blink in this screen when user loads the addresses really fast
     // I set that the user will see this screen at least for 2 seconds
     setTimeout(() => {

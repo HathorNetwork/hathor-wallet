@@ -12,8 +12,16 @@ import HathorAlert from '../components/HathorAlert';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
 import path from 'path';
+import { connect } from "react-redux";
 
 import hathorLib from '@hathor/wallet-lib';
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+    addressesTxs: state.addressesTxs,
+  };
+};
 
 /**
  * Screen that has a list of addresses of the wallet
@@ -27,7 +35,6 @@ class AddressList extends React.Component {
    * page: {Number} Current page of the list
    * totalPages: {Number} Total number of pages of the list
    * filtered: {Boolean} If the list is filtered
-   * transactionsByAddress: {Object} Object with number of transactions for each address
    */
   state = {
     addresses: [],
@@ -35,27 +42,11 @@ class AddressList extends React.Component {
     page: 1,
     totalPages: 0,
     filtered: false,
-    transactionsByAddress: null,
   }
 
   componentDidMount = () => {
-    const walletData = hathorLib.wallet.getWalletData();
-    const addressKeys = walletData.keys;
-    const addresses = [];
-    const transactionsByAddress = {};
-    for (const key in addressKeys) {
-      const addressData = {
-        address: key,
-        index: addressKeys[key].index,
-      };
-
-      addresses.push(addressData);
-      transactionsByAddress[key] = 0;
-    }
-
-    this.updateNumberOfTransactions(transactionsByAddress, walletData.historyTransactions);
-
-    this.setState({ addresses, filteredAddresses: addresses, totalPages: this.getTotalPages(addresses), transactionsByAddress });
+    const addresses = this.props.wallet.getAllAddresses();
+    this.setState({ addresses, filteredAddresses: addresses, totalPages: this.getTotalPages(addresses) });
   }
 
   /**
@@ -67,28 +58,6 @@ class AddressList extends React.Component {
    */
   getTotalPages = (array) => {
     return Math.ceil(array.length / WALLET_HISTORY_COUNT);
-  }
-
-  /**
-   * Update number of transactions for each address
-   *
-   * @param {Object} addressData Transactions by address object {address1: 0, address2: 0}
-   * @param {Object} historyTransactions History of transactions from the wallet data storage
-   *
-   * @return {Number} Total number of transactions using this address
-   */
-  updateNumberOfTransactions = (addressData, historyTransactions) => {
-    for (const tx_id in historyTransactions) {
-      const tx = historyTransactions[tx_id];
-      let foundAddresses = [];
-      for (const el of [...tx.outputs, ...tx.inputs]) {
-        const address = el.decoded.address;
-        if (address in addressData && !(address in foundAddresses)) {
-          addressData[address] += 1;
-          foundAddresses.push(address);
-        }
-      }
-    }
   }
 
   /**
@@ -175,12 +144,12 @@ class AddressList extends React.Component {
     const renderData = () => {
       const startIndex = (this.state.page - 1) * WALLET_HISTORY_COUNT;
       const endIndex = startIndex + WALLET_HISTORY_COUNT;
-      return this.state.filteredAddresses.slice(startIndex, endIndex).map((data) => {
+      return this.state.filteredAddresses.slice(startIndex, endIndex).map((address) => {
         return (
-          <tr key={data.address}>
-            <td><a href="true" onClick={(e) => this.goToAddressSearch(e, data.address)}>{data.address}</a></td>
-            <td>{data.index}</td>
-            <td className="number">{this.state.transactionsByAddress && this.state.transactionsByAddress[data.address]}</td>
+          <tr key={address}>
+            <td><a href="true" onClick={(e) => this.goToAddressSearch(e, address)}>{address}</a></td>
+            <td>{this.props.wallet.getAddressIndex(address)}</td>
+            <td className="number">{address in this.props.addressesTxs ? this.props.addressesTxs[address] : 0}</td>
           </tr>
         )
       });
@@ -215,4 +184,4 @@ class AddressList extends React.Component {
   }
 }
 
-export default AddressList;
+export default connect(mapStateToProps)(AddressList);
