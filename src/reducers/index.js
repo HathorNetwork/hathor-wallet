@@ -6,6 +6,7 @@
  */
 
 import hathorLib from '@hathor/wallet-lib';
+import { VERSION } from '../constants';
 
 const initialState = {
   tokensHistory: {},
@@ -169,6 +170,8 @@ const isAllAuthority = (tx) => {
  * Got wallet history. Update history and balance for each token.
  */
 const onLoadWalletSuccess = (state, action) => {
+  // Update the version of the wallet that the data was loaded
+  hathorLib.storage.setItem('wallet:version', VERSION);
   const { history } = action.payload;
   const tokensHistory = {};
   const newAddressesTxs = {};
