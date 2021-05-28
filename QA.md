@@ -2,6 +2,8 @@
 
 ### These tests must be done in an Electron application. Some features might work on the web browser but show different behavior when using electron.
 
+You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor.network/v1a/) to run the tests.
+
 1. **Wallet update**
     1. [Using the old version of the wallet!] If your wallet is not initialized, initialize it.
     1. Close the wallet.
@@ -18,9 +20,8 @@
     1. Try to click 'Create my words' without selecting checkbox (must show error).
     1. Close and open your wallet. You must see the screen to select 'New wallet' or 'Import wallet'. Select 'new wallet' and then 'create my words'.
     1. Select to do backup now. (Really save those words, we will load this wallet later with them).
-    1. Click 'Validate' before selecting all the words, you must see an error message on the screen.
-    1. Click 'Validate' with all words selected but in the wrong order, you must see an error message on the screen.
-    1. Validate with correct order.
+    1. Correctly select the first word but select a wrong one in the second. Check that it returns to the seed screen to restart the validation.
+    1. Validate all the words correctly.
     1. Try to select insecure password (like '123'). It must show error.
     1. Select password and PIN.
 
@@ -108,15 +109,16 @@
     1. Melt 20.00 tokens. The total supply and your balance must be 130.00 now.
     1. Click on 'Balance & History' and copy your address. Then go back to 'Administrative Tools' and click to delegate mint.
     1. Type your address and delegate. Now you must have 2 mint outputs.
-    1. Get a random address and click to delegate melt. Deselect the option to 'Create another melt output for you?'. Delegate and now you must have no melt outputs.
-    1. Go back to the 'Administrative Tools', click to destroy mint and select 2. You must see a message saying 'You have no more authority outputs for this token'.
+    1. Click to delegate melt and deselect the option to 'Create another melt output for you?'. Delegate the authority to the address WZ7pDnkPnxbs14GHdUFivFzPbzitwNtvZo and now you must have no melt outputs.
+    1. Go back to the 'Administrative Tools', click to destroy mint and select 3. You must see an error message that you don't have 3 mint authority outputs.
+    1. Select 2 and complete the destroy. You must see a message saying 'You have no more authority outputs for this token'.
     1. Go to 'About TST' tab and must see 'Can mint new tokens: No'.
 
 1. **Change server**
     1. Click on the 'Wallet' navigation link, then on the settings icon and the on 'Change server'.
-    1. Select one of the default servers and connect.
+    1. Select one of the default servers and connect. It will connect to the mainnet.
     1. The transaction list must be empty.
-    1. Go back, change again to your test server and validate all transactions appear again.
+    1. Go back, change again to the testnet server. Before loading the wallet it must ask to confirm that you want to connect to a testnet. Check that all transactions load again.
 
 1. **Add passphrase**
     1. Click on the settings icon and then 'Set a passphrase'.
@@ -150,7 +152,10 @@
     1. Must see an error that the output is already spent.
 
 1. **Late backup**
-    1. Reset wallet and start a new one without doing backup. It must show a yellow warning saying a backup must be done.
+    1. Reset the wallet and close it.
+    1. Open the wallet with the parameters `--unsafe-mode --debug`.
+    1. Click on the application menu Debug > Open Dev Tools. Then type `localStorage.clear()`. This is to simulate a fresh install of the app.
+    1. Close and open the wallet again and start a new wallet one without doing backup. It must show a yellow warning saying a backup must be done.
     1. Do the backup (following procedures in the 'Initialization' tests). The backup message has to disappear.
 
 1. **Hardware wallet initialization**
