@@ -211,7 +211,7 @@ class TokenHistory extends React.Component {
     }
 
     const renderHistoryData = () => {
-      const keys = hathorLib.wallet.getWalletData().keys;
+      const keys = (hathorLib.wallet.getWalletData() || {}).keys || [];
       return this.state.transactions.map((tx, idx) => {
         let statusElement = '';
         let trClass = '';

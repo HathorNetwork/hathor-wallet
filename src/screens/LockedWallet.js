@@ -87,10 +87,12 @@ class LockedWallet extends React.Component {
   }
 
   render() {
+    const walletPrefix = hathorLib.storage.store.prefix;
     return (
       <div className="content-wrapper flex align-items-center">
         <div className="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
           <div className="d-flex align-items-start flex-column">
+            <p>Wallet prefix: {walletPrefix}</p>
             <p>{t`Your wallet is locked. Please write down your PIN to unlock it.`}</p>
             <form ref="unlockForm" className="w-100" onSubmit={this.unlockClicked}>
               <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control" />
