@@ -16,6 +16,24 @@ import hathorLib from '@hathor/wallet-lib';
  */
 export class LedgerError extends Error {}
 
+const formatPathData = (index) => {
+  pathArr = [
+    44  + 0x80000000, // 44'
+    280 + 0x80000000, // 280'
+    0   + 0x80000000, // 0'
+    0,                // 0
+  ];
+  if (index !== undefined) {
+    pathArr.push(index);
+  }
+  const buffer = Buffer.alloc(21);
+  buffer[0] = 5;
+  pathArr.forEach((element, index) => {
+    buffer.writeUInt32BE(element, 1 + 4 * index);
+  });
+  return buffer;
+};
+
 let ledger = null;
 
 if (IPC_RENDERER) {
@@ -71,12 +89,10 @@ if (IPC_RENDERER) {
       // first assemble data to be sent
       const arr = [];
       if (changeIndex > -1) {
-        // With change output
-        arr.push(hathorLib.transaction.intToBytes(1, 1));
-        // Change index of array
-        arr.push(hathorLib.transaction.intToBytes(changeIndex, 1));
+        // encode the bit indicating existence of change and change index on first byte
+        arr.push(hathorLib.transaction.intToBytes(0x80 | changeIndex, 1))
         // Change key index of the address
-        arr.push(hathorLib.transaction.intToBytes(changeKeyIndex, 4));
+        arr.push(formatPathData(changeKeyIndex));
       } else {
         // no change output
         arr.push(hathorLib.transaction.intToBytes(0, 1));
@@ -102,8 +118,7 @@ if (IPC_RENDERER) {
       const arr = [];
       for (const input of data.inputs) {
         const index = keys[input.address].index;
-        const indexBytes = hathorLib.transaction.intToBytes(index, 4);
-        arr.push(indexBytes);
+        arr.push(formatPathData(index));
       }
       IPC_RENDERER.send("ledger:getSignatures", arr);
     },

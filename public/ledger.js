@@ -21,14 +21,43 @@ class Ledger {
       switch (e.statusCode) {
         case 0x6985:
           return {status: e.statusCode, message: 'Request denied by user on Ledger'};
-        case 0x6b00:  // SW_DEVELOPER_ERROR
-        case 0x6b01:  // SW_INVALID_PARAM
-        case 0x6b02:  // SW_IMPROPER_INIT
+        case 0x6a86:  // WRONG_P1P2
+        case 0x6a87:  // SW_WRONG_DATA_LENGTH
+        case 0x6d00:  // SW_INS_NOT_SUPPORTED
+        case 0x6e00:  // SW_CLA_NOT_SUPPORTED
+        case 0xb000:  // SW_WRONG_RESPONSE_LENGTH
+        case 0xb001:  // SW_DISPLAY_BIP32_PATH_FAIL
+        case 0xb002:  // SW_DISPLAY_ADDRESS_FAIL
+        case 0xb003:  // SW_DISPLAY_AMOUNT_FAIL
+        case 0xb004:  // SW_WRONG_TX_LENGTH
+        case 0xb005:  // SW_TX_PARSING_FAIL
+        case 0xb006:  // SW_TX_HASH_FAIL
+        case 0xb007:  // SW_BAD_STATE
+        case 0xb008:  // SW_SIGNATURE_FAIL
+        case 0xb009:  // SW_INVALID_TX
         default:
           return {status: e.statusCode, message: 'Error communicating with Ledger'};
       }
     }
     return e;
+  }
+
+  static formatPathData(index) {
+    pathArr = [
+      44  + 0x80000000, // 44'
+      280 + 0x80000000, // 280'
+      0   + 0x80000000, // 0'
+      0,                // 0
+    ];
+    if (index !== undefined) {
+      pathArr.push(index);
+    }
+    const buffer = Buffer.alloc(21);
+    buffer[0] = 5;
+    pathArr.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    return buffer;
   }
 
   constructor() {
@@ -74,10 +103,10 @@ class Ledger {
 
     // Ledger commands
     this.commands = {
-      'VERSION': 0x01,
-      'ADDRESS': 0x02,
-      'SEND_TX': 0x04,
-      'PUBLIC_KEY_DATA': 0x10,
+      'VERSION': 0x03,
+      'ADDRESS': 0x04,
+      'PUBLIC_KEY_DATA': 0x05,
+      'SEND_TX': 0x06,
     }
 
     // Queue of commands to send to ledger so we don't send them in paralel
@@ -197,7 +226,7 @@ class Ledger {
   getPublicKeyData = async () => {
     try {
       const transport = await this.getTransport();
-      return await this.sendToLedgerOrQueue(transport, this.commands.PUBLIC_KEY_DATA, 0, 0);
+      return await this.sendToLedgerOrQueue(transport, this.commands.PUBLIC_KEY_DATA, 0, 0, Ledger.formatPathData());
     } catch (e) {
       throw Ledger.parseLedgerError(e);
     }
@@ -213,7 +242,7 @@ class Ledger {
   checkAddress = async (index) => {
     try {
       const transport = await this.getTransport();
-      const result = await this.sendToLedgerOrQueue(transport, this.commands.ADDRESS, 0, 0, index);
+      const result = await this.sendToLedgerOrQueue(transport, this.commands.ADDRESS, 0, 0, Ledger.formatPathData(index));
       return result;
     } catch (e) {
       throw Ledger.parseLedgerError(e);
@@ -241,9 +270,10 @@ class Ledger {
     let offset = 0;
     try {
       const transport = await this.getTransport();
+      let i=0;
       while (offset < data.length) {
         const toSend = data.slice(offset, offset + maxLedgerBuffer);
-        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 0, 0, toSend);
+        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 0, i++, toSend);
         offset += maxLedgerBuffer;
       }
     } catch (e) {
@@ -273,7 +303,7 @@ class Ledger {
     try {
       const transport = await this.getTransport();
       for (const index of indexes) {
-        const value = await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 1, 0, index);
+        const value = await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 1, 0, Ledger.formatPathData(index));
         // we remove the last 2 bytes as they're just control bytes from ledger to say if
         // the communication was successful or not
         values.push(value.slice(0, -2));
