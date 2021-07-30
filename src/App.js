@@ -183,6 +183,9 @@ const returnStartedRoute = (Component, props, rest) => {
       if (rest.loaded) {
         // When the wallet is opened, the path that is called is '/', which currenctly redirects to the Wallet component
         // in that case, if the wallet is not loaded but it's started, it should redirect to the signin/wallet type screen
+        if (hathorLib.wallet.isHardwareWallet()) {
+          return <Redirect to={{pathname: '/wallet_type/'}} />;
+        }
         return <Redirect to={{pathname: '/signin/'}} />;
       } else {
         return <Component {...props} />;
