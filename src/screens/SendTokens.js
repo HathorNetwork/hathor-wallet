@@ -234,6 +234,8 @@ class SendTokens extends React.Component {
         this.data = data;
         $('#pinModal').modal('show');
       } else {
+        // currently we only support HTR
+        data.tokens = [];
         this.executeSendLedger(data);
       }
     } catch(e) {

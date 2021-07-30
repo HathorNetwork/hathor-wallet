@@ -118,7 +118,7 @@ if (IPC_RENDERER) {
       const arr = [];
       for (const input of data.inputs) {
         const index = keys[input.address].index;
-        arr.push(formatPathData(index));
+        arr.push(index);
       }
       IPC_RENDERER.send("ledger:getSignatures", arr);
     },
