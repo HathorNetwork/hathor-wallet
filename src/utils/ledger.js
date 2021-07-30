@@ -26,8 +26,8 @@ const formatPathData = (index) => {
   if (index !== undefined) {
     pathArr.push(index);
   }
-  const buffer = Buffer.alloc(21);
-  buffer[0] = 5;
+  const buffer = Buffer.alloc(1+4*pathArr.length);
+  buffer[0] = pathArr.length;
   pathArr.forEach((element, index) => {
     buffer.writeUInt32BE(element, 1 + 4 * index);
   });

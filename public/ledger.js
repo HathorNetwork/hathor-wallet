@@ -66,13 +66,11 @@ class Ledger {
       0   + 0x80000000, // 0'
       0,                // 0
     ];
-    let pathLen = 4;
     if (index !== undefined) {
       pathArr.push(index);
-      pathLen++;
     }
-    const buffer = Buffer.alloc(1+(4*pathLen));
-    buffer[0] = pathLen;
+    const buffer = Buffer.alloc(1+(4*pathArr.length));
+    buffer[0] = pathArr.length;
     pathArr.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
