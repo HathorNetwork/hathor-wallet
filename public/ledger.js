@@ -17,6 +17,22 @@ const ledgerCLA = 0xe0;
 class Ledger {
   
   static parseLedgerError(e) {
+    const errorMap = {
+      0x6a86:  "WRONG_P1P2",
+      0x6a87:  "SW_WRONG_DATA_LENGTH",
+      0x6d00:  "SW_INS_NOT_SUPPORTED",
+      0x6e00:  "SW_CLA_NOT_SUPPORTED",
+      0xb000:  "SW_WRONG_RESPONSE_LENGTH",
+      0xb001:  "SW_DISPLAY_BIP32_PATH_FAIL",
+      0xb002:  "SW_DISPLAY_ADDRESS_FAIL",
+      0xb003:  "SW_DISPLAY_AMOUNT_FAIL",
+      0xb004:  "SW_WRONG_TX_LENGTH",
+      0xb005:  "SW_TX_PARSING_FAIL",
+      0xb006:  "SW_TX_HASH_FAIL",
+      0xb007:  "SW_BAD_STATE",
+      0xb008:  "SW_SIGNATURE_FAIL",
+      0xb009:  "SW_INVALID_TX",
+    };
     if (e.name && e.name === 'TransportStatusError') {
       switch (e.statusCode) {
         case 0x6985:
@@ -36,6 +52,7 @@ class Ledger {
         case 0xb008:  // SW_SIGNATURE_FAIL
         case 0xb009:  // SW_INVALID_TX
         default:
+          console.log("LedgerError: ", errorMap[e.statusCode] || 'UNKNOWN_ERROR');
           return {status: e.statusCode, message: 'Error communicating with Ledger'};
       }
     }
@@ -43,17 +60,19 @@ class Ledger {
   }
 
   static formatPathData(index) {
-    pathArr = [
+    const pathArr = [
       44  + 0x80000000, // 44'
       280 + 0x80000000, // 280'
       0   + 0x80000000, // 0'
       0,                // 0
     ];
+    let pathLen = 4;
     if (index !== undefined) {
       pathArr.push(index);
+      pathLen++;
     }
-    const buffer = Buffer.alloc(21);
-    buffer[0] = 5;
+    const buffer = Buffer.alloc(1+(4*pathLen));
+    buffer[0] = pathLen;
     pathArr.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });

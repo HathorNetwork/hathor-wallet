@@ -114,7 +114,7 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  async startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false) {
+  async startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false, xpub = null) {
     // Set loading addresses screen to show
     store.dispatch(loadingAddresses(true));
     // When we start a wallet from the locked screen, we need to unlock it in the storage
@@ -149,6 +149,7 @@ const wallet = {
     const walletConfig = {
       seed: words,
       xpriv,
+      xpub,
       store: STORE,
       passphrase,
       connection,
@@ -237,6 +238,7 @@ const wallet = {
     store.dispatch(loadingAddresses(true));
     const accessData = {
       xpubkey: xpub,
+      from_xpub: true,
     }
     const promise = oldWalletUtil.startWallet(accessData, true);
     promise.then(() => {
@@ -279,7 +281,7 @@ const wallet = {
 
     const address = storage.getItem('wallet:address');
     const lastSharedIndex = storage.getItem('wallet:lastSharedIndex');
-    const lastGeneratedIndex = wallet.getLastGeneratedIndex();
+    const lastGeneratedIndex = oldWalletUtil.getLastGeneratedIndex();
 
     store.dispatch(historyUpdate({historyTransactions, allTokens, lastSharedIndex, lastSharedAddress: address, addressesFound: lastGeneratedIndex + 1, transactionsFound}));
   },
