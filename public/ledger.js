@@ -59,6 +59,21 @@ class Ledger {
     return e;
   }
 
+  /**
+   * Format bip32 path data to transmit to ledger
+   *
+   * We use the index to form the path m/44'/280'/0'/0/<index>
+   * in a format that the ledger can read
+   *
+   * - 1 byte with the path length
+   * - unsigned int 32b (4 bytes) for each level
+   * - hardened levels (with a `'`) have a 0x80000000 shift
+   * - if index is not passed, use m/44'/280'/0'/0
+   *
+   * @param {number} index Index level of the path we want
+   *
+   * @return {Buffer} A buffer with the formatted bip32 path
+   */
   static formatPathData(index) {
     const pathArr = [
       44  + 0x80000000, // 44'
@@ -252,6 +267,8 @@ class Ledger {
   /**
    * Send address command so ledger can show specific address for user to validate
    *
+   * We send the bip32 path of the address
+   *
    * @param {Buffer} index Address index to be shown on ledger
    *
    * @return {Promise} Promise resolved when user validates that the address is correct.
@@ -272,12 +289,12 @@ class Ledger {
    * Maximum data that can be transferred to ledger is 255 bytes
    *
    * p1 = 0
-   * p2 = remaining calls
+   * p2 = chunk index (starting at 0)
    * Eg: 3 rounds (data has 612 bytes)
    * p1 p2 data
-   * 0  2  255 bytes
    * 0  1  255 bytes
-   * 0  0  102 bytes
+   * 0  2  255 bytes
+   * 0  3  102 bytes
    *
    * @param {Object} data Data to send to Ledger (change_output_info + sighash_all)
    *
@@ -304,11 +321,11 @@ class Ledger {
    * We request the signature for each input
    *
    * p1 = 1
-   * p2 = *
-   * data = priv key index (4 bytes)
+   * p2 = 0
+   * data = bip32 path of the priv key (21 bytes) [1 + 4*n bytes, with n == path length]
    * ## done, no more signatures needed
    * p1 = 2
-   * p2 = *
+   * p2 = 0
    * data = none
    *
    * @param {Object} indexes Index of the key we want the data signed with
