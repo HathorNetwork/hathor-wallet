@@ -34,6 +34,8 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 1. **Wallet screen**
     1. Copy the address and send 10.00 HTR from another wallet to this address.
     1. Check that the transaction appears in the list, the balance was updated and the address also changed.
+    1. Click on 'See all addresses' and see the list. The address used to send the transaction should have 'Number of transactions' equal to 1.
+    1. Copy this address and paste to search, validate it appears only one line on the table with the searched address.
     1. Click on 'Generate new address' and validate it has changed.
     1. Click on the 'QR Code', and copy the address to validate it really copied.
     1. Read the QRCode and validate it's the same as the written text.
