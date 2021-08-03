@@ -269,7 +269,7 @@ class Ledger {
    *
    * We send the bip32 path of the address
    *
-   * @param {Buffer} index Address index to be shown on ledger
+   * @param {number} index Address index to be shown on ledger
    *
    * @return {Promise} Promise resolved when user validates that the address is correct.
    */

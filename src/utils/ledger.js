@@ -66,7 +66,7 @@ if (IPC_RENDERER) {
     /**
      * Show address from index (in the path) on ledger
      *
-     * @param {Buffer} index Path index of addres as 4 bytes number
+     * @param {number} index Path index of address
      *
      * @memberof Ledger
      * @inner
@@ -89,10 +89,13 @@ if (IPC_RENDERER) {
       // first assemble data to be sent
       const arr = [];
       if (changeIndex > -1) {
-        // encode the bit indicating existence of change and change index on first byte
-        arr.push(hathorLib.transaction.intToBytes(0x80 | changeIndex, 1))
-        // Change key index of the address
-        arr.push(formatPathData(changeKeyIndex));
+        const changeBuffer = formatPathData(changeKeyIndex)
+        // encode the bit indicating existence of change and change path length on first byte
+        arr.push(hathorLib.transaction.intToBytes(0x80 | changeBuffer[0], 1))
+        // change output index on the second
+        arr.push(hathorLib.transaction.intToBytes(changeIndex, 1))
+        // Change key path of the address
+        arr.push(changeBuffer.slice(1));
       } else {
         // no change output
         arr.push(hathorLib.transaction.intToBytes(0, 1));
