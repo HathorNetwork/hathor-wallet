@@ -17,7 +17,7 @@ import hathorLib from '@hathor/wallet-lib';
 export class LedgerError extends Error {}
 
 const formatPathData = (index) => {
-  pathArr = [
+  const pathArr = [
     44  + 0x80000000, // 44'
     280 + 0x80000000, // 280'
     0   + 0x80000000, // 0'
@@ -26,7 +26,7 @@ const formatPathData = (index) => {
   if (index !== undefined) {
     pathArr.push(index);
   }
-  const buffer = Buffer.alloc(1+4*pathArr.length);
+  const buffer = Buffer.alloc(1+(4*pathArr.length));
   buffer[0] = pathArr.length;
   pathArr.forEach((element, index) => {
     buffer.writeUInt32BE(element, 1 + 4 * index);
