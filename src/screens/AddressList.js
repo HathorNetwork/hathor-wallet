@@ -89,7 +89,7 @@ class AddressList extends React.Component {
     if (text) {
       if (hathorLib.transaction.isAddressValid(text)) {
         for (const addr of this.state.addresses) {
-          if (addr.address === text) {
+          if (addr === text) {
             this.setState({ filtered: true, filteredAddresses: [addr], totalPages: 1, page: 1 });
             return
           }
