@@ -129,4 +129,4 @@ export const IPC_RENDERER = ipcRenderer;
 /**
  * Flag to hide/show elements after ledger integration is done
  */
-export const LEDGER_ENABLED = true;
+export const LEDGER_ENABLED = false;

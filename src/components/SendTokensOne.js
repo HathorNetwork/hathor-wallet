@@ -138,7 +138,7 @@ class SendTokensOne extends React.Component {
    * 2. If amount of selected inputs is larger than outputs amount, we create a change output
    * 3. If inputs were selected, check if they are valid and add address key to input
    */
-  handleInitialData = (data) => {
+  validateInputsAndOutputs = (data) => {
     const noInputs = this.noInputs.current.checked;
     const walletData = hathorLib.wallet.getWalletData();
     const history = 'historyTransactions' in walletData ? walletData['historyTransactions'] : {};
