@@ -138,6 +138,8 @@ class SendTokens extends React.Component {
       if (!dataOne) return;
       if (hathorLib.wallet.isHardwareWallet()) {
         dataOne = instance.validateInputsAndOutputs(dataOne);
+        // currently we only support HTR
+        data['tokens'] = [];
       }
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
@@ -237,8 +239,6 @@ class SendTokens extends React.Component {
         this.data = data;
         $('#pinModal').modal('show');
       } else {
-        // currently we only support HTR
-        data.tokens = [];
         this.executeSendLedger(data);
       }
     } catch(e) {
