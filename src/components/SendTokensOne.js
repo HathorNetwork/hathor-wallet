@@ -133,6 +133,25 @@ class SendTokensOne extends React.Component {
   }
 
   /**
+   * Validate inputs and outpus
+   * 1. If inputs were not selected, select inputs from outputs amount
+   * 2. If amount of selected inputs is larger than outputs amount, we create a change output
+   * 3. If inputs were selected, check if they are valid and add address key to input
+   */
+  validateInputsAndOutputs = (data) => {
+    const noInputs = this.noInputs.current.checked;
+    const walletData = hathorLib.wallet.getWalletData();
+    const history = 'historyTransactions' in walletData ? walletData['historyTransactions'] : {};
+    const result = hathorLib.wallet.prepareSendTokensData(data, this.state.selected, noInputs, history, this.state.selectedTokens);
+    if (result.success === false) {
+      this.props.updateState({ errorMessage: result.message, loading: false });
+      return null;
+    }
+
+    return result.data;
+  }
+
+  /**
    * Called when select input checkbox is clicked
    *
    * @param {Object} e Event emitted when checkbox is clicked

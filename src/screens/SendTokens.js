@@ -136,6 +136,11 @@ class SendTokens extends React.Component {
       const instance = ref.current;
       const dataOne = instance.getData();
       if (!dataOne) return;
+      if (hathorLib.wallet.isHardwareWallet()) {
+        dataOne = instance.validateInputsAndOutputs(dataOne);
+        // currently we only support HTR
+        data['tokens'] = [];
+      }
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
     }

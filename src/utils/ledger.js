@@ -16,6 +16,24 @@ import hathorLib from '@hathor/wallet-lib';
  */
 export class LedgerError extends Error {}
 
+const formatPathData = (index) => {
+  const pathArr = [
+    44  + 0x80000000, // 44'
+    280 + 0x80000000, // 280'
+    0   + 0x80000000, // 0'
+    0,                // 0
+  ];
+  if (index !== undefined) {
+    pathArr.push(index);
+  }
+  const buffer = Buffer.alloc(1+(4*pathArr.length));
+  buffer[0] = pathArr.length;
+  pathArr.forEach((element, index) => {
+    buffer.writeUInt32BE(element, 1 + 4 * index);
+  });
+  return buffer;
+};
+
 let ledger = null;
 
 if (IPC_RENDERER) {
@@ -48,7 +66,7 @@ if (IPC_RENDERER) {
     /**
      * Show address from index (in the path) on ledger
      *
-     * @param {Buffer} index Path index of addres as 4 bytes number
+     * @param {number} index Path index of address
      *
      * @memberof Ledger
      * @inner
@@ -71,12 +89,13 @@ if (IPC_RENDERER) {
       // first assemble data to be sent
       const arr = [];
       if (changeIndex > -1) {
-        // With change output
-        arr.push(hathorLib.transaction.intToBytes(1, 1));
-        // Change index of array
-        arr.push(hathorLib.transaction.intToBytes(changeIndex, 1));
-        // Change key index of the address
-        arr.push(hathorLib.transaction.intToBytes(changeKeyIndex, 4));
+        const changeBuffer = formatPathData(changeKeyIndex)
+        // encode the bit indicating existence of change and change path length on first byte
+        arr.push(hathorLib.transaction.intToBytes(0x80 | changeBuffer[0], 1))
+        // change output index on the second
+        arr.push(hathorLib.transaction.intToBytes(changeIndex, 1))
+        // Change key path of the address
+        arr.push(changeBuffer.slice(1));
       } else {
         // no change output
         arr.push(hathorLib.transaction.intToBytes(0, 1));
@@ -102,8 +121,7 @@ if (IPC_RENDERER) {
       const arr = [];
       for (const input of data.inputs) {
         const index = keys[input.address].index;
-        const indexBytes = hathorLib.transaction.intToBytes(index, 4);
-        arr.push(indexBytes);
+        arr.push(index);
       }
       IPC_RENDERER.send("ledger:getSignatures", arr);
     },

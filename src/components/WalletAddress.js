@@ -81,7 +81,7 @@ class WalletAddress extends React.Component {
 
     if (hathorLib.wallet.isHardwareWallet()) {
       $('#ledgerAlert').modal('show');
-      ledger.checkAddress(hathorLib.transaction.intToBytes(this.props.lastSharedIndex, 4));
+      ledger.checkAddress(this.props.lastSharedIndex);
     }
   }
 
@@ -135,7 +135,9 @@ class WalletAddress extends React.Component {
               </div>
             }
           </div>
-          <a href="true" onClick={this.seeAllAddresses} className="mt-3 ">{t`See all addresses`}</a>
+          {hathorLib.wallet.isSoftwareWallet() &&   // hide all addresses for hardware wallet
+            <a href="true" onClick={this.seeAllAddresses} className="mt-3 ">{t`See all addresses`}</a>
+          }
         </div>
       );
     }

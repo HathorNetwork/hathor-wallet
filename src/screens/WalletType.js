@@ -115,9 +115,8 @@ class WalletType extends React.Component {
       const chainCode = Buffer.from(data.slice(65, 97));
       const fingerprint = Buffer.from(data.slice(97, 101));
       const xpub = hathorLib.wallet.xpubFromData(compressedPubkey, chainCode, fingerprint);
-      // First we clean what can still be there of a last wallet
-      wallet.cleanWallet();
-      wallet.startHardwareWallet(xpub);
+
+      wallet.startWallet(null, '', null, '', this.props.history, false, xpub);
       hathorLib.wallet.markBackupAsDone();
       this.props.history.push('/wallet/');
     } else {
