@@ -11,7 +11,6 @@ import { VERSION } from '../constants';
 const initialState = {
   tokensHistory: {},
   tokensBalance: {},
-  addressesTxs: {},
   // Address to be used and is shown in the screen
   lastSharedAddress: null,
   // Index of the address to be used
@@ -90,7 +89,7 @@ const rootReducer = (state = initialState, action) => {
     case 'update_request_error_status_code':
       return Object.assign({}, state, {requestErrorStatusCode: action.payload});
     case 'update_height':
-      return Object.assign({}, state, {height: action.payload.height});
+      return onUpdateHeight(state, action);
     case 'set_wallet':
       return onSetWallet(state, action);
     case 'reset_wallet':
@@ -101,6 +100,8 @@ const rootReducer = (state = initialState, action) => {
       return onNewTx(state, action);
     case 'update_tx':
       return onUpdateTx(state, action);
+    case 'update_token_history':
+      return onUpdateTokenHistory(state, action);
     default:
       return state;
   }
@@ -130,7 +131,7 @@ const onResetWallet = (state, action) => {
   };
 };
 
-const getTxHistoryFromTx = (tx, tokenUid, tokenTxBalance) => {
+const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
   return {
     tx_id: tx.tx_id,
     timestamp: tx.timestamp,
@@ -165,58 +166,15 @@ const isAllAuthority = (tx) => {
   return true;
 }
 
-
 /**
- * Got wallet history. Update history and balance for each token.
+ * Got wallet history. Update wallet data on redux
  */
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
   hathorLib.storage.setItem('wallet:version', VERSION);
-  const { history } = action.payload;
-  const tokensHistory = {};
-  const newAddressesTxs = {};
-  const allTokens = new Set();
-  // iterate through all txs received and map all tokens this wallet has, with
-  // its history and balance
-  for (const tx of Object.values(history)) {
-    // we first get all tokens present in this tx (that belong to the user) and
-    // the corresponding balances
-    const balances = state.wallet.getTxBalance(tx, { includeAuthorities: true });
-    for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
-      allTokens.add(tokenUid);
-      let tokenHistory = tokensHistory[tokenUid];
-      if (tokenHistory === undefined) {
-        tokenHistory = [];
-        tokensHistory[tokenUid] = tokenHistory;
-      }
-      // add this tx to the history of the corresponding token
-      tokenHistory.push(getTxHistoryFromTx(tx, tokenUid, tokenTxBalance));
-    }
-
-    const txAddresses = state.wallet.getTxAddresses(tx);
-    for (const addr of txAddresses) {
-      if (addr in newAddressesTxs) {
-        newAddressesTxs[addr] += 1;
-      } else {
-        newAddressesTxs[addr] = 1;
-      }
-    }
-
-  }
-
-  const tokensBalance = {};
-  for (const tokenUid of Object.keys(tokensHistory)) {
-    const totalBalance = state.wallet.getBalance(tokenUid);
-    // update token total balance
-    tokensBalance[tokenUid] = totalBalance;
-  }
-
-  // in the end, sort (in place) all tx lists in descending order by timestamp
-  for (const txList of Object.values(tokensHistory)) {
-    txList.sort((elem1, elem2) => elem2.timestamp - elem1.timestamp);
-  }
-
-  const address = state.wallet.getCurrentAddress();
+  const { tokensHistory, tokensBalance, tokens } = action.payload;
+  const allTokens = new Set(tokens);
+  const address = state.wallet.getCurrentAddress().address;
   const addressIndex = state.wallet.getAddressIndex(address);
 
   return {
@@ -226,7 +184,6 @@ const onLoadWalletSuccess = (state, action) => {
     loadingAddresses: false,
     lastSharedAddress: address,
     lastSharedIndex: addressIndex,
-    addressesTxs: newAddressesTxs,
     allTokens,
   };
 };
@@ -246,7 +203,7 @@ const addTxToSortedList = (tokenUid, tx, txTokenBalance, currentHistory) => {
       // If is_voided changed, we update the tx in the history
       // otherwise we just return the currentHistory without change
       if (tx.is_voided !== currentHistory[i].isVoided) {
-        const txHistory = getTxHistoryFromTx(tx, tokenUid, txTokenBalance);
+        const txHistory = getTxHistoryFromWSTx(tx, tokenUid, txTokenBalance);
         // return new object so redux triggers update
         const newHistory = [...currentHistory];
         newHistory[i] = txHistory;
@@ -264,7 +221,7 @@ const addTxToSortedList = (tokenUid, tx, txTokenBalance, currentHistory) => {
       index = i + 1;
     }
   }
-  const txHistory = getTxHistoryFromTx(tx, tokenUid, txTokenBalance);
+  const txHistory = getTxHistoryFromWSTx(tx, tokenUid, txTokenBalance);
   // return new object so redux triggers update
   const newHistory = [...currentHistory];
   newHistory.splice(index, 0, txHistory);
@@ -276,11 +233,9 @@ const addTxToSortedList = (tokenUid, tx, txTokenBalance, currentHistory) => {
  * because it might have been voided
  */
 const onUpdateTx = (state, action) => {
-  const { tx } = action.payload;
-  let changed = false;
+  const { tx, updatedBalanceMap } = action.payload;
 
   const updatedHistoryMap = {};
-  const updatedBalanceMap = {};
   const balances = state.wallet.getTxBalance(tx, { includeAuthorities: true });
 
   for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
@@ -293,12 +248,8 @@ const onUpdateTx = (state, action) => {
       return el.tx_id === tx.tx_id;
     });
 
-    // We update the balance and the history
-    const totalBalance = state.wallet.getBalance(tokenUid);
-    updatedBalanceMap[tokenUid] = totalBalance;
-
     const newHistory = [...currentHistory];
-    newHistory[txIndex] = getTxHistoryFromTx(tx, tokenUid, tokenTxBalance)
+    newHistory[txIndex] = getTxHistoryFromWSTx(tx, tokenUid, tokenTxBalance)
     updatedHistoryMap[tokenUid] = newHistory;
   }
 
@@ -315,11 +266,10 @@ const onUpdateTx = (state, action) => {
  * Updates the history and balance when a new tx arrives
  */
 const onNewTx = (state, action) => {
-  const { tx } = action.payload;
+  const { tx, updatedBalanceMap } = action.payload;
 
   const allTokens = state.allTokens;
   const updatedHistoryMap = {};
-  const updatedBalanceMap = {};
   const balances = state.wallet.getTxBalance(tx, { includeAuthorities: true });
 
   // we now loop through all tokens present in the new tx to get the new history and balance
@@ -329,33 +279,18 @@ const onNewTx = (state, action) => {
     const currentHistory = state.tokensHistory[tokenUid] || [];
     const newTokenHistory = addTxToSortedList(tokenUid, tx, tokenTxBalance, currentHistory);
     updatedHistoryMap[tokenUid] = newTokenHistory;
-    // totalBalance should not be confused with tokenTxBalance. The latter is the balance of the new
-    // tx, while the former is the total balance of the token, considering all tx history
-    const totalBalance = state.wallet.getBalance(tokenUid);
-    updatedBalanceMap[tokenUid] = totalBalance;
   }
   const newTokensHistory = Object.assign({}, state.tokensHistory, updatedHistoryMap);
   const newTokensBalance = Object.assign({}, state.tokensBalance, updatedBalanceMap);
 
-  const address = state.wallet.getCurrentAddress();
+  const address = state.wallet.getCurrentAddress().address;
   const addressIndex = state.wallet.getAddressIndex(address);
-
-  const newAddressesTxs = Object.assign({}, state.addressesTxs);
-  const txAddresses = state.wallet.getTxAddresses(tx);
-  for (const addr of txAddresses) {
-    if (addr in newAddressesTxs) {
-      newAddressesTxs[addr] += 1;
-    } else {
-      newAddressesTxs[addr] = 1;
-    }
-  }
 
   return Object.assign({}, state, {
     tokensHistory: newTokensHistory,
     tokensBalance: newTokensBalance,
     lastSharedAddress: address,
     lastSharedIndex: addressIndex,
-    addressesTxs: newAddressesTxs,
     allTokens,
   });
 };
@@ -374,6 +309,42 @@ const onCleanData = (state, action) => {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
   });
+};
+
+/**
+ * Update token history after fetching more data in pagination
+ */
+const onUpdateTokenHistory = (state, action) => {
+  const { token, newHistory } = action.payload;
+  const currentHistory = state.tokensHistory[token] || [];
+
+  const updatedHistoryMap = {};
+  updatedHistoryMap[token] = [...currentHistory, ...newHistory];
+  const newTokensHistory = Object.assign({}, state.tokensHistory, updatedHistoryMap);
+  return {
+    ...state,
+    tokensHistory: newTokensHistory,
+  };
+};
+
+/**
+ * Update height value on redux
+ * If value is different from last value we also update HTR balance
+ */
+const onUpdateHeight = (state, action) => {
+  if (action.payload.height !== state.height) {
+    const tokensBalance = {};
+    const { uid } = hathorLib.constants.HATHOR_TOKEN_CONFIG;
+    tokensBalance[uid] = action.payload.htrUpdatedBalance;
+    const newTokensBalance = Object.assign({}, state.tokensBalance, tokensBalance);
+    return {
+      ...state,
+      tokensBalance: newTokensBalance,
+      height: action.payload.height,
+    };
+  }
+
+  return state;
 };
 
 export default rootReducer;
