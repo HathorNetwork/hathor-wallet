@@ -54,19 +54,19 @@ class TokenMint extends React.Component {
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = (pin) => {
+  prepareSendTransaction = async (pin) => {
     const amountValue = wallet.decimalToInteger(this.state.amount);
     const address = this.chooseAddress.current.checked ? null : this.address.current.value;
-    return this.props.wallet.mintTokens(
+    const transaction = await this.props.wallet.prepareMintTokensData(
       this.props.token.uid,
       amountValue,
-      address,
       {
+        address,
         createAnotherMint: this.createAnother.current.checked,
-        startMiningTx: false,
         pinCode: pin
       }
     );
+    return new hathorLib.SendTransaction({ transaction, pin });
   }
 
   /**

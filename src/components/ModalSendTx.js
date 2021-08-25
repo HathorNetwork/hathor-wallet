@@ -79,7 +79,7 @@ class ModalSendTx extends React.Component {
    *
    * @param {Object} e Event emitted when button is clicked
    */
-  handlePin = (e) => {
+  handlePin = async (e) => {
     e.preventDefault();
     if (this.refs.formPin.checkValidity() === false) {
       this.refs.formPin.classList.add('was-validated');
@@ -89,7 +89,7 @@ class ModalSendTx extends React.Component {
       if (hathorLib.wallet.isPinCorrect(pin)) {
         $('#pinModal').data('bs.modal')._config.backdrop = 'static';
         $('#pinModal').data('bs.modal')._config.keyboard = false;
-        this.sendTransaction = this.props.prepareSendTransaction(pin);
+        this.sendTransaction = await this.props.prepareSendTransaction(pin);
         if (this.sendTransaction) {
           // Show send tx handler component and start sending
           this.setState({ step: 1, loading: true });

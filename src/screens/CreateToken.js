@@ -102,7 +102,7 @@ class CreateToken extends React.Component {
    *
    * @return {hathorLib.SendTransaction} SendTransaction object
    */
-  prepareSendTransaction = (pin) => {
+  prepareSendTransaction = async (pin) => {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
@@ -111,18 +111,17 @@ class CreateToken extends React.Component {
       address = this.refs.address.value;
     }
 
-    const ret = this.props.wallet.createNewToken(
-      this.refs.shortName.value,
-      this.refs.symbol.value,
-      wallet.decimalToInteger(this.state.amount),
-      address,
-      { startMiningTx: false, pinCode: pin }
-    )
-
-    if (ret.success) {
-      return ret.sendTransaction;
-    } else {
-      this.setState({ errorMessage: ret.message });
+    let transaction;
+    try {
+      transaction = await this.props.wallet.prepareCreateNewToken(
+        this.refs.shortName.value,
+        this.refs.symbol.value,
+        wallet.decimalToInteger(this.state.amount),
+        { address, pinCode: pin }
+      );
+      return new hathorLib.SendTransaction({ transaction, pin });
+    } catch (e) {
+      this.setState({ errorMessage: e.message });
     }
   }
 

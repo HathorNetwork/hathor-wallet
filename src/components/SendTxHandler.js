@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import hathorLib from '@hathor/wallet-lib';
+import { SendTransaction, ErrorMessages as errorMessagesEnum } from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
 
 
@@ -26,6 +26,9 @@ class SendTxHandler extends React.Component {
   // Success message to be show after tx is sent
   successMessage = t`Your transaction was sent successfully!`
 
+  // Promise of the sendTransaction object that resolves when the tx is sent
+  sendPromise = null
+
   /**
    * miningEstimation {Number} Estimated seconds to complete the job
    * jobID {String} Mining job ID
@@ -41,7 +44,18 @@ class SendTxHandler extends React.Component {
     // Start listening for events
     this.addSendTxEventHandlers();
     // Start sendTransaction object (submit job)
-    this.props.sendTransaction.start();
+    if (this.props.sendTransaction.transaction) {
+      // Token action transactions already have the full tx prepared
+      // just need to mine and propagate
+      this.sendPromise = this.props.sendTransaction.runFromMining();
+    } else {
+      this.sendPromise = this.props.sendTransaction.run();
+    }
+    this.sendPromise.then((tx) => {
+      this.sendSuccess(tx);
+    }, (err) => {
+      this.sendError(err.message);
+    });
   }
 
   /**
@@ -51,9 +65,7 @@ class SendTxHandler extends React.Component {
     this.props.sendTransaction.on('job-submitted', this.updateEstimation);
     this.props.sendTransaction.on('estimation-updated', this.updateEstimation);
     this.props.sendTransaction.on('job-done', this.jobDone);
-    this.props.sendTransaction.on('send-success', this.sendSuccess);
     this.props.sendTransaction.on('send-error', this.sendError);
-    this.props.sendTransaction.on('unexpected-error', this.sendError);
   }
 
   /**
@@ -74,7 +86,14 @@ class SendTxHandler extends React.Component {
    * @param {String} message Error message
    */
   sendError = (message) => {
-    this.setState({ errorMessage: `Error: ${message}`});
+    const errorMap = {
+      [errorMessagesEnum.ErrorMessages.UNEXPECTED_PUSH_TX_ERROR]: t`There was an unexpected error when pushing the transaction to the network.`,
+      [errorMessagesEnum.ErrorMessages.NO_UTXOS_AVAILABLE]: t`There are no utxos available to fill the transaction.`,
+      [errorMessagesEnum.ErrorMessages.INVALID_INPUT]: t`The selected inputs are invalid.`,
+    }
+
+    const errorMessage = message in errorMap ? errorMap[message] : message;
+    this.setState({ errorMessage: `Error: ${errorMessage}`});
     if (this.props.onSendError) {
       this.props.onSendError(message);
     }
@@ -124,7 +143,7 @@ class SendTxHandler extends React.Component {
  * onSendError: optional method to be executed when an error happens while sending the tx
  */
 SendTxHandler.propTypes = {
-  sendTransaction: PropTypes.instanceOf(hathorLib.SendTransaction).isRequired,
+  sendTransaction: PropTypes.instanceOf(SendTransaction).isRequired,
   onSendSuccess: PropTypes.func,
   onSendError: PropTypes.func,
 };
