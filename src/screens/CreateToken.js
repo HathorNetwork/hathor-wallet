@@ -131,14 +131,16 @@ class CreateToken extends React.Component {
    * @param {Object} tx Create token transaction data
    */
   onTokenCreateSuccess = (tx) => {
+    const name = this.refs.shortName.value;
+    const symbol = this.refs.symbol.value;
     const token = {
       uid: tx.hash,
-      name: this.refs.shortName.value,
-      symbol: this.refs.symbol.value
+      name,
+      symbol
     };
 
     // Update redux with added token
-    tokens.saveTokenRedux(token.uid);
+    tokens.addToken(token.uid, name, symbol);
     // Must update the shared address, in case we have used one for the change
     wallet.updateSharedAddress();
     this.showAlert(token);
