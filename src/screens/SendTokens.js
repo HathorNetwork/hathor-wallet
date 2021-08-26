@@ -162,7 +162,7 @@ class SendTokens extends React.Component {
     try {
       // Prepare data and submit job to tx mining API
       this.data = hathorLib.transaction.prepareData(data, null, {getSignature: false, completeTx: false});
-      const transaction = hathorLib.helperUtils.createTxFromData(this.data);
+      const transaction = hathorLib.helpersUtils.createTxFromData(this.data);
       this.sendTransaction = new hathorLib.SendTransaction({ transaction });
       this.setState({ ledgerStep: 1, ledgerModalTitle: t`Sending transaction` });
     } catch(e) {
