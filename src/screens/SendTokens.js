@@ -255,7 +255,6 @@ class SendTokens extends React.Component {
    * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
    */
   prepareSendTransaction = async (pin) => {
-    console.log('Wat', this.data)
     return new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, pin });
   }
 
