@@ -26,9 +26,6 @@ class SendTxHandler extends React.Component {
   // Success message to be show after tx is sent
   successMessage = t`Your transaction was sent successfully!`
 
-  // Promise of the sendTransaction object that resolves when the tx is sent
-  sendPromise = null
-
   /**
    * miningEstimation {Number} Estimated seconds to complete the job
    * jobID {String} Mining job ID
@@ -43,15 +40,17 @@ class SendTxHandler extends React.Component {
   componentDidMount = () => {
     // Start listening for events
     this.addSendTxEventHandlers();
+    // Promise of the sendTransaction object that resolves when the tx is sent
+    let sendPromise;
     // Start sendTransaction object (submit job)
     if (this.props.sendTransaction.transaction) {
       // Token action transactions already have the full tx prepared
       // just need to mine and propagate
-      this.sendPromise = this.props.sendTransaction.runFromMining();
+      sendPromise = this.props.sendTransaction.runFromMining();
     } else {
-      this.sendPromise = this.props.sendTransaction.run();
+      sendPromise = this.props.sendTransaction.run();
     }
-    this.sendPromise.then((tx) => {
+    sendPromise.then((tx) => {
       this.sendSuccess(tx);
     }, (err) => {
       this.sendError(err.message);
