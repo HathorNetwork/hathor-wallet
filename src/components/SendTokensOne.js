@@ -142,6 +142,11 @@ class SendTokensOne extends React.Component {
     const noInputs = this.noInputs.current.checked;
     const walletData = hathorLib.wallet.getWalletData();
     const history = 'historyTransactions' in walletData ? walletData['historyTransactions'] : {};
+    // This method is used by hardware wallet because it still uses old methods from lib for speeding the integration process
+    // the new methods expect input object with txId key but the old one expect tx_id
+    for (let input of data.inputs) {
+      input.tx_id = input.txId;
+    }
     const result = hathorLib.wallet.prepareSendTokensData(data, this.state.selected, noInputs, history, this.state.selectedTokens);
     if (result.success === false) {
       this.props.updateState({ errorMessage: result.message, loading: false });
