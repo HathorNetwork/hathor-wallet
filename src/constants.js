@@ -105,6 +105,11 @@ export const TESTNET_EXPLORER_BASE_URL = "https://explorer.testnet.hathor.networ
  */
 export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
 
+/**
+ * URL of NFT standard
+ */
+export const NFT_STANDARD_RFC_URL = "https://github.com/HathorNetwork/rfcs/blob/master/text/0032-nft-standard.md";
+
 export const HATHOR_WEBSITE_URL = "https://hathor.network/";
 
 /**

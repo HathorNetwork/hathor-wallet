@@ -104,6 +104,16 @@ const tokens = {
       return 0;
     }
   },
+
+  /**
+   * Returns the fee in HTR for creating an NFT
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  getNFTFee() {
+    return 1;
+  },
 }
 
 export default tokens;

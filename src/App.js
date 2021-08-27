@@ -10,6 +10,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
+import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import WaitVersion from './components/WaitVersion';
 import TransactionDetail from './screens/TransactionDetail';
@@ -78,6 +79,7 @@ class Root extends React.Component {
     return (
       <Switch>
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
+        <StartedRoute exact path="/create_nft" component={CreateNFT} loaded={true} />
         <StartedRoute exact path="/custom_tokens" component={CustomTokens} loaded={true} />
         <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} />
         <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} />
