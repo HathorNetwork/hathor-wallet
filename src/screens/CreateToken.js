@@ -102,7 +102,7 @@ class CreateToken extends React.Component {
    *
    * @return {hathorLib.SendTransaction} SendTransaction object
    */
-  prepareSendTransaction = (pin) => {
+  prepareSendTransaction = async (pin) => {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
@@ -111,18 +111,17 @@ class CreateToken extends React.Component {
       address = this.refs.address.value;
     }
 
-    const ret = this.props.wallet.createNewToken(
-      this.refs.shortName.value,
-      this.refs.symbol.value,
-      wallet.decimalToInteger(this.state.amount),
-      address,
-      { startMiningTx: false, pinCode: pin }
-    )
-
-    if (ret.success) {
-      return ret.sendTransaction;
-    } else {
-      this.setState({ errorMessage: ret.message });
+    let transaction;
+    try {
+      transaction = await this.props.wallet.prepareCreateNewToken(
+        this.refs.shortName.value,
+        this.refs.symbol.value,
+        wallet.decimalToInteger(this.state.amount),
+        { address, pinCode: pin }
+      );
+      return new hathorLib.SendTransaction({ transaction, pin });
+    } catch (e) {
+      this.setState({ errorMessage: e.message });
     }
   }
 
@@ -132,14 +131,16 @@ class CreateToken extends React.Component {
    * @param {Object} tx Create token transaction data
    */
   onTokenCreateSuccess = (tx) => {
+    const name = this.refs.shortName.value;
+    const symbol = this.refs.symbol.value;
     const token = {
       uid: tx.hash,
-      name: this.refs.shortName.value,
-      symbol: this.refs.symbol.value
+      name,
+      symbol
     };
 
     // Update redux with added token
-    tokens.saveTokenRedux(token.uid);
+    tokens.addToken(token.uid, name, symbol);
     // Must update the shared address, in case we have used one for the change
     wallet.updateSharedAddress();
     this.showAlert(token);

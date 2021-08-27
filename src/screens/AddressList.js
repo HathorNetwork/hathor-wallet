@@ -18,8 +18,7 @@ import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
-    addressesTxs: state.addressesTxs,
+    wallet: state.wallet
   };
 };
 
@@ -44,8 +43,20 @@ class AddressList extends React.Component {
     filtered: false,
   }
 
-  componentDidMount = () => {
-    const addresses = this.props.wallet.getAllAddresses();
+  componentDidMount = async () => {
+    const addresses = [];
+    const iterator = this.props.wallet.getAllAddresses();
+    for (;;) {
+      const addressObj = await iterator.next();
+      const { value, done } = addressObj;
+
+      if (done) {
+        break;
+      }
+
+      addresses.push(value);
+    }
+
     this.setState({ addresses, filteredAddresses: addresses, totalPages: this.getTotalPages(addresses) });
   }
 
@@ -89,7 +100,7 @@ class AddressList extends React.Component {
     if (text) {
       if (hathorLib.transaction.isAddressValid(text)) {
         for (const addr of this.state.addresses) {
-          if (addr === text) {
+          if (addr.address === text) {
             this.setState({ filtered: true, filteredAddresses: [addr], totalPages: 1, page: 1 });
             return
           }
@@ -144,12 +155,12 @@ class AddressList extends React.Component {
     const renderData = () => {
       const startIndex = (this.state.page - 1) * WALLET_HISTORY_COUNT;
       const endIndex = startIndex + WALLET_HISTORY_COUNT;
-      return this.state.filteredAddresses.slice(startIndex, endIndex).map((address) => {
+      return this.state.filteredAddresses.slice(startIndex, endIndex).map((addressObj) => {
         return (
-          <tr key={address}>
-            <td><a href="true" onClick={(e) => this.goToAddressSearch(e, address)}>{address}</a></td>
-            <td>{this.props.wallet.getAddressIndex(address)}</td>
-            <td className="number">{address in this.props.addressesTxs ? this.props.addressesTxs[address] : 0}</td>
+          <tr key={addressObj.address}>
+            <td><a href="true" onClick={(e) => this.goToAddressSearch(e, addressObj.address)}>{addressObj.address}</a></td>
+            <td>{addressObj.index}</td>
+            <td className="number">{addressObj.transactions}</td>
           </tr>
         )
       });

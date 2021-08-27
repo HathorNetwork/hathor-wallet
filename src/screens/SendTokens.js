@@ -162,7 +162,8 @@ class SendTokens extends React.Component {
     try {
       // Prepare data and submit job to tx mining API
       this.data = hathorLib.transaction.prepareData(data, null, {getSignature: false, completeTx: false});
-      this.sendTransaction = new hathorLib.SendTransaction({data: this.data});
+      const transaction = hathorLib.helpersUtils.createTxFromData(this.data);
+      this.sendTransaction = new hathorLib.SendTransaction({ transaction });
       this.setState({ ledgerStep: 1, ledgerModalTitle: t`Sending transaction` });
     } catch(e) {
       this.handleSendError(e);
@@ -253,13 +254,8 @@ class SendTokens extends React.Component {
    *
    * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
    */
-  prepareSendTransaction = (pin) => {
-    const ret = this.props.wallet.sendManyOutputsTransaction(this.data.outputs, this.data.inputs, null, { startMiningTx: false, pinCode: pin });
-    if (ret.success) {
-      return ret.sendTransaction;
-    } else {
-      this.setState({ errorMessage: ret.message, ledgerStep: 0 });
-    }
+  prepareSendTransaction = async (pin) => {
+    return new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, pin });
   }
 
   /**

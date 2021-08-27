@@ -92,8 +92,10 @@ export const updateRequestErrorStatusCode = data => ({ type: "update_request_err
 
 /**
  * Set height
+ * height {number} new network height
+ * htrUpdatedBalance {Object} balance of HTR
  */
-export const updateHeight = data => ({ type: "update_height", payload: data });
+export const updateHeight = (height, htrUpdatedBalance) => ({ type: "update_height", payload: { height, htrUpdatedBalance } });
 
 /**
  * wallet {HathorWallet} wallet object
@@ -106,16 +108,26 @@ export const setWallet = (wallet) => ({ type: "set_wallet", payload: wallet });
 export const resetWallet = () => ({ type: "reset_wallet" });
 
 /**
- * history {Object} history of this wallet (including txs from all tokens)
+ * tokensHistory {Object} history for each token
+ * tokensBalance {Object} balance for each token
+ * tokens {Array} array of token uids the the wallet has
  */
-export const loadWalletSuccess = (history) => ({ type: "load_wallet_success", payload: { history } });
+export const loadWalletSuccess = (tokensHistory, tokensBalance, tokens) => ({ type: "load_wallet_success", payload: { tokensHistory, tokensBalance, tokens } });
 
 /**
  * tx {Object} the new transaction
+ * updatedBalanceMap {Object} balance updated of each token in this tx
  */
-export const newTx = (tx) => ({ type: "new_tx", payload: { tx } });
+export const newTx = (tx, updatedBalanceMap) => ({ type: "new_tx", payload: { tx, updatedBalanceMap } });
 
 /**
  * tx {Object} the new transaction
+ * updatedBalanceMap {Object} balance updated of each token in this tx
  */
-export const updateTx = (tx) => ({ type: "update_tx", payload: { tx } });
+export const updateTx = (tx, updatedBalanceMap) => ({ type: "update_tx", payload: { tx, updatedBalanceMap } });
+
+/**
+ * token {String} token of the updated history
+ * newHistory {Array} array with the new fetched history
+ */
+export const updateTokenHistory = (token, newHistory) => ({ type: "update_token_history", payload: { token, newHistory } });

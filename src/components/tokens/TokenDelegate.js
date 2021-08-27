@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 import TokenAction from './TokenAction';
 import { connect } from "react-redux";
+import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
   return {
@@ -41,18 +42,19 @@ class TokenDelegate extends React.Component {
    * SendTransaction object that emit events while the tx is being sent and promise resolves when the sending is done
    * In case of error, an object with {success: false, message}
    */
-  prepareSendTransaction = (pin) => {
+  prepareSendTransaction = async (pin) => {
     const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
-    return this.props.wallet.delegateAuthority(
+
+    const transaction = await this.props.wallet.prepareDelegateAuthorityData(
       this.props.token.uid,
       type.toLowerCase(),
       this.delegateAddress.current.value,
       {
         createAnother: this.delegateCreateAnother.current.checked,
-        startMiningTx: false,
         pinCode: pin,
       }
     );
+    return new hathorLib.SendTransaction({ transaction, pin });
   }
 
   /**
