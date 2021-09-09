@@ -224,7 +224,7 @@ class CreateNFT extends React.Component {
   goToNFTGuide = (e) => {
     e.preventDefault();
     // TODO create this guide in the website (this will be later used as a medium post)
-    //helpers.openExternalURL(NFT_GUIDE_URL);
+    // helpers.openExternalURL(NFT_GUIDE_URL);
   }
 
   render = () => {
