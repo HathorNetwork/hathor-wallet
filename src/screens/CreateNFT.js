@@ -42,8 +42,15 @@ class CreateNFT extends React.Component {
   constructor(props) {
     super(props);
 
-    this.address = React.createRef();
-    this.inputWrapper = React.createRef();
+    this.addressDivRef = React.createRef();
+    this.formCreateNFTRef = React.createRef();
+    this.addressRef = React.createRef();
+    this.autoselectAddressRef = React.createRef();
+    this.nameRef = React.createRef();
+    this.symbolRef = React.createRef();
+    this.nftDataRef = React.createRef();
+    this.createMintAuthorityRef = React.createRef();
+    this.createMeltAuthorityRef = React.createRef();
 
     /**
      * errorMessage {string} Message to show when error happens on the form
@@ -63,9 +70,9 @@ class CreateNFT extends React.Component {
    * Validates if the create NFT form is valid
    */
   formValid = () => {
-    const isValid = this.refs.formCreateNFT.checkValidity();
+    const isValid = this.formCreateNFTRef.current.checkValidity();
     if (isValid) {
-      if (this.refs.address.value === '' && !this.refs.autoselectAddress.checked) {
+      if (this.addressRef.current.value === '' && !this.autoselectAddressRef.current.checked) {
         this.setState({ errorMessage: t`Must choose an address or auto select` });
         return false;
       }
@@ -77,7 +84,7 @@ class CreateNFT extends React.Component {
       }
       return true;
     } else {
-      this.refs.formCreateNFT.classList.add('was-validated')
+      this.formCreateNFTRef.current.classList.add('was-validated')
     }
   }
 
@@ -103,24 +110,24 @@ class CreateNFT extends React.Component {
   prepareSendTransaction = async (pin) => {
     // Get the address to send the created tokens
     let address = '';
-    if (this.refs.autoselectAddress.checked) {
+    if (this.autoselectAddressRef.current.checked) {
       address = hathorLib.wallet.getAddressToUse();
     } else {
-      address = this.refs.address.value;
+      address = this.addressRef.current.value;
     }
 
-    const name = this.refs.shortName.value;
-    const symbol = this.refs.symbol.value;
-    const nftData = this.refs.nftData.value;
-    const createMint = this.refs.createMintAuthority.checked;
-    const createMelt = this.refs.createMeltAuthority.checked;
+    const name = this.nameRef.current.value;
+    const symbol = this.symbolRef.current.value;
+    const nftData = this.nftDataRef.current.value;
+    const createMint = this.createMintAuthorityRef.current.checked;
+    const createMelt = this.createMeltAuthorityRef.current.checked;
 
     let transaction;
     try {
       transaction = await this.props.wallet.prepareCreateNewToken(
         name,
         symbol,
-        this.state.amount,
+        parseInt(this.state.amount),
         {
           nftData,
           address,
@@ -141,8 +148,8 @@ class CreateNFT extends React.Component {
    * @param {Object} tx Create token transaction data
    */
   onTokenCreateSuccess = (tx) => {
-    const name = this.refs.shortName.value;
-    const symbol = this.refs.symbol.value;
+    const name = this.nameRef.current.value;
+    const symbol = this.symbolRef.current.value;
     const token = {
       uid: tx.hash,
       name,
@@ -186,9 +193,9 @@ class CreateNFT extends React.Component {
   handleCheckboxAddress = (e) => {
     const value = e.target.checked;
     if (value) {
-      $(this.address.current).hide(400);
+      $(this.addressDivRef.current).hide(400);
     } else {
-      $(this.address.current).show(400);
+      $(this.addressDivRef.current).show(400);
     }
   }
 
@@ -261,22 +268,22 @@ class CreateNFT extends React.Component {
           )}
         </p>
         <hr className="mb-5 mt-5"/>
-        <form ref="formCreateNFT" id="formCreateNFT">
+        <form ref={this.formCreateNFTRef} id="formCreateNFT">
           <div className="row">
             <div className="form-group col-9">
               <label>{t`NFT Data`}</label>
-              <input required ref="nftData" placeholder={t`ipfs://...`} type="text" className="form-control" />
-              <small id="nftDataHelp" className="form-text text-muted">This can be the ipfs link to your metadata.json file, the link to your asset or a string that uniquely identify your NFT</small>
+              <input required ref={this.nftDataRef} placeholder={t`ipfs://...`} type="text" className="form-control" />
+              <small id="nftDataHelp" className="form-text text-muted">This can be the IPFS link to your metadata.json file, the link to your asset or a string that uniquely identify your NFT</small>
             </div>
           </div>
           <div className="row">
             <div className="form-group col-6">
               <label>{t`Short name`}</label>
-              <input required ref="shortName" placeholder={t`MyCoin`} type="text" className="form-control" />
+              <input required ref={this.nameRef} placeholder={t`MyCoin`} type="text" className="form-control" />
             </div>
             <div className="form-group col-3">
               <label>{t`Symbol`}</label>
-              <input required ref="symbol" placeholder={t`MYC (2-5 characters)`} type="text" minLength={2} maxLength={5} className="form-control" />
+              <input required ref={this.symbolRef} placeholder={t`MYC (2-5 characters)`} type="text" minLength={2} maxLength={5} className="form-control" />
             </div>
           </div>
           <div className="row">
@@ -286,21 +293,21 @@ class CreateNFT extends React.Component {
             </div>
             <div className="form-group d-flex flex-row align-items-center address-checkbox">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" ref="autoselectAddress" id="autoselectAddress" defaultChecked={true} onChange={this.handleCheckboxAddress} />
+                <input className="form-check-input" type="checkbox" ref={this.autoselectAddressRef} id="autoselectAddress" defaultChecked={true} onChange={this.handleCheckboxAddress} />
                 <label className="form-check-label" htmlFor="autoselectAddress">
                   {t`Select address automatically`}
                 </label>
               </div>
             </div>
-            <div className="form-group col-5" ref={this.address} style={{display: 'none'}}>
+            <div className="form-group col-5" ref={this.addressDivRef} style={{display: 'none'}}>
               <label>{t`Destination address`}</label>
-              <input ref="address" type="text" placeholder={t`Address`} className="form-control" />
+              <input ref={this.addressRef} type="text" placeholder={t`Address`} className="form-control" />
             </div>
           </div>
           <div className="row mt-3">
             <div className="form-group d-flex flex-row align-items-center create-mint-checkbox col-5">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" ref="createMintAuthority" id="createMintAuthority" defaultChecked={false} />
+                <input className="form-check-input" type="checkbox" ref={this.createMintAuthorityRef} id="createMintAuthority" defaultChecked={false} />
                 <label className="form-check-label" htmlFor="createMintAuthority">
                   {t`Create a mint authority`}<small id="createMintHelp" className="form-text text-muted">If you want to be able to mint more units of this NFT.</small>
                 </label>
@@ -308,7 +315,7 @@ class CreateNFT extends React.Component {
             </div>
             <div className="form-group d-flex flex-row align-items-center create-melt-checkbox col-4">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" ref="createMeltAuthority" id="createMeltAuthority" defaultChecked={false} />
+                <input className="form-check-input" type="checkbox" ref={this.createMeltAuthorityRef} id="createMeltAuthority" defaultChecked={false} />
                 <label className="form-check-label" htmlFor="createMeltAuthority">
                   {t`Create a melt authority`}<small id="createMeltHelp" className="form-text text-muted">If you want to be able to melt the units of this NFT.</small>
                 </label>
