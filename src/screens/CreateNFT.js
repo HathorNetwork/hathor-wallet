@@ -19,7 +19,7 @@ import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
-import { NFT_STANDARD_RFC_URL } from '../constants';
+import { NFT_STANDARD_RFC_URL, NFT_DATA_MAX_SIZE } from '../constants';
 import InputNumber from '../components/InputNumber';
 
 
@@ -272,8 +272,8 @@ class CreateNFT extends React.Component {
           <div className="row">
             <div className="form-group col-9">
               <label>{t`NFT Data`}</label>
-              <input required ref={this.nftDataRef} placeholder={t`ipfs://...`} type="text" className="form-control" />
-              <small id="nftDataHelp" className="form-text text-muted">This can be the IPFS link to your metadata.json file, the link to your asset or a string that uniquely identify your NFT</small>
+              <input required ref={this.nftDataRef} placeholder={t`ipfs://...`} type="text" className="form-control" maxLength={NFT_DATA_MAX_SIZE} />
+              <small id="nftDataHelp" className="form-text text-muted">This can be the IPFS link to your metadata.json file, the link to your asset or a string that uniquely identify your NFT. Max size: 150.</small>
             </div>
           </div>
           <div className="row">

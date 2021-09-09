@@ -140,3 +140,8 @@ export const LEDGER_ENABLED = false;
  * Flag to hide/show create NFT button
  */
 export const NFT_ENABLED = false;
+
+/**
+ * Maximum size of NFT data length
+ */
+export const NFT_DATA_MAX_SIZE = 150;
