@@ -325,7 +325,7 @@ class CreateNFT extends React.Component {
           <hr className="mb-5 mt-5"/>
           <p><strong>HTR available:</strong> {hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR</p>
           <p><strong>Deposit:</strong> {hathorLib.helpers.prettyValue(depositAmount)} HTR</p>
-          <p><strong>Fee:</strong> {hathorLib.helpers.prettyValue(tokens.getNFTFee())} HTR</p>
+          <p><strong>Fee:</strong> {nftFee} HTR</p>
           <p><strong>Total:</strong> {hathorLib.helpers.prettyValue(tokens.getNFTFee() + depositAmount)} HTR</p>
           <button type="button" className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
         </form>
