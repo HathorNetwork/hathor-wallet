@@ -252,7 +252,7 @@ class CreateNFT extends React.Component {
         <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your NFT.`}</p>
         <p>
           {str2jsx(
-            t`When creating and minting NFTs, a |bold:deposit of ${htrDeposit}%| in HTR is required and an additional |bold:fee of ${nftFee} HTR|. If these tokens are later melted, this HTR deposit will be returned (depending on the amount melted) and the fee can never be returned. Read more about the NFT standard |link:here|.`,
+            t`When creating and minting NFTs, a |bold:deposit of ${htrDeposit}%| in HTR is required and an additional |bold:fee of ${nftFee} HTR|. If these tokens are later melted, this HTR deposit will be returned (depending on the amount melted) and the fee will never be returned. Read more about the NFT standard |link:here|.`,
             {
               bold: (x, i) => <strong key={i}>{x}</strong>,
               link: (x, i) => <a key={i} href="true" onClick={this.goToRFC}>{x}</a>,
@@ -317,7 +317,7 @@ class CreateNFT extends React.Component {
               <div className="form-check">
                 <input className="form-check-input" type="checkbox" ref={this.createMeltAuthorityRef} id="createMeltAuthority" defaultChecked={false} />
                 <label className="form-check-label" htmlFor="createMeltAuthority">
-                  {t`Create a melt authority`}<small id="createMeltHelp" className="form-text text-muted">If you want to be able to melt the units of this NFT.</small>
+                  {t`Create a melt authority`}<small id="createMeltHelp" className="form-text text-muted">If you want to be able to melt units of this NFT.</small>
                 </label>
               </div>
             </div>
