@@ -14,6 +14,7 @@ import HathorAlert from '../components/HathorAlert';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
+import { NFT_ENABLED } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
 
 
@@ -49,6 +50,17 @@ class CustomTokens extends React.Component {
     }
   }
 
+  /**
+   * Triggered when user clicks on the Create NFT button
+   */
+  createNFTClicked = () => {
+    if (hathorLib.wallet.isHardwareWallet()) {
+      $('#notSupported').modal('show');
+    } else {
+      this.props.history.push('/create_nft/');
+    }
+  }
+
   render() {
     return (
       <div className="content-wrapper">
@@ -59,6 +71,7 @@ class CustomTokens extends React.Component {
         <p>{t`If you want to use a custom token that already exists, you need to register this token in your Hathor Wallet. For this, you will need the custom token's Configuration String, which you can get from the creators of the token.`}</p>
         <div className="d-flex flex-row align-items-center justify-content-center mt-5">
           <button className="btn btn-hathor mr-4" onClick={this.createTokenClicked}>{t`Create a new token`}</button>
+          { NFT_ENABLED && <button className="btn btn-hathor mr-4" onClick={this.createNFTClicked}>{t`Create an NFT`}</button> }
           <button className="btn btn-hathor" onClick={this.registerTokenClicked}>{t`Register a token`}</button>
         </div>
         <ModalAddToken success={this.newTokenSuccess} />

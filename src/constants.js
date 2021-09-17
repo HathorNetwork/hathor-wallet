@@ -105,6 +105,11 @@ export const TESTNET_EXPLORER_BASE_URL = "https://explorer.testnet.hathor.networ
  */
 export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
 
+/**
+ * URL of NFT standard
+ */
+export const NFT_STANDARD_RFC_URL = "https://github.com/HathorNetwork/rfcs/blob/master/text/0032-nft-standard.md";
+
 export const HATHOR_WEBSITE_URL = "https://hathor.network/";
 
 /**
@@ -130,3 +135,13 @@ export const IPC_RENDERER = ipcRenderer;
  * Flag to hide/show elements after ledger integration is done
  */
 export const LEDGER_ENABLED = false;
+
+/**
+ * Flag to hide/show create NFT button
+ */
+export const NFT_ENABLED = false;
+
+/**
+ * Maximum size of NFT data length
+ */
+export const NFT_DATA_MAX_SIZE = 150;
