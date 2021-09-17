@@ -273,7 +273,7 @@ class CreateNFT extends React.Component {
             <div className="form-group col-9">
               <label>{t`NFT Data`}</label>
               <input required ref={this.nftDataRef} placeholder={t`ipfs://...`} type="text" className="form-control" maxLength={NFT_DATA_MAX_SIZE} />
-              <small id="nftDataHelp" className="form-text text-muted">This can be the IPFS link to your metadata.json file, the link to your asset or a string that uniquely identify your NFT. Max size: {NFT_DATA_MAX_SIZE} characters.</small>
+              <small id="nftDataHelp" className="form-text text-muted">String that uniquely identify your NFT. For example, the IPFS link to your metadata file, a URI to your asset or any string. Max size: {NFT_DATA_MAX_SIZE} characters.</small>
             </div>
           </div>
           <div className="row">
