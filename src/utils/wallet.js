@@ -24,6 +24,7 @@ import {
   changeServer,
   updateTokenHistory,
   tokenMetadataUpdated,
+  metadataLoaded,
 } from '../actions/index';
 import {
   helpers,
@@ -229,6 +230,7 @@ const wallet = {
   async startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false, xpub = null) {
     // Set loading addresses screen to show
     store.dispatch(loadingAddresses(true));
+    store.dispatch(metadataLoaded(false));
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
 

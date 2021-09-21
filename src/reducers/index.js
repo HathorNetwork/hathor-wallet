@@ -47,6 +47,8 @@ const initialState = {
   wallet: null,
   // Metadata of tokens
   tokenMetadata: {},
+  // When metadata is loaded from the lib
+  metadataLoaded: false,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -106,6 +108,8 @@ const rootReducer = (state = initialState, action) => {
       return onUpdateTokenHistory(state, action);
     case 'token_metadata_updated':
       return tokenMetadataUpdated(state, action);
+    case 'metadata_loaded':
+      return Object.assign({}, state, {metadataLoaded: action.payload});
     default:
       return state;
   }
@@ -359,6 +363,7 @@ const tokenMetadataUpdated = (state, action) => {
 
   return {
     ...state,
+    metadataLoaded: true,
     tokenMetadata: data,
   };
 };
