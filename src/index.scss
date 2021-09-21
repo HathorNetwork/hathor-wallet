@@ -818,3 +818,37 @@ span.software {
 .modal-body-pin {
   min-height: 120px;
 }
+
+.token-nft-preview {
+
+  & figure {
+    margin: 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  & video, & img {
+    border-radius: 5px;
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+  }
+
+  border-radius: 10px;
+  border: 1px solid #eee;
+  width: 280px;
+
+  & > p {
+    border-bottom: 1px solid #eee;
+    margin: 0;
+    padding: 1rem;
+
+    &:first-child {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+}
