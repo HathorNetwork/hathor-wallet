@@ -27,6 +27,7 @@ const mapStateToProps = (state) => {
   return {
     tokens: state.tokens,
     wallet: state.wallet,
+    metadataLoaded: state.metadataLoaded,
   };
 };
 
@@ -354,6 +355,10 @@ class SendTokens extends React.Component {
     }
 
     const renderPage = () => {
+      if (!this.props.metadataLoaded) {
+        return <p>{t`Before sending a transaction you must wait until we finish loading the full data of your wallet.`}</p>
+      }
+
       return (
         <div>
           <form ref="formSendTokens" id="formSendTokens">
