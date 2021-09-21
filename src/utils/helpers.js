@@ -69,6 +69,41 @@ const helpers = {
       return TESTNET_EXPLORER_BASE_URL;
     }
   },
+
+  /**
+   * Render value to integer or decimal
+   *
+   * @param {number} amount Amount to render
+   * @param {boolean} isInteger If it's an integer or decimal
+   *
+   * @return {string} rendered value
+   * @memberof Helpers
+   * @inner
+   */
+  renderValue(amount, isInteger) {
+    if (isInteger) {
+      return hathorLib.helpersUtils.prettyIntegerValue(amount);
+    } else {
+      return hathorLib.helpersUtils.prettyValue(amount);
+    }
+  },
+
+  /**
+   * Get file extension by name and path
+   *
+   * @param {string} file Full file path with name
+   *
+   * @return {string} file extension
+   * @memberof Helpers
+   * @inner
+   */
+  getFileExtension(file) {
+    const parts = file.split('.');
+    if (parts.length === 1) {
+      return '';
+    }
+    return parts[parts.length - 1];
+  },
 }
 
 export default helpers;
