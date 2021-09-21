@@ -333,7 +333,7 @@ class TxData extends React.Component {
         <div key={idx}>
           <div>{outputValue(output)} {renderOutputToken(output)} {output.decoded && addBadge && hathorLib.wallet.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
           <div>
-            {output.decoded ? renderDecodedScript(output.decoded) : t`${output.script} (unknown script)` }
+            {renderDecodedScript(output)}
             {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>{t`Spent`}</Link>)</span> : ''}
           </div>
         </div>
@@ -346,13 +346,13 @@ class TxData extends React.Component {
       });
     }
 
-    const renderDecodedScript = (decoded) => {
-      switch (decoded.type) {
+    const renderDecodedScript = (output) => {
+      switch (output.decoded.type) {
         case 'P2PKH':
         case 'MultiSig':
-          return renderP2PKHorMultiSig(decoded);
+          return renderP2PKHorMultiSig(output.decoded);
         case 'NanoContractMatchValues':
-          return renderNanoContractMatchValues(decoded);
+          return renderNanoContractMatchValues(output.decoded);
         default:
           let script = output.script;
           try {

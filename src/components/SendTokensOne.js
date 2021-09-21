@@ -14,6 +14,7 @@ import { connect } from "react-redux";
 import _ from 'lodash';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
+import helpers from '../utils/helpers';
 
 
 const mapStateToProps = (state) => {
@@ -22,6 +23,7 @@ const mapStateToProps = (state) => {
   return {
     tokensBalance: state.tokensBalance,
     height: state.height,
+    tokenMetadata: state.tokenMetadata
   };
 };
 
@@ -216,10 +218,11 @@ class SendTokensOne extends React.Component {
 
     const renderBalance = () => {
       let availableBalance = 0;
+      const isNFT = this.state.selected.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.state.selected.uid].nft;
       if (this.state.selected.uid in this.props.tokensBalance) {
         availableBalance = this.props.tokensBalance[this.state.selected.uid].available;
       }
-      return <span className="ml-3">({t`Balance available: `}{hathorLib.helpers.prettyValue(availableBalance)})</span>;
+      return <span className="ml-3">({t`Balance available: `}{helpers.renderValue(availableBalance, isNFT)})</span>;
     }
 
     return (

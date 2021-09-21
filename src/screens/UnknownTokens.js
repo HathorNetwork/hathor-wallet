@@ -16,6 +16,7 @@ import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import { WALLET_HISTORY_COUNT } from '../constants';
+import helpers from '../utils/helpers';
 
 
 const mapStateToProps = (state) => {
@@ -23,6 +24,7 @@ const mapStateToProps = (state) => {
     registeredTokens: state.tokens,
     allTokens: state.allTokens,
     tokensBalance: state.tokensBalance,
+    tokenMetadata: state.tokenMetadata,
   };
 };
 
@@ -130,15 +132,16 @@ class UnknownTokens extends React.Component {
         return <p>You don't have any unknown tokens</p>;
       } else {
         return unknownTokens.map((token, index) => {
+          const isNFT = token.uid in this.props.tokenMetadata && this.props.tokenMetadata[token.uid].nft;
           return (
             <div key={token.uid} className="unknown-token card">
               <div className="header d-flex flex-row align-items-center justify-content-between">
                 <div className="d-flex flex-column align-items-center justify-content-center">
                   <p>{token.uid}</p>
                   <div className="d-flex flex-row align-items-center justify-content-start w-100">
-                    <span><strong>{t`Total:`}</strong> {hathorLib.helpers.prettyValue(token.balance.available + token.balance.locked)}</span>
-                    <span className="ml-2"><strong>{t`Available:`}</strong> {hathorLib.helpers.prettyValue(token.balance.available)}</span>
-                    <span className="ml-2"><strong>{t`Locked:`}</strong> {hathorLib.helpers.prettyValue(token.balance.locked)}</span>
+                    <span><strong>{t`Total:`}</strong> {helpers.renderValue(token.balance.available + token.balance.locked, isNFT)}</span>
+                    <span className="ml-2"><strong>{t`Available:`}</strong> {helpers.renderValue(token.balance.available, isNFT)}</span>
+                    <span className="ml-2"><strong>{t`Locked:`}</strong> {helpers.renderValue(token.balance.locked, isNFT)}</span>
                   </div>
                 </div>
                 <div className="d-flex flex-row align-items-center">
