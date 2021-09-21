@@ -90,6 +90,7 @@ class SendTokensOne extends React.Component {
    * Iterate through inputs and outputs to add each information typed to the data object
    */
   getData = () => {
+    const isNFT = this.state.selected.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.state.selected.uid].nft;
     let data = {'outputs': [], 'inputs': []};
     for (const output of this.outputs) {
       const address = output.current.address.current.value;
@@ -97,9 +98,9 @@ class SendTokensOne extends React.Component {
 
       if (address && valueStr) {
         // Doing the check here because need to validate before doing parseInt
-        const tokensValue = wallet.decimalToInteger(valueStr);
+        const tokensValue = isNFT ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
         if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${helpers.renderValue(hathorLib.constants.MAX_OUTPUT_VALUE, isNFT)}` });
           return null;
         }
         let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'token': this.state.selected.uid};
@@ -184,9 +185,11 @@ class SendTokensOne extends React.Component {
   }
 
   render = () => {
+    const isNFT = this.state.selected && this.state.selected.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.state.selected.uid].nft;
+
     const renderOutputs = () => {
       return this.outputs.map((output, index) =>
-        <OutputsWrapper key={index} index={index} ref={output} addOutput={this.addOutput} />
+        <OutputsWrapper key={index} index={index} ref={output} addOutput={this.addOutput} isNFT={isNFT} />
       );
     }
 
@@ -218,22 +221,30 @@ class SendTokensOne extends React.Component {
 
     const renderBalance = () => {
       let availableBalance = 0;
-      const isNFT = this.state.selected.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.state.selected.uid].nft;
       if (this.state.selected.uid in this.props.tokensBalance) {
         availableBalance = this.props.tokensBalance[this.state.selected.uid].available;
       }
       return <span className="ml-3">({t`Balance available: `}{helpers.renderValue(availableBalance, isNFT)})</span>;
     }
 
+    const renderNFTHelper = () => {
+      return (
+        <div>
+          <small className="text-muted">This is an NFT token. The amount will be an integer number, without decimal places.</small>
+        </div>
+      );
+    }
+
     return (
       <div className='send-tokens-wrapper card'>
-        <div className="mb-3">
+        <div>
           <label><strong>{t`Token:`}</strong></label>
           {this.state.selected && renderSelectToken()}
           {this.state.selected && renderBalance()}
           {this.state.selectedTokens.length !== 1 ? <button type="button" className="text-danger remove-token-btn ml-3" onClick={(e) => this.props.removeToken(this.props.index)}>{t`Remove`}</button> : null}
         </div>
-        <div className="outputs-wrapper">
+        {isNFT && renderNFTHelper()}
+        <div className="outputs-wrapper mt-3">
           <label>Outputs</label>
           {renderOutputs()}
         </div>
