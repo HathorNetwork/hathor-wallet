@@ -45,6 +45,8 @@ const initialState = {
   // Height of the best chain of the network arrived from ws data
   height: 0,
   wallet: null,
+  // Metadata of tokens
+  tokenMetadata: {},
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -102,6 +104,8 @@ const rootReducer = (state = initialState, action) => {
       return onUpdateTx(state, action);
     case 'update_token_history':
       return onUpdateTokenHistory(state, action);
+    case 'token_metadata_updated':
+      return tokenMetadataUpdated(state, action);
     default:
       return state;
   }
@@ -345,6 +349,18 @@ const onUpdateHeight = (state, action) => {
   }
 
   return state;
+};
+
+/**
+ * Update token metadata
+ */
+const tokenMetadataUpdated = (state, action) => {
+  const { data } = action.payload;
+
+  return {
+    ...state,
+    tokenMetadata: data,
+  };
 };
 
 export default rootReducer;

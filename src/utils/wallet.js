@@ -23,6 +23,7 @@ import {
   cleanData,
   changeServer,
   updateTokenHistory,
+  tokenMetadataUpdated,
 } from '../actions/index';
 import {
   helpers,
@@ -309,6 +310,10 @@ const wallet = {
       this.fetchNewTxTokenBalance(wallet, tx).then((updatedBalanceMap) => {
         store.dispatch(updateTx(tx, updatedBalanceMap));
       });
+    });
+
+    wallet.on('token-metadata-updated', (data) => {
+      store.dispatch(tokenMetadataUpdated(data));
     });
 
     this.setConnectionEvents(connection, wallet);

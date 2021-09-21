@@ -131,3 +131,8 @@ export const updateTx = (tx, updatedBalanceMap) => ({ type: "update_tx", payload
  * newHistory {Array} array with the new fetched history
  */
 export const updateTokenHistory = (token, newHistory) => ({ type: "update_token_history", payload: { token, newHistory } });
+
+/**
+ * data {Object} object with token metadata
+ */
+export const tokenMetadataUpdated = (data) => ({ type: "token_metadata_updated", payload: { data } });
