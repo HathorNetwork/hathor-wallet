@@ -134,7 +134,7 @@ export const IPC_RENDERER = ipcRenderer;
 /**
  * Flag to hide/show elements after ledger integration is done
  */
-export const LEDGER_ENABLED = false;
+export const LEDGER_ENABLED = true;
 
 /**
  * Flag to hide/show create NFT button
