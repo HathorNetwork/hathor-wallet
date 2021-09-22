@@ -91,7 +91,7 @@ class NFTListElement extends React.Component {
             <figure className="figure flex-fill p-4 d-flex align-items-center justify-content-center">
               { media }
             </figure>
-            <p><strong>Balance: </strong>{this.props.nftElement.balance} {this.props.nftElement.symbol}</p>
+            <p><strong>Balance: </strong>{helpers.renderValue(this.props.nftElement.balance, true)} {this.props.nftElement.symbol}</p>
             <p><a href="true" onClick={(e) => this.goToTokenDetail(e, this.props.nftElement.id)}>{t`See on explorer`}</a></p>
           </div>        
         </div>
