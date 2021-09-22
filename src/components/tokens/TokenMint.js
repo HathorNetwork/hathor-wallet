@@ -12,12 +12,14 @@ import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import tokens from '../../utils/tokens';
 import wallet from '../../utils/wallet';
+import helpers from '../../utils/helpers';
 import InputNumber from '../InputNumber';
 import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
   return {
     wallet: state.wallet,
+    tokenMetadata: state.tokenMetadata,
   };
 };
 
@@ -55,7 +57,7 @@ class TokenMint extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = async (pin) => {
-    const amountValue = wallet.decimalToInteger(this.state.amount);
+    const amountValue = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
     const address = this.chooseAddress.current.checked ? null : this.address.current.value;
     const transaction = await this.props.wallet.prepareMintTokensData(
       this.props.token.uid,
@@ -70,10 +72,18 @@ class TokenMint extends React.Component {
   }
 
   /**
+   * Return if token is an NFT
+   */
+  isNFT = () => {
+    return this.props.token.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.props.token.uid].nft;
+  }
+
+  /**
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const prettyAmountValue = hathorLib.helpers.prettyValue(wallet.decimalToInteger(this.state.amount));
+    const amount = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
+    const prettyAmountValue = helpers.renderValue(amount, this.isNFT());
     return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;
   }
 
@@ -110,6 +120,8 @@ class TokenMint extends React.Component {
   }
 
   render() {
+    const isNFT = this.props.token.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.props.token.uid].nft;
+
     const renderMintAddress = () => {
       return (
         <div className="d-flex flex-row align-items-center justify-content-start col-12 mb-3">
@@ -129,18 +141,37 @@ class TokenMint extends React.Component {
       );
     }
 
+    const renderInputNumber = () => {
+      if (this.isNFT()) {
+        return (
+          <InputNumber
+           required
+           className="form-control"
+           onValueChange={this.onAmountChange}
+           placeholder="0"
+           precision={0}
+          />
+        );
+      } else {
+        return (
+          <InputNumber
+           required
+           className="form-control"
+           onValueChange={this.onAmountChange}
+           placeholder={hathorLib.helpers.prettyValue(0)}
+          />
+        );
+      }
+    }
+
     const renderForm = () => {
       return (
         <div>
           <div className="row">
             <div className="form-group col-3">
               <label>Amount</label>
-              <InputNumber
-               required
-               className="form-control"
-               onValueChange={this.onAmountChange}
-               placeholder={hathorLib.helpers.prettyValue(0)}
-              />
+              {renderInputNumber()}
+              {this.isNFT() && <small className="text-muted">{t`This is an NFT token. The amount will be an integer number, without decimal places.`}</small>}
             </div>
             {renderMintAddress()}
           </div>
@@ -157,12 +188,22 @@ class TokenMint extends React.Component {
       )
     }
 
+    const getAmountToCalculateDeposit = () => {
+      if (this.isNFT()) {
+        // The NFT amount will be an integer but to get the token deposit
+        // we must use the decimal
+        return this.state.amount / 100;
+      } else {
+        return this.state.amount;
+      }
+    }
+
     return (
       <TokenAction
        renderForm={renderForm}
        title={t`Mint tokens`}
        subtitle={`A deposit of ${hathorLib.tokens.getDepositPercentage() * 100}% in HTR of the mint amount is required`}
-       deposit={`Deposit: ${tokens.getDepositAmount(this.state.amount)} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
+       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit())} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
        buttonName={t`Go`}
        validateForm={this.mint}
        getSuccessMessage={this.getSuccessMessage}
