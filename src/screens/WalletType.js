@@ -12,7 +12,7 @@ import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
 import ledger from '../utils/ledger';
 import helpers from '../utils/helpers';
-import { IPC_RENDERER, HATHOR_WEBSITE_URL } from '../constants';
+import { LEDGER_GUIDE_URL, IPC_RENDERER, HATHOR_WEBSITE_URL } from '../constants';
 import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
 import { str2jsx } from '../utils/i18n';
@@ -156,13 +156,13 @@ class WalletType extends React.Component {
   }
 
   /**
-   * Method called to open external website page.
+   * Method called to open ledger guide
    *
    * @param {Object} e Event for the click
    */
-  openWebsiteLink = (e) => {
+  openLedgerGuide = (e) => {
     e.preventDefault();
-    const url = new URL('wallet-types/', HATHOR_WEBSITE_URL);
+    const url = new URL(LEDGER_GUIDE_URL);
     helpers.openExternalURL(url.href);
   }
 
@@ -171,11 +171,15 @@ class WalletType extends React.Component {
       return (
         <div>
           <p className="mt-4 mb-4">{t`Hathor Wallet supports two types of wallet: software and hardware.`}</p>
-          <p className="mt-4 mb-4"><SpanFmt>{t`**Hardware wallets** are dedicated external devices that store your private information. We currently support the Ledger hardware wallet. **Software wallets**, on the other hand, store the information on your computer.`}</SpanFmt></p>
           <p className="mt-4 mb-4">
-            {str2jsx(t`For more information on different types of wallet, check out |fn:this page|.`,
-                     {fn: (x, i) => <a key={i} onClick={this.openWebsiteLink} href="true">{x}</a>})}
+            {str2jsx(t`|bold:Hardware wallets| are dedicated external devices that store your private information. We currently support the Ledger hardware wallet and the ledger app must be installed in developer mode for now. For a tutorial about how to use the ledger app with Hathor Wallet check out |fn:this page|.`,
+              {
+                bold: (x, i) => <strong key={i}>{x}</strong>,
+                fn: (x, i) => <a key={i} onClick={this.openLedgerGuide} href="true">{x}</a>
+              }
+            )}
           </p>
+          <p className="mt-4 mb-4"><SpanFmt>{t`**Software wallets**, on the other hand, store the information on your computer.`}</SpanFmt></p>
           <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
             <button onClick={this.goToHardwareWallet} type="button" className="btn btn-hathor mr-3">{t`Hardware wallet`}</button>
             <button onClick={this.goToSoftwareWallet} type="button" className="btn btn-hathor">{t`Software wallet`}</button>
