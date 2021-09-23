@@ -145,3 +145,8 @@ export const NFT_ENABLED = false;
  * Maximum size of NFT data length
  */
 export const NFT_DATA_MAX_SIZE = 150;
+
+/**
+ * URL for the ledger guide
+ */
+export const LEDGER_GUIDE_URL = 'https://medium.com/hathor-network/hathor-is-available-on-ledger-wallet-31cb1613b060';
