@@ -7,26 +7,27 @@ msgstr ""
 msgid "I want to reset my wallet"
 msgstr ""
 
-#: src/screens/AddressList.js:138
+#: src/screens/AddressList.js:149
 msgid "Search address"
 msgstr ""
 
-#: src/screens/AddressList.js:162
+#: src/screens/AddressList.js:173
 msgid "Addresses"
 msgstr ""
 
 #: src/components/OutputsWrapper.js:49
 #: src/components/tokens/TokenMint.js:126
-#: src/screens/AddressList.js:169
-#: src/screens/CreateToken.js:277
+#: src/screens/AddressList.js:180
+#: src/screens/CreateNFT.js:304
+#: src/screens/CreateToken.js:278
 msgid "Address"
 msgstr ""
 
-#: src/screens/AddressList.js:170
+#: src/screens/AddressList.js:181
 msgid "Index"
 msgstr ""
 
-#: src/screens/AddressList.js:171
+#: src/screens/AddressList.js:182
 msgid "Number of transactions"
 msgstr ""
 
@@ -115,8 +116,123 @@ msgstr ""
 msgid "Set a passphrase"
 msgstr ""
 
+#: src/screens/CreateNFT.js:76
 #: src/screens/CreateToken.js:69
 msgid "Must choose an address or auto select"
+msgstr ""
+
+#: src/screens/CreateNFT.js:82
+#, javascript-format
+msgid "Maximum NFT units to mint is ${ hathorLib.constants.MAX_OUTPUT_VALUE }"
+msgstr ""
+
+#: src/screens/CreateNFT.js:234
+msgid "Your NFT has been successfully created!"
+msgstr ""
+
+#: src/screens/CreateNFT.js:235
+msgid ""
+"You can share the following configuration string with other people to let "
+"them register your brand new NFT in their wallets."
+msgstr ""
+
+#: src/screens/CreateNFT.js:236
+#: src/screens/CreateToken.js:222
+msgid "Remember to **make a backup** of this configuration string."
+msgstr ""
+
+#: src/screens/CreateNFT.js:250
+msgid ""
+"Here you will create a new NFT. After the creation, you will be able to "
+"send the units of this NFT to other addresses."
+msgstr ""
+
+#: src/screens/CreateNFT.js:251
+msgid ""
+"NFTs share the address space with all other tokens, including HTR. This "
+"means that you can send and receive tokens using any valid address."
+msgstr ""
+
+#: src/screens/CreateNFT.js:252
+msgid ""
+"Remember to make a backup of your new token's configuration string. You "
+"will need to send it to other people to allow them to use your NFT."
+msgstr ""
+
+#: src/screens/CreateNFT.js:255
+#, javascript-format
+msgid ""
+"When creating and minting NFTs, a |bold:deposit of ${ htrDeposit }%| in HTR "
+"is required and an additional |bold:fee of ${ nftFee } HTR|. If these "
+"tokens are later melted, this HTR deposit will be returned (depending on "
+"the amount melted) and the fee will never be returned. Read more about the "
+"NFT standard |link:here|."
+msgstr ""
+
+#: src/screens/CreateNFT.js:264
+msgid ""
+"The most common usage for an NFT is to represent a digital asset. Please "
+"see |link:this guide| that explains how to create an NFT data (including "
+"suggestions on how to upload files to the IPFS network) in the Hathor "
+"standard in order to be able to show your asset in our explorer."
+msgstr ""
+
+#: src/screens/CreateNFT.js:274
+msgid "NFT Data"
+msgstr ""
+
+#: src/screens/CreateNFT.js:275
+msgid "ipfs://..."
+msgstr ""
+
+#: src/components/ModalEditToken.js:87
+#: src/screens/CreateNFT.js:281
+#: src/screens/CreateToken.js:250
+msgid "Short name"
+msgstr ""
+
+#: src/screens/CreateNFT.js:282
+#: src/screens/CreateToken.js:251
+msgid "MyCoin"
+msgstr ""
+
+#: src/components/ModalEditToken.js:90
+#: src/screens/CreateNFT.js:285
+#: src/screens/CreateToken.js:254
+msgid "Symbol"
+msgstr ""
+
+#: src/screens/CreateNFT.js:286
+#: src/screens/CreateToken.js:255
+msgid "MYC (2-5 characters)"
+msgstr ""
+
+#: src/screens/CreateNFT.js:291
+#: src/screens/CreateToken.js:260
+msgid "Amount"
+msgstr ""
+
+#: src/screens/CreateNFT.js:298
+#: src/screens/CreateToken.js:272
+msgid "Select address automatically"
+msgstr ""
+
+#: src/screens/CreateNFT.js:303
+#: src/screens/CreateToken.js:277
+msgid "Destination address"
+msgstr ""
+
+#: src/screens/CreateNFT.js:312
+msgid "Create a mint authority"
+msgstr ""
+
+#: src/screens/CreateNFT.js:320
+msgid "Create a melt authority"
+msgstr ""
+
+#: src/screens/CreateNFT.js:334
+#, javascript-format
+msgid "NFT ${ _this.state.name } created"
 msgstr ""
 
 #: src/screens/CreateToken.js:77
@@ -124,39 +240,35 @@ msgstr ""
 msgid "Maximum value to mint token is ${ max_output_value_str }"
 msgstr ""
 
-#: src/screens/CreateToken.js:219
+#: src/screens/CreateToken.js:220
 msgid "Your token has been successfully created!"
 msgstr ""
 
-#: src/screens/CreateToken.js:220
+#: src/screens/CreateToken.js:221
 msgid ""
 "You can share the following configuration string with other people to let "
 "them use your brand new token."
 msgstr ""
 
-#: src/screens/CreateToken.js:221
-msgid "Remember to **make a backup** of this configuration string."
-msgstr ""
-
-#: src/screens/CreateToken.js:233
+#: src/screens/CreateToken.js:234
 msgid ""
 "Here you will create a new customized token. After the creation, you will "
 "be able to send this new token to other addresses."
 msgstr ""
 
-#: src/screens/CreateToken.js:234
+#: src/screens/CreateToken.js:235
 msgid ""
 "Custom tokens share the address space with all other tokens, including HTR. "
 "This means that you can send and receive tokens using any valid address."
 msgstr ""
 
-#: src/screens/CreateToken.js:235
+#: src/screens/CreateToken.js:236
 msgid ""
 "Remember to make a backup of your new token's configuration string. You "
 "will need to send it to other people to allow them to use your new token."
 msgstr ""
 
-#: src/screens/CreateToken.js:238
+#: src/screens/CreateToken.js:239
 #, javascript-format
 msgid ""
 "When creating and minting tokens, a |bold:deposit of ${ htrDeposit }%| in "
@@ -164,46 +276,16 @@ msgid ""
 "returned. Read more about it |link:here|."
 msgstr ""
 
-#: src/components/ModalEditToken.js:87
-#: src/screens/CreateToken.js:249
-msgid "Short name"
-msgstr ""
-
-#: src/screens/CreateToken.js:250
-msgid "MyCoin"
-msgstr ""
-
-#: src/components/ModalEditToken.js:90
-#: src/screens/CreateToken.js:253
-msgid "Symbol"
-msgstr ""
-
-#: src/screens/CreateToken.js:254
-msgid "MYC (2-5 characters)"
-msgstr ""
-
-#: src/screens/CreateToken.js:259
-msgid "Amount"
-msgstr ""
-
-#: src/screens/CreateToken.js:271
-msgid "Select address automatically"
-msgstr ""
-
-#: src/screens/CreateToken.js:276
-msgid "Destination address"
-msgstr ""
-
-#: src/screens/CreateToken.js:285
+#: src/screens/CreateToken.js:286
 #, javascript-format
 msgid "Token ${ _this.state.name } created"
 msgstr ""
 
-#: src/screens/CustomTokens.js:56
+#: src/screens/CustomTokens.js:68
 msgid "Custom Tokens"
 msgstr ""
 
-#: src/screens/CustomTokens.js:57
+#: src/screens/CustomTokens.js:69
 msgid ""
 "You can create your own digital token with customized specifications on "
 "Hathor Network with only a few clicks. They will fully work under the same "
@@ -212,13 +294,13 @@ msgid ""
 "price of the native HTR token, and they can serve multiple purposes."
 msgstr ""
 
-#: src/screens/CustomTokens.js:58
+#: src/screens/CustomTokens.js:70
 msgid ""
 "Every custom token has a unique **Configuration String** which must be "
 "shared with all other people that will use the custom token."
 msgstr ""
 
-#: src/screens/CustomTokens.js:59
+#: src/screens/CustomTokens.js:71
 msgid ""
 "If you want to use a custom token that already exists, you need to register "
 "this token in your Hathor Wallet. For this, you will need the custom "
@@ -226,15 +308,19 @@ msgid ""
 "token."
 msgstr ""
 
-#: src/screens/CustomTokens.js:61
+#: src/screens/CustomTokens.js:73
 msgid "Create a new token"
 msgstr ""
 
-#: src/screens/CustomTokens.js:62
+#: src/screens/CustomTokens.js:74
+msgid "Create an NFT"
+msgstr ""
+
+#: src/screens/CustomTokens.js:75
 msgid "Register a token"
 msgstr ""
 
-#: src/screens/CustomTokens.js:65
+#: src/screens/CustomTokens.js:78
 msgid "Token registered with success!"
 msgstr ""
 
@@ -353,31 +439,31 @@ msgstr ""
 msgid "You tried to access a page that does not exist in Hathor Wallet"
 msgstr ""
 
-#: src/screens/SendTokens.js:161
-#: src/screens/SendTokens.js:393
+#: src/screens/SendTokens.js:167
+#: src/screens/SendTokens.js:394
 msgid "Sending transaction"
 msgstr ""
 
-#: src/screens/SendTokens.js:299
+#: src/screens/SendTokens.js:300
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:361
+#: src/screens/SendTokens.js:362
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:362
-#: src/screens/SendTokens.js:391
+#: src/screens/SendTokens.js:363
+#: src/screens/SendTokens.js:392
 msgid "Send Tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:374
+#: src/screens/SendTokens.js:375
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:375
+#: src/screens/SendTokens.js:376
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
@@ -631,7 +717,7 @@ msgid "Please update you API version and try again"
 msgstr ""
 
 #: src/screens/VersionError.js:56
-#: src/screens/WalletType.js:192
+#: src/screens/WalletType.js:195
 msgid "Try again"
 msgstr ""
 
@@ -680,46 +766,49 @@ msgstr ""
 msgid "Unregister token"
 msgstr ""
 
-#: src/screens/WalletType.js:174
+#: src/screens/WalletType.js:173
 msgid "Hathor Wallet supports two types of wallet: software and hardware."
 msgstr ""
 
 #: src/screens/WalletType.js:175
 msgid ""
-"**Hardware wallets** are dedicated external devices that store your private "
-"information. We currently support the Ledger hardware wallet. **Software "
-"wallets**, on the other hand, store the information on your computer."
-msgstr ""
-
-#: src/screens/WalletType.js:177
-msgid "For more information on different types of wallet, check out |fn:this page|."
-msgstr ""
-
-#: src/screens/WalletType.js:181
-msgid "Hardware wallet"
+"|bold:Hardware wallets| are dedicated external devices that store your "
+"private information. We currently support the Ledger hardware wallet and "
+"the ledger app must be installed in developer mode for now. For a tutorial "
+"about how to use the ledger app with Hathor Wallet check out |fn:this page|."
 msgstr ""
 
 #: src/screens/WalletType.js:182
+msgid ""
+"**Software wallets**, on the other hand, store the information on your "
+"computer."
+msgstr ""
+
+#: src/screens/WalletType.js:184
+msgid "Hardware wallet"
+msgstr ""
+
+#: src/screens/WalletType.js:185
 msgid "Software wallet"
 msgstr ""
 
-#: src/screens/WalletType.js:199
+#: src/screens/WalletType.js:202
 msgid "You need to authorize the operation on your Ledger."
 msgstr ""
 
-#: src/screens/WalletType.js:201
+#: src/screens/WalletType.js:204
 msgid "Please connect your Ledger device to the computer and open the Hathor app."
 msgstr ""
 
-#: src/screens/WalletType.js:207
+#: src/screens/WalletType.js:210
 msgid "Step 2/2"
 msgstr ""
 
-#: src/screens/WalletType.js:209
+#: src/screens/WalletType.js:212
 msgid "Step 1/2"
 msgstr ""
 
-#: src/screens/WalletType.js:216
+#: src/screens/WalletType.js:219
 msgid "Connecting to Ledger"
 msgstr ""
 
@@ -851,7 +940,7 @@ msgstr ""
 #: src/components/ModalEditToken.js:95
 #: src/components/ModalSendTx.js:181
 #: src/components/ModalUnregisteredTokenInfo.js:113
-#: src/components/tokens/TokenAction.js:134
+#: src/components/tokens/TokenAction.js:133
 msgid "Cancel"
 msgstr ""
 
@@ -890,7 +979,7 @@ msgstr ""
 
 #: src/components/ModalAddressQRCode.js:93
 #: src/components/TokenGeneralInfo.js:145
-#: src/components/WalletAddress.js:149
+#: src/components/WalletAddress.js:151
 msgid "Copy to clipboard"
 msgstr ""
 
@@ -1115,7 +1204,7 @@ msgid "Public Explorer"
 msgstr ""
 
 #: src/components/OutputsWrapper.js:54
-#: src/components/SendTokensOne.js:186
+#: src/components/SendTokensOne.js:210
 msgid "This feature is disabled for hardware wallet"
 msgstr ""
 
@@ -1187,27 +1276,27 @@ msgstr ""
 msgid "Retry request"
 msgstr ""
 
-#: src/components/SendTokensOne.js:186
+#: src/components/SendTokensOne.js:210
 msgid "Select token"
 msgstr ""
 
-#: src/components/SendTokensOne.js:198
+#: src/components/SendTokensOne.js:222
 msgid "Balance available: "
 msgstr ""
 
-#: src/components/SendTokensOne.js:204
+#: src/components/SendTokensOne.js:228
 msgid "Token:"
 msgstr ""
 
-#: src/components/SendTokensOne.js:207
+#: src/components/SendTokensOne.js:231
 msgid "Remove"
 msgstr ""
 
-#: src/components/SendTokensOne.js:216
+#: src/components/SendTokensOne.js:240
 msgid "Choose inputs automatically"
 msgstr ""
 
-#: src/components/SendTokensOne.js:220
+#: src/components/SendTokensOne.js:244
 msgid "Inputs"
 msgstr ""
 
@@ -1221,6 +1310,18 @@ msgstr ""
 
 #: src/components/SendTxHandler.js:27
 msgid "Your transaction was sent successfully!"
+msgstr ""
+
+#: src/components/SendTxHandler.js:89
+msgid "There was an unexpected error when pushing the transaction to the network."
+msgstr ""
+
+#: src/components/SendTxHandler.js:90
+msgid "There are no utxos available to fill the transaction."
+msgstr ""
+
+#: src/components/SendTxHandler.js:91
+msgid "The selected inputs are invalid."
 msgstr ""
 
 #: src/components/ServerStatus.js:34
@@ -1304,17 +1405,17 @@ msgstr ""
 msgid "Your balance available:"
 msgstr ""
 
-#: src/components/TokenBar.js:135
+#: src/components/TokenBar.js:139
 msgid "Tokens"
-msgstr ""
-
-#: src/components/TokenBar.js:163
-#: src/components/TokenBar.js:164
-msgid "Lock wallet"
 msgstr ""
 
 #: src/components/TokenBar.js:167
 #: src/components/TokenBar.js:168
+msgid "Lock wallet"
+msgstr ""
+
+#: src/components/TokenBar.js:171
+#: src/components/TokenBar.js:172
 msgid "Settings"
 msgstr ""
 
@@ -1367,47 +1468,47 @@ msgstr ""
 msgid "Download QRCode"
 msgstr ""
 
-#: src/components/TokenHistory.js:185
+#: src/components/TokenHistory.js:205
 msgid "Date"
 msgstr ""
 
-#: src/components/TokenHistory.js:186
+#: src/components/TokenHistory.js:206
 msgid "ID"
 msgstr ""
 
-#: src/components/TokenHistory.js:187
+#: src/components/TokenHistory.js:207
 msgid "Type"
 msgstr ""
 
-#: src/components/TokenHistory.js:189
+#: src/components/TokenHistory.js:209
 msgid "Value"
 msgstr ""
 
-#: src/components/TokenHistory.js:209
+#: src/components/TokenHistory.js:229
 msgid "Voided"
 msgstr ""
 
-#: src/components/TokenHistory.js:221
+#: src/components/TokenHistory.js:241
 msgid "Token creation"
 msgstr ""
 
-#: src/components/TokenHistory.js:223
+#: src/components/TokenHistory.js:243
 msgid "Received"
 msgstr ""
 
-#: src/components/TokenHistory.js:228
+#: src/components/TokenHistory.js:248
 msgid "Token deposit"
 msgstr ""
 
-#: src/components/TokenHistory.js:230
+#: src/components/TokenHistory.js:250
 msgid "Sent"
 msgstr ""
 
-#: src/components/TokenHistory.js:260
+#: src/components/TokenHistory.js:280
 msgid "You are receiving transactions in real time."
 msgstr ""
 
-#: src/components/TokenHistory.js:265
+#: src/components/TokenHistory.js:285
 #, javascript-format
 msgid "Page ${ page }"
 msgstr ""
@@ -1613,7 +1714,7 @@ msgid "Copy raw tx to clipboard"
 msgstr ""
 
 #: src/components/TxData.js:666
-#: src/components/WalletAddress.js:178
+#: src/components/WalletAddress.js:180
 msgid "Copied to clipboard!"
 msgstr ""
 
@@ -1648,27 +1749,28 @@ msgstr ""
 msgid "Get qrcode"
 msgstr ""
 
-#: src/components/WalletAddress.js:138
+#: src/components/WalletAddress.js:139
+#.  hide all addresses for hardware wallet
 msgid "See all addresses"
 msgstr ""
 
-#: src/components/WalletAddress.js:159
+#: src/components/WalletAddress.js:161
 msgid "Show full address"
 msgstr ""
 
-#: src/components/WalletAddress.js:168
+#: src/components/WalletAddress.js:170
 msgid "Validate that the address below is the same presented on the Ledger screen."
 msgstr ""
 
-#: src/components/WalletAddress.js:169
+#: src/components/WalletAddress.js:171
 msgid "Press both buttons on your Ledger in case the address is valid."
 msgstr ""
 
-#: src/components/WalletAddress.js:179
+#: src/components/WalletAddress.js:181
 msgid "You must use an old address before generating new ones"
 msgstr ""
 
-#: src/components/WalletAddress.js:181
+#: src/components/WalletAddress.js:183
 msgid "Validate address on Ledger"
 msgstr ""
 
@@ -1676,84 +1778,84 @@ msgstr ""
 msgid "Transaction history"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:45
-#: src/components/tokens/TokenDelegate.js:62
-#: src/components/tokens/TokenDelegate.js:90
-#: src/components/tokens/TokenDestroy.js:58
-#: src/components/tokens/TokenDestroy.js:99
+#: src/components/tokens/TokenDelegate.js:46
+#: src/components/tokens/TokenDelegate.js:64
+#: src/components/tokens/TokenDelegate.js:92
+#: src/components/tokens/TokenDestroy.js:60
+#: src/components/tokens/TokenDestroy.js:101
 msgid "Mint"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:45
-#: src/components/tokens/TokenDelegate.js:62
-#: src/components/tokens/TokenDelegate.js:90
-#: src/components/tokens/TokenDestroy.js:58
-#: src/components/tokens/TokenDestroy.js:99
+#: src/components/tokens/TokenDelegate.js:46
+#: src/components/tokens/TokenDelegate.js:64
+#: src/components/tokens/TokenDelegate.js:92
+#: src/components/tokens/TokenDestroy.js:60
+#: src/components/tokens/TokenDestroy.js:101
 msgid "Melt"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:63
+#: src/components/tokens/TokenDelegate.js:65
 #, javascript-format
 msgid "${ type } output delegated!"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:68
-#: src/components/tokens/TokenDestroy.js:71
-#: src/components/tokens/TokenDestroy.js:80
+#: src/components/tokens/TokenDelegate.js:70
+#: src/components/tokens/TokenDestroy.js:73
+#: src/components/tokens/TokenDestroy.js:82
 msgid "mint"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:68
-#: src/components/tokens/TokenDestroy.js:71
-#: src/components/tokens/TokenDestroy.js:80
+#: src/components/tokens/TokenDelegate.js:70
+#: src/components/tokens/TokenDestroy.js:73
+#: src/components/tokens/TokenDestroy.js:82
 msgid "melt"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:73
+#: src/components/tokens/TokenDelegate.js:75
 #, javascript-format
 msgid "Address of the new ${ type } authority"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:81
+#: src/components/tokens/TokenDelegate.js:83
 msgid "Create another ${ type } output for you?"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:83
+#: src/components/tokens/TokenDelegate.js:85
 #: src/components/tokens/TokenMelt.js:99
 #: src/components/tokens/TokenMint.js:153
 msgid "Leave it checked unless you know what you are doing"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:96
+#: src/components/tokens/TokenDelegate.js:98
 msgid "Delegate"
 msgstr ""
 
-#: src/components/tokens/TokenDelegate.js:99
+#: src/components/tokens/TokenDelegate.js:101
 msgid "Delegating authority"
 msgstr ""
 
-#: src/components/tokens/TokenDestroy.js:59
+#: src/components/tokens/TokenDestroy.js:61
 #, javascript-format
 msgid "${ label } outputs destroyed!"
 msgstr ""
 
-#: src/components/tokens/TokenDestroy.js:73
+#: src/components/tokens/TokenDestroy.js:75
 #, javascript-format
 msgid "You only have ${ authoritiesLength } ${ type } ${ plural } to destroy."
 msgstr ""
 
-#: src/components/tokens/TokenDestroy.js:84
+#: src/components/tokens/TokenDestroy.js:86
 #, javascript-format
 msgid ""
 "Are you sure you want to destroy **${ quantity } ${ type }** authority ${ "
 "plural }?"
 msgstr ""
 
-#: src/components/tokens/TokenDestroy.js:106
+#: src/components/tokens/TokenDestroy.js:108
 msgid "Destroy"
 msgstr ""
 
-#: src/components/tokens/TokenDestroy.js:110
+#: src/components/tokens/TokenDestroy.js:112
 msgid "Destroying authorities"
 msgstr ""
 
