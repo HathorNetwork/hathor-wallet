@@ -131,7 +131,9 @@ class Server extends React.Component {
    * reloads data and redirects to wallet screen
    */
   executeServerChange = () => {
-    const promise = wallet.changeServer(this.props.wallet, this.refs.pin.value, this.props.history);
+    // We don't have PIN on hardware wallet
+    const pin = hathorLib.wallet.isSoftwareWallet() ? this.refs.pin.value : null;
+    const promise = wallet.changeServer(this.props.wallet, pin, this.props.history);
     promise.then(() => {
       this.props.history.push('/wallet/');
     }, () => {
