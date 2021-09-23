@@ -17,18 +17,79 @@ const ledgerCLA = 0xe0;
 class Ledger {
   
   static parseLedgerError(e) {
+    const errorMap = {
+      0x6a86:  "WRONG_P1P2",
+      0x6a87:  "SW_WRONG_DATA_LENGTH",
+      0x6d00:  "SW_INS_NOT_SUPPORTED",
+      0x6e00:  "SW_CLA_NOT_SUPPORTED",
+      0xb000:  "SW_WRONG_RESPONSE_LENGTH",
+      0xb001:  "SW_DISPLAY_BIP32_PATH_FAIL",
+      0xb002:  "SW_DISPLAY_ADDRESS_FAIL",
+      0xb003:  "SW_DISPLAY_AMOUNT_FAIL",
+      0xb004:  "SW_WRONG_TX_LENGTH",
+      0xb005:  "SW_TX_PARSING_FAIL",
+      0xb006:  "SW_TX_HASH_FAIL",
+      0xb007:  "SW_BAD_STATE",
+      0xb008:  "SW_SIGNATURE_FAIL",
+      0xb009:  "SW_INVALID_TX",
+    };
     if (e.name && e.name === 'TransportStatusError') {
       switch (e.statusCode) {
         case 0x6985:
           return {status: e.statusCode, message: 'Request denied by user on Ledger'};
-        case 0x6b00:  // SW_DEVELOPER_ERROR
-        case 0x6b01:  // SW_INVALID_PARAM
-        case 0x6b02:  // SW_IMPROPER_INIT
+        case 0x6a86:  // WRONG_P1P2
+        case 0x6a87:  // SW_WRONG_DATA_LENGTH
+        case 0x6d00:  // SW_INS_NOT_SUPPORTED
+        case 0x6e00:  // SW_CLA_NOT_SUPPORTED
+        case 0xb000:  // SW_WRONG_RESPONSE_LENGTH
+        case 0xb001:  // SW_DISPLAY_BIP32_PATH_FAIL
+        case 0xb002:  // SW_DISPLAY_ADDRESS_FAIL
+        case 0xb003:  // SW_DISPLAY_AMOUNT_FAIL
+        case 0xb004:  // SW_WRONG_TX_LENGTH
+        case 0xb005:  // SW_TX_PARSING_FAIL
+        case 0xb006:  // SW_TX_HASH_FAIL
+        case 0xb007:  // SW_BAD_STATE
+        case 0xb008:  // SW_SIGNATURE_FAIL
+        case 0xb009:  // SW_INVALID_TX
         default:
+          console.log("LedgerError: ", errorMap[e.statusCode] || 'UNKNOWN_ERROR');
           return {status: e.statusCode, message: 'Error communicating with Ledger'};
       }
     }
     return e;
+  }
+
+  /**
+   * Format bip32 path data to transmit to ledger
+   *
+   * We use the index to form the path m/44'/280'/0'/0/<index>
+   * in a format that the ledger can read
+   *
+   * - 1 byte with the path length
+   * - unsigned int 32b (4 bytes) for each level
+   * - hardened levels (with a `'`) have a 0x80000000 shift
+   * - if index is not passed, use m/44'/280'/0'/0
+   *
+   * @param {number} index Index level of the path we want
+   *
+   * @return {Buffer} A buffer with the formatted bip32 path
+   */
+  static formatPathData(index) {
+    const pathArr = [
+      44  + 0x80000000, // 44'
+      280 + 0x80000000, // 280'
+      0   + 0x80000000, // 0'
+      0,                // 0
+    ];
+    if (index !== undefined) {
+      pathArr.push(index);
+    }
+    const buffer = Buffer.alloc(1+(4*pathArr.length));
+    buffer[0] = pathArr.length;
+    pathArr.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    return buffer;
   }
 
   constructor() {
@@ -74,10 +135,10 @@ class Ledger {
 
     // Ledger commands
     this.commands = {
-      'VERSION': 0x01,
-      'ADDRESS': 0x02,
-      'SEND_TX': 0x04,
-      'PUBLIC_KEY_DATA': 0x10,
+      'VERSION': 0x03,
+      'ADDRESS': 0x04,
+      'PUBLIC_KEY_DATA': 0x05,
+      'SEND_TX': 0x06,
     }
 
     // Queue of commands to send to ledger so we don't send them in paralel
@@ -197,7 +258,7 @@ class Ledger {
   getPublicKeyData = async () => {
     try {
       const transport = await this.getTransport();
-      return await this.sendToLedgerOrQueue(transport, this.commands.PUBLIC_KEY_DATA, 0, 0);
+      return await this.sendToLedgerOrQueue(transport, this.commands.PUBLIC_KEY_DATA, 0, 0, Ledger.formatPathData());
     } catch (e) {
       throw Ledger.parseLedgerError(e);
     }
@@ -206,14 +267,16 @@ class Ledger {
   /**
    * Send address command so ledger can show specific address for user to validate
    *
-   * @param {Buffer} index Address index to be shown on ledger
+   * We send the bip32 path of the address
+   *
+   * @param {number} index Address index to be shown on ledger
    *
    * @return {Promise} Promise resolved when user validates that the address is correct.
    */
   checkAddress = async (index) => {
     try {
       const transport = await this.getTransport();
-      const result = await this.sendToLedgerOrQueue(transport, this.commands.ADDRESS, 0, 0, index);
+      const result = await this.sendToLedgerOrQueue(transport, this.commands.ADDRESS, 0, 0, Ledger.formatPathData(index));
       return result;
     } catch (e) {
       throw Ledger.parseLedgerError(e);
@@ -226,12 +289,12 @@ class Ledger {
    * Maximum data that can be transferred to ledger is 255 bytes
    *
    * p1 = 0
-   * p2 = remaining calls
+   * p2 = chunk index (starting at 0)
    * Eg: 3 rounds (data has 612 bytes)
    * p1 p2 data
-   * 0  2  255 bytes
    * 0  1  255 bytes
-   * 0  0  102 bytes
+   * 0  2  255 bytes
+   * 0  3  102 bytes
    *
    * @param {Object} data Data to send to Ledger (change_output_info + sighash_all)
    *
@@ -241,9 +304,10 @@ class Ledger {
     let offset = 0;
     try {
       const transport = await this.getTransport();
+      let i=0;
       while (offset < data.length) {
         const toSend = data.slice(offset, offset + maxLedgerBuffer);
-        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 0, 0, toSend);
+        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 0, i++, toSend);
         offset += maxLedgerBuffer;
       }
     } catch (e) {
@@ -257,11 +321,11 @@ class Ledger {
    * We request the signature for each input
    *
    * p1 = 1
-   * p2 = *
-   * data = priv key index (4 bytes)
+   * p2 = 0
+   * data = bip32 path of the priv key (21 bytes) [1 + 4*n bytes, with n == path length]
    * ## done, no more signatures needed
    * p1 = 2
-   * p2 = *
+   * p2 = 0
    * data = none
    *
    * @param {Object} indexes Index of the key we want the data signed with
@@ -273,7 +337,7 @@ class Ledger {
     try {
       const transport = await this.getTransport();
       for (const index of indexes) {
-        const value = await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 1, 0, index);
+        const value = await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 1, 0, Ledger.formatPathData(index));
         // we remove the last 2 bytes as they're just control bytes from ledger to say if
         // the communication was successful or not
         values.push(value.slice(0, -2));

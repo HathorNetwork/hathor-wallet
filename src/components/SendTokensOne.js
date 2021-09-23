@@ -124,12 +124,36 @@ class SendTokensOne extends React.Component {
         const index = input.current.index.current.value;
 
         if (txId && index) {
-          data['inputs'].push({'tx_id': txId, 'index': index, 'token': this.state.selected.uid });
+          data['inputs'].push({'txId': txId, 'index': parseInt(index, 10), 'token': this.state.selected.uid });
         }
       }
     }
 
     return data;
+  }
+
+  /**
+   * Validate inputs and outpus
+   * 1. If inputs were not selected, select inputs from outputs amount
+   * 2. If amount of selected inputs is larger than outputs amount, we create a change output
+   * 3. If inputs were selected, check if they are valid and add address key to input
+   */
+  validateInputsAndOutputs = (data) => {
+    const noInputs = this.noInputs.current.checked;
+    const walletData = hathorLib.wallet.getWalletData();
+    const history = 'historyTransactions' in walletData ? walletData['historyTransactions'] : {};
+    // This method is used by hardware wallet because it still uses old methods from lib for speeding the integration process
+    // the new methods expect input object with txId key but the old one expect tx_id
+    for (let input of data.inputs) {
+      input.tx_id = input.txId;
+    }
+    const result = hathorLib.wallet.prepareSendTokensData(data, this.state.selected, noInputs, history, this.state.selectedTokens);
+    if (result.success === false) {
+      this.props.updateState({ errorMessage: result.message, loading: false });
+      return null;
+    }
+
+    return result.data;
   }
 
   /**

@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
+import wallet from '../utils/wallet';
 import TokenPagination from './TokenPagination';
 import hathorLib from '@hathor/wallet-lib';
 import { connect } from "react-redux";
@@ -21,6 +22,7 @@ const mapStateToProps = (state, props) => {
   }
   return { 
     tokensHistory: history,
+    wallet: state.wallet
   };
 };
 
@@ -39,6 +41,7 @@ class TokenHistory extends React.Component {
    * reference {string} ID of the reference transaction used when clicking on pagination button
    * direction {string} 'previous' or 'next', dependending on which pagination button the user has clicked
    * transactions {Array} List of transactions to be shown in the screen
+   * shouldFetch {Boolean} If should fetch more history (when the fetch returns 0 elements, should be set to false)
    */
   state = {
     hasAfter: false,
@@ -48,6 +51,7 @@ class TokenHistory extends React.Component {
     reference: null,
     direction: null,
     transactions: [],
+    shouldFetch: true,
   };
 
   componentDidMount = () => {
@@ -61,13 +65,29 @@ class TokenHistory extends React.Component {
   }
 
   /**
+   * Fetch more history
+   */
+  fetchMoreHistory = async () => {
+    if (this.state.shouldFetch) {
+      const newHistory = await wallet.fetchMoreHistory(this.props.wallet, this.props.selectedToken, this.props.tokensHistory);
+      if (newHistory.length === 0) {
+        // Last page already fetched, no need to fetch anymore
+        this.setState({ shouldFetch: false });
+      }
+    }
+  }
+
+  /**
    * Called when user clicks 'Next' pagination button
    *
    * @param {Object} e Event emitted when button is clicked
    */
-  nextClicked = (e) => {
+  nextClicked = async (e) => {
     e.preventDefault();
     this.setState({ reference: this.state.lastHash, direction: 'next' }, () => {
+      // Every time the user clicks on the next button we must try to fetch more history
+      // usually we will have at least five more pages already fetched
+      this.fetchMoreHistory();
       this.handleHistoryUpdate();
     });
   }

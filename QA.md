@@ -34,6 +34,8 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 1. **Wallet screen**
     1. Copy the address and send 10.00 HTR from another wallet to this address.
     1. Check that the transaction appears in the list, the balance was updated and the address also changed.
+    1. Click on 'See all addresses' and see the list. The address used to send the transaction should have 'Number of transactions' equal to 1.
+    1. Copy this address and paste to search, validate it appears only one line on the table with the searched address.
     1. Click on 'Generate new address' and validate it has changed.
     1. Click on the 'QR Code', and copy the address to validate it really copied.
     1. Read the QRCode and validate it's the same as the written text.
@@ -166,9 +168,9 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Choose 'Hardware Wallet'.
     1. Wallet should go through both steps and show 'Step 1/2' and 'Step 2/2'.
     1. On your Ledger, check it is requesting your authorization.
-    1. Deny the authorization request on Ledger (left button). It should show an error on the wallet.
+    1. Deny the authorization request on Ledger (scroll with left or right and click both buttons on "Reject" step). It should show an error on the wallet.
     1. Click 'Try again'. It goes through both steps and asks for authorization again.
-    1. Grant authorization request (right button). It will proceed to 'Loading transactions' screen.
+    1. Grant authorization request (click both buttons on the "Approve" step). It will proceed to 'Loading transactions' screen.
 
 1. **Ledger wallet screen**
     1. On the main wallet screen, confirm 'Address to receive tokens' is truncated (eg: 'HGZmqThwa6...'). There should be a 'Show full address' button next to it.
@@ -176,7 +178,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Click on 'Show full address'. A modal will display asking you to compare the address on the wallet and on Ledger.
     1. Check that the modal cannot be closed, not even by clicking outside it.
     1. Confirm that both addresses (on wallet and Ledger) are the same. Copy this address on the computed.
-    1. Click both buttons on Ledger. Modal should close.
+    1. On the Ledger click both buttons on the "Approve" step. Modal should close.
     1. Send 10.00 HTR from another wallet to the copied address.
     1. Check that the transaction appears in the list, the balance was updated and the address also changed.
     1. Click on 'Generate new address' and validate it has changed.
@@ -190,10 +192,10 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Click on 'Add another token' button. A modal is displayed saying the action is not supported.
     1. Try sending a transaction to an invalid address. An error message should show up on the wallet. Nothing should be displayed on Ledger.
     1. Send tokens to both copied addresses in the same transaction (2 outputs). A modal will be displayed asking to confirm operation on Ledger.
-    1. On Ledger, it should show 'Output 1/2' on the first line and the address + amount on the second line. After clicking both buttons, it shows 'Output 2/2' and the other output (address + value).
-    1. Clicking both buttons one more time will display the confirmation screen. Deny the transaction (left button). The modal will hide and an error message should appear on the wallet.
-    1. Click to send the transaction again. This time, approve it on the confirmation screen (right button). Ledger screen will show 'Processing...' for a while and the desktop wallet will display the modal while solving proof of work.
-    1. After transaction is completed, it closes the modal and goes back to main wallet screen. The first transaction on the list must have amount 0.00.
+    1. On Ledger, it should show 'Output 1/2' on the first step the address on the second and the amount on the third step (steps being from left to right), then an "Approve" and "Reject" steps. After clicking both buttons on the "Approve", it shows 'Output 2/2' and the other output (address and ammount).
+    1. Clicking both buttons on the "Approve" step one more time will display the confirmation screen. Reject signing the transaction. The modal will hide and an error message should appear on the wallet.
+    1. Click to send the transaction again. This time, approve it on the signing screen. Ledger screen will show 'Processing' for a while and the desktop wallet will display the modal while solving proof of work.
+    1. After transaction is completed, it closes the modal and goes back to main wallet screen. The first transaction on the list must have value 0.00.
 
 1. **Ledger misc**
     1. Go to the settings screen.

@@ -115,13 +115,12 @@ class TokenAction extends React.Component {
    *
    * @param {String} pin PIN written by the user
    */
-  onPrepareSendTransaction = (pin) => {
-    const ret = this.props.prepareSendTransaction(pin);
-
-    if (ret.success) {
-      return ret.sendTransaction;
-    } else {
-      this.onSendError(ret.message);
+  onPrepareSendTransaction = async (pin) => {
+    try {
+      const sendTransaction = await this.props.prepareSendTransaction(pin);
+      return sendTransaction;
+    } catch (e) {
+      this.onSendError(e.message);
     }
   }
 

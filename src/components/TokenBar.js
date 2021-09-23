@@ -105,7 +105,11 @@ class TokenBar extends React.Component {
    */
   getTokenBalance = (uid) => {
     const balance = this.props.tokensBalance[uid];
-    const total = balance.available + balance.locked;
+    let total = 0;
+    if (balance) {
+      // If we don't have any transaction for the token, balance will be undefined
+      total = balance.available + balance.locked;
+    }
     return hathorLib.helpers.prettyValue(total);
   }
 

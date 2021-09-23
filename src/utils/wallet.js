@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS } from '../constants';
+import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT } from '../constants';
 import STORE from '../storageInstance';
 import store from '../store/index';
 import {
@@ -21,7 +21,8 @@ import {
   sharedAddressUpdate,
   reloadData,
   cleanData,
-  changeServer
+  changeServer,
+  updateTokenHistory,
 } from '../actions/index';
 import {
   helpers,
@@ -101,6 +102,116 @@ const wallet = {
   },
 
   /**
+   * Map token history object to the expected object in the wallet redux data
+   *
+   * tx {Object} history data element
+   * tokenUid {String} token uid
+   */
+  mapTokenHistory(tx, tokenUid) {
+    return {
+      tx_id: tx.txId,
+      timestamp: tx.timestamp,
+      tokenUid,
+      balance: tx.balance,
+      // in wallet service this comes as 0/1 and in the full node comes with true/false
+      is_voided: Boolean(tx.voided),
+      version: tx.version,
+    }
+  },
+
+  /**
+   * Get all tokens that this wallet has any transaction and fetch balance/history for each of them
+   * We could do a lazy history load only when the user selects to see the token
+   * but this would change the behaviour of the wallet and was not the goal of this moment
+   * We should do this in the future anwyay
+   *
+   * wallet {HathorWallet} wallet object
+   */
+  async fetchWalletData(wallet) {
+    // First we get the tokens in the wallet
+    const tokens = await wallet.getTokens();
+
+    const tokensHistory = {};
+    const tokensBalance = {};
+    // Then for each token we get the balance and history
+    for (const token of tokens) {
+      /* eslint-disable no-await-in-loop */
+      const balance = await wallet.getBalance(token);
+      const tokenBalance = balance[0].balance;
+      tokensBalance[token] = { available: tokenBalance.unlocked, locked: tokenBalance.locked };
+      // We fetch history count of 5 pages and then we fetch a new page each 'Next' button clicked
+      const history = await wallet.getTxHistory({ token_id: token, count: 5 * WALLET_HISTORY_COUNT });
+      tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
+      /* eslint-enable no-await-in-loop */
+    }
+
+    // Then we get from the addresses iterator all addresses
+    return { tokensHistory, tokensBalance, tokens };
+  },
+
+  /**
+   * Fetch paginated history for specific token
+   *
+   * wallet {HathorWallet} wallet object
+   * token {string} Token uid
+   * history {Array} current token history array
+   */
+  async fetchMoreHistory(wallet, token, history) {
+    const newHistory = await wallet.getTxHistory({ token_id: token, skip: history.length, count: WALLET_HISTORY_COUNT });
+    const newHistoryObjects = newHistory.map((element) => this.mapTokenHistory(element, token));
+
+    if (newHistoryObjects.length) {
+      store.dispatch(updateTokenHistory(token, newHistoryObjects));
+    }
+
+    return newHistoryObjects;
+  },
+
+  /**
+   * After a new transaction arrives in the websocket we must
+   * fetch the new balance for each token on it and use
+   * this new data to update redux info
+   *
+   * wallet {HathorWallet} wallet object
+   * tx {Object} full transaction object from the websocket
+   */
+  async fetchNewTxTokenBalance(wallet, tx) {
+    const updatedBalanceMap = {};
+    const balances = wallet.getTxBalance(tx);
+    // we now loop through all tokens present in the new tx to get the new balance
+    for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
+      updatedBalanceMap[tokenUid] = await this.fetchTokenBalance(wallet, tokenUid);
+    }
+    return updatedBalanceMap;
+  },
+
+  /**
+   * Method that fetches the balance of a token
+   * and pre process for the expected format
+   *
+   * wallet {HathorWallet} wallet object
+   * uid {String} Token uid to fetch balance
+   */
+  async fetchTokenBalance(wallet, uid) {
+    const balance = await wallet.getBalance(uid);
+    const tokenBalance = balance[0].balance;
+    return { available: tokenBalance.unlocked, locked: tokenBalance.locked };
+  },
+
+  /**
+   * Fetch HTR balance
+   *
+   * wallet {HathorWallet} wallet object
+   */
+  async fetchNewHTRBalance(wallet) {
+    if (wallet.isReady()) {
+      // Need to update tokensBalance if wallet is ready
+      const { uid } = hathorConstants.HATHOR_TOKEN_CONFIG;
+      return await this.fetchTokenBalance(wallet, uid);
+    }
+  },
+
+  /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
@@ -114,7 +225,7 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  async startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false) {
+  async startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false, xpub = null) {
     // Set loading addresses screen to show
     store.dispatch(loadingAddresses(true));
     // When we start a wallet from the locked screen, we need to unlock it in the storage
@@ -149,6 +260,7 @@ const wallet = {
     const walletConfig = {
       seed: words,
       xpriv,
+      xpub,
       store: STORE,
       passphrase,
       connection,
@@ -162,14 +274,14 @@ const wallet = {
     const serverInfo = await wallet.start({ pinCode: pin, password });
     // TODO should we save server info?
     //store.dispatch(setServerInfo(serverInfo));
-    wallet.on('state', (state) => {
+    wallet.on('state', async (state) => {
       if (state === HathorWallet.ERROR) {
         // ERROR
         // TODO Should we show an error screen and try to restart the wallet?
-      } else if (state === HathorWallet.READY) {
+      } else if (wallet.isReady()) {
         // READY
-        const historyTransactions = wallet.getTxHistory();
-        store.dispatch(loadWalletSuccess(historyTransactions));
+        const { tokensHistory, tokensBalance, tokens } = await this.fetchWalletData(wallet);
+        store.dispatch(loadWalletSuccess(tokensHistory, tokensBalance, tokens));
       }
     });
 
@@ -187,19 +299,30 @@ const wallet = {
           routerHistory.push(`/transaction/${tx.tx_id}/`);
         }
       }
-      store.dispatch(newTx(tx));
+      // Fetch new balance for each token in the tx and update redux
+      this.fetchNewTxTokenBalance(wallet, tx).then((updatedBalanceMap) => {
+        store.dispatch(newTx(tx, updatedBalanceMap));
+      });
     });
 
     wallet.on('update-tx', (tx) => {
-      store.dispatch(updateTx(tx));
+      this.fetchNewTxTokenBalance(wallet, tx).then((updatedBalanceMap) => {
+        store.dispatch(updateTx(tx, updatedBalanceMap));
+      });
     });
 
-    this.setConnectionEvents(connection);
+    this.setConnectionEvents(connection, wallet);
   },
 
-  setConnectionEvents(connection) {
+  setConnectionEvents(connection, wallet) {
     connection.on('best-block-update', (height) => {
-      store.dispatch(updateHeight({ height }));
+      // HTR balance might have updated because of new height
+      // and some block HTR might have unlocked
+      this.fetchNewHTRBalance(wallet).then((htrUpdatedBalance) => {
+        if (htrUpdatedBalance) {
+          store.dispatch(updateHeight(height, htrUpdatedBalance));
+        }
+      });
     });
 
     connection.on('state', (state) => {
@@ -221,7 +344,11 @@ const wallet = {
 
   async changeServer(wallet, pin, routerHistory) {
     wallet.stop({ cleanStorage: false });
-    await this.startWallet(null, '', pin, '', routerHistory, true);
+    if (oldWalletUtil.isSoftwareWallet()) {
+      await this.startWallet(null, '', pin, '', routerHistory, true);
+    } else {
+      await this.startWallet(null, '', null, '', routerHistory, false, wallet.xpub);
+    }
   },
 
   /*
@@ -237,6 +364,7 @@ const wallet = {
     store.dispatch(loadingAddresses(true));
     const accessData = {
       xpubkey: xpub,
+      from_xpub: true,
     }
     const promise = oldWalletUtil.startWallet(accessData, true);
     promise.then(() => {
@@ -279,7 +407,7 @@ const wallet = {
 
     const address = storage.getItem('wallet:address');
     const lastSharedIndex = storage.getItem('wallet:lastSharedIndex');
-    const lastGeneratedIndex = wallet.getLastGeneratedIndex();
+    const lastGeneratedIndex = oldWalletUtil.getLastGeneratedIndex();
 
     store.dispatch(historyUpdate({historyTransactions, allTokens, lastSharedIndex, lastSharedAddress: address, addressesFound: lastGeneratedIndex + 1, transactionsFound}));
   },

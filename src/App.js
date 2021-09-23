@@ -10,6 +10,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
+import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import WaitVersion from './components/WaitVersion';
 import TransactionDetail from './screens/TransactionDetail';
@@ -78,6 +79,7 @@ class Root extends React.Component {
     return (
       <Switch>
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
+        <StartedRoute exact path="/create_nft" component={CreateNFT} loaded={true} />
         <StartedRoute exact path="/custom_tokens" component={CustomTokens} loaded={true} />
         <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} />
         <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} />
@@ -183,6 +185,9 @@ const returnStartedRoute = (Component, props, rest) => {
       if (rest.loaded) {
         // When the wallet is opened, the path that is called is '/', which currenctly redirects to the Wallet component
         // in that case, if the wallet is not loaded but it's started, it should redirect to the signin/wallet type screen
+        if (hathorLib.wallet.isHardwareWallet()) {
+          return <Redirect to={{pathname: '/wallet_type/'}} />;
+        }
         return <Redirect to={{pathname: '/signin/'}} />;
       } else {
         return <Component {...props} />;

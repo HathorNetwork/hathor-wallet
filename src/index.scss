@@ -190,6 +190,10 @@ div.new-address-wrapper canvas {
   margin-bottom: 1rem;
 }
 
+#formCreateNFT {
+  padding-bottom: 2rem;
+}
+
 .tx-input-wrapper textarea {
   margin: 1rem 0;
 }
@@ -568,6 +572,7 @@ svg.svg-wrapper {
 .token-bar .body {
   width: 100%;
   overflow-y: auto;
+  flex: 1 1;
 }
 
 .token-bar .token-wrapper {
@@ -622,7 +627,8 @@ svg.svg-wrapper {
   width: 13rem;
 }
 
-#formCreateToken .address-checkbox {
+#formCreateToken .address-checkbox, #formCreateNFT .address-checkbox {
+  padding-left: 1rem;
   padding-top: 2rem;
 }
 
