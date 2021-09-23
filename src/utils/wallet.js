@@ -344,7 +344,11 @@ const wallet = {
 
   async changeServer(wallet, pin, routerHistory) {
     wallet.stop({ cleanStorage: false });
-    await this.startWallet(null, '', pin, '', routerHistory, true);
+    if (oldWalletUtil.isSoftwareWallet()) {
+      await this.startWallet(null, '', pin, '', routerHistory, true);
+    } else {
+      await this.startWallet(null, '', null, '', routerHistory, false, wallet.xpub);
+    }
   },
 
   /*
