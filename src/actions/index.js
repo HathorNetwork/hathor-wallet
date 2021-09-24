@@ -141,3 +141,8 @@ export const tokenMetadataUpdated = (data) => ({ type: "token_metadata_updated",
  * Set if metadata was already loaded from the lib
  */
 export const metadataLoaded = data => ({ type: "metadata_loaded", payload: data });
+
+/**
+ * Remove token metadata after unregister token
+ */
+export const removeTokenMetadata = data => ({ type: "remove_token_metadata", payload: data });

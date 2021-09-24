@@ -35,7 +35,8 @@ import {
   wallet as oldWalletUtil,
   walletUtils,
   storage,
-  tokens
+  tokens,
+  metadataApi
 } from '@hathor/wallet-lib';
 import version from './version';
 
@@ -214,6 +215,34 @@ const wallet = {
   },
 
   /**
+   * The wallet needs each token metadata to show information correctly
+   * So we fetch the tokens metadata and store on redux
+   *
+   * @param {Array} tokens Array of token uids
+   * @param {String} network Network name
+   *
+   * @memberof Wallet
+   * @inner
+   **/
+  async fetchTokensMetadata(tokens, network) {
+    const metadatas = {};
+
+    for (const token of tokens) {
+      try {
+        const response = await metadataApi.getDag(token, network);
+        if (response.data && token in response.data) {
+          const tokenMeta = response.data[token];
+          metadatas[token] = tokenMeta;
+        }
+      } catch (e) {
+        // No need to do anything, the metadata for this token was not found
+      }
+    }
+
+    store.dispatch(tokenMetadataUpdated(metadatas));
+  },
+
+  /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
@@ -240,6 +269,9 @@ const wallet = {
     // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     const dataToken = tokens.getTokens();
     store.dispatch(reloadData({ tokens: dataToken }));
+
+    // Fetch metadata of all tokens registered
+    this.fetchTokensMetadata(dataToken.map((token) => token.uid), data.network);
 
     // If we've lost redux data, we could not properly stop the wallet object
     // then we don't know if we've cleaned up the wallet data in the storage
@@ -312,10 +344,6 @@ const wallet = {
       this.fetchNewTxTokenBalance(wallet, tx).then((updatedBalanceMap) => {
         store.dispatch(updateTx(tx, updatedBalanceMap));
       });
-    });
-
-    wallet.on('token-metadata-updated', (data) => {
-      store.dispatch(tokenMetadataUpdated(data));
     });
 
     this.setConnectionEvents(connection, wallet);

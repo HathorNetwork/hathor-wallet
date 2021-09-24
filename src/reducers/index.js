@@ -110,6 +110,8 @@ const rootReducer = (state = initialState, action) => {
       return tokenMetadataUpdated(state, action);
     case 'metadata_loaded':
       return Object.assign({}, state, {metadataLoaded: action.payload});
+    case 'remove_token_metadata':
+      return removeTokenMetadata(state, action);
     default:
       return state;
   }
@@ -360,11 +362,29 @@ const onUpdateHeight = (state, action) => {
  */
 const tokenMetadataUpdated = (state, action) => {
   const { data } = action.payload;
+  const newMeta = Object.assign({}, state.tokenMetadata, data);
 
   return {
     ...state,
     metadataLoaded: true,
-    tokenMetadata: data,
+    tokenMetadata: newMeta,
+  };
+};
+
+/**
+ * Remove token metadata
+ */
+const removeTokenMetadata = (state, action) => {
+  const uid = action.payload;
+
+  const newMeta = Object.assign({}, state.tokenMetadata);
+  if (uid in newMeta) {
+    delete newMeta[uid];
+  }
+
+  return {
+    ...state,
+    tokenMetadata: newMeta,
   };
 };
 
