@@ -20,7 +20,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.19.1';
+export const VERSION = '0.20.1';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
@@ -134,7 +134,7 @@ export const IPC_RENDERER = ipcRenderer;
 /**
  * Flag to hide/show elements after ledger integration is done
  */
-export const LEDGER_ENABLED = false;
+export const LEDGER_ENABLED = true;
 
 /**
  * Flag to hide/show create NFT button
@@ -178,3 +178,8 @@ export const AUDIO_MEDIA_TYPES_BY_EXTENSION = {
   mp3: 'audio/mpeg',
   wav: 'audio/wav'
 }
+
+/**
+ * URL for the ledger guide
+ */
+export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';

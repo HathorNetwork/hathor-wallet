@@ -21,7 +21,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.19.1",
+  "version": "0.20.1",
   "private": true,
   "dependencies": {
     "@hathor/wallet-lib": "^0.22.0",

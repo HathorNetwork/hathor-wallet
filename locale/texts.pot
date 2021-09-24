@@ -75,7 +75,7 @@ msgstr ""
 
 #: src/screens/ChoosePassphrase.js:140
 #: src/screens/LockedWallet.js:96
-#: src/screens/Server.js:215
+#: src/screens/Server.js:217
 msgid "PIN"
 msgstr ""
 
@@ -541,44 +541,44 @@ msgstr ""
 msgid "Invalid value."
 msgstr ""
 
-#: src/screens/Server.js:178
+#: src/screens/Server.js:180
 msgid ""
 "The selected server connects you to a testnet. Beware if someone asked you "
 "to do it, the **tokens from testnet have no value**. Only continue if you "
 "know what you are doing."
 msgstr ""
 
-#: src/screens/Server.js:179
+#: src/screens/Server.js:181
 msgid ""
 "To continue with the server change you must type 'testnet' in the box below "
 "and click on 'Connect to testnet' button."
 msgstr ""
 
-#: src/screens/Server.js:190
+#: src/screens/Server.js:192
 msgid "Connect to testnet"
 msgstr ""
 
-#: src/screens/Server.js:196
+#: src/screens/Server.js:198
 msgid "Select one of the default servers to connect or choose a new one"
 msgstr ""
 
-#: src/screens/Server.js:209
+#: src/screens/Server.js:211
 msgid "Select a new server"
 msgstr ""
 
-#: src/screens/Server.js:213
+#: src/screens/Server.js:215
 msgid "New server"
 msgstr ""
 
-#: src/screens/Server.js:218
+#: src/screens/Server.js:220
 msgid "Connect to server"
 msgstr ""
 
-#: src/screens/Server.js:222
+#: src/screens/Server.js:224
 msgid "Confirm testnet server"
 msgstr ""
 
-#: src/screens/Server.js:222
+#: src/screens/Server.js:224
 msgid "Cancel change"
 msgstr ""
 
@@ -734,7 +734,7 @@ msgid "Please update you API version and try again"
 msgstr ""
 
 #: src/screens/VersionError.js:56
-#: src/screens/WalletType.js:191
+#: src/screens/WalletType.js:195
 msgid "Try again"
 msgstr ""
 
@@ -787,42 +787,45 @@ msgstr ""
 msgid "Hathor Wallet supports two types of wallet: software and hardware."
 msgstr ""
 
-#: src/screens/WalletType.js:174
+#: src/screens/WalletType.js:175
 msgid ""
-"**Hardware wallets** are dedicated external devices that store your private "
-"information. We currently support the Ledger hardware wallet. **Software "
-"wallets**, on the other hand, store the information on your computer."
+"|bold:Hardware wallets| are dedicated external devices that store your "
+"private information. We currently support the Ledger hardware wallet and "
+"the ledger app must be installed in developer mode for now. For a tutorial "
+"about how to use the ledger app with Hathor Wallet check out |fn:this page|."
 msgstr ""
 
-#: src/screens/WalletType.js:176
-msgid "For more information on different types of wallet, check out |fn:this page|."
+#: src/screens/WalletType.js:182
+msgid ""
+"**Software wallets**, on the other hand, store the information on your "
+"computer."
 msgstr ""
 
-#: src/screens/WalletType.js:180
+#: src/screens/WalletType.js:184
 msgid "Hardware wallet"
 msgstr ""
 
-#: src/screens/WalletType.js:181
+#: src/screens/WalletType.js:185
 msgid "Software wallet"
 msgstr ""
 
-#: src/screens/WalletType.js:198
+#: src/screens/WalletType.js:202
 msgid "You need to authorize the operation on your Ledger."
 msgstr ""
 
-#: src/screens/WalletType.js:200
+#: src/screens/WalletType.js:204
 msgid "Please connect your Ledger device to the computer and open the Hathor app."
 msgstr ""
 
-#: src/screens/WalletType.js:206
+#: src/screens/WalletType.js:210
 msgid "Step 2/2"
 msgstr ""
 
-#: src/screens/WalletType.js:208
+#: src/screens/WalletType.js:212
 msgid "Step 1/2"
 msgstr ""
 
-#: src/screens/WalletType.js:215
+#: src/screens/WalletType.js:219
 msgid "Connecting to Ledger"
 msgstr ""
 
