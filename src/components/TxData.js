@@ -312,8 +312,7 @@ class TxData extends React.Component {
       } else {
         // if it's an NFT token we should show integer value
         const uid = this.getUIDFromTokenData(hathorLib.wallet.getTokenIndex(output.token_data));
-        const isNFT = isTokenNFT(uid);
-        return helpers.renderValue(output.value, isNFT);
+        return helpers.renderValue(output.value, isNFT(uid));
       }
     }
 
@@ -549,8 +548,8 @@ class TxData extends React.Component {
       )
     }
 
-    const isTokenNFT = (uid) => {
-      return uid in this.props.tokenMetadata && this.props.tokenMetadata[uid].nft;
+    const isNFT = (uid) => {
+      return helpers.isTokenNFT(uid, this.props.tokenMetadata);
     }
 
     const renderBalanceData = (balance) => {
@@ -559,13 +558,13 @@ class TxData extends React.Component {
         if (balance[token] > 0) {
           return (
             <div key={token}>
-              <span className='received-value'><SpanFmt>{t`**${tokenSymbol}:** Received`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-down'></i> {helpers.renderValue(balance[token], isTokenNFT(token))}</span>
+              <span className='received-value'><SpanFmt>{t`**${tokenSymbol}:** Received`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-down'></i> {helpers.renderValue(balance[token], isNFT(token))}</span>
             </div>
           )
         } else {
           return (
             <div key={token}>
-              <span className='sent-value'><SpanFmt>{t`**${tokenSymbol}:** Sent`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-up'></i> {helpers.renderValue(balance[token], isTokenNFT(token))}</span>
+              <span className='sent-value'><SpanFmt>{t`**${tokenSymbol}:** Sent`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-up'></i> {helpers.renderValue(balance[token], isNFT(token))}</span>
             </div>
           );
         }
@@ -628,11 +627,7 @@ class TxData extends React.Component {
       }
 
       const createdToken = this.props.transaction.tokens[0];
-      if (createdToken.uid in this.props.tokenMetadata) {
-        return this.props.tokenMetadata[createdToken.uid].nft;
-      }
-
-      return false;
+      return helpers.isTokenNFT(createdToken.uid, this.props.tokenMetadata);
     }
 
     const loadTxData = () => {

@@ -112,7 +112,7 @@ class TokenBar extends React.Component {
       // If we don't have any transaction for the token, balance will be undefined
       total = balance.available + balance.locked;
     }
-    const isNFT = uid in this.props.tokenMetadata && this.props.tokenMetadata[uid].nft;
+    const isNFT = helpers.isTokenNFT(uid, this.props.tokenMetadata);
     return helpers.renderValue(total, isNFT);
   }
 

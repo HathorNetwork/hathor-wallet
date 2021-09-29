@@ -104,6 +104,20 @@ const helpers = {
     }
     return parts[parts.length - 1];
   },
+
+  /**
+   * If token is an NFT checking metadata
+   *
+   * @param {string} uid Token uid
+   * @param {Object} metadatas Metadatas of registered tokens
+   *
+   * @return {boolean} if token is an NFT
+   * @memberof Helpers
+   * @inner
+   */
+  isTokenNFT(uid, metadatas) {
+    return uid in metadatas && metadatas[uid].nft;
+  },
 }
 
 export default helpers;

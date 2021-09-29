@@ -12,7 +12,8 @@ import TokenAction from './TokenAction';
 import wallet from '../../utils/wallet';
 import helpers from '../../utils/helpers';
 import InputNumber from '../InputNumber';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
+import { get } from 'lodash';
 
 const mapStateToProps = (state) => {
   return {
@@ -68,7 +69,7 @@ class TokenMelt extends React.Component {
    * Return if token is an NFT
    */
   isNFT = () => {
-    return this.props.token.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.props.token.uid].nft;
+    return helpers.isTokenNFT(get(this.props, 'token.uid'), this.props.tokenMetadata);
   }
 
   /**

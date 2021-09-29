@@ -132,7 +132,7 @@ class UnknownTokens extends React.Component {
         return <p>You don't have any unknown tokens</p>;
       } else {
         return unknownTokens.map((token, index) => {
-          const isNFT = token.uid in this.props.tokenMetadata && this.props.tokenMetadata[token.uid].nft;
+          const isNFT = helpers.isTokenNFT(token.uid, this.props.tokenMetadata);
           return (
             <div key={token.uid} className="unknown-token card">
               <div className="header d-flex flex-row align-items-center justify-content-between">

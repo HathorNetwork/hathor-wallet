@@ -15,6 +15,7 @@ import TokenPagination from './TokenPagination';
 import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
 import helpers from '../utils/helpers';
+import { get } from 'lodash';
 
 const mapStateToProps = (state, props) => {
   let history = [];
@@ -234,7 +235,7 @@ class TokenHistory extends React.Component {
 
     const renderHistoryData = () => {
       const keys = hathorLib.wallet.getWalletData().keys;
-      const isNFT = this.props.selectedToken in this.props.tokenMetadata && this.props.tokenMetadata[this.props.selectedToken].nft;
+      const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
       return this.state.transactions.map((tx, idx) => {
         let statusElement = '';
         let trClass = '';

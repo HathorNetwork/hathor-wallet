@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
+import { get } from 'lodash';
 
 
 const mapStateToProps = (state) => {
@@ -35,7 +36,7 @@ class WalletBalance extends React.Component {
       locked: token.uid in this.props.tokensBalance ? this.props.tokensBalance[token.uid].locked : 0,
     }
 
-    const isNFT = this.props.selectedToken in this.props.tokenMetadata && this.props.tokenMetadata[this.props.selectedToken].nft;
+    const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
 
     const renderBalance = () => {
       return (

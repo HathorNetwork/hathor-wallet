@@ -16,6 +16,7 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
 import helpers from '../utils/helpers';
+import { get } from 'lodash';
 
 const mapStateToProps = (state, props) => {
   const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
@@ -224,7 +225,7 @@ class TokenAdministrative extends React.Component {
       );
     }
 
-    const isNFT = this.props.token.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.props.token.uid].nft;
+    const isNFT = helpers.isTokenNFT(get(this.props, 'token.uid'), this.props.tokenMetadata);
 
     return (
       <div className="flex align-items-center">

@@ -14,6 +14,7 @@ import HathorAlert from '../components/HathorAlert';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import helpers from '../utils/helpers';
+import { get } from 'lodash';
 
 
 const mapStateToProps = (state) => {
@@ -126,7 +127,7 @@ class TokenGeneralInfo extends React.Component {
       return `${configArr[0]}:${configArr[1]}...${configArr[3]}`;
     }
 
-    const isNFT = this.props.token.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.props.token.uid].nft;
+    const isNFT = helpers.isTokenNFT(get(this.props, 'token.uid'), this.props.tokenMetadata);
 
     const renderTokenInfo = () => {
       return (
