@@ -228,6 +228,7 @@ const wallet = {
    **/
   async fetchTokensMetadata(tokens, network, downloadRetry = 0) {
     const metadataPerToken = {};
+    let didBreak = false;
 
     const handleRetry = (index) => {
       if (downloadRetry === METADATA_RETRY_LIMIT) {
@@ -240,6 +241,7 @@ const wallet = {
           this.fetchTokensMetadata(tokens.slice(index), network, downloadRetry + 1);
         }, DOWNLOAD_METADATA_RETRY_INTERVAL);
         // Will break the for
+        didBreak = true;
         return true;
       }
     }
@@ -270,7 +272,13 @@ const wallet = {
       }
     }
 
-    if (!isEmpty(metadataPerToken)) {
+    if (isEmpty(metadataPerToken)) {
+      if (!didBreak) {
+        // We need to at least set metadataLoaded to true
+        // because we've reached the end of downloads
+        store.dispatch(metadataLoaded(true));
+      }
+    } else {
       store.dispatch(tokenMetadataUpdated(metadataPerToken));
     }
   },
