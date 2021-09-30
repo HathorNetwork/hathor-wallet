@@ -121,8 +121,6 @@ class TokenMint extends React.Component {
   }
 
   render() {
-    const isNFT = this.props.token.uid in this.props.tokenMetadata && this.props.tokenMetadata[this.props.token.uid].nft;
-
     const renderMintAddress = () => {
       return (
         <div className="d-flex flex-row align-items-center justify-content-start col-12 mb-3">

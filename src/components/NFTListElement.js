@@ -9,7 +9,6 @@ import React from 'react';
 import { t } from 'ttag'
 import { NFT_MEDIA_TYPES, VIDEO_MEDIA_TYPES_BY_EXTENSION, AUDIO_MEDIA_TYPES_BY_EXTENSION } from '../constants';
 import helpers from '../utils/helpers';
-import path from 'path';
 
 
 /**
@@ -27,7 +26,7 @@ class NFTListElement extends React.Component {
    */
   goToTokenDetail = (e, token) => {
     e.preventDefault();
-    const url = path.join(helpers.getExplorerURL(), `token_detail/${token}`);
+    const url = helpers.getFullExplorerURL(`token_detail/${token}`);
     helpers.openExternalURL(url);
   }
 

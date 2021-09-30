@@ -345,20 +345,28 @@ class TxData extends React.Component {
       });
     }
 
-    const renderDecodedScript = (output) => {
-      switch (output.decoded.type) {
-        case 'P2PKH':
-        case 'MultiSig':
-          return renderP2PKHorMultiSig(output.decoded);
-        case 'NanoContractMatchValues':
-          return renderNanoContractMatchValues(output.decoded);
-        default:
-          let script = output.script;
-          try {
-            script = atob(output.script)
-          } catch {}
+    const renderUndecodedScript = (script) => {
+      let renderedScript = script;
+      try {
+        renderedScript = atob(renderedScript);
+      } catch {}
 
-          return `Unable to decode script: ${script.trim()}`;
+      return `Unable to decode script: ${renderedScript.trim()}`;
+    }
+
+    const renderDecodedScript = (output) => {
+      if (output.decoded) {
+        switch (output.decoded.type) {
+          case 'P2PKH':
+          case 'MultiSig':
+            return renderP2PKHorMultiSig(output.decoded);
+          case 'NanoContractMatchValues':
+            return renderNanoContractMatchValues(output.decoded);
+          default:
+            return renderUndecodedScript(output.script);
+        }
+      } else {
+        return renderUndecodedScript(output.script);
       }
     }
 
@@ -638,7 +646,7 @@ class TxData extends React.Component {
           {renderBalance()}
           <div className="d-flex flex-row align-items-start mt-3 mb-3">
             <div className="d-flex flex-column align-items-start common-div bordered-wrapper mr-3">
-              <div><label>Type:</label> {hathorLib.helpers.getTxType(this.props.transaction)} {isNFTCreation() && '(NFT)'}</div>
+              <div><label>{t`Type:`}</label> {hathorLib.helpers.getTxType(this.props.transaction)} {isNFTCreation() && '(NFT)'}</div>
               <div><label>{t`Time:`}</label> {hathorLib.dateFormatter.parseTimestamp(this.props.transaction.timestamp)}</div>
               <div><label>{t`Nonce:`}</label> {this.props.transaction.nonce}</div>
               <div><label>{t`Weight:`}</label> {hathorLib.helpers.roundFloat(this.props.transaction.weight)}</div>

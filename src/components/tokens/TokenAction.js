@@ -134,7 +134,7 @@ class TokenAction extends React.Component {
 
   render() {
     if (!this.props.metadataLoaded) {
-      return <p>{t`Before executing token actions you must wait until the full data of your wallet is loaded.`}</p>
+      return <p>{t`Loading metadata...`}</p>
     }
 
     const renderButtons = () => {

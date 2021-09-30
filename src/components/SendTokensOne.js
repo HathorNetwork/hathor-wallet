@@ -234,7 +234,7 @@ class SendTokensOne extends React.Component {
     const renderNFTHelper = () => {
       return (
         <div>
-          <small className="text-muted">This is an NFT token. The amount will be an integer number, without decimal places.</small>
+          <small className="text-muted">This is an NFT token. The amount must be an integer number, without decimal places.</small>
         </div>
       );
     }

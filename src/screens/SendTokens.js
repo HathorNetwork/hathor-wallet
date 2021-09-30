@@ -356,7 +356,7 @@ class SendTokens extends React.Component {
 
     const renderPage = () => {
       if (!this.props.metadataLoaded) {
-        return <p>{t`Before sending a transaction you must wait until the full data of your wallet is loaded.`}</p>
+        return <p>{t`Loading metadata...`}</p>
       }
 
       return (

@@ -9,6 +9,7 @@ import store from '../store/index';
 import { networkUpdate } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
+import path from 'path';
 
 let shell = null;
 if (window.require) {
@@ -109,14 +110,28 @@ const helpers = {
    * If token is an NFT checking metadata
    *
    * @param {string} uid Token uid
-   * @param {Object} metadatas Metadatas of registered tokens
+   * @param {Object} metadataPerToken Metadatas of registered tokens
    *
    * @return {boolean} if token is an NFT
    * @memberof Helpers
    * @inner
    */
-  isTokenNFT(uid, metadatas) {
-    return uid in metadatas && metadatas[uid].nft;
+  isTokenNFT(uid, metadataPerToken) {
+    return uid in metadataPerToken && metadataPerToken[uid].nft;
+  },
+
+  /**
+   * Return full explorer URL joining base url and path
+   *
+   * @param {String} path URL path to join
+   *
+   * @return {String} Full explorer URL
+   *
+   * @memberof Helpers
+   * @inner
+   */
+  getFullExplorerURL(urlPath) {
+    return path.join(this.getExplorerURL(), urlPath);
   },
 }
 
