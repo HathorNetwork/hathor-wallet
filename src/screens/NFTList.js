@@ -19,13 +19,16 @@ const mapStateToProps = (state) => {
   const registeredTokens = state.tokens;
   const tokenMetadata = state.tokenMetadata || {};
   const nftList = Object.values(tokenMetadata).filter((meta) => {
-    const hasNFTMedia = meta.nft_media && meta.nft_media.file;
-    const isRegistered = state.tokens.find((registeredToken) => registeredToken.uid === meta.id);
-    return hasNFTMedia && isRegistered;
+    return meta.nft_media && meta.nft_media.file;
   });
 
+  const tokenConfigByUid = {};
+  for (const token of state.tokens) {
+    tokenConfigByUid[token.uid] = token;
+  }
+
   const nftData = nftList.map((meta) => {
-    const tokenConfig = state.tokens.find((registeredToken) => registeredToken.uid === meta.id);
+    const tokenConfig = tokenConfigByUid[meta.id];
     const balance = state.tokensBalance[meta.id] || { available: 0 };
     return {
       name: tokenConfig.name,
@@ -48,6 +51,7 @@ const mapStateToProps = (state) => {
 class NFTList extends React.Component {
   /**
    * page: {Number} Current page of the list
+   * `page` is 1-indexed, i.e. `page=1` means the first page and `page=0` is invalid.
    * totalPages: {Number} Total number of pages of the list
    */
   state = {
@@ -71,7 +75,8 @@ class NFTList extends React.Component {
   /**
    * Event received from pagination component after a page button in clicked
    *
-   * @param data {Object} Data with clicked page {'selected'}
+   * @param data {Object} Data with clicked page {'selected'}.
+   * `selected` is 0-indexed, i.e. `selected=0` means the first page.
    */
   handlePageClick = (data) => {
     const page = data.selected + 1;
