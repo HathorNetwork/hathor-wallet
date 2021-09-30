@@ -183,3 +183,13 @@ export const AUDIO_MEDIA_TYPES_BY_EXTENSION = {
  * URL for the ledger guide
  */
 export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';
+
+/**
+ * Limit of retries when downloading token metadata
+ */
+export const METADATA_RETRY_LIMIT = 5;
+
+/**
+ * Interval between metadata download retries in milliseconds
+ */
+export const DOWNLOAD_METADATA_RETRY_INTERVAL = 5000;
