@@ -16,7 +16,7 @@ msgid "Addresses"
 msgstr ""
 
 #: src/components/OutputsWrapper.js:58
-#: src/components/tokens/TokenMint.js:138
+#: src/components/tokens/TokenMint.js:137
 #: src/screens/AddressList.js:180
 #: src/screens/CreateNFT.js:304
 #: src/screens/CreateToken.js:278
@@ -383,11 +383,11 @@ msgstr ""
 msgid "Unlock"
 msgstr ""
 
-#: src/screens/NFTList.js:84
+#: src/screens/NFTList.js:89
 msgid "Your list is empty."
 msgstr ""
 
-#: src/screens/NFTList.js:114
+#: src/screens/NFTList.js:119
 msgid ""
 "This list will have all the registered NFTs that you have balance and that "
 "have a digital asset being shown in our explorer."
@@ -458,10 +458,9 @@ msgstr ""
 msgid "All your tokens were already added"
 msgstr ""
 
+#: src/components/tokens/TokenAction.js:137
 #: src/screens/SendTokens.js:359
-msgid ""
-"Before sending a transaction you must wait until the full data of your "
-"wallet is loaded."
+msgid "Loading metadata..."
 msgstr ""
 
 #: src/screens/SendTokens.js:367
@@ -674,22 +673,22 @@ msgstr ""
 msgid "Transaction with hash ${ _this3.props.match.params.id } not found"
 msgstr ""
 
-#: src/components/NFTListElement.js:95
+#: src/components/NFTListElement.js:94
 #: src/screens/TransactionDetail.js:130
 msgid "See on explorer"
 msgstr ""
 
-#: src/components/WalletBalance.js:43
+#: src/components/WalletBalance.js:44
 #: src/screens/UnknownTokens.js:142
 msgid "Total:"
 msgstr ""
 
-#: src/components/WalletBalance.js:44
+#: src/components/WalletBalance.js:45
 #: src/screens/UnknownTokens.js:143
 msgid "Available:"
 msgstr ""
 
-#: src/components/WalletBalance.js:45
+#: src/components/WalletBalance.js:46
 #: src/screens/UnknownTokens.js:144
 msgid "Locked:"
 msgstr ""
@@ -995,14 +994,14 @@ msgid "Address to receive tokens"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:93
-#: src/components/TokenGeneralInfo.js:156
+#: src/components/TokenGeneralInfo.js:157
 #: src/components/WalletAddress.js:151
 msgid "Copy to clipboard"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:96
 #: src/components/ModalAddressQRCode.js:101
-#: src/components/TokenGeneralInfo.js:160
+#: src/components/TokenGeneralInfo.js:161
 msgid "Download"
 msgstr ""
 
@@ -1047,8 +1046,8 @@ msgstr ""
 
 #: src/components/ModalBackupWords.js:202
 #: src/components/ModalSendTx.js:182
-#: src/components/tokens/TokenMelt.js:157
-#: src/components/tokens/TokenMint.js:207
+#: src/components/tokens/TokenMelt.js:158
+#: src/components/tokens/TokenMint.js:206
 msgid "Go"
 msgstr ""
 
@@ -1225,7 +1224,7 @@ msgid "Public Explorer"
 msgstr ""
 
 #: src/components/OutputsWrapper.js:63
-#: src/components/SendTokensOne.js:215
+#: src/components/SendTokensOne.js:219
 msgid "This feature is disabled for hardware wallet"
 msgstr ""
 
@@ -1297,27 +1296,27 @@ msgstr ""
 msgid "Retry request"
 msgstr ""
 
-#: src/components/SendTokensOne.js:215
+#: src/components/SendTokensOne.js:219
 msgid "Select token"
 msgstr ""
 
-#: src/components/SendTokensOne.js:227
+#: src/components/SendTokensOne.js:231
 msgid "Balance available: "
 msgstr ""
 
-#: src/components/SendTokensOne.js:241
+#: src/components/SendTokensOne.js:245
 msgid "Token:"
 msgstr ""
 
-#: src/components/SendTokensOne.js:244
+#: src/components/SendTokensOne.js:248
 msgid "Remove"
 msgstr ""
 
-#: src/components/SendTokensOne.js:254
+#: src/components/SendTokensOne.js:258
 msgid "Choose inputs automatically"
 msgstr ""
 
-#: src/components/SendTokensOne.js:258
+#: src/components/SendTokensOne.js:262
 msgid "Inputs"
 msgstr ""
 
@@ -1366,63 +1365,63 @@ msgid ""
 "have support for Ledger."
 msgstr ""
 
-#: src/components/TokenAdministrative.js:152
+#: src/components/TokenAdministrative.js:153
 msgid "This feature is not currently supported for a hardware wallet."
 msgstr ""
 
-#: src/components/TokenAdministrative.js:187
-#: src/components/TokenAdministrative.js:198
+#: src/components/TokenAdministrative.js:188
+#: src/components/TokenAdministrative.js:199
 msgid "Operations"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:188
-#: src/components/tokens/TokenMelt.js:156
+#: src/components/TokenAdministrative.js:189
+#: src/components/tokens/TokenMelt.js:157
 msgid "Melt tokens"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:189
+#: src/components/TokenAdministrative.js:190
 msgid "Delegate melt"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:190
+#: src/components/TokenAdministrative.js:191
 msgid "Destroy melt"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:199
-#: src/components/tokens/TokenMint.js:204
+#: src/components/TokenAdministrative.js:200
+#: src/components/tokens/TokenMint.js:203
 msgid "Mint tokens"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:199
+#: src/components/TokenAdministrative.js:200
 msgid "Mint more tokens"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:200
+#: src/components/TokenAdministrative.js:201
 msgid "Delegate mint"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:201
+#: src/components/TokenAdministrative.js:202
 msgid "Destroy mint"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:208
+#: src/components/TokenAdministrative.js:209
 msgid "You have no more authority outputs for this token"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:214
+#: src/components/TokenAdministrative.js:215
 msgid "Mint authority management"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:219
+#: src/components/TokenAdministrative.js:220
 msgid "Melt authority management"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:231
-#: src/components/TokenGeneralInfo.js:138
+#: src/components/TokenAdministrative.js:232
+#: src/components/TokenGeneralInfo.js:139
 msgid "Total supply:"
 msgstr ""
 
-#: src/components/TokenAdministrative.js:232
+#: src/components/TokenAdministrative.js:233
 msgid "Your balance available:"
 msgstr ""
 
@@ -1440,100 +1439,101 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:107
+#: src/components/TokenGeneralInfo.js:108
 #.  If copied with success
 msgid "Configuration string copied to clipboard!"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:134
+#: src/components/TokenGeneralInfo.js:135
 msgid "UID:"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:135
+#: src/components/TokenGeneralInfo.js:136
+#: src/components/TxData.js:649
 msgid "Type:"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:136
+#: src/components/TokenGeneralInfo.js:137
 msgid "Name:"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:137
+#: src/components/TokenGeneralInfo.js:138
 msgid "Symbol:"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:139
+#: src/components/TokenGeneralInfo.js:140
 msgid "Can mint new tokens:"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:140
+#: src/components/TokenGeneralInfo.js:141
 msgid ""
 "Indicates whether the token owner can create new tokens, increasing the "
 "total supply"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:141
+#: src/components/TokenGeneralInfo.js:142
 msgid "Can melt tokens:"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:142
+#: src/components/TokenGeneralInfo.js:143
 msgid ""
 "Indicates whether the token owner can destroy tokens, decreasing the total "
 "supply"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:143
+#: src/components/TokenGeneralInfo.js:144
 msgid "Total number of transactions:"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:152
+#: src/components/TokenGeneralInfo.js:153
 msgid "Configuration String"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:160
+#: src/components/TokenGeneralInfo.js:161
 msgid "Download QRCode"
 msgstr ""
 
-#: src/components/TokenHistory.js:207
+#: src/components/TokenHistory.js:208
 msgid "Date"
 msgstr ""
 
-#: src/components/TokenHistory.js:208
+#: src/components/TokenHistory.js:209
 msgid "ID"
 msgstr ""
 
-#: src/components/TokenHistory.js:209
+#: src/components/TokenHistory.js:210
 msgid "Type"
 msgstr ""
 
-#: src/components/TokenHistory.js:211
+#: src/components/TokenHistory.js:212
 msgid "Value"
 msgstr ""
 
-#: src/components/TokenHistory.js:231
+#: src/components/TokenHistory.js:232
 msgid "Voided"
 msgstr ""
 
-#: src/components/TokenHistory.js:244
+#: src/components/TokenHistory.js:245
 msgid "Token creation"
 msgstr ""
 
-#: src/components/TokenHistory.js:246
+#: src/components/TokenHistory.js:247
 msgid "Received"
 msgstr ""
 
-#: src/components/TokenHistory.js:251
+#: src/components/TokenHistory.js:252
 msgid "Token deposit"
 msgstr ""
 
-#: src/components/TokenHistory.js:253
+#: src/components/TokenHistory.js:254
 msgid "Sent"
 msgstr ""
 
-#: src/components/TokenHistory.js:283
+#: src/components/TokenHistory.js:284
 msgid "You are receiving transactions in real time."
 msgstr ""
 
-#: src/components/TokenHistory.js:288
+#: src/components/TokenHistory.js:289
 #, javascript-format
 msgid "Page ${ page }"
 msgstr ""
@@ -1551,185 +1551,185 @@ msgstr ""
 msgid "Unknown authority"
 msgstr ""
 
-#: src/components/TxData.js:321
+#: src/components/TxData.js:320
 msgid "This token is not registered in your wallet."
 msgstr ""
 
-#: src/components/TxData.js:337
+#: src/components/TxData.js:336
 msgid "Spent"
 msgstr ""
 
-#: src/components/TxData.js:370
+#: src/components/TxData.js:377
 #, javascript-format
 msgid "${ ret } | Locked until ${ parsedTimestamp }"
 msgstr ""
 
-#: src/components/TxData.js:377
+#: src/components/TxData.js:384
 #, javascript-format
 msgid ""
 "Match values (nano contract), oracle id: ${ decoded.oracle_data_id } hash: "
 "${ decoded.oracle_pubkey_hash }"
 msgstr ""
 
-#: src/components/TxData.js:417
-#: src/components/TxData.js:426
+#: src/components/TxData.js:424
+#: src/components/TxData.js:433
 #.  there are conflicts, but it is not voided
 msgid "This ${ typeStr } is valid."
 msgstr ""
 
-#: src/components/TxData.js:428
+#: src/components/TxData.js:435
 #.  there are conflicts, but it is not voided
 msgid ""
 "Although there is a double-spending transaction, this transaction has the "
 "highest accumulated weight and is valid."
 msgstr ""
 
-#: src/components/TxData.js:433
+#: src/components/TxData.js:440
 #.  there are conflicts, but it is not voided
 msgid "Transactions double spending the same outputs as this transaction:"
 msgstr ""
 
-#: src/components/TxData.js:447
+#: src/components/TxData.js:454
 #.  it is voided, but there is no conflict
 #, javascript-format
 msgid "This ${ typeStr } is voided and **NOT** valid."
 msgstr ""
 
-#: src/components/TxData.js:449
+#: src/components/TxData.js:456
 #.  it is voided, but there is no conflict
 msgid ""
 "This ${ typeStr } is verifying (directly or indirectly) a voided "
 "double-spending transaction, hence it is voided as well."
 msgstr ""
 
-#: src/components/TxData.js:452
+#: src/components/TxData.js:459
 #.  it is voided, but there is no conflict
 #, javascript-format
 msgid "This ${ typeStr } is voided because of these transactions: "
 msgstr ""
 
-#: src/components/TxData.js:462
+#: src/components/TxData.js:469
 #.  it is voided, and there is a conflict
 msgid "This ${ typeStr } is **NOT** valid."
 msgstr ""
 
-#: src/components/TxData.js:464
+#: src/components/TxData.js:471
 #.  it is voided, and there is a conflict
 msgid "It is voided by: "
 msgstr ""
 
-#: src/components/TxData.js:470
+#: src/components/TxData.js:477
 #.  it is voided, and there is a conflict
 msgid "Conflicts with: "
 msgstr ""
 
-#: src/components/TxData.js:490
+#: src/components/TxData.js:497
 #, javascript-format
 msgid "Over ${ acc }"
 msgstr ""
 
-#: src/components/TxData.js:495
+#: src/components/TxData.js:502
 msgid "Retrieving accumulated weight data..."
 msgstr ""
 
-#: src/components/TxData.js:534
+#: src/components/TxData.js:541
 msgid "Tokens:"
 msgstr ""
 
-#: src/components/TxData.js:548
+#: src/components/TxData.js:555
 msgid "Your address"
 msgstr ""
 
-#: src/components/TxData.js:562
+#: src/components/TxData.js:569
 #, javascript-format
 msgid "**${ tokenSymbol }:** Received"
 msgstr ""
 
-#: src/components/TxData.js:568
+#: src/components/TxData.js:575
 msgid "**${ tokenSymbol }:** Sent"
 msgstr ""
 
-#: src/components/TxData.js:592
+#: src/components/TxData.js:599
 msgid "Balance:"
 msgstr ""
 
-#: src/components/TxData.js:601
+#: src/components/TxData.js:608
 msgid "First block:"
 msgstr ""
 
-#: src/components/TxData.js:610
+#: src/components/TxData.js:617
 msgid "Accumulated weight:"
 msgstr ""
 
-#: src/components/TxData.js:619
+#: src/components/TxData.js:626
 msgid "Confirmation level:"
 msgstr ""
 
-#: src/components/TxData.js:642
+#: src/components/TxData.js:645
 msgid "Block"
 msgstr ""
 
-#: src/components/TxData.js:642
+#: src/components/TxData.js:645
 msgid "Transaction"
 msgstr ""
 
-#: src/components/TxData.js:647
+#: src/components/TxData.js:650
 msgid "Time:"
 msgstr ""
 
-#: src/components/TxData.js:648
+#: src/components/TxData.js:651
 msgid "Nonce:"
 msgstr ""
 
-#: src/components/TxData.js:649
+#: src/components/TxData.js:652
 msgid "Weight:"
 msgstr ""
 
-#: src/components/TxData.js:661
+#: src/components/TxData.js:664
 msgid "Inputs:"
 msgstr ""
 
-#: src/components/TxData.js:665
+#: src/components/TxData.js:668
 msgid "Outputs:"
 msgstr ""
 
-#: src/components/TxData.js:672
+#: src/components/TxData.js:675
 msgid "Parents:"
 msgstr ""
 
-#: src/components/TxData.js:676
+#: src/components/TxData.js:679
 msgid "Children:"
 msgstr ""
 
-#: src/components/TxData.js:676
+#: src/components/TxData.js:679
 msgid "Click to hide"
 msgstr ""
 
-#: src/components/TxData.js:676
+#: src/components/TxData.js:679
 msgid "Click to show"
 msgstr ""
 
-#: src/components/TxData.js:681
+#: src/components/TxData.js:684
 msgid "Verification neighbors"
 msgstr ""
 
-#: src/components/TxData.js:684
+#: src/components/TxData.js:687
 msgid "Funds neighbors"
 msgstr ""
 
-#: src/components/TxData.js:696
+#: src/components/TxData.js:699
 msgid "Hide raw transaction"
 msgstr ""
 
-#: src/components/TxData.js:696
+#: src/components/TxData.js:699
 msgid "Show raw transaction"
 msgstr ""
 
-#: src/components/TxData.js:699
+#: src/components/TxData.js:702
 msgid "Copy raw tx to clipboard"
 msgstr ""
 
-#: src/components/TxData.js:710
+#: src/components/TxData.js:713
 #: src/components/WalletAddress.js:180
 msgid "Copied to clipboard!"
 msgstr ""
@@ -1794,12 +1794,6 @@ msgstr ""
 msgid "Transaction history"
 msgstr ""
 
-#: src/components/tokens/TokenAction.js:137
-msgid ""
-"Before executing token actions you must wait until the full data of your "
-"wallet is loaded."
-msgstr ""
-
 #: src/components/tokens/TokenDelegate.js:46
 #: src/components/tokens/TokenDelegate.js:64
 #: src/components/tokens/TokenDelegate.js:92
@@ -1843,8 +1837,8 @@ msgid "Create another ${ type } output for you?"
 msgstr ""
 
 #: src/components/tokens/TokenDelegate.js:85
-#: src/components/tokens/TokenMelt.js:146
-#: src/components/tokens/TokenMint.js:184
+#: src/components/tokens/TokenMelt.js:147
+#: src/components/tokens/TokenMint.js:183
 msgid "Leave it checked unless you know what you are doing"
 msgstr ""
 
@@ -1881,48 +1875,48 @@ msgstr ""
 msgid "Destroying authorities"
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:80
+#: src/components/tokens/TokenMelt.js:81
 #, javascript-format
 msgid "${ prettyAmountValue } ${ _this.props.token.symbol } melted!"
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:93
+#: src/components/tokens/TokenMelt.js:94
 #, javascript-format
 msgid "The total amount you have is only ${ prettyWalletAmount }."
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:137
-#: src/components/tokens/TokenMint.js:174
+#: src/components/tokens/TokenMelt.js:138
+#: src/components/tokens/TokenMint.js:173
 msgid ""
 "This is an NFT token. The amount will be an integer number, without decimal "
 "places."
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:144
+#: src/components/tokens/TokenMelt.js:145
 msgid "Create another melt output for you?"
 msgstr ""
 
-#: src/components/tokens/TokenMelt.js:161
+#: src/components/tokens/TokenMelt.js:162
 msgid "Melting tokens"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:87
+#: src/components/tokens/TokenMint.js:88
 #, javascript-format
 msgid "${ prettyAmountValue } ${ _this.props.token.symbol } minted!"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:97
+#: src/components/tokens/TokenMint.js:98
 msgid "Address is required when not selected automatically"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:132
+#: src/components/tokens/TokenMint.js:131
 msgid "Automatically select address to receive new tokens"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:182
+#: src/components/tokens/TokenMint.js:181
 msgid "Create another mint output for you?"
 msgstr ""
 
-#: src/components/tokens/TokenMint.js:211
+#: src/components/tokens/TokenMint.js:210
 msgid "Minting tokens"
 msgstr ""
