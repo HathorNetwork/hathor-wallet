@@ -135,7 +135,7 @@ export const updateTokenHistory = (token, newHistory) => ({ type: "update_token_
 /**
  * data {Object} object with token metadata
  */
-export const tokenMetadataUpdated = (data) => ({ type: "token_metadata_updated", payload: { data } });
+export const tokenMetadataUpdated = (data, errors) => ({ type: "token_metadata_updated", payload: { data, errors } });
 
 /**
  * Set if metadata was already loaded from the lib

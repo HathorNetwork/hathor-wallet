@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT, METADATA_RETRY_LIMIT, DOWNLOAD_METADATA_RETRY_INTERVAL } from '../constants';
+import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT } from '../constants';
 import STORE from '../storageInstance';
 import store from '../store/index';
 import {
@@ -228,59 +228,28 @@ const wallet = {
    **/
   async fetchTokensMetadata(tokens, network, downloadRetry = 0) {
     const metadataPerToken = {};
-    let didBreak = false;
-
-    const handleRetry = (index) => {
-      if (downloadRetry === METADATA_RETRY_LIMIT) {
-        // Should we throw an error and prevent wallet usage only because metadata was not loaded correctly?
-        // Right now I'm continuing and will download as many as we can
-        // Won't break the for
-        return false;
-      } else {
-        setTimeout(() => {
-          this.fetchTokensMetadata(tokens.slice(index), network, downloadRetry + 1);
-        }, DOWNLOAD_METADATA_RETRY_INTERVAL);
-        // Will break the for
-        didBreak = true;
-        return true;
-      }
-    }
+    const errors = [];
 
     for (const [index, token] of tokens.entries()) {
+      if (token === hathorConstants.HATHOR_TOKEN_CONFIG.uid) {
+        continue;
+      }
+
       try {
-        const response = await metadataApi.getDagMetadata(token, network);
-        if (response.data && token in response.data) {
-          const tokenMeta = response.data[token];
+        const data = await metadataApi.getDagMetadata(token, network);
+        // When the getDagMetadata method returns null, it means that we have no metadata for this token
+        if (data) {
+          const tokenMeta = data[token];
           metadataPerToken[token] = tokenMeta;
-        } else {
-          // Error downloading metadata, then we should wait a few seconds and retry if still didn't reached retry limit
-          const shouldBreak = handleRetry(index);
-          if (shouldBreak) {
-            break;
-          }
         }
       } catch (e) {
-        if (e.response && e.response.status === 404) {
-          // No need to do anything, the metadata for this token was not found
-        } else {
-          // Error downloading metadata, then we should wait a few seconds and retry if still didn't reached retry limit
-          const shouldBreak = handleRetry(index);
-          if (shouldBreak) {
-            break;
-          }
-        }
+        // Error downloading metadata, then we should wait a few seconds and retry if still didn't reached retry limit
+        console.log('Error downloading metadata of token', token);
+        errors.push(token);
       }
     }
 
-    if (isEmpty(metadataPerToken)) {
-      if (!didBreak) {
-        // We need to at least set metadataLoaded to true
-        // because we've reached the end of downloads
-        store.dispatch(metadataLoaded(true));
-      }
-    } else {
-      store.dispatch(tokenMetadataUpdated(metadataPerToken));
-    }
+    store.dispatch(tokenMetadataUpdated(metadataPerToken, errors));
   },
 
   /**

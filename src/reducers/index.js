@@ -47,6 +47,8 @@ const initialState = {
   wallet: null,
   // Metadata of tokens
   tokenMetadata: {},
+  // Token list of uids that had errors when loading metadata
+  tokenMetadataErrors: [],
   // When metadata is loaded from the lib
   metadataLoaded: false,
 };
@@ -361,13 +363,15 @@ const onUpdateHeight = (state, action) => {
  * Update token metadata
  */
 const tokenMetadataUpdated = (state, action) => {
-  const { data } = action.payload;
+  const { data, errors } = action.payload;
   const newMeta = Object.assign({}, state.tokenMetadata, data);
+  const newErrors = [...state.tokenMetadataErrors, ...errors]
 
   return {
     ...state,
     metadataLoaded: true,
     tokenMetadata: newMeta,
+    tokenMetadataErrors: newErrors,
   };
 };
 
