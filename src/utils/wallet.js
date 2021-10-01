@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT } from '../constants';
+import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT, METADATA_CONCURRENT_DOWNLOAD } from '../constants';
 import STORE from '../storageInstance';
 import store from '../store/index';
 import {
@@ -39,7 +39,7 @@ import {
   metadataApi
 } from '@hathor/wallet-lib';
 import version from './version';
-import { isEmpty } from 'lodash';
+import { chunk } from 'lodash';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
@@ -230,23 +230,26 @@ const wallet = {
     const metadataPerToken = {};
     const errors = [];
 
-    for (const [index, token] of tokens.entries()) {
-      if (token === hathorConstants.HATHOR_TOKEN_CONFIG.uid) {
-        continue;
-      }
-
-      try {
-        const data = await metadataApi.getDagMetadata(token, network);
-        // When the getDagMetadata method returns null, it means that we have no metadata for this token
-        if (data) {
-          const tokenMeta = data[token];
-          metadataPerToken[token] = tokenMeta;
+    const tokenChunks = chunk(tokens, METADATA_CONCURRENT_DOWNLOAD);
+    for (const chunk of tokenChunks) {
+      await Promise.all(chunk.map(async (token) => {
+        if (token === hathorConstants.HATHOR_TOKEN_CONFIG.uid) {
+          return;
         }
-      } catch (e) {
-        // Error downloading metadata, then we should wait a few seconds and retry if still didn't reached retry limit
-        console.log('Error downloading metadata of token', token);
-        errors.push(token);
-      }
+
+        try {
+          const data = await metadataApi.getDagMetadata(token, network);
+          // When the getDagMetadata method returns null, it means that we have no metadata for this token
+          if (data) {
+            const tokenMeta = data[token];
+            metadataPerToken[token] = tokenMeta;
+          }
+        } catch (e) {
+          // Error downloading metadata, then we should wait a few seconds and retry if still didn't reached retry limit
+          console.log('Error downloading metadata of token', token);
+          errors.push(token);
+        }
+      }));
     }
 
     store.dispatch(tokenMetadataUpdated(metadataPerToken, errors));

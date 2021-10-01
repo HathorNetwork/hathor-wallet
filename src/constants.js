@@ -183,3 +183,8 @@ export const AUDIO_MEDIA_TYPES_BY_EXTENSION = {
  * URL for the ledger guide
  */
 export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';
+
+/**
+ * How many token meta we are downloading concurrently
+ */
+export const METADATA_CONCURRENT_DOWNLOAD = 10;
