@@ -19,7 +19,7 @@ import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
-import { NFT_STANDARD_RFC_URL, NFT_DATA_MAX_SIZE } from '../constants';
+import { NFT_GUIDE_URL, NFT_STANDARD_RFC_URL, NFT_DATA_MAX_SIZE } from '../constants';
 import InputNumber from '../components/InputNumber';
 
 
@@ -223,8 +223,7 @@ class CreateNFT extends React.Component {
    */
   goToNFTGuide = (e) => {
     e.preventDefault();
-    // TODO create this guide in the website (this will be later used as a medium post)
-    // helpers.openExternalURL(NFT_GUIDE_URL);
+    helpers.openExternalURL(NFT_GUIDE_URL);
   }
 
   render = () => {
@@ -252,7 +251,7 @@ class CreateNFT extends React.Component {
         <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your NFT.`}</p>
         <p>
           {str2jsx(
-            t`When creating and minting NFTs, a |bold:deposit of ${htrDeposit}%| in HTR is required and an additional |bold:fee of ${nftFee} HTR|. If these tokens are later melted, this HTR deposit will be returned (depending on the amount melted) and the fee will never be returned. Read more about the NFT standard |link:here|.`,
+            t`When creating and minting NFTs, a |bold:deposit of ${htrDeposit / 100}%| in HTR is required and an additional |bold:fee of ${nftFee} HTR|. If these tokens are later melted, this HTR deposit will be returned (depending on the amount melted) and the fee will never be returned. Read more about the NFT standard |link:here|.`,
             {
               bold: (x, i) => <strong key={i}>{x}</strong>,
               link: (x, i) => <a key={i} href="true" onClick={this.goToRFC}>{x}</a>,

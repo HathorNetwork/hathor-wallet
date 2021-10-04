@@ -137,11 +137,6 @@ export const IPC_RENDERER = ipcRenderer;
 export const LEDGER_ENABLED = true;
 
 /**
- * Flag to hide/show create NFT button
- */
-export const NFT_ENABLED = false;
-
-/**
  * Maximum size of NFT data length
  */
 export const NFT_DATA_MAX_SIZE = 150;
@@ -150,3 +145,8 @@ export const NFT_DATA_MAX_SIZE = 150;
  * URL for the ledger guide
  */
 export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';
+
+/**
+ * URL for the NFT guide
+ */
+export const NFT_GUIDE_URL = 'https://hathor.network/ledger-guide';
