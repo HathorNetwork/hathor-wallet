@@ -19,7 +19,7 @@ import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
-import { NFT_STANDARD_RFC_URL, NFT_DATA_MAX_SIZE } from '../constants';
+import { NFT_GUIDE_URL, NFT_STANDARD_RFC_URL, NFT_DATA_MAX_SIZE } from '../constants';
 import InputNumber from '../components/InputNumber';
 
 
@@ -223,8 +223,7 @@ class CreateNFT extends React.Component {
    */
   goToNFTGuide = (e) => {
     e.preventDefault();
-    // TODO create this guide in the website (this will be later used as a medium post)
-    // helpers.openExternalURL(NFT_GUIDE_URL);
+    helpers.openExternalURL(NFT_GUIDE_URL);
   }
 
   render = () => {
@@ -239,7 +238,10 @@ class CreateNFT extends React.Component {
       )
     }
 
-    const htrDeposit = hathorLib.tokens.getDepositPercentage() * 100;
+    // This htrDeposit variable will be used only in the explanation text
+    // so this must be 0.01 (the text will show 0.01%) because the amount to create for NFTs is an integer.
+    // Then to create 100 units, the deposit is 0.01 HTR, to create 1,000 units the deposit is 0.1 HTR
+    const htrDeposit = hathorLib.tokens.getDepositPercentage();
     const depositAmount = hathorLib.tokens.getDepositAmount(this.state.amount); 
     const nftFee = hathorLib.helpers.prettyValue(tokens.getNFTFee());
 

@@ -18,7 +18,7 @@ msgstr ""
 #: src/components/OutputsWrapper.js:58
 #: src/components/tokens/TokenMint.js:137
 #: src/screens/AddressList.js:180
-#: src/screens/CreateNFT.js:304
+#: src/screens/CreateNFT.js:306
 #: src/screens/CreateToken.js:278
 msgid "Address"
 msgstr ""
@@ -126,40 +126,40 @@ msgstr ""
 msgid "Maximum NFT units to mint is ${ hathorLib.constants.MAX_OUTPUT_VALUE }"
 msgstr ""
 
-#: src/screens/CreateNFT.js:234
+#: src/screens/CreateNFT.js:233
 msgid "Your NFT has been successfully created!"
 msgstr ""
 
-#: src/screens/CreateNFT.js:235
+#: src/screens/CreateNFT.js:234
 msgid ""
 "You can share the following configuration string with other people to let "
 "them register your brand new NFT in their wallets."
 msgstr ""
 
-#: src/screens/CreateNFT.js:236
+#: src/screens/CreateNFT.js:235
 #: src/screens/CreateToken.js:222
 msgid "Remember to **make a backup** of this configuration string."
 msgstr ""
 
-#: src/screens/CreateNFT.js:250
+#: src/screens/CreateNFT.js:252
 msgid ""
 "Here you will create a new NFT. After the creation, you will be able to "
 "send the units of this NFT to other addresses."
 msgstr ""
 
-#: src/screens/CreateNFT.js:251
+#: src/screens/CreateNFT.js:253
 msgid ""
 "NFTs share the address space with all other tokens, including HTR. This "
 "means that you can send and receive tokens using any valid address."
 msgstr ""
 
-#: src/screens/CreateNFT.js:252
+#: src/screens/CreateNFT.js:254
 msgid ""
 "Remember to make a backup of your new token's configuration string. You "
 "will need to send it to other people to allow them to use your NFT."
 msgstr ""
 
-#: src/screens/CreateNFT.js:255
+#: src/screens/CreateNFT.js:257
 #, javascript-format
 msgid ""
 "When creating and minting NFTs, a |bold:deposit of ${ htrDeposit }%| in HTR "
@@ -169,7 +169,7 @@ msgid ""
 "NFT standard |link:here|."
 msgstr ""
 
-#: src/screens/CreateNFT.js:264
+#: src/screens/CreateNFT.js:266
 msgid ""
 "The most common usage for an NFT is to represent a digital asset. Please "
 "see |link:this guide| that explains how to create an NFT data (including "
@@ -177,60 +177,60 @@ msgid ""
 "standard in order to be able to show your asset in our explorer."
 msgstr ""
 
-#: src/screens/CreateNFT.js:274
+#: src/screens/CreateNFT.js:276
 msgid "NFT Data"
 msgstr ""
 
-#: src/screens/CreateNFT.js:275
+#: src/screens/CreateNFT.js:277
 msgid "ipfs://..."
 msgstr ""
 
 #: src/components/ModalEditToken.js:87
-#: src/screens/CreateNFT.js:281
+#: src/screens/CreateNFT.js:283
 #: src/screens/CreateToken.js:250
 msgid "Short name"
 msgstr ""
 
-#: src/screens/CreateNFT.js:282
+#: src/screens/CreateNFT.js:284
 #: src/screens/CreateToken.js:251
 msgid "MyCoin"
 msgstr ""
 
 #: src/components/ModalEditToken.js:90
-#: src/screens/CreateNFT.js:285
+#: src/screens/CreateNFT.js:287
 #: src/screens/CreateToken.js:254
 msgid "Symbol"
 msgstr ""
 
-#: src/screens/CreateNFT.js:286
+#: src/screens/CreateNFT.js:288
 #: src/screens/CreateToken.js:255
 msgid "MYC (2-5 characters)"
 msgstr ""
 
-#: src/screens/CreateNFT.js:291
+#: src/screens/CreateNFT.js:293
 #: src/screens/CreateToken.js:260
 msgid "Amount"
 msgstr ""
 
-#: src/screens/CreateNFT.js:298
+#: src/screens/CreateNFT.js:300
 #: src/screens/CreateToken.js:272
 msgid "Select address automatically"
 msgstr ""
 
-#: src/screens/CreateNFT.js:303
+#: src/screens/CreateNFT.js:305
 #: src/screens/CreateToken.js:277
 msgid "Destination address"
 msgstr ""
 
-#: src/screens/CreateNFT.js:312
+#: src/screens/CreateNFT.js:314
 msgid "Create a mint authority"
 msgstr ""
 
-#: src/screens/CreateNFT.js:320
+#: src/screens/CreateNFT.js:322
 msgid "Create a melt authority"
 msgstr ""
 
-#: src/screens/CreateNFT.js:334
+#: src/screens/CreateNFT.js:336
 #, javascript-format
 msgid "NFT ${ _this.state.name } created"
 msgstr ""
@@ -281,11 +281,11 @@ msgstr ""
 msgid "Token ${ _this.state.name } created"
 msgstr ""
 
-#: src/screens/CustomTokens.js:68
+#: src/screens/CustomTokens.js:67
 msgid "Custom Tokens"
 msgstr ""
 
-#: src/screens/CustomTokens.js:69
+#: src/screens/CustomTokens.js:68
 msgid ""
 "You can create your own digital token with customized specifications on "
 "Hathor Network with only a few clicks. They will fully work under the same "
@@ -294,13 +294,13 @@ msgid ""
 "price of the native HTR token, and they can serve multiple purposes."
 msgstr ""
 
-#: src/screens/CustomTokens.js:70
+#: src/screens/CustomTokens.js:69
 msgid ""
 "Every custom token has a unique **Configuration String** which must be "
 "shared with all other people that will use the custom token."
 msgstr ""
 
-#: src/screens/CustomTokens.js:71
+#: src/screens/CustomTokens.js:70
 msgid ""
 "If you want to use a custom token that already exists, you need to register "
 "this token in your Hathor Wallet. For this, you will need the custom "
@@ -308,19 +308,19 @@ msgid ""
 "token."
 msgstr ""
 
-#: src/screens/CustomTokens.js:73
+#: src/screens/CustomTokens.js:72
 msgid "Create a new token"
 msgstr ""
 
-#: src/screens/CustomTokens.js:74
+#: src/screens/CustomTokens.js:73
 msgid "Create an NFT"
 msgstr ""
 
-#: src/screens/CustomTokens.js:75
+#: src/screens/CustomTokens.js:74
 msgid "Register a token"
 msgstr ""
 
-#: src/screens/CustomTokens.js:78
+#: src/screens/CustomTokens.js:77
 msgid "Token registered with success!"
 msgstr ""
 
