@@ -137,6 +137,11 @@ export const IPC_RENDERER = ipcRenderer;
 export const LEDGER_ENABLED = true;
 
 /**
+ * Flag to hide/show create NFT button
+ */
+export const NFT_ENABLED = true;
+
+/**
  * Maximum size of NFT data length
  */
 export const NFT_DATA_MAX_SIZE = 150;
