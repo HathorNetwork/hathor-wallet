@@ -187,7 +187,7 @@ export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';
 /**
  * URL for the NFT guide
  */
-export const NFT_GUIDE_URL = 'https://hathor.network/ledger-guide';
+export const NFT_GUIDE_URL = 'https://hathor.network/nft-guide';
 
 /**
  * How many token meta we are downloading concurrently
