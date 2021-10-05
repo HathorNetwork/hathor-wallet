@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import { connect } from "react-redux";
 import { selectToken } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
+import helpers from '../utils/helpers';
 
 
 const mapStateToProps = (state) => {
@@ -18,6 +19,7 @@ const mapStateToProps = (state) => {
     allTokens: state.allTokens,
     selectedToken: state.selectedToken,
     tokensBalance: state.tokensBalance,
+    tokenMetadata: state.tokenMetadata,
   };
 };
 
@@ -110,7 +112,8 @@ class TokenBar extends React.Component {
       // If we don't have any transaction for the token, balance will be undefined
       total = balance.available + balance.locked;
     }
-    return hathorLib.helpers.prettyValue(total);
+    const isNFT = helpers.isTokenNFT(uid, this.props.tokenMetadata);
+    return helpers.renderValue(total, isNFT);
   }
 
   /**

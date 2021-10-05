@@ -14,6 +14,7 @@ import { connect } from "react-redux";
 import _ from 'lodash';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
+import helpers from '../utils/helpers';
 
 
 const mapStateToProps = (state) => {
@@ -22,6 +23,7 @@ const mapStateToProps = (state) => {
   return {
     tokensBalance: state.tokensBalance,
     height: state.height,
+    tokenMetadata: state.tokenMetadata
   };
 };
 
@@ -85,6 +87,13 @@ class SendTokensOne extends React.Component {
   }
 
   /**
+   * Use helper method to check if token is an NFT
+   */
+  isNFT = () => {
+    return helpers.isTokenNFT(_.get(this.state, 'selected.uid'), this.props.tokenMetadata);
+  }
+
+  /**
    * Iterate through inputs and outputs to add each information typed to the data object
    */
   getData = () => {
@@ -95,9 +104,9 @@ class SendTokensOne extends React.Component {
 
       if (address && valueStr) {
         // Doing the check here because need to validate before doing parseInt
-        const tokensValue = wallet.decimalToInteger(valueStr);
+        const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
         if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${helpers.renderValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT())}` });
           return null;
         }
         let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'token': this.state.selected.uid};
@@ -184,7 +193,7 @@ class SendTokensOne extends React.Component {
   render = () => {
     const renderOutputs = () => {
       return this.outputs.map((output, index) =>
-        <OutputsWrapper key={index} index={index} ref={output} addOutput={this.addOutput} />
+        <OutputsWrapper key={index} index={index} ref={output} addOutput={this.addOutput} isNFT={this.isNFT()} />
       );
     }
 
@@ -219,18 +228,27 @@ class SendTokensOne extends React.Component {
       if (this.state.selected.uid in this.props.tokensBalance) {
         availableBalance = this.props.tokensBalance[this.state.selected.uid].available;
       }
-      return <span className="ml-3">({t`Balance available: `}{hathorLib.helpers.prettyValue(availableBalance)})</span>;
+      return <span className="ml-3">({t`Balance available: `}{helpers.renderValue(availableBalance, this.isNFT())})</span>;
+    }
+
+    const renderNFTHelper = () => {
+      return (
+        <div>
+          <small className="text-muted">This is an NFT token. The amount must be an integer number, without decimal places.</small>
+        </div>
+      );
     }
 
     return (
       <div className='send-tokens-wrapper card'>
-        <div className="mb-3">
+        <div>
           <label><strong>{t`Token:`}</strong></label>
           {this.state.selected && renderSelectToken()}
           {this.state.selected && renderBalance()}
           {this.state.selectedTokens.length !== 1 ? <button type="button" className="text-danger remove-token-btn ml-3" onClick={(e) => this.props.removeToken(this.props.index)}>{t`Remove`}</button> : null}
         </div>
-        <div className="outputs-wrapper">
+        {this.isNFT() && renderNFTHelper()}
+        <div className="outputs-wrapper mt-3">
           <label>Outputs</label>
           {renderOutputs()}
         </div>

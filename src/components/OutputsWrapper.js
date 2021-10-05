@@ -44,10 +44,19 @@ class OutputsWrapper extends React.Component {
   }
 
   render = () => {
+    const renderInputNumber = () => {
+      const classNames = "form-control output-value col-2";
+      if (this.props.isNFT) {
+        return <InputNumber key="nft-value" ref={this.value} className={classNames} placeholder="0" precision={0} />;
+      } else {
+        return <InputNumber key="value" ref={this.value} placeholder={hathorLib.helpers.prettyValue(0)} className={classNames} />;
+      }
+    }
+
     return (
       <div className="input-group mb-3">
         <input type="text" ref={this.address} placeholder={t`Address`} className="form-control output-address col-5" />
-        <InputNumber ref={this.value} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control output-value col-2" />
+        {renderInputNumber()}
         <div className="form-check mr-2 d-flex flex-column justify-content-center">
           <input className="form-check-input mt-0 has-timelock" type="checkbox"
             ref={this.timelockCheckbox} onChange={this.handleCheckboxTimelockChange} id={this.uniqueID}

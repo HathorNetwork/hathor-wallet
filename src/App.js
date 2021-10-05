@@ -43,6 +43,7 @@ import STORE from './storageInstance';
 import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
+import NFTList from './screens/NFTList';
 
 
 hathorLib.storage.setStore(STORE);
@@ -78,6 +79,7 @@ class Root extends React.Component {
   render() {
     return (
       <Switch>
+        <StartedRoute exact path="/nft" component={NFTList} loaded={true} />
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
         <StartedRoute exact path="/create_nft" component={CreateNFT} loaded={true} />
         <StartedRoute exact path="/custom_tokens" component={CustomTokens} loaded={true} />

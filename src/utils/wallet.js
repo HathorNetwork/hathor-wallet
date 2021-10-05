@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT } from '../constants';
+import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT, METADATA_CONCURRENT_DOWNLOAD } from '../constants';
 import STORE from '../storageInstance';
 import store from '../store/index';
 import {
@@ -23,6 +23,8 @@ import {
   cleanData,
   changeServer,
   updateTokenHistory,
+  tokenMetadataUpdated,
+  metadataLoaded,
 } from '../actions/index';
 import {
   helpers,
@@ -33,9 +35,11 @@ import {
   wallet as oldWalletUtil,
   walletUtils,
   storage,
-  tokens
+  tokens,
+  metadataApi
 } from '@hathor/wallet-lib';
 import version from './version';
+import { chunk } from 'lodash';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
@@ -212,6 +216,46 @@ const wallet = {
   },
 
   /**
+   * The wallet needs each token metadata to show information correctly
+   * So we fetch the tokens metadata and store on redux
+   *
+   * @param {Array} tokens Array of token uids
+   * @param {String} network Network name
+   * @param {Number} downloadRetry Number of retries already done
+   *
+   * @memberof Wallet
+   * @inner
+   **/
+  async fetchTokensMetadata(tokens, network, downloadRetry = 0) {
+    const metadataPerToken = {};
+    const errors = [];
+
+    const tokenChunks = chunk(tokens, METADATA_CONCURRENT_DOWNLOAD);
+    for (const chunk of tokenChunks) {
+      await Promise.all(chunk.map(async (token) => {
+        if (token === hathorConstants.HATHOR_TOKEN_CONFIG.uid) {
+          return;
+        }
+
+        try {
+          const data = await metadataApi.getDagMetadata(token, network);
+          // When the getDagMetadata method returns null, it means that we have no metadata for this token
+          if (data) {
+            const tokenMeta = data[token];
+            metadataPerToken[token] = tokenMeta;
+          }
+        } catch (e) {
+          // Error downloading metadata, then we should wait a few seconds and retry if still didn't reached retry limit
+          console.log('Error downloading metadata of token', token);
+          errors.push(token);
+        }
+      }));
+    }
+
+    store.dispatch(tokenMetadataUpdated(metadataPerToken, errors));
+  },
+
+  /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
@@ -228,6 +272,7 @@ const wallet = {
   async startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false, xpub = null) {
     // Set loading addresses screen to show
     store.dispatch(loadingAddresses(true));
+    store.dispatch(metadataLoaded(false));
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
 
@@ -237,6 +282,9 @@ const wallet = {
     // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     const dataToken = tokens.getTokens();
     store.dispatch(reloadData({ tokens: dataToken }));
+
+    // Fetch metadata of all tokens registered
+    this.fetchTokensMetadata(dataToken.map((token) => token.uid), data.network);
 
     // If we've lost redux data, we could not properly stop the wallet object
     // then we don't know if we've cleaned up the wallet data in the storage

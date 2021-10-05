@@ -131,3 +131,18 @@ export const updateTx = (tx, updatedBalanceMap) => ({ type: "update_tx", payload
  * newHistory {Array} array with the new fetched history
  */
 export const updateTokenHistory = (token, newHistory) => ({ type: "update_token_history", payload: { token, newHistory } });
+
+/**
+ * data {Object} object with token metadata
+ */
+export const tokenMetadataUpdated = (data, errors) => ({ type: "token_metadata_updated", payload: { data, errors } });
+
+/**
+ * Set if metadata was already loaded from the lib
+ */
+export const metadataLoaded = data => ({ type: "metadata_loaded", payload: data });
+
+/**
+ * Remove token metadata after unregister token
+ */
+export const removeTokenMetadata = data => ({ type: "remove_token_metadata", payload: data });

@@ -19,10 +19,14 @@ import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
 import hathorLib from '@hathor/wallet-lib';
 import { MAX_GRAPH_LEVEL } from '../constants';
+import helpers from '../utils/helpers';
 
 
 const mapStateToProps = (state) => {
-  return { tokens: state.tokens };
+  return {
+    tokens: state.tokens,
+    tokenMetadata: state.tokenMetadata || {}
+  };
 };
 
 const mapDispatchToProps = dispatch => {
@@ -212,6 +216,21 @@ class TxData extends React.Component {
   }
 
   /**
+   * Get uid of token from an output token data
+   *
+   * @param {number} tokenData
+   *
+   * @return {string} Token uid
+   */
+  getUIDFromTokenData = (tokenData) => {
+    if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
+      return hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+    }
+    const tokenConfig = this.props.transaction.tokens[tokenData - 1];
+    return tokenConfig.uid;
+  }
+
+  /**
    * Returns if the token from uid in parameter is not registered in the wallet
    *
    * @param {string} uid UID of the token to check
@@ -291,7 +310,9 @@ class TxData extends React.Component {
           return t`Unknown authority`;
         }
       } else {
-        return hathorLib.helpers.prettyValue(output.value);
+        // if it's an NFT token we should show integer value
+        const uid = this.getUIDFromTokenData(hathorLib.wallet.getTokenIndex(output.token_data));
+        return helpers.renderValue(output.value, isNFT(uid));
       }
     }
 
@@ -311,7 +332,7 @@ class TxData extends React.Component {
         <div key={idx}>
           <div>{outputValue(output)} {renderOutputToken(output)} {output.decoded && addBadge && hathorLib.wallet.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
           <div>
-            {output.decoded ? renderDecodedScript(output.decoded) : t`${output.script} (unknown script)` }
+            {renderDecodedScript(output)}
             {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>{t`Spent`}</Link>)</span> : ''}
           </div>
         </div>
@@ -324,15 +345,28 @@ class TxData extends React.Component {
       });
     }
 
-    const renderDecodedScript = (decoded) => {
-      switch (decoded.type) {
-        case 'P2PKH':
-        case 'MultiSig':
-          return renderP2PKHorMultiSig(decoded);
-        case 'NanoContractMatchValues':
-          return renderNanoContractMatchValues(decoded);
-        default:
-          return 'Unable to decode';
+    const renderUndecodedScript = (script) => {
+      let renderedScript = script;
+      try {
+        renderedScript = atob(renderedScript);
+      } catch {}
+
+      return `Unable to decode script: ${renderedScript.trim()}`;
+    }
+
+    const renderDecodedScript = (output) => {
+      if (output.decoded) {
+        switch (output.decoded.type) {
+          case 'P2PKH':
+          case 'MultiSig':
+            return renderP2PKHorMultiSig(output.decoded);
+          case 'NanoContractMatchValues':
+            return renderNanoContractMatchValues(output.decoded);
+          default:
+            return renderUndecodedScript(output.script);
+        }
+      } else {
+        return renderUndecodedScript(output.script);
       }
     }
 
@@ -522,19 +556,23 @@ class TxData extends React.Component {
       )
     }
 
+    const isNFT = (uid) => {
+      return helpers.isTokenNFT(uid, this.props.tokenMetadata);
+    }
+
     const renderBalanceData = (balance) => {
       return Object.keys(balance).map((token) => {
         const tokenSymbol = this.getSymbol(token);
         if (balance[token] > 0) {
           return (
             <div key={token}>
-              <span className='received-value'><SpanFmt>{t`**${tokenSymbol}:** Received`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-down'></i> {hathorLib.helpers.prettyValue(balance[token])}</span>
+              <span className='received-value'><SpanFmt>{t`**${tokenSymbol}:** Received`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-down'></i> {helpers.renderValue(balance[token], isNFT(token))}</span>
             </div>
           )
         } else {
           return (
             <div key={token}>
-              <span className='sent-value'><SpanFmt>{t`**${tokenSymbol}:** Sent`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-up'></i> {hathorLib.helpers.prettyValue(balance[token])}</span>
+              <span className='sent-value'><SpanFmt>{t`**${tokenSymbol}:** Sent`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-up'></i> {helpers.renderValue(balance[token], isNFT(token))}</span>
             </div>
           );
         }
@@ -591,6 +629,15 @@ class TxData extends React.Component {
       );
     }
 
+    const isNFTCreation = () => {
+      if (this.props.transaction.version !== hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
+        return false;
+      }
+
+      const createdToken = this.props.transaction.tokens[0];
+      return helpers.isTokenNFT(createdToken.uid, this.props.tokenMetadata);
+    }
+
     const loadTxData = () => {
       return (
         <div className="tx-data-wrapper">
@@ -599,7 +646,7 @@ class TxData extends React.Component {
           {renderBalance()}
           <div className="d-flex flex-row align-items-start mt-3 mb-3">
             <div className="d-flex flex-column align-items-start common-div bordered-wrapper mr-3">
-              <div><label>{t`Type:`}</label> {hathorLib.helpers.getTxType(this.props.transaction)}</div>
+              <div><label>{t`Type:`}</label> {hathorLib.helpers.getTxType(this.props.transaction)} {isNFTCreation() && '(NFT)'}</div>
               <div><label>{t`Time:`}</label> {hathorLib.dateFormatter.parseTimestamp(this.props.transaction.timestamp)}</div>
               <div><label>{t`Nonce:`}</label> {this.props.transaction.nonce}</div>
               <div><label>{t`Weight:`}</label> {hathorLib.helpers.roundFloat(this.props.transaction.weight)}</div>

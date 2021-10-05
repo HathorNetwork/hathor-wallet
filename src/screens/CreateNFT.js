@@ -202,8 +202,8 @@ class CreateNFT extends React.Component {
   /**
    * Handles amount input change
    */
-  onAmountChange = (e) => {
-    this.setState({ amount: e.target.value });
+  onAmountChange = (newValue) => {
+    this.setState({ amount: newValue });
   }
 
   /**
@@ -291,7 +291,7 @@ class CreateNFT extends React.Component {
           <div className="row">
             <div className="form-group col-4">
               <label>{t`Amount`}</label>
-              <input required type="number" min="0" step="1" className="form-control" placeholder="How many NFT units to create" onChange={this.onAmountChange} />
+              <InputNumber required className="form-control" precision={0} placeholder="How many NFT units to create" onValueChange={this.onAmountChange} />
             </div>
             <div className="form-group d-flex flex-row align-items-center address-checkbox">
               <div className="form-check">

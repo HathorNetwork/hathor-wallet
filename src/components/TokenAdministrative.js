@@ -15,6 +15,8 @@ import TokenDestroy from '../components/tokens/TokenDestroy';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
+import helpers from '../utils/helpers';
+import { get } from 'lodash';
 
 const mapStateToProps = (state, props) => {
   const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
@@ -32,6 +34,7 @@ const mapStateToProps = (state, props) => {
     tokensHistory: state.tokensHistory,
     tokensBalance: state.tokensBalance,
     wallet: state.wallet,
+    tokenMetadata: state.tokenMetadata,
   };
 };
 
@@ -222,10 +225,12 @@ class TokenAdministrative extends React.Component {
       );
     }
 
+    const isNFT = helpers.isTokenNFT(get(this.props, 'token.uid'), this.props.tokenMetadata);
+
     return (
       <div className="flex align-items-center">
-        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.state.totalSupply ? hathorLib.helpers.prettyValue(this.state.totalSupply) : '-'} {this.props.token.symbol}</p>
-        <p className="mt-2 mb-2"><strong>{t`Your balance available:`} </strong>{hathorLib.helpers.prettyValue(this.state.balance)} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.state.totalSupply ? helpers.renderValue(this.state.totalSupply, isNFT) : '-'} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>{t`Your balance available:`} </strong>{helpers.renderValue(this.state.balance, isNFT)} {this.props.token.symbol}</p>
         <div className="token-detail-wallet-info">
           {renderMintMeltWrapper()}
         </div>

@@ -9,6 +9,8 @@ import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
+import helpers from '../utils/helpers';
+import { get } from 'lodash';
 
 
 const mapStateToProps = (state) => {
@@ -16,6 +18,7 @@ const mapStateToProps = (state) => {
     selectedToken: state.selectedToken,
     tokens: state.tokens,
     tokensBalance: state.tokensBalance,
+    tokenMetadata: state.tokenMetadata,
   };
 };
 
@@ -33,13 +36,14 @@ class WalletBalance extends React.Component {
       locked: token.uid in this.props.tokensBalance ? this.props.tokensBalance[token.uid].locked : 0,
     }
 
-    const renderBalance = () => {
+    const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
 
+    const renderBalance = () => {
       return (
         <div>
-          <p><strong>{t`Total:`}</strong> {hathorLib.helpers.prettyValue(balance.available + balance.locked)} {symbol}</p>
-          <p><strong>{t`Available:`}</strong> {hathorLib.helpers.prettyValue(balance.available)} {symbol}</p>
-          <p><strong>{t`Locked:`}</strong> {hathorLib.helpers.prettyValue(balance.locked)} {symbol}</p>
+          <p><strong>{t`Total:`}</strong> {helpers.renderValue(balance.available + balance.locked, isNFT)} {symbol}</p>
+          <p><strong>{t`Available:`}</strong> {helpers.renderValue(balance.available, isNFT)} {symbol}</p>
+          <p><strong>{t`Locked:`}</strong> {helpers.renderValue(balance.locked, isNFT)} {symbol}</p>
         </div>
       );
     }

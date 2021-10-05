@@ -10,12 +10,15 @@ import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import wallet from '../../utils/wallet';
+import helpers from '../../utils/helpers';
 import InputNumber from '../InputNumber';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
+import { get } from 'lodash';
 
 const mapStateToProps = (state) => {
   return {
     wallet: state.wallet,
+    tokenMetadata: state.tokenMetadata,
   };
 };
 
@@ -26,6 +29,11 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 class TokenMelt extends React.Component {
+  /**
+   * amount {number} Amount of tokens to melt
+   */
+  state = { amount: 0 };
+
   constructor(props) {
     super(props);
 
@@ -45,8 +53,7 @@ class TokenMelt extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = async (pin) => {
-    const sanitizedValue = (this.amount.current.value || "").replace(/,/g, '');
-    const amountValue = wallet.decimalToInteger(sanitizedValue);
+    const amountValue = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
     const transaction = await this.props.wallet.prepareMeltTokensData(
       this.props.token.uid,
       amountValue,
@@ -59,10 +66,18 @@ class TokenMelt extends React.Component {
   }
 
   /**
+   * Return if token is an NFT
+   */
+  isNFT = () => {
+    return helpers.isTokenNFT(get(this.props, 'token.uid'), this.props.tokenMetadata);
+  }
+
+  /**
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const prettyAmountValue = hathorLib.helpers.prettyValue(wallet.decimalToInteger(this.amount.current.value));
+    const amount = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
+    const prettyAmountValue = helpers.renderValue(amount, this.isNFT());
     return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;
   }
 
@@ -73,21 +88,54 @@ class TokenMelt extends React.Component {
    * @return {string} Error message, in case of form invalid. Nothing, otherwise.
    */
   melt = () => {
-    const amountValue = wallet.decimalToInteger(this.amount.current.value);
+    const amountValue = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
     if (amountValue > this.props.walletAmount) {
-      const prettyWalletAmount = hathorLib.helpers.prettyValue(this.props.walletAmount);
+      const prettyWalletAmount = helpers.renderValue(this.props.walletAmount, this.isNFT());
       return t`The total amount you have is only ${prettyWalletAmount}.`;
     }
   }
 
+  /**
+   * Handles amount input change
+   */
+  onAmountChange = (amount) => {
+    this.setState({amount});
+  }
+
   render() {
+    const renderInputNumber = () => {
+      if (this.isNFT()) {
+        return (
+          <InputNumber
+           required
+           ref={this.amount}
+           placeholder="0"
+           className="form-control"
+           precision={0}
+           onValueChange={this.onAmountChange}
+          />
+        )
+      } else {
+        return (
+          <InputNumber
+           required
+           ref={this.amount}
+           placeholder={hathorLib.helpers.prettyValue(0)}
+           className="form-control"
+           onValueChange={this.onAmountChange}
+          />
+        )
+      }
+    }
+
     const renderForm = () => {
       return (
         <div>
           <div className="row">
             <div className="form-group col-3">
               <label>Amount</label>
-              <InputNumber required ref={this.amount} placeholder={hathorLib.helpers.prettyValue(0)} className="form-control" />
+              {renderInputNumber()}
+              {this.isNFT() && <small className="text-muted">{t`This is an NFT token. The amount will be an integer number, without decimal places.`}</small>}
             </div>
           </div>
           <div className="form-group d-flex flex-row align-items-center">

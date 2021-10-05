@@ -142,6 +142,39 @@ export const LEDGER_ENABLED = true;
 export const NFT_DATA_MAX_SIZE = 150;
 
 /**
+ * Number of NFT elements per page in the NFT list screen
+ */
+export const NFT_LIST_PER_PAGE = 6;
+
+/**
+ * Allowed media types for NFT
+ */
+export const NFT_MEDIA_TYPES = {
+  image: 'IMAGE',
+  video: 'VIDEO',
+  audio: 'AUDIO',
+  pdf: 'PDF',
+}
+
+/**
+ * Map of video file extensions to media types in html
+ */
+export const VIDEO_MEDIA_TYPES_BY_EXTENSION = {
+  mp4: 'video/mp4',
+  ogg: 'video/ogg',
+  webm: 'video/webm'
+}
+
+/**
+ * Map of audio file extensions to media types in html
+ */
+export const AUDIO_MEDIA_TYPES_BY_EXTENSION = {
+  ogg: 'audio/ogg',
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav'
+}
+
+/**
  * URL for the ledger guide
  */
 export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';
@@ -150,3 +183,8 @@ export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';
  * URL for the NFT guide
  */
 export const NFT_GUIDE_URL = 'https://hathor.network/ledger-guide';
+
+/**
+ * How many token meta we are downloading concurrently
+ */
+export const METADATA_CONCURRENT_DOWNLOAD = 10;
