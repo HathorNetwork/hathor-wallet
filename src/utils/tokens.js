@@ -6,7 +6,7 @@
  */
 
 import store from '../store/index';
-import { newTokens } from '../actions/index';
+import { newTokens, removeTokenMetadata } from '../actions/index';
 import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 
@@ -31,6 +31,9 @@ const tokens = {
   addToken(uid, name, symbol) {
     const tokens = hathorLib.tokens.addToken(uid, name, symbol);
     store.dispatch(newTokens({tokens, uid: uid}));
+    const reduxState = store.getState();
+    const reduxWallet = reduxState.wallet;
+    wallet.fetchTokensMetadata([uid], reduxWallet.conn.network);
   },
 
   /**
@@ -66,6 +69,7 @@ const tokens = {
       const libPromise = hathorLib.tokens.unregisterToken(uid);
       libPromise.then((tokens) => {
         store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
+        store.dispatch(removeTokenMetadata(uid));
         resolve();
       }, (e) => {
         reject(e);

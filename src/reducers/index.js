@@ -45,6 +45,12 @@ const initialState = {
   // Height of the best chain of the network arrived from ws data
   height: 0,
   wallet: null,
+  // Metadata of tokens
+  tokenMetadata: {},
+  // Token list of uids that had errors when loading metadata
+  tokenMetadataErrors: [],
+  // When metadata is loaded from the lib
+  metadataLoaded: false,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -102,6 +108,12 @@ const rootReducer = (state = initialState, action) => {
       return onUpdateTx(state, action);
     case 'update_token_history':
       return onUpdateTokenHistory(state, action);
+    case 'token_metadata_updated':
+      return tokenMetadataUpdated(state, action);
+    case 'metadata_loaded':
+      return Object.assign({}, state, {metadataLoaded: action.payload});
+    case 'remove_token_metadata':
+      return removeTokenMetadata(state, action);
     default:
       return state;
   }
@@ -345,6 +357,39 @@ const onUpdateHeight = (state, action) => {
   }
 
   return state;
+};
+
+/**
+ * Update token metadata
+ */
+const tokenMetadataUpdated = (state, action) => {
+  const { data, errors } = action.payload;
+  const newMeta = Object.assign({}, state.tokenMetadata, data);
+  const newErrors = [...state.tokenMetadataErrors, ...errors]
+
+  return {
+    ...state,
+    metadataLoaded: true,
+    tokenMetadata: newMeta,
+    tokenMetadataErrors: newErrors,
+  };
+};
+
+/**
+ * Remove token metadata
+ */
+const removeTokenMetadata = (state, action) => {
+  const uid = action.payload;
+
+  const newMeta = Object.assign({}, state.tokenMetadata);
+  if (uid in newMeta) {
+    delete newMeta[uid];
+  }
+
+  return {
+    ...state,
+    tokenMetadata: newMeta,
+  };
 };
 
 export default rootReducer;

@@ -54,6 +54,9 @@ class Navigation extends React.Component {
                 <NavLink to="/custom_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Custom tokens`}</NavLink>
               </li>
               <li className="nav-item">
+                <NavLink to="/nft/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`NFTs`}</NavLink>
+              </li>
+              <li className="nav-item">
                 <a className="nav-link" href="true" onClick={this.goToExplorer}>{t`Public Explorer`}</a>
               </li>
             </ul>
