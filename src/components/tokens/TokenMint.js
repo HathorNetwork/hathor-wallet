@@ -69,7 +69,7 @@ class TokenMint extends React.Component {
         pinCode: pin
       }
     );
-    return new hathorLib.SendTransaction({ transaction, pin });
+    return new hathorLib.SendTransaction({ transaction, pin, network: this.props.wallet.getNetworkObject() });
   }
 
   /**
