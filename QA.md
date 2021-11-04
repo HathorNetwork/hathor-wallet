@@ -163,6 +163,13 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Paste the address and 1.00 as the amount. Deselect 'Choose inputs automatically' and paste the transaction ID and index copied before.
     1. Must see an error that the output is already spent.
 
+1. **Create NFT**
+    1. Click on 'Custom tokens', then 'Create an NFT'.
+    1. Fill NFT data as 'test data', name and symbol as 'NFT Test' and 'NFTT', and amount as 100. Check only the melt authority checkbox.
+    1. Double check the Fee is 0.01 HTR, the deposit is 0.01 HTR and the Total is 0.02 HTR.
+    1. Create the NFT and open the transaction on the list.
+    1. Validate that the first output is the data output unable to decode with 0.01 HTR and there is one output with 1.00 of tokens, one output with the melt authority and possibly one change output of HTR.
+
 1. **Late backup**
     1. Reset the wallet and close it.
     1. Open the wallet with the parameters `--unsafe-mode --debug`.
