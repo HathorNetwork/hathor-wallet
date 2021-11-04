@@ -13,7 +13,9 @@ import HathorAlert from './HathorAlert';
 import wallet from '../utils/wallet';
 import TokenPagination from './TokenPagination';
 import hathorLib from '@hathor/wallet-lib';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
+import helpers from '../utils/helpers';
+import { get } from 'lodash';
 
 const mapStateToProps = (state, props) => {
   let history = [];
@@ -22,7 +24,8 @@ const mapStateToProps = (state, props) => {
   }
   return { 
     tokensHistory: history,
-    wallet: state.wallet
+    wallet: state.wallet,
+    tokenMetadata: state.tokenMetadata,
   };
 };
 
@@ -232,10 +235,11 @@ class TokenHistory extends React.Component {
 
     const renderHistoryData = () => {
       const keys = hathorLib.wallet.getWalletData().keys;
+      const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
       return this.state.transactions.map((tx, idx) => {
         let statusElement = '';
         let trClass = '';
-        let value = hathorLib.helpers.prettyValue(tx.balance);
+        let value = helpers.renderValue(tx.balance, isNFT);
         if (tx.balance > 0) {
           if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
             statusElement = <span>{t`Token creation`} <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;

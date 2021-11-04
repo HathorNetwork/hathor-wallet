@@ -11,6 +11,14 @@ import $ from 'jquery';
 import ModalSendTx from '../../components/ModalSendTx';
 import ReactLoading from 'react-loading';
 import colors from '../../index.scss';
+import { connect } from "react-redux";
+
+
+const mapStateToProps = (state) => {
+  return {
+    metadataLoaded: state.metadataLoaded,
+  };
+};
 
 
 /**
@@ -125,6 +133,10 @@ class TokenAction extends React.Component {
   }
 
   render() {
+    if (!this.props.metadataLoaded) {
+      return <p>{t`Loading metadata...`}</p>
+    }
+
     const renderButtons = () => {
       return (
         <div className='d-flex mt-4 flex-column'>
@@ -159,4 +171,4 @@ class TokenAction extends React.Component {
   }
 }
 
-export default TokenAction;
+export default connect(mapStateToProps)(TokenAction);

@@ -50,7 +50,7 @@ class TokenDestroy extends React.Component {
       this.state.destroyQuantity,
       { pinCode: pin },
     );
-    return new hathorLib.SendTransaction({ transaction, pin });
+    return new hathorLib.SendTransaction({ transaction, pin, network: this.props.wallet.getNetworkObject() });
   }
 
   /**

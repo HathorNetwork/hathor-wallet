@@ -50,7 +50,11 @@ const InputNumber = React.forwardRef(
         value.substr(0, value.length - precision)
       );
       const fractionalPart = value.substr(value.length - precision);
-      return `${decimalPart}${separator}${fractionalPart}`;
+      if (fractionalPart.length === 0) {
+        return decimalPart;
+      } else {
+        return `${decimalPart}${separator}${fractionalPart}`;
+      }
     };
 
     const innerRef = ref || useRef();

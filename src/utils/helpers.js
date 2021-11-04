@@ -9,6 +9,7 @@ import store from '../store/index';
 import { networkUpdate } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
+import path from 'path';
 
 let shell = null;
 if (window.require) {
@@ -68,6 +69,69 @@ const helpers = {
     } else {
       return TESTNET_EXPLORER_BASE_URL;
     }
+  },
+
+  /**
+   * Render value to integer or decimal
+   *
+   * @param {number} amount Amount to render
+   * @param {boolean} isInteger If it's an integer or decimal
+   *
+   * @return {string} rendered value
+   * @memberof Helpers
+   * @inner
+   */
+  renderValue(amount, isInteger) {
+    if (isInteger) {
+      return hathorLib.helpersUtils.prettyIntegerValue(amount);
+    } else {
+      return hathorLib.helpersUtils.prettyValue(amount);
+    }
+  },
+
+  /**
+   * Get file extension by name and path
+   *
+   * @param {string} file Full file path with name
+   *
+   * @return {string} file extension
+   * @memberof Helpers
+   * @inner
+   */
+  getFileExtension(file) {
+    const parts = file.split('.');
+    if (parts.length === 1) {
+      return '';
+    }
+    return parts[parts.length - 1];
+  },
+
+  /**
+   * If token is an NFT checking metadata
+   *
+   * @param {string} uid Token uid
+   * @param {Object} metadataPerToken Metadatas of registered tokens
+   *
+   * @return {boolean} if token is an NFT
+   * @memberof Helpers
+   * @inner
+   */
+  isTokenNFT(uid, metadataPerToken) {
+    return uid in metadataPerToken && metadataPerToken[uid].nft;
+  },
+
+  /**
+   * Return full explorer URL joining base url and path
+   *
+   * @param {String} path URL path to join
+   *
+   * @return {String} Full explorer URL
+   *
+   * @memberof Helpers
+   * @inner
+   */
+  getFullExplorerURL(urlPath) {
+    return path.join(this.getExplorerURL(), urlPath);
   },
 }
 

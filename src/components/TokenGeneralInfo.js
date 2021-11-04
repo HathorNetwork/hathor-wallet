@@ -12,7 +12,16 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import hathorLib from '@hathor/wallet-lib';
 import HathorAlert from '../components/HathorAlert';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import helpers from '../utils/helpers';
+import { get } from 'lodash';
 
+
+const mapStateToProps = (state) => {
+  return {
+    tokenMetadata: state.tokenMetadata,
+  };
+};
 
 /**
  * Component to show a token general info
@@ -118,13 +127,16 @@ class TokenGeneralInfo extends React.Component {
       return `${configArr[0]}:${configArr[1]}...${configArr[3]}`;
     }
 
+    const isNFT = helpers.isTokenNFT(get(this.props, 'token.uid'), this.props.tokenMetadata);
+
     const renderTokenInfo = () => {
       return (
         <div className="token-general-info">
           <p className="mb-2"><strong>{t`UID:`} </strong>{this.props.token.uid}</p>
+          <p className="mt-2 mb-2"><strong>{t`Type:`} </strong>{isNFT ? 'NFT' : 'Custom Token'}</p>
           <p className="mt-2 mb-2"><strong>{t`Name:`} </strong>{this.props.token.name}</p>
           <p className="mt-2 mb-2"><strong>{t`Symbol:`} </strong>{this.props.token.symbol}</p>
-          <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{hathorLib.helpers.prettyValue(this.state.totalSupply)} {this.props.token.symbol}</p>
+          <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{helpers.renderValue(this.state.totalSupply, isNFT)} {this.props.token.symbol}</p>
           <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{this.state.canMint ? 'Yes' : 'No'}</p>
           <p className="mb-2 subtitle">{t`Indicates whether the token owner can create new tokens, increasing the total supply`}</p>
           <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{this.state.canMelt ? 'Yes' : 'No'}</p>
@@ -179,4 +191,4 @@ TokenGeneralInfo.propTypes = {
   showConfigString: PropTypes.bool.isRequired,
 };
 
-export default TokenGeneralInfo;
+export default connect(mapStateToProps, null, null, {forwardRef: true})(TokenGeneralInfo);

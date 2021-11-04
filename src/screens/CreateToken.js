@@ -119,7 +119,7 @@ class CreateToken extends React.Component {
         wallet.decimalToInteger(this.state.amount),
         { address, pinCode: pin }
       );
-      return new hathorLib.SendTransaction({ transaction, pin });
+      return new hathorLib.SendTransaction({ transaction, pin, network: this.props.wallet.getNetworkObject() });
     } catch (e) {
       this.setState({ errorMessage: e.message });
     }
