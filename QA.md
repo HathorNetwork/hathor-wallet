@@ -201,6 +201,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Confirm the Timelock checkbox is also disabled.
     1. Click on 'Add another token' button. A modal is displayed saying the action is not supported.
     1. Try sending a transaction to an invalid address. An error message should show up on the wallet. Nothing should be displayed on Ledger.
+    1. Try sending a transaction with an amount bigger than the one you have. An error message should show up on the wallet. Nothing should be displayed on Ledger.
     1. Send tokens to both copied addresses in the same transaction (2 outputs). A modal will be displayed asking to confirm operation on Ledger.
     1. On Ledger, it should show 'Output 1/2' on the first step the address on the second and the amount on the third step (steps being from left to right), then an "Approve" and "Reject" steps. After clicking both buttons on the "Approve", it shows 'Output 2/2' and the other output (address and ammount).
     1. Clicking both buttons on the "Approve" step one more time will display the confirmation screen. Reject signing the transaction. The modal will hide and an error message should appear on the wallet.
@@ -212,6 +213,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Click on change server. The usual Change Server screen should show up, but with no PIN field. Change to a new server.
     1. On the settings screen, click on 'Set a passphrase'. It should show a modal saying the action is not supported and it should be done directly on Ledger.
     1. Go to Custom Tokens on the top navigation bar. Clicking 'Create a new token' should display a modal saying action is not supported.
+    1. Now click on 'Create an NFT' and should display a modal saying action is not supported.
     1. Lock wallet. It should go the screen asking to select the wallet type (software or hardware).
     1. Choose 'Hardware Wallet' and go through the same process again.
     1. When finished loading the wallet, it should show the same balance and transactions as before locking.
