@@ -234,7 +234,10 @@ class TokenHistory extends React.Component {
     }
 
     const renderHistoryData = () => {
-      const keys = hathorLib.wallet.getWalletData().keys;
+      const data = hathorLib.wallet.getWalletData()
+      if(data==null)
+        return hathorLib.wallet.lock();
+      const keys = data.keys;
       const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
       return this.state.transactions.map((tx, idx) => {
         let statusElement = '';
