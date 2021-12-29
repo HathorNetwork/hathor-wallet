@@ -13,6 +13,7 @@ const constants = require('./constants');
 
 const maxLedgerBuffer = 255;
 const ledgerCLA = 0xe0;
+const ledgerOK = Buffer.from('9000', 'hex');
 
 class Ledger {
   
@@ -32,6 +33,7 @@ class Ledger {
       0xb007:  "SW_BAD_STATE",
       0xb008:  "SW_SIGNATURE_FAIL",
       0xb009:  "SW_INVALID_TX",
+      0xb00a:  "SW_INVALID_SIGNATURE",
     };
     if (e.name && e.name === 'TransportStatusError') {
       switch (e.statusCode) {
@@ -51,6 +53,7 @@ class Ledger {
         case 0xb007:  // SW_BAD_STATE
         case 0xb008:  // SW_SIGNATURE_FAIL
         case 0xb009:  // SW_INVALID_TX
+        case 0xb00a:  // SW_INVALID_SIGNATURE
         default:
           console.log("LedgerError: ", errorMap[e.statusCode] || 'UNKNOWN_ERROR');
           return {status: e.statusCode, message: 'Error communicating with Ledger'};
@@ -139,6 +142,10 @@ class Ledger {
       'ADDRESS': 0x04,
       'PUBLIC_KEY_DATA': 0x05,
       'SEND_TX': 0x06,
+      'SIGN_TOKEN': 0x07,
+      'SEND_TOKEN': 0x08,
+      'VERIFY_TOKEN_SIGNATURE': 0x09,
+      'RESET_TOKEN_SIGNATURES': 0x0a,
     }
 
     // Queue of commands to send to ledger so we don't send them in paralel
@@ -217,7 +224,11 @@ class Ledger {
           "getPublicKeyData",
           "checkAddress",
           "sendTx",
-          "getSignatures"
+          "getSignatures",
+          "signToken",
+          "sendTokens",
+          "verifyTokenSignature",
+          "resetTokenSignatures",
         ];
         this.transport.decorateAppAPIMethods(this, this.methods, "HTR");
         resolve(transport);
@@ -348,6 +359,85 @@ class Ledger {
     } finally {
       const transport = await this.getTransport();
       await transport.send(ledgerCLA, this.commands.SEND_TX, 2, 0);
+    }
+  }
+
+  /**
+   * Get signature for token on ledger
+   *
+   * @param {Object} data Data to send to Ledger
+   *   version + uid + len(symbol) + symbol + len(name) + name
+   *
+   * @return {Promise} Promise resolved when signature is received
+   */
+  signToken = async (data) => {
+    try {
+      const transport = await this.getTransport();
+      const result = await this.sendToLedgerOrQueue(transport, this.commands.SIGN_TOKEN, 0, 0, data);
+      return result.slice(0, -2);
+    } catch (e) {
+      throw Ledger.parseLedgerError(e);
+    }
+  }
+
+  /**
+   * Send tokens and signatures to ledger before a tx
+   *
+   * @param {Object} tokens List of data to send to ledger
+   *   List of data with the format:
+   *     version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
+   *
+   * @return {Promise} Promise resolved when signature is received
+   */
+  sendTokens = async (tokens) => {
+    const values = [];
+    try {
+      const transport = await this.getTransport();
+      for (let [index, data] of tokens.entries()) {
+        const value = await this.sendToLedgerOrQueue(transport, this.commands.SEND_TOKEN, index, 0, data);
+        // Compare response with ledger SW_OK
+        if (ledgerOK.compare(value) !== 0) {
+          // only return failures
+          values.push(data);
+        }
+      }
+      return values;
+    } catch (e) {
+      throw Ledger.parseLedgerError(e);
+    }
+  }
+
+  /**
+   * Verify a token and signature with ledger
+   *
+   * @param {Object} data Data to send to Ledger
+   *   version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
+   *
+   * @return {Promise} Promise resolved when signature is received
+   */
+  verifyTokenSignature = async (data) => {
+    try {
+      const transport = await this.getTransport();
+      await this.sendToLedgerOrQueue(transport, this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
+    } catch (e) {
+      throw Ledger.parseLedgerError(e);
+    }
+  }
+
+  /**
+   * Reset token signatures
+   *
+   * @param {Object} data Data to send to Ledger
+   *   version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
+   *
+   * @return {Promise} Promise resolved when signature is received
+   */
+  resetTokenSignatures = async () => {
+    try {
+      const transport = await this.getTransport();
+      await this.sendToLedgerOrQueue(transport, this.commands.RESET_TOKEN_SIGNATURES, 0, 0, data);
+    } catch (e) {
+      throw Ledger.parseLedgerError(e);
     }
   }
 }

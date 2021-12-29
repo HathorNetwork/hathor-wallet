@@ -34,6 +34,38 @@ const formatPathData = (index) => {
   return buffer;
 };
 
+const intToByte = (number) => {
+  const buf = Buffer.alloc(1);
+  buf[0] = number;
+  return buf;
+}
+
+const serializeTokenInfo = (token, hasSignature) => {
+  // version + uid + len(symbol) + symbol + len(name) + name
+  const uidBytes = Buffer.from(token.uid, "hex");
+  const symbolBytes = Buffer.from(token.symbol, "utf8");
+  const nameBytes = Buffer.from(token.name, "utf8");
+  const arr = [];
+
+  // 0: token version = 1 (always)
+  arr.push(intToByte(1));
+  // 1: uid bytes (length is fixed 32 bytes)
+  arr.push(uidBytes);
+  // 2, 3: symbol length + bytes
+  arr.push(intToByte(symbolBytes.length));
+  arr.push(symbolBytes);
+  // 4, 5: name length + bytes
+  arr.push(intToByte(nameBytes.length));
+  arr.push(nameBytes);
+
+  if (hasSignature) {
+    // 6: signature (length is fixed 32 bytes)
+    arr.push(Buffer.from(token.signature, "hex"));
+  }
+
+  return arr;
+}
+
 let ledger = null;
 
 if (IPC_RENDERER) {
@@ -124,6 +156,61 @@ if (IPC_RENDERER) {
         arr.push(index);
       }
       IPC_RENDERER.send("ledger:getSignatures", arr);
+    },
+
+    /**
+     * Sign token info on ledger
+     *
+     * @param {Object} token
+     *  with uid (hex), symbol and name
+     *
+     * @memberof Ledger
+     * @inner
+     */
+    signToken(token) {
+      const data = Buffer.concat(serializeTokenInfo(token, false));
+
+      IPC_RENDERER.send("ledger:signToken", data);
+    },
+
+    /**
+     * Send tokens to ledger to create context for sign_tx
+     *
+     * @param {Object} tokens
+     *  each with uid (hex), symbol, name and signature
+     *
+     * @memberof Ledger
+     * @inner
+     */
+    sendTokens(tokens) {
+      const data = tokens.map(t => Buffer.concat(serializeTokenInfo(t, true)));
+
+      IPC_RENDERER.send("ledger:sendTokens", data);
+    },
+
+    /**
+     * Verify token signature matches the token info on ledger
+     *
+     * @param {Object} token
+     *  with uid (hex), symbol, name and signature
+     *
+     * @memberof Ledger
+     * @inner
+     */
+    verifyTokenSignature(token) {
+      const data = Buffer.concat(serializeTokenInfo(token, true));
+
+      IPC_RENDERER.send("ledger:verifyTokenSignature", data);
+    },
+
+    /**
+     * Reset token signatures on ledger
+     *
+     * @memberof Ledger
+     * @inner
+     */
+    resetTokenSignatures() {
+      IPC_RENDERER.send("ledger:resetTokenSignatures");
     },
   }
 }

@@ -118,6 +118,32 @@ const tokens = {
   getNFTFee() {
     return 1;
   },
+
+  /**
+   * Returns the token signatures on storage
+   * This is only used for hw wallets.
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  getTokenSignatures() {
+    const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
+    if (tokenSignatures === null) return {};
+    return tokenSignatures;
+  },
+
+  /**
+   * Add a token signature to storage, overwriting if exists
+   * This is only used for hw wallets.
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  addTokenSignature(uid, signature) {
+    const tokenSignatures = this.getTokenSignatures();
+    tokenSignatures[uid] = signature;
+    hathorLib.storage.setItem('wallet:token:signatures');
+  },
 }
 
 export default tokens;
