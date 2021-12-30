@@ -40,7 +40,7 @@ const intToByte = (number) => {
   return buf;
 }
 
-const serializeTokenInfo = (token, hasSignature) => {
+export const serializeTokenInfo = (token, hasSignature) => {
   // version + uid + len(symbol) + symbol + len(name) + name
   const uidBytes = Buffer.from(token.uid, "hex");
   const symbolBytes = Buffer.from(token.symbol, "utf8");

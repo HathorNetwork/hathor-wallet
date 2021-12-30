@@ -128,7 +128,8 @@ const tokens = {
    */
   getTokenSignatures() {
     const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
-    if (tokenSignatures === null) return {};
+    if (!tokenSignatures) return {};
+    // if (tokenSignatures === null) return {};
     return tokenSignatures;
   },
 
@@ -142,7 +143,7 @@ const tokens = {
   addTokenSignature(uid, signature) {
     const tokenSignatures = this.getTokenSignatures();
     tokenSignatures[uid] = signature;
-    hathorLib.storage.setItem('wallet:token:signatures');
+    hathorLib.storage.setItem('wallet:token:signatures', tokenSignatures);
   },
 }
 
