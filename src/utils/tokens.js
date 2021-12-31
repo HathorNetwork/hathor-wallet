@@ -145,6 +145,10 @@ const tokens = {
     tokenSignatures[uid] = signature;
     hathorLib.storage.setItem('wallet:token:signatures', tokenSignatures);
   },
+
+  resetTokenSignatures() {
+    hathorLib.storage.setItem('wallet:token:signatures', {});
+  },
 }
 
 export default tokens;
