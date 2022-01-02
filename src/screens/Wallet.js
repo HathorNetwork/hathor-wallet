@@ -126,6 +126,10 @@ class Wallet extends React.Component {
     const promise = tokens.unregisterToken(this.props.selectedToken);
     promise.then(() => {
       $('#unregisterModal').modal('hide');
+      if (hathorLib.wallet.isHardwareWallet()) {
+        // delete signature if it exists
+        tokens.removeTokenSignature(this.props.selectedToken.uid);
+      }
     }, (e) => {
       this.unregisterModalRef.current.updateErrorMessage(e.message);
     });
