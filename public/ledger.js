@@ -387,7 +387,7 @@ class Ledger {
    *   List of data with the format:
    *     version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
    *
-   * @return {Promise} Promise resolved when signature is received
+   * @return {Promise} Promise resolved when all requests finish
    */
   sendTokens = async (tokens) => {
     const values = [];
@@ -413,7 +413,7 @@ class Ledger {
    * @param {Object} data Data to send to Ledger
    *   version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
    *
-   * @return {Promise} Promise resolved when signature is received
+   * @return {Promise} Promise resolved when Ledger request finishes
    */
   verifyTokenSignature = async (data) => {
     try {
@@ -427,15 +427,12 @@ class Ledger {
   /**
    * Reset token signatures
    *
-   * @param {Object} data Data to send to Ledger
-   *   version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
-   *
-   * @return {Promise} Promise resolved when signature is received
+   * @return {Promise} Promise resolved when signatures are reset on Ledger
    */
   resetTokenSignatures = async () => {
     try {
       const transport = await this.getTransport();
-      await this.sendToLedgerOrQueue(transport, this.commands.RESET_TOKEN_SIGNATURES, 0, 0, data);
+      await this.sendToLedgerOrQueue(transport, this.commands.RESET_TOKEN_SIGNATURES, 0, 0);
     } catch (e) {
       throw Ledger.parseLedgerError(e);
     }

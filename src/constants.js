@@ -193,3 +193,8 @@ export const NFT_GUIDE_URL = 'https://hathor.network/nft-guide';
  * How many token meta we are downloading concurrently
  */
 export const METADATA_CONCURRENT_DOWNLOAD = 10;
+
+/**
+ * Token version
+ */
+export const TOKEN_VERSION = 1;

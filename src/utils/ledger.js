@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { IPC_RENDERER } from '../constants';
+import { IPC_RENDERER, TOKEN_VERSION } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
 
 /**
@@ -34,12 +34,14 @@ const formatPathData = (index) => {
   return buffer;
 };
 
-const intToByte = (number) => {
-  const buf = Buffer.alloc(1);
-  buf[0] = number;
-  return buf;
-}
 
+/**
+ * Serialize token information to an array of Buffer
+ *
+ * @return {Array} Array of Buffers
+ *
+ * @memberof Ledger
+ */
 export const serializeTokenInfo = (token, hasSignature) => {
   // version + uid + len(symbol) + symbol + len(name) + name
   const uidBytes = Buffer.from(token.uid, "hex");
@@ -48,14 +50,14 @@ export const serializeTokenInfo = (token, hasSignature) => {
   const arr = [];
 
   // 0: token version = 1 (always)
-  arr.push(intToByte(1));
+  arr.push(hathorLib.helpersUtils.intToBytes(TOKEN_VERSION, 1));
   // 1: uid bytes (length is fixed 32 bytes)
   arr.push(uidBytes);
   // 2, 3: symbol length + bytes
-  arr.push(intToByte(symbolBytes.length));
+  arr.push(hathorLib.helpersUtils.intToBytes(symbolBytes.length, 1));
   arr.push(symbolBytes);
   // 4, 5: name length + bytes
-  arr.push(intToByte(nameBytes.length));
+  arr.push(hathorLib.helpersUtils.intToBytes(nameBytes.length, 1));
   arr.push(nameBytes);
 
   if (hasSignature) {
