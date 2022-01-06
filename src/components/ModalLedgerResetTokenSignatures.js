@@ -74,7 +74,7 @@ function ModalLedgerResetTokenSignatures() {
 
   // useEffect second parameter [] ensures this runs only once
   useEffect(() => {
-    $(`#${modalId}`).on('hide.bs.modal', (e) => {
+    $(`#${modalId}`).on('hidden.bs.modal', (e) => {
       // clean state when closing
       initialState();
       // remove ledger listeners when closing
