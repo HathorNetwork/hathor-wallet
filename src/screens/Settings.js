@@ -169,7 +169,7 @@ class Settings extends React.Component {
             <p><strong>{t`Allow notifications:`}</strong> {this.state.isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={this.toggleNotificationSettings}> {t`Change`} </a></p>
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
             <button className="btn btn-hathor" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
-            {hathorLib.wallet.isHardwareWallet() && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens`}</button> }
+            {hathorLib.wallet.isHardwareWallet() && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
         </div>

@@ -13,13 +13,13 @@ import { IPC_RENDERER } from '../constants';
 import { t } from 'ttag';
 
 /**
- * Component that shows a modal to add one specific unknown token to the wallet
+ * Component shows a modal to reset all token signatures and handle interaction with ledger
  *
  * @memberof Components
  */
 function ModalLedgerResetTokenSignatures() {
   const modalId = "resetTokenSignatures";
-  const [onLedger, blockClose] = useState(false);
+  const [waitingLedger, setWaitingLedger] = useState(false);
   const [errorMessage, setError] = useState(null);
 
   const closeModal = () => {
@@ -27,19 +27,18 @@ function ModalLedgerResetTokenSignatures() {
   }
 
   const initialState = () => {
-    blockClose(false);
+    setWaitingLedger(false);
     setError(null);
   }
 
   /**
    * Method called when user clicks the button to reset token signatures
    *
-   * @param {Object} e Event emitted when user clicks the button
    */
   const handleSend = () => {
     setError(null);
     // send command to ledger
-    blockClose(true);
+    setWaitingLedger(true);
     ledger.resetTokenSignatures();
   }
 
@@ -52,8 +51,7 @@ function ModalLedgerResetTokenSignatures() {
    * @param {Object} arg Data returned from the reset token signatures call
    */
   const handleSignatureReset = (event, arg) => {
-    console.log('handleSignature', event, arg);
-    blockClose(false);
+    setWaitingLedger(false);
     if (arg.success) {
       // clean signatures and close on ok
       tokens.resetTokenSignatures();
@@ -104,7 +102,11 @@ function ModalLedgerResetTokenSignatures() {
 
   const renderFooter = () => {
     // Don't render the footer separator if there is no footer
-    if (onLedger) return null;
+    if (waitingLedger) return (
+      <div className="modal-footer">
+        <p>{t`Waiting for Ledger...`}</p>
+      </div>
+    );
 
     return (
       <div className="modal-footer">
@@ -121,7 +123,9 @@ function ModalLedgerResetTokenSignatures() {
       <div className="flex align-items-center">
         <div className='d-flex flex-column align-items-start justify-content-between token-detail-top'>
           <div className='d-flex flex-column justify-content-between mr-3'>
-            <p className="mt-2 mb-2">{t`This action will untrust all tokens on Ledger, you will need to confirm the token information on Ledger again to use it on transactions`}</p>
+            <p className="mt-2 mb-2">
+              {t`This will only remove the verification that Ledger trusts all tokens from you wallet but it won't have any effect in your balance or history. You can only execute this action for all tokens, so if you decide to use any token after that you will need to verify it again with Ledger.`}
+            </p>
           </div>
         </div>
       </div>

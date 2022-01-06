@@ -14,7 +14,6 @@ import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
 import ModalBackupWords from '../components/ModalBackupWords';
 import ModalConfirm from '../components/ModalConfirm';
-import ModalLedgerResetTokenSignatures from '../components/ModalLedgerResetTokenSignatures';
 import TokenBar from '../components/TokenBar';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import TokenAdministrative from '../components/TokenAdministrative';
@@ -106,13 +105,6 @@ class Wallet extends React.Component {
   }
 
   /**
-   * Called when user clicks to untrust all tokens, then opens the modal
-   */
-  untrustClicked = () => {
-    $('#resetTokenSignatures').modal('show');
-  }
-
-  /**
    * Called when user clicks to unregister the token, then opens the modal
    */
   unregisterClicked = () => {
@@ -126,10 +118,6 @@ class Wallet extends React.Component {
     const promise = tokens.unregisterToken(this.props.selectedToken);
     promise.then(() => {
       $('#unregisterModal').modal('hide');
-      if (hathorLib.wallet.isHardwareWallet()) {
-        // delete signature if it exists
-        tokens.removeTokenSignature(this.props.selectedToken.uid);
-      }
     }, (e) => {
       this.unregisterModalRef.current.updateErrorMessage(e.message);
     });
@@ -255,25 +243,14 @@ class Wallet extends React.Component {
       )
     }
 
-    const renderNameAndActions = () => {
-      if (hathorLib.tokens.isHathorToken(this.props.selectedToken)) return (
-        <p className='token-name mb-0'><strong>{token ? token.name : ''}</strong></p>
-      );
-
-      return (
-        <p className='token-name mb-0'>
-          <strong>{token ? token.name : ''}</strong>
-          <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>
-          {hathorLib.wallet.isHardwareWallet() && <i className="fa fa-bomb pointer ml-3" title={t`Untrust all tokens`} onClick={this.untrustClicked}></i>}
-        </p>
-      );
-    }
-
     const renderUnlockedWallet = () => {
       return (
         <div className='wallet-wrapper'>
           <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
-            {renderNameAndActions()}
+            <p className='token-name mb-0'>
+              <strong>{token ? token.name : ''}</strong>
+              {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>}
+            </p>
           </div>
           {renderTokenData(token)}
         </div>
@@ -297,7 +274,6 @@ class Wallet extends React.Component {
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title={t`Unregister token`} body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
-        {hathorLib.wallet.isHardwareWallet() && <ModalLedgerResetTokenSignatures />}
       </div>
     );
   }

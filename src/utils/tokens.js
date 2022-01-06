@@ -137,6 +137,9 @@ const tokens = {
    * Add a token signature to storage, overwriting if exists
    * This is only used for hw wallets.
    *
+   * @param {string} uid hex value of the token uid
+   * @param {string} signature hex value of the signature
+   *
    * @memberof Tokens
    * @inner
    */
@@ -151,8 +154,10 @@ const tokens = {
   },
 
   /**
-   * Add a token signature to storage, overwriting if exists
+   * Remove a token signature from storage
    * This is only used for hw wallets.
+   *
+   * @param {string} uid hex value of the token uid to be removed
    *
    * @memberof Tokens
    * @inner
