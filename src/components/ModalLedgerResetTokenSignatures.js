@@ -20,6 +20,7 @@ import { t } from 'ttag';
 function ModalLedgerResetTokenSignatures() {
   const modalId = "resetTokenSignatures";
   const [waitingLedger, setWaitingLedger] = useState(false);
+  const [showOk, setOk] = useState(false);
   const [errorMessage, setError] = useState(null);
 
   const closeModal = () => {
@@ -29,6 +30,7 @@ function ModalLedgerResetTokenSignatures() {
   const initialState = () => {
     setWaitingLedger(false);
     setError(null);
+    setOk(false);
   }
 
   /**
@@ -55,7 +57,8 @@ function ModalLedgerResetTokenSignatures() {
     if (arg.success) {
       // clean signatures and close on ok
       tokens.resetTokenSignatures();
-      $(`#${modalId}`).modal('hide');
+      // Show ok message
+      setOk(true);
     } else {
       switch (arg.error.status) {
         // user deny
@@ -110,7 +113,7 @@ function ModalLedgerResetTokenSignatures() {
 
     return (
       <div className="modal-footer">
-        <button type="button" className="btn btn-hathor" onClick={handleSend}>{t`Start`}</button>
+        {!showOk && <button type="button" className="btn btn-hathor" onClick={handleSend}>{t`Start`}</button>}
         <button onClick={closeModal} type="button" className="btn btn-secondary">{t`Close`}</button>
       </div>
     );
@@ -119,6 +122,7 @@ function ModalLedgerResetTokenSignatures() {
   const renderMessage = () => {
     // If there is error, don't show message
     if (errorMessage !== null) return null;
+    if (showOk) return <label>{t`Custom tokens on Ledger were reset!`}</label>
     return (
       <div className="flex align-items-center">
         <div className='d-flex flex-column align-items-start justify-content-between token-detail-top'>
