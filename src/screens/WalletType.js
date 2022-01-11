@@ -13,7 +13,7 @@ import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
 import ledger from '../utils/ledger';
 import helpers from '../utils/helpers';
-import { LEDGER_GUIDE_URL, IPC_RENDERER, HATHOR_WEBSITE_URL } from '../constants';
+import { LEDGER_GUIDE_URL, IPC_RENDERER, HATHOR_WEBSITE_URL, LEDGER_MIN_VERSION, LEDGER_MAX_VERSION } from '../constants';
 import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
 import { str2jsx } from '../utils/i18n';
