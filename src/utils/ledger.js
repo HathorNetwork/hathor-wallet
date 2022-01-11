@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { IPC_RENDERER, TOKEN_VERSION } from '../constants';
+import { IPC_RENDERER, LEDGER_TOKEN_VERSION } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
 
 /**
@@ -38,6 +38,9 @@ const formatPathData = (index) => {
 /**
  * Serialize token information to an array of Buffer
  *
+ * @param {Object} token, with uid, symbol and name (optionally with signature)
+ * @param {boolean} hasSignature to indicate if we should add the signature buffer
+ *
  * @return {Array} Array of Buffers
  *
  * @memberof Ledger
@@ -50,7 +53,7 @@ export const serializeTokenInfo = (token, hasSignature) => {
   const arr = [];
 
   // 0: token version = 1 (always)
-  arr.push(hathorLib.helpersUtils.intToBytes(TOKEN_VERSION, 1));
+  arr.push(hathorLib.helpersUtils.intToBytes(LEDGER_TOKEN_VERSION, 1));
   // 1: uid bytes (length is fixed 32 bytes)
   arr.push(uidBytes);
   // 2, 3: symbol length + bytes

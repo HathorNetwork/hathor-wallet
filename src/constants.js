@@ -195,6 +195,6 @@ export const NFT_GUIDE_URL = 'https://hathor.network/nft-guide';
 export const METADATA_CONCURRENT_DOWNLOAD = 10;
 
 /**
- * Token version
+ * Ledger token version to use when sending a token to ledger
  */
-export const TOKEN_VERSION = 1;
+export const LEDGER_TOKEN_VERSION = 1;
