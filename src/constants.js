@@ -198,3 +198,14 @@ export const METADATA_CONCURRENT_DOWNLOAD = 10;
  * Ledger token version to use when sending a token to ledger
  */
 export const LEDGER_TOKEN_VERSION = 1;
+
+/**
+ * Min Ledger app version supported by this wallet
+ */
+export const LEDGER_MIN_VERSION = '1.0.0';
+
+/**
+ * Max Ledger app version supported by this wallet
+ * Obs: max not inclusive, so we do NOT support this version
+ */
+export const LEDGER_MAX_VERSION = '1.1.0';

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag'
+import semvercmp from 'semver-compare';
 
 import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
@@ -70,6 +71,16 @@ class WalletType extends React.Component {
    */
   handleVersion = (event, arg) => {
     if (arg.success) {
+      // compare ledger version with our min version
+      let version = arg.data.slice(3, 6).join('.');
+      if (
+        semvercmp(version, LEDGER_MIN_VERSION) < 0 ||
+        semvercmp(version, LEDGER_MAX_VERSION) >= 0
+      ) {
+        // unsupported version
+        this.setState({ errorMessage: t`Unsupported Ledger app version` });
+        return;
+      }
       // We wait 2 seconds to update the message on the screen
       // so the user don't see the screen updating fast
       setTimeout(() => {
