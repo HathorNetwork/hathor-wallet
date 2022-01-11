@@ -74,8 +74,7 @@ class Root extends React.Component {
           // remove all invalid signatures
           // arg.data is a list of uids with invalid signatures
           arg.data.forEach(uid => {
-            // XXX: test if we have to turn uid into hex string
-            tokens.removeTokenSignature(uid);
+            tokens.removeTokenSignature(uid.toString('hex'));
           });
         }
       });
