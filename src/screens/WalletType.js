@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { t } from 'ttag'
-import semvercmp from 'semver-compare';
 
 import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
@@ -74,8 +73,8 @@ class WalletType extends React.Component {
       // compare ledger version with our min version
       let version = arg.data.slice(3, 6).join('.');
       if (
-        semvercmp(version, LEDGER_MIN_VERSION) < 0 ||
-        semvercmp(version, LEDGER_MAX_VERSION) >= 0
+        helpers.cmpVersionString(version, LEDGER_MIN_VERSION) < 0 ||
+        helpers.cmpVersionString(version, LEDGER_MAX_VERSION) >= 0
       ) {
         // unsupported version
         this.setState({ errorMessage: t`Unsupported Ledger app version` });
