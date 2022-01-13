@@ -69,7 +69,7 @@ class Root extends React.Component {
         }
       });
 
-      IPC_RENDERER.on("ledger:manyTokenSignatureValid", (event, arg) => {
+      IPC_RENDERER.on('ledger:manyTokenSignatureValid', (event, arg) => {
         if (hathorLib.wallet.isHardwareWallet()) {
           // remove all invalid signatures
           // arg.data is a list of uids with invalid signatures
