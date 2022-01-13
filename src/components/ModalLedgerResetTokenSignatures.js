@@ -113,7 +113,7 @@ function ModalLedgerResetTokenSignatures() {
 
     return (
       <div className="modal-footer">
-        {!showOk && <button type="button" className="btn btn-hathor" onClick={handleSend}>{t`Start`}</button>}
+        {!showOk && <button type="button" className="btn btn-hathor" onClick={handleSend}>{ errorMessage === null ? t`Start` : t`Try again` }</button>}
         <button onClick={closeModal} type="button" className="btn btn-secondary">{t`Close`}</button>
       </div>
     );
