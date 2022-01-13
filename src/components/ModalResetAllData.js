@@ -22,7 +22,7 @@ class ModalResetAllData extends React.Component {
   /**
    * errorMessage {string} Message to be shown to the user in case of error in the form
    */
-  state = { errorMessage: '' };
+  state = { errorMessage: '', forgotPassword: false };
 
   /**
    * Method to be called when user clicks the button to confirm  
@@ -32,24 +32,58 @@ class ModalResetAllData extends React.Component {
    */
   handleConfirm = (e) => {
     e.preventDefault();
+
+    // Form is invalid
     if (this.refs.formConfirm.checkValidity() === false) {
-      this.refs.formConfirm.classList.add('was-validated');
-    } else {
-      this.refs.formConfirm.classList.remove('was-validated');
-      const password = this.refs.password.value;
-      const forgotPassword = this.refs.forgotPassword.checked;
-      if (password && !hathorLib.wallet.isPasswordCorrect(password)) {
-        this.setState({errorMessage: t`Invalid password`})
-      } else if (!password && !forgotPassword) {
-        this.setState({errorMessage: t`You must write your password or check that you have forgotten it`});
-      } else {
-        if (this.refs.confirmMessage.value.toLowerCase() === CONFIRM_RESET_MESSAGE.toLowerCase()) {
-          this.props.success();
-        } else {
-          this.setState({errorMessage: t`Confirm message does not match`})
-        }
-      }
+      this.refs.formConfirm.classList.add('was-validated')
+      return
     }
+
+    this.refs.formConfirm.classList.remove('was-validated')
+    const password = this.refs.password.value
+    const forgotPassword = this.state.forgotPassword
+
+    // Confirmation message was incorrect
+    if (this.refs.confirmMessage.value.toLowerCase() !== CONFIRM_RESET_MESSAGE.toLowerCase()) {
+      this.setState({errorMessage: t`Confirmation message does not match`})
+      return
+    }
+
+    // Password was not informed nor did the user forget it
+    if (!password && !forgotPassword) {
+      this.setState({errorMessage: t`You must write your password or check that you have forgotten it`})
+      return
+    }
+
+    // Password was informed and it is incorrect
+    const correctPassword = hathorLib.wallet.isPasswordCorrect(password)
+    if (password && !correctPassword) {
+      this.setState({errorMessage: t`Invalid password`})
+      return
+    }
+
+    // Password was informed and correct OR password was forgotten: we can proceed to wallet reset.
+    this.props.success()
+  }
+
+  setForgotPassword = (e) => {
+    this.setState(state => ({forgotPassword: !state.forgotPassword}))
+
+    // Clearing password field if the user did forget it
+    if (!this.state.forgotPassword) {
+      this.refs.password.value = ''
+    }
+  }
+
+  onDismiss = (e) => {
+    // Form cleanup
+    this.refs.formConfirm.classList.remove('was-validated')
+    this.refs.password.value = ''
+    this.refs.confirmMessage.value = ''
+    this.setState({
+      forgotPassword: false,
+      errorMessage: ''
+    })
   }
 
   render() {
@@ -76,14 +110,16 @@ class ModalResetAllData extends React.Component {
               <form ref="formConfirm">
                 <div className="form-group">
                   <label htmlFor="password">{t`Password*`}</label>
-                  <input type="password" ref="password" autoComplete="off" className="pin-input form-control" />
+                  <input type="password" ref="password" autoComplete="off" className="pin-input form-control"
+                         disabled={this.state.forgotPassword} required={!this.state.forgotPassword} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="confirmMessage">{t`Confirm message*`}</label>
                   <input type="text" ref="confirmMessage" placeholder={t`Write '${CONFIRM_RESET_MESSAGE}'`} className="form-control" required />
                 </div>
                 <div className="form-check">
-                  <input ref="forgotPassword" type="checkbox" className="form-check-input" id="forgotPassword" />
+                  <input ref="forgotPassword" type="checkbox" className="form-check-input" id="forgotPassword"
+                         checked={this.state.forgotPassword} onChange={this.setForgotPassword}/>
                   <label className="form-check-label" htmlFor="forgotPassword">{t`I forgot my password`}</label>
                 </div>
               </form>
@@ -96,7 +132,7 @@ class ModalResetAllData extends React.Component {
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`No`}</button>
+              <button onClick={this.onDismiss} type="button" className="btn btn-secondary" data-dismiss="modal">{t`No`}</button>
               <button onClick={this.handleConfirm} type="button" className="btn btn-hathor">{t`Yes`}</button>
             </div>
           </div>

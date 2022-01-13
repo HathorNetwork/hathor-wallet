@@ -1085,7 +1085,7 @@ msgid "You must write your password or check that you have forgotten it"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:49
-msgid "Confirm message does not match"
+msgid "Confirmation message does not match"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:57
