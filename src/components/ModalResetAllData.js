@@ -20,7 +20,8 @@ import SpanFmt from './SpanFmt';
  */
 class ModalResetAllData extends React.Component {
   /**
-   * errorMessage {string} Message to be shown to the user in case of error in the form
+   * @property {string} errorMessage Message to be shown to the user in case of error in the form
+   * @property {boolean} [forgotPassword] Identifies if the user has forgotten their password
    */
   state = { errorMessage: '', forgotPassword: false };
 
@@ -66,6 +67,11 @@ class ModalResetAllData extends React.Component {
     this.props.success()
   }
 
+  /**
+   * Method to be called when user clicks the "Forgot Password" checkbox
+   * In case the user forgot the password, the "Password" field is disabled and cleared
+   * @param {Object} e Event emitted when checkbox is clicked
+   */
   setForgotPassword = (e) => {
     this.setState(state => ({forgotPassword: !state.forgotPassword}))
 
@@ -75,6 +81,11 @@ class ModalResetAllData extends React.Component {
     }
   }
 
+  /**
+   * Method to be called when user closes the modal with the "No" button
+   * Clears the form validation and fields.
+   * @param {Object} e Event emitted when button is clicked
+   */
   onDismiss = (e) => {
     // Form cleanup
     this.refs.formConfirm.classList.remove('was-validated')
