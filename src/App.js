@@ -144,7 +144,8 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
 }
 
 /**
- * Decides which screen to open at application start according to current state.
+ * Build the selected route component, validating the wallet state and the route security parameters needed for it.
+ * In case any criteria wasn't met, redirect to the relevant route.
  *
  * @param Component
  * @param props
