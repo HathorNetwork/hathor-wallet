@@ -2,7 +2,7 @@
 MIT License
 
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
-Original from: https://github.com/sindresorhus/electron-context-menu
+Original from: https://github.com/sindresorhus/electron-context-menu/releases/tag/v3.1.1
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documen
     tation files (the "Software"), to deal in the Software without restriction, including without limitation the rights
