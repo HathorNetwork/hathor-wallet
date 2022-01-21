@@ -20,8 +20,6 @@ Original from: https://github.com/sindresorhus/electron-context-menu/releases/ta
 const electron = require('electron');
 // const cliTruncate = require('cli-truncate');
 // const {download} = require('electron-dl');
-// const isDev = require('electron-is-dev');
-const isDev = false; // Switch this as necessary
 
 const webContents = win => win.webContents || (win.id && win);
 
@@ -218,7 +216,7 @@ const create = (win, options) => {
             })
         };
 
-        const shouldShowInspectElement = typeof options.showInspectElement === 'boolean' ? options.showInspectElement : isDev;
+        const shouldShowInspectElement = typeof options.showInspectElement === 'boolean' ? options.showInspectElement : false;
 
         function word(suggestion) {
             return {
