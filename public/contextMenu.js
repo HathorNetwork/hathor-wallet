@@ -18,8 +18,6 @@ Original from: https://github.com/sindresorhus/electron-context-menu/releases/ta
     OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 const electron = require('electron');
-// const cliTruncate = require('cli-truncate');
-// const {download} = require('electron-dl');
 
 const webContents = win => win.webContents || (win.id && win);
 
@@ -53,40 +51,10 @@ const create = (win, options) => {
 
         const {editFlags} = props;
         const hasText = props.selectionText.trim().length > 0;
-        const isLink = Boolean(props.linkURL);
         const can = type => editFlags[`can${type}`] && hasText;
 
         const defaultActions = {
             separator: () => ({type: 'separator'}),
-            learnSpelling: decorateMenuItem({
-                id: 'learnSpelling',
-                label: '&Learn Spelling',
-                visible: Boolean(props.isEditable && hasText && props.misspelledWord),
-                click() {
-                    const target = webContents(win);
-                    target.session.addWordToSpellCheckerDictionary(props.misspelledWord);
-                }
-            }),
-            lookUpSelection: decorateMenuItem({
-                id: 'lookUpSelection',
-                label: 'Look Up “{selection}”',
-                visible: process.platform === 'darwin' && hasText && !isLink,
-                click() {
-                    if (process.platform === 'darwin') {
-                        webContents(win).showDefinitionForSelection();
-                    }
-                }
-            }),
-            searchWithGoogle: decorateMenuItem({
-                id: 'searchWithGoogle',
-                label: '&Search with Google',
-                visible: hasText,
-                click() {
-                    const url = new URL('https://www.google.com/search');
-                    url.searchParams.set('q', props.selectionText);
-                    electron.shell.openExternal(url.toString());
-                }
-            }),
             cut: decorateMenuItem({
                 id: 'cut',
                 label: 'Cu&t',
@@ -136,67 +104,6 @@ const create = (win, options) => {
                     }
                 }
             }),
-            // saveImage: decorateMenuItem({
-            //     id: 'saveImage',
-            //     label: 'Save I&mage',
-            //     visible: props.mediaType === 'image',
-            //     click(menuItem) {
-            //         props.srcURL = menuItem.transform ? menuItem.transform(props.srcURL) : props.srcURL;
-            //         download(win, props.srcURL);
-            //     }
-            // }),
-            // saveImageAs: decorateMenuItem({
-            //     id: 'saveImageAs',
-            //     label: 'Sa&ve Image As…',
-            //     visible: props.mediaType === 'image',
-            //     click(menuItem) {
-            //         props.srcURL = menuItem.transform ? menuItem.transform(props.srcURL) : props.srcURL;
-            //         download(win, props.srcURL, {saveAs: true});
-            //     }
-            // }),
-            copyLink: decorateMenuItem({
-                id: 'copyLink',
-                label: 'Copy Lin&k',
-                visible: props.linkURL.length > 0 && props.mediaType === 'none',
-                click(menuItem) {
-                    props.linkURL = menuItem.transform ? menuItem.transform(props.linkURL) : props.linkURL;
-
-                    electron.clipboard.write({
-                        bookmark: props.linkText,
-                        text: props.linkURL
-                    });
-                }
-            }),
-            // saveLinkAs: decorateMenuItem({
-            //     id: 'saveLinkAs',
-            //     label: 'Save Link As…',
-            //     visible: props.linkURL.length > 0 && props.mediaType === 'none',
-            //     click(menuItem) {
-            //         props.linkURL = menuItem.transform ? menuItem.transform(props.linkURL) : props.linkURL;
-            //         download(win, props.linkURL, {saveAs: true});
-            //     }
-            // }),
-            copyImage: decorateMenuItem({
-                id: 'copyImage',
-                label: 'Cop&y Image',
-                visible: props.mediaType === 'image',
-                click() {
-                    webContents(win).copyImageAt(props.x, props.y);
-                }
-            }),
-            copyImageAddress: decorateMenuItem({
-                id: 'copyImageAddress',
-                label: 'C&opy Image Address',
-                visible: props.mediaType === 'image',
-                click(menuItem) {
-                    props.srcURL = menuItem.transform ? menuItem.transform(props.srcURL) : props.srcURL;
-
-                    electron.clipboard.write({
-                        bookmark: props.srcURL,
-                        text: props.srcURL
-                    });
-                }
-            }),
             inspect: () => ({
                 id: 'inspect',
                 label: 'I&nspect Element',
@@ -208,66 +115,18 @@ const create = (win, options) => {
                     }
                 }
             }),
-            services: () => ({
-                id: 'services',
-                label: 'Services',
-                role: 'services',
-                visible: process.platform === 'darwin' && (props.isEditable || hasText)
-            })
         };
 
         const shouldShowInspectElement = typeof options.showInspectElement === 'boolean' ? options.showInspectElement : false;
 
-        function word(suggestion) {
-            return {
-                id: 'dictionarySuggestions',
-                label: suggestion,
-                visible: Boolean(props.isEditable && hasText && props.misspelledWord),
-                click(menuItem) {
-                    const target = webContents(win);
-                    target.replaceMisspelling(menuItem.label);
-                }
-            };
-        }
-
         let dictionarySuggestions = [];
-        if (hasText && props.misspelledWord && props.dictionarySuggestions.length > 0) {
-            dictionarySuggestions = props.dictionarySuggestions.map(suggestion => word(suggestion));
-        } else {
-            dictionarySuggestions.push(
-                {
-                    id: 'dictionarySuggestions',
-                    label: 'No Guesses Found',
-                    visible: Boolean(hasText && props.misspelledWord),
-                    enabled: false
-                }
-            );
-        }
 
         let menuTemplate = [
-            dictionarySuggestions.length > 0 && defaultActions.separator(),
-            ...dictionarySuggestions,
-            defaultActions.separator(),
-            defaultActions.learnSpelling(),
-            defaultActions.separator(),
-            options.showLookUpSelection !== false && defaultActions.lookUpSelection(),
-            defaultActions.separator(),
-            options.showSearchWithGoogle !== false && defaultActions.searchWithGoogle(),
-            defaultActions.separator(),
             defaultActions.cut(),
             defaultActions.copy(),
             defaultActions.paste(),
             defaultActions.separator(),
-            options.showSaveImage && defaultActions.saveImage(),
-            options.showSaveImageAs && defaultActions.saveImageAs(),
-            options.showCopyImage !== false && defaultActions.copyImage(),
-            options.showCopyImageAddress && defaultActions.copyImageAddress(),
-            defaultActions.separator(),
-            defaultActions.copyLink(),
-            options.showSaveLinkAs && defaultActions.saveLinkAs(),
-            defaultActions.separator(),
             shouldShowInspectElement && defaultActions.inspect(),
-            options.showServices && defaultActions.services(),
             defaultActions.separator()
         ];
 
@@ -291,8 +150,6 @@ const create = (win, options) => {
             }
         }
 
-        // Filter out leading/trailing separators
-        // TODO: https://github.com/electron/electron/issues/5869
         menuTemplate = removeUnusedMenuItems(menuTemplate);
 
         for (const menuItem of menuTemplate) {
@@ -300,12 +157,6 @@ const create = (win, options) => {
             if (options.labels && options.labels[menuItem.id]) {
                 menuItem.label = options.labels[menuItem.id];
             }
-
-            // Replace placeholders in menu item labels
-            // if (typeof menuItem.label === 'string' && menuItem.label.includes('{selection}')) {
-            //     const selectionString = typeof props.selectionText === 'string' ? props.selectionText.trim() : '';
-            //     menuItem.label = menuItem.label.replace('{selection}', cliTruncate(selectionString, 25).replace(/&/g, '&&'));
-            // }
         }
 
         if (menuTemplate.length > 0) {

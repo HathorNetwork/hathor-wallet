@@ -44,9 +44,8 @@ const debugMode = (
 
 // Creates the context menu on mouse right-click for allowing copy/paste and other configurable actions
 contextMenu({
-  menu: (actions, props, browserWindow, dictionarySuggestions) => {
+  menu: (actions) => {
     return [
-        ...dictionarySuggestions,
         actions.separator(),
         actions.copy({}),
         actions.paste({}),
