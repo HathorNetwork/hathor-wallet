@@ -21,87 +21,90 @@ const electron = require('electron');
 
 const webContents = win => win.webContents || (win.id && win);
 
-const decorateMenuItem = menuItem => {
-  return (options = {}) => {
-    if (options.transform && !options.click) {
-      menuItem.transform = options.transform;
-    }
-
-    return menuItem;
-  };
-};
-
+/**
+ * Removes menuItems that are not being used
+ * @param menuTemplate
+ * @returns {*}
+ */
 const removeUnusedMenuItems = menuTemplate => {
   let notDeletedPreviousElement;
 
   return menuTemplate
-    .filter(menuItem => menuItem !== undefined && menuItem !== false && menuItem.visible !== false && menuItem.visible !== '')
-    .filter((menuItem, index, array) => {
-      const toDelete = menuItem.type === 'separator' && (!notDeletedPreviousElement || index === array.length - 1 || array[index + 1].type === 'separator');
-      notDeletedPreviousElement = toDelete ? notDeletedPreviousElement : menuItem;
-      return !toDelete;
-    });
+    .filter(menuItem => {
+      // First rules to remove an item
+      return menuItem.visible !== false && menuItem.visible !== '';
+    })
 };
 
+/**
+ * Creates a function that handles context menu events and adds it to the window listener.
+ * Returns another function to dispose of this listener.
+ * @param {Electron.BrowserWindow} win
+ * @param {ContextMenuOptions} options
+ * @returns {(function(): void)|*} A function to dispose of the context-menu listener
+ */
 const create = (win, options) => {
+  /**
+   * A function to handle Electron.BrowserWindow "context-menu" events
+   * Builds all the relevant menuItems for the current context.
+   * @param {Event} event
+   * @param {Record<string,unknown>} props
+   */
   const handleContextMenu = (event, props) => {
-    if (typeof options.shouldShowMenu === 'function' && options.shouldShowMenu(event, props) === false) {
-      return;
-    }
-
+    /**
+     * Flags that inform if the field can be copied from and pasted to ( e.g.: Can't copy from password )
+     */
     const {editFlags} = props;
     const hasText = props.selectionText.trim().length > 0;
+
+    /**
+     * Helps identify if the user can copy/cut from a field. No text means false.
+     * @param {'Cut'|'Copy'} type
+     * @returns {*|boolean} If truthy, can Copy/Cut
+     */
     const can = type => editFlags[`can${type}`] && hasText;
 
+    // Map of functions that create the default menuItems
     const defaultActions = {
       separator: () => ({type: 'separator'}),
-      cut: decorateMenuItem({
+      cut: () => ({
         id: 'cut',
-        label: 'Cu&t',
+        label: 'Cu&t', // The "&" represents that the next letter will be the keyboard shortcut for this item
         enabled: can('Cut'),
         visible: props.isEditable,
-        click(menuItem) {
+        click() {
           const target = webContents(win);
 
-          if (!menuItem.transform && target) {
+          if (target) {
             target.cut();
           } else {
-            props.selectionText = menuItem.transform ? menuItem.transform(props.selectionText) : props.selectionText;
             electron.clipboard.writeText(props.selectionText);
           }
         }
       }),
-      copy: decorateMenuItem({
+      copy: () => ({
         id: 'copy',
         label: '&Copy',
         enabled: can('Copy'),
         visible: props.isEditable || hasText,
-        click(menuItem) {
+        click() {
           const target = webContents(win);
 
-          if (!menuItem.transform && target) {
+          if (target) {
             target.copy();
           } else {
-            props.selectionText = menuItem.transform ? menuItem.transform(props.selectionText) : props.selectionText;
             electron.clipboard.writeText(props.selectionText);
           }
         }
       }),
-      paste: decorateMenuItem({
+      paste: () => ({
         id: 'paste',
         label: '&Paste',
         enabled: editFlags.canPaste,
         visible: props.isEditable,
-        click(menuItem) {
+        click() {
           const target = webContents(win);
-
-          if (menuItem.transform) {
-            let clipboardContent = electron.clipboard.readText(props.selectionText);
-            clipboardContent = menuItem.transform ? menuItem.transform(clipboardContent) : clipboardContent;
-            target.insertText(clipboardContent);
-          } else {
-            target.paste();
-          }
+          target.paste();
         }
       }),
       inspect: () => ({
@@ -119,55 +122,35 @@ const create = (win, options) => {
 
     const shouldShowInspectElement = typeof options.showInspectElement === 'boolean' ? options.showInspectElement : false;
 
-    let dictionarySuggestions = [];
-
+    // Build a default menu template
     let menuTemplate = [
       defaultActions.cut(),
       defaultActions.copy(),
       defaultActions.paste(),
-      defaultActions.separator(),
-      shouldShowInspectElement && defaultActions.inspect(),
-      defaultActions.separator()
     ];
 
-    if (options.menu) {
-      menuTemplate = options.menu(defaultActions, props, win, dictionarySuggestions, event);
+    // If on debug mode, show the "Inspect" button too
+    if (shouldShowInspectElement) {
+      menuTemplate.push(defaultActions.separator())
+      menuTemplate.push(defaultActions.inspect())
     }
 
-    if (options.prepend) {
-      const result = options.prepend(defaultActions, props, win, event);
-
-      if (Array.isArray(result)) {
-        menuTemplate.unshift(...result);
-      }
-    }
-
-    if (options.append) {
-      const result = options.append(defaultActions, props, win, event);
-
-      if (Array.isArray(result)) {
-        menuTemplate.push(...result);
-      }
-    }
-
+    // Remove items that are not relevant for this context
     menuTemplate = removeUnusedMenuItems(menuTemplate);
 
-    for (const menuItem of menuTemplate) {
-      // Apply custom labels for default menu items
-      if (options.labels && options.labels[menuItem.id]) {
-        menuItem.label = options.labels[menuItem.id];
-      }
-    }
-
+    // Only render if there are elements remaining
     if (menuTemplate.length > 0) {
       const menu = electron.Menu.buildFromTemplate(menuTemplate);
       menu.popup(win);
     }
   };
 
+  // Adds the above function to the context-menu listener for handling mouse right-clicks
   webContents(win).on('context-menu', handleContextMenu);
 
+  // Returns a function that allows for disposal of the listener
   return () => {
+    // No need to dispose if the window that contained the listener was already destroyed
     if (win.isDestroyed()) {
       return;
     }
@@ -176,22 +159,43 @@ const create = (win, options) => {
   };
 };
 
+/**
+ * @typedef ContextMenuOptions
+ * @property {boolean} showInspectElement If true, the "Inspect" option will be shown on the Context Menu
+ */
+
+/**
+ * This library creates a function that handles "context menu" events for an Electron.BrowserWindow.
+ *
+ * @param {ContextMenuOptions} options
+ * @returns {function} A function with no parameters that allows for disposal of every resource allocated for the ContextMenu.
+ */
 module.exports = (options = {}) => {
+  // Process validation
   if (process.type === 'renderer') {
     throw new Error('Cannot use electron-context-menu in the renderer process!');
   }
 
+  // Handles the state of all disposables, variables and event listeners
   let isDisposed = false;
   const disposables = [];
 
+  /**
+   * Initializes the event listeners and the ContextMenu itself
+   * @param {Electron.BrowserWindow} win
+   * @returns {void}
+    */
   const init = win => {
+    // Avoid re-instantiating when the listeners were already disposed
     if (isDisposed) {
       return;
     }
 
+    // The create function returns an element that should persist on memory but be disposed at window close
     const disposeMenu = create(win, options);
-
     disposables.push(disposeMenu);
+
+    // Creates a new function to remove the contextMenu from the array of disposables when executed
     const removeDisposable = () => {
       const index = disposables.indexOf(disposeMenu);
       if (index !== -1) {
@@ -199,6 +203,7 @@ module.exports = (options = {}) => {
       }
     };
 
+    // Makes sure this function will be called at window close
     if (typeof win.once !== 'undefined') { // Support for BrowserView
       win.once('closed', removeDisposable);
     }
@@ -208,51 +213,37 @@ module.exports = (options = {}) => {
     });
   };
 
+  /**
+   * Disposes of all listeners and avoid future initialization of this object
+   * @returns {void}
+   */
   const dispose = () => {
+    // Disposes of each event listener on the disposables array
     for (const dispose of disposables) {
       dispose();
     }
 
+    // Clears the array and signals the disposal
     disposables.length = 0;
     isDisposed = true;
   };
 
-  if (options.window) {
-    const win = options.window;
-
-    // When window is a webview that has not yet finished loading webContents is not available
-    if (webContents(win) === undefined) {
-      const onDomReady = () => {
-        init(win);
-      };
-
-      const listenerFunction = win.addEventListener || win.addListener;
-      listenerFunction('dom-ready', onDomReady, {once: true});
-
-      disposables.push(() => {
-        win.removeEventListener('dom-ready', onDomReady, {once: true});
-      });
-
-      return dispose;
-    }
-
-    init(win);
-
-    return dispose;
-  }
-
+  // Initializes the listeners on all available windows
   for (const win of electron.BrowserWindow.getAllWindows()) {
     init(win);
   }
 
+  // Function to be called on window creation event
   const onWindowCreated = (event, win) => {
     init(win);
   };
 
+  // Associating function to event listener
   electron.app.on('browser-window-created', onWindowCreated);
   disposables.push(() => {
     electron.app.removeListener('browser-window-created', onWindowCreated);
   });
 
+  // Returns to the caller a function that allows for disposal of every resource allocated for the ContextMenu.
   return dispose;
 };
