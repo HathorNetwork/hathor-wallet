@@ -22,237 +22,237 @@ const electron = require('electron');
 const webContents = win => win.webContents || (win.id && win);
 
 const decorateMenuItem = menuItem => {
-    return (options = {}) => {
-        if (options.transform && !options.click) {
-            menuItem.transform = options.transform;
-        }
+  return (options = {}) => {
+    if (options.transform && !options.click) {
+      menuItem.transform = options.transform;
+    }
 
-        return menuItem;
-    };
+    return menuItem;
+  };
 };
 
 const removeUnusedMenuItems = menuTemplate => {
-    let notDeletedPreviousElement;
+  let notDeletedPreviousElement;
 
-    return menuTemplate
-        .filter(menuItem => menuItem !== undefined && menuItem !== false && menuItem.visible !== false && menuItem.visible !== '')
-        .filter((menuItem, index, array) => {
-            const toDelete = menuItem.type === 'separator' && (!notDeletedPreviousElement || index === array.length - 1 || array[index + 1].type === 'separator');
-            notDeletedPreviousElement = toDelete ? notDeletedPreviousElement : menuItem;
-            return !toDelete;
-        });
+  return menuTemplate
+    .filter(menuItem => menuItem !== undefined && menuItem !== false && menuItem.visible !== false && menuItem.visible !== '')
+    .filter((menuItem, index, array) => {
+      const toDelete = menuItem.type === 'separator' && (!notDeletedPreviousElement || index === array.length - 1 || array[index + 1].type === 'separator');
+      notDeletedPreviousElement = toDelete ? notDeletedPreviousElement : menuItem;
+      return !toDelete;
+    });
 };
 
 const create = (win, options) => {
-    const handleContextMenu = (event, props) => {
-        if (typeof options.shouldShowMenu === 'function' && options.shouldShowMenu(event, props) === false) {
-            return;
+  const handleContextMenu = (event, props) => {
+    if (typeof options.shouldShowMenu === 'function' && options.shouldShowMenu(event, props) === false) {
+      return;
+    }
+
+    const {editFlags} = props;
+    const hasText = props.selectionText.trim().length > 0;
+    const can = type => editFlags[`can${type}`] && hasText;
+
+    const defaultActions = {
+      separator: () => ({type: 'separator'}),
+      cut: decorateMenuItem({
+        id: 'cut',
+        label: 'Cu&t',
+        enabled: can('Cut'),
+        visible: props.isEditable,
+        click(menuItem) {
+          const target = webContents(win);
+
+          if (!menuItem.transform && target) {
+            target.cut();
+          } else {
+            props.selectionText = menuItem.transform ? menuItem.transform(props.selectionText) : props.selectionText;
+            electron.clipboard.writeText(props.selectionText);
+          }
         }
+      }),
+      copy: decorateMenuItem({
+        id: 'copy',
+        label: '&Copy',
+        enabled: can('Copy'),
+        visible: props.isEditable || hasText,
+        click(menuItem) {
+          const target = webContents(win);
 
-        const {editFlags} = props;
-        const hasText = props.selectionText.trim().length > 0;
-        const can = type => editFlags[`can${type}`] && hasText;
-
-        const defaultActions = {
-            separator: () => ({type: 'separator'}),
-            cut: decorateMenuItem({
-                id: 'cut',
-                label: 'Cu&t',
-                enabled: can('Cut'),
-                visible: props.isEditable,
-                click(menuItem) {
-                    const target = webContents(win);
-
-                    if (!menuItem.transform && target) {
-                        target.cut();
-                    } else {
-                        props.selectionText = menuItem.transform ? menuItem.transform(props.selectionText) : props.selectionText;
-                        electron.clipboard.writeText(props.selectionText);
-                    }
-                }
-            }),
-            copy: decorateMenuItem({
-                id: 'copy',
-                label: '&Copy',
-                enabled: can('Copy'),
-                visible: props.isEditable || hasText,
-                click(menuItem) {
-                    const target = webContents(win);
-
-                    if (!menuItem.transform && target) {
-                        target.copy();
-                    } else {
-                        props.selectionText = menuItem.transform ? menuItem.transform(props.selectionText) : props.selectionText;
-                        electron.clipboard.writeText(props.selectionText);
-                    }
-                }
-            }),
-            paste: decorateMenuItem({
-                id: 'paste',
-                label: '&Paste',
-                enabled: editFlags.canPaste,
-                visible: props.isEditable,
-                click(menuItem) {
-                    const target = webContents(win);
-
-                    if (menuItem.transform) {
-                        let clipboardContent = electron.clipboard.readText(props.selectionText);
-                        clipboardContent = menuItem.transform ? menuItem.transform(clipboardContent) : clipboardContent;
-                        target.insertText(clipboardContent);
-                    } else {
-                        target.paste();
-                    }
-                }
-            }),
-            inspect: () => ({
-                id: 'inspect',
-                label: 'I&nspect Element',
-                click() {
-                    win.inspectElement(props.x, props.y);
-
-                    if (webContents(win).isDevToolsOpened()) {
-                        webContents(win).devToolsWebContents.focus();
-                    }
-                }
-            }),
-        };
-
-        const shouldShowInspectElement = typeof options.showInspectElement === 'boolean' ? options.showInspectElement : false;
-
-        let dictionarySuggestions = [];
-
-        let menuTemplate = [
-            defaultActions.cut(),
-            defaultActions.copy(),
-            defaultActions.paste(),
-            defaultActions.separator(),
-            shouldShowInspectElement && defaultActions.inspect(),
-            defaultActions.separator()
-        ];
-
-        if (options.menu) {
-            menuTemplate = options.menu(defaultActions, props, win, dictionarySuggestions, event);
+          if (!menuItem.transform && target) {
+            target.copy();
+          } else {
+            props.selectionText = menuItem.transform ? menuItem.transform(props.selectionText) : props.selectionText;
+            electron.clipboard.writeText(props.selectionText);
+          }
         }
+      }),
+      paste: decorateMenuItem({
+        id: 'paste',
+        label: '&Paste',
+        enabled: editFlags.canPaste,
+        visible: props.isEditable,
+        click(menuItem) {
+          const target = webContents(win);
 
-        if (options.prepend) {
-            const result = options.prepend(defaultActions, props, win, event);
-
-            if (Array.isArray(result)) {
-                menuTemplate.unshift(...result);
-            }
+          if (menuItem.transform) {
+            let clipboardContent = electron.clipboard.readText(props.selectionText);
+            clipboardContent = menuItem.transform ? menuItem.transform(clipboardContent) : clipboardContent;
+            target.insertText(clipboardContent);
+          } else {
+            target.paste();
+          }
         }
+      }),
+      inspect: () => ({
+        id: 'inspect',
+        label: 'I&nspect Element',
+        click() {
+          win.inspectElement(props.x, props.y);
 
-        if (options.append) {
-            const result = options.append(defaultActions, props, win, event);
-
-            if (Array.isArray(result)) {
-                menuTemplate.push(...result);
-            }
+          if (webContents(win).isDevToolsOpened()) {
+            webContents(win).devToolsWebContents.focus();
+          }
         }
-
-        menuTemplate = removeUnusedMenuItems(menuTemplate);
-
-        for (const menuItem of menuTemplate) {
-            // Apply custom labels for default menu items
-            if (options.labels && options.labels[menuItem.id]) {
-                menuItem.label = options.labels[menuItem.id];
-            }
-        }
-
-        if (menuTemplate.length > 0) {
-            const menu = electron.Menu.buildFromTemplate(menuTemplate);
-            menu.popup(win);
-        }
+      }),
     };
 
-    webContents(win).on('context-menu', handleContextMenu);
+    const shouldShowInspectElement = typeof options.showInspectElement === 'boolean' ? options.showInspectElement : false;
 
-    return () => {
-        if (win.isDestroyed()) {
-            return;
-        }
+    let dictionarySuggestions = [];
 
-        webContents(win).removeListener('context-menu', handleContextMenu);
-    };
+    let menuTemplate = [
+      defaultActions.cut(),
+      defaultActions.copy(),
+      defaultActions.paste(),
+      defaultActions.separator(),
+      shouldShowInspectElement && defaultActions.inspect(),
+      defaultActions.separator()
+    ];
+
+    if (options.menu) {
+      menuTemplate = options.menu(defaultActions, props, win, dictionarySuggestions, event);
+    }
+
+    if (options.prepend) {
+      const result = options.prepend(defaultActions, props, win, event);
+
+      if (Array.isArray(result)) {
+        menuTemplate.unshift(...result);
+      }
+    }
+
+    if (options.append) {
+      const result = options.append(defaultActions, props, win, event);
+
+      if (Array.isArray(result)) {
+        menuTemplate.push(...result);
+      }
+    }
+
+    menuTemplate = removeUnusedMenuItems(menuTemplate);
+
+    for (const menuItem of menuTemplate) {
+      // Apply custom labels for default menu items
+      if (options.labels && options.labels[menuItem.id]) {
+        menuItem.label = options.labels[menuItem.id];
+      }
+    }
+
+    if (menuTemplate.length > 0) {
+      const menu = electron.Menu.buildFromTemplate(menuTemplate);
+      menu.popup(win);
+    }
+  };
+
+  webContents(win).on('context-menu', handleContextMenu);
+
+  return () => {
+    if (win.isDestroyed()) {
+      return;
+    }
+
+    webContents(win).removeListener('context-menu', handleContextMenu);
+  };
 };
 
 module.exports = (options = {}) => {
-    if (process.type === 'renderer') {
-        throw new Error('Cannot use electron-context-menu in the renderer process!');
+  if (process.type === 'renderer') {
+    throw new Error('Cannot use electron-context-menu in the renderer process!');
+  }
+
+  let isDisposed = false;
+  const disposables = [];
+
+  const init = win => {
+    if (isDisposed) {
+      return;
     }
 
-    let isDisposed = false;
-    const disposables = [];
+    const disposeMenu = create(win, options);
 
-    const init = win => {
-        if (isDisposed) {
-            return;
-        }
-
-        const disposeMenu = create(win, options);
-
-        disposables.push(disposeMenu);
-        const removeDisposable = () => {
-            const index = disposables.indexOf(disposeMenu);
-            if (index !== -1) {
-                disposables.splice(index, 1);
-            }
-        };
-
-        if (typeof win.once !== 'undefined') { // Support for BrowserView
-            win.once('closed', removeDisposable);
-        }
-
-        disposables.push(() => {
-            win.off('closed', removeDisposable);
-        });
+    disposables.push(disposeMenu);
+    const removeDisposable = () => {
+      const index = disposables.indexOf(disposeMenu);
+      if (index !== -1) {
+        disposables.splice(index, 1);
+      }
     };
 
-    const dispose = () => {
-        for (const dispose of disposables) {
-            dispose();
-        }
-
-        disposables.length = 0;
-        isDisposed = true;
-    };
-
-    if (options.window) {
-        const win = options.window;
-
-        // When window is a webview that has not yet finished loading webContents is not available
-        if (webContents(win) === undefined) {
-            const onDomReady = () => {
-                init(win);
-            };
-
-            const listenerFunction = win.addEventListener || win.addListener;
-            listenerFunction('dom-ready', onDomReady, {once: true});
-
-            disposables.push(() => {
-                win.removeEventListener('dom-ready', onDomReady, {once: true});
-            });
-
-            return dispose;
-        }
-
-        init(win);
-
-        return dispose;
+    if (typeof win.once !== 'undefined') { // Support for BrowserView
+      win.once('closed', removeDisposable);
     }
 
-    for (const win of electron.BrowserWindow.getAllWindows()) {
-        init(win);
-    }
-
-    const onWindowCreated = (event, win) => {
-        init(win);
-    };
-
-    electron.app.on('browser-window-created', onWindowCreated);
     disposables.push(() => {
-        electron.app.removeListener('browser-window-created', onWindowCreated);
+      win.off('closed', removeDisposable);
     });
+  };
+
+  const dispose = () => {
+    for (const dispose of disposables) {
+      dispose();
+    }
+
+    disposables.length = 0;
+    isDisposed = true;
+  };
+
+  if (options.window) {
+    const win = options.window;
+
+    // When window is a webview that has not yet finished loading webContents is not available
+    if (webContents(win) === undefined) {
+      const onDomReady = () => {
+        init(win);
+      };
+
+      const listenerFunction = win.addEventListener || win.addListener;
+      listenerFunction('dom-ready', onDomReady, {once: true});
+
+      disposables.push(() => {
+        win.removeEventListener('dom-ready', onDomReady, {once: true});
+      });
+
+      return dispose;
+    }
+
+    init(win);
 
     return dispose;
+  }
+
+  for (const win of electron.BrowserWindow.getAllWindows()) {
+    init(win);
+  }
+
+  const onWindowCreated = (event, win) => {
+    init(win);
+  };
+
+  electron.app.on('browser-window-created', onWindowCreated);
+  disposables.push(() => {
+    electron.app.removeListener('browser-window-created', onWindowCreated);
+  });
+
+  return dispose;
 };
