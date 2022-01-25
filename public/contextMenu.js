@@ -27,8 +27,6 @@ const webContents = win => win.webContents || (win.id && win);
  * @returns {*}
  */
 const removeUnusedMenuItems = menuTemplate => {
-  let notDeletedPreviousElement;
-
   return menuTemplate
     .filter(menuItem => {
       // First rules to remove an item
