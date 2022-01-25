@@ -7,6 +7,7 @@
 
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, Tray, Menu, dialog, ipcMain} = require('electron')
+const contextMenu = require('./contextMenu')
 const Sentry = require('@sentry/electron')
 const url = require('url');
 const path = require('path');
@@ -40,6 +41,11 @@ const debugMode = (
   process.argv.indexOf('--unsafe-mode') >= 0 &&
   process.argv.indexOf('--debug') >= 0
 );
+
+// Creates the context menu on mouse right-click for allowing copy/paste and other configurable actions
+contextMenu({
+  showInspectElement: debugMode
+})
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
