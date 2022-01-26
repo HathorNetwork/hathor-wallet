@@ -193,3 +193,8 @@ export const NFT_GUIDE_URL = 'https://hathor.network/nft-guide';
  * How many token meta we are downloading concurrently
  */
 export const METADATA_CONCURRENT_DOWNLOAD = 10;
+
+/**
+ * Ledger token version to use when sending a token to ledger
+ */
+export const LEDGER_TOKEN_VERSION = 1;
