@@ -149,6 +149,32 @@ const tokens = {
     tokenSignatures[uid] = signature;
     hathorLib.storage.setItem('wallet:token:signatures', tokenSignatures);
   },
+
+  /**
+   * Overwrite token signatures, deleting all of them.
+   * This is only used for hw wallets.
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  resetTokenSignatures() {
+    hathorLib.storage.setItem('wallet:token:signatures', {});
+  },
+
+  /**
+   * Remove a token signature from storage
+   * This is only used for hw wallets.
+   *
+   * @param {string} uid hex value of the token uid to be removed
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  removeTokenSignature(uid) {
+    const tokenSignatures = this.getTokenSignatures();
+    delete tokenSignatures[uid];
+    hathorLib.storage.setItem('wallet:token:signatures', tokenSignatures);
+  },
 }
 
 export default tokens;
