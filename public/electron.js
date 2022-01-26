@@ -254,6 +254,10 @@ const ledgerMethods = {
   'checkAddress': 'address',
   'sendTx': 'txSent',
   'getSignatures': 'signatures',
+  'signToken': 'tokenSignature',
+  'sendTokens': 'tokenDataSent',
+  'verifyTokenSignature': 'tokenSignatureValid',
+  'resetTokenSignatures': 'tokenSignatureReset',
 }
 
 function addLedgerListeners(mainWindow) {
