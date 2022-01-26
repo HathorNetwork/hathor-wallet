@@ -263,6 +263,7 @@ const ledgerMethods = {
   'signToken': 'tokenSignature',
   'sendTokens': 'tokenDataSent',
   'verifyTokenSignature': 'tokenSignatureValid',
+  'verifyManyTokenSignatures': 'manyTokenSignatureValid',
   'resetTokenSignatures': 'tokenSignatureReset',
 }
 

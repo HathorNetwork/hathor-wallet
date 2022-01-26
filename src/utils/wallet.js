@@ -39,6 +39,7 @@ import {
   metadataApi
 } from '@hathor/wallet-lib';
 import version from './version';
+import ledger from './ledger';
 import { chunk } from 'lodash';
 
 let Sentry = null;
@@ -418,6 +419,26 @@ const wallet = {
     promise.then(() => {
       this.afterLoadAddressHistory();
     });
+
+    const tokenSignatures = storage.getItem('wallet:token:signatures');
+    if (tokenSignatures) {
+      const dataToken = tokens.getTokens();
+      const tokensToVerify = dataToken
+        .filter(t => tokenSignatures.includes(t.uid))
+        .map(t => {
+          const signature = tokenSignatures[t.uid];
+          return {
+            uid: t.uid,
+            name: t.name,
+            symbol: t.symbol,
+            signature: signature,
+          };
+        });
+
+      if (tokensToVerify.length !== 0) {
+        ledger.verifyManyTokenSignatures(tokensToVerify);
+      }
+    }
     return promise;
   },
 

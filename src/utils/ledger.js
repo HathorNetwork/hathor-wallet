@@ -209,6 +209,21 @@ if (IPC_RENDERER) {
     },
 
     /**
+     * Verify token signature matches the token info on ledger
+     *
+     * @param {Object} tokens
+     *  each with uid (hex), symbol, name and signature
+     *
+     * @memberof Ledger
+     * @inner
+     */
+    verifyManyTokenSignatures(tokens) {
+      const data = tokens.map(t => Buffer.concat(serializeTokenInfo(t, true)));
+
+      IPC_RENDERER.send("ledger:verifyManyTokenSignatures", data);
+    },
+
+    /**
      * Reset token signatures on ledger
      *
      * @memberof Ledger

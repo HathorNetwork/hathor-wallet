@@ -425,6 +425,32 @@ class Ledger {
   }
 
   /**
+   * Verify a token and signature with ledger
+   *
+   * @param {Object} tokens Array of data to send to Ledger
+   *   version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
+   *
+   * @return {Promise} Promise resolved when signature is received
+   */
+  verifyManyTokenSignatures = async (tokens) => {
+    const values = [];
+    try {
+      const transport = await this.getTransport();
+      for (let [index, data] of tokens.entries()) {
+        const value = await this.sendToLedgerOrQueue(transport, this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
+        // Compare response with ledger SW_OK
+        if (ledgerOK.compare(value) !== 0) {
+          // only return failures
+          values.push(data);
+        }
+      }
+      return values;
+    } catch (e) {
+      throw Ledger.parseLedgerError(e);
+    }
+  }
+
+  /**
    * Reset token signatures
    *
    * @return {Promise} Promise resolved when signatures are reset on Ledger
