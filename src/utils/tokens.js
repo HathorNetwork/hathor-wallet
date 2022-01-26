@@ -123,13 +123,14 @@ const tokens = {
    * Returns the token signatures on storage
    * This is only used for hw wallets.
    *
+   * @return {Object} Map of token uid to signatures
+   *
    * @memberof Tokens
    * @inner
    */
   getTokenSignatures() {
     const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
     if (!tokenSignatures) return {};
-    // if (tokenSignatures === null) return {};
     return tokenSignatures;
   },
 
@@ -137,8 +138,8 @@ const tokens = {
    * Add a token signature to storage, overwriting if exists
    * This is only used for hw wallets.
    *
-   * @param {string} uid hex value of the token uid
-   * @param {string} signature hex value of the signature
+   * @param {string} hex value of token uid
+   * @param {string} hex value of signature
    *
    * @memberof Tokens
    * @inner
