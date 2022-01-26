@@ -34,7 +34,6 @@ const formatPathData = (index) => {
   return buffer;
 };
 
-
 /**
  * Serialize token information to an array of Buffer
  *
@@ -70,6 +69,7 @@ export const serializeTokenInfo = (token, hasSignature) => {
 
   return arr;
 }
+
 
 let ledger = null;
 
