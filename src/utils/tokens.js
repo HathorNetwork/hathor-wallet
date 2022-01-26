@@ -135,6 +135,21 @@ const tokens = {
   },
 
   /**
+   * Returns a single token signature from storage or null if not found.
+   * This is only used for hw wallets.
+   *
+   * @param {string} uid hex value of token uid
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  getTokenSignature(uid) {
+    const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
+    if (!tokenSignatures.hasOwnProperty(uid)) return null;
+    return tokenSignatures[uid];
+  },
+
+  /**
    * Add a token signature to storage, overwriting if exists
    * This is only used for hw wallets.
    *
