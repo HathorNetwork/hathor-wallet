@@ -15,6 +15,7 @@ import _ from 'lodash';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
+import version from '../utils/version';
 
 
 const mapStateToProps = (state) => {
@@ -142,30 +143,6 @@ class SendTokensOne extends React.Component {
   }
 
   /**
-   * Validate inputs and outpus
-   * 1. If inputs were not selected, select inputs from outputs amount
-   * 2. If amount of selected inputs is larger than outputs amount, we create a change output
-   * 3. If inputs were selected, check if they are valid and add address key to input
-   */
-  validateInputsAndOutputs = (data) => {
-    const noInputs = this.noInputs.current.checked;
-    const walletData = hathorLib.wallet.getWalletData();
-    const history = 'historyTransactions' in walletData ? walletData['historyTransactions'] : {};
-    // This method is used by hardware wallet because it still uses old methods from lib for speeding the integration process
-    // the new methods expect input object with txId key but the old one expect tx_id
-    for (let input of data.inputs) {
-      input.tx_id = input.txId;
-    }
-    const result = hathorLib.wallet.prepareSendTokensData(data, this.state.selected, noInputs, history, this.state.selectedTokens);
-    if (result.success === false) {
-      this.props.updateState({ errorMessage: result.message, loading: false });
-      return null;
-    }
-
-    return result.data;
-  }
-
-  /**
    * Called when select input checkbox is clicked
    *
    * @param {Object} e Event emitted when checkbox is clicked
@@ -216,8 +193,8 @@ class SendTokensOne extends React.Component {
     const renderSelectToken = () => {
       return (
         <select className="ml-3" value={this.state.selected.uid} onChange={this.changeSelect}
-          title={hathorLib.wallet.isHardwareWallet() ? t`This feature is disabled for hardware wallet` : t`Select token`} 
-          disabled={hathorLib.wallet.isHardwareWallet() ? true : null}>
+          title={version.isLedgerCustomTokensAllowed() ? t`Select token` : t`This feature is disabled for hardware wallet`}
+          disabled={version.isLedgerCustomTokensAllowed() ? null : true}>
           {renderTokenOptions()}
         </select>
       );

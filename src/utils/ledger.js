@@ -122,23 +122,43 @@ if (IPC_RENDERER) {
      * @memberof Ledger
      * @inner
      */
-    sendTx(data, changeIndex, changeKeyIndex) {
+    sendTx(data, changeInfo, useOldProtocol) {
+      // XXX: if custom tokens not allowed, use old protocol for first change output
       // first assemble data to be sent
-      const arr = [];
-      if (changeIndex > -1) {
-        const changeBuffer = formatPathData(changeKeyIndex)
-        // encode the bit indicating existence of change and change path length on first byte
-        arr.push(hathorLib.transaction.intToBytes(0x80 | changeBuffer[0], 1))
-        // change output index on the second
-        arr.push(hathorLib.transaction.intToBytes(changeIndex, 1))
-        // Change key path of the address
-        arr.push(changeBuffer.slice(1));
+      let initialData;
+      if (useOldProtocol) {
+        // Old protocol
+        // Only allows 1 change output so the changeInfo[0] will be used if it exists
+        const arr = [];
+        if (changeInfo.length > 0) {
+          const change = changeInfo[0];
+          const changeBuffer = formatPathData(change.keyIndex)
+          // encode the bit indicating existence of change and change path length on first byte
+          arr.push(hathorLib.transaction.intToBytes(0x80 | changeBuffer[0], 1))
+          // change output index on the second
+          arr.push(hathorLib.transaction.intToBytes(change.outputIndex, 1))
+          // Change key path of the address
+          arr.push(changeBuffer.slice(1));
+        } else {
+          // no change output
+          arr.push(hathorLib.transaction.intToBytes(0, 1));
+        }
+        initialData = Buffer.concat(arr);
       } else {
-        // no change output
-        arr.push(hathorLib.transaction.intToBytes(0, 1));
+        // Protocol v1
+        // start with version byte 0x01
+        // 1 byte for length of change info
+        // each change:
+        //    - 1 byte for output index
+        //    - bip32 path (can be up to 21 bytes)
+        const arr = [Buffer.from([0x01])];
+        arr.push(hathorLib.transaction.intToBytes(changeInfo.length, 1));
+        changeInfo.forEach(change => {
+          arr.push(hathorLib.transaction.intToBytes(change.outputIndex));
+          arr.push(formatPathData(change.keyIndex));
+        });
+        initialData = Buffer.concat(arr);
       }
-
-      const initialData = Buffer.concat(arr);
       const dataBytes = hathorLib.transaction.dataToSign(data);
       const dataToSend = Buffer.concat([initialData, dataBytes]);
 

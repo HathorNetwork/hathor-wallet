@@ -133,6 +133,33 @@ const helpers = {
   getFullExplorerURL(urlPath) {
     return path.join(this.getExplorerURL(), urlPath);
   },
+
+  /**
+   * Compare 2 version strings with format X.X.X
+   * (only numbers and length must be 3)
+   * Works as a "greater than" operator
+   *
+   * @param {string} v1, first version string
+   * @param {string} v2, second version string
+   *
+   * @returns {Number} 0 if equal, 1 if v1 > v2 and -1 if v2 > v1
+   *
+   * @memberof Helpers
+   * @inner
+   */
+  cmpVersionString (v1, v2) {
+      var pv1 = v1.split('.');
+      var pv2 = v2.split('.');
+      for (var i = 0; i < 3; i++) {
+          var nv1 = Number(pv1[i]);
+          var nv2 = Number(pv2[i]);
+          if (nv1 > nv2) return 1;
+          if (nv2 > nv1) return -1;
+          if (!isNaN(nv1) && isNaN(nv2)) return 1;
+          if (isNaN(nv1) && !isNaN(nv2)) return -1;
+      }
+      return 0;
+  },
 }
 
 export default helpers;

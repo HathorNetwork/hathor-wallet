@@ -65,6 +65,24 @@ const version = {
       return false;
     }
   }
+
+  /**
+   * Checks if custom tokens are allowed.
+   *
+   * @param {Object} routerHistory History to push new path if we find no version on hw wallet.
+   *
+   * @memberof Version
+   * @inner
+   */
+  isLedgerCustomTokenAllowed() {
+    if (!hathorLib.wallet.isHardwareWallet()) {
+      // software wallet always has custom tokens allowed
+      return true;
+    }
+    const version = hathorLib.storage.getItem('ledger:version');
+    if (version !== null) return helpers.cmpVersionString(version, '1.0.1') > 0;
+    return false;
+  }
 }
 
 export default version;

@@ -18,7 +18,9 @@ import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import ModalAlert from '../components/ModalAlert';
 import SendTxHandler from '../components/SendTxHandler';
 import ledger, { LedgerError } from '../utils/ledger';
-import { IPC_RENDERER } from '../constants';
+import tokens from '../utils/tokens';
+import version from '../utils/version';
+import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT } from '../constants';
 import ReactLoading from 'react-loading';
 import colors from '../index.scss';
 
@@ -33,7 +35,7 @@ const mapStateToProps = (state) => {
 
 
 /**
- * Screen used to send tokens to another wallet.  
+ * Screen used to send tokens to another wallet.
  * Can send more than one token in the same transaction.
  *
  * @memberof Screens
@@ -44,9 +46,6 @@ class SendTokens extends React.Component {
 
     // Holds the children components references
     this.references = [React.createRef()];
-
-    // Data pending to be sent while waiting ledger signatures
-    this.pendingData = null;
 
     // Partial data while waiting tx mining to add nonce and parents
     this.data = null;
@@ -64,6 +63,8 @@ class SendTokens extends React.Component {
       txTokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
       ledgerStep: 0,
       ledgerModalTitle: t`Validate outputs on Ledger`,
+      ledgerAlertModalTitle: null,
+      ledgerAlertModalBody: null,
       data: null,
     };
   }
@@ -72,6 +73,7 @@ class SendTokens extends React.Component {
     if (IPC_RENDERER) {
       IPC_RENDERER.on("ledger:txSent", this.handleTxSent);
       IPC_RENDERER.on("ledger:signatures", this.handleSignatures);
+      IPC_RENDERER.on("ledger:tokenDataSent", this.handleSendToken);
     }
   }
 
@@ -79,11 +81,12 @@ class SendTokens extends React.Component {
     if (IPC_RENDERER) {
       IPC_RENDERER.removeAllListeners("ledger:txSent");
       IPC_RENDERER.removeAllListeners("ledger:signatures");
+      IPC_RENDERER.removeAllListeners("ledger:tokenDataSent");
     }
   }
 
   /**
-   * Handle the response of a send tx call to Ledger. 
+   * Handle the response of a send tx call to Ledger.
    *
    * @param {IpcRendererEvent} event May be used to reply to the event
    * @param {Object} arg Data returned from the send tx call
@@ -93,11 +96,11 @@ class SendTokens extends React.Component {
       this.getSignatures();
     } else {
       this.handleSendError(new LedgerError(arg.error.message));
-    } 
+    }
   }
 
   /**
-   * Handle the response of a get signatures call to Ledger. 
+   * Handle the response of a get signatures call to Ledger.
    *
    * @param {IpcRendererEvent} event May be used to reply to the event
    * @param {Object} arg Data returned from the get signatures call
@@ -105,6 +108,33 @@ class SendTokens extends React.Component {
   handleSignatures = (event, arg) => {
     if (arg.success) {
       this.onLedgerSuccess(arg.data);
+    } else {
+      this.handleSendError(new LedgerError(arg.error.message));
+    }
+  }
+
+  /**
+   * Handle the response of a send token data call to Ledger.
+   * Will list all tokens that failed verification, if all pass then start sign tx
+   *
+   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {Object} arg Data returned from the send token data call
+   */
+  handleSendToken = (event, arg) => {
+    // If a token does not pass:
+    // modal to warn and either sign or cancel (use component)
+    if (arg.success) {
+      // arg.data is a list of failed uids
+      if (arg.data.length === 0) {
+        // send cached data
+        this.executeSendLedger();
+        return;
+      }
+      // some token was invalid, it will be on arg, which ones
+      this.ledgerAlertModalTitle = t`Invalid custom tokens`
+      const tokenList = this.state.txTokens.filter(t => arg.data.includes(t.uid))
+      this.ledgerAlertModalBody = this.renderAlertTokenList(tokenList);
+      $("#ledgerAlertModal").modal('show');
     } else {
       this.handleSendError(new LedgerError(arg.error.message));
     }
@@ -126,23 +156,17 @@ class SendTokens extends React.Component {
   }
 
   /**
-   * Get inputs and outputs data from child components  
+   * Get inputs and outputs data from child components
    * Each child component holds inputs/outputs for one token
    *
    * @return {Object} Object holding all inputs and outputs {'inputs': [...], 'outputs': [...]}
    */
   getData = () => {
-    let data = {'inputs': [], 'outputs': []};
+    let data = {'inputs': [], 'outputs': [], 'tokens': []};
     for (const ref of this.references) {
       const instance = ref.current;
       let dataOne = instance.getData();
       if (!dataOne) return;
-      if (hathorLib.wallet.isHardwareWallet()) {
-        dataOne = instance.validateInputsAndOutputs(dataOne);
-        if (!dataOne) return;
-        // currently we only support HTR
-        data['tokens'] = [];
-      }
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
     }
@@ -153,20 +177,9 @@ class SendTokens extends React.Component {
    * Add signature to each input and execute send transaction
    */
   onLedgerSuccess = (signatures) => {
-    const data = this.pendingData;
-    const keys = hathorLib.wallet.getWalletData().keys;
-    for (const [index, input] of data.inputs.entries()) {
-      const signature = Buffer.from(signatures[index]);
-      const keyIndex = keys[input.address].index;
-      const pubKey = hathorLib.wallet.getPublicKey(keyIndex);
-      input['data'] = hathorLib.transaction.createInputData(signature, pubKey);
-    }
     try {
       // Prepare data and submit job to tx mining API
-      this.data = hathorLib.transaction.prepareData(data, null, {getSignature: false, completeTx: false});
-      const network = this.props.wallet.getNetworkObject();
-      const transaction = hathorLib.helpersUtils.createTxFromData(this.data, network);
-      this.sendTransaction = new hathorLib.SendTransaction({ transaction, network });
+      this.sendTransaction.prepareTxFrom(signatures);
       this.setState({ ledgerStep: 1, ledgerModalTitle: t`Sending transaction` });
     } catch(e) {
       this.handleSendError(e);
@@ -178,7 +191,7 @@ class SendTokens extends React.Component {
    */
   getSignatures = () => {
     const keys = hathorLib.wallet.getWalletData().keys;
-    ledger.getSignatures(Object.assign({}, this.pendingData), keys);
+    ledger.getSignatures(Object.assign({}, this.data), keys);
   }
 
   /**
@@ -204,32 +217,75 @@ class SendTokens extends React.Component {
   }
 
   /**
-   * Method executed to send transaction on ledger
-   * It opens the ledger modal to wait for user action on the device
+   * Method executed before sending a tx to be signed by Ledger
    *
-   * @param {Object} data Transaction data
+   * Checks if we have any custom token, if not we just send to sign
+   * If we have custom tokens we must send all tokens first
+   * When all tokens are sent we should send the tx to sign
    */
-  executeSendLedger = (data) => {
-    // Complete data with default values
-    hathorLib.transaction.completeTx(data);
+  beforeSendLedger = () => {
+    // remove HTR if present
+    const txTokens = this.state.txTokens.filter(t => !hathorLib.tokens.isHathorToken(t.uid));
 
-    // Find if tx has change output
-    const changeIndex = data.outputs.findIndex((v) => v.isChange === true);
-    let changeKeyIndex = null;
-    if (changeIndex > -1) {
-      // Find index path that generated the output address
-      const changeOutput = data.outputs[changeIndex];
-      const keys = hathorLib.wallet.getWalletData().keys;
-      changeKeyIndex = keys[changeOutput.address].index;
+    if (txTokens.length === 0) {
+      // no custom tokens, just send
+      this.executeSendLedger();
+      return;
+    }
+    // get all custom tokens, and include the signatures
+    const tokenSignatures = tokens.getTokenSignatures();
+    const missingSigs = txTokens.filter(t => !tokenSignatures.hasOwnProperty(t.uid));
+    if (missingSigs.length !== 0) {
+      // there are tokens without signatures, missingSigs
+      // set tittle and content
+      this.ledgerAlertModalTitle = t`Unverified custom tokens`
+      this.ledgerAlertModalBody = this.renderAlertTokenList(missingSigs);
+      $("#ledgerAlertModal").modal('show');
+      return;
     }
 
-    this.pendingData = data;
-    ledger.sendTx(data, changeIndex, changeKeyIndex);
+    const tokenSigs = txTokens.map(t => {
+      return {
+        uid: t.uid,
+        symbol: t.symbol,
+        name: t.name,
+        signature: tokenSignatures[t.uid],
+      };
+    });
+
+    ledger.sendTokens(tokenSigs);
+  }
+
+  /**
+   * Method executed to send transaction on ledger
+   * It opens the ledger modal to wait for user action on the device
+   */
+  executeSendLedger = () => {
+    // Complete data with default values
+    hathorLib.transaction.completeTx(this.data);
+
+    this.sendTransaction = hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, network: this.props.wallet.getNetworkObject() });
+    this.data = this.sendTransaction.prepareTxData();
+
+    const changeInfo = [];
+    const keys = hathorLib.wallet.getWalletData().keys;
+    this.data.outputs.forEach((output, outputIndex) => {
+      if (output.isChange) {
+        changeInfo.push({
+          outputIndex,
+          keyIndex: keys[output.address].index,
+        });
+      }
+    });
+
+    const useOldProtocol = !version.isLedgerCustomTokenAllowed();
+
+    ledger.sendTx(this.data, changeInfo, useOldProtocol);
     $('#alertModal').modal('show');
   }
 
   /**
-   * Method executed when user validates its PIN on the modal  
+   * Method executed when user validates its PIN on the modal
    * Checks if the form is valid, get data from child components, complete the transaction and execute API request
    */
   beforeSend = () => {
@@ -239,11 +295,11 @@ class SendTokens extends React.Component {
     if (!data) return;
     this.setState({ errorMessage: '' });
     try {
+      this.data = data;
       if (hathorLib.wallet.isSoftwareWallet()) {
-        this.data = data;
         $('#pinModal').modal('show');
       } else {
-        this.executeSendLedger(data);
+        this.beforeSendLedger();
       }
     } catch(e) {
       this.handleSendError(e);
@@ -289,14 +345,24 @@ class SendTokens extends React.Component {
   }
 
   /**
-   * Executed when user clicks to add another token to this transaction  
-   * Checks if still have a known token available that is not selected yet  
+   * Executed when user clicks to add another token to this transaction
+   * Checks if still have a known token available that is not selected yet
    * Create a new child reference with this new token
    */
   addAnotherToken = () => {
     if (hathorLib.wallet.isHardwareWallet()) {
-      $('#notSupported').modal('show');
-      return;
+      if (!version.isLedgerCustomTokenAllowed()) {
+        // Custom token not allowed for this Ledger version
+        $('#notSupported').modal('show');
+        return;
+      }
+      if (this.state.txTokens.filter(t => !hathorLib.tokens.isHathorToken(t.uid)).length === LEDGER_TX_CUSTOM_TOKEN_LIMIT) {
+        // limit is 10 custom tokens per tx
+        this.ledgerAlertModalTitle = t`Token limit reached`
+        this.ledgerAlertModalBody = <p>{t`Ledger has a limit of ${LEDGER_TX_CUSTOM_TOKEN_LIMIT} different tokens per transaction.`}</p>
+        $("#ledgerAlertModal").modal('show');
+        return;
+      }
     }
 
     if (this.state.txTokens.length === this.props.tokens.length) {
@@ -317,7 +383,7 @@ class SendTokens extends React.Component {
   }
 
   /**
-   * Called when the select of a new token has changed  
+   * Called when the select of a new token has changed
    * Used to change the selects in all other child components because the selected token can't be selected anymore
    *
    * @param {Object} selected Config of token that was selected {'name', 'symbol', 'uid'}
@@ -347,6 +413,11 @@ class SendTokens extends React.Component {
    */
   onSendTokensClicked = () => {
     this.beforeSend();
+  }
+
+  renderAlertTokenList = (tokenList) => {
+    const rows = tokenList.map(t => <li key={t.uid}><p>{t.name} (t.symbol)</p></li>)
+    return <ul>{rows}</ul>
   }
 
   render = () => {
@@ -393,6 +464,17 @@ class SendTokens extends React.Component {
       }
     }
 
+    const renderLedgerModals = () => {
+      if (hathorLib.wallet.isSoftwareWallet()) return null;
+
+      return (
+        <div>
+          <ModalAlert id="ledgerAlertModal" title={this.ledgerAlertModalTitle} body={this.ledgerAlertModalBody} buttonName={t`Close`} />
+        </div>
+      );
+    }
+
+
     return (
       <div className="content-wrapper flex align-items-center">
         <BackButton {...this.props} />
@@ -401,6 +483,7 @@ class SendTokens extends React.Component {
         <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} title={t`Sending transaction`} />
         <ModalAlertNotSupported />
         <ModalAlert title={this.state.ledgerModalTitle} showFooter={false} body={renderAlertBody()} />
+        {renderLedgerModals()}
       </div>
     );
   }
