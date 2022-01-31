@@ -64,7 +64,7 @@ const version = {
     } else {
       return false;
     }
-  }
+  },
 
   /**
    * Checks if custom tokens are allowed.

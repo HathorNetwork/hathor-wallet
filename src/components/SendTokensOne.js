@@ -193,8 +193,8 @@ class SendTokensOne extends React.Component {
     const renderSelectToken = () => {
       return (
         <select className="ml-3" value={this.state.selected.uid} onChange={this.changeSelect}
-          title={version.isLedgerCustomTokensAllowed() ? t`Select token` : t`This feature is disabled for hardware wallet`}
-          disabled={version.isLedgerCustomTokensAllowed() ? null : true}>
+          title={version.isLedgerCustomTokenAllowed() ? t`Select token` : t`This feature is disabled for hardware wallet`}
+          disabled={version.isLedgerCustomTokenAllowed() ? null : true}>
           {renderTokenOptions()}
         </select>
       );

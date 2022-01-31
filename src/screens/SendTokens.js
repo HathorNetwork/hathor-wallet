@@ -264,7 +264,7 @@ class SendTokens extends React.Component {
     // Complete data with default values
     hathorLib.transaction.completeTx(this.data);
 
-    this.sendTransaction = hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, network: this.props.wallet.getNetworkObject() });
+    this.sendTransaction = new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, network: this.props.wallet.getNetworkObject() });
     this.data = this.sendTransaction.prepareTxData();
 
     const changeInfo = [];
@@ -416,7 +416,7 @@ class SendTokens extends React.Component {
   }
 
   renderAlertTokenList = (tokenList) => {
-    const rows = tokenList.map(t => <li key={t.uid}><p>{t.name} (t.symbol)</p></li>)
+    const rows = tokenList.map(t => <li key={t.uid}><p>{t.name} ({t.symbol})</p></li>)
     return <ul>{rows}</ul>
   }
 

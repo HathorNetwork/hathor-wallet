@@ -154,7 +154,7 @@ if (IPC_RENDERER) {
         const arr = [Buffer.from([0x01])];
         arr.push(hathorLib.transaction.intToBytes(changeInfo.length, 1));
         changeInfo.forEach(change => {
-          arr.push(hathorLib.transaction.intToBytes(change.outputIndex));
+          arr.push(hathorLib.transaction.intToBytes(change.outputIndex, 1));
           arr.push(formatPathData(change.keyIndex));
         });
         initialData = Buffer.concat(arr);
