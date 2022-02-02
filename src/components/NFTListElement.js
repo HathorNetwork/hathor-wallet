@@ -39,9 +39,7 @@ class NFTListElement extends React.Component {
     // In case it's not there, we try to get from the file extension
     // mimeType will already have image/png, video/mp4, application/pdf, audio/mp3
     // so we don't need to handle anything if it's already set
-    const mimeType = this.props.nftElement.nft_media.mime_type;
-
-    let fileType = mimeType;
+    let fileType = this.props.nftElement.nft_media.mime_type;
     if (!fileType) {
       const ext = helpers.getFileExtension(file);
 
