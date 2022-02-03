@@ -35,16 +35,21 @@ class NFTListElement extends React.Component {
 
     const file = this.props.nftElement.nft_media.file;
 
-    const ext = helpers.getFileExtension(file);
+    // The metadata may have the media mime type (useful for videos and audios) because many times the file does not have an extension.
+    // In case it's not there, we try to get from the file extension
+    // mimeType will already have image/png, video/mp4, application/pdf, audio/mp3
+    // so we don't need to handle anything if it's already set
+    let fileType = this.props.nftElement.nft_media.mime_type;
+    if (!fileType) {
+      const ext = helpers.getFileExtension(file);
 
-    let fileType;
+      if (nftType === NFT_MEDIA_TYPES.audio) {
+        fileType = AUDIO_MEDIA_TYPES_BY_EXTENSION[ext];
+      }
 
-    if (nftType === NFT_MEDIA_TYPES.audio) {
-      fileType = AUDIO_MEDIA_TYPES_BY_EXTENSION[ext];
-    }
-
-    if (nftType === NFT_MEDIA_TYPES.video) {
-      fileType = VIDEO_MEDIA_TYPES_BY_EXTENSION[ext];
+      if (nftType === NFT_MEDIA_TYPES.video) {
+        fileType = VIDEO_MEDIA_TYPES_BY_EXTENSION[ext];
+      }
     }
 
     let media;
