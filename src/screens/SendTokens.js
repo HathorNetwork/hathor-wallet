@@ -179,7 +179,11 @@ class SendTokens extends React.Component {
   onLedgerSuccess = (signatures) => {
     try {
       // Prepare data and submit job to tx mining API
-      this.sendTransaction.prepareTxFrom(signatures);
+      const arr = [];
+      for (let i=0;i<signatures.length;i++) {
+        arr.push(Buffer.from(signatures[i]));
+      }
+      this.sendTransaction.prepareTxFrom(arr);
       this.setState({ ledgerStep: 1, ledgerModalTitle: t`Sending transaction` });
     } catch(e) {
       this.handleSendError(e);
@@ -261,11 +265,11 @@ class SendTokens extends React.Component {
    * It opens the ledger modal to wait for user action on the device
    */
   executeSendLedger = () => {
-    // Complete data with default values
-    hathorLib.transaction.completeTx(this.data);
-
     this.sendTransaction = new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, network: this.props.wallet.getNetworkObject() });
     this.data = this.sendTransaction.prepareTxData();
+
+    // Complete data with default values
+    hathorLib.transaction.completeTx(this.data);
 
     const changeInfo = [];
     const keys = hathorLib.wallet.getWalletData().keys;
