@@ -7,7 +7,7 @@
 
 import store from '../store/index';
 import { isVersionAllowedUpdate } from '../actions/index';
-import { FIRST_WALLET_COMPATIBLE_VERSION } from '../constants';
+import { FIRST_WALLET_COMPATIBLE_VERSION, LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION } from '../constants';
 import helpers from './helpers';
 import hathorLib from '@hathor/wallet-lib';
 
@@ -80,7 +80,7 @@ const version = {
       return true;
     }
     const version = hathorLib.storage.getItem('ledger:version');
-    if (version !== null) return helpers.cmpVersionString(version, '1.0.1') > 0;
+    if (version !== null) return helpers.cmpVersionString(version, LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION) >= 0;
     return false;
   }
 }

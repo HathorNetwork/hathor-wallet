@@ -214,3 +214,8 @@ export const LEDGER_MIN_VERSION = '1.0.0';
  * Obs: max not inclusive, so we do NOT support this version
  */
 export const LEDGER_MAX_VERSION = '1.1.0';
+
+/**
+ * First Ledger version with support for custom tokens
+ */
+export const LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION = '1.0.2'

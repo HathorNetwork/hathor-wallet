@@ -19,6 +19,7 @@ import ModalAlert from './ModalAlert.js';
 class ModalAlertNotSupported extends React.Component {
   render() {
     const renderBody = () => {
+      if (this.props.body) return this.props.body;
       return (
         <div>
           <p>{t`Unfortunately this feature is currently not supported when using a hardware wallet. If you need this feature, you can use it switching to a software wallet.`}</p>
