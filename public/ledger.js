@@ -391,20 +391,16 @@ class Ledger {
    */
   sendTokens = async (tokens) => {
     const values = [];
-    try {
-      const transport = await this.getTransport();
-      for (let [index, data] of tokens.entries()) {
-        const value = await this.sendToLedgerOrQueue(transport, this.commands.SEND_TOKEN, index, 0, data);
-        // Compare response with ledger SW_OK
-        if (ledgerOK.compare(value) !== 0) {
-          // only return failures
-          values.push(data);
-        }
+    const transport = await this.getTransport();
+    for (let [index, data] of tokens.entries()) {
+      try {
+        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TOKEN, index, 0, data);
+      } catch (e) {
+        // only return failures
+        values.push(data);
       }
-      return values;
-    } catch (e) {
-      throw Ledger.parseLedgerError(e);
     }
+    return values;
   }
 
   /**
@@ -434,20 +430,16 @@ class Ledger {
    */
   verifyManyTokenSignatures = async (tokens) => {
     const values = [];
-    try {
-      const transport = await this.getTransport();
-      for (let [index, data] of tokens.entries()) {
-        const value = await this.sendToLedgerOrQueue(transport, this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
-        // Compare response with ledger SW_OK
-        if (ledgerOK.compare(value) !== 0) {
-          // only return failures
-          values.push(data);
-        }
+    const transport = await this.getTransport();
+    for (let [index, data] of tokens.entries()) {
+      try {
+        await this.sendToLedgerOrQueue(transport, this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
+      } catch (e) {
+        // only return failures
+        values.push(data);
       }
-      return values;
-    } catch (e) {
-      throw Ledger.parseLedgerError(e);
     }
+    return values;
   }
 
   /**
