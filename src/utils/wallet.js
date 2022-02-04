@@ -181,7 +181,7 @@ const wallet = {
    */
   async fetchNewTxTokenBalance(wallet, tx) {
     const updatedBalanceMap = {};
-    const balances = wallet.getTxBalance(tx);
+    const balances = await wallet.getTxBalance(tx);
     // we now loop through all tokens present in the new tx to get the new balance
     for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
       updatedBalanceMap[tokenUid] = await this.fetchTokenBalance(wallet, tokenUid);
@@ -333,7 +333,7 @@ const wallet = {
       }
     });
 
-    wallet.on('new-tx', (tx) => {
+    wallet.on('new-tx', async (tx) => {
       let message = '';
       if (helpers.isBlock(tx)) {
         message = 'You\'ve found a new block! Click to open it.';
@@ -348,15 +348,15 @@ const wallet = {
         }
       }
       // Fetch new balance for each token in the tx and update redux
-      this.fetchNewTxTokenBalance(wallet, tx).then((updatedBalanceMap) => {
-        store.dispatch(newTx(tx, updatedBalanceMap));
-      });
+      const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
+      const updatedBalanceMap = await this.fetchNewTxTokenBalance(wallet, tx);
+      store.dispatch(newTx(tx, updatedBalanceMap, balances));
     });
 
-    wallet.on('update-tx', (tx) => {
-      this.fetchNewTxTokenBalance(wallet, tx).then((updatedBalanceMap) => {
-        store.dispatch(updateTx(tx, updatedBalanceMap));
-      });
+    wallet.on('update-tx', async (tx) => {
+      const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
+      const updatedBalanceMap = await this.fetchNewTxTokenBalance(wallet, tx);
+      store.dispatch(updateTx(tx, updatedBalanceMap, balances));
     });
 
     this.setConnectionEvents(connection, wallet);

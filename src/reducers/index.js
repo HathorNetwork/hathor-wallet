@@ -245,10 +245,9 @@ const addTxToSortedList = (tokenUid, tx, txTokenBalance, currentHistory) => {
  * because it might have been voided
  */
 const onUpdateTx = (state, action) => {
-  const { tx, updatedBalanceMap } = action.payload;
+  const { tx, updatedBalanceMap, balances } = action.payload;
 
   const updatedHistoryMap = {};
-  const balances = state.wallet.getTxBalance(tx, { includeAuthorities: true });
 
   for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
     // The only tx information that might have changed is the 'isVoided'
@@ -278,11 +277,10 @@ const onUpdateTx = (state, action) => {
  * Updates the history and balance when a new tx arrives
  */
 const onNewTx = (state, action) => {
-  const { tx, updatedBalanceMap } = action.payload;
+  const { tx, updatedBalanceMap, balances } = action.payload;
 
   const allTokens = state.allTokens;
   const updatedHistoryMap = {};
-  const balances = state.wallet.getTxBalance(tx, { includeAuthorities: true });
 
   // we now loop through all tokens present in the new tx to get the new history and balance
   for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
