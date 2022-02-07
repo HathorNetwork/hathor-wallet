@@ -220,7 +220,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Go to the token wallet screen and check that the checkmark icon is back to a key icon.
 
 1. **Ledger send tokens**
-    1. Copy 2 different addresses.
+    1. On the wallet screen copy 2 different addresses from your wallet.
     1. Click on 'Send tokens' on the top menu.
     1. Confirm that the token dropdown list can be clicked and show all tokens.
     1. Confirm the Timelock checkbox is disabled.
