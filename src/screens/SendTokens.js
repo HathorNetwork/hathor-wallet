@@ -131,9 +131,11 @@ class SendTokens extends React.Component {
         return;
       }
       // some token was invalid, it will be on arg, which ones
-      this.ledgerAlertModalTitle = t`Invalid custom tokens`
       const tokenList = this.state.txTokens.filter(t => arg.data.includes(t.uid))
-      this.ledgerAlertModalBody = this.renderAlertTokenList(tokenList);
+      this.setState({
+        ledgerAlertModalTitle: t`Invalid custom tokens`,
+        ledgerAlertModalBody: this.renderAlertTokenList(tokenList),
+      });
       $("#ledgerAlertModal").modal('show');
     } else {
       this.handleSendError(new LedgerError(arg.error.message));
@@ -242,8 +244,10 @@ class SendTokens extends React.Component {
     if (missingSigs.length !== 0) {
       // there are tokens without signatures, missingSigs
       // set tittle and content
-      this.ledgerAlertModalTitle = t`Unverified custom tokens`
-      this.ledgerAlertModalBody = this.renderAlertTokenList(missingSigs);
+      this.setState({
+        ledgerAlertModalTitle: t`Unverified custom tokens`,
+        ledgerAlertModalBody: this.renderAlertTokenList(missingSigs),
+      });
       $("#ledgerAlertModal").modal('show');
       return;
     }
@@ -362,8 +366,11 @@ class SendTokens extends React.Component {
       }
       if (this.state.txTokens.filter(t => !hathorLib.tokens.isHathorToken(t.uid)).length === LEDGER_TX_CUSTOM_TOKEN_LIMIT) {
         // limit is 10 custom tokens per tx
-        this.ledgerAlertModalTitle = t`Token limit reached`
-        this.ledgerAlertModalBody = <p>{t`Ledger has a limit of ${LEDGER_TX_CUSTOM_TOKEN_LIMIT} different tokens per transaction.`}</p>
+        const modalBody = <p>{t`Ledger has a limit of ${LEDGER_TX_CUSTOM_TOKEN_LIMIT} different tokens per transaction.`}</p>
+        this.setState({
+          ledgerAlertModalTitle: t`Token limit reached`,
+          ledgerAlertModalBody: modalBody,
+        });
         $("#ledgerAlertModal").modal('show');
         return;
       }
@@ -481,7 +488,7 @@ class SendTokens extends React.Component {
         <div>
           {!version.isLedgerCustomTokenAllowed() && <ModalAlertNotSupported body={notSupportedBody}/>}
           <ModalAlert title={this.state.ledgerModalTitle} showFooter={false} body={renderAlertBody()} />
-          <ModalAlert id="ledgerAlertModal" title={this.ledgerAlertModalTitle} body={this.ledgerAlertModalBody} buttonName={t`Close`} />
+          <ModalAlert id="ledgerAlertModal" title={this.state.ledgerAlertModalTitle} body={this.state.ledgerAlertModalBody} buttonName={t`Close`} />
         </div>
       );
     }

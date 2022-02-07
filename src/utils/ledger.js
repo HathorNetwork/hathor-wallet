@@ -208,9 +208,12 @@ if (IPC_RENDERER) {
      * @inner
      */
     sendTokens(tokens) {
-      const data = tokens.map(t => Buffer.concat(serializeTokenInfo(t, true)));
+      const tokenMap = {};
+      tokens.forEach(t => {
+        tokenMap[t.uid] = Buffer.concat(serializeTokenInfo(t, true));
+      });
 
-      IPC_RENDERER.send("ledger:sendTokens", data);
+      IPC_RENDERER.send("ledger:sendTokens", tokenMap);
     },
 
     /**
@@ -238,9 +241,12 @@ if (IPC_RENDERER) {
      * @inner
      */
     verifyManyTokenSignatures(tokens) {
-      const data = tokens.map(t => Buffer.concat(serializeTokenInfo(t, true)));
+      const tokenMap = {};
+      tokens.forEach(t => {
+        tokenMap[t.uid] = Buffer.concat(serializeTokenInfo(t, true));
+      });
 
-      IPC_RENDERER.send("ledger:verifyManyTokenSignatures", data);
+      IPC_RENDERER.send("ledger:verifyManyTokenSignatures", tokenMap);
     },
 
     /**

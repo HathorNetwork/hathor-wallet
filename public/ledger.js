@@ -383,21 +383,24 @@ class Ledger {
   /**
    * Send tokens and signatures to ledger before a tx
    *
-   * @param {Object} tokens List of data to send to ledger
-   *   List of data with the format:
+   * @param {Object} tokenMap of data to send to Ledger
+   *   keys are the token uid and values are the token info in the format:
    *     version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
    *
    * @return {Promise} Promise resolved when all requests finish
    */
-  sendTokens = async (tokens) => {
+  sendTokens = async (tokenMap) => {
     const values = [];
     const transport = await this.getTransport();
-    for (let [index, data] of tokens.entries()) {
+    let i = 0;
+    for (let [uid, data] of Object.entries(tokenMap)) {
       try {
-        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TOKEN, index, 0, data);
+        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TOKEN, i, 0, data);
       } catch (e) {
         // only return failures
-        values.push(data);
+        values.push(uid);
+      } finally {
+        i++;
       }
     }
     return values;
@@ -423,20 +426,21 @@ class Ledger {
   /**
    * Verify a token and signature with ledger
    *
-   * @param {Object} tokens Array of data to send to Ledger
-   *   version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
+   * @param {Object} tokenMap of data to send to Ledger
+   *   keys are the token uid and values are the token info in the format:
+   *     version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
    *
    * @return {Promise} Promise resolved when signature is received
    */
-  verifyManyTokenSignatures = async (tokens) => {
+  verifyManyTokenSignatures = async (tokenMap) => {
     const values = [];
     const transport = await this.getTransport();
-    for (let [index, data] of tokens.entries()) {
+    for (let [uid, data] of Object.entries(tokenMap)) {
       try {
         await this.sendToLedgerOrQueue(transport, this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
       } catch (e) {
         // only return failures
-        values.push(data);
+        values.push(uid);
       }
     }
     return values;
