@@ -201,7 +201,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Click on 'Generate new address' and validate it has changed.
     1. Confirm again address on the wallet and on Ledger (by clicking 'Show full address').
 
-1. Ledger custom token wallet screen
+1. **Ledger custom token wallet screen**
     1. On the main wallet screen get another address and send any amount of a custom token to this address.
     1. Register the token and go to the token wallet screen.
     1. Check that there is a key icon next to it's name and click the key icon.
@@ -212,7 +212,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Try to sign the token again but this time click both buttons on the "Accept" step, a success message should show on the wallet.
     1. After closing the modal, check that that the key icon is now an unclicable checkmark icon and hovering shows the message "Token signed with Ledger".
 
-1. Ledger reset token signature
+1. **Ledger reset token signature**
     1. Go to settings and click the button "Untrust all tokens on Ledger".
     1. Read the message and click "Start", the device should show "Reset token signatures".
     1. Click both buttons on the "Reject" step and check that an error message appears on the wallet.
