@@ -401,48 +401,6 @@ const wallet = {
   },
 
   /*
-   * Start the wallet and load its data from an xpub
-   *
-   * @param {String} xpub The xpub string from the wallet we're loading
-   *
-   * @return {Promise} Promise that resolves when finishes loading address history
-   * @memberof Wallet
-   * @inner
-   */
-  startHardwareWallet(xpub) {
-    store.dispatch(loadingAddresses(true));
-    const accessData = {
-      xpubkey: xpub,
-      from_xpub: true,
-    }
-    const promise = oldWalletUtil.startWallet(accessData, true);
-    promise.then(() => {
-      this.afterLoadAddressHistory();
-    });
-
-    const tokenSignatures = storage.getItem('wallet:token:signatures');
-    if (tokenSignatures) {
-      const dataToken = tokens.getTokens();
-      const tokensToVerify = dataToken
-        .filter(t => tokenSignatures.includes(t.uid))
-        .map(t => {
-          const signature = tokenSignatures[t.uid];
-          return {
-            uid: t.uid,
-            name: t.name,
-            symbol: t.symbol,
-            signature: signature,
-          };
-        });
-
-      if (tokensToVerify.length !== 0) {
-        ledger.verifyManyTokenSignatures(tokensToVerify);
-      }
-    }
-    return promise;
-  },
-
-  /*
    * Update localStorage and redux when a new tx arrive in the websocket
    *
    * @param {Object} data Object with data of the new tx
