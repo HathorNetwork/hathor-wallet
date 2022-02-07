@@ -240,6 +240,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. On Ledger you should check that each token is being sent to the correct address then click both buttons on the 'Approve' screen.
     1. After transaction is completed, it closes the modal and goes back to main wallet screen. The first transaction on the list must have value 0.00.
     1. Click on the first transaction and confirm that it has 4 outputs. The extra 2 outputs are change outputs and should be marked with 'Your address'.
+    1. Close the wallet and open it again, check the custom token screen of the token used on the last transaction. Make sure that there is a checkmark icon next to the token name.
 
 1. **Ledger misc**
     1. Go to the settings screen.
