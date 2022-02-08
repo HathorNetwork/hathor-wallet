@@ -125,11 +125,10 @@ if (IPC_RENDERER) {
     sendTx(data, changeInfo, useOldProtocol) {
       // XXX: if custom tokens not allowed, use old protocol for first change output
       // first assemble data to be sent
-      let initialData;
+      const arr = [];
       if (useOldProtocol) {
         // Old protocol
         // Only allows 1 change output so the changeInfo[0] will be used if it exists
-        const arr = [];
         if (changeInfo.length > 0) {
           const change = changeInfo[0];
           const changeBuffer = formatPathData(change.keyIndex)
@@ -143,7 +142,6 @@ if (IPC_RENDERER) {
           // no change output
           arr.push(hathorLib.transaction.intToBytes(0, 1));
         }
-        initialData = Buffer.concat(arr);
       } else {
         // Protocol v1
         // start with version byte 0x01
@@ -151,14 +149,14 @@ if (IPC_RENDERER) {
         // each change:
         //    - 1 byte for output index
         //    - bip32 path (can be up to 21 bytes)
-        const arr = [Buffer.from([0x01])];
+        arr.push(Buffer.from([0x01]));
         arr.push(hathorLib.transaction.intToBytes(changeInfo.length, 1));
         changeInfo.forEach(change => {
           arr.push(hathorLib.transaction.intToBytes(change.outputIndex, 1));
           arr.push(formatPathData(change.keyIndex));
         });
-        initialData = Buffer.concat(arr);
       }
+      const initialData = Buffer.concat(arr);
       const dataBytes = hathorLib.transaction.dataToSign(data);
       const dataToSend = Buffer.concat([initialData, dataBytes]);
 

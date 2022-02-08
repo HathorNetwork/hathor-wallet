@@ -384,7 +384,7 @@ class Ledger {
    * Send tokens and signatures to ledger before a tx
    *
    * @param {Object} tokenMap of data to send to Ledger
-   *   keys are the token uid and values are the token info in the format:
+   *   keys are the token uid and values are the token info serialized as Buffer in the format:
    *     version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
    *
    * @return {Promise} Promise resolved when all requests finish
@@ -427,7 +427,7 @@ class Ledger {
    * Verify a token and signature with ledger
    *
    * @param {Object} tokenMap of data to send to Ledger
-   *   keys are the token uid and values are the token info in the format:
+   *   keys are the token uid and values are the token info serialized as Buffer in the format:
    *     version + uid + len(symbol) + symbol + len(name) + name + len(signature) + signature
    *
    * @return {Promise} Promise resolved when signature is received

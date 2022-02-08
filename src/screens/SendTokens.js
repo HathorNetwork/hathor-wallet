@@ -478,15 +478,17 @@ class SendTokens extends React.Component {
     const renderLedgerModals = () => {
       if (hathorLib.wallet.isSoftwareWallet()) return null;
 
-      let notSupportedBody = (
-        <div>
-          <p>{t`Unfortunately this feature is not supported with the Hathor app version on your Ledger device. If you need this feature, you can use it by installing the most recent Hathor app.`}</p>
-        </div>
+      let notSupportedModal = (
+        <ModalAlertNotSupported>
+          <div>
+            <p>{t`Unfortunately this feature is not supported with the Hathor app version on your Ledger device. If you need this feature, you can use it by installing the most recent Hathor app.`}</p>
+          </div>
+        </ModalAlertNotSupported>
       );
 
       return (
         <div>
-          {!version.isLedgerCustomTokenAllowed() && <ModalAlertNotSupported body={notSupportedBody}/>}
+          {!version.isLedgerCustomTokenAllowed() && notSupportedModal}
           <ModalAlert title={this.state.ledgerModalTitle} showFooter={false} body={renderAlertBody()} />
           <ModalAlert id="ledgerAlertModal" title={this.state.ledgerAlertModalTitle} body={this.state.ledgerAlertModalBody} buttonName={t`Close`} />
         </div>

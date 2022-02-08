@@ -147,7 +147,7 @@ const helpers = {
    * @memberof Helpers
    * @inner
    */
-  cmpVersionString (v1, v2) {
+  cmpVersionString(v1, v2) {
       var pv1 = v1.split('.');
       var pv2 = v2.split('.');
       for (var i = 0; i < 3; i++) {

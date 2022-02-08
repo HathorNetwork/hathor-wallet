@@ -67,9 +67,7 @@ const version = {
   },
 
   /**
-   * Checks if custom tokens are allowed.
-   *
-   * @param {Object} routerHistory History to push new path if we find no version on hw wallet.
+   * Checks if custom tokens are allowed on the current Ledger device.
    *
    * @memberof Version
    * @inner
