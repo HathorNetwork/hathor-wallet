@@ -11,6 +11,7 @@ import { t } from 'ttag'
 import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
 import ledger from '../utils/ledger';
+import version from '../utils/version';
 import helpers from '../utils/helpers';
 import { LEDGER_GUIDE_URL, IPC_RENDERER, HATHOR_WEBSITE_URL } from '../constants';
 import SpanFmt from '../components/SpanFmt';
@@ -118,6 +119,27 @@ class WalletType extends React.Component {
 
       wallet.startWallet(null, '', null, '', this.props.history, false, xpub);
       hathorLib.wallet.markBackupAsDone();
+
+      const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
+      if (tokenSignatures) {
+        const dataToken = hathorLib.tokens.getTokens();
+        const tokensToVerify = dataToken
+          .filter(t => tokenSignatures[t.uid] != undefined)
+          .map(t => {
+            const signature = tokenSignatures[t.uid];
+            return {
+              uid: t.uid,
+              name: t.name,
+              symbol: t.symbol,
+              signature: signature,
+            };
+          });
+
+        if (version.isLedgerCustomTokenAllowed() && tokensToVerify.length !== 0) {
+          ledger.verifyManyTokenSignatures(tokensToVerify);
+        }
+      }
+
       this.props.history.push('/wallet/');
     } else {
       // Error
