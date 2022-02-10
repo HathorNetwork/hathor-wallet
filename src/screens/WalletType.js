@@ -13,7 +13,7 @@ import wallet from '../utils/wallet';
 import ledger from '../utils/ledger';
 import version from '../utils/version';
 import helpers from '../utils/helpers';
-import { LEDGER_GUIDE_URL, IPC_RENDERER, HATHOR_WEBSITE_URL } from '../constants';
+import { LEDGER_GUIDE_URL, IPC_RENDERER, HATHOR_WEBSITE_URL, LEDGER_MIN_VERSION, LEDGER_MAX_VERSION } from '../constants';
 import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
 import { str2jsx } from '../utils/i18n';
@@ -71,6 +71,17 @@ class WalletType extends React.Component {
    */
   handleVersion = (event, arg) => {
     if (arg.success) {
+      // compare ledger version with our min version
+      const version = arg.data.slice(3, 6).join('.');
+      hathorLib.storage.setItem('ledger:version', version);
+      if (
+        helpers.cmpVersionString(version, LEDGER_MIN_VERSION) < 0 ||
+        helpers.cmpVersionString(version, LEDGER_MAX_VERSION) >= 0
+      ) {
+        // unsupported version
+        this.setState({ errorMessage: t`Unsupported Ledger app version` });
+        return;
+      }
       // We wait 2 seconds to update the message on the screen
       // so the user don't see the screen updating fast
       setTimeout(() => {
