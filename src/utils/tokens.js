@@ -144,7 +144,7 @@ const tokens = {
    * @inner
    */
   getTokenSignature(uid) {
-    const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
+    const tokenSignatures = this.getTokenSignatures();
     if (!tokenSignatures.hasOwnProperty(uid)) return null;
     return tokenSignatures[uid];
   },
