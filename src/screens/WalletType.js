@@ -146,7 +146,7 @@ class WalletType extends React.Component {
             };
           });
 
-        if (version.isLedgerCustomTokenAllowed() && tokensToVerify.length !== 0) {
+        if (hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && tokensToVerify.length !== 0) {
           ledger.verifyManyTokenSignatures(tokensToVerify);
         }
       }

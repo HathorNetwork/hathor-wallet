@@ -488,7 +488,7 @@ class SendTokens extends React.Component {
 
       return (
         <div>
-          {!version.isLedgerCustomTokenAllowed() && notSupportedModal}
+          {hathorLib.wallet.isHardwareWallet() && !version.isLedgerCustomTokenAllowed() && notSupportedModal}
           <ModalAlert title={this.state.ledgerModalTitle} showFooter={false} body={renderAlertBody()} />
           <ModalAlert id="ledgerAlertModal" title={this.state.ledgerAlertModalTitle} body={this.state.ledgerAlertModalBody} buttonName={t`Close`} />
         </div>
