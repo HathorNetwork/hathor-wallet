@@ -275,7 +275,7 @@ class Wallet extends React.Component {
             <p className='token-name mb-0'>
               <strong>{token ? token.name : ''}</strong>
               {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>}
-              {version.isLedgerCustomTokenAllowed() && renderSignTokenIcon()}
+              {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && renderSignTokenIcon()}
             </p>
           </div>
           {renderTokenData(token)}
@@ -305,7 +305,7 @@ class Wallet extends React.Component {
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title={t`Unregister token`} body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
-        {version.isLedgerCustomTokenAllowed() && <ModalLedgerSignToken token={token} modalId="signTokenDataModal" cb={updateTokenSignature} />}
+        {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && <ModalLedgerSignToken token={token} modalId="signTokenDataModal" cb={updateTokenSignature} />}
       </div>
     );
   }

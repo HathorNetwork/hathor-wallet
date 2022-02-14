@@ -191,10 +191,11 @@ class SendTokensOne extends React.Component {
     }
 
     const renderSelectToken = () => {
+      const enableSelect = !hathorLib.wallet.isHardwareWallet() || version.isLedgerCustomTokenAllowed();
       return (
         <select className="ml-3" value={this.state.selected.uid} onChange={this.changeSelect}
-          title={version.isLedgerCustomTokenAllowed() ? t`Select token` : t`This feature is disabled for the current Ledger app version`}
-          disabled={version.isLedgerCustomTokenAllowed() ? null : true}>
+          title={enableSelect ? t`Select token` : t`This feature is disabled for the current Ledger app version`}
+          disabled={enableSelect ? null : true}>
           {renderTokenOptions()}
         </select>
       );

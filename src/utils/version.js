@@ -73,10 +73,6 @@ const version = {
    * @inner
    */
   isLedgerCustomTokenAllowed() {
-    if (!hathorLib.wallet.isHardwareWallet()) {
-      // software wallet always has custom tokens allowed
-      return true;
-    }
     const version = hathorLib.storage.getItem('ledger:version');
     if (version !== null) return helpers.cmpVersionString(version, LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION) >= 0;
     return false;
