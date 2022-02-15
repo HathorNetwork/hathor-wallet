@@ -14,6 +14,7 @@ import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
 import ModalBackupWords from '../components/ModalBackupWords';
 import ModalConfirm from '../components/ModalConfirm';
+import ModalLedgerSignToken from '../components/ModalLedgerSignToken';
 import TokenBar from '../components/TokenBar';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import TokenAdministrative from '../components/TokenAdministrative';
@@ -23,6 +24,7 @@ import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import tokens from '../utils/tokens';
+import version from '../utils/version';
 import BackButton from '../components/BackButton';
 
 
@@ -56,6 +58,7 @@ class Wallet extends React.Component {
   state = {
     backupDone: true,
     successMessage: '',
+    hasTokenSignature: false,
   };
 
   // Reference for the TokenGeneralInfo component
@@ -80,6 +83,11 @@ class Wallet extends React.Component {
         this.administrativeRef.current.updateTokenInfo();
       }
     });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const signature = tokens.getTokenSignature(nextProps.selectedToken);
+    this.setState({hasTokenSignature: !!signature});
   }
 
   /**
@@ -109,6 +117,13 @@ class Wallet extends React.Component {
    */
   unregisterClicked = () => {
     $('#unregisterModal').modal('show');
+  }
+
+  /**
+   * Called when user clicks to sign the token, then opens the modal
+   */
+  signClicked = () => {
+    $('#signTokenDataModal').modal('show');
   }
 
   /**
@@ -243,6 +258,16 @@ class Wallet extends React.Component {
       )
     }
 
+    const renderSignTokenIcon = () => {
+      // Don't show if it's HTR
+      if (hathorLib.tokens.isHathorToken(this.props.selectedToken)) return null;
+
+      const signature = tokens.getTokenSignature(this.props.selectedToken);
+      // Show only if we don't have a signature on storage
+      if (signature === null) return <i className="fa fa-key pointer ml-3" title={t`Sign token on Ledger`} onClick={this.signClicked}></i>
+      return <i className="fa fa-check pointer ml-3" title={t`Token signed with Ledger`}></i>
+    }
+
     const renderUnlockedWallet = () => {
       return (
         <div className='wallet-wrapper'>
@@ -250,11 +275,17 @@ class Wallet extends React.Component {
             <p className='token-name mb-0'>
               <strong>{token ? token.name : ''}</strong>
               {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>}
+              {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && renderSignTokenIcon()}
             </p>
           </div>
           {renderTokenData(token)}
         </div>
       );
+    }
+
+    // Trigger a render when we sign a token
+    const updateTokenSignature = (value) => {
+      this.setState({hasTokenSignature: value});
     }
 
     return (
@@ -274,6 +305,7 @@ class Wallet extends React.Component {
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title={t`Unregister token`} body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
+        {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && <ModalLedgerSignToken token={token} modalId="signTokenDataModal" cb={updateTokenSignature} />}
       </div>
     );
   }

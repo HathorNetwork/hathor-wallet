@@ -193,3 +193,29 @@ export const NFT_GUIDE_URL = 'https://hathor.network/nft-guide';
  * How many token meta we are downloading concurrently
  */
 export const METADATA_CONCURRENT_DOWNLOAD = 10;
+
+/**
+ * Ledger token version to use when sending a token to ledger
+ */
+export const LEDGER_TOKEN_VERSION = 1;
+
+/**
+ * How many custom tokens a tx can have when signing with Ledger
+ */
+export const LEDGER_TX_CUSTOM_TOKEN_LIMIT = 10;
+
+/**
+ * Min Ledger app version supported by this wallet
+ */
+export const LEDGER_MIN_VERSION = '1.0.0';
+
+/**
+ * Max Ledger app version supported by this wallet
+ * Obs: max not inclusive, so we do NOT support this version
+ */
+export const LEDGER_MAX_VERSION = '2.0.0';
+
+/**
+ * First Ledger version with support for custom tokens
+ */
+export const LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION = '1.1.0'

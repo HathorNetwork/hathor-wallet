@@ -39,6 +39,7 @@ import {
   metadataApi
 } from '@hathor/wallet-lib';
 import version from './version';
+import ledger from './ledger';
 import { chunk } from 'lodash';
 
 let Sentry = null;
@@ -397,28 +398,6 @@ const wallet = {
     } else {
       await this.startWallet(null, '', null, '', routerHistory, false, wallet.xpub);
     }
-  },
-
-  /*
-   * Start the wallet and load its data from an xpub
-   *
-   * @param {String} xpub The xpub string from the wallet we're loading
-   *
-   * @return {Promise} Promise that resolves when finishes loading address history
-   * @memberof Wallet
-   * @inner
-   */
-  startHardwareWallet(xpub) {
-    store.dispatch(loadingAddresses(true));
-    const accessData = {
-      xpubkey: xpub,
-      from_xpub: true,
-    }
-    const promise = oldWalletUtil.startWallet(accessData, true);
-    promise.then(() => {
-      this.afterLoadAddressHistory();
-    });
-    return promise;
   },
 
   /*

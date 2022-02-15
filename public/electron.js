@@ -260,6 +260,11 @@ const ledgerMethods = {
   'checkAddress': 'address',
   'sendTx': 'txSent',
   'getSignatures': 'signatures',
+  'signToken': 'tokenSignature',
+  'sendTokens': 'tokenDataSent',
+  'verifyTokenSignature': 'tokenSignatureValid',
+  'verifyManyTokenSignatures': 'manyTokenSignatureValid',
+  'resetTokenSignatures': 'tokenSignatureReset',
 }
 
 function addLedgerListeners(mainWindow) {
