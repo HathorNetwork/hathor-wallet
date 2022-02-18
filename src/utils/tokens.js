@@ -118,6 +118,78 @@ const tokens = {
   getNFTFee() {
     return 1;
   },
+
+  /**
+   * Returns the token signatures on storage
+   * This is only used for hw wallets.
+   *
+   * @return {Object} Map of token uid to signatures
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  getTokenSignatures() {
+    const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
+    if (!tokenSignatures) return {};
+    return tokenSignatures;
+  },
+
+  /**
+   * Returns a single token signature from storage or null if not found.
+   * This is only used for hw wallets.
+   *
+   * @param {string} uid hex value of token uid
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  getTokenSignature(uid) {
+    const tokenSignatures = this.getTokenSignatures();
+    if (!tokenSignatures.hasOwnProperty(uid)) return null;
+    return tokenSignatures[uid];
+  },
+
+  /**
+   * Add a token signature to storage, overwriting if exists
+   * This is only used for hw wallets.
+   *
+   * @param {string} hex value of token uid
+   * @param {string} hex value of signature
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  addTokenSignature(uid, signature) {
+    const tokenSignatures = this.getTokenSignatures();
+    tokenSignatures[uid] = signature;
+    hathorLib.storage.setItem('wallet:token:signatures', tokenSignatures);
+  },
+
+  /**
+   * Overwrite token signatures, deleting all of them.
+   * This is only used for hw wallets.
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  resetTokenSignatures() {
+    hathorLib.storage.setItem('wallet:token:signatures', {});
+  },
+
+  /**
+   * Remove a token signature from storage
+   * This is only used for hw wallets.
+   *
+   * @param {string} uid hex value of the token uid to be removed
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  removeTokenSignature(uid) {
+    const tokenSignatures = this.getTokenSignatures();
+    delete tokenSignatures[uid];
+    hathorLib.storage.setItem('wallet:token:signatures', tokenSignatures);
+  },
 }
 
 export default tokens;

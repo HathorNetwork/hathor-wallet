@@ -32,6 +32,7 @@ import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
 import version from './utils/version';
 import wallet from './utils/wallet';
+import tokens from './utils/tokens';
 import { connect } from "react-redux";
 import RequestErrorModal from './components/RequestError';
 import store from './store/index';
@@ -66,12 +67,23 @@ class Root extends React.Component {
           this.props.history.push('/wallet_type/');
         }
       });
+
+      IPC_RENDERER.on('ledger:manyTokenSignatureValid', (event, arg) => {
+        if (hathorLib.wallet.isHardwareWallet()) {
+          // remove all invalid signatures
+          // arg.data is a list of uids with invalid signatures
+          arg.data.forEach(uid => {
+            tokens.removeTokenSignature(uid.toString('hex'));
+          });
+        }
+      });
     }
   }
 
   componentWillUnmount() {
     if (IPC_RENDERER) {
       IPC_RENDERER.removeAllListeners("ledger:closed");
+      IPC_RENDERER.removeAllListeners("ledger:manyTokenSignatureValid");
     }
   }
 

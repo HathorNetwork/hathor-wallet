@@ -12,6 +12,7 @@ import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
 import { Link } from 'react-router-dom';
 import SpanFmt from '../components/SpanFmt';
+import ModalLedgerResetTokenSignatures from '../components/ModalLedgerResetTokenSignatures';
 import ModalConfirm from '../components/ModalConfirm';
 import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
@@ -19,6 +20,7 @@ import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { str2jsx } from '../utils/i18n';
+import version from '../utils/version';
 
 
 /**
@@ -142,8 +144,16 @@ class Settings extends React.Component {
     helpers.openExternalURL(url);
   }
 
+  /**
+   * Called when user clicks to untrust all tokens, then opens the modal
+   */
+  untrustClicked = () => {
+    $('#resetTokenSignatures').modal('show');
+  }
+
   render() {
     const serverURL = hathorLib.helpers.getServerURL();
+    const ledgerCustomTokens = hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
     return (
       <div className="content-wrapper settings">
         <BackButton {...this.props} />
@@ -161,9 +171,11 @@ class Settings extends React.Component {
             <p><strong>{t`Allow notifications:`}</strong> {this.state.isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={this.toggleNotificationSettings}> {t`Change`} </a></p>
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
             <button className="btn btn-hathor" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
+            {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
         </div>
+        {ledgerCustomTokens && <ModalLedgerResetTokenSignatures />}
         <ModalResetAllData success={this.handleReset} />
         <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
         <ModalAlertNotSupported title={t`Complete action on your hardware wallet`}>

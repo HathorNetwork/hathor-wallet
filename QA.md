@@ -201,19 +201,46 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Click on 'Generate new address' and validate it has changed.
     1. Confirm again address on the wallet and on Ledger (by clicking 'Show full address').
 
+1. **Ledger custom token wallet screen**
+    1. On the main wallet screen get another address and send any amount of a custom token to this address.
+    1. Register the token and go to the token wallet screen.
+    1. Check that there is a key icon next to it's name and click the key icon.
+    1. A modal should appear, confirm that the token symbol, name and uid are correct.
+    1. Click the "Sign token" button and check the Ledger device, it should say "Confirm token data".
+    1. Confirm that the symbol, name and uid are correct (use buttons to scroll).
+    1. Click both buttons on the "Reject" step and check that an error message "User denied token on Ledger" appears on the wallet.
+    1. Try to sign the token again but this time click both buttons on the "Accept" step, a success message should show on the wallet.
+    1. After closing the modal, check that that the key icon is now an unclicable checkmark icon and hovering shows the message "Token signed with Ledger".
+
+1. **Ledger reset token signature**
+    1. Go to settings and click the button "Untrust all tokens on Ledger".
+    1. Read the message and click "Start", the device should show "Reset token signatures".
+    1. Click both buttons on the "Reject" step and check that an error message appears on the wallet.
+    1. Click the "Try again" button and this time click both buttons on the "Approve" step.
+    1. Go to the token wallet screen and check that the checkmark icon is back to a key icon.
+
 1. **Ledger send tokens**
-    1. Copy 2 different addresses.
+    1. On the wallet screen copy 2 different addresses from your wallet.
     1. Click on 'Send tokens' on the top menu.
-    1. Confirm that the token dropdown list cannot be clicked. A message saying this feature is disabled for hardware wallet is displayed when hovering the dropdown.
-    1. Confirm the Timelock checkbox is also disabled.
-    1. Click on 'Add another token' button. A modal is displayed saying the action is not supported.
+    1. Confirm that the token dropdown list can be clicked and show all tokens.
+    1. Confirm the Timelock checkbox is disabled.
     1. Try sending a transaction to an invalid address. An error message should show up on the wallet. Nothing should be displayed on Ledger.
     1. Try sending a transaction with an amount bigger than the one you have. An error message should show up on the wallet. Nothing should be displayed on Ledger.
-    1. Send tokens to both copied addresses in the same transaction (2 outputs). A modal will be displayed asking to confirm operation on Ledger.
+    1. Send HTR tokens to both copied addresses in the same transaction (2 outputs). A modal will be displayed asking to confirm operation on Ledger.
     1. On Ledger, it should show 'Output 1/2' on the first step the address on the second and the amount on the third step (steps being from left to right), then an "Approve" and "Reject" steps. After clicking both buttons on the "Approve", it shows 'Output 2/2' and the other output (address and ammount).
     1. Clicking both buttons on the "Approve" step one more time will display the confirmation screen. Reject signing the transaction. The modal will hide and an error message should appear on the wallet.
     1. Click to send the transaction again. This time, approve it on the signing screen. Ledger screen will show 'Processing' for a while and the desktop wallet will display the modal while solving proof of work.
     1. After transaction is completed, it closes the modal and goes back to main wallet screen. The first transaction on the list must have value 0.00.
+    1. Go to the custom token wallet page and confirm that the key icon is showing next to the name (and not a checkmark).
+    1. If there is a checkmark icon, go to settings and untrust all tokens.
+    1. Click on 'Send tokens' on the top menu again.
+    1. Change the token dropdown to the custom token and try to send any amount. A modal will be displayed saying there are unverified custom tokens and the list should have the custom token added to the transaction.
+    1. Go to the custom token wallet screen and sign the custom token with Ledger (key icon next to the name).
+    1. Go back to the 'Send tokens' screen and click on 'Add another token' button and send HTR to an address and the custom token to the second copied address. Make sure both amounts are less than the balance available. A modal will be displayed asking to confirm operation on Ledger.
+    1. On Ledger you should check that each token is being sent to the correct address then click both buttons on the 'Approve' screen.
+    1. After transaction is completed, it closes the modal and goes back to main wallet screen. The first transaction on the list must have value 0.00.
+    1. Click on the first transaction and confirm that it has 4 outputs. The extra 2 outputs are change outputs and should be marked with 'Your address'.
+    1. Close the wallet and open it again, check the custom token screen of the token used on the last transaction. Make sure that there is a checkmark icon next to the token name.
 
 1. **Ledger misc**
     1. Go to the settings screen.

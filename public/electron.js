@@ -35,7 +35,7 @@ if (process.platform === 'darwin') {
 }
 
 const appName = 'Hathor Wallet';
-const walletVersion = '0.21.2';
+const walletVersion = '0.22.0';
 
 const debugMode = (
   process.argv.indexOf('--unsafe-mode') >= 0 &&
@@ -260,6 +260,11 @@ const ledgerMethods = {
   'checkAddress': 'address',
   'sendTx': 'txSent',
   'getSignatures': 'signatures',
+  'signToken': 'tokenSignature',
+  'sendTokens': 'tokenDataSent',
+  'verifyTokenSignature': 'tokenSignatureValid',
+  'verifyManyTokenSignatures': 'manyTokenSignatureValid',
+  'resetTokenSignatures': 'tokenSignatureReset',
 }
 
 function addLedgerListeners(mainWindow) {
