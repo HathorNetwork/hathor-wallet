@@ -31,7 +31,9 @@ import {
   constants as hathorConstants,
   errors as hathorErrors,
   HathorWallet,
+  HathorWalletServiceWallet,
   Connection,
+  Network,
   wallet as oldWalletUtil,
   walletUtils,
   storage,
@@ -292,35 +294,47 @@ const wallet = {
     // If it's fromXpriv, then we can't clean access data because we need that
     oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
 
-    const connection = new Connection({
-      network: data.network,
-      servers: [helpers.getServerURL()],
-    });
-
-    const beforeReloadCallback = () => {
-      store.dispatch(loadingAddresses(true));
-    };
-
     let xpriv = null;
     if (fromXpriv) {
       xpriv = oldWalletUtil.getXprivKey(pin);
     }
 
-    const walletConfig = {
-      seed: words,
-      xpriv,
-      xpub,
-      store: STORE,
-      passphrase,
-      connection,
-      beforeReloadCallback,
-    };
+    const useWalletService = true;
+    let wallet;
+    let connection;
 
-    const wallet = new HathorWallet(walletConfig);
+    if (useWalletService) {
+      const network = new Network(data.network);
+
+      wallet = new HathorWalletServiceWallet(() => {}, words, network);
+      connection = wallet.conn;
+    } else {
+      connection = new Connection({
+        network: data.network,
+        servers: [helpers.getServerURL()],
+      });
+
+      const beforeReloadCallback = () => {
+        store.dispatch(loadingAddresses(true));
+      };
+
+      const walletConfig = {
+        seed: words,
+        xpriv,
+        xpub,
+        store: STORE,
+        passphrase,
+        connection,
+        beforeReloadCallback,
+      };
+
+      wallet = new HathorWallet(walletConfig);
+    }
 
     store.dispatch(setWallet(wallet));
 
     const serverInfo = await wallet.start({ pinCode: pin, password });
+
     // TODO should we save server info?
     //store.dispatch(setServerInfo(serverInfo));
     wallet.on('state', async (state) => {
