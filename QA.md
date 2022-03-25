@@ -69,16 +69,6 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Validate it has the new created token in the token list.
     1. Click on the token uid and should redirect to the wallet main screen with TST selected.
 
-1. **Create an NFT**
-    1. Click on 'Custom tokens', then 'Create an NFT'.
-    1. Set the NFT data as 'ipfs://test', name as 'Test Token', symbol 'TST', and amount 10.
-    1. Validate the fee shows as 0.01 HTR and deposit as 0.01 HTR as well.
-    1. Create the NFT and see it created on the testnet explorer (should be the last transaction or you can search by token uid).
-    1. Double check that the first output is the data output and the token output has 0.10 of amount.
-    1. Back to the wallet, validate its symbol appeared selected in the token bar.
-    1. The list of transactions should have only one, with type 'Token creation' and amount of 0.10.
-    1. Click on the HTR token (in the token bar) and check if the first transaction is of type 'Token deposit' with amount of 0.01.
-
 1. **Send tokens**
     1. Copy the address.
     1. Click on 'Send tokens'.
@@ -168,7 +158,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Fill NFT data as 'test data', name and symbol as 'NFT Test' and 'NFTT', and amount as 100. Check only the melt authority checkbox.
     1. Double check the Fee is 0.01 HTR, the deposit is 0.01 HTR and the Total is 0.02 HTR.
     1. Create the NFT and open the transaction on the list.
-    1. Validate that the first output is the data output unable to decode with 0.01 HTR and there is one output with 1.00 of tokens, one output with the melt authority and possibly one change output of HTR.
+    1. Validate that the first output is the data output showing `ipfs://test [Data]` with 0.01 HTR and there is one output with 1.00 of tokens, one output with the melt authority and possibly one change output of HTR.
 
 1. **Late backup**
     1. Reset the wallet and close it.
