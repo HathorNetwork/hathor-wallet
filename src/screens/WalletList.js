@@ -7,8 +7,22 @@
 
 import React, { useState, useRef } from 'react';
 import { t } from 'ttag'
+import { setWalletPrefix } from '../actions/index';
+import { connect } from "react-redux";
 
 import hathorLib from '@hathor/wallet-lib';
+
+const mapStateToProps = (state) => {
+  return {
+    walletPrefix: state.walletPrefix,
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setWalletPrefix: (data) => dispatch(setWalletPrefix(data)),
+  };
+};
 
 /**
  * Screen that has a list of wallets available.
@@ -32,7 +46,7 @@ function WalletList(props) {
   const goToWallet = (e, prefix) => {
     e.preventDefault();
     setError(null);
-    hathorLib.storage.store.prefix = prefix;
+    props.setWalletPrefix(prefix);
     hathorLib.wallet.lock();
     props.history.push('/');
   }
@@ -62,7 +76,7 @@ function WalletList(props) {
   }
 
   const walletTable = Object.entries(listOfWallets).sort(([key1, v1], [key2, v2]) => {
-    if (key1 === hathorLib.storage.store.prefix) {
+    if (key1 === props.walletPrefix) {
       // Always start with current wallet
       return -1;
     }
@@ -70,7 +84,7 @@ function WalletList(props) {
   }).map(([prefix, walletInfo]) => {
     return (
       <tr key={prefix}>
-        <td><a href="true" onClick={(e) => goToWallet(e, prefix)}>{prefix === hathorLib.storage.store.prefix ? t`Current`+": "+walletInfo.name : walletInfo.name}</a></td>
+        <td><a href="true" onClick={(e) => goToWallet(e, prefix)}>{prefix === props.walletPrefix ? t`Current`+": "+walletInfo.name : walletInfo.name}</a></td>
       </tr>
     );
   });
@@ -108,4 +122,4 @@ function WalletList(props) {
   );
 }
 
-export default WalletList;
+export default connect(mapStateToProps, mapDispatchToProps)(WalletList);

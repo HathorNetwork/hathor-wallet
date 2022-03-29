@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { connect } from "react-redux";
 
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
@@ -21,7 +22,19 @@ import hathorLib from '@hathor/wallet-lib';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
+import { setWalletPrefix } from '../actions/index';
 
+const mapStateToProps = (state) => {
+  return {
+    walletPrefix: state.walletPrefix,
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setWalletPrefix: (data) => dispatch(setWalletPrefix(data)),
+  };
+};
 
 /**
  * Settings screen
@@ -62,14 +75,14 @@ class Settings extends React.Component {
    */
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
-    const walletPrefix = hathorLib.storage.store.prefix;
-    wallet.resetWalletData();
-    // Set to the default prefix
-    hathorLib.storage.store.prefix = '';
+    const walletPrefix = this.props.walletPrefix;
     if (walletPrefix !== '') {
       // Remove from list of wallets
       hathorLib.storage.store.removeWallet(walletPrefix);
     }
+    // Set to the default prefix
+    this.props.setWalletPrefix('');
+    wallet.resetWalletData();
     hathorLib.wallet.lock();
     this.props.history.push('/');
     // this.props.history.push('/welcome/');
@@ -209,4 +222,4 @@ class Settings extends React.Component {
   }
 }
 
-export default Settings;
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

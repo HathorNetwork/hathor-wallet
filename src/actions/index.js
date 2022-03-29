@@ -148,3 +148,8 @@ export const metadataLoaded = data => ({ type: "metadata_loaded", payload: data 
  * Remove token metadata after unregister token
  */
 export const removeTokenMetadata = data => ({ type: "remove_token_metadata", payload: data });
+
+/**
+ * Set the current wallet prefix
+ */
+export const setWalletPrefix = prefix => ({type: "set_wallet_prefix", payload: prefix});

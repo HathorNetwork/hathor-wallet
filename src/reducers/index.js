@@ -51,6 +51,8 @@ const initialState = {
   tokenMetadataErrors: [],
   // When metadata is loaded from the lib
   metadataLoaded: false,
+  // Current Wallet Prefix
+  walletPrefix: '',
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -114,8 +116,18 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {metadataLoaded: action.payload});
     case 'remove_token_metadata':
       return removeTokenMetadata(state, action);
+    case 'set_wallet_prefix':
+      return setWalletPrefix(state, action);
     default:
       return state;
+  }
+};
+
+const setWalletPrefix = (state, action) => {
+  hathorLib.storage.store.prefix = action.payload;
+  return {
+    ...state,
+    walletPrefix: action.payload,
   }
 };
 

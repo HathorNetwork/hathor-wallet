@@ -8,11 +8,24 @@
 import React from 'react';
 import { t } from 'ttag';
 import ModalResetAllData from '../components/ModalResetAllData';
+import { setWalletPrefix } from '../actions/index';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
+import { connect } from "react-redux";
 
+const mapStateToProps = (state) => {
+  return {
+    walletPrefix: state.walletPrefix,
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setWalletPrefix: (data) => dispatch(setWalletPrefix(data)),
+  };
+};
 
 /**
  * When wallet is locked show this screen and ask for PIN to unlock the wallet
@@ -83,7 +96,7 @@ class LockedWallet extends React.Component {
    */
    changeWalletClicked = (e) => {
     e.preventDefault();
-    hathorLib.storage.store.prefix = e.target.value;
+    this.props.setWalletPrefix(e.target.value);
   }
 
   /**
@@ -97,7 +110,6 @@ class LockedWallet extends React.Component {
 
   render() {
     const listOfWallets = hathorLib.storage.store.getListOfWallets();
-    const walletName = hathorLib.storage.store.getWalletName();
 
     const renderWalletSelect = () => {
       const walletOptions = Object.entries(listOfWallets).filter(([prefix, walletInfo]) => {
@@ -106,7 +118,7 @@ class LockedWallet extends React.Component {
         return walletType === 'software';
       }).map(([prefix, walletInfo]) => {
         return (
-          <option value={prefix} selected={prefix === hathorLib.storage.store.prefix? true : false}>{walletInfo.name}</option>
+          <option key={prefix} value={prefix} selected={prefix === this.props.walletPrefix? true : false}>{walletInfo.name}</option>
         );
       });
 
@@ -143,4 +155,4 @@ class LockedWallet extends React.Component {
   }
 }
 
-export default LockedWallet;
+export default connect(mapStateToProps, mapDispatchToProps)(LockedWallet);
