@@ -16,6 +16,7 @@ import TransactionDetail from './screens/TransactionDetail';
 import LoadingAddresses from './screens/LoadingAddresses';
 import Server from './screens/Server';
 import ChoosePassphrase from './screens/ChoosePassphrase';
+import WalletList from './screens/WalletList';
 import CustomTokens from './screens/CustomTokens';
 import Welcome from './screens/Welcome';
 import SentryPermission from './screens/SentryPermission';
@@ -99,6 +100,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} />
         <StartedRoute exact path="/settings" component={Settings} loaded={true} />
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
+        <StartedRoute exact path="/wallet/list" component={WalletList} loaded={true} />
         <StartedRoute exact path="/server" component={Server} loaded={true} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} />
         <StartedRoute exact path="/addresses" component={AddressList} loaded={true} />
@@ -166,7 +168,7 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
  */
 const returnStartedRoute = (Component, props, rest) => {
   // On Windows the pathname that is being pushed into history has a prefix of '/C:'
-  // So everytime I use 'push' it works, because I set the pathname
+  // So every time I use 'push' it works, because I set the pathname
   // However when I use history.goBack, it gets the pathname from the history stack
   // So it does not find the path because of the prefix
   // Besides that, when electron loads initially it needs to load index.html from the filesystem

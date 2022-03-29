@@ -12,7 +12,6 @@ import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
-import version from '../utils/version';
 
 
 /**
@@ -78,6 +77,16 @@ class LockedWallet extends React.Component {
   }
 
   /**
+   * When user clicks to change the wallet, it will change the current selected wallet
+   *
+   * @param {Object} e Event of when the link is clicked
+   */
+   changeWalletClicked = (e) => {
+    e.preventDefault();
+    hathorLib.storage.store.prefix = e.target.value;
+  }
+
+  /**
    * When reset modal validates, then execute method to reset all data from the wallet and redirect to Welcome screen
    */
   handleReset = () => {
@@ -87,10 +96,35 @@ class LockedWallet extends React.Component {
   }
 
   render() {
+    const listOfWallets = hathorLib.storage.store.getListOfWallets();
+    const walletName = hathorLib.storage.store.getWalletName();
+
+    const renderWalletSelect = () => {
+      const walletOptions = Object.entries(listOfWallets).filter(([prefix, walletInfo]) => {
+        // only show software wallets
+        const walletType = hathorLib.storage.store.getPrefixedItem(prefix, 'wallet:type');
+        return walletType === 'software';
+      }).map(([prefix, walletInfo]) => {
+        return (
+          <option value={prefix} selected={prefix === hathorLib.storage.store.prefix? true : false}>{walletInfo.name}</option>
+        );
+      });
+
+      return (<div className="d-flex align-items-center flex-row w-100 mt-4 form-group">
+        <label>
+          {t`Wallet`}:
+          <select onChange={(e) => this.changeWalletClicked(e)}>
+            {walletOptions}
+          </select>
+        </label>
+      </div>);
+    }
+
     return (
       <div className="content-wrapper flex align-items-center">
         <div className="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
           <div className="d-flex align-items-start flex-column">
+            {renderWalletSelect()}
             <p>{t`Your wallet is locked. Please write down your PIN to unlock it.`}</p>
             <form ref="unlockForm" className="w-100" onSubmit={this.unlockClicked}>
               <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control" />

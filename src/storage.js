@@ -53,9 +53,42 @@ class LocalStorageStore {
  * It's not a problem if 'wallet:data' is not persisted, as this data is always loaded when we connect to the server.
  */
 class HybridStore {
+  static nonPrefixedKeyList = ['list-of-wallets'];
+
   constructor() {
     this.memStore = new hathorLib.MemoryStore();
     this.persistentStore = new LocalStorageStore();
+    this.prefix = '';
+    this.nonPrefixedKeys = new Set(HybridStore.nonPrefixedKeyList);
+  }
+
+  getListOfWallets() {
+    return this.getItem('list-of-wallets') || {'': { name: 'Default' }};
+  }
+
+  getWalletName() {
+    const listOfWallets = this.getListOfWallets();
+    return listOfWallets[this.prefix].name;
+  }
+
+  removeWallet(prefix) {
+    const listOfWallets = this.getListOfWallets();
+    if (listOfWallets[prefix] !== undefined) {
+      delete listOfWallets[prefix];
+      this.setItem('list-of-wallets', listOfWallets);
+    } else {
+      // The wallet being deleted does not exist
+      throw new Error('Wallet does not exist.');
+    }
+  }
+
+  addWallet(name, prefix) {
+    const listOfWallets = this.getListOfWallets();
+    if (listOfWallets[prefix] !== undefined) {
+      throw new Error("This wallet prefix is already in use.");
+    }
+    listOfWallets[prefix] = {name};
+    this.setItem('list-of-wallets', listOfWallets);
   }
 
   _getStore(key) {
@@ -65,19 +98,42 @@ class HybridStore {
     return this.persistentStore;
   }
 
+  _getKey(prefix, key) {
+    if (this.nonPrefixedKeys.has(key)) {
+      return key;
+    }
+    if (prefix && prefix.length > 0) {
+      return prefix + "$" + key;
+    }
+    return key;
+  }
+
+  getPrefixedItem(prefix, key) {
+    return this._getStore(key).getItem(this._getKey(prefix, key));
+  }
+
+  setPrefixedItem(prefix, key, value) {
+    return this._getStore(key).setItem(this._getKey(prefix, key), value);
+  }
+
+  removePrefixedItem(prefix, key) {
+    return this._getStore(key).removeItem(this._getKey(prefix, key));
+  }
+
   getItem(key) {
-    return this._getStore(key).getItem(key);
+    return this.getPrefixedItem(this.prefix, key);
   }
 
   setItem(key, value) {
-    return this._getStore(key).setItem(key, value);
+    return this.setPrefixedItem(this.prefix, key, value);
   }
 
   removeItem(key) {
-    return this._getStore(key).removeItem(key);
+    return this.removePrefixedItem(this.prefix, key);
   }
 
   clear() {
+    // XXX Should we clear all keys or only the the prefixed ones?
     this.memStore.clear();
     this.persistentStore.clear();
   }

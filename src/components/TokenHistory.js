@@ -42,7 +42,7 @@ class TokenHistory extends React.Component {
    * firstHash {string} ID of the first transaction being shown
    * lastHash {string} ID of the last transaction being shown
    * reference {string} ID of the reference transaction used when clicking on pagination button
-   * direction {string} 'previous' or 'next', dependending on which pagination button the user has clicked
+   * direction {string} 'previous' or 'next', depending on which pagination button the user has clicked
    * transactions {Array} List of transactions to be shown in the screen
    * shouldFetch {Boolean} If should fetch more history (when the fetch returns 0 elements, should be set to false)
    */
@@ -234,7 +234,6 @@ class TokenHistory extends React.Component {
     }
 
     const renderHistoryData = () => {
-      const keys = hathorLib.wallet.getWalletData().keys;
       const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
       return this.state.transactions.map((tx, idx) => {
         let statusElement = '';

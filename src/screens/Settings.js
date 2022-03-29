@@ -62,8 +62,17 @@ class Settings extends React.Component {
    */
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
+    const walletPrefix = hathorLib.storage.store.prefix;
     wallet.resetWalletData();
-    this.props.history.push('/welcome/');
+    // Set to the default prefix
+    hathorLib.storage.store.prefix = '';
+    if (walletPrefix !== '') {
+      // Remove from list of wallets
+      hathorLib.storage.store.removeWallet(walletPrefix);
+    }
+    hathorLib.wallet.lock();
+    this.props.history.push('/');
+    // this.props.history.push('/welcome/');
   }
 
   /**
@@ -82,6 +91,13 @@ class Settings extends React.Component {
     } else {
       this.props.history.push('/wallet/passphrase/');
     }
+  }
+
+  /**
+   * Called when user clicks on "Change Wallet" button.
+   */
+  changeWallet = () => {
+    this.props.history.push('/wallet/list/');
   }
 
   /**
@@ -152,7 +168,7 @@ class Settings extends React.Component {
   }
 
   render() {
-    const serverURL = hathorLib.helpers.getServerURL();
+    const serverURL = hathorLib.config.getServerUrl();
     const ledgerCustomTokens = hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
     return (
       <div className="content-wrapper settings">
@@ -172,6 +188,7 @@ class Settings extends React.Component {
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
             <button className="btn btn-hathor" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
             {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
+            <button className="btn btn-hathor mt-4" onClick={this.changeWallet}>{t`Change wallet`}</button>
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
         </div>
