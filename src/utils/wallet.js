@@ -196,7 +196,6 @@ const wallet = {
     if (!wallet.isReady()) {
       return null;
     }
-
     const updatedBalanceMap = {};
     const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
 
@@ -289,6 +288,7 @@ const wallet = {
 
     store.dispatch(tokenMetadataUpdated(metadataPerToken, errors));
   },
+
 
   /**
    * Fetches both history and balance for the affected tokens in updatedBalanceMap
@@ -740,10 +740,10 @@ const wallet = {
    * @inner
    */
   initSentry(dsn) {
-    Sentry.init({
+    /*Sentry.init({
       dsn: dsn,
       release: process.env.npm_package_version
-    });
+    })*/
   },
 
   /**
@@ -755,7 +755,7 @@ const wallet = {
   updateSentryState() {
     if (this.isSentryAllowed()) {
       // Init Sentry
-      this.initSentry(SENTRY_DSN);
+      // this.initSentry(SENTRY_DSN);
     } else {
       // Turn off Sentry
       this.initSentry('');
