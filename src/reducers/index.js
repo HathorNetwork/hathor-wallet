@@ -114,6 +114,8 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {metadataLoaded: action.payload});
     case 'remove_token_metadata':
       return removeTokenMetadata(state, action);
+    case 'partially_update_history_and_balance':
+      return partiallyUpdateHistoryAndBalance(state, action);
     default:
       return state;
   }
@@ -186,8 +188,15 @@ const onLoadWalletSuccess = (state, action) => {
   hathorLib.storage.setItem('wallet:version', VERSION);
   const { tokensHistory, tokensBalance, tokens } = action.payload;
   const allTokens = new Set(tokens);
-  const address = state.wallet.getCurrentAddress().address;
-  const addressIndex = state.wallet.getAddressIndex(address);
+  const currentAddress = state.wallet.getCurrentAddress(); //.address;
+  const address = currentAddress.address;
+  let addressIndex
+
+  if (typeof currentAddress.index !== undefined) {
+    addressIndex = currentAddress.index;
+  } else {
+    addressIndex = state.wallet.getAddressIndex(address);
+  }
 
   return {
     ...state,
@@ -277,32 +286,7 @@ const onUpdateTx = (state, action) => {
  * Updates the history and balance when a new tx arrives
  */
 const onNewTx = (state, action) => {
-  const { tx, updatedBalanceMap, balances } = action.payload;
-
-  const allTokens = state.allTokens;
-  const updatedHistoryMap = {};
-
-  // we now loop through all tokens present in the new tx to get the new history and balance
-  for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
-    allTokens.add(tokenUid);
-    // we may not have this token yet, so state.tokensHistory[tokenUid] would return undefined
-    const currentHistory = state.tokensHistory[tokenUid] || [];
-    const newTokenHistory = addTxToSortedList(tokenUid, tx, tokenTxBalance, currentHistory);
-    updatedHistoryMap[tokenUid] = newTokenHistory;
-  }
-  const newTokensHistory = Object.assign({}, state.tokensHistory, updatedHistoryMap);
-  const newTokensBalance = Object.assign({}, state.tokensBalance, updatedBalanceMap);
-
-  const address = state.wallet.getCurrentAddress().address;
-  const addressIndex = state.wallet.getAddressIndex(address);
-
-  return Object.assign({}, state, {
-    tokensHistory: newTokensHistory,
-    tokensBalance: newTokensBalance,
-    lastSharedAddress: address,
-    lastSharedIndex: addressIndex,
-    allTokens,
-  });
+  return state;
 };
 
 const onUpdateLoadedData = (state, action) => ({
@@ -387,6 +371,25 @@ const removeTokenMetadata = (state, action) => {
   return {
     ...state,
     tokenMetadata: newMeta,
+  };
+};
+
+/**
+ * Partially update the token history and balance
+ */
+export const partiallyUpdateHistoryAndBalance = (state, action) => {
+  const { tokensHistory, tokensBalance } = action.payload;
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      ...tokensHistory,
+    },
+    tokensBalance: {
+      ...state.tokensBalance,
+      ...tokensBalance,
+    },
   };
 };
 

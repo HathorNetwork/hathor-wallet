@@ -148,3 +148,8 @@ export const metadataLoaded = data => ({ type: "metadata_loaded", payload: data 
  * Remove token metadata after unregister token
  */
 export const removeTokenMetadata = data => ({ type: "remove_token_metadata", payload: data });
+
+/**
+ * Partially update history and balance
+ */
+export const partiallyUpdateHistoryAndBalance = (data) => ({ type: "partially_update_history_and_balance", payload: data });
