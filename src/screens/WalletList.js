@@ -65,7 +65,6 @@ function WalletList(props) {
     const walletName = walletNameRef.current?.value;
     try {
       hathorLib.storage.store.addWallet(walletName, walletName);
-      // walletNameRef.current?.value = '';
       // This will trigger a state change which will reload the component.
       setListOfWallets(hathorLib.storage.store.getListOfWallets());
     } catch (ex) {
@@ -82,9 +81,11 @@ function WalletList(props) {
     }
     return key1 > key2;
   }).map(([prefix, walletInfo]) => {
+    const walletTitle = prefix === props.walletPrefix ? t`Current`+": "+walletInfo.name : walletInfo.name;
+    const onclick = (e) => goToWallet(e, prefix);
     return (
       <tr key={prefix}>
-        <td><a href="true" onClick={(e) => goToWallet(e, prefix)}>{prefix === props.walletPrefix ? t`Current`+": "+walletInfo.name : walletInfo.name}</a></td>
+        <td><a href="true" onClick={onclick}>{walletTitle}</a></td>
       </tr>
     );
   });

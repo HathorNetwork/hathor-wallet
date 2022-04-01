@@ -118,14 +118,14 @@ class LockedWallet extends React.Component {
         return walletType === 'software';
       }).map(([prefix, walletInfo]) => {
         return (
-          <option key={prefix} value={prefix} selected={prefix === this.props.walletPrefix? true : false}>{walletInfo.name}</option>
+          <option key={prefix} value={prefix}>{walletInfo.name}</option>
         );
       });
 
       return (<div className="d-flex align-items-center flex-row w-100 mt-4 form-group">
         <label>
           {t`Wallet`}:
-          <select onChange={(e) => this.changeWalletClicked(e)}>
+          <select defaultValue={this.props.walletPrefix} onChange={(e) => this.changeWalletClicked(e)}>
             {walletOptions}
           </select>
         </label>

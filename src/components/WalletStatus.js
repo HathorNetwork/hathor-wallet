@@ -13,7 +13,6 @@ import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
   return {
-    isLocked: state.wallet?.store?.getItem('wallet:locked'),
     walletPrefix: state.walletPrefix,
   };
 };
@@ -24,9 +23,6 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 function WalletStatus(props) {
-  // if (props.isLocked === true) {
-  //   return null;
-  // }
 
   const listOfWallets = hathorLib.storage.store.getListOfWallets();
   const walletName = listOfWallets[props.walletPrefix].name;

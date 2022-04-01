@@ -85,7 +85,6 @@ class Settings extends React.Component {
     wallet.resetWalletData();
     hathorLib.wallet.lock();
     this.props.history.push('/');
-    // this.props.history.push('/welcome/');
   }
 
   /**
@@ -121,7 +120,7 @@ class Settings extends React.Component {
   }
 
   /**
-   * Called when user clicks to change notification settings  
+   * Called when user clicks to change notification settings
    * Sets modal state, depending on the current settings and open it
    *
    * @param {Object} e Event emitted on link click
@@ -149,7 +148,7 @@ class Settings extends React.Component {
   }
 
   /**
-   * Called after user confirms the notification toggle action  
+   * Called after user confirms the notification toggle action
    * Toggle user notification settings, update screen state and close the confirm modal
    */
   handleToggleNotificationSettings = () => {
