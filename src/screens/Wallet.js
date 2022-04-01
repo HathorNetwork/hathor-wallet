@@ -38,9 +38,11 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = (state) => {
   return {
     selectedToken: state.selectedToken,
+    entireState: state,
     tokens: state.tokens,
     wallet: state.wallet,
     tokenHistory: state.tokensHistory[state.selectedToken] || [],
+    tokenBalance: state.tokensBalance[state.selectedToken] || {},
   };
 };
 
@@ -144,6 +146,12 @@ class Wallet extends React.Component {
    * @return {boolean} If should show administrative tab
    */
   shouldShowAdministrativeTab = () => {
+    // Wallet Service
+    if (this.props.tokenBalance.hasOwnProperty('mint') && this.props.tokenBalance.hasOwnProperty('melt')) {
+      return this.props.tokenBalance.mint || this.props.tokenBalance.melt;
+    }
+
+    // Old facade
     if (this.props.wallet.getMintAuthority(this.props.selectedToken, { skipSpent: false })) {
       return true;
     }
