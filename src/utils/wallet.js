@@ -5,7 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT, METADATA_CONCURRENT_DOWNLOAD } from '../constants';
+import {
+  SENTRY_DSN,
+  DEBUG_LOCAL_DATA_KEYS,
+  WALLET_HISTORY_COUNT,
+  METADATA_CONCURRENT_DOWNLOAD,
+  WALLET_SERVICE_MAINNET_BASE_URL,
+  WALLET_SERVICE_MAINNET_BASE_WS_URL,
+} from '../constants';
 import STORE from '../storageInstance';
 import store from '../store/index';
 import {
@@ -25,6 +32,7 @@ import {
   updateTokenHistory,
   tokenMetadataUpdated,
   metadataLoaded,
+  partiallyUpdateHistoryAndBalance,
 } from '../actions/index';
 import {
   helpers,
@@ -38,7 +46,8 @@ import {
   walletUtils,
   storage,
   tokens,
-  metadataApi
+  metadataApi,
+  config,
 } from '@hathor/wallet-lib';
 import version from './version';
 import ledger from './ledger';
@@ -123,7 +132,7 @@ const wallet = {
       // in wallet service this comes as 0/1 and in the full node comes with true/false
       is_voided: Boolean(tx.voided),
       version: tx.version,
-    }
+    };
   },
 
   /**
@@ -145,9 +154,25 @@ const wallet = {
       /* eslint-disable no-await-in-loop */
       const balance = await wallet.getBalance(token);
       const tokenBalance = balance[0].balance;
-      tokensBalance[token] = { available: tokenBalance.unlocked, locked: tokenBalance.locked };
+      const authorities = balance[0].tokenAuthorities;
+
+      let mint = false;
+      let melt = false;
+
+      if (authorities) {
+        const { unlocked } = authorities;
+        mint = unlocked.mint;
+        melt = unlocked.melt;
+      }
+
+      tokensBalance[token] = {
+        available: tokenBalance.unlocked,
+        locked: tokenBalance.locked,
+        mint,
+        melt,
+      };
       // We fetch history count of 5 pages and then we fetch a new page each 'Next' button clicked
-      const history = await wallet.getTxHistory({ token_id: token, count: 5 * WALLET_HISTORY_COUNT });
+      const history = await wallet.getTxHistory({ token_id: token, count: WALLET_HISTORY_COUNT });
       tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
       /* eslint-enable no-await-in-loop */
     }
@@ -183,10 +208,14 @@ const wallet = {
    * tx {Object} full transaction object from the websocket
    */
   async fetchNewTxTokenBalance(wallet, tx) {
+    if (!wallet.isReady()) {
+      return null;
+    }
     const updatedBalanceMap = {};
     const balances = await wallet.getTxBalance(tx);
     // we now loop through all tokens present in the new tx to get the new balance
-    for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
+    for (const [tokenUid] of Object.entries(balances)) {
+      /* eslint-disable no-await-in-loop */
       updatedBalanceMap[tokenUid] = await this.fetchTokenBalance(wallet, tokenUid);
     }
     return updatedBalanceMap;
@@ -202,7 +231,23 @@ const wallet = {
   async fetchTokenBalance(wallet, uid) {
     const balance = await wallet.getBalance(uid);
     const tokenBalance = balance[0].balance;
-    return { available: tokenBalance.unlocked, locked: tokenBalance.locked };
+    const authorities = balance[0].tokenAuthorities;
+
+    let mint = false;
+    let melt = false;
+
+    if (authorities) {
+      const { unlocked } = authorities;
+      mint = unlocked.mint;
+      melt = unlocked.melt;
+    }
+
+    return {
+      available: tokenBalance.unlocked,
+      locked: tokenBalance.locked,
+      mint,
+      melt,
+    };
   },
 
   /**
@@ -258,6 +303,7 @@ const wallet = {
     store.dispatch(tokenMetadataUpdated(metadataPerToken, errors));
   },
 
+
   /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
@@ -276,6 +322,7 @@ const wallet = {
     // Set loading addresses screen to show
     store.dispatch(loadingAddresses(true));
     store.dispatch(metadataLoaded(false));
+
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
 
@@ -294,21 +341,76 @@ const wallet = {
     // If it's fromXpriv, then we can't clean access data because we need that
     oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
 
-    let xpriv = null;
-    if (fromXpriv) {
-      xpriv = oldWalletUtil.getXprivKey(pin);
-    }
-
     const useWalletService = true;
     let wallet;
     let connection;
 
+    const handlePartialUpdate = async (updatedBalanceMap) => {
+      const tokens = Object.keys(updatedBalanceMap);
+      const tokensHistory = {};
+      const tokensBalance = {};
+
+      for (const token of tokens) {
+        /* eslint-disable no-await-in-loop */
+        const balance = await wallet.getBalance(token);
+        const tokenBalance = balance[0].balance;
+        const authorities = balance[0].tokenAuthorities;
+
+        let mint = false;
+        let melt = false;
+
+        if (authorities) {
+          const { unlocked } = authorities;
+          mint = unlocked.mint;
+          melt = unlocked.melt;
+        }
+
+        tokensBalance[token] = {
+          available: tokenBalance.unlocked,
+          locked: tokenBalance.locked,
+          mint,
+          melt,
+        };
+        const history = await wallet.getTxHistory({ token_id: token });
+        tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
+        /* eslint-enable no-await-in-loop */
+      }
+
+      store.dispatch(partiallyUpdateHistoryAndBalance({ tokensHistory, tokensBalance }));
+    };
+
     if (useWalletService) {
+      store.dispatch(loadingAddresses(true));
       const network = new Network(data.network);
 
-      wallet = new HathorWalletServiceWallet(() => {}, words, network);
+      let xpriv = null;
+      if (fromXpriv) {
+        xpriv = oldWalletUtil.getAcctPathXprivKey(pin);
+      }
+
+      // Set urls for wallet service
+      config.setWalletServiceBaseUrl(WALLET_SERVICE_MAINNET_BASE_URL);
+      config.setWalletServiceBaseWsUrl(WALLET_SERVICE_MAINNET_BASE_WS_URL);
+
+      const walletConfig = {
+        seed: words,
+        xpriv,
+        xpub,
+        requestPassword: () => {
+        },
+        passphrase,
+        network,
+      };
+
+      wallet = new HathorWalletServiceWallet(walletConfig);
       connection = wallet.conn;
     } else {
+      let xpriv = null;
+
+      if (fromXpriv) {
+        xpriv = oldWalletUtil.getXprivKey(pin);
+      }
+
       connection = new Connection({
         network: data.network,
         servers: [helpers.getServerURL()],
@@ -332,8 +434,6 @@ const wallet = {
     }
 
     store.dispatch(setWallet(wallet));
-
-    const serverInfo = await wallet.start({ pinCode: pin, password });
 
     // TODO should we save server info?
     //store.dispatch(setServerInfo(serverInfo));
@@ -362,10 +462,20 @@ const wallet = {
           routerHistory.push(`/transaction/${tx.tx_id}/`);
         }
       }
+
+      this.fetchNewTxTokenBalance(wallet, tx).then(async (updatedBalanceMap) => {
+        if (updatedBalanceMap) {
+          store.dispatch(newTx(tx, updatedBalanceMap));
+          handlePartialUpdate(updatedBalanceMap);
+        }
+      });
+
       // Fetch new balance for each token in the tx and update redux
+      /*
       const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
       const updatedBalanceMap = await this.fetchNewTxTokenBalance(wallet, tx);
-      store.dispatch(newTx(tx, updatedBalanceMap, balances));
+      */
+      // store.dispatch(newTx(tx, updatedBalanceMap, balances));
     });
 
     wallet.on('update-tx', async (tx) => {
@@ -373,6 +483,8 @@ const wallet = {
       const updatedBalanceMap = await this.fetchNewTxTokenBalance(wallet, tx);
       store.dispatch(updateTx(tx, updatedBalanceMap, balances));
     });
+
+    const serverInfo = await wallet.start({ pinCode: pin, password });
 
     this.setConnectionEvents(connection, wallet);
   },
@@ -699,10 +811,10 @@ const wallet = {
    * @inner
    */
   initSentry(dsn) {
-    Sentry.init({
+    /*Sentry.init({
       dsn: dsn,
       release: process.env.npm_package_version
-    })
+    })*/
   },
 
   /**
@@ -714,7 +826,7 @@ const wallet = {
   updateSentryState() {
     if (this.isSentryAllowed()) {
       // Init Sentry
-      this.initSentry(SENTRY_DSN);
+      // this.initSentry(SENTRY_DSN);
     } else {
       // Turn off Sentry
       this.initSentry('');
