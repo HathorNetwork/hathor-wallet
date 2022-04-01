@@ -98,15 +98,36 @@ class TokenAdministrative extends React.Component {
    * Update token state after didmount or props update
    */
   updateWalletInfo = () => {
-    const mintUtxos = this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
-    const mintCount = mintUtxos ? mintUtxos.length : 0;
+    if (!this.props.token && !this.props.token.uid) {
+      return;
+    }
 
-    const meltUtxos = this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
-    const meltCount = meltUtxos ? meltUtxos.length : 0;
+    const { uid } = this.props.token;
 
-    const tokenBalance = this.props.token.uid in this.props.tokensBalance ? this.props.tokensBalance[this.props.token.uid].available : 0;
+    let canMintUtxos = false;
+    let canMeltUtxos = false;
+    let mintCount = 0;
+    let meltCount = 0;
 
-    this.setState({ mintCount, meltCount, balance: tokenBalance });
+    const tokenBalance = this.props.tokensBalance[uid];
+
+    if (tokenBalance.hasOwnProperty('mint') || tokenBalance.hasOwnProperty('melt')) {
+      // Wallet Service
+      canMintUtxos = tokenBalance.mint;
+      canMeltUtxos = tokenBalance.melt;
+      mintCount = 1;
+      meltCount = 1;
+    } else {
+      // Old Facade
+      canMintUtxos = this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
+      canMeltUtxos = this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
+      mintCount = mintUtxos ? mintUtxos.length : 0;
+      meltCount = meltUtxos ? meltUtxos.length : 0;
+    }
+
+    const balance = this.props.token.uid in this.props.tokensBalance ? this.props.tokensBalance[this.props.token.uid].available : 0;
+
+    this.setState({ mintCount, meltCount, balance: balance });
   }
 
   /**
