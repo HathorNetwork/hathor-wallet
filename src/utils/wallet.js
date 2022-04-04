@@ -196,6 +196,7 @@ const wallet = {
     if (!wallet.isReady()) {
       return null;
     }
+
     const updatedBalanceMap = {};
     const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
 
