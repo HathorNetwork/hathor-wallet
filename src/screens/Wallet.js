@@ -43,6 +43,7 @@ const mapStateToProps = (state) => {
     wallet: state.wallet,
     tokenHistory: state.tokensHistory[state.selectedToken] || [],
     tokenBalance: state.tokensBalance[state.selectedToken] || {},
+    useWalletService: state.useWalletService,
   };
 };
 
@@ -147,7 +148,7 @@ class Wallet extends React.Component {
    */
   shouldShowAdministrativeTab = () => {
     // Wallet Service
-    if (this.props.tokenBalance.hasOwnProperty('mint') && this.props.tokenBalance.hasOwnProperty('melt')) {
+    if (this.props.useWalletService) {
       return this.props.tokenBalance.mint || this.props.tokenBalance.melt;
     }
 

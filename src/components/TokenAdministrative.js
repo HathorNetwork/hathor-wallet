@@ -35,6 +35,7 @@ const mapStateToProps = (state, props) => {
     tokensBalance: state.tokensBalance,
     wallet: state.wallet,
     tokenMetadata: state.tokenMetadata,
+    useWalletService: state.useWalletService,
   };
 };
 
@@ -111,12 +112,14 @@ class TokenAdministrative extends React.Component {
 
     const tokenBalance = this.props.tokensBalance[uid];
 
-    if (tokenBalance.hasOwnProperty('mint') || tokenBalance.hasOwnProperty('melt')) {
+    if (this.props.useWalletService) {
       // Wallet Service
+      // TODO: This should come from the wallet service and display the count properly
       canMintUtxos = tokenBalance.mint;
       canMeltUtxos = tokenBalance.melt;
-      mintCount = 1;
-      meltCount = 1;
+
+      mintCount = canMintUtxos ? 1 : 0;
+      meltCount = canMeltUtxos ? 1 : 0;
     } else {
       // Old Facade
       canMintUtxos = this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
