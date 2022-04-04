@@ -492,9 +492,31 @@ const wallet = {
       store.dispatch(updateTx(tx, updatedBalanceMap, balances));
     });
 
-    const serverInfo = await wallet.start({ pinCode: pin, password });
+    try {
+      const serverInfo = await wallet.start({ pinCode: pin, password });
 
-    this.setConnectionEvents(connection, wallet);
+      this.setConnectionEvents(connection, wallet);
+    } catch(e) {
+      if (useWalletService) {
+        // Wallet Service start wallet will fail if the status returned from
+        // the service is 'error' or if the start wallet request failed.
+        // We should fallback to the old facade by storing the flag to ignore
+        // the feature flag
+        await featureFlags.ignoreWalletServiceFlag();
+
+        // Restart the page, ignoring cache to make sure events are reset
+        walletHelpers.reloadElectron();
+      }
+    }
+
+    featureFlags.on('wallet-service-enabled', (newUseWalletService) => {
+      // We should only force reset the bundle if the user was on
+      // the wallet service facade and the newflag sends him to
+      // the old facade
+      if (useWalletService && useWalletService !== newUseWalletService) {
+        walletHelpers.reloadElectron();
+      }
+    });
   },
 
   setConnectionEvents(connection, wallet) {

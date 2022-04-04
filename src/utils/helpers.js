@@ -38,6 +38,20 @@ const helpers = {
     }
   },
 
+  reloadElectron() {
+    // If we don't have window.require, we can assume the app is running on a browser, so we can just
+    // use the regular window.location to reload
+    if (!window.require) {
+      window.location.reload();
+    }
+
+    const { getCurrentWindow } = window.require('electron').remote;
+
+    const currentWindow = getCurrentWindow();
+
+    currentWindow.reload();
+  },
+
   /**
    * Update network variables in redux, storage and lib
    *
