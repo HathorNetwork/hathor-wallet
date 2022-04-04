@@ -214,8 +214,10 @@ const wallet = {
     if (!wallet.isReady()) {
       return null;
     }
+
     const updatedBalanceMap = {};
-    const balances = await wallet.getTxBalance(tx);
+    const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
+
     // we now loop through all tokens present in the new tx to get the new balance
     for (const [tokenUid] of Object.entries(balances)) {
       /* eslint-disable no-await-in-loop */
