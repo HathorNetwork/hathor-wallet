@@ -48,6 +48,7 @@
     "react-scripts": "^3.0.1",
     "redux": "^4.0.0",
     "ttag": "^1.7.22",
+    "unleash-proxy-client": "^1.11.0",
     "viz.js": "^2.1.2"
   },
   "main": "public/electron.js",

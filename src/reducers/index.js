@@ -51,6 +51,8 @@ const initialState = {
   tokenMetadataErrors: [],
   // When metadata is loaded from the lib
   metadataLoaded: false,
+  // Should we use the wallet service facade?
+  useWalletService: false,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -116,6 +118,8 @@ const rootReducer = (state = initialState, action) => {
       return removeTokenMetadata(state, action);
     case 'partially_update_history_and_balance':
       return partiallyUpdateHistoryAndBalance(state, action);
+    case 'set_use_wallet_service':
+      return onSetUseWalletService(state, action);
     default:
       return state;
   }
@@ -390,6 +394,18 @@ export const partiallyUpdateHistoryAndBalance = (state, action) => {
       ...state.tokensBalance,
       ...tokensBalance,
     },
+  };
+};
+
+/**
+ * Are we using the wallet service facade?
+ */
+export const onSetUseWalletService = (state, action) => {
+  const useWalletService = action.payload;
+
+  return {
+    ...state,
+    useWalletService,
   };
 };
 

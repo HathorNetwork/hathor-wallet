@@ -13,6 +13,7 @@ import {
   WALLET_SERVICE_MAINNET_BASE_URL,
   WALLET_SERVICE_MAINNET_BASE_WS_URL,
 } from '../constants';
+import { FeatureFlags } from '../featureFlags';
 import STORE from '../storageInstance';
 import store from '../store/index';
 import {
@@ -33,6 +34,7 @@ import {
   tokenMetadataUpdated,
   metadataLoaded,
   partiallyUpdateHistoryAndBalance,
+  setUseWalletService,
 } from '../actions/index';
 import {
   helpers,
@@ -52,6 +54,7 @@ import {
 import version from './version';
 import ledger from './ledger';
 import { chunk } from 'lodash';
+import walletHelpers from './helpers';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
@@ -340,8 +343,13 @@ const wallet = {
     // then we don't know if we've cleaned up the wallet data in the storage
     // If it's fromXpriv, then we can't clean access data because we need that
     oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
+ 
+    const uniqueDeviceId = walletHelpers.getUniqueId();
+    const featureFlags = new FeatureFlags(uniqueDeviceId, data.network);
+    const useWalletService = await featureFlags.shouldUseWalletService();
 
-    const useWalletService = true;
+    store.dispatch(setUseWalletService(useWalletService));
+
     let wallet;
     let connection;
 

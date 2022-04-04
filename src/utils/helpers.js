@@ -160,6 +160,20 @@ const helpers = {
       }
       return 0;
   },
+
+  getUniqueId() {
+    const currentUniqueId = localStorage.getItem('app:uniqueId');
+
+    if (currentUniqueId) {
+      return currentUniqueId;
+    }
+
+    const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+
+    localStorage.setItem('app:uniqueId', uniqueId);
+
+    return uniqueId;
+  }
 }
 
 export default helpers;

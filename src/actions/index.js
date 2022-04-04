@@ -153,3 +153,8 @@ export const removeTokenMetadata = data => ({ type: "remove_token_metadata", pay
  * Partially update history and balance
  */
 export const partiallyUpdateHistoryAndBalance = (data) => ({ type: "partially_update_history_and_balance", payload: data });
+
+/**
+ * Flag indicating if we are using the wallet service facade
+ */
+export const setUseWalletService = (useWalletService) => ({ type: "set_use_wallet_service", payload: useWalletService });
