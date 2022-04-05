@@ -10,6 +10,11 @@ import { t } from 'ttag'
 import { setWalletPrefix } from '../actions/index';
 import { connect } from "react-redux";
 
+import {
+  WalletAlreadyExistError,
+  InvalidWalletNameError,
+} from '../errors';
+
 import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
@@ -67,10 +72,16 @@ function WalletList(props) {
       hathorLib.storage.store.addWallet(walletName, walletName);
       // This will trigger a state change which will reload the component.
       setListOfWallets(hathorLib.storage.store.getListOfWallets());
-    } catch (ex) {
-      // wallet already exists
-      console.log(ex);
-      setError(ex.message);
+    } catch (err) {
+      if (err instanceof WalletAlreadyExistError) {
+        // wallet already exists
+        setError(err.message);
+      } else if (err instanceof InvalidWalletNameError) {
+        // invalid wallet name
+        setError(err.message);
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -94,7 +105,7 @@ function WalletList(props) {
     <form ref={newWalletFormRef} className="w-100">
       <div className="row">
         <div className="col-6">
-          <input ref={walletNameRef} type="text" autoComplete="off" placeholder={t`Wallet Name`} className="form-control" required />
+          <input ref={walletNameRef} type="text" maxLength="50" autoComplete="off" placeholder={t`Wallet Name`} className="form-control" required />
         </div>
         <div className="col-6">
           <button onClick={onNewWalletClick} type="button" className="btn btn-hathor">{t`Create new wallet`}</button>

@@ -90,11 +90,11 @@ class LockedWallet extends React.Component {
   }
 
   /**
-   * When user clicks to change the wallet, it will change the current selected wallet
+   * When user selects a different wallet, it will change the current selected wallet
    *
-   * @param {Object} e Event of when the link is clicked
+   * @param {Object} e Event of when the selected wallet changes
    */
-   changeWalletClicked = (e) => {
+   changeWalletHandler = (e) => {
     e.preventDefault();
     this.props.setWalletPrefix(e.target.value);
   }
@@ -125,7 +125,7 @@ class LockedWallet extends React.Component {
       return (<div className="d-flex align-items-center flex-row w-100 mt-4 form-group">
         <label>
           {t`Wallet`}:
-          <select defaultValue={this.props.walletPrefix} onChange={(e) => this.changeWalletClicked(e)}>
+          <select defaultValue={this.props.walletPrefix} onChange={(e) => this.changeWalletHandler(e)}>
             {walletOptions}
           </select>
         </label>
