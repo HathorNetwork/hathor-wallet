@@ -105,8 +105,6 @@ class TokenAdministrative extends React.Component {
 
     const { uid } = this.props.token;
 
-    let canMintUtxos = false;
-    let canMeltUtxos = false;
     let mintCount = 0;
     let meltCount = 0;
 
@@ -115,15 +113,16 @@ class TokenAdministrative extends React.Component {
     if (this.props.useWalletService) {
       // Wallet Service
       // TODO: This should come from the wallet service and display the count properly
-      canMintUtxos = tokenBalance.mint;
-      canMeltUtxos = tokenBalance.melt;
+      const canMintUtxos = tokenBalance.mint;
+      const canMeltUtxos = tokenBalance.melt;
 
       mintCount = canMintUtxos ? 1 : 0;
       meltCount = canMeltUtxos ? 1 : 0;
     } else {
       // Old Facade
-      canMintUtxos = this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
-      canMeltUtxos = this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
+      const mintUtxos = this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
+      const meltUtxos = this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
+
       mintCount = mintUtxos ? mintUtxos.length : 0;
       meltCount = meltUtxos ? meltUtxos.length : 0;
     }
