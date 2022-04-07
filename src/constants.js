@@ -232,4 +232,4 @@ export const WALLET_SERVICE_MAINNET_BASE_WS_URL = 'wss://ws.wallet-service.hatho
  */
 export const UNLEASH_URL = 'https://unleash-proxy.b7e6a7f52ee9fefaf0c53e300cfcb014.hathor.network/proxy';
 export const UNLEASH_CLIENT_KEY = 'wKNhpEXKa39aTRgIjcNsO4Im618bRGTq';
-export const UNLEASH_POLLING_INTERVAL = 15; // seconds
+export const UNLEASH_POLLING_INTERVAL = 120; // seconds
