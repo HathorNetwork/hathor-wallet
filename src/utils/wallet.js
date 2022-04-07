@@ -774,10 +774,10 @@ const wallet = {
    * @inner
    */
   initSentry(dsn) {
-    /*Sentry.init({
+    Sentry.init({
       dsn: dsn,
       release: process.env.npm_package_version
-    })*/
+    });
   },
 
   /**
@@ -789,7 +789,7 @@ const wallet = {
   updateSentryState() {
     if (this.isSentryAllowed()) {
       // Init Sentry
-      // this.initSentry(SENTRY_DSN);
+      this.initSentry(SENTRY_DSN);
     } else {
       // Turn off Sentry
       this.initSentry('');
