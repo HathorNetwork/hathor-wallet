@@ -73,7 +73,6 @@ class WalletAddress extends React.Component {
     } else {
       let addressIndex;
 
-      // TODO: This should be removed once `getAddressIndex` is implemented on the wallet-service facade
       if (address.index) {
         addressIndex = address.index;
       } else {

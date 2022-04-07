@@ -661,7 +661,9 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  resetWalletData() {
+  async resetWalletData() {
+    await FeatureFlags.clearIgnoreWalletServiceFlag();
+
     this.cleanWalletRedux();
     oldWalletUtil.resetWalletData();
   },
