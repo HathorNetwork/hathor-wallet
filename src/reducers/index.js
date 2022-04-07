@@ -53,6 +53,7 @@ const initialState = {
   metadataLoaded: false,
   // Should we use the wallet service facade?
   useWalletService: false,
+  lockWalletPromise: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -120,6 +121,10 @@ const rootReducer = (state = initialState, action) => {
       return partiallyUpdateHistoryAndBalance(state, action);
     case 'set_use_wallet_service':
       return onSetUseWalletService(state, action);
+    case 'lock_wallet_for_result':
+      return onLockWalletForResult(state, action);
+    case 'resolve_lock_wallet_promise':
+      return onResolveLockWalletPromise(state, action);
     default:
       return state;
   }
@@ -407,6 +412,29 @@ export const onSetUseWalletService = (state, action) => {
     ...state,
     useWalletService,
   };
+};
+
+/**
+ * Sets the promise to be resolved after the user typed his PIN on lock screen
+ */
+export const onLockWalletForResult = (state, action) => {
+  return {
+    ...state,
+    lockWalletPromise: action.payload,
+  };
+};
+
+export const onResolveLockWalletPromise = (state, action) => {
+  // Resolve the promise with the result
+  // TODO: I don't like this, but we don't have in this project a way to use middlewares in our
+  // actions (like redux-thunk, or redux-saga). We should refactor this if we ever start using
+  // this kind of mechanism.
+  state.lockWalletPromise(action.payload);
+
+  return {
+    ...state,
+    lockWalletPromise: null,
+  }
 };
 
 export default rootReducer;
