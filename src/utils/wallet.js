@@ -35,6 +35,7 @@ import {
   metadataLoaded,
   partiallyUpdateHistoryAndBalance,
   setUseWalletService,
+  lockWalletForResult,
 } from '../actions/index';
 import {
   helpers,
@@ -406,8 +407,13 @@ const wallet = {
         seed: words,
         xpriv,
         xpub,
-        requestPassword: () => {
-        },
+        requestPassword: async () => new Promise((resolve) => {
+          /**
+           * Lock screen will call `resolve` with the pin screen after validation
+           */
+          routerHistory.push('/locked/');
+          store.dispatch(lockWalletForResult(resolve));
+        }),
         passphrase,
         network,
       };

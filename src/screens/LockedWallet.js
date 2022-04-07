@@ -7,13 +7,26 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { connect } from "react-redux";
 import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
-import version from '../utils/version';
+import { resolveLockWalletPromise } from '../actions';
 
+
+const mapStateToProps = (state) => {
+  return {
+    lockWalletPromise: state.lockWalletPromise,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    resolveLockWalletPromise: pin => dispatch(resolveLockWalletPromise(pin)),
+  };
+};
 
 /**
  * When wallet is locked show this screen and ask for PIN to unlock the wallet
@@ -52,6 +65,15 @@ class LockedWallet extends React.Component {
       this.refs.unlockForm.classList.remove('was-validated')
       if (!hathorLib.wallet.isPinCorrect(pin)) {
         this.setState({ errorMessage: t`Invalid PIN` });
+        return;
+      }
+
+      // LockedWallet screen was called for a result, so we should resolve the promise with the PIN after
+      // it is validated.
+      if (this.props.lockWalletPromise) {
+        this.props.resolveLockWalletPromise(pin);
+        // return to the last screen
+        this.props.history.goBack();
         return;
       }
 
@@ -109,4 +131,4 @@ class LockedWallet extends React.Component {
   }
 }
 
-export default LockedWallet;
+export default connect(mapStateToProps, mapDispatchToProps)(LockedWallet);

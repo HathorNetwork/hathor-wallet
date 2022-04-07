@@ -158,3 +158,13 @@ export const partiallyUpdateHistoryAndBalance = (data) => ({ type: "partially_up
  * Flag indicating if we are using the wallet service facade
  */
 export const setUseWalletService = (useWalletService) => ({ type: "set_use_wallet_service", payload: useWalletService });
+
+/**
+ * Action to display the locked wallet screen and resolve the passed promise after the user typed his PIN
+ */
+export const lockWalletForResult = (promise) => ({ type: "lock_wallet_for_result", payload: promise });
+
+/**
+ * This will resolve the promise and reset the lockWalletPromise state
+ */
+export const resolveLockWalletPromise = (pin) => ({ type: "resolve_lock_wallet_promise", payload: pin });
