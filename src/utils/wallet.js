@@ -290,6 +290,39 @@ const wallet = {
     store.dispatch(tokenMetadataUpdated(metadataPerToken, errors));
   },
 
+  async handlePartialUpdate (wallet, updatedBalanceMap) {
+    const tokens = Object.keys(updatedBalanceMap);
+    const tokensHistory = {};
+    const tokensBalance = {};
+
+    for (const token of tokens) {
+      /* eslint-disable no-await-in-loop */
+      const balance = await wallet.getBalance(token);
+      const tokenBalance = balance[0].balance;
+      const authorities = balance[0].tokenAuthorities;
+
+      let mint = false;
+      let melt = false;
+
+      if (authorities) {
+        const { unlocked } = authorities;
+        mint = unlocked.mint;
+        melt = unlocked.melt;
+      }
+
+      tokensBalance[token] = {
+        available: tokenBalance.unlocked,
+        locked: tokenBalance.locked,
+        mint,
+        melt,
+      };
+      const history = await wallet.getTxHistory({ token_id: token });
+      tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
+      /* eslint-enable no-await-in-loop */
+    }
+
+    store.dispatch(partiallyUpdateHistoryAndBalance({ tokensHistory, tokensBalance }));
+  },
 
   /**
    * Fetches both history and balance for the affected tokens in updatedBalanceMap
