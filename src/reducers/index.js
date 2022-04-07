@@ -105,8 +105,6 @@ const rootReducer = (state = initialState, action) => {
       return onResetWallet(state, action);
     case 'load_wallet_success':
       return onLoadWalletSuccess(state, action);
-    case 'new_tx':
-      return onNewTx(state, action);
     case 'update_tx':
       return onUpdateTx(state, action);
     case 'update_token_history':
@@ -289,13 +287,6 @@ const onUpdateTx = (state, action) => {
     tokensHistory: newTokensHistory,
     tokensBalance: newTokensBalance,
   });
-};
-
-/**
- * Updates the history and balance when a new tx arrives
- */
-const onNewTx = (state, action) => {
-  return state;
 };
 
 const onUpdateLoadedData = (state, action) => ({

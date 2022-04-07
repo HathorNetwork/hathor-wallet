@@ -21,7 +21,6 @@ import {
   updateLoadedData,
   isOnlineUpdate,
   updateHeight,
-  newTx,
   updateTx,
   loadingAddresses,
   loadWalletSuccess,

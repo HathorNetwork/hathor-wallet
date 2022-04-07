@@ -119,13 +119,6 @@ export const loadWalletSuccess = (tokensHistory, tokensBalance, tokens) => ({ ty
  * updatedBalanceMap {Object} balance updated of each token in this tx
  * balances {Object} balance of each token in this tx for this wallet including authorities
  */
-export const newTx = (tx, updatedBalanceMap, balances) => ({ type: "new_tx", payload: { tx, updatedBalanceMap, balances } });
-
-/**
- * tx {Object} the new transaction
- * updatedBalanceMap {Object} balance updated of each token in this tx
- * balances {Object} balance of each token in this tx for this wallet including authorities
- */
 export const updateTx = (tx, updatedBalanceMap, balances) => ({ type: "update_tx", payload: { tx, updatedBalanceMap, balances } });
 
 /**
