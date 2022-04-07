@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { connect } from "react-redux";
 import $ from 'jquery';
 import PinInput from './PinInput';
 import hathorLib from '@hathor/wallet-lib';
@@ -14,6 +15,13 @@ import SendTxHandler from '../components/SendTxHandler';
 import ReactLoading from 'react-loading';
 import colors from '../index.scss';
 
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+    useWalletService: state.useWalletService,
+  };
+};
 
 /**
  * Component that shows a modal with a form to ask for the user PIN
@@ -89,6 +97,13 @@ class ModalSendTx extends React.Component {
       if (hathorLib.wallet.isPinCorrect(pin)) {
         $('#pinModal').data('bs.modal')._config.backdrop = 'static';
         $('#pinModal').data('bs.modal')._config.keyboard = false;
+
+        // If we are using the wallet service facade, we should avail of the validated PIN
+        // to renew the auth token.
+        if (this.props.useWalletService) {
+          await this.props.wallet.validateAndRenewAuthToken(pin);
+        }
+
         this.sendTransaction = await this.props.prepareSendTransaction(pin);
         if (this.sendTransaction) {
           // Show send tx handler component and start sending
@@ -215,4 +230,4 @@ class ModalSendTx extends React.Component {
   }
 }
 
-export default ModalSendTx;
+export default connect(mapStateToProps)(ModalSendTx);
