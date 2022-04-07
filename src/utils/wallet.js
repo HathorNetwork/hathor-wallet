@@ -563,24 +563,6 @@ const wallet = {
   },
 
   /*
-   * Update localStorage and redux when a new tx arrive in the websocket
-   *
-   * @param {Object} data Object with data of the new tx
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  newAddressHistory(data) {
-    const walletData = oldWalletUtil.getWalletData();
-    // Update historyTransactions with new one
-    const historyTransactions = 'historyTransactions' in walletData ? walletData['historyTransactions'] : {};
-    const allTokens = 'allTokens' in walletData ? walletData['allTokens'] : [];
-    oldWalletUtil.updateHistoryData(historyTransactions, allTokens, [data], null, walletData);
-
-    this.afterLoadAddressHistory();
-  },
-
-  /*
    * After load address history we should update redux data
    *
    * @memberof Wallet
@@ -648,84 +630,6 @@ const wallet = {
     const lastSharedIndex = oldWalletUtil.getLastSharedIndex();
     const lastSharedAddress = storage.getItem('wallet:address');
     this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
-  },
-
-  /**
-   * Update address shared in localStorage and redux
-   *
-   * @param {string} lastSharedAddress
-   * @param {number} lastSharedIndex
-   * @memberof Wallet
-   * @inner
-   */
-  updateAddress(lastSharedAddress, lastSharedIndex, updateRedux) {
-    oldWalletUtil.updateAddress(lastSharedAddress, lastSharedIndex);
-    if (updateRedux) {
-      this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
-    }
-  },
-
-  /**
-   * Generate a new address
-   * We update the wallet data and new address shared
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  generateNewAddress() {
-    const { newAddress, newIndex } = oldWalletUtil.generateNewAddress();
-
-    // Save in redux the new shared address
-    this.updateSharedAddressRedux(newAddress.toString(), newIndex);
-
-    return {address: newAddress.toString(), index: newIndex};
-  },
-
-  /**
-   * Get next address after the last shared one (only if it's already generated)
-   * Update the data in localStorage and Redux
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  getNextAddress() {
-    const result = oldWalletUtil.getNextAddress();
-    if (result) {
-      const {address, index} = result;
-      this.updateSharedAddressRedux(address, index);
-      return result;
-    }
-    return null;
-  },
-
-  /**
-   * Get data from localStorage and save to redux
-   *
-   * @return {boolean} if was saved
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  localStorageToRedux() {
-    let data = oldWalletUtil.getWalletData();
-    if (data) {
-      const dataToken = tokens.getTokens();
-      // Saving wallet data
-      store.dispatch(reloadData({
-        historyTransactions: data.historyTransactions || {},
-        allTokens: new Set(data.allTokens || []),
-        tokens: dataToken,
-      }));
-
-      // Saving address data
-      store.dispatch(sharedAddressUpdate({
-        lastSharedAddress: storage.getItem('wallet:address'),
-        lastSharedIndex: oldWalletUtil.getLastSharedIndex(),
-      }));
-      return true;
-    } else {
-      return false;
-    }
   },
 
   /*
