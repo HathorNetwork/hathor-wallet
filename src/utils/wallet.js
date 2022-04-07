@@ -364,22 +364,18 @@ const wallet = {
 
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
-
+ 
     // This check is important to set the correct network on storage and redux
     const data = await version.checkApiVersion();
 
-    // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
+    // Fetch metadata of all tokens registered
     const dataToken = tokens.getTokens();
+
+    // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     store.dispatch(reloadData({ tokens: dataToken }));
 
-    // Fetch metadata of all tokens registered
     this.fetchTokensMetadata(dataToken.map((token) => token.uid), data.network);
 
-    // If we've lost redux data, we could not properly stop the wallet object
-    // then we don't know if we've cleaned up the wallet data in the storage
-    // If it's fromXpriv, then we can't clean access data because we need that
-    oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
- 
     const uniqueDeviceId = walletHelpers.getUniqueId();
     const featureFlags = new FeatureFlags(uniqueDeviceId, data.network);
     const useWalletService = await featureFlags.shouldUseWalletService();
@@ -389,42 +385,7 @@ const wallet = {
     let wallet;
     let connection;
 
-    const handlePartialUpdate = async (updatedBalanceMap) => {
-      const tokens = Object.keys(updatedBalanceMap);
-      const tokensHistory = {};
-      const tokensBalance = {};
-
-      for (const token of tokens) {
-        /* eslint-disable no-await-in-loop */
-        const balance = await wallet.getBalance(token);
-        const tokenBalance = balance[0].balance;
-        const authorities = balance[0].tokenAuthorities;
-
-        let mint = false;
-        let melt = false;
-
-        if (authorities) {
-          const { unlocked } = authorities;
-          mint = unlocked.mint;
-          melt = unlocked.melt;
-        }
-
-        tokensBalance[token] = {
-          available: tokenBalance.unlocked,
-          locked: tokenBalance.locked,
-          mint,
-          melt,
-        };
-        const history = await wallet.getTxHistory({ token_id: token });
-        tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
-        /* eslint-enable no-await-in-loop */
-      }
-
-      store.dispatch(partiallyUpdateHistoryAndBalance({ tokensHistory, tokensBalance }));
-    };
-
     if (useWalletService) {
-      store.dispatch(loadingAddresses(true));
       const network = new Network(data.network);
 
       let xpriv = null;
@@ -454,6 +415,11 @@ const wallet = {
       wallet = new HathorWalletServiceWallet(walletConfig);
       connection = wallet.conn;
     } else {
+      // If we've lost redux data, we could not properly stop the wallet object
+      // then we don't know if we've cleaned up the wallet data in the storage
+      // If it's fromXpriv, then we can't clean access data because we need that
+      oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
+
       let xpriv = null;
 
       if (fromXpriv) {
@@ -504,7 +470,9 @@ const wallet = {
       } else {
         message = 'You\'ve received a new transaction! Click to open it.'
       }
+
       const notification = this.sendNotification(message);
+
       // Set the notification click, in case we have sent one
       if (notification !== undefined) {
         notification.onclick = () => {
@@ -630,7 +598,14 @@ const wallet = {
     const lastSharedIndex = storage.getItem('wallet:lastSharedIndex');
     const lastGeneratedIndex = oldWalletUtil.getLastGeneratedIndex();
 
-    store.dispatch(historyUpdate({historyTransactions, allTokens, lastSharedIndex, lastSharedAddress: address, addressesFound: lastGeneratedIndex + 1, transactionsFound}));
+    store.dispatch(historyUpdate({
+      historyTransactions,
+      allTokens,
+      lastSharedIndex,
+      lastSharedAddress: address,
+      addressesFound: lastGeneratedIndex + 1,
+      transactionsFound,
+    }));
   },
 
   /**
