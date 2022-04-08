@@ -147,12 +147,6 @@ class Wallet extends React.Component {
    * @return {boolean} If should show administrative tab
    */
   shouldShowAdministrativeTab = () => {
-    // Wallet Service
-    if (this.props.useWalletService) {
-      return this.props.tokenBalance.mint || this.props.tokenBalance.melt;
-    }
-
-    // Old facade
     if (this.props.wallet.getMintAuthority(this.props.selectedToken, { skipSpent: false })) {
       return true;
     }
