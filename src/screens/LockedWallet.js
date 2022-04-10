@@ -13,7 +13,9 @@ import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
+import ReactLoading from 'react-loading';
 import { resolveLockWalletPromise } from '../actions';
+import colors from '../index.scss';
 
 
 const mapStateToProps = (state) => {
@@ -41,7 +43,8 @@ class LockedWallet extends React.Component {
      * errorMessage {string} Message to be shown in case of error in modal
      */
     this.state = {
-      errorMessage: ''
+      errorMessage: '',
+      loading: false,
     }
   }
 
@@ -59,6 +62,11 @@ class LockedWallet extends React.Component {
    */
   unlockClicked = (e) => {
     e.preventDefault();
+
+    if (this.state.loading) {
+      return;
+    }
+
     const isValid = this.refs.unlockForm.checkValidity();
     if (isValid) {
       const pin = this.refs.pin.value;
@@ -77,11 +85,19 @@ class LockedWallet extends React.Component {
         return;
       }
 
+      this.setState({
+        loading: true,
+      });
+
       // The last parameter being true means that we are going to start the wallet from an xpriv
       // that's already in localStorage encrypted. Because of that we don't need to send the
       // seed (first parameter) neither the password (second parameter).
       const promise = wallet.startWallet(null, '', pin, '', this.props.history, true);
+
       promise.then(() => {
+        this.setState({
+          loading: false,
+        });
         this.props.history.push('/wallet/');
       });
     } else {
@@ -120,7 +136,13 @@ class LockedWallet extends React.Component {
             {this.state.errorMessage && <p className="mt-4 text-danger">{this.state.errorMessage}</p>}
             <div className="d-flex align-items-center justify-content-between flex-row w-100 mt-4">
               <a className="mt-4" onClick={(e) => this.resetClicked(e)} href="true">{t`Reset all data`}</a>
-              <button onClick={this.unlockClicked} type="button" className="btn btn-hathor">{t`Unlock`}</button>
+              <button onClick={this.unlockClicked} type="button" className="btn btn-hathor">
+                {
+                  this.state.loading ?
+                  <ReactLoading type='spin' width={24} height={24} /> :
+                  t`Unlock`
+                }
+              </button>
             </div>
           </div>
         </div>
