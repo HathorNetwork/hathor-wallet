@@ -20,6 +20,7 @@ import { get } from 'lodash';
 const mapStateToProps = (state) => {
   return {
     tokenMetadata: state.tokenMetadata,
+    wallet: state.wallet,
   };
 };
 
@@ -58,20 +59,20 @@ class TokenGeneralInfo extends React.Component {
   /**
    * Upadte token info getting data from the full node (can mint, can melt, total supply)
    */
-  updateTokenInfo = () => {
+  updateTokenInfo = async () => {
     this.setState({ errorMessage: '' });
-    hathorLib.walletApi.getGeneralTokenInfo(this.props.token.uid, (response) => {
-      if (response.success) {
-        this.setState({
-          totalSupply: response.total,
-          canMint: response.mint.length > 0,
-          canMelt: response.melt.length > 0,
-          transactionsCount: response.transactions_count,
-        });
-      } else {
-        this.setState({ errorMessage: response.message });
-      }
-    });
+
+    try {
+      const tokenDetails = await this.props.wallet.getTokenDetails(this.props.token.uid);
+      this.setState({
+        totalSupply: tokenDetails.total,
+        canMint: tokenDetails.mint.length > 0,
+        canMelt: tokenDetails.melt.length > 0,
+        transactionsCount: tokenDetails.transactions_count,
+      });
+    } catch (e) {
+      this.setState({ errorMessage: e.message });
+    }
   }
 
   /**
