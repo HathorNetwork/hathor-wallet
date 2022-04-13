@@ -15,7 +15,6 @@ import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
 import { resolveLockWalletPromise } from '../actions';
-import colors from '../index.scss';
 
 
 const mapStateToProps = (state) => {
