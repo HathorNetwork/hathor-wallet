@@ -190,7 +190,7 @@ class Settings extends React.Component {
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
             <CopyToClipboard text={uniqueIdentifier} onCopy={this.copied}>
               <span>
-                <p><strong>Unique identifier:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
+                <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
               </span>
             </CopyToClipboard>
             <button className="btn btn-hathor" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
