@@ -15,6 +15,7 @@ import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
 import { resolveLockWalletPromise } from '../actions';
+import colors from '../index.scss'
 
 
 const mapStateToProps = (state) => {
@@ -135,13 +136,18 @@ class LockedWallet extends React.Component {
             {this.state.errorMessage && <p className="mt-4 text-danger">{this.state.errorMessage}</p>}
             <div className="d-flex align-items-center justify-content-between flex-row w-100 mt-4">
               <a className="mt-4" onClick={(e) => this.resetClicked(e)} href="true">{t`Reset all data`}</a>
-              <button onClick={this.unlockClicked} type="button" className="btn btn-hathor">
-                {
-                  this.state.loading ?
-                  <ReactLoading type='spin' width={24} height={24} /> :
-                  t`Unlock`
-                }
-              </button>
+              <div className="d-flex align-items-center justify-content-between btn-hathor-loading-wrapper">
+                {this.state.loading && (
+                  <ReactLoading color={colors.purpleHathor} type='spin' width={24} height={24} className="loading" />
+                )}
+                <button
+                  onClick={this.unlockClicked}
+                  type="button"
+                  className="btn btn-hathor"
+                  disabled={this.state.loading}>
+                  {t`Unlock`}
+                </button>
+              </div>
             </div>
           </div>
         </div>
