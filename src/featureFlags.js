@@ -6,6 +6,8 @@ import {
   UNLEASH_POLLING_INTERVAL,
 } from './constants';
 
+const IGNORE_WALLET_SERVICE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
+
 export class FeatureFlags extends events.EventEmitter {
   constructor(userId, network) {
     super();
@@ -47,7 +49,7 @@ export class FeatureFlags extends events.EventEmitter {
   */
   async shouldUseWalletService() {
     try {
-      const shouldIgnore = await localStorage.getItem('featureFlags:ignoreWalletServiceFlag');
+      const shouldIgnore = await localStorage.getItem(IGNORE_WALLET_SERVICE_FLAG);
       if (shouldIgnore) {
         return false;
       }
@@ -72,7 +74,7 @@ export class FeatureFlags extends events.EventEmitter {
    * Sets the ignore flag on the storage to persist it between app restarts
    */
   async ignoreWalletServiceFlag() {
-    await localStorage.setItem('featureFlags:ignoreWalletServiceFlag', 'true');
+    await localStorage.setItem(IGNORE_WALLET_SERVICE_FLAG, 'true');
     this.walletServiceEnabled = false;
 
     // Stop the client from polling
@@ -83,6 +85,6 @@ export class FeatureFlags extends events.EventEmitter {
    * Removes the ignore flag from the storage
    */
   static async clearIgnoreWalletServiceFlag() {
-    await localStorage.removeItem('featureFlags:ignoreWalletServiceFlag');
+    await localStorage.removeItem(IGNORE_WALLET_SERVICE_FLAG);
   }
 }
