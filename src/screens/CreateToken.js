@@ -107,7 +107,7 @@ class CreateToken extends React.Component {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
-      address = this.props.wallet.getNextAddress().address;
+      address = this.props.wallet.getCurrentAddress({ markAsUsed: true }).address;
     } else {
       address = this.refs.address.value;
     }

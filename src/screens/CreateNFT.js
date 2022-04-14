@@ -112,7 +112,7 @@ class CreateNFT extends React.Component {
     // Get the address to send the created tokens
     let address = '';
     if (this.autoselectAddressRef.current.checked) {
-      address = this.props.wallet.getNextAddress().address;
+      address = this.props.wallet.getCurrentAddress({ markAsUsed: true }).address;
     } else {
       address = this.addressRef.current.value;
     }
