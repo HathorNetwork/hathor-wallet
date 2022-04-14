@@ -64,11 +64,13 @@ class TokenGeneralInfo extends React.Component {
 
     try {
       const tokenDetails = await this.props.wallet.getTokenDetails(this.props.token.uid);
+      const { totalSupply, totalTransactions, authorities } = tokenDetails;
+
       this.setState({
-        totalSupply: tokenDetails.total,
-        canMint: tokenDetails.mint.length > 0,
-        canMelt: tokenDetails.melt.length > 0,
-        transactionsCount: tokenDetails.transactions_count,
+        totalSupply,
+        canMint: authorities.mint,
+        canMelt: authorities.melt,
+        transactionsCount: totalTransactions,
       });
     } catch (e) {
       this.setState({ errorMessage: e.message });
