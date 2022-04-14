@@ -80,7 +80,7 @@ class TokenAdministrative extends React.Component {
   }
 
   /**
-   * Update token info getting data from the full node (can mint, can melt, total supply)
+   * Update token info getting data from the facade (can mint, can melt, total supply, total transactions)
    */
   updateTokenInfo = async () => {
     this.setState({ errorMessage: '' });

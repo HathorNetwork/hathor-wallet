@@ -57,7 +57,7 @@ class TokenGeneralInfo extends React.Component {
   }
 
   /**
-   * Upadte token info getting data from the full node (can mint, can melt, total supply)
+   * Update token info getting data from the facade (can mint, can melt, total supply and total transactions)
    */
   updateTokenInfo = async () => {
     this.setState({ errorMessage: '' });
