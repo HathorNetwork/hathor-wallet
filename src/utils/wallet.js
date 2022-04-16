@@ -351,8 +351,7 @@ const wallet = {
 
     const uniqueDeviceId = walletHelpers.getUniqueId();
     const featureFlags = new FeatureFlags(uniqueDeviceId, data.network);
-    const hardwareWallet = !oldWalletUtil.isSoftwareWallet();
-
+    const hardwareWallet = oldWalletUtil.isHardwareWallet();
     // For now, the wallet service does not support hardware wallet, so default to the old facade
     const useWalletService = hardwareWallet ? false : await featureFlags.shouldUseWalletService();
 
