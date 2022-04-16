@@ -367,12 +367,12 @@ const wallet = {
     // This check is important to set the correct network on storage and redux
     const data = await version.checkApiVersion();
 
-    // Fetch metadata of all tokens registered
     const dataToken = tokens.getTokens();
 
     // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     store.dispatch(reloadData({ tokens: dataToken }));
 
+    // Fetch metadata of all tokens registered
     this.fetchTokensMetadata(dataToken.map((token) => token.uid), data.network);
 
     const uniqueDeviceId = walletHelpers.getUniqueId();
