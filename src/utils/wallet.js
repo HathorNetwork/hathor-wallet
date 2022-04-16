@@ -155,27 +155,9 @@ const wallet = {
     // Then for each token we get the balance and history
     for (const token of tokens) {
       /* eslint-disable no-await-in-loop */
-      const balance = await wallet.getBalance(token);
-      const tokenBalance = balance[0].balance;
-      const authorities = balance[0].tokenAuthorities;
-
-      let mint = false;
-      let melt = false;
-
-      if (authorities) {
-        const { unlocked } = authorities;
-        mint = unlocked.mint;
-        melt = unlocked.melt;
-      }
-
-      tokensBalance[token] = {
-        available: tokenBalance.unlocked,
-        locked: tokenBalance.locked,
-        mint,
-        melt,
-      };
       // We fetch history count of 5 pages and then we fetch a new page each 'Next' button clicked
       const history = await wallet.getTxHistory({ token_id: token, count: WALLET_HISTORY_COUNT });
+      tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
       tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
       /* eslint-enable no-await-in-loop */
     }
@@ -315,26 +297,9 @@ const wallet = {
 
     for (const token of tokens) {
       /* eslint-disable no-await-in-loop */
-      const balance = await wallet.getBalance(token);
-      const tokenBalance = balance[0].balance;
-      const authorities = balance[0].tokenAuthorities;
-
-      let mint = false;
-      let melt = false;
-
-      if (authorities) {
-        const { unlocked } = authorities;
-        mint = unlocked.mint;
-        melt = unlocked.melt;
-      }
-
-      tokensBalance[token] = {
-        available: tokenBalance.unlocked,
-        locked: tokenBalance.locked,
-        mint,
-        melt,
-      };
       const history = await wallet.getTxHistory({ token_id: token });
+
+      tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
       tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
       /* eslint-enable no-await-in-loop */
     }
