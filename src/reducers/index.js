@@ -53,6 +53,7 @@ const initialState = {
   metadataLoaded: false,
   // Should we use the wallet service facade?
   useWalletService: false,
+  // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
   lockWalletPromise: null,
 };
 
