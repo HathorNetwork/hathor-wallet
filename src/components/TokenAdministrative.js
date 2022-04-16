@@ -99,7 +99,7 @@ class TokenAdministrative extends React.Component {
    * Update token state after didmount or props update
    */
   updateWalletInfo = () => {
-    if (!this.props.token && !this.props.token.uid) {
+    if (!this.props.token || !this.props.token.uid) {
       return;
     }
 
