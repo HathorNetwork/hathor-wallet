@@ -195,23 +195,15 @@ const onLoadWalletSuccess = (state, action) => {
   hathorLib.storage.setItem('wallet:version', VERSION);
   const { tokensHistory, tokensBalance, tokens } = action.payload;
   const allTokens = new Set(tokens);
-  const currentAddress = state.wallet.getCurrentAddress(); //.address;
-  const address = currentAddress.address;
-  let addressIndex
-
-  if (typeof currentAddress.index !== undefined) {
-    addressIndex = currentAddress.index;
-  } else {
-    addressIndex = state.wallet.getAddressIndex(address);
-  }
+  const currentAddress = state.wallet.getCurrentAddress();
 
   return {
     ...state,
     tokensHistory,
     tokensBalance,
     loadingAddresses: false,
-    lastSharedAddress: address,
-    lastSharedIndex: addressIndex,
+    lastSharedAddress: currentAddress.address,
+    lastSharedIndex: currentAddress.index,
     allTokens,
   };
 };
