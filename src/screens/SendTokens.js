@@ -269,6 +269,7 @@ class SendTokens extends React.Component {
    * It opens the ledger modal to wait for user action on the device
    */
   executeSendLedger = () => {
+    // Wallet Service currently does not support Ledger, so we default to the regular SendTransaction
     this.sendTransaction = new hathorLib.SendTransaction({
       outputs: this.data.outputs,
       inputs: this.data.inputs,
