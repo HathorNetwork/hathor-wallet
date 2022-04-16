@@ -290,6 +290,15 @@ const wallet = {
     store.dispatch(tokenMetadataUpdated(metadataPerToken, errors));
   },
 
+  /**
+   * Fetches both history and balance for the affected tokens in updatedBalanceMap
+   *
+   * @param {HathorWallet} wallet object
+   * @param {Object} updatedBalanceMap An object containing tokens as the keys and their updated balances as values
+   *
+   * @memberof Wallet
+   * @inner
+   **/
   async handlePartialUpdate (wallet, updatedBalanceMap) {
     const tokens = Object.keys(updatedBalanceMap);
     const tokensHistory = {};
