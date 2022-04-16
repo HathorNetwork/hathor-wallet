@@ -468,6 +468,11 @@ const wallet = {
     });
 
     wallet.on('update-tx', async (tx) => {
+      // `update-tx` event is not yet being emitted from the wallet-service facade as it is not implemented,
+      // we should ignore this message for now to prevent errors when we start emitting it in the future
+      if (useWalletService) {
+        return;
+      }
       const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
       const updatedBalanceMap = await this.fetchNewTxTokenBalance(wallet, tx);
       store.dispatch(updateTx(tx, updatedBalanceMap, balances));
