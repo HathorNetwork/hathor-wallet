@@ -106,8 +106,8 @@ class TokenAdministrative extends React.Component {
     const mintUtxos = await this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
     const meltUtxos = await this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
 
-    const mintCount = mintUtxos ? mintUtxos.length : 0;
-    const meltCount = meltUtxos ? meltUtxos.length : 0;
+    const mintCount = mintUtxos.length;
+    const meltCount = meltUtxos.length;
 
     const balance = this.props.token.uid in this.props.tokensBalance ? this.props.tokensBalance[this.props.token.uid].available : 0;
 
