@@ -57,11 +57,13 @@ class Wallet extends React.Component {
   /**
    * backupDone {boolean} if words backup was already done
    * successMessage {string} Message to be shown on alert success
+   * shouldShowAdministrativeTab {boolean} If we should display the Administrative Tools tab
    */
   state = {
     backupDone: true,
     successMessage: '',
     hasTokenSignature: false,
+    shouldShowAdministrativeTab: false,
   };
 
   // Reference for the TokenGeneralInfo component
@@ -91,6 +93,12 @@ class Wallet extends React.Component {
   componentWillReceiveProps(nextProps) {
     const signature = tokens.getTokenSignature(nextProps.selectedToken);
     this.setState({hasTokenSignature: !!signature});
+
+    // This will be called everytime the props are updated, so check if
+    // the selected token changed
+    if (this.props.selectedToken !== nextProps.selectedToken) {
+      this.shouldShowAdministrativeTab(nextProps.selectedToken);
+    }
   }
 
   /**
@@ -143,25 +151,29 @@ class Wallet extends React.Component {
 
   /*
    * We show the administrative tools tab only for the users that one day had an authority output, even if it was already spent
-   *
-   * @return {boolean} If should show administrative tab
+   * 
+   * This will set the shouldShowAdministrativeTab state param based on the response of getMintAuthority and getMeltAuthority
    */
-  shouldShowAdministrativeTab = () => {
-    // Wallet Service
-    if (this.props.useWalletService) {
-      return this.props.tokenBalance.mint || this.props.tokenBalance.melt;
+  shouldShowAdministrativeTab = async (tokenId) => {
+    const mintAuthorities = await this.props.wallet.getMintAuthority(tokenId, { skipSpent: false });
+
+    if (mintAuthorities.length > 0) {
+      return this.setState({
+        shouldShowAdministrativeTab: true,
+      });
     }
 
-    // Old facade
-    if (this.props.wallet.getMintAuthority(this.props.selectedToken, { skipSpent: false })) {
-      return true;
+    const meltAuthorities = await this.props.wallet.getMeltAuthority(tokenId, { skipSpent: false });
+
+    if (meltAuthorities.length > 0) {
+      return this.setState({
+        shouldShowAdministrativeTab: true,
+      });
     }
 
-    if (this.props.wallet.getMeltAuthority(this.props.selectedToken, { skipSpent: false })) {
-      return true;
-    }
-
-    return false;
+    return this.setState({
+      shouldShowAdministrativeTab: false,
+    });
   }
 
   goToAllAddresses = () => {
@@ -204,7 +216,7 @@ class Wallet extends React.Component {
     }
 
     const renderTabAdmin = () => {
-      if (this.shouldShowAdministrativeTab()) {
+      if (this.state.shouldShowAdministrativeTab) {
         return (
             <li className="nav-item">
               <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">{t`Administrative Tools`}</a>
@@ -216,7 +228,7 @@ class Wallet extends React.Component {
     }
 
     const renderContentAdmin = () => {
-      if (this.shouldShowAdministrativeTab()) {
+      if (this.state.shouldShowAdministrativeTab) {
         return (
           <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
             <TokenAdministrative key={this.props.selectedToken} token={token} ref={this.administrativeRef} />

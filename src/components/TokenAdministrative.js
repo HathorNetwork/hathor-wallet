@@ -98,34 +98,16 @@ class TokenAdministrative extends React.Component {
   /**
    * Update token state after didmount or props update
    */
-  updateWalletInfo = () => {
-    if (!this.props.token || !this.props.token.uid) {
+  updateWalletInfo = async () => {
+    if (!this.props.token && !this.props.token.uid) {
       return;
     }
 
-    const { uid } = this.props.token;
+    const mintUtxos = await this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
+    const meltUtxos = await this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
 
-    let mintCount = 0;
-    let meltCount = 0;
-
-    const tokenBalance = this.props.tokensBalance[uid];
-
-    if (this.props.useWalletService) {
-      // Wallet Service
-      // TODO: This should come from the wallet service and display the count properly
-      const canMintUtxos = tokenBalance.mint;
-      const canMeltUtxos = tokenBalance.melt;
-
-      mintCount = canMintUtxos ? 1 : 0;
-      meltCount = canMeltUtxos ? 1 : 0;
-    } else {
-      // Old Facade
-      const mintUtxos = this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
-      const meltUtxos = this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
-
-      mintCount = mintUtxos ? mintUtxos.length : 0;
-      meltCount = meltUtxos ? meltUtxos.length : 0;
-    }
+    const mintCount = mintUtxos.length;
+    const meltCount = meltUtxos.length;
 
     const balance = this.props.token.uid in this.props.tokensBalance ? this.props.tokensBalance[this.props.token.uid].available : 0;
 
