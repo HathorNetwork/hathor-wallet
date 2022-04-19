@@ -94,7 +94,11 @@ class Wallet extends React.Component {
     const signature = tokens.getTokenSignature(nextProps.selectedToken);
     this.setState({hasTokenSignature: !!signature});
 
-    this.shouldShowAdministrativeTab(nextProps.selectedToken);
+    // This will be called everytime the props are updated, so check if
+    // the selected token changed
+    if (this.props.selectedToken !== nextProps.selectedToken) {
+      this.shouldShowAdministrativeTab(nextProps.selectedToken);
+    }
   }
 
   /**
