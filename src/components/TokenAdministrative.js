@@ -80,19 +80,24 @@ class TokenAdministrative extends React.Component {
   }
 
   /**
-   * Upadte token info getting data from the full node (can mint, can melt, total supply)
+   * Update token info getting data from the facade (can mint, can melt, total supply, total transactions)
    */
-  updateTokenInfo = () => {
+  updateTokenInfo = async () => {
     this.setState({ errorMessage: '' });
-    hathorLib.walletApi.getGeneralTokenInfo(this.props.token.uid, (response) => {
-      if (response.success) {
-        this.setState({
-          totalSupply: response.total,
-        });
-      } else {
-        this.setState({ errorMessage: response.message });
-      }
-    });
+
+    try {
+      const tokenDetails = await this.props.wallet.getTokenDetails(this.props.token.uid);
+      const { totalSupply, totalTransactions, authorities } = tokenDetails;
+
+      this.setState({
+        totalSupply,
+        canMint: authorities.mint,
+        canMelt: authorities.melt,
+        transactionsCount: totalTransactions,
+      });
+    } catch (e) {
+      this.setState({ errorMessage: e.message });
+    }
   }
 
   /**
