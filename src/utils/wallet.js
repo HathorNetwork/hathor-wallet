@@ -156,7 +156,7 @@ const wallet = {
     for (const token of tokens) {
       /* eslint-disable no-await-in-loop */
       // We fetch history count of 5 pages and then we fetch a new page each 'Next' button clicked
-      const history = await wallet.getTxHistory({ token_id: token, count: WALLET_HISTORY_COUNT });
+      const history = await wallet.getTxHistory({ token_id: token, count: 5 * WALLET_HISTORY_COUNT });
       tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
       tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
       /* eslint-enable no-await-in-loop */
