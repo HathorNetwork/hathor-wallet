@@ -26,27 +26,26 @@ const version = {
    * @memberof Version
    * @inner
    */
-  checkApiVersion() {
-    const newPromise = new Promise((resolve, reject) => {
-      const libPromise = hathorLib.version.checkApiVersion();
-      libPromise.then((data) => {
-        // Update version allowed in redux
-        store.dispatch(isVersionAllowedUpdate({allowed: hathorLib.helpers.isVersionAllowed(data.version, hathorLib.constants.MIN_API_VERSION)}));
-        // Set network in lib to use the correct address byte
-        let network;
-        if (data.network === 'mainnet') {
-          network = 'mainnet';
-        } else {
-          // Can we assume it will be testnet? I think it's safe
-          network = 'testnet';
-        }
-        helpers.updateNetwork(network);
-        resolve({...data, network});
-      }, (error) => {
-        reject();
-      });
-    });
-    return newPromise;
+  async checkApiVersion(wallet) {
+    const data = await wallet.getVersionData();
+
+    // Update version allowed in redux
+    store.dispatch(isVersionAllowedUpdate({
+      allowed: hathorLib.helpers.isVersionAllowed(data.version, hathorLib.constants.MIN_API_VERSION)
+    }));
+    // Set network in lib to use the correct address byte
+    let network;
+    if (data.network === 'mainnet') {
+      network = 'mainnet';
+    } else {
+      // Can we assume it will be testnet? I think it's safe
+      network = 'testnet';
+    }
+    helpers.updateNetwork(network);
+    return {
+      ...data,
+      network,
+    };
   },
 
   /**
