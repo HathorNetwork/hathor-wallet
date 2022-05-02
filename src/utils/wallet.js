@@ -364,19 +364,17 @@ const wallet = {
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
  
-    // This check is important to set the correct network on storage and redux
-    const data = await version.checkApiVersion();
-
+    const network = config.getNetwork();
     const dataToken = tokens.getTokens();
 
     // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     store.dispatch(reloadData({ tokens: dataToken }));
 
     // Fetch metadata of all tokens registered
-    this.fetchTokensMetadata(dataToken.map((token) => token.uid), data.network);
+    this.fetchTokensMetadata(dataToken.map((token) => token.uid), network);
 
     const uniqueDeviceId = walletHelpers.getUniqueId();
-    const featureFlags = new FeatureFlags(uniqueDeviceId, data.network);
+    const featureFlags = new FeatureFlags(uniqueDeviceId, network);
     const hardwareWallet = oldWalletUtil.isHardwareWallet();
     // For now, the wallet service does not support hardware wallet, so default to the old facade
     const useWalletService = hardwareWallet ? false : await featureFlags.shouldUseWalletService();
@@ -387,7 +385,7 @@ const wallet = {
     let connection;
 
     if (useWalletService) {
-      const network = new Network(data.network);
+      const network = new Network(network);
 
       let xpriv = null;
       if (fromXpriv) {
@@ -397,6 +395,9 @@ const wallet = {
       // Set urls for wallet service
       config.setWalletServiceBaseUrl(WALLET_SERVICE_MAINNET_BASE_URL);
       config.setWalletServiceBaseWsUrl(WALLET_SERVICE_MAINNET_BASE_WS_URL);
+
+      // This check is important to set the correct network on storage and redux
+      const versionData = await wallet.getVersionData();
 
       const walletConfig = {
         seed: words,
