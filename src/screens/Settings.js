@@ -22,7 +22,14 @@ import hathorLib from '@hathor/wallet-lib';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
+import { connect } from "react-redux";
 
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+    useWalletService: state.useWalletService,
+  };
+};
 
 /**
  * Settings screen
@@ -167,7 +174,8 @@ class Settings extends React.Component {
   }
 
   render() {
-    const serverURL = hathorLib.helpers.getServerURL();
+    const serverURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
+    const wsServerURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
     const ledgerCustomTokens = hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
     const uniqueIdentifier = helpers.getUniqueId();
 
@@ -179,6 +187,11 @@ class Settings extends React.Component {
         </div>
         <div>
           <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
+          {
+            this.props.useWalletService && (
+              <p><SpanFmt>{t`**Real-time server:** You are connected to ${wsServerURL}`}</SpanFmt></p>
+            )
+          }
           <button className="btn btn-hathor" onClick={this.changeServer}>{t`Change server`}</button>
         </div>
         <hr />
@@ -216,4 +229,4 @@ class Settings extends React.Component {
   }
 }
 
-export default Settings;
+export default connect(mapStateToProps)(Settings);

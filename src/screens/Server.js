@@ -14,14 +14,19 @@ import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
 import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
-import { DEFAULT_SERVERS } from '../constants';
+import {
+  DEFAULT_SERVERS,
+  DEFAULT_WALLET_SERVICE_SERVERS,
+  DEFAULT_WALLET_SERVICE_WS_SERVERS,
+} from '../constants';
 import colors from '../index.scss';
 import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet
+    wallet: state.wallet,
+    useWalletService: state.useWalletService,
   };
 };
 
@@ -68,8 +73,9 @@ class Server extends React.Component {
    * Called after user click the button to change the server  
    * Check if form is valid and then reload that from new server
    */
-  serverSelected = () => {
+  serverSelected = async () => {
     this.setState({ errorMessage: '' });
+
     if ((this.state.newServer && this.refs.newServer.value === '') || (!this.state.newServer && this.state.selectedValue === '')) {
       this.setState({ errorMessage: t`New server is not valid` });
       return;
@@ -88,25 +94,28 @@ class Server extends React.Component {
     }
 
     this.setState({ loading: true, errorMessage: '', selectedServer: newServer });
-    const currentServer = hathorLib.helpers.getServerURL();
-    // Update new server in local storage
-    hathorLib.wallet.changeServer(newServer);
-    hathorLib.versionApi.getVersion((data) => {
-      // If the user selected a testnet server, we show a modal to confirm the operation
-      if (data.network !== 'mainnet') {
+    const currentServer = this.props.useWalletService ?
+      hathorLib.config.getWalletServiceBaseUrl() : 
+      hathorLib.config.getServerUrl();
+
+    // Update new server in storage and in the config singleton
+    this.props.wallet.changeServer(newServer);
+
+    try {
+      const versionData = await this.props.wallet.getVersionData();
+      if (versionData.network !== 'mainnet') {
         // Go back to the previous server
         // If the user decides to continue with this change, we will update again
-        hathorLib.wallet.changeServer(currentServer);
+        this.props.wallet.changeServer(currentServer);
         $('#alertModal').modal('show');
-        this.setState({ loading: false });
       } else {
         this.executeServerChange();
       }
-    }, () => {
+    } catch (e) {
       // Go back to the previous server
-      hathorLib.wallet.changeServer(currentServer);
+      this.props.wallet.changeServer(currentServer);
       this.setState({ loading: false });
-    });
+    }
   }
 
   /**
@@ -157,22 +166,52 @@ class Server extends React.Component {
   }
 
   /**
-   * Update state of the selected server
+   * Update state of the selected base server
    *
    * @param {Object} e Event of select change
    */
-  handleSelectChange = (e) => {
-    this.setState({ selectedValue: DEFAULT_SERVERS[e.target.value] });
+  handleBaseURLSelectChange = (e) => {
+    if (this.props.useWalletService) {
+      this.setState({ selectedBaseServer: DEFAULT_WALLET_SERVICE_SERVERS[e.target.value] });
+    } else {
+      this.setState({ selectedBaseServer: DEFAULT_SERVERS[e.target.value] });
+    }
+  }
+
+
+  /**
+   * Update state of the selected websocket server
+   *
+   * @param {Object} e Event of select change
+   */
+  handleWsURLSelectChange = (e) => {
+    if (!this.props.useWalletService) {
+      // should never happen
+      return;
+    }
+
+    this.setState({ selectedBaseServer: DEFAULT_WALLET_SERVICE_WS_SERVERS[e.target.value] });
   }
 
   render() {
+    const mapServerToOption = (servers) => servers.map((server, idx) => (
+      <option key={idx} value={idx}>{server}</option>
+    ));
+
     const renderServerOptions = () => {
-      return DEFAULT_SERVERS.map((server, idx) => {
-        return (
-          <option key={idx} value={idx}>{server}</option>
-        );
-      });
-    }
+      return this.props.useWalletService ?
+        mapServerToOption(DEFAULT_WALLET_SERVICE_SERVERS) :
+        mapServerToOption(DEFAULT_SERVERS);
+    };
+
+    const renderWsServerOptions = () => {
+      if (!this.props.useWalletService) {
+        // should never happen
+        return null;
+      }
+
+      return mapServerToOption(DEFAULT_WALLET_SERVICE_WS_SERVERS);
+    };
 
     const renderConfirmBody = () => {
       return (
@@ -199,12 +238,36 @@ class Server extends React.Component {
         <form onSubmit={e => { e.preventDefault(); }}>
           <div className="row mt-3">
             <div className="col-12">
-              <select onChange={this.handleSelectChange}>
+              { this.props.useWalletService && (
+                  <span>
+                    <p>{t`Base server`}:</p>
+                  </span>
+                )
+              }
+              <select onChange={this.handleBaseURLSelectChange}>
                 <option value=""> -- </option>
                 {renderServerOptions()}
               </select>
             </div>
           </div>
+          {
+            this.props.useWalletService && (
+              <div className="row mt-3">
+                <div className="col-12">
+                  { this.props.useWalletService && (
+                      <span>
+                        <p>{t`Real-time server`}:</p>
+                      </span>
+                    )
+                  }
+                  <select onChange={this.handleWsURLSelectChange}>
+                    <option value=""> -- </option>
+                    {renderWsServerOptions()}
+                  </select>
+                </div>
+              </div>
+            )
+          }
           <div className="form-check checkbox-wrapper mt-3">
             <input className="form-check-input" type="checkbox" id="newServerCheckbox" onChange={this.handleCheckboxChange} />
             <label className="form-check-label" htmlFor="newServerCheckbox">
