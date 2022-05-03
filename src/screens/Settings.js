@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { t } from 'ttag';
-
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
 import { Link } from 'react-router-dom';
+import HathorAlert from '../components/HathorAlert';
 import SpanFmt from '../components/SpanFmt';
 import ModalLedgerResetTokenSignatures from '../components/ModalLedgerResetTokenSignatures';
 import ModalConfirm from '../components/ModalConfirm';
@@ -151,9 +152,25 @@ class Settings extends React.Component {
     $('#resetTokenSignatures').modal('show');
   }
 
+  /**
+   * Method called on copy to clipboard success
+   * Show alert success message
+   *
+   * @param {string} text Text copied to clipboard
+   * @param {*} result Null in case of error
+   */
+  copied = (text, result) => {
+    if (result) {
+      // If copied with success
+      this.refs.alertCopied.show(1000);
+    }
+  }
+
   render() {
     const serverURL = hathorLib.helpers.getServerURL();
     const ledgerCustomTokens = hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
+    const uniqueIdentifier = helpers.getUniqueId();
+
     return (
       <div className="content-wrapper settings">
         <BackButton {...this.props} />
@@ -165,11 +182,17 @@ class Settings extends React.Component {
           <button className="btn btn-hathor" onClick={this.changeServer}>{t`Change server`}</button>
         </div>
         <hr />
+
         <div>
           <h4>{t`Advanced Settings`}</h4>
           <div className="d-flex flex-column align-items-start mt-4">
             <p><strong>{t`Allow notifications:`}</strong> {this.state.isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={this.toggleNotificationSettings}> {t`Change`} </a></p>
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
+            <CopyToClipboard text={uniqueIdentifier} onCopy={this.copied}>
+              <span>
+                <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
+              </span>
+            </CopyToClipboard>
             <button className="btn btn-hathor" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
             {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
@@ -187,6 +210,7 @@ class Settings extends React.Component {
             </p>
           </div>
         </ModalAlertNotSupported>
+        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
       </div>
     );
   }

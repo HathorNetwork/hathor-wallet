@@ -5,7 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { SENTRY_DSN, DEBUG_LOCAL_DATA_KEYS, WALLET_HISTORY_COUNT, METADATA_CONCURRENT_DOWNLOAD } from '../constants';
+import {
+  SENTRY_DSN,
+  DEBUG_LOCAL_DATA_KEYS,
+  WALLET_HISTORY_COUNT,
+  METADATA_CONCURRENT_DOWNLOAD,
+  WALLET_SERVICE_MAINNET_BASE_URL,
+  WALLET_SERVICE_MAINNET_BASE_WS_URL,
+} from '../constants';
+import { FeatureFlags } from '../featureFlags';
 import STORE from '../storageInstance';
 import store from '../store/index';
 import {
@@ -13,7 +21,6 @@ import {
   updateLoadedData,
   isOnlineUpdate,
   updateHeight,
-  newTx,
   updateTx,
   loadingAddresses,
   loadWalletSuccess,
@@ -25,22 +32,29 @@ import {
   updateTokenHistory,
   tokenMetadataUpdated,
   metadataLoaded,
+  partiallyUpdateHistoryAndBalance,
+  setUseWalletService,
+  lockWalletForResult,
 } from '../actions/index';
 import {
   helpers,
   constants as hathorConstants,
   errors as hathorErrors,
   HathorWallet,
+  HathorWalletServiceWallet,
   Connection,
+  Network,
   wallet as oldWalletUtil,
   walletUtils,
   storage,
   tokens,
-  metadataApi
+  metadataApi,
+  config,
 } from '@hathor/wallet-lib';
 import version from './version';
 import ledger from './ledger';
 import { chunk } from 'lodash';
+import walletHelpers from './helpers';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
@@ -121,7 +135,7 @@ const wallet = {
       // in wallet service this comes as 0/1 and in the full node comes with true/false
       is_voided: Boolean(tx.voided),
       version: tx.version,
-    }
+    };
   },
 
   /**
@@ -141,11 +155,9 @@ const wallet = {
     // Then for each token we get the balance and history
     for (const token of tokens) {
       /* eslint-disable no-await-in-loop */
-      const balance = await wallet.getBalance(token);
-      const tokenBalance = balance[0].balance;
-      tokensBalance[token] = { available: tokenBalance.unlocked, locked: tokenBalance.locked };
       // We fetch history count of 5 pages and then we fetch a new page each 'Next' button clicked
       const history = await wallet.getTxHistory({ token_id: token, count: 5 * WALLET_HISTORY_COUNT });
+      tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
       tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
       /* eslint-enable no-await-in-loop */
     }
@@ -181,10 +193,16 @@ const wallet = {
    * tx {Object} full transaction object from the websocket
    */
   async fetchNewTxTokenBalance(wallet, tx) {
+    if (!wallet.isReady()) {
+      return null;
+    }
+
     const updatedBalanceMap = {};
-    const balances = await wallet.getTxBalance(tx);
+    const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
+
     // we now loop through all tokens present in the new tx to get the new balance
-    for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
+    for (const [tokenUid] of Object.entries(balances)) {
+      /* eslint-disable no-await-in-loop */
       updatedBalanceMap[tokenUid] = await this.fetchTokenBalance(wallet, tokenUid);
     }
     return updatedBalanceMap;
@@ -200,7 +218,23 @@ const wallet = {
   async fetchTokenBalance(wallet, uid) {
     const balance = await wallet.getBalance(uid);
     const tokenBalance = balance[0].balance;
-    return { available: tokenBalance.unlocked, locked: tokenBalance.locked };
+    const authorities = balance[0].tokenAuthorities;
+
+    let mint = false;
+    let melt = false;
+
+    if (authorities) {
+      const { unlocked } = authorities;
+      mint = unlocked.mint;
+      melt = unlocked.melt;
+    }
+
+    return {
+      available: tokenBalance.unlocked,
+      locked: tokenBalance.locked,
+      mint,
+      melt,
+    };
   },
 
   /**
@@ -257,6 +291,32 @@ const wallet = {
   },
 
   /**
+   * Fetches both history and balance for the affected tokens in updatedBalanceMap
+   *
+   * @param {HathorWallet} wallet object
+   * @param {Object} updatedBalanceMap An object containing tokens as the keys and their updated balances as values
+   *
+   * @memberof Wallet
+   * @inner
+   **/
+  async handlePartialUpdate (wallet, updatedBalanceMap) {
+    const tokens = Object.keys(updatedBalanceMap);
+    const tokensHistory = {};
+    const tokensBalance = {};
+
+    for (const token of tokens) {
+      /* eslint-disable no-await-in-loop */
+      const history = await wallet.getTxHistory({ token_id: token });
+
+      tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
+      tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
+      /* eslint-enable no-await-in-loop */
+    }
+
+    store.dispatch(partiallyUpdateHistoryAndBalance({ tokensHistory, tokensBalance }));
+  },
+
+  /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
@@ -274,53 +334,97 @@ const wallet = {
     // Set loading addresses screen to show
     store.dispatch(loadingAddresses(true));
     store.dispatch(metadataLoaded(false));
+
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
-
+ 
     // This check is important to set the correct network on storage and redux
     const data = await version.checkApiVersion();
 
-    // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     const dataToken = tokens.getTokens();
+
+    // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     store.dispatch(reloadData({ tokens: dataToken }));
 
     // Fetch metadata of all tokens registered
     this.fetchTokensMetadata(dataToken.map((token) => token.uid), data.network);
 
-    // If we've lost redux data, we could not properly stop the wallet object
-    // then we don't know if we've cleaned up the wallet data in the storage
-    // If it's fromXpriv, then we can't clean access data because we need that
-    oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
+    const uniqueDeviceId = walletHelpers.getUniqueId();
+    const featureFlags = new FeatureFlags(uniqueDeviceId, data.network);
+    const hardwareWallet = oldWalletUtil.isHardwareWallet();
+    // For now, the wallet service does not support hardware wallet, so default to the old facade
+    const useWalletService = hardwareWallet ? false : await featureFlags.shouldUseWalletService();
 
-    const connection = new Connection({
-      network: data.network,
-      servers: [helpers.getServerURL()],
-    });
+    store.dispatch(setUseWalletService(useWalletService));
 
-    const beforeReloadCallback = () => {
-      store.dispatch(loadingAddresses(true));
-    };
+    let wallet;
+    let connection;
 
-    let xpriv = null;
-    if (fromXpriv) {
-      xpriv = oldWalletUtil.getXprivKey(pin);
+    if (useWalletService) {
+      const network = new Network(data.network);
+
+      let xpriv = null;
+      if (fromXpriv) {
+        xpriv = oldWalletUtil.getAcctPathXprivKey(pin);
+      }
+
+      // Set urls for wallet service
+      config.setWalletServiceBaseUrl(WALLET_SERVICE_MAINNET_BASE_URL);
+      config.setWalletServiceBaseWsUrl(WALLET_SERVICE_MAINNET_BASE_WS_URL);
+
+      const walletConfig = {
+        seed: words,
+        xpriv,
+        xpub,
+        requestPassword: async () => new Promise((resolve) => {
+          /**
+           * Lock screen will call `resolve` with the pin screen after validation
+           */
+          routerHistory.push('/locked/');
+          store.dispatch(lockWalletForResult(resolve));
+        }),
+        passphrase,
+        network,
+      };
+
+      wallet = new HathorWalletServiceWallet(walletConfig);
+      connection = wallet.conn;
+    } else {
+      // If we've lost redux data, we could not properly stop the wallet object
+      // then we don't know if we've cleaned up the wallet data in the storage
+      // If it's fromXpriv, then we can't clean access data because we need that
+      oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
+
+      let xpriv = null;
+
+      if (fromXpriv) {
+        xpriv = oldWalletUtil.getXprivKey(pin);
+      }
+
+      connection = new Connection({
+        network: data.network,
+        servers: [helpers.getServerURL()],
+      });
+
+      const beforeReloadCallback = () => {
+        store.dispatch(loadingAddresses(true));
+      };
+
+      const walletConfig = {
+        seed: words,
+        xpriv,
+        xpub,
+        store: STORE,
+        passphrase,
+        connection,
+        beforeReloadCallback,
+      };
+
+      wallet = new HathorWallet(walletConfig);
     }
-
-    const walletConfig = {
-      seed: words,
-      xpriv,
-      xpub,
-      store: STORE,
-      passphrase,
-      connection,
-      beforeReloadCallback,
-    };
-
-    const wallet = new HathorWallet(walletConfig);
 
     store.dispatch(setWallet(wallet));
 
-    const serverInfo = await wallet.start({ pinCode: pin, password });
     // TODO should we save server info?
     //store.dispatch(setServerInfo(serverInfo));
     wallet.on('state', async (state) => {
@@ -341,26 +445,64 @@ const wallet = {
       } else {
         message = 'You\'ve received a new transaction! Click to open it.'
       }
+
       const notification = this.sendNotification(message);
+
       // Set the notification click, in case we have sent one
       if (notification !== undefined) {
         notification.onclick = () => {
           routerHistory.push(`/transaction/${tx.tx_id}/`);
         }
       }
-      // Fetch new balance for each token in the tx and update redux
-      const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
-      const updatedBalanceMap = await this.fetchNewTxTokenBalance(wallet, tx);
-      store.dispatch(newTx(tx, updatedBalanceMap, balances));
+
+      this.fetchNewTxTokenBalance(wallet, tx).then(async (updatedBalanceMap) => {
+        if (updatedBalanceMap) {
+          this.handlePartialUpdate(wallet, updatedBalanceMap);
+
+          // If we are here, we have already fetched new addresses, so it's safe to
+          // call getCurrentAddress to make sure we display a new address to the user
+          const currentAddress = wallet.getCurrentAddress();
+          this.updateSharedAddressRedux(currentAddress.address, currentAddress.index);
+        }
+      });
     });
 
     wallet.on('update-tx', async (tx) => {
+      // `update-tx` event is not yet being emitted from the wallet-service facade as it is not implemented,
+      // we should ignore this message for now to prevent errors when we start emitting it in the future
+      if (useWalletService) {
+        return;
+      }
       const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
       const updatedBalanceMap = await this.fetchNewTxTokenBalance(wallet, tx);
       store.dispatch(updateTx(tx, updatedBalanceMap, balances));
     });
 
-    this.setConnectionEvents(connection, wallet);
+    try {
+      const serverInfo = await wallet.start({ pinCode: pin, password });
+
+      this.setConnectionEvents(connection, wallet);
+    } catch(e) {
+      if (useWalletService) {
+        // Wallet Service start wallet will fail if the status returned from
+        // the service is 'error' or if the start wallet request failed.
+        // We should fallback to the old facade by storing the flag to ignore
+        // the feature flag
+        await featureFlags.ignoreWalletServiceFlag();
+
+        // Restart the page, ignoring cache to make sure events are reset
+        walletHelpers.reloadElectron();
+      }
+    }
+
+    featureFlags.on('wallet-service-enabled', (newUseWalletService) => {
+      // We should only force reset the bundle if the user was on
+      // the wallet service facade and the newflag sends him to
+      // the old facade
+      if (useWalletService && useWalletService !== newUseWalletService) {
+        walletHelpers.reloadElectron();
+      }
+    });
   },
 
   setConnectionEvents(connection, wallet) {
@@ -401,24 +543,6 @@ const wallet = {
   },
 
   /*
-   * Update localStorage and redux when a new tx arrive in the websocket
-   *
-   * @param {Object} data Object with data of the new tx
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  newAddressHistory(data) {
-    const walletData = oldWalletUtil.getWalletData();
-    // Update historyTransactions with new one
-    const historyTransactions = 'historyTransactions' in walletData ? walletData['historyTransactions'] : {};
-    const allTokens = 'allTokens' in walletData ? walletData['allTokens'] : [];
-    oldWalletUtil.updateHistoryData(historyTransactions, allTokens, [data], null, walletData);
-
-    this.afterLoadAddressHistory();
-  },
-
-  /*
    * After load address history we should update redux data
    *
    * @memberof Wallet
@@ -436,7 +560,14 @@ const wallet = {
     const lastSharedIndex = storage.getItem('wallet:lastSharedIndex');
     const lastGeneratedIndex = oldWalletUtil.getLastGeneratedIndex();
 
-    store.dispatch(historyUpdate({historyTransactions, allTokens, lastSharedIndex, lastSharedAddress: address, addressesFound: lastGeneratedIndex + 1, transactionsFound}));
+    store.dispatch(historyUpdate({
+      historyTransactions,
+      allTokens,
+      lastSharedIndex,
+      lastSharedAddress: address,
+      addressesFound: lastGeneratedIndex + 1,
+      transactionsFound,
+    }));
   },
 
   /**
@@ -481,84 +612,6 @@ const wallet = {
     this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
   },
 
-  /**
-   * Update address shared in localStorage and redux
-   *
-   * @param {string} lastSharedAddress
-   * @param {number} lastSharedIndex
-   * @memberof Wallet
-   * @inner
-   */
-  updateAddress(lastSharedAddress, lastSharedIndex, updateRedux) {
-    oldWalletUtil.updateAddress(lastSharedAddress, lastSharedIndex);
-    if (updateRedux) {
-      this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
-    }
-  },
-
-  /**
-   * Generate a new address
-   * We update the wallet data and new address shared
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  generateNewAddress() {
-    const { newAddress, newIndex } = oldWalletUtil.generateNewAddress();
-
-    // Save in redux the new shared address
-    this.updateSharedAddressRedux(newAddress.toString(), newIndex);
-
-    return {address: newAddress.toString(), index: newIndex};
-  },
-
-  /**
-   * Get next address after the last shared one (only if it's already generated)
-   * Update the data in localStorage and Redux
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  getNextAddress() {
-    const result = oldWalletUtil.getNextAddress();
-    if (result) {
-      const {address, index} = result;
-      this.updateSharedAddressRedux(address, index);
-      return result;
-    }
-    return null;
-  },
-
-  /**
-   * Get data from localStorage and save to redux
-   *
-   * @return {boolean} if was saved
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  localStorageToRedux() {
-    let data = oldWalletUtil.getWalletData();
-    if (data) {
-      const dataToken = tokens.getTokens();
-      // Saving wallet data
-      store.dispatch(reloadData({
-        historyTransactions: data.historyTransactions || {},
-        allTokens: new Set(data.allTokens || []),
-        tokens: dataToken,
-      }));
-
-      // Saving address data
-      store.dispatch(sharedAddressUpdate({
-        lastSharedAddress: storage.getItem('wallet:address'),
-        lastSharedIndex: oldWalletUtil.getLastSharedIndex(),
-      }));
-      return true;
-    } else {
-      return false;
-    }
-  },
-
   /*
    * Clean all data before logout wallet
    * - Clean local storage
@@ -588,7 +641,9 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  resetWalletData() {
+  async resetWalletData() {
+    await FeatureFlags.clearIgnoreWalletServiceFlag();
+
     this.cleanWalletRedux();
     oldWalletUtil.resetWalletData();
   },
@@ -688,7 +743,7 @@ const wallet = {
     Sentry.init({
       dsn: dsn,
       release: process.env.npm_package_version
-    })
+    });
   },
 
   /**

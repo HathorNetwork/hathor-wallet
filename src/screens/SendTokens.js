@@ -24,12 +24,12 @@ import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT } from '../constants';
 import ReactLoading from 'react-loading';
 import colors from '../index.scss';
 
-
 const mapStateToProps = (state) => {
   return {
     tokens: state.tokens,
     wallet: state.wallet,
     metadataLoaded: state.metadataLoaded,
+    useWalletService: state.useWalletService,
   };
 };
 
@@ -269,7 +269,12 @@ class SendTokens extends React.Component {
    * It opens the ledger modal to wait for user action on the device
    */
   executeSendLedger = () => {
-    this.sendTransaction = new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, network: this.props.wallet.getNetworkObject() });
+    // Wallet Service currently does not support Ledger, so we default to the regular SendTransaction
+    this.sendTransaction = new hathorLib.SendTransaction({
+      outputs: this.data.outputs,
+      inputs: this.data.inputs,
+      network: this.props.wallet.getNetworkObject(),
+    });
     this.data = this.sendTransaction.prepareTxData();
 
     // Complete data with default values
@@ -322,6 +327,14 @@ class SendTokens extends React.Component {
    * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
    */
   prepareSendTransaction = async (pin) => {
+    if (this.props.useWalletService) {
+      return new hathorLib.SendTransactionWalletService(this.props.wallet, {
+        outputs: this.data.outputs,
+        inputs: this.data.inputs,
+        pin,
+      });
+    }
+
     return new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, pin, network: this.props.wallet.getNetworkObject() });
   }
 

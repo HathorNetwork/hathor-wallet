@@ -66,13 +66,15 @@ class WalletAddress extends React.Component {
    */
   generateNewAddress = (e) => {
     e.preventDefault();
-    const { address } = this.props.wallet.getNextAddress();
+    const address = this.props.wallet.getNextAddress();
 
-    if (address === this.props.lastSharedAddress) {
+    if (address.address === this.props.lastSharedAddress) {
       this.refs.alertError.show(3000);
     } else {
-      const addressIndex = this.props.wallet.getAddressIndex(address);
-      this.props.sharedAddressUpdate({ lastSharedAddress: address, lastSharedIndex: addressIndex});
+      this.props.sharedAddressUpdate({
+        lastSharedAddress: address.address,
+        lastSharedIndex: address.index,
+      });
     }
   }
 
