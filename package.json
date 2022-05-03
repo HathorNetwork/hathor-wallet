@@ -24,7 +24,7 @@
   "version": "0.22.1",
   "private": true,
   "dependencies": {
-    "@hathor/wallet-lib": "^0.33.1",
+    "@hathor/wallet-lib": "^0.35.0",
     "@ledgerhq/hw-transport-node-hid": "^4.73.4",
     "@sentry/electron": "^0.17.0",
     "babel-polyfill": "^6.26.0",
