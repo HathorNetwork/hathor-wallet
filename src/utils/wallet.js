@@ -385,9 +385,8 @@ const wallet = {
     let connection;
 
     if (useWalletService) {
-      const network = new Network(network);
-
       let xpriv = null;
+
       if (fromXpriv) {
         xpriv = oldWalletUtil.getAcctPathXprivKey(pin);
       }
@@ -395,9 +394,6 @@ const wallet = {
       // Set urls for wallet service
       config.setWalletServiceBaseUrl(WALLET_SERVICE_MAINNET_BASE_URL);
       config.setWalletServiceBaseWsUrl(WALLET_SERVICE_MAINNET_BASE_WS_URL);
-
-      // This check is important to set the correct network on storage and redux
-      const versionData = await wallet.getVersionData();
 
       const walletConfig = {
         seed: words,
@@ -411,7 +407,7 @@ const wallet = {
           store.dispatch(lockWalletForResult(resolve));
         }),
         passphrase,
-        network,
+        network: new Network(network),
       };
 
       wallet = new HathorWalletServiceWallet(walletConfig);
@@ -429,7 +425,7 @@ const wallet = {
       }
 
       connection = new Connection({
-        network: data.network,
+        network: network,
         servers: [helpers.getServerURL()],
       });
 
