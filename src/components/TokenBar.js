@@ -11,6 +11,7 @@ import { connect } from "react-redux";
 import { selectToken } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
+import wallet from "../utils/wallet";
 
 
 const mapStateToProps = (state) => {
@@ -76,7 +77,7 @@ class TokenBar extends React.Component {
 
   /**
    * Called when user selects another token
-   * 
+   *
    * @param {string} uid UID of token user selected
    */
   tokenSelected = (uid) => {
@@ -127,10 +128,23 @@ class TokenBar extends React.Component {
     const unknownTokens = this.getUnknownTokens();
 
     const renderTokens = () => {
+      const shouldHideZeroBalanceTokens = wallet.areZeroBalanceTokensHidden();
       return this.props.registeredTokens.map((token) => {
+        let hideThisToken = false;
+        const tokenUid = token.uid;
+        const isTokenHTR = tokenUid === '00';
+        const tokenBalance = this.getTokenBalance(tokenUid);
+
+        // The "hide" setting should apply for every token except HTR
+        if (shouldHideZeroBalanceTokens && !isTokenHTR && tokenBalance === '0.00') {
+          hideThisToken = true;
+        }
+
+        // Deciding if this token should be hidden.
+        if (hideThisToken) return;
         return (
-          <div key={token.uid} className={`token-wrapper ${token.uid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(token.uid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${this.getTokenBalance(token.uid)}`}</span>
+          <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
+            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${tokenBalance}`}</span>
           </div>
         )
       });
