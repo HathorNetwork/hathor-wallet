@@ -56,6 +56,7 @@ class Server extends React.Component {
       selectedServer: '',
       selectedWsServer: '',
       testnetError: '',
+      selectedNetwork: 'mainnet',
     }
   }
 
@@ -75,30 +76,33 @@ class Server extends React.Component {
    * Check if form is valid and then reload that from new server
    */
   serverSelected = async () => {
-    this.setState({ errorMessage: '' });
+    let errorMessage = '';
 
     let invalidServer = false;
     if (this.state.newServer) {
       if (this.refs.newServer.value === '') {
         invalidServer = true;
+        errorMessage = t`New server is not valid`
       }
 
       if (this.props.useWalletService && this.refs.newWsServer.value === '') {
         invalidServer = true;
+        errorMessage = t`New real-time server is not valid`
       }
     } else {
       if (this.state.selectedServer === '') {
         invalidServer = true;
+        errorMessage = t`New server is not valid`
       }
       if (this.props.useWalletService && this.state.selectedWsServer === '') {
         invalidServer = true;
+        errorMessage = t`New real-time server is not valid`
       }
     }
 
+    this.setState({ errorMessage });
+
     if (invalidServer) {
-      this.setState({
-        errorMessage: t`New server is not valid`,
-      });
       return;
     }
 
@@ -144,6 +148,20 @@ class Server extends React.Component {
     try {
       const versionData = await this.props.wallet.getVersionData();
       if (versionData.network !== 'mainnet') {
+        const network = versionData.network;
+        let selectedNetwork = '';
+
+        // Network might be 'testnet-golf' or 'testnet-charlie'
+        if (network.startsWith('testnet')) {
+          selectedNetwork = 'testnet';
+        } else {
+          selectedNetwork = network;
+        }
+
+        this.setState({
+          selectedNetwork,
+        });
+
         // Go back to the previous server
         // If the user decides to continue with this change, we will update again
         this.props.wallet.changeServer(currentServer);
@@ -152,10 +170,10 @@ class Server extends React.Component {
         }
         $('#alertModal').modal('show');
       } else {
-        this.executeServerChange();
         // We are on mainnet, so set the network on the singleton and storage
         hathorLib.config.setNetwork('mainnet');
         helpers.updateNetwork('mainnet');
+        this.executeServerChange();
       }
     } catch (e) {
       // Go back to the previous server
@@ -173,15 +191,16 @@ class Server extends React.Component {
       this.setState({ testnetError: t`Invalid value.` });
       return;
     }
+
     this.props.wallet.changeServer(this.state.selectedServer);
     if (this.props.useWalletService) {
       hathorLib.config.setWalletServiceBaseWsUrl(this.state.selectedWsServer);
     }
 
     // Set network on config singleton so the load wallet will get it properly
-    hathorLib.config.setNetwork('testnet');
+    hathorLib.config.setNetwork(this.state.selectedNetwork);
     // Store on localStorage
-    helpers.updateNetwork('testnet');
+    helpers.updateNetwork(this.state.selectedNetwork);
     $('#alertModal').on('hidden.bs.modal', (e) => {
       this.setState({ loading: true });
       this.executeServerChange();
