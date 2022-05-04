@@ -17,6 +17,7 @@ import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
+import wallet from "../utils/wallet";
 
 
 const mapStateToProps = (state) => {
@@ -53,12 +54,13 @@ class UnknownTokens extends React.Component {
   }
 
   /**
-   * Get all unknown tokens from the wallet  
+   * Get all unknown tokens from the wallet
    * Comparing `allTokens` and `tokens` in the Redux we get the ones that are unknown
    *
+   * @param {boolean} [hideZeroBalance] If true, omits tokens with zero balance
    * @return {Array} Array with unknown tokens {uid, balance, history}
    */
-  getUnknownTokens = () => {
+  getUnknownTokens = (hideZeroBalance) => {
     let unknownTokens = [];
     this.historyRefs = [];
     this.anchorOpenRefs = [];
@@ -68,6 +70,18 @@ class UnknownTokens extends React.Component {
       if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
         const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, token, false);
         const balance = this.props.tokensBalance[token];
+
+        // Filtering tokens according to "hide zero balance tokens" setting
+        let hideThisToken = false;
+        const totalBalance = balance.available + balance.locked;
+        if (hideZeroBalance && totalBalance === 0) {
+          hideThisToken = true;
+        }
+        console.log({ hideThisToken, token, balance })
+        if (hideThisToken) {
+          continue;
+        }
+
         unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions});
 
         this.historyRefs.push(React.createRef());
@@ -125,7 +139,7 @@ class UnknownTokens extends React.Component {
   }
 
   render = () => {
-    const unknownTokens = this.getUnknownTokens();
+    const unknownTokens = this.getUnknownTokens(wallet.areZeroBalanceTokensHidden());
 
     const renderTokens = () => {
       if (unknownTokens.length === 0) {
