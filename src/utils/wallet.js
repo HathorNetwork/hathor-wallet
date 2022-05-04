@@ -391,9 +391,14 @@ const wallet = {
         xpriv = oldWalletUtil.getAcctPathXprivKey(pin);
       }
 
-      // Set urls for wallet service
-      config.setWalletServiceBaseUrl(WALLET_SERVICE_MAINNET_BASE_URL);
-      config.setWalletServiceBaseWsUrl(WALLET_SERVICE_MAINNET_BASE_WS_URL);
+      const {
+        walletServiceBaseUrl,
+        walletServiceWsUrl,
+      } = HathorWalletServiceWallet.getServerUrlsFromStorage();
+
+      // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
+      config.setWalletServiceBaseUrl(walletServiceBaseUrl || WALLET_SERVICE_MAINNET_BASE_URL);
+      config.setWalletServiceBaseWsUrl(walletServiceWsUrl || WALLET_SERVICE_MAINNET_BASE_WS_URL);
 
       const walletConfig = {
         seed: words,
