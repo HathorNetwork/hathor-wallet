@@ -48,7 +48,10 @@ class Settings extends React.Component {
   dateSetTimeoutInterval = null
 
   componentDidMount() {
-    this.setState({ isNotificationOn: wallet.isNotificationOn() });
+    this.setState({
+      isNotificationOn: wallet.isNotificationOn(),
+      zeroBalanceTokensHidden: wallet.areZeroBalanceTokensHidden()
+    });
 
     this.dateSetTimeoutInterval = setInterval(() => {
       this.setState({ now: new Date() });
@@ -130,7 +133,7 @@ class Settings extends React.Component {
     } else {
       wallet.hideZeroBalanceTokens();
     }
-    this.setState({ zeroBalanceTokensHidden: areZeroBalanceTokensHidden });
+    this.setState({ zeroBalanceTokensHidden: !areZeroBalanceTokensHidden });
   }
 
   /**
