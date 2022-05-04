@@ -832,6 +832,38 @@ const wallet = {
   },
 
   /**
+   * Checks if the zero-balance tokens are set to be hidden
+   *
+   * @return {boolean} If the tokens are hidden
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  areZeroBalanceTokensHidden() {
+    return storage.getItem('wallet:hide_zero_balance_tokens') !== false;
+  },
+
+  /**
+   * Turns on the hiding of zero-balance tokens
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  hideZeroBalanceTokens() {
+    storage.setItem('wallet:hide_zero_balance_tokens', true);
+  },
+
+  /**
+   * Turns off the hiding of zero-balance tokens
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  showZeroBalanceTokens() {
+    storage.setItem('wallet:hide_zero_balance_tokens', false);
+  },
+
+  /**
    * Converts a decimal value to integer. On the full node and the wallet lib, we only deal with
    * integer values for amount. So a value of 45.97 for the user is handled by them as 4597.
    * We need the Math.round because of some precision errors in js
