@@ -200,7 +200,17 @@ class Settings extends React.Component {
           <h4>{t`Advanced Settings`}</h4>
           <div className="d-flex flex-column align-items-start mt-4">
             <p><strong>{t`Allow notifications:`}</strong> {this.state.isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={this.toggleNotificationSettings}> {t`Change`} </a></p>
-            <p><strong>{t`Hide zero-balance tokens:`}</strong> {this.state.zeroBalanceTokensHidden ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={this.toggleZeroBalanceTokens}> {t`Change`} </a></p>
+            <p>
+              <strong>{t`Hide zero-balance tokens:`}</strong> {
+              this.state.zeroBalanceTokensHidden
+                ? <span>{t`Yes`}</span>
+                : <span>{t`No`}</span>
+              }
+              <a className="ml-3" href="true" onClick={this.toggleZeroBalanceTokens}> {t`Change`} </a>
+              <i className="fa fa-question-circle pointer ml-3"
+                 title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallets.`}>
+              </i>
+            </p>
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
             <CopyToClipboard text={uniqueIdentifier} onCopy={this.copied}>
               <span>
