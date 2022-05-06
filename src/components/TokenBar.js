@@ -129,18 +129,15 @@ class TokenBar extends React.Component {
 
     const renderTokens = () => {
       return this.props.registeredTokens.map((token) => {
-        let hideThisToken = false;
         const tokenUid = token.uid;
-        const isTokenHTR = tokenUid === '00';
+        const isTokenHTR = tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
         const tokenBalance = this.getTokenBalance(tokenUid);
 
-        // The "hide" setting should apply for every token except HTR
+        // Skip every token without balance, except HTR, if the hiding flag is active
         if (shouldHideZeroBalanceTokens && !isTokenHTR && tokenBalance === '0.00') {
-          hideThisToken = true;
+          return;
         }
 
-        // Deciding if this token should be hidden.
-        if (hideThisToken) return;
         return (
           <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
             <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${tokenBalance}`}</span>
