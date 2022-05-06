@@ -61,34 +61,30 @@ class UnknownTokens extends React.Component {
    * @return {Array} Array with unknown tokens {uid, balance, history}
    */
   getUnknownTokens = (hideZeroBalance) => {
-    let unknownTokens = [];
     this.historyRefs = [];
     this.anchorOpenRefs = [];
     this.anchorHideRefs = [];
-    for (const token of this.props.allTokens) {
-      // If has balance but does not have token saved yet
-      if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
-        const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, token, false);
-        const balance = this.props.tokensBalance[token];
 
-        // Filtering tokens according to "hide zero balance tokens" setting
-        let hideThisToken = false;
-        const totalBalance = balance.available + balance.locked;
-        if (hideZeroBalance && totalBalance === 0) {
-          hideThisToken = true;
-        }
-        console.log({ hideThisToken, token, balance })
-        if (hideThisToken) {
-          continue;
-        }
+    const unknownTokens = wallet.fetchUnknownTokens({
+      allTokens: this.props.allTokens,
+      registeredTokens: this.props.registeredTokens,
+      tokensBalance: this.props.tokensBalance,
+      hideZeroBalance,
+    })
 
-        unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions});
+    for (const tokenObj of unknownTokens) {
+      // Populating token transaction history on the object
+      tokenObj.history = hathorLib.wallet.filterHistoryTransactions(
+        this.props.historyTransactions,
+        tokenObj.uid,
+        false
+      );
 
-        this.historyRefs.push(React.createRef());
-        this.anchorOpenRefs.push(React.createRef());
-        this.anchorHideRefs.push(React.createRef());
-      }
+      this.historyRefs.push(React.createRef());
+      this.anchorOpenRefs.push(React.createRef());
+      this.anchorHideRefs.push(React.createRef());
     }
+
     return unknownTokens;
   }
 

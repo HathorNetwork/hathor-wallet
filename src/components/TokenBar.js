@@ -57,26 +57,14 @@ class TokenBar extends React.Component {
    * @return {number} Quantity of unknown tokens
    */
   getUnknownTokens = (hideZeroBalance) => {
-    let diff = 0;
-    for (const uid of this.props.allTokens) {
-      const index = this.props.registeredTokens.findIndex((token) => token.uid === uid);
-      if (index === -1) {
-        // Token still does not exist in registered tokens
+    const unknownTokens = wallet.fetchUnknownTokens({
+      allTokens: this.props.allTokens,
+      registeredTokens: this.props.registeredTokens,
+      tokensBalance: this.props.tokensBalance,
+      hideZeroBalance,
+    })
 
-        // Checking if it should be hidden because it has zero balance
-        const balance = this.props.tokensBalance[uid];
-        let hideThisToken = false;
-        const totalBalance = balance.available + balance.locked;
-        if (hideZeroBalance && totalBalance === 0) {
-          hideThisToken = true;
-        }
-
-        if (!hideThisToken) {
-          diff += 1;
-        }
-      }
-    }
-    return diff;
+    return unknownTokens.length;
   }
 
   /**

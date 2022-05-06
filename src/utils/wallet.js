@@ -317,6 +317,48 @@ const wallet = {
   },
 
   /**
+   * Filters only the non-registered tokens from the allTokens list.
+   * Optionally filters only those with non-zero balance.
+   *
+   * @param params
+   * @param {Object[]} [params.allTokens] prop from screen
+   * @param {Object[]} [params.registeredTokens] prop from screen
+   * @param {Object[]} [params.tokensBalance] prop from screen
+   * @param {boolean} [params.hideZeroBalance] If true, omits tokens with zero balance
+   * @returns {{uid:string, balance:{available:number,locked:number}}[]}
+   */
+  fetchUnknownTokens(params = {}) {
+    const {allTokens, registeredTokens, tokensBalance, hideZeroBalance} = params;
+    const unknownTokens = [];
+
+    // Iterating tokens to filter unregistered ones
+    for (const tokenUid of allTokens) {
+      // If it is already registered, skip it.
+      if (registeredTokens.find((x) => x.uid === tokenUid)) {
+        continue;
+      }
+      const balance = tokensBalance[tokenUid];
+
+      // If the "show only non-zero balance tokens" flag is active, filter here.
+      if (hideZeroBalance) {
+        const totalBalance = balance.available + balance.locked;
+
+        // This token has zero balance: skip it.
+        if (hideZeroBalance && totalBalance === 0) {
+          continue;
+        }
+      }
+
+      unknownTokens.push({
+        uid: tokenUid,
+        balance: balance,
+      });
+    }
+
+    return unknownTokens;
+  },
+
+  /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
@@ -337,7 +379,7 @@ const wallet = {
 
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
- 
+
     // This check is important to set the correct network on storage and redux
     const data = await version.checkApiVersion();
 
