@@ -99,19 +99,25 @@ class TokenBar extends React.Component {
   }
 
   /**
-   * Get the balance of one token
+   * Gets the balance of one token formatted for exhibition
    *
    * @param {string} uid UID to get balance from
+   * @param {boolean} [returnInteger] Returns the total value as an integer
    *
-   * @return {string} Available balance of token formatted
+   * @return {string|number} Available balance of token in the specified format
    */
-  getTokenBalance = (uid) => {
+  getTokenBalance = (uid, returnInteger = false) => {
     const balance = this.props.tokensBalance[uid];
     let total = 0;
     if (balance) {
       // If we don't have any transaction for the token, balance will be undefined
       total = balance.available + balance.locked;
     }
+
+    // Converting a possible "undefined" result to a valid integer.
+    if (returnInteger) return total;
+
+    // Formatting to string for exhibition
     const isNFT = helpers.isTokenNFT(uid, this.props.tokenMetadata);
     return helpers.renderValue(total, isNFT);
   }
@@ -131,16 +137,16 @@ class TokenBar extends React.Component {
       return this.props.registeredTokens.map((token) => {
         const tokenUid = token.uid;
         const isTokenHTR = tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
-        const tokenBalance = this.getTokenBalance(tokenUid);
+        const totalBalance = this.getTokenBalance(tokenUid, true);
 
         // Skip every token without balance, except HTR, if the hiding flag is active
-        if (shouldHideZeroBalanceTokens && !isTokenHTR && tokenBalance === '0.00') {
+        if (shouldHideZeroBalanceTokens && !isTokenHTR && totalBalance === 0) {
           return;
         }
 
         return (
           <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${tokenBalance}`}</span>
+            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${(this.getTokenBalance(tokenUid))}`}</span>
           </div>
         )
       });
