@@ -21,6 +21,7 @@ const version = {
   /**
    * Checks if the API version of the server the wallet is connected is valid for this wallet version
    *
+   * @param {HathorWallet | HathorWalletServiceWallet} wallet - Current wallet instance
    * @return {Promise} Promise that resolves after getting the version and updating Redux
    *
    * @memberof Version
