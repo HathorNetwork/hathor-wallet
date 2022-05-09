@@ -40,14 +40,14 @@ const version = {
         hathorLib.constants.MIN_API_VERSION
       ),
     }));
+
     // Set network in lib to use the correct address byte
-    let network;
-    if (data.network === 'mainnet') {
-      network = 'mainnet';
-    } else {
-      // Can we assume it will be testnet? I think it's safe
+    let network = data.network;
+
+    if (data.network.startsWith('testnet')) {
       network = 'testnet';
     }
+
     helpers.updateNetwork(network);
     return {
       ...data,

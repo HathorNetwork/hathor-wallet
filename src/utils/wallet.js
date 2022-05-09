@@ -28,7 +28,6 @@ import {
   sharedAddressUpdate,
   reloadData,
   cleanData,
-  changeServer,
   updateTokenHistory,
   tokenMetadataUpdated,
   metadataLoaded,
@@ -371,10 +370,10 @@ const wallet = {
     store.dispatch(reloadData({ tokens: dataToken }));
 
     // Fetch metadata of all tokens registered
-    this.fetchTokensMetadata(dataToken.map((token) => token.uid), network);
+    this.fetchTokensMetadata(dataToken.map((token) => token.uid), network.name);
 
     const uniqueDeviceId = walletHelpers.getUniqueId();
-    const featureFlags = new FeatureFlags(uniqueDeviceId, network);
+    const featureFlags = new FeatureFlags(uniqueDeviceId, network.name);
     const hardwareWallet = oldWalletUtil.isHardwareWallet();
     // For now, the wallet service does not support hardware wallet, so default to the old facade
     const useWalletService = hardwareWallet ? false : await featureFlags.shouldUseWalletService();
@@ -412,7 +411,7 @@ const wallet = {
           store.dispatch(lockWalletForResult(resolve));
         }),
         passphrase,
-        network: new Network(network),
+        network,
       };
 
       wallet = new HathorWalletServiceWallet(walletConfig);
@@ -430,7 +429,7 @@ const wallet = {
       }
 
       connection = new Connection({
-        network: network,
+        network: network.name,
         servers: [helpers.getServerURL()],
       });
 
