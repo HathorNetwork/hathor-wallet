@@ -106,11 +106,14 @@ class Server extends React.Component {
       return;
     }
 
+    const newBaseServerInputValue = this.refs.newServer.value;
+    const newWsServerInputValue = this.refs.newWsServer.value;
+
     let newBaseServer = null;
     let newWsServer = null;
     if (this.state.newServer) {
-      newBaseServer = this.refs.newServer.value;
-      newWsServer = this.refs.newWsServer.value;
+      newBaseServer = newBaseServerInputValue;
+      newWsServer = newWsServerInputValue;
     } else {
       newBaseServer = this.state.selectedServer;
       newWsServer = this.state.selectedWsServer;
