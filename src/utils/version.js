@@ -30,9 +30,15 @@ const version = {
   async checkApiVersion(wallet) {
     const data = await wallet.getVersionData();
 
-    // Update version allowed in redux
+    /**
+     * Checks if the version downloaded from the backend (fullnode or wallet-service, depending on the facade)
+     * is allowed by checking it against the MIN_API_VERSION constant from the library.
+     */
     store.dispatch(isVersionAllowedUpdate({
-      allowed: hathorLib.helpers.isVersionAllowed(data.version, hathorLib.constants.MIN_API_VERSION)
+      allowed: hathorLib.helpers.isVersionAllowed(
+        data.version,
+        hathorLib.constants.MIN_API_VERSION
+      ),
     }));
     // Set network in lib to use the correct address byte
     let network;
