@@ -65,6 +65,27 @@ if (window.require) {
 }
 
 /**
+ * Key string constants for manipulating the storage
+ * @type {{
+ * lastSharedIndex: string,
+ * notification: string,
+ * address: string,
+ * data: string,
+ * hideZeroBalanceTokens: string,
+ * sentry: string
+ * }}
+ * @readonly
+ */
+const storageKeys = {
+  address: 'wallet:address',
+  lastSharedIndex: 'wallet:lastSharedIndex',
+  data: 'wallet:data',
+  sentry: 'wallet:sentry',
+  notification: 'wallet:notification',
+  hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
+}
+
+/**
  * We use localStorage and Redux to save data.
  * In localStorage we have the following keys (prefixed by wallet:)
  * - data: object with data from the wallet including (all have full description in the reducers file)
@@ -598,8 +619,8 @@ const wallet = {
     const allTokens = 'allTokens' in data ? data['allTokens'] : [];
     const transactionsFound = Object.keys(historyTransactions).length;
 
-    const address = storage.getItem('wallet:address');
-    const lastSharedIndex = storage.getItem('wallet:lastSharedIndex');
+    const address = storage.getItem(storageKeys.address);
+    const lastSharedIndex = storage.getItem(storageKeys.lastSharedIndex);
     const lastGeneratedIndex = oldWalletUtil.getLastGeneratedIndex();
 
     store.dispatch(historyUpdate({
@@ -650,7 +671,7 @@ const wallet = {
    */
   updateSharedAddress() {
     const lastSharedIndex = oldWalletUtil.getLastSharedIndex();
-    const lastSharedAddress = storage.getItem('wallet:address');
+    const lastSharedAddress = storage.getItem(storageKeys.address);
     this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
   },
 
@@ -713,10 +734,10 @@ const wallet = {
       // XXX from v0.12.0 to v0.13.0, xpubkey changes from wallet:data to access:data.
       // That's not a problem if wallet is being initialized. However, if it's already
       // initialized, we need to set the xpubkey in the correct place.
-      const oldData = JSON.parse(localStorage.getItem('wallet:data'));
+      const oldData = JSON.parse(localStorage.getItem(storageKeys.data));
       accessData.xpubkey = oldData.xpubkey;
       oldWalletUtil.setWalletAccessData(accessData);
-      localStorage.removeItem('wallet:data');
+      localStorage.removeItem(storageKeys.data);
     }
 
     // Load history from new server
@@ -746,7 +767,7 @@ const wallet = {
    * @inner
    */
   allowSentry() {
-    storage.setItem('wallet:sentry', true);
+    storage.setItem(storageKeys.sentry, true);
     this.updateSentryState();
   },
 
@@ -757,7 +778,7 @@ const wallet = {
    * @inner
    */
   disallowSentry() {
-    storage.setItem('wallet:sentry', false);
+    storage.setItem(storageKeys.sentry, false);
     this.updateSentryState();
   },
 
@@ -770,7 +791,7 @@ const wallet = {
    * @inner
    */
   getSentryPermission() {
-    return storage.getItem('wallet:sentry');
+    return storage.getItem(storageKeys.sentry);
   },
 
   /**
@@ -850,7 +871,7 @@ const wallet = {
    * @inner
    */
   isNotificationOn() {
-    return storage.getItem('wallet:notification') !== false;
+    return storage.getItem(storageKeys.notification) !== false;
   },
 
   /**
@@ -860,7 +881,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOn() {
-    storage.setItem('wallet:notification', true);
+    storage.setItem(storageKeys.notification, true);
   },
 
   /**
@@ -870,7 +891,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOff() {
-    storage.setItem('wallet:notification', false);
+    storage.setItem(storageKeys.notification, false);
   },
 
   /**
@@ -882,7 +903,7 @@ const wallet = {
    * @inner
    */
   areZeroBalanceTokensHidden() {
-    return storage.getItem('wallet:hide_zero_balance_tokens') !== false;
+    return storage.getItem(storageKeys.hideZeroBalanceTokens) !== false;
   },
 
   /**
@@ -892,7 +913,7 @@ const wallet = {
    * @inner
    */
   hideZeroBalanceTokens() {
-    storage.setItem('wallet:hide_zero_balance_tokens', true);
+    storage.setItem(storageKeys.hideZeroBalanceTokens, true);
   },
 
   /**
@@ -902,7 +923,7 @@ const wallet = {
    * @inner
    */
   showZeroBalanceTokens() {
-    storage.setItem('wallet:hide_zero_balance_tokens', false);
+    storage.setItem(storageKeys.hideZeroBalanceTokens, false);
   },
 
   /**
