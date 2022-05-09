@@ -215,7 +215,7 @@ class Settings extends React.Component {
               }
               <a className="ml-3" href="true" onClick={this.toggleZeroBalanceTokens}> {t`Change`} </a>
               <i className="fa fa-question-circle pointer ml-3"
-                 title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallets.`}>
+                 title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallet.`}>
               </i>
             </p>
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
