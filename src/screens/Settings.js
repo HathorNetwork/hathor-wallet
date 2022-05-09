@@ -125,11 +125,38 @@ class Settings extends React.Component {
   }
 
   /**
-   * Activates or deactivates the option to hide zero-balance tokens from the UI.
-   * @param {Event} e
+   * Called when user clicks to change the "Hide zero-balance tokens" flag.
+   * Sets modal state, depending on the current settings and open it.
+   *
+   * @param {Object} e Event emitted on link click
    */
   toggleZeroBalanceTokens = (e) => {
     e.preventDefault();
+    if (wallet.areZeroBalanceTokensHidden()) {
+      this.setState({
+        confirmData: {
+          title: t`Show zero-balance tokens`,
+          body: t`Are you sure you want to show all tokens, including those with zero balance?`,
+          handleYes: this.handleToggleZeroBalanceTokens
+        }
+      });
+    } else {
+      this.setState({
+        confirmData: {
+          title: t`Hide zero-balance tokens`,
+          body: t`Are you sure you want to hide tokens with zero balance?`,
+          handleYes: this.handleToggleZeroBalanceTokens
+        }
+      });
+    }
+    $('#confirmModal').modal('show');
+  }
+
+  /**
+   * Activates or deactivates the option to hide zero-balance tokens from the UI.
+   * @param {Event} e
+   */
+  handleToggleZeroBalanceTokens = (e) => {
     const areZeroBalanceTokensHidden = wallet.areZeroBalanceTokensHidden();
 
     if (areZeroBalanceTokensHidden) {
@@ -138,6 +165,7 @@ class Settings extends React.Component {
       wallet.hideZeroBalanceTokens();
     }
     this.setState({ zeroBalanceTokensHidden: !areZeroBalanceTokensHidden });
+    $('#confirmModal').modal('hide');
   }
 
   /**
