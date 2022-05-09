@@ -328,10 +328,7 @@ class Server extends React.Component {
             this.props.useWalletService && (
               <div className="row mt-3">
                 <div className="col-12">
-                  { this.props.useWalletService && (
-                      <p className="input-label">{t`Real-time server`}:</p>
-                    )
-                  }
+                  <p className="input-label">{t`Real-time server`}:</p>
                   <select onChange={this.handleWsURLSelectChange}>
                     <option value=""> -- </option>
                     {renderWsServerOptions()}
