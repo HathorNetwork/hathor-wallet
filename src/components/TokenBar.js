@@ -114,7 +114,7 @@ class TokenBar extends React.Component {
       total = balance.available + balance.locked;
     }
 
-    // Converting a possible "undefined" result to a valid integer.
+    // Returning the raw integer value, according to parameter
     if (returnInteger) return total;
 
     // Formatting to string for exhibition
