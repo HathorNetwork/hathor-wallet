@@ -134,7 +134,14 @@ class TokenBar extends React.Component {
     const unknownTokens = this.getUnknownTokens(shouldHideZeroBalanceTokens);
 
     const renderTokens = () => {
-      return this.props.registeredTokens.map((token) => {
+      const registeredTokens = wallet.fetchRegisteredTokens({
+        allTokens: this.props.allTokens,
+        registeredTokens: this.props.registeredTokens,
+        tokensBalance: this.props.tokensBalance,
+        hideZeroBalance: shouldHideZeroBalanceTokens,
+      })
+
+      return registeredTokens.map((token) => {
         const tokenUid = token.uid;
         const isTokenHTR = tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
         const totalBalance = this.getTokenBalance(tokenUid, true);

@@ -83,6 +83,7 @@ const storageKeys = {
   sentry: 'wallet:sentry',
   notification: 'wallet:notification',
   hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
+  alwaysShowTokens: 'wallet:always_show_tokens',
 }
 
 /**
@@ -374,6 +375,49 @@ const wallet = {
         uid: tokenUid,
         balance: balance,
       });
+    }
+
+    return unknownTokens;
+  },
+
+  fetchRegisteredTokens(params = {}) {
+    const {allTokens, registeredTokens, tokensBalance, hideZeroBalance} = params;
+    const alwaysShowTokensArray = this.listTokensAlwaysShow();
+    const unknownTokens = [];
+
+    // Iterating tokens to filter unregistered ones
+    for (const tokenUid of allTokens) {
+      const registeredObject = registeredTokens.find((x) => x.uid === tokenUid);
+
+      // Skipping unregistered tokens
+      if (!registeredObject) {
+        continue;
+      }
+
+      const balance = tokensBalance[tokenUid];
+      const tokenData = {
+        ...registeredObject,
+        balance: balance,
+      };
+
+      // If we indicated this token should always be exhibited, add it already.
+      console.log(alwaysShowTokensArray)
+      if (alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid)) {
+        unknownTokens.push(tokenData);
+        continue;
+      }
+
+      // If the "show only non-zero balance tokens" flag is active, filter here.
+      if (hideZeroBalance) {
+        const totalBalance = balance.available + balance.locked;
+
+        // This token has zero balance: skip it.
+        if (hideZeroBalance && totalBalance === 0) {
+          continue;
+        }
+      }
+
+      unknownTokens.push(tokenData);
     }
 
     return unknownTokens;
@@ -924,6 +968,27 @@ const wallet = {
    */
   showZeroBalanceTokens() {
     storage.setItem(storageKeys.hideZeroBalanceTokens, false);
+  },
+
+  setTokenAlwaysShow(tokenUid) {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || new Map();
+    alwaysShowMap.set(tokenUid,true);
+    storage.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
+  },
+
+  isTokenAlwaysShow(tokenUid) {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens);
+    if (alwaysShowMap) return false;
+    return alwaysShowMap.get(tokenUid) || false;
+  },
+
+  listTokensAlwaysShow() {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens);
+    const alwaysShowArray = [];
+    for (const tokenUid in alwaysShowMap) {
+      alwaysShowArray.push(tokenUid);
+    }
+    return alwaysShowArray;
   },
 
   /**
