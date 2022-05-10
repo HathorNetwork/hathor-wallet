@@ -351,6 +351,7 @@ const wallet = {
    */
   fetchUnknownTokens(params = {}) {
     const {allTokens, registeredTokens, tokensBalance, hideZeroBalance} = params;
+    const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const unknownTokens = [];
 
     // Iterating tokens to filter unregistered ones
@@ -360,6 +361,16 @@ const wallet = {
         continue;
       }
       const balance = tokensBalance[tokenUid];
+      const tokenData = {
+        uid: tokenUid,
+        balance: balance,
+      };
+
+      // If we indicated this token should always be exhibited, add it already.
+      if (alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid)) {
+        unknownTokens.push(tokenData);
+        continue;
+      }
 
       // If the "show only non-zero balance tokens" flag is active, filter here.
       if (hideZeroBalance) {
@@ -370,11 +381,7 @@ const wallet = {
           continue;
         }
       }
-
-      unknownTokens.push({
-        uid: tokenUid,
-        balance: balance,
-      });
+      unknownTokens.push(tokenData);
     }
 
     return unknownTokens;
@@ -383,7 +390,7 @@ const wallet = {
   fetchRegisteredTokens(params = {}) {
     const {allTokens, registeredTokens, tokensBalance, hideZeroBalance} = params;
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
-    const unknownTokens = [];
+    const filteredTokens = [];
 
     // Iterating tokens to filter unregistered ones
     for (const tokenUid of allTokens) {
@@ -401,9 +408,8 @@ const wallet = {
       };
 
       // If we indicated this token should always be exhibited, add it already.
-      console.log(alwaysShowTokensArray)
       if (alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid)) {
-        unknownTokens.push(tokenData);
+        filteredTokens.push(tokenData);
         continue;
       }
 
@@ -417,10 +423,10 @@ const wallet = {
         }
       }
 
-      unknownTokens.push(tokenData);
+      filteredTokens.push(tokenData);
     }
 
-    return unknownTokens;
+    return filteredTokens;
   },
 
   /**
