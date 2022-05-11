@@ -165,7 +165,7 @@ class TokenGeneralInfo extends React.Component {
           }
             <a className="ml-3" href="true" onClick={this.handleToggleAlwaysShow}> {t`Change`} </a>
             <i className="fa fa-question-circle pointer ml-3"
-               title={t`If selected, it will overwrite the "Hide zero-balance tokens settings".`}>
+               title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
             </i>
           </p>
         </div>

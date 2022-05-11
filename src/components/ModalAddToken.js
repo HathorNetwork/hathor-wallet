@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
+import wallet from "../utils/wallet";
 
 
 /**
@@ -21,7 +22,16 @@ class ModalAddToken extends React.Component {
   /**
    * errorMessage {string} Message that will be shown to the user in case of error
    */
-  state = { errorMessage: '' };
+  state = {
+    errorMessage: '',
+    alwaysShow: false,
+  };
+
+  handleToggleAlwaysShow = (e) => {
+    e.preventDefault();
+    const newValue = !this.state.alwaysShow;
+    this.setState( { alwaysShow: newValue });
+  }
 
   componentDidMount = () => {
     $('#addTokenModal').on('hide.bs.modal', (e) => {
@@ -40,7 +50,7 @@ class ModalAddToken extends React.Component {
   }
 
   /**
-   * Method called when user clicks the button to register the token  
+   * Method called when user clicks the button to register the token
    * Validates that the data written is valid
    *
    * @param {Object} e Event emitted when user clicks the button
@@ -54,6 +64,7 @@ class ModalAddToken extends React.Component {
     const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
     promise.then((tokenData) => {
       tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
+      wallet.setTokenAlwaysShow(tokenData.uid, this.state.alwaysShow);
       this.props.success();
     }, (e) => {
       this.setState({ errorMessage: e.message });
@@ -84,6 +95,17 @@ class ModalAddToken extends React.Component {
                         {this.state.errorMessage}
                       </p>
                   </div>
+                </div>
+                <div className="form-check">
+                  <input className="form-check-input" type="checkbox" ref="alwaysShowToken"
+                         id="alwaysShowToken" defaultChecked={false}
+                         onChange={this.handleToggleAlwaysShow} />
+                  <label className="form-check-label" htmlFor="alwaysShowToken">
+                    {t`Always show this token`}
+                  </label>
+                  <i className="fa fa-question-circle pointer ml-3"
+                     title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
+                  </i>
                 </div>
               </form>
             </div>
