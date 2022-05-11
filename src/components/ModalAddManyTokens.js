@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
+import wallet from "../utils/wallet";
 
 
 /**
@@ -21,7 +22,16 @@ class ModalAddManyTokens extends React.Component {
   /**
    * errorMessage {string} Message that will be shown to the user in case of error
    */
-  state = { errorMessage: '' };
+  state = {
+    errorMessage: '',
+    alwaysShow: false,
+  };
+
+  handleToggleAlwaysShow = (e) => {
+    e.preventDefault();
+    const newValue = !this.state.alwaysShow;
+    this.setState( { alwaysShow: newValue });
+  }
 
   componentDidMount = () => {
     $('#addManyTokensModal').on('hide.bs.modal', (e) => {
@@ -40,7 +50,7 @@ class ModalAddManyTokens extends React.Component {
   }
 
   /**
-   * Method called when user clicks the button to add the tokens  
+   * Method called when user clicks the button to add the tokens
    * Validates that all configuration strings written are valid
    *
    * @param {Object} e Event emitted when user clicks the button
@@ -74,6 +84,7 @@ class ModalAddManyTokens extends React.Component {
       // If all promises succeed, we add the tokens and show success message
       for (const config of toAdd) {
         tokens.addToken(config.uid, config.name, config.symbol);
+        wallet.setTokenAlwaysShow(tokenData.uid, this.state.alwaysShow);
       }
       this.props.success(toAdd.length);
     }, (e) => {
@@ -99,6 +110,17 @@ class ModalAddManyTokens extends React.Component {
                 <div className="form-group">
                   <textarea className="form-control" rows={8} ref="configs" placeholder={t`Configuration strings`} />
                 </div>
+                { wallet.areZeroBalanceTokensHidden() ? <div className="form-check">
+                  <input className="form-check-input" type="checkbox" ref="alwaysShowToken"
+                         id="alwaysShowToken" defaultChecked={false}
+                         onChange={this.handleToggleAlwaysShow} />
+                  <label className="form-check-label" htmlFor="alwaysShowToken">
+                    {t`Always show these tokens`}
+                  </label>
+                  <i className="fa fa-question-circle pointer ml-3"
+                     title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
+                  </i>
+                </div> : '' }
                 <div className="row">
                   <div className="col-12 col-sm-10">
                       <p className="error-message text-danger">
