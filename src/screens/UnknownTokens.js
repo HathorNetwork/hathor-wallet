@@ -178,7 +178,7 @@ class UnknownTokens extends React.Component {
         <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
         <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
         {unknownTokens && renderTokens()}
-        <ModalAddManyTokens success={this.massiveImportSuccess} />
+        <ModalAddManyTokens success={this.massiveImportSuccess} tokensBalance={this.props.tokensBalance} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         <TokenBar {...this.props}  />
       </div>

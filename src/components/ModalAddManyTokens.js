@@ -24,11 +24,11 @@ class ModalAddManyTokens extends React.Component {
    */
   state = {
     errorMessage: '',
+    shouldExhibitAlwaysShowCheckbox: false,
     alwaysShow: false,
   };
 
   handleToggleAlwaysShow = (e) => {
-    e.preventDefault();
     const newValue = !this.state.alwaysShow;
     this.setState( { alwaysShow: newValue });
   }
@@ -36,7 +36,11 @@ class ModalAddManyTokens extends React.Component {
   componentDidMount = () => {
     $('#addManyTokensModal').on('hide.bs.modal', (e) => {
       this.refs.configs.value = '';
-      this.setState({ errorMessage: '' });
+      this.setState({
+        errorMessage: '',
+        shouldExhibitAlwaysShowCheckbox: false,
+        alwaysShow: false,
+      });
     })
 
     $('#addManyTokensModal').on('shown.bs.modal', (e) => {
@@ -55,7 +59,7 @@ class ModalAddManyTokens extends React.Component {
    *
    * @param {Object} e Event emitted when user clicks the button
    */
-  handleAdd = (e) => {
+  handleAdd = async (e) => {
     e.preventDefault();
     const configs = this.refs.configs.value.trim();
     if (configs === '') {
@@ -80,17 +84,42 @@ class ModalAddManyTokens extends React.Component {
       }
     }
 
-    Promise.all(validations).then((toAdd) => {
+    try {
+      const toAdd = await Promise.all(validations)
+      const tokensBalance = this.props.tokensBalance;
+      const areZeroBalanceTokensHidden = wallet.areZeroBalanceTokensHidden();
+      const tokensWithoutBalance = [];
+      const tokensToAdd = [];
+
       // If all promises succeed, we add the tokens and show success message
       for (const config of toAdd) {
+        const tokenUid = config.uid;
+        const tokenBalance = tokensBalance[tokenUid];
+        const tokenHasZeroBalance = (tokenBalance.available + tokenBalance.locked) === 0;
+
+        if (areZeroBalanceTokensHidden && tokenHasZeroBalance && !this.state.shouldExhibitAlwaysShowCheckbox) {
+          tokensWithoutBalance.push({ ...config });
+          continue;
+        }
+
         tokens.addToken(config.uid, config.name, config.symbol);
-        wallet.setTokenAlwaysShow(tokenData.uid, this.state.alwaysShow);
+        wallet.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
       }
+
+      if (tokensWithoutBalance.length) {
+        const emptyTokenNames = tokensWithoutBalance.map(t => t.symbol).join(',')
+        this.setState({
+          shouldExhibitAlwaysShowCheckbox: true,
+          errorMessage: t`This following tokens have no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show these tokens? (You can always undo this on the token info screen.)\n${emptyTokenNames}`
+        })
+        return;
+      }
+
       this.props.success(toAdd.length);
-    }, (e) => {
+    } catch (e) {
       // If one fails, we show error message
-      this.setState({ errorMessage: e.message });
-    });
+      this.setState({errorMessage: e.message});
+    }
   }
 
   render() {
@@ -110,10 +139,9 @@ class ModalAddManyTokens extends React.Component {
                 <div className="form-group">
                   <textarea className="form-control" rows={8} ref="configs" placeholder={t`Configuration strings`} />
                 </div>
-                { wallet.areZeroBalanceTokensHidden() ? <div className="form-check">
-                  <input className="form-check-input" type="checkbox" ref="alwaysShowToken"
-                         id="alwaysShowToken" defaultChecked={false}
-                         onChange={this.handleToggleAlwaysShow} />
+                { this.state.shouldExhibitAlwaysShowCheckbox ? <div className="form-check">
+                  <input className="form-check-input" type="checkbox" id="alwaysShowToken"
+                         checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow} />
                   <label className="form-check-label" htmlFor="alwaysShowToken">
                     {t`Always show these tokens`}
                   </label>
