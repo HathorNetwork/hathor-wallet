@@ -96,7 +96,7 @@ class ModalAddToken extends React.Component {
                       </p>
                   </div>
                 </div>
-                <div className="form-check">
+                { wallet.areZeroBalanceTokensHidden() ? <div className="form-check">
                   <input className="form-check-input" type="checkbox" ref="alwaysShowToken"
                          id="alwaysShowToken" defaultChecked={false}
                          onChange={this.handleToggleAlwaysShow} />
@@ -106,7 +106,7 @@ class ModalAddToken extends React.Component {
                   <i className="fa fa-question-circle pointer ml-3"
                      title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
                   </i>
-                </div>
+                </div> : '' }
               </form>
             </div>
             <div className="modal-footer">
