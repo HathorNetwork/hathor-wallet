@@ -369,6 +369,9 @@ const wallet = {
     // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     store.dispatch(reloadData({ tokens: dataToken }));
 
+    // We are offline, the connection object is yet to be created
+    store.dispatch(isOnlineUpdate({ isOnline: false }));
+
     // Fetch metadata of all tokens registered
     this.fetchTokensMetadata(dataToken.map((token) => token.uid), network.name);
 
