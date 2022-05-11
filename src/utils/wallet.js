@@ -6,10 +6,10 @@
  */
 
 import {
-  SENTRY_DSN,
   DEBUG_LOCAL_DATA_KEYS,
-  WALLET_HISTORY_COUNT,
   METADATA_CONCURRENT_DOWNLOAD,
+  SENTRY_DSN,
+  WALLET_HISTORY_COUNT,
   WALLET_SERVICE_MAINNET_BASE_URL,
   WALLET_SERVICE_MAINNET_BASE_WS_URL,
 } from '../constants';
@@ -17,42 +17,40 @@ import { FeatureFlags } from '../featureFlags';
 import STORE from '../storageInstance';
 import store from '../store/index';
 import {
-  setWallet,
-  updateLoadedData,
+  cleanData,
+  historyUpdate,
   isOnlineUpdate,
-  updateHeight,
-  updateTx,
   loadingAddresses,
   loadWalletSuccess,
-  historyUpdate,
-  sharedAddressUpdate,
-  reloadData,
-  cleanData,
-  changeServer,
-  updateTokenHistory,
-  tokenMetadataUpdated,
+  lockWalletForResult,
   metadataLoaded,
   partiallyUpdateHistoryAndBalance,
+  reloadData,
   setUseWalletService,
-  lockWalletForResult,
+  setWallet,
+  sharedAddressUpdate,
+  tokenMetadataUpdated,
+  updateHeight,
+  updateLoadedData,
+  updateTokenHistory,
+  updateTx,
 } from '../actions/index';
 import {
-  helpers,
+  config,
+  Connection,
   constants as hathorConstants,
   errors as hathorErrors,
   HathorWallet,
   HathorWalletServiceWallet,
-  Connection,
+  helpers,
+  metadataApi,
   Network,
-  wallet as oldWalletUtil,
-  walletUtils,
   storage,
   tokens,
-  metadataApi,
-  config,
+  wallet as oldWalletUtil,
+  walletUtils,
 } from '@hathor/wallet-lib';
 import version from './version';
-import ledger from './ledger';
 import { chunk } from 'lodash';
 import walletHelpers from './helpers';
 
@@ -976,16 +974,16 @@ const wallet = {
     storage.setItem(storageKeys.hideZeroBalanceTokens, false);
   },
 
-  setTokenAlwaysShow(tokenUid) {
-    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || new Map();
-    alwaysShowMap.set(tokenUid,true);
+  setTokenAlwaysShow(tokenUid, newValue = false) {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
+    if (!newValue) delete alwaysShowMap[tokenUid];
+    else alwaysShowMap[tokenUid] = true;
     storage.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
   },
 
   isTokenAlwaysShow(tokenUid) {
-    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens);
-    if (alwaysShowMap) return false;
-    return alwaysShowMap.get(tokenUid) || false;
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
+    return alwaysShowMap[tokenUid] || false;
   },
 
   listTokensAlwaysShow() {

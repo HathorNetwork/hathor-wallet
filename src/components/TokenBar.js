@@ -143,13 +143,6 @@ class TokenBar extends React.Component {
 
       return registeredTokens.map((token) => {
         const tokenUid = token.uid;
-        const isTokenHTR = tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
-        const totalBalance = this.getTokenBalance(tokenUid, true);
-
-        // Skip every token without balance, except HTR, if the hiding flag is active
-        if (shouldHideZeroBalanceTokens && !isTokenHTR && totalBalance === 0) {
-          return;
-        }
 
         return (
           <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>

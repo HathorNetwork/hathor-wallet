@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import helpers from '../utils/helpers';
 import { get } from 'lodash';
+import wallet from "../utils/wallet";
 
 
 const mapStateToProps = (state) => {
@@ -43,6 +44,7 @@ class TokenGeneralInfo extends React.Component {
     canMint: null,
     canMelt: null,
     transactionsCount: 0,
+    alwaysShow: false,
   };
 
   componentDidMount() {
@@ -63,7 +65,9 @@ class TokenGeneralInfo extends React.Component {
     this.setState({ errorMessage: '' });
 
     try {
-      const tokenDetails = await this.props.wallet.getTokenDetails(this.props.token.uid);
+      const tokenUid = this.props.token.uid;
+      const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
+      const alwaysShow = wallet.isTokenAlwaysShow(tokenUid)
       const { totalSupply, totalTransactions, authorities } = tokenDetails;
 
       this.setState({
@@ -71,10 +75,18 @@ class TokenGeneralInfo extends React.Component {
         canMint: authorities.mint,
         canMelt: authorities.melt,
         transactionsCount: totalTransactions,
+        alwaysShow,
       });
     } catch (e) {
       this.setState({ errorMessage: e.message });
     }
+  }
+
+  handleToggleAlwaysShow = (e) => {
+    e.preventDefault();
+    const newValue = !this.state.alwaysShow;
+    wallet.setTokenAlwaysShow(this.props.token.uid, newValue);
+    this.setState( { alwaysShow: newValue });
   }
 
   /**
@@ -99,7 +111,7 @@ class TokenGeneralInfo extends React.Component {
   }
 
   /**
-   * Method called on copy to clipboard success  
+   * Method called on copy to clipboard success
    * Show alert success message
    *
    * @param {string} text Text copied to clipboard
@@ -145,6 +157,17 @@ class TokenGeneralInfo extends React.Component {
           <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{this.state.canMelt ? 'Yes' : 'No'}</p>
           <p className="mb-2 subtitle">{t`Indicates whether the token owner can destroy tokens, decreasing the total supply`}</p>
           <p className="mt-2 mb-4"><strong>{t`Total number of transactions:`} </strong>{this.state.transactionsCount}</p>
+          <p className="mt-2 mb-4">
+            <strong>{t`Always show this token:`}</strong> {
+            this.state.alwaysShow
+              ? <span>{t`Yes`}</span>
+              : <span>{t`No`}</span>
+          }
+            <a className="ml-3" href="true" onClick={this.handleToggleAlwaysShow}> {t`Change`} </a>
+            <i className="fa fa-question-circle pointer ml-3"
+               title={t`If selected, it will overwrite the "Hide zero-balance tokens settings".`}>
+            </i>
+          </p>
         </div>
       );
     }
@@ -159,7 +182,7 @@ class TokenGeneralInfo extends React.Component {
               <CopyToClipboard text={configurationString} onCopy={this.copied}>
                 <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i>
               </CopyToClipboard>
-            </span> 
+            </span>
             <QRCode size={200} value={configurationString} />
             <a className="mt-2" onClick={(e) => this.downloadQrCode(e)} download={`${this.props.token.name} (${this.props.token.symbol}) - ${configurationString}`} href="true" ref="downloadLink">{t`Download`} <i className="fa fa-download ml-1" title={t`Download QRCode`}></i></a>
           </div>
