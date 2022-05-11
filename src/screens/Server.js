@@ -150,15 +150,14 @@ class Server extends React.Component {
 
     try {
       const versionData = await this.props.wallet.getVersionData();
+
       if (versionData.network !== 'mainnet') {
         const network = versionData.network;
-        let selectedNetwork = '';
+        let selectedNetwork = network;
 
         // Network might be 'testnet-golf' or 'testnet-charlie'
         if (network.startsWith('testnet')) {
           selectedNetwork = 'testnet';
-        } else {
-          selectedNetwork = network;
         }
 
         this.setState({
@@ -247,6 +246,12 @@ class Server extends React.Component {
    * @param {Object} e Event of select change
    */
   handleBaseURLSelectChange = (e) => {
+    if (e.target.value === '') {
+      return this.setState({
+        selectedWsServer: '',
+      });
+    }
+
     if (this.props.useWalletService) {
       this.setState({ selectedServer: DEFAULT_WALLET_SERVICE_SERVERS[e.target.value] });
     } else {
@@ -264,6 +269,12 @@ class Server extends React.Component {
     if (!this.props.useWalletService) {
       // should never happen
       return;
+    }
+
+    if (e.target.value === '') {
+      return this.setState({
+        selectedWsServer: '',
+      });
     }
 
     this.setState({ selectedWsServer: DEFAULT_WALLET_SERVICE_WS_SERVERS[e.target.value] });
