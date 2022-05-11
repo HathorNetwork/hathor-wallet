@@ -25,6 +25,7 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import tokens from '../utils/tokens';
 import version from '../utils/version';
+import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
 
 
@@ -141,8 +142,10 @@ class Wallet extends React.Component {
    * When user confirms the unregister of the token, hide the modal and execute it
    */
   unregisterConfirmed = () => {
-    const promise = tokens.unregisterToken(this.props.selectedToken);
+    const tokenUid = this.props.selectedToken;
+    const promise = tokens.unregisterToken(tokenUid);
     promise.then(() => {
+      wallet.setTokenAlwaysShow(tokenUid, false);
       $('#unregisterModal').modal('hide');
     }, (e) => {
       this.unregisterModalRef.current.updateErrorMessage(e.message);
@@ -151,7 +154,7 @@ class Wallet extends React.Component {
 
   /*
    * We show the administrative tools tab only for the users that one day had an authority output, even if it was already spent
-   * 
+   *
    * This will set the shouldShowAdministrativeTab state param based on the response of getMintAuthority and getMeltAuthority
    */
   shouldShowAdministrativeTab = async (tokenId) => {

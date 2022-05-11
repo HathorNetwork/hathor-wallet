@@ -24,11 +24,11 @@ class ModalAddToken extends React.Component {
    */
   state = {
     errorMessage: '',
+    shouldExhibitAlwaysShowCheckbox: false,
     alwaysShow: false,
   };
 
   handleToggleAlwaysShow = (e) => {
-    e.preventDefault();
     const newValue = !this.state.alwaysShow;
     this.setState( { alwaysShow: newValue });
   }
@@ -36,7 +36,11 @@ class ModalAddToken extends React.Component {
   componentDidMount = () => {
     $('#addTokenModal').on('hide.bs.modal', (e) => {
       this.refs.config.value = '';
-      this.setState({ errorMessage: '' });
+      this.setState({
+        errorMessage: '',
+        shouldExhibitAlwaysShowCheckbox: false,
+        alwaysShow: false,
+      });
     })
 
     $('#addTokenModal').on('shown.bs.modal', (e) => {
@@ -55,21 +59,34 @@ class ModalAddToken extends React.Component {
    *
    * @param {Object} e Event emitted when user clicks the button
    */
-  handleAdd = (e) => {
+  handleAdd = async (e) => {
     e.preventDefault();
     if (this.refs.config.value === '') {
       this.setState({ errorMessage: t`Must provide configuration string or uid, name, and symbol` });
       return;
     }
-    const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
-    promise.then((tokenData) => {
-      tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
-      wallet.setTokenAlwaysShow(tokenData.uid, this.state.alwaysShow);
+    try {
+      const tokenData = await hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
+      const tokensBalance = this.props.tokensBalance;
+
+      const tokenUid = tokenData.uid;
+      const tokenBalance = tokensBalance[tokenUid];
+      const tokenHasZeroBalance = (tokenBalance.available + tokenBalance.locked) === 0;
+
+      if (wallet.areZeroBalanceTokensHidden() && tokenHasZeroBalance && !this.state.shouldExhibitAlwaysShowCheckbox) {
+        this.setState({
+          shouldExhibitAlwaysShowCheckbox: true,
+          errorMessage: t`This token has no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show this token? (You can always undo this on the token info screen.)`
+        })
+        return;
+      }
+
+      tokens.addToken(tokenUid, tokenData.name, tokenData.symbol);
+      wallet.setTokenAlwaysShow(tokenUid, this.state.alwaysShow);
       this.props.success();
-    }, (e) => {
-      this.setState({ errorMessage: e.message });
-      return;
-    });
+    } catch (e) {
+      this.setState({errorMessage: e.message});
+    }
   }
 
   render() {
@@ -87,7 +104,9 @@ class ModalAddToken extends React.Component {
               <p>{t`To register a token that already exists, just write down its configuration string`}</p>
               <form ref="formAddToken">
                 <div className="form-group">
-                  <textarea type="text" className="form-control" ref="config" placeholder={t`Configuration string`} />
+                  <textarea type="text" className="form-control" ref="config"
+                            placeholder={t`Configuration string`}
+                            readOnly={this.state.shouldExhibitAlwaysShowCheckbox} />
                 </div>
                 <div className="row">
                   <div className="col-12 col-sm-10">
@@ -96,15 +115,14 @@ class ModalAddToken extends React.Component {
                       </p>
                   </div>
                 </div>
-                { wallet.areZeroBalanceTokensHidden() ? <div className="form-check">
-                  <input className="form-check-input" type="checkbox" ref="alwaysShowToken"
-                         id="alwaysShowToken" defaultChecked={false}
-                         onChange={this.handleToggleAlwaysShow} />
+                { this.state.shouldExhibitAlwaysShowCheckbox ? <div className="form-check">
+                  <input className="form-check-input" type="checkbox" id="alwaysShowTokenCheckbox"
+                         checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow} />
                   <label className="form-check-label" htmlFor="alwaysShowToken">
                     {t`Always show this token`}
                   </label>
                   <i className="fa fa-question-circle pointer ml-3"
-                     title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
+                     title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings for this token.`}>
                   </i>
                 </div> : '' }
               </form>
