@@ -70,7 +70,8 @@ if (window.require) {
  * address: string,
  * data: string,
  * hideZeroBalanceTokens: string,
- * sentry: string
+ * sentry: string,
+ * alwaysShowTokens: string,
  * }}
  * @readonly
  */
@@ -341,9 +342,9 @@ const wallet = {
    * Optionally filters only those with non-zero balance.
    *
    * @param params
-   * @param {Object[]} [params.allTokens] prop from screen
-   * @param {Object[]} [params.registeredTokens] prop from screen
-   * @param {Object[]} [params.tokensBalance] prop from screen
+   * @param {Object[]} [params.allTokens] list of all available tokens
+   * @param {Object[]} [params.registeredTokens] list of registered tokens
+   * @param {Object[]} [params.tokensBalance] data about token balances
    * @param {boolean} [params.hideZeroBalance] If true, omits tokens with zero balance
    * @returns {{uid:string, balance:{available:number,locked:number}}[]}
    */
@@ -385,6 +386,17 @@ const wallet = {
     return unknownTokens;
   },
 
+  /**
+   * Filters only the registered tokens from the allTokens list.
+   * Optionally filters only those with non-zero balance.
+   *
+   * @param params
+   * @param {Object[]} [params.allTokens] list of all available tokens
+   * @param {Object[]} [params.registeredTokens] list of registered tokens
+   * @param {Object[]} [params.tokensBalance] data about token balances
+   * @param {boolean} [params.hideZeroBalance] If true, omits tokens with zero balance
+   * @returns {object[]}
+   */
   fetchRegisteredTokens(params = {}) {
     const {allTokens, registeredTokens, tokensBalance, hideZeroBalance} = params;
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
@@ -974,6 +986,12 @@ const wallet = {
     storage.setItem(storageKeys.hideZeroBalanceTokens, false);
   },
 
+  /**
+   * Defines if a token should always be shown, despite having zero balance and the "hide zero
+   * balance" setting being active.
+   * @param {string} tokenUid uid of the token to be updated
+   * @param {boolean} [newValue=false] If true, the token will always be shown
+   */
   setTokenAlwaysShow(tokenUid, newValue = false) {
     const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
     if (!newValue) delete alwaysShowMap[tokenUid];
@@ -981,11 +999,20 @@ const wallet = {
     storage.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
   },
 
+  /**
+   * Returns if a token is set to always be shown despite the "hide zero balance" setting
+   * @param {string} tokenUid
+   * @returns {boolean}
+   */
   isTokenAlwaysShow(tokenUid) {
     const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
     return alwaysShowMap[tokenUid] || false;
   },
 
+  /**
+   * Returns an array containing the uids of the tokens set to always be shown
+   * @returns {string[]}
+   */
   listTokensAlwaysShow() {
     const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens);
     const alwaysShowArray = [];

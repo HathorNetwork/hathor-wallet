@@ -145,7 +145,7 @@ class Wallet extends React.Component {
     const tokenUid = this.props.selectedToken;
     const promise = tokens.unregisterToken(tokenUid);
     promise.then(() => {
-      wallet.setTokenAlwaysShow(tokenUid, false);
+      wallet.setTokenAlwaysShow(tokenUid, false); // Remove this token from "always show"
       $('#unregisterModal').modal('hide');
     }, (e) => {
       this.unregisterModalRef.current.updateErrorMessage(e.message);

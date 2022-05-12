@@ -18,6 +18,11 @@ import { NFT_ENABLED } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
 import { connect } from "react-redux";
 
+/**
+ * Maps redux state to instance props
+ * @param state
+ * @returns {{tokensBalance:Object}}
+ */
 const mapStateToProps = (state) => {
   return {
     tokensBalance: state.tokensBalance,

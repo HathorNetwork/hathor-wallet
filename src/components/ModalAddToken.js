@@ -20,7 +20,9 @@ import wallet from "../utils/wallet";
  */
 class ModalAddToken extends React.Component {
   /**
-   * errorMessage {string} Message that will be shown to the user in case of error
+   * @property {string} errorMessage Message that will be shown to the user in case of error
+   * @property {boolean} shouldExhibitAlwaysShowCheckbox Defines "always show" checkbox rendering
+   * @property {boolean} alwaysShow Defines if tokens will be added with "Always Show" setting
    */
   state = {
     errorMessage: '',
@@ -28,6 +30,10 @@ class ModalAddToken extends React.Component {
     alwaysShow: false,
   };
 
+  /**
+   * Handles the click on the "Always show this token" checkbox
+   * @param {Event} e
+   */
   handleToggleAlwaysShow = (e) => {
     const newValue = !this.state.alwaysShow;
     this.setState( { alwaysShow: newValue });
@@ -61,10 +67,13 @@ class ModalAddToken extends React.Component {
    */
   handleAdd = async (e) => {
     e.preventDefault();
+
+    // Validating input field contents
     if (this.refs.config.value === '') {
       this.setState({ errorMessage: t`Must provide configuration string or uid, name, and symbol` });
       return;
     }
+
     try {
       const tokenData = await hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
       const tokensBalance = this.props.tokensBalance;
@@ -73,7 +82,16 @@ class ModalAddToken extends React.Component {
       const tokenBalance = tokensBalance[tokenUid];
       const tokenHasZeroBalance = (tokenBalance.available + tokenBalance.locked) === 0;
 
-      if (wallet.areZeroBalanceTokensHidden() && tokenHasZeroBalance && !this.state.shouldExhibitAlwaysShowCheckbox) {
+      /*
+       * We only make this validation if the "Hide Zero-Balance Tokens" setting is active,
+       * and only do it once. If the warning message was shown, we will accept the "alwaysShow"
+       * checkbox value as the user decision already.
+       */
+      if (
+        wallet.areZeroBalanceTokensHidden()
+        && tokenHasZeroBalance
+        && !this.state.shouldExhibitAlwaysShowCheckbox
+      ) {
         this.setState({
           shouldExhibitAlwaysShowCheckbox: true,
           errorMessage: t`This token has no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show this token? (You can always undo this on the token info screen.)`
@@ -81,6 +99,7 @@ class ModalAddToken extends React.Component {
         return;
       }
 
+      // Adding the token to the wallet and returning with the success callback
       tokens.addToken(tokenUid, tokenData.name, tokenData.symbol);
       wallet.setTokenAlwaysShow(tokenUid, this.state.alwaysShow);
       this.props.success();

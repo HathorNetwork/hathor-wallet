@@ -20,7 +20,9 @@ import wallet from "../utils/wallet";
  */
 class ModalAddManyTokens extends React.Component {
   /**
-   * errorMessage {string} Message that will be shown to the user in case of error
+   * @property {string} errorMessage Message that will be shown to the user in case of error
+   * @property {boolean} shouldExhibitAlwaysShowCheckbox Defines "always show" checkbox rendering
+   * @property {boolean} alwaysShow Defines if tokens will be added with "Always Show" setting
    */
   state = {
     errorMessage: '',
@@ -28,6 +30,10 @@ class ModalAddManyTokens extends React.Component {
     alwaysShow: false,
   };
 
+  /**
+   * Handles the click on the "Always show this token" checkbox
+   * @param {Event} e
+   */
   handleToggleAlwaysShow = (e) => {
     const newValue = !this.state.alwaysShow;
     this.setState( { alwaysShow: newValue });
@@ -55,7 +61,8 @@ class ModalAddManyTokens extends React.Component {
 
   /**
    * Method called when user clicks the button to add the tokens
-   * Validates that all configuration strings written are valid
+   * Validates that all configuration strings written are valid and applies logic to warn/ask the
+   * user about tokens that would be hidden under current settings.
    *
    * @param {Object} e Event emitted when user clicks the button
    */
@@ -91,20 +98,37 @@ class ModalAddManyTokens extends React.Component {
       const tokensWithoutBalance = [];
       const tokensToAdd = [];
 
-      // If all promises succeed, we add the tokens and show success message
+      // All promises succeeded, validating token balances
       for (const config of toAdd) {
         const tokenUid = config.uid;
         const tokenBalance = tokensBalance[tokenUid];
         const tokenHasZeroBalance = (tokenBalance.available + tokenBalance.locked) === 0;
 
-        if (areZeroBalanceTokensHidden && tokenHasZeroBalance && !this.state.shouldExhibitAlwaysShowCheckbox) {
+        /*
+         * We only make this validation if the "Hide Zero-Balance Tokens" setting is active,
+         * and only do it once. If the warning message was shown, we will accept the "alwaysShow"
+         * checkbox value as the user decision already.
+         */
+        if (
+          areZeroBalanceTokensHidden
+          && tokenHasZeroBalance
+          && !this.state.shouldExhibitAlwaysShowCheckbox
+        ) {
           tokensWithoutBalance.push(config);
           continue;
         }
 
+        // Prepare the token to be added to the wallet
         tokensToAdd.push(config)
       }
 
+      /*
+       * This array will only be populated if the "Hide zero balance tokens" setting is active and
+       * the user tried to add tokens with zero balance.
+       * In this case, we will stop the process and render a warning message with an option to
+       * always show these tokens being added.
+       * No tokens will be added here.
+       */
       if (tokensWithoutBalance.length) {
         const emptyTokenNames = tokensWithoutBalance.map(t => t.symbol).join(', ')
         this.setState({
@@ -114,6 +138,7 @@ class ModalAddManyTokens extends React.Component {
         return;
       }
 
+      // Adding the tokens to the wallet and returning with the success callback
       for (const config of tokensToAdd) {
         tokens.addToken(config.uid, config.name, config.symbol);
         wallet.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
@@ -121,7 +146,7 @@ class ModalAddManyTokens extends React.Component {
 
       this.props.success(toAdd.length);
     } catch (e) {
-      // If one fails, we show error message
+      // If one of the promises fail, we show an error message
       this.setState({errorMessage: e.message});
     }
   }
@@ -141,7 +166,9 @@ class ModalAddManyTokens extends React.Component {
               <p>{t`You can register one or more tokens writing the configuration string of each one below.`}</p>
               <form ref="formAddToken">
                 <div className="form-group">
-                  <textarea className="form-control" rows={8} ref="configs" placeholder={t`Configuration strings`} />
+                  <textarea className="form-control" rows={8} ref="configs"
+                            placeholder={t`Configuration strings`}
+                            readOnly={this.state.shouldExhibitAlwaysShowCheckbox} />
                 </div>
                 <div className="row">
                   <div className="col-12 col-sm-10">

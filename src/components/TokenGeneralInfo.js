@@ -32,11 +32,12 @@ const mapStateToProps = (state) => {
  */
 class TokenGeneralInfo extends React.Component {
   /**
-   * errorMessage {String} Message to show in case of error getting token info
-   * totalSupply {number} Token total supply
-   * canMint {boolean} If this token can still be minted
-   * canMelt {boolean} If this token can still be melted
-   * transactionsCount {number} Total number of transactions of this token
+   * @property {string} errorMessage Message to show in case of error getting token info
+   * @property {number} totalSupply Token total supply
+   * @property {boolean} canMint If this token can still be minted
+   * @property {boolean} canMelt If this token can still be melted
+   * @property {number} transactionsCount Total number of transactions of this token
+   * @property {boolean} alwaysShow Indicates if this token is always shown despite having zero bal.
    */
   state = {
     errorMessage: '',
@@ -82,6 +83,10 @@ class TokenGeneralInfo extends React.Component {
     }
   }
 
+  /**
+   * Handles the click on the "Always show this token" link
+   * @param {Event} e
+   */
   handleToggleAlwaysShow = (e) => {
     e.preventDefault();
     const newValue = !this.state.alwaysShow;
