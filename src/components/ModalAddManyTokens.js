@@ -98,21 +98,25 @@ class ModalAddManyTokens extends React.Component {
         const tokenHasZeroBalance = (tokenBalance.available + tokenBalance.locked) === 0;
 
         if (areZeroBalanceTokensHidden && tokenHasZeroBalance && !this.state.shouldExhibitAlwaysShowCheckbox) {
-          tokensWithoutBalance.push({ ...config });
+          tokensWithoutBalance.push(config);
           continue;
         }
 
-        tokens.addToken(config.uid, config.name, config.symbol);
-        wallet.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
+        tokensToAdd.push(config)
       }
 
       if (tokensWithoutBalance.length) {
-        const emptyTokenNames = tokensWithoutBalance.map(t => t.symbol).join(',')
+        const emptyTokenNames = tokensWithoutBalance.map(t => t.symbol).join(', ')
         this.setState({
           shouldExhibitAlwaysShowCheckbox: true,
           errorMessage: t`This following tokens have no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show these tokens? (You can always undo this on the token info screen.)\n${emptyTokenNames}`
         })
         return;
+      }
+
+      for (const config of tokensToAdd) {
+        tokens.addToken(config.uid, config.name, config.symbol);
+        wallet.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
       }
 
       this.props.success(toAdd.length);
@@ -139,6 +143,13 @@ class ModalAddManyTokens extends React.Component {
                 <div className="form-group">
                   <textarea className="form-control" rows={8} ref="configs" placeholder={t`Configuration strings`} />
                 </div>
+                <div className="row">
+                  <div className="col-12 col-sm-10">
+                      <p className="error-message text-danger">
+                        {this.state.errorMessage}
+                      </p>
+                  </div>
+                </div>
                 { this.state.shouldExhibitAlwaysShowCheckbox ? <div className="form-check">
                   <input className="form-check-input" type="checkbox" id="alwaysShowToken"
                          checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow} />
@@ -149,13 +160,6 @@ class ModalAddManyTokens extends React.Component {
                      title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
                   </i>
                 </div> : '' }
-                <div className="row">
-                  <div className="col-12 col-sm-10">
-                      <p className="error-message text-danger">
-                        {this.state.errorMessage}
-                      </p>
-                  </div>
-                </div>
               </form>
             </div>
             <div className="modal-footer">
