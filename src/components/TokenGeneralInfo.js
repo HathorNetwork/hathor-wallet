@@ -16,6 +16,8 @@ import { connect } from 'react-redux';
 import helpers from '../utils/helpers';
 import { get } from 'lodash';
 import wallet from "../utils/wallet";
+import ModalConfirm from "./ModalConfirm";
+import $ from "jquery";
 
 
 const mapStateToProps = (state) => {
@@ -38,6 +40,7 @@ class TokenGeneralInfo extends React.Component {
    * @property {boolean} canMelt If this token can still be melted
    * @property {number} transactionsCount Total number of transactions of this token
    * @property {boolean} alwaysShow Indicates if this token is always shown despite having zero bal.
+   * @property {{title:string,body:string,handleYes:function}} confirmData Confirm modal settings
    */
   state = {
     errorMessage: '',
@@ -46,6 +49,11 @@ class TokenGeneralInfo extends React.Component {
     canMelt: null,
     transactionsCount: 0,
     alwaysShow: false,
+    confirmData: {
+      title: '',
+      body: '',
+      handleYes: () => {}
+    }
   };
 
   componentDidMount() {
@@ -87,11 +95,36 @@ class TokenGeneralInfo extends React.Component {
    * Handles the click on the "Always show this token" link
    * @param {Event} e
    */
-  handleToggleAlwaysShow = (e) => {
+  toggleAlwaysShow = (e) => {
     e.preventDefault();
+    if (this.state.alwaysShow) {
+      this.setState({
+        confirmData: {
+          title: t`Disable always show`,
+          body: t`Are you sure you want to disable always show for token ${this.props.token.symbol}?`,
+          handleYes: this.handleToggleAlwaysShow
+        }
+      });
+    } else {
+      this.setState({
+        confirmData: {
+          title: t`Enable always show`,
+          body: t`Are you sure you want to always show token ${this.props.token.symbol}?`,
+          handleYes: this.handleToggleAlwaysShow
+        }
+      });
+    }
+    $('#confirmModal').modal('show');
+  }
+
+  /**
+   * Activates or deactivates always show on this token
+   */
+  handleToggleAlwaysShow = () => {
     const newValue = !this.state.alwaysShow;
     wallet.setTokenAlwaysShow(this.props.token.uid, newValue);
     this.setState( { alwaysShow: newValue });
+    $('#confirmModal').modal('hide');
   }
 
   /**
@@ -168,7 +201,7 @@ class TokenGeneralInfo extends React.Component {
               ? <span>{t`Yes`}</span>
               : <span>{t`No`}</span>
           }
-            <a className="ml-3" href="true" onClick={this.handleToggleAlwaysShow}> {t`Change`} </a>
+            <a className="ml-3" href="true" onClick={this.toggleAlwaysShow}> {t`Change`} </a>
             <i className="fa fa-question-circle pointer ml-3"
                title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
             </i>
@@ -204,6 +237,7 @@ class TokenGeneralInfo extends React.Component {
           {this.props.showConfigString && renderConfigString()}
         </div>
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
+        <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
       </div>
     )
   }
