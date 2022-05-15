@@ -46,6 +46,8 @@ class Server extends React.Component {
      * newServer {boolean} If user selected checkbox that he wants to set a new server
      * selectedValue {string} Server selected from the user
      * selectedServer {string} Server that the user wants to connect
+     * selectedWsServer {string} Websocket Server that the user wants to connect (only used when on the wallet-service facade)
+     * selectedNetwork {string} Network that the user wants to connect
      * testnetError {string} Message to be shown in case of error when changing to a testnet server.
      */
     this.state = {
@@ -55,8 +57,8 @@ class Server extends React.Component {
       loading: false,
       selectedServer: '',
       selectedWsServer: '',
+      selectedNetwork: null,
       testnetError: '',
-      selectedNetwork: 'mainnet',
     }
   }
 
