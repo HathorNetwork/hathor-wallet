@@ -26,7 +26,6 @@ import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
     useWalletService: state.useWalletService,
   };
 };
