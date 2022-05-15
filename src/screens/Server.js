@@ -173,6 +173,7 @@ class Server extends React.Component {
           this.props.wallet.changeWsServer(currentWsServer);
         }
         $('#alertModal').modal('show');
+        this.setState({ loading: false });
       } else {
         // We are on mainnet, so set the network on the singleton and storage
         hathorLib.config.setNetwork('mainnet');
