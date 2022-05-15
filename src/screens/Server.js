@@ -170,7 +170,7 @@ class Server extends React.Component {
         // If the user decides to continue with this change, we will update again
         this.props.wallet.changeServer(currentServer);
         if (this.props.useWalletService) {
-          hathorLib.config.setWalletServiceBaseWsUrl(currentWsServer);
+          this.props.wallet.changeWsServer(currentWsServer);
         }
         $('#alertModal').modal('show');
       } else {
