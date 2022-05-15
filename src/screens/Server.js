@@ -182,6 +182,9 @@ class Server extends React.Component {
     } catch (e) {
       // Go back to the previous server
       this.props.wallet.changeServer(currentServer);
+      if (this.props.useWalletService) {
+        this.props.wallet.changeWsServer(currentWsServer);
+      }
       this.setState({ loading: false });
     }
   }
