@@ -316,32 +316,6 @@ const wallet = {
   },
 
   /**
-   * Fetches both history and balance for the affected tokens in updatedBalanceMap
-   *
-   * @param {HathorWallet} wallet object
-   * @param {Object} updatedBalanceMap An object containing tokens as the keys and their updated balances as values
-   *
-   * @memberof Wallet
-   * @inner
-   **/
-  async handlePartialUpdate (wallet, updatedBalanceMap) {
-    const tokens = Object.keys(updatedBalanceMap);
-    const tokensHistory = {};
-    const tokensBalance = {};
-
-    for (const token of tokens) {
-      /* eslint-disable no-await-in-loop */
-      const history = await wallet.getTxHistory({ token_id: token });
-
-      tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
-      tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
-      /* eslint-enable no-await-in-loop */
-    }
-
-    store.dispatch(partiallyUpdateHistoryAndBalance({ tokensHistory, tokensBalance }));
-  },
-
-  /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
