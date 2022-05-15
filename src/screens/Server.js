@@ -253,7 +253,7 @@ class Server extends React.Component {
   handleBaseURLSelectChange = (e) => {
     if (e.target.value === '') {
       return this.setState({
-        selectedWsServer: '',
+        selectedServer: '',
       });
     }
 
