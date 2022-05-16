@@ -994,8 +994,12 @@ const wallet = {
    */
   setTokenAlwaysShow(tokenUid, newValue = false) {
     const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
-    if (!newValue) delete alwaysShowMap[tokenUid];
-    else alwaysShowMap[tokenUid] = true;
+    if (!newValue) {
+      delete alwaysShowMap[tokenUid];
+    }
+    else {
+      alwaysShowMap[tokenUid] = true;
+    }
     storage.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
   },
 

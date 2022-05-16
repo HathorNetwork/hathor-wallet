@@ -16,7 +16,7 @@ import BackButton from '../components/BackButton';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { NFT_ENABLED } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 
 /**
  * Maps redux state to instance props

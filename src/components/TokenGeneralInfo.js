@@ -52,7 +52,7 @@ class TokenGeneralInfo extends React.Component {
     confirmData: {
       title: '',
       body: '',
-      handleYes: () => {}
+      handleYes: () => {},
     }
   };
 
@@ -76,7 +76,7 @@ class TokenGeneralInfo extends React.Component {
     try {
       const tokenUid = this.props.token.uid;
       const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
-      const alwaysShow = wallet.isTokenAlwaysShow(tokenUid)
+      const alwaysShow = wallet.isTokenAlwaysShow(tokenUid);
       const { totalSupply, totalTransactions, authorities } = tokenDetails;
 
       this.setState({
@@ -102,7 +102,7 @@ class TokenGeneralInfo extends React.Component {
         confirmData: {
           title: t`Disable always show`,
           body: t`Are you sure you want to disable always show for token ${this.props.token.symbol}?`,
-          handleYes: this.handleToggleAlwaysShow
+          handleYes: this.handleToggleAlwaysShow,
         }
       });
     } else {
@@ -110,7 +110,7 @@ class TokenGeneralInfo extends React.Component {
         confirmData: {
           title: t`Enable always show`,
           body: t`Are you sure you want to always show token ${this.props.token.symbol}?`,
-          handleYes: this.handleToggleAlwaysShow
+          handleYes: this.handleToggleAlwaysShow,
         }
       });
     }
@@ -123,7 +123,7 @@ class TokenGeneralInfo extends React.Component {
   handleToggleAlwaysShow = () => {
     const newValue = !this.state.alwaysShow;
     wallet.setTokenAlwaysShow(this.props.token.uid, newValue);
-    this.setState( { alwaysShow: newValue });
+    this.setState({ alwaysShow: newValue });
     $('#confirmModal').modal('hide');
   }
 
