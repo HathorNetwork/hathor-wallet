@@ -1019,11 +1019,7 @@ const wallet = {
    */
   listTokensAlwaysShow() {
     const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens);
-    const alwaysShowArray = [];
-    for (const tokenUid in alwaysShowMap) {
-      alwaysShowArray.push(tokenUid);
-    }
-    return alwaysShowArray;
+    return Object.keys(alwaysShowMap);
   },
 
   /**
