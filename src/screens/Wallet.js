@@ -141,15 +141,15 @@ class Wallet extends React.Component {
   /**
    * When user confirms the unregister of the token, hide the modal and execute it
    */
-  unregisterConfirmed = () => {
+  unregisterConfirmed = async () => {
     const tokenUid = this.props.selectedToken;
-    const promise = tokens.unregisterToken(tokenUid);
-    promise.then(() => {
+    try {
+      await tokens.unregisterToken(tokenUid);
       wallet.setTokenAlwaysShow(tokenUid, false); // Remove this token from "always show"
       $('#unregisterModal').modal('hide');
-    }, (e) => {
+    } catch (e) {
       this.unregisterModalRef.current.updateErrorMessage(e.message);
-    });
+    }
   }
 
   /*
