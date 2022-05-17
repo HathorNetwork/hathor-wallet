@@ -18,7 +18,7 @@ const initialState = {
   // If the backend API version is allowed for this admin (boolean)
   isVersionAllowed: undefined,
   // If the connection with the server is online
-  isOnline: undefined,
+  isOnline: false,
   // Network that you are connected
   network: undefined,
   // Config of the last request that failed
