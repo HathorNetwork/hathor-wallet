@@ -157,33 +157,33 @@ class ModalAddManyTokens extends React.Component {
     }
   }
 
-  renderAlwaysShowCheckbox = () => {
-    return (
-      <div className="form-check">
-        <input className="form-check-input" type="checkbox" id="alwaysShowToken"
-               checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow}/>
-        <label className="form-check-label" htmlFor="alwaysShowToken">
-          {t`Always show these tokens`}
-        </label>
-        <i className="fa fa-question-circle pointer ml-3"
-           title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
-        </i>
-      </div>
-    );
-  }
-
-  renderWarningMessage = () => {
-    return (
-      <div className="col-12 col-sm-12">
-        <div ref="warningText" className="alert alert-warning" role="alert">
-          {this.state.warningMessage}<br/>
-          <strong>{this.state.tokensToAdd}</strong>
-        </div>
-      </div>
-    );
-  }
-
   render() {
+    const renderAlwaysShowCheckbox = () => {
+      return (
+        <div className="form-check">
+          <input className="form-check-input" type="checkbox" id="alwaysShowToken"
+                 checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow}/>
+          <label className="form-check-label" htmlFor="alwaysShowToken">
+            {t`Always show these tokens`}
+          </label>
+          <i className="fa fa-question-circle pointer ml-3"
+             title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
+          </i>
+        </div>
+      );
+    }
+
+    const renderWarningMessage = () => {
+      return (
+        <div className="col-12 col-sm-12">
+          <div ref="warningText" className="alert alert-warning" role="alert">
+            {this.state.warningMessage}<br/>
+            <strong>{this.state.tokensToAdd}</strong>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="modal fade" id="addManyTokensModal" tabIndex="-1" role="dialog" aria-labelledby="addManyTokensModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
@@ -208,9 +208,9 @@ class ModalAddManyTokens extends React.Component {
                         {this.state.errorMessage}
                       </p>
                   </div>
-                  { this.state.warningMessage.length && this.renderWarningMessage() }
+                  { this.state.warningMessage.length && renderWarningMessage() }
                 </div>
-                { this.state.shouldExhibitAlwaysShowCheckbox && this.renderAlwaysShowCheckbox() }
+                { this.state.shouldExhibitAlwaysShowCheckbox && renderAlwaysShowCheckbox() }
               </form>
             </div>
             <div className="modal-footer">
