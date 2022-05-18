@@ -57,12 +57,12 @@ class TokenBar extends React.Component {
    * @return {number} Quantity of unknown tokens
    */
   getUnknownTokens = (hideZeroBalance) => {
-    const unknownTokens = wallet.fetchUnknownTokens({
-      allTokens: this.props.allTokens,
-      registeredTokens: this.props.registeredTokens,
-      tokensBalance: this.props.tokensBalance,
+    const unknownTokens = wallet.fetchUnknownTokens(
+      this.props.allTokens,
+      this.props.registeredTokens,
+      this.props.tokensBalance,
       hideZeroBalance,
-    })
+    );
 
     return unknownTokens.length;
   }
@@ -141,12 +141,12 @@ class TokenBar extends React.Component {
     const unknownTokens = this.getUnknownTokens(shouldHideZeroBalanceTokens);
 
     const renderTokens = () => {
-      const registeredTokens = wallet.fetchRegisteredTokens({
-        allTokens: this.props.allTokens,
-        registeredTokens: this.props.registeredTokens,
-        tokensBalance: this.props.tokensBalance,
-        hideZeroBalance: shouldHideZeroBalanceTokens,
-      })
+      const registeredTokens = wallet.fetchRegisteredTokens(
+        this.props.allTokens,
+        this.props.registeredTokens,
+        this.props.tokensBalance,
+        shouldHideZeroBalanceTokens,
+      );
 
       return registeredTokens.map((token) => {
         const tokenUid = token.uid;

@@ -65,12 +65,12 @@ class UnknownTokens extends React.Component {
     this.anchorOpenRefs = [];
     this.anchorHideRefs = [];
 
-    const unknownTokens = wallet.fetchUnknownTokens({
-      allTokens: this.props.allTokens,
-      registeredTokens: this.props.registeredTokens,
-      tokensBalance: this.props.tokensBalance,
+    const unknownTokens = wallet.fetchUnknownTokens(
+      this.props.allTokens,
+      this.props.registeredTokens,
+      this.props.tokensBalance,
       hideZeroBalance,
-    })
+    );
 
     for (const tokenObj of unknownTokens) {
       // Populating token transaction history on the object

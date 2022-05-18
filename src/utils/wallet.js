@@ -342,15 +342,13 @@ const wallet = {
    * Filters only the non-registered tokens from the allTokens list.
    * Optionally filters only those with non-zero balance.
    *
-   * @param params
-   * @param {Object[]} [params.allTokens] list of all available tokens
-   * @param {Object[]} [params.registeredTokens] list of registered tokens
-   * @param {Object[]} [params.tokensBalance] data about token balances
-   * @param {boolean} [params.hideZeroBalance] If true, omits tokens with zero balance
+   * @param {Object[]} allTokens list of all available tokens
+   * @param {Object[]} registeredTokens list of registered tokens
+   * @param {Object[]} tokensBalance data about token balances
+   * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
    * @returns {{uid:string, balance:{available:number,locked:number}}[]}
    */
-  fetchUnknownTokens(params = {}) {
-    const {allTokens, registeredTokens, tokensBalance, hideZeroBalance} = params;
+  fetchUnknownTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance) {
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const unknownTokens = [];
 
@@ -391,15 +389,13 @@ const wallet = {
    * Filters only the registered tokens from the allTokens list.
    * Optionally filters only those with non-zero balance.
    *
-   * @param params
-   * @param {Object[]} [params.allTokens] list of all available tokens
-   * @param {Object[]} [params.registeredTokens] list of registered tokens
-   * @param {Object[]} [params.tokensBalance] data about token balances
-   * @param {boolean} [params.hideZeroBalance] If true, omits tokens with zero balance
+   * @param {Object[]} allTokens list of all available tokens
+   * @param {Object[]} registeredTokens list of registered tokens
+   * @param {Object[]} tokensBalance data about token balances
+   * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
    * @returns {object[]}
    */
-  fetchRegisteredTokens(params = {}) {
-    const {allTokens, registeredTokens, tokensBalance, hideZeroBalance} = params;
+  fetchRegisteredTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance) {
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const filteredTokens = [];
 
