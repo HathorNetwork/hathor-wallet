@@ -105,7 +105,7 @@ class TokenGeneralInfo extends React.Component {
       this.setState({
         confirmData: {
           title: t`Disable always show`,
-          body: t`Are you sure you want to disable always show for token ${this.props.token.symbol}?`,
+          body: t`Are you sure you don't want to always show token ${this.props.token.symbol}? If you continue you won't see this token if it has zero balance and you selected to hide zero balance tokens.`,
           handleYes: this.handleToggleAlwaysShow,
         }
       });
