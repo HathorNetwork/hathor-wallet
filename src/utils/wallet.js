@@ -396,7 +396,6 @@ const wallet = {
    * @returns {object[]}
    */
   fetchRegisteredTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance) {
-    console.log({allTokens,registeredTokens,tokensBalance,hideZeroBalance});
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const filteredTokens = [];
 

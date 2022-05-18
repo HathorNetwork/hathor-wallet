@@ -30,6 +30,19 @@ class ModalAddToken extends React.Component {
     alwaysShow: false,
   };
 
+  renderAlwaysShowCheckbox = () => {
+    return (<div className="form-check">
+      <input className="form-check-input" type="checkbox" id="alwaysShowTokenCheckbox"
+             checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow} />
+      <label className="form-check-label" htmlFor="alwaysShowToken">
+        {t`Always show this token`}
+      </label>
+      <i className="fa fa-question-circle pointer ml-3"
+         title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings for this token.`}>
+      </i>
+    </div>)
+  }
+
   /**
    * Handles the click on the "Always show this token" checkbox
    * @param {Event} e
@@ -134,16 +147,7 @@ class ModalAddToken extends React.Component {
                       </p>
                   </div>
                 </div>
-                { this.state.shouldExhibitAlwaysShowCheckbox ? <div className="form-check">
-                  <input className="form-check-input" type="checkbox" id="alwaysShowTokenCheckbox"
-                         checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow} />
-                  <label className="form-check-label" htmlFor="alwaysShowToken">
-                    {t`Always show this token`}
-                  </label>
-                  <i className="fa fa-question-circle pointer ml-3"
-                     title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings for this token.`}>
-                  </i>
-                </div> : '' }
+                { this.state.shouldExhibitAlwaysShowCheckbox && this.renderAlwaysShowCheckbox() }
               </form>
             </div>
             <div className="modal-footer">
