@@ -24,6 +24,7 @@ class ModalAddManyTokens extends React.Component {
    * @property {string} warningMessage Message that will be shown to the user in warning scenarios
    * @property {boolean} shouldExhibitAlwaysShowCheckbox Defines "always show" checkbox rendering
    * @property {boolean} alwaysShow Defines if tokens will be added with "Always Show" setting
+   * @property {string} tokensToAdd Stores the tokens that will be added. Used on user messages.
    */
   state = {
     errorMessage: '',
@@ -50,7 +51,7 @@ class ModalAddManyTokens extends React.Component {
         warningMessage: '',
         shouldExhibitAlwaysShowCheckbox: false,
         alwaysShow: false,
-        tokensToAdd: false,
+        tokensToAdd: '',
       });
     })
 
