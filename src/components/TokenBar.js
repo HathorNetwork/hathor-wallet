@@ -99,14 +99,12 @@ class TokenBar extends React.Component {
   }
 
   /**
-   * Gets the balance of one token formatted for exhibition
+   * Gets the balance of one token
    *
    * @param {string} uid UID to get balance from
-   * @param {boolean} [returnInteger] Returns the total value as an integer
-   *
-   * @return {string|number} Available balance of token in the specified format
+   * @return {number} Total token balance
    */
-  getTokenBalance = (uid, returnInteger = false) => {
+  getTokenBalance = (uid) => {
     const balance = this.props.tokensBalance[uid];
     let total = 0;
     if (balance) {
@@ -114,8 +112,17 @@ class TokenBar extends React.Component {
       total = balance.available + balance.locked;
     }
 
-    // Returning the raw integer value, according to parameter
-    if (returnInteger) return total;
+    return total;
+  }
+
+  /**
+   * Gets the balance of one token formatted for exhibition
+   *
+   * @param {string} uid UID to get balance from
+   * @return {string} String formatted balance, ready for exhibition
+   */
+  getTokenBalanceFormatted = (uid) => {
+    const total = this.getTokenBalance(uid);
 
     // Formatting to string for exhibition
     const isNFT = helpers.isTokenNFT(uid, this.props.tokenMetadata);
@@ -137,7 +144,7 @@ class TokenBar extends React.Component {
       return this.props.registeredTokens.map((token) => {
         const tokenUid = token.uid;
         const isTokenHTR = tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
-        const totalBalance = this.getTokenBalance(tokenUid, true);
+        const totalBalance = this.getTokenBalance(tokenUid);
 
         // Skip every token without balance, except HTR, if the hiding flag is active
         if (shouldHideZeroBalanceTokens && !isTokenHTR && totalBalance === 0) {
@@ -146,7 +153,7 @@ class TokenBar extends React.Component {
 
         return (
           <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${(this.getTokenBalance(tokenUid))}`}</span>
+            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${(this.getTokenBalanceFormatted(tokenUid))}`}</span>
           </div>
         )
       });
