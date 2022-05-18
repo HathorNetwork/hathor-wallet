@@ -142,7 +142,6 @@ class TokenBar extends React.Component {
 
     const renderTokens = () => {
       const registeredTokens = wallet.fetchRegisteredTokens(
-        this.props.allTokens,
         this.props.registeredTokens,
         this.props.tokensBalance,
         shouldHideZeroBalanceTokens,

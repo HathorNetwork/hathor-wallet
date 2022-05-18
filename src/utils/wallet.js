@@ -389,13 +389,12 @@ const wallet = {
    * Filters only the registered tokens from the allTokens list.
    * Optionally filters only those with non-zero balance.
    *
-   * @param {Object[]} allTokens list of all available tokens
    * @param {Object[]} registeredTokens list of registered tokens
    * @param {Object[]} tokensBalance data about token balances
    * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
    * @returns {object[]}
    */
-  fetchRegisteredTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance) {
+  fetchRegisteredTokens(registeredTokens, tokensBalance, hideZeroBalance) {
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const filteredTokens = [];
 
