@@ -109,7 +109,11 @@ class Server extends React.Component {
     }
 
     const newBaseServerInputValue = this.refs.newServer.value;
-    const newWsServerInputValue = this.refs.newWsServer.value;
+    let newWsServerInputValue = null;
+
+    if (this.props.useWalletService) {
+      newWsServerInputValue = this.refs.newWsServer.value;
+    }
 
     let newBaseServer = null;
     let newWsServer = null;
