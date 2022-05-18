@@ -154,9 +154,8 @@ class Settings extends React.Component {
 
   /**
    * Activates or deactivates the option to hide zero-balance tokens from the UI.
-   * @param {Event} e
    */
-  handleToggleZeroBalanceTokens = (e) => {
+  handleToggleZeroBalanceTokens = () => {
     const areZeroBalanceTokensHidden = wallet.areZeroBalanceTokensHidden();
 
     if (areZeroBalanceTokensHidden) {
