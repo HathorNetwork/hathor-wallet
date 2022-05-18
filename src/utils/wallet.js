@@ -1019,7 +1019,7 @@ const wallet = {
    * @returns {string[]}
    */
   listTokensAlwaysShow() {
-    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens);
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
     return Object.keys(alwaysShowMap);
   },
 
