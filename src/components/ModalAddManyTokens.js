@@ -167,6 +167,14 @@ class ModalAddManyTokens extends React.Component {
     </div>)
   }
 
+  renderWarningMessage = () => {
+    return (<div className="col-12 col-sm-12">
+      <div ref="warningText" className="alert alert-warning" role="alert">
+        {this.state.warningMessage}
+      </div>
+    </div>)
+  }
+
   render() {
     return (
       <div className="modal fade" id="addManyTokensModal" tabIndex="-1" role="dialog" aria-labelledby="addManyTokensModal" aria-hidden="true">
@@ -191,10 +199,8 @@ class ModalAddManyTokens extends React.Component {
                       <p className="error-message text-danger">
                         {this.state.errorMessage}
                       </p>
-                      <p className="warning-message text-warning">
-                        {this.state.warningMessage}
-                      </p>
                   </div>
+                  { this.state.warningMessage.length && this.renderWarningMessage() }
                 </div>
                 { this.state.shouldExhibitAlwaysShowCheckbox && this.renderAlwaysShowCheckbox() }
               </form>

@@ -45,6 +45,14 @@ class ModalAddToken extends React.Component {
     </div>)
   }
 
+  renderWarningMessage = () => {
+    return (<div className="col-12 col-sm-12">
+      <div ref="warningText" className="alert alert-warning" role="alert">
+        {this.state.warningMessage}
+      </div>
+    </div>)
+  }
+
   /**
    * Handles the click on the "Always show this token" checkbox
    * @param {Event} e
@@ -148,10 +156,8 @@ class ModalAddToken extends React.Component {
                       <p className="error-message text-danger">
                         {this.state.errorMessage}
                       </p>
-                      <p className="warning-message text-warning">
-                        {this.state.warningMessage}
-                      </p>
                   </div>
+                  { this.state.warningMessage.length && this.renderWarningMessage() }
                 </div>
                 { this.state.shouldExhibitAlwaysShowCheckbox && this.renderAlwaysShowCheckbox() }
               </form>
