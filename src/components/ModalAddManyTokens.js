@@ -21,11 +21,13 @@ import wallet from "../utils/wallet";
 class ModalAddManyTokens extends React.Component {
   /**
    * @property {string} errorMessage Message that will be shown to the user in case of error
+   * @property {string} warningMessage Message that will be shown to the user in warning scenarios
    * @property {boolean} shouldExhibitAlwaysShowCheckbox Defines "always show" checkbox rendering
    * @property {boolean} alwaysShow Defines if tokens will be added with "Always Show" setting
    */
   state = {
     errorMessage: '',
+    warningMessage: '',
     shouldExhibitAlwaysShowCheckbox: false,
     alwaysShow: false,
   };
@@ -44,6 +46,7 @@ class ModalAddManyTokens extends React.Component {
       this.refs.configs.value = '';
       this.setState({
         errorMessage: '',
+        warningMessage: '',
         shouldExhibitAlwaysShowCheckbox: false,
         alwaysShow: false,
       });
@@ -133,7 +136,7 @@ class ModalAddManyTokens extends React.Component {
         const emptyTokenNames = tokensWithoutBalance.map(t => t.symbol).join(', ')
         this.setState({
           shouldExhibitAlwaysShowCheckbox: true,
-          errorMessage: t`This following tokens have no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show these tokens? (You can always undo this on the token info screen.)\n${emptyTokenNames}`
+          warningMessage: t`The following tokens have no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show these tokens? (You can always undo this on the token info screen.)\n${emptyTokenNames}`
         })
         return;
       }
@@ -187,6 +190,9 @@ class ModalAddManyTokens extends React.Component {
                   <div className="col-12 col-sm-10">
                       <p className="error-message text-danger">
                         {this.state.errorMessage}
+                      </p>
+                      <p className="warning-message text-warning">
+                        {this.state.warningMessage}
                       </p>
                   </div>
                 </div>
