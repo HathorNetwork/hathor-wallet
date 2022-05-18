@@ -36,7 +36,7 @@ class ModalAddToken extends React.Component {
    */
   handleToggleAlwaysShow = (e) => {
     const newValue = !this.state.alwaysShow;
-    this.setState( { alwaysShow: newValue });
+    this.setState({ alwaysShow: newValue });
   }
 
   componentDidMount = () => {

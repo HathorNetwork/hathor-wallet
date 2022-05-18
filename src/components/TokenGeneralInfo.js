@@ -39,8 +39,12 @@ class TokenGeneralInfo extends React.Component {
    * @property {boolean} canMint If this token can still be minted
    * @property {boolean} canMelt If this token can still be melted
    * @property {number} transactionsCount Total number of transactions of this token
-   * @property {boolean} alwaysShow Indicates if this token is always shown despite having zero bal.
-   * @property {{title:string,body:string,handleYes:function}} confirmData Confirm modal settings
+   * @property {boolean} alwaysShow Indicates if this token is always shown even without balance
+   * @property {{
+   *  title:string,
+   *  body:string,
+   *  handleYes:function
+   * }} confirmData Confirm modal settings
    */
   state = {
     errorMessage: '',
