@@ -228,6 +228,19 @@ export const WALLET_SERVICE_MAINNET_BASE_URL = 'https://wallet-service.hathor.ne
 export const WALLET_SERVICE_MAINNET_BASE_WS_URL = 'wss://ws.wallet-service.hathor.network/';
 
 /**
+ * Default Wallet Service servers
+ */
+export const DEFAULT_WALLET_SERVICE_SERVERS = [
+  WALLET_SERVICE_MAINNET_BASE_URL,
+];
+
+/**
+ * Default Wallet Service websocket servers
+ */
+export const DEFAULT_WALLET_SERVICE_WS_SERVERS = [
+  WALLET_SERVICE_MAINNET_BASE_WS_URL,
+];
+/**
  * Unleash constants
  */
 export const UNLEASH_URL = 'https://unleash-proxy.b7e6a7f52ee9fefaf0c53e300cfcb014.hathor.network/proxy';
