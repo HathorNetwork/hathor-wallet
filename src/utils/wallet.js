@@ -992,14 +992,13 @@ const wallet = {
    * Defines if a token should always be shown, despite having zero balance and the "hide zero
    * balance" setting being active.
    * @param {string} tokenUid uid of the token to be updated
-   * @param {boolean} [newValue=false] If true, the token will always be shown
+   * @param {boolean} newValue If true, the token will always be shown
    */
-  setTokenAlwaysShow(tokenUid, newValue = false) {
+  setTokenAlwaysShow(tokenUid, newValue) {
     const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
     if (!newValue) {
       delete alwaysShowMap[tokenUid];
-    }
-    else {
+    } else {
       alwaysShowMap[tokenUid] = true;
     }
     storage.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
