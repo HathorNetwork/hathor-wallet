@@ -396,26 +396,25 @@ const wallet = {
    * @returns {object[]}
    */
   fetchRegisteredTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance) {
+    console.log({allTokens,registeredTokens,tokensBalance,hideZeroBalance});
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const filteredTokens = [];
 
     // Iterating tokens to filter unregistered ones
-    for (const tokenUid of allTokens) {
-      const registeredObject = registeredTokens.find((x) => x.uid === tokenUid);
+    for (const registeredObject of registeredTokens) {
+      const tokenUid = registeredObject.uid;
 
-      // Skipping unregistered tokens
-      if (!registeredObject) {
-        continue;
-      }
-
-      const balance = tokensBalance[tokenUid];
+      // If there is no entry for this token on tokensBalance, generate an empty balance object.
+      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
       const tokenData = {
         ...registeredObject,
         balance: balance,
       };
 
       // If we indicated this token should always be exhibited, add it already.
-      if (alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid)) {
+      const isTokenHTR = tokenUid === hathorConstants.HATHOR_TOKEN_CONFIG.uid;
+      const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
+      if (isTokenHTR || alwaysShowThisToken) {
         filteredTokens.push(tokenData);
         continue;
       }
