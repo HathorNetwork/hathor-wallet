@@ -30,6 +30,7 @@ class ModalAddManyTokens extends React.Component {
     warningMessage: '',
     shouldExhibitAlwaysShowCheckbox: false,
     alwaysShow: false,
+    tokensToAdd: '',
   };
 
   /**
@@ -49,6 +50,7 @@ class ModalAddManyTokens extends React.Component {
         warningMessage: '',
         shouldExhibitAlwaysShowCheckbox: false,
         alwaysShow: false,
+        tokensToAdd: false,
       });
     })
 
@@ -136,7 +138,8 @@ class ModalAddManyTokens extends React.Component {
         const emptyTokenNames = tokensWithoutBalance.map(t => t.symbol).join(', ')
         this.setState({
           shouldExhibitAlwaysShowCheckbox: true,
-          warningMessage: t`The following tokens have no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show these tokens? (You can always undo this on the token info screen.)\n${emptyTokenNames}`
+          warningMessage: t`The following tokens have no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show these tokens? (You can always undo this on the token info screen.)`,
+          tokensToAdd: emptyTokenNames,
         })
         return;
       }
@@ -170,11 +173,14 @@ class ModalAddManyTokens extends React.Component {
   }
 
   renderWarningMessage = () => {
-    return (<div className="col-12 col-sm-12">
-      <div ref="warningText" className="alert alert-warning" role="alert">
-        {this.state.warningMessage}
+    return (
+      <div className="col-12 col-sm-12">
+        <div ref="warningText" className="alert alert-warning" role="alert">
+          {this.state.warningMessage}<br/>
+          <strong>{this.state.tokensToAdd}</strong>
+        </div>
       </div>
-    </div>)
+    );
   }
 
   render() {
