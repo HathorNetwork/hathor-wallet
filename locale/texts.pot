@@ -112,7 +112,7 @@ msgid "Confirm"
 msgstr ""
 
 #: src/screens/ChoosePassphrase.js:161
-#: src/screens/Settings.js:208
+#: src/screens/Settings.js:266
 msgid "Set a passphrase"
 msgstr ""
 
@@ -375,7 +375,7 @@ msgstr ""
 
 #: src/components/ModalResetAllData.js:113
 #: src/screens/LockedWallet.js:138
-#: src/screens/Settings.js:210
+#: src/screens/Settings.js:268
 msgid "Reset all data"
 msgstr ""
 
@@ -638,99 +638,128 @@ msgstr ""
 msgid "Cancel change"
 msgstr ""
 
-#: src/screens/Settings.js:112
+#: src/screens/Settings.js:116
 msgid "Turn notifications off"
 msgstr ""
 
-#: src/screens/Settings.js:113
+#: src/screens/Settings.js:117
 msgid "Are you sure you don't want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:120
+#: src/screens/Settings.js:124
 msgid "Turn notifications on"
 msgstr ""
 
-#: src/screens/Settings.js:121
+#: src/screens/Settings.js:125
 msgid "Are you sure you want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:185
+#: src/screens/Settings.js:144
+msgid "Show zero-balance tokens"
+msgstr ""
+
+#: src/screens/Settings.js:145
+msgid "Are you sure you want to show all tokens, including those with zero balance?"
+msgstr ""
+
+#: src/screens/Settings.js:152
+msgid "Hide zero-balance tokens"
+msgstr ""
+
+#: src/screens/Settings.js:153
+msgid "Are you sure you want to hide tokens with zero balance?"
+msgstr ""
+
+#: src/screens/Settings.js:232
 msgid "Date and time:"
 msgstr ""
 
-#: src/screens/Settings.js:188
+#: src/screens/Settings.js:235
 #, javascript-format
 msgid "**Server:** You are connected to ${ serverURL }"
 msgstr ""
 
-#: src/screens/Settings.js:191
+#: src/screens/Settings.js:238
 msgid "**Real-time server:** You are connected to ${ wsServerURL }"
 msgstr ""
 
 #: src/components/RequestError.js:184
-#: src/screens/Settings.js:194
+#: src/screens/Settings.js:241
 msgid "Change server"
 msgstr ""
 
-#: src/screens/Settings.js:199
+#: src/screens/Settings.js:246
 msgid "Advanced Settings"
 msgstr ""
 
-#: src/screens/Settings.js:201
+#: src/screens/Settings.js:248
 msgid "Allow notifications:"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:147
-#: src/screens/Settings.js:201
-#: src/screens/Settings.js:202
+#: src/screens/Settings.js:248
+#: src/screens/Settings.js:252
+#: src/screens/Settings.js:260
 msgid "Yes"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:146
-#: src/screens/Settings.js:201
-#: src/screens/Settings.js:202
+#: src/screens/Settings.js:248
+#: src/screens/Settings.js:253
+#: src/screens/Settings.js:260
 msgid "No"
 msgstr ""
 
-#: src/screens/Settings.js:201
-#: src/screens/Settings.js:202
+#: src/screens/Settings.js:248
+#: src/screens/Settings.js:255
+#: src/screens/Settings.js:260
 msgid "Change"
 msgstr ""
 
-#: src/screens/Settings.js:202
+#: src/screens/Settings.js:250
+msgid "Hide zero-balance tokens:"
+msgstr ""
+
+#: src/screens/Settings.js:257
+msgid ""
+"When selected, any tokens with a balance of zero will not be displayed "
+"anywhere in the wallet."
+msgstr ""
+
+#: src/screens/Settings.js:260
 msgid "Automatically report bugs to Hathor:"
 msgstr ""
 
-#: src/screens/Settings.js:205
+#: src/screens/Settings.js:263
 msgid "Unique identifier"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:93
 #: src/components/TokenGeneralInfo.js:160
 #: src/components/WalletAddress.js:153
-#: src/screens/Settings.js:205
+#: src/screens/Settings.js:263
 msgid "Copy to clipboard"
 msgstr ""
 
-#: src/screens/Settings.js:209
+#: src/screens/Settings.js:267
 msgid "Untrust all tokens on Ledger"
 msgstr ""
 
-#: src/screens/Settings.js:216
+#: src/screens/Settings.js:274
 msgid "Complete action on your hardware wallet"
 msgstr ""
 
-#: src/screens/Settings.js:218
+#: src/screens/Settings.js:276
 msgid "You can set your passphrase directly on your hardware wallet."
 msgstr ""
 
-#: src/screens/Settings.js:220
+#: src/screens/Settings.js:278
 msgid "|fn:More info| about this on Ledger."
 msgstr ""
 
 #: src/components/TxData.js:730
 #: src/components/WalletAddress.js:182
-#: src/screens/Settings.js:225
+#: src/screens/Settings.js:283
 msgid "Copied to clipboard!"
 msgstr ""
 
@@ -761,44 +790,44 @@ msgid "See on explorer"
 msgstr ""
 
 #: src/components/WalletBalance.js:44
-#: src/screens/UnknownTokens.js:142
+#: src/screens/UnknownTokens.js:152
 msgid "Total:"
 msgstr ""
 
 #: src/components/WalletBalance.js:45
-#: src/screens/UnknownTokens.js:143
+#: src/screens/UnknownTokens.js:153
 msgid "Available:"
 msgstr ""
 
 #: src/components/WalletBalance.js:46
-#: src/screens/UnknownTokens.js:144
+#: src/screens/UnknownTokens.js:154
 msgid "Locked:"
 msgstr ""
 
-#: src/screens/UnknownTokens.js:148
+#: src/screens/UnknownTokens.js:158
 msgid "Show history"
 msgstr ""
 
-#: src/screens/UnknownTokens.js:149
+#: src/screens/UnknownTokens.js:159
 msgid "Hide history"
 msgstr ""
 
-#: src/screens/UnknownTokens.js:165
+#: src/screens/UnknownTokens.js:175
 msgid "Unknown Tokens"
 msgstr ""
 
-#: src/screens/UnknownTokens.js:166
+#: src/screens/UnknownTokens.js:176
 msgid "Register Tokens"
 msgstr ""
 
-#: src/screens/UnknownTokens.js:168
+#: src/screens/UnknownTokens.js:178
 msgid ""
 "Those are the custom tokens which you have at least one transaction. They "
 "are still unregistered in this wallet. You need to register a custom token "
 "in order to send new transactions using it."
 msgstr ""
 
-#: src/screens/UnknownTokens.js:169
+#: src/screens/UnknownTokens.js:179
 msgid ""
 "If you have reset your wallet, you need to register your custom tokens "
 "again."
@@ -1593,17 +1622,17 @@ msgstr ""
 msgid "Your balance available:"
 msgstr ""
 
-#: src/components/TokenBar.js:142
+#: src/components/TokenBar.js:165
 msgid "Tokens"
 msgstr ""
 
-#: src/components/TokenBar.js:170
-#: src/components/TokenBar.js:171
+#: src/components/TokenBar.js:193
+#: src/components/TokenBar.js:194
 msgid "Lock wallet"
 msgstr ""
 
-#: src/components/TokenBar.js:174
-#: src/components/TokenBar.js:175
+#: src/components/TokenBar.js:197
+#: src/components/TokenBar.js:198
 msgid "Settings"
 msgstr ""
 
