@@ -28,7 +28,6 @@ import {
   sharedAddressUpdate,
   reloadData,
   cleanData,
-  changeServer,
   updateTokenHistory,
   tokenMetadataUpdated,
   metadataLoaded,
@@ -401,19 +400,20 @@ const wallet = {
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
 
-    // This check is important to set the correct network on storage and redux
-    const data = await version.checkApiVersion();
-
+    const network = config.getNetwork();
     const dataToken = tokens.getTokens();
 
     // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
     store.dispatch(reloadData({ tokens: dataToken }));
 
+    // We are offline, the connection object is yet to be created
+    store.dispatch(isOnlineUpdate({ isOnline: false }));
+
     // Fetch metadata of all tokens registered
-    this.fetchTokensMetadata(dataToken.map((token) => token.uid), data.network);
+    this.fetchTokensMetadata(dataToken.map((token) => token.uid), network.name);
 
     const uniqueDeviceId = walletHelpers.getUniqueId();
-    const featureFlags = new FeatureFlags(uniqueDeviceId, data.network);
+    const featureFlags = new FeatureFlags(uniqueDeviceId, network.name);
     const hardwareWallet = oldWalletUtil.isHardwareWallet();
     // For now, the wallet service does not support hardware wallet, so default to the old facade
     const useWalletService = hardwareWallet ? false : await featureFlags.shouldUseWalletService();
@@ -424,16 +424,20 @@ const wallet = {
     let connection;
 
     if (useWalletService) {
-      const network = new Network(data.network);
-
       let xpriv = null;
+
       if (fromXpriv) {
         xpriv = oldWalletUtil.getAcctPathXprivKey(pin);
       }
 
-      // Set urls for wallet service
-      config.setWalletServiceBaseUrl(WALLET_SERVICE_MAINNET_BASE_URL);
-      config.setWalletServiceBaseWsUrl(WALLET_SERVICE_MAINNET_BASE_WS_URL);
+      const {
+        walletServiceBaseUrl,
+        walletServiceWsUrl,
+      } = HathorWalletServiceWallet.getServerUrlsFromStorage();
+
+      // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
+      config.setWalletServiceBaseUrl(walletServiceBaseUrl || WALLET_SERVICE_MAINNET_BASE_URL);
+      config.setWalletServiceBaseWsUrl(walletServiceWsUrl || WALLET_SERVICE_MAINNET_BASE_WS_URL);
 
       const walletConfig = {
         seed: words,
@@ -465,7 +469,7 @@ const wallet = {
       }
 
       connection = new Connection({
-        network: data.network,
+        network: network.name,
         servers: [helpers.getServerURL()],
       });
 
