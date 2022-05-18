@@ -155,16 +155,18 @@ class ModalAddManyTokens extends React.Component {
   }
 
   renderAlwaysShowCheckbox = () => {
-    return (<div className="form-check">
-      <input className="form-check-input" type="checkbox" id="alwaysShowToken"
-             checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow} />
-      <label className="form-check-label" htmlFor="alwaysShowToken">
-        {t`Always show these tokens`}
-      </label>
-      <i className="fa fa-question-circle pointer ml-3"
-         title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
-      </i>
-    </div>)
+    return (
+      <div className="form-check">
+        <input className="form-check-input" type="checkbox" id="alwaysShowToken"
+               checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow}/>
+        <label className="form-check-label" htmlFor="alwaysShowToken">
+          {t`Always show these tokens`}
+        </label>
+        <i className="fa fa-question-circle pointer ml-3"
+           title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings.`}>
+        </i>
+      </div>
+    );
   }
 
   renderWarningMessage = () => {
