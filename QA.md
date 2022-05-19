@@ -111,10 +111,37 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Melt 20.00 tokens. The total supply and your balance must be 130.00 now.
     1. Click on 'Balance & History' and copy your address. Then go back to 'Administrative Tools' and click to delegate mint.
     1. Type your address and delegate. Now you must have 2 mint outputs.
-    1. Click to delegate melt and deselect the option to 'Create another melt output for you?'. Delegate the authority to the address WZ7pDnkPnxbs14GHdUFivFzPbzitwNtvZo and now you must have no melt outputs.
+    1. Click to delegate melt and deselect the option to 'Create another melt output for you?'. Delegate the authority to the address `WZ7pDnkPnxbs14GHdUFivFzPbzitwNtvZo` and now you must have no melt outputs.
     1. Go back to the 'Administrative Tools', click to destroy mint and select 3. You must see an error message that you don't have 3 mint authority outputs.
     1. Select 2 and complete the destroy. You must see a message saying 'You have no more authority outputs for this token'.
     1. Go to 'About TST' tab and must see 'Can mint new tokens: No'.
+
+1. **Hide Zero-balance tokens**
+    1. Go to 'Custom Tokens', then 'Register token'
+    1. Enter the following string: (assuming you are on testnet. If not, create a custom token in another wallet for this test.)<br/>
+        `[Hiding Token Test:HIDET:009f4365268aa3083c3bbdabae377fbbf720604e132b58602f6572cf45af8bd5:43f57655]`
+    1. Go back to the Main screen and check the the token `HIDET` is now available on the token bar to the left.
+    1. Navigate to 'Settings', on the option 'Hide zero-balance tokens', and select 'Change'.
+    1. Confirm that you want to hide zero-balance tokens.
+    1. Navigate back to the tokens screen and check that the token `HIDET` is no longer on the token bar to the left.
+    1. Navigate to 'Settings' and de-select the option to 'Hide zero-balance tokens'.
+    1. Navigate back to the tokens screen and check that the token `HIDET` is being shown again.
+
+1. **Always show tokens**
+    1. Unregister the token `HIDET`
+    1. Activate the 'Hide zero-balance tokens' setting on the Settings page
+    1. Go to 'Custom Tokens', then 'Register token' and enter once again the `HIDET` configuration string from above
+    1. A message must be shown on screen alerting that you do not have balance on this token.
+    1. This message must also ask if you want to always show this token despite the 'Hide zero-balance tokens' being active
+    1. Select the 'Always show' option and register the token.
+    1. Navigate to the main screen and check that the `HIDET` token is being shown.
+    1. Go to the 'About' tab. A line must be informing that the token is always being shown.
+    1. This line also contains a button to change this setting for this token. Click it.
+    1. Confirm that you do not want to always show this token.
+    1. Navigate to the HTR token using the bar on the left.
+    1. Check that the `HIDET` token is no longer being shown on this bar.
+    1. Go to the 'Settings' screen and de-activate the 'Hide zero-balance tokens' setting
+    1. Navigate back to the main screen and check that the `HIDET` token is being displayed again on the token bar.
 
 1. **Change server**
     1. Click on the 'Wallet' navigation link, then on the settings icon and the on 'Change server'.
