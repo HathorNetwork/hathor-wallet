@@ -64,6 +64,29 @@ if (window.require) {
 }
 
 /**
+ * Key string constants for manipulating the storage
+ * @type {{
+ * lastSharedIndex: string,
+ * notification: string,
+ * address: string,
+ * data: string,
+ * hideZeroBalanceTokens: string,
+ * sentry: string,
+ * alwaysShowTokens: string,
+ * }}
+ * @readonly
+ */
+const storageKeys = {
+  address: 'wallet:address',
+  lastSharedIndex: 'wallet:lastSharedIndex',
+  data: 'wallet:data',
+  sentry: 'wallet:sentry',
+  notification: 'wallet:notification',
+  hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
+  alwaysShowTokens: 'wallet:always_show_tokens',
+}
+
+/**
  * We use localStorage and Redux to save data.
  * In localStorage we have the following keys (prefixed by wallet:)
  * - data: object with data from the wallet including (all have full description in the reducers file)
@@ -316,6 +339,101 @@ const wallet = {
   },
 
   /**
+   * Filters only the non-registered tokens from the allTokens list.
+   * Optionally filters only those with non-zero balance.
+   *
+   * @param {Object[]} allTokens list of all available tokens
+   * @param {Object[]} registeredTokens list of registered tokens
+   * @param {Object[]} tokensBalance data about token balances
+   * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
+   * @returns {{uid:string, balance:{available:number,locked:number}}[]}
+   */
+  fetchUnknownTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance) {
+    const alwaysShowTokensArray = this.listTokensAlwaysShow();
+    const unknownTokens = [];
+
+    // Iterating tokens to filter unregistered ones
+    for (const tokenUid of allTokens) {
+      // If it is already registered, skip it.
+      if (registeredTokens.find((x) => x.uid === tokenUid)) {
+        continue;
+      }
+      const balance = tokensBalance[tokenUid];
+      const tokenData = {
+        uid: tokenUid,
+        balance: balance,
+      };
+
+      // If we indicated this token should always be exhibited, add it already.
+      if (alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid)) {
+        unknownTokens.push(tokenData);
+        continue;
+      }
+
+      // If the "show only non-zero balance tokens" flag is active, filter here.
+      if (hideZeroBalance) {
+        const totalBalance = balance.available + balance.locked;
+
+        // This token has zero balance: skip it.
+        if (hideZeroBalance && totalBalance === 0) {
+          continue;
+        }
+      }
+      unknownTokens.push(tokenData);
+    }
+
+    return unknownTokens;
+  },
+
+  /**
+   * Filters only the registered tokens from the allTokens list.
+   * Optionally filters only those with non-zero balance.
+   *
+   * @param {Object[]} registeredTokens list of registered tokens
+   * @param {Object[]} tokensBalance data about token balances
+   * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
+   * @returns {object[]}
+   */
+  fetchRegisteredTokens(registeredTokens, tokensBalance, hideZeroBalance) {
+    const alwaysShowTokensArray = this.listTokensAlwaysShow();
+    const filteredTokens = [];
+
+    // Iterating tokens to filter unregistered ones
+    for (const registeredObject of registeredTokens) {
+      const tokenUid = registeredObject.uid;
+
+      // If there is no entry for this token on tokensBalance, generate an empty balance object.
+      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
+      const tokenData = {
+        ...registeredObject,
+        balance: balance,
+      };
+
+      // If we indicated this token should always be exhibited, add it already.
+      const isTokenHTR = tokenUid === hathorConstants.HATHOR_TOKEN_CONFIG.uid;
+      const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
+      if (isTokenHTR || alwaysShowThisToken) {
+        filteredTokens.push(tokenData);
+        continue;
+      }
+
+      // If the "show only non-zero balance tokens" flag is active, filter here.
+      if (hideZeroBalance) {
+        const totalBalance = balance.available + balance.locked;
+
+        // This token has zero balance: skip it.
+        if (hideZeroBalance && totalBalance === 0) {
+          continue;
+        }
+      }
+
+      filteredTokens.push(tokenData);
+    }
+
+    return filteredTokens;
+  },
+
+  /**
    * Start a new HD wallet with new private key
    * Encrypt this private key and save data in localStorage
    *
@@ -336,7 +454,7 @@ const wallet = {
 
     // When we start a wallet from the locked screen, we need to unlock it in the storage
     oldWalletUtil.unlock();
- 
+
     const network = config.getNetwork();
     const dataToken = tokens.getTokens();
 
@@ -560,8 +678,8 @@ const wallet = {
     const allTokens = 'allTokens' in data ? data['allTokens'] : [];
     const transactionsFound = Object.keys(historyTransactions).length;
 
-    const address = storage.getItem('wallet:address');
-    const lastSharedIndex = storage.getItem('wallet:lastSharedIndex');
+    const address = storage.getItem(storageKeys.address);
+    const lastSharedIndex = storage.getItem(storageKeys.lastSharedIndex);
     const lastGeneratedIndex = oldWalletUtil.getLastGeneratedIndex();
 
     store.dispatch(historyUpdate({
@@ -612,7 +730,7 @@ const wallet = {
    */
   updateSharedAddress() {
     const lastSharedIndex = oldWalletUtil.getLastSharedIndex();
-    const lastSharedAddress = storage.getItem('wallet:address');
+    const lastSharedAddress = storage.getItem(storageKeys.address);
     this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
   },
 
@@ -675,10 +793,10 @@ const wallet = {
       // XXX from v0.12.0 to v0.13.0, xpubkey changes from wallet:data to access:data.
       // That's not a problem if wallet is being initialized. However, if it's already
       // initialized, we need to set the xpubkey in the correct place.
-      const oldData = JSON.parse(localStorage.getItem('wallet:data'));
+      const oldData = JSON.parse(localStorage.getItem(storageKeys.data));
       accessData.xpubkey = oldData.xpubkey;
       oldWalletUtil.setWalletAccessData(accessData);
-      localStorage.removeItem('wallet:data');
+      localStorage.removeItem(storageKeys.data);
     }
 
     // Load history from new server
@@ -708,7 +826,7 @@ const wallet = {
    * @inner
    */
   allowSentry() {
-    storage.setItem('wallet:sentry', true);
+    storage.setItem(storageKeys.sentry, true);
     this.updateSentryState();
   },
 
@@ -719,7 +837,7 @@ const wallet = {
    * @inner
    */
   disallowSentry() {
-    storage.setItem('wallet:sentry', false);
+    storage.setItem(storageKeys.sentry, false);
     this.updateSentryState();
   },
 
@@ -732,7 +850,7 @@ const wallet = {
    * @inner
    */
   getSentryPermission() {
-    return storage.getItem('wallet:sentry');
+    return storage.getItem(storageKeys.sentry);
   },
 
   /**
@@ -812,7 +930,7 @@ const wallet = {
    * @inner
    */
   isNotificationOn() {
-    return storage.getItem('wallet:notification') !== false;
+    return storage.getItem(storageKeys.notification) !== false;
   },
 
   /**
@@ -822,7 +940,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOn() {
-    storage.setItem('wallet:notification', true);
+    storage.setItem(storageKeys.notification, true);
   },
 
   /**
@@ -832,7 +950,74 @@ const wallet = {
    * @inner
    */
   turnNotificationOff() {
-    storage.setItem('wallet:notification', false);
+    storage.setItem(storageKeys.notification, false);
+  },
+
+  /**
+   * Checks if the zero-balance tokens are set to be hidden
+   *
+   * @return {boolean} If the tokens are hidden
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  areZeroBalanceTokensHidden() {
+    return storage.getItem(storageKeys.hideZeroBalanceTokens) !== false;
+  },
+
+  /**
+   * Turns on the hiding of zero-balance tokens
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  hideZeroBalanceTokens() {
+    storage.setItem(storageKeys.hideZeroBalanceTokens, true);
+  },
+
+  /**
+   * Turns off the hiding of zero-balance tokens
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  showZeroBalanceTokens() {
+    storage.setItem(storageKeys.hideZeroBalanceTokens, false);
+  },
+
+  /**
+   * Defines if a token should always be shown, despite having zero balance and the "hide zero
+   * balance" setting being active.
+   * @param {string} tokenUid uid of the token to be updated
+   * @param {boolean} newValue If true, the token will always be shown
+   */
+  setTokenAlwaysShow(tokenUid, newValue) {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
+    if (!newValue) {
+      delete alwaysShowMap[tokenUid];
+    } else {
+      alwaysShowMap[tokenUid] = true;
+    }
+    storage.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
+  },
+
+  /**
+   * Returns if a token is set to always be shown despite the "hide zero balance" setting
+   * @param {string} tokenUid
+   * @returns {boolean}
+   */
+  isTokenAlwaysShow(tokenUid) {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
+    return alwaysShowMap[tokenUid] || false;
+  },
+
+  /**
+   * Returns an array containing the uids of the tokens set to always be shown
+   * @returns {string[]}
+   */
+  listTokensAlwaysShow() {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
+    return Object.keys(alwaysShowMap);
   },
 
   /**

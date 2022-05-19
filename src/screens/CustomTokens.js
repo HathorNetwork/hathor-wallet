@@ -16,7 +16,18 @@ import BackButton from '../components/BackButton';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { NFT_ENABLED } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
+import { connect } from 'react-redux';
 
+/**
+ * Maps redux state to instance props
+ * @param state
+ * @returns {{tokensBalance:Object}}
+ */
+const mapStateToProps = (state) => {
+  return {
+    tokensBalance: state.tokensBalance,
+  };
+};
 
 /**
  * Initial screen of custom tokens
@@ -74,7 +85,7 @@ class CustomTokens extends React.Component {
           { NFT_ENABLED && <button className="btn btn-hathor mr-4" onClick={this.createNFTClicked}>{t`Create an NFT`}</button> }
           <button className="btn btn-hathor" onClick={this.registerTokenClicked}>{t`Register a token`}</button>
         </div>
-        <ModalAddToken success={this.newTokenSuccess} />
+        <ModalAddToken success={this.newTokenSuccess} tokensBalance={this.props.tokensBalance} />
         <HathorAlert ref="alertSuccess" text={t`Token registered with success!`} type="success" />
         <ModalAlertNotSupported />
       </div>
@@ -82,4 +93,4 @@ class CustomTokens extends React.Component {
   }
 }
 
-export default CustomTokens;
+export default connect(mapStateToProps)(CustomTokens);

@@ -45,6 +45,7 @@ class Settings extends React.Component {
   state = {
     confirmData: {},
     isNotificationOn: null,
+    zeroBalanceTokensHidden: null,
     now: new Date(),
     showTimestamp: false,
   }
@@ -53,7 +54,10 @@ class Settings extends React.Component {
   dateSetTimeoutInterval = null
 
   componentDidMount() {
-    this.setState({ isNotificationOn: wallet.isNotificationOn() });
+    this.setState({
+      isNotificationOn: wallet.isNotificationOn(),
+      zeroBalanceTokensHidden: wallet.areZeroBalanceTokensHidden()
+    });
 
     this.dateSetTimeoutInterval = setInterval(() => {
       this.setState({ now: new Date() });
@@ -99,7 +103,7 @@ class Settings extends React.Component {
   }
 
   /**
-   * Called when user clicks to change notification settings  
+   * Called when user clicks to change notification settings
    * Sets modal state, depending on the current settings and open it
    *
    * @param {Object} e Event emitted on link click
@@ -127,7 +131,50 @@ class Settings extends React.Component {
   }
 
   /**
-   * Called after user confirms the notification toggle action  
+   * Called when user clicks to change the "Hide zero-balance tokens" flag.
+   * Sets modal state, depending on the current settings and open it.
+   *
+   * @param {Object} e Event emitted on link click
+   */
+  toggleZeroBalanceTokens = (e) => {
+    e.preventDefault();
+    if (wallet.areZeroBalanceTokensHidden()) {
+      this.setState({
+        confirmData: {
+          title: t`Show zero-balance tokens`,
+          body: t`Are you sure you want to show all tokens, including those with zero balance?`,
+          handleYes: this.handleToggleZeroBalanceTokens
+        }
+      });
+    } else {
+      this.setState({
+        confirmData: {
+          title: t`Hide zero-balance tokens`,
+          body: t`Are you sure you want to hide tokens with zero balance?`,
+          handleYes: this.handleToggleZeroBalanceTokens
+        }
+      });
+    }
+    $('#confirmModal').modal('show');
+  }
+
+  /**
+   * Activates or deactivates the option to hide zero-balance tokens from the UI.
+   */
+  handleToggleZeroBalanceTokens = () => {
+    const areZeroBalanceTokensHidden = wallet.areZeroBalanceTokensHidden();
+
+    if (areZeroBalanceTokensHidden) {
+      wallet.showZeroBalanceTokens();
+    } else {
+      wallet.hideZeroBalanceTokens();
+    }
+    this.setState({ zeroBalanceTokensHidden: !areZeroBalanceTokensHidden });
+    $('#confirmModal').modal('hide');
+  }
+
+  /**
+   * Called after user confirms the notification toggle action
    * Toggle user notification settings, update screen state and close the confirm modal
    */
   handleToggleNotificationSettings = () => {
@@ -199,6 +246,17 @@ class Settings extends React.Component {
           <h4>{t`Advanced Settings`}</h4>
           <div className="d-flex flex-column align-items-start mt-4">
             <p><strong>{t`Allow notifications:`}</strong> {this.state.isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={this.toggleNotificationSettings}> {t`Change`} </a></p>
+            <p>
+              <strong>{t`Hide zero-balance tokens:`}</strong> {
+              this.state.zeroBalanceTokensHidden
+                ? <span>{t`Yes`}</span>
+                : <span>{t`No`}</span>
+              }
+              <a className="ml-3" href="true" onClick={this.toggleZeroBalanceTokens}> {t`Change`} </a>
+              <i className="fa fa-question-circle pointer ml-3"
+                 title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallet.`}>
+              </i>
+            </p>
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
             <CopyToClipboard text={uniqueIdentifier} onCopy={this.copied}>
               <span>

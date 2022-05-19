@@ -17,6 +17,7 @@ import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
+import wallet from "../utils/wallet";
 
 
 const mapStateToProps = (state) => {
@@ -53,28 +54,37 @@ class UnknownTokens extends React.Component {
   }
 
   /**
-   * Get all unknown tokens from the wallet  
+   * Get all unknown tokens from the wallet
    * Comparing `allTokens` and `tokens` in the Redux we get the ones that are unknown
    *
+   * @param {boolean} [hideZeroBalance] If true, omits tokens with zero balance
    * @return {Array} Array with unknown tokens {uid, balance, history}
    */
-  getUnknownTokens = () => {
-    let unknownTokens = [];
+  getUnknownTokens = (hideZeroBalance) => {
     this.historyRefs = [];
     this.anchorOpenRefs = [];
     this.anchorHideRefs = [];
-    for (const token of this.props.allTokens) {
-      // If has balance but does not have token saved yet
-      if (this.props.registeredTokens.find((x) => x.uid === token) === undefined) {
-        const filteredHistoryTransactions = hathorLib.wallet.filterHistoryTransactions(this.props.historyTransactions, token, false);
-        const balance = this.props.tokensBalance[token];
-        unknownTokens.push({'uid': token, 'balance': balance, 'history': filteredHistoryTransactions});
 
-        this.historyRefs.push(React.createRef());
-        this.anchorOpenRefs.push(React.createRef());
-        this.anchorHideRefs.push(React.createRef());
-      }
+    const unknownTokens = wallet.fetchUnknownTokens(
+      this.props.allTokens,
+      this.props.registeredTokens,
+      this.props.tokensBalance,
+      hideZeroBalance,
+    );
+
+    for (const tokenObj of unknownTokens) {
+      // Populating token transaction history on the object
+      tokenObj.history = hathorLib.wallet.filterHistoryTransactions(
+        this.props.historyTransactions,
+        tokenObj.uid,
+        false
+      );
+
+      this.historyRefs.push(React.createRef());
+      this.anchorOpenRefs.push(React.createRef());
+      this.anchorHideRefs.push(React.createRef());
     }
+
     return unknownTokens;
   }
 
@@ -125,7 +135,7 @@ class UnknownTokens extends React.Component {
   }
 
   render = () => {
-    const unknownTokens = this.getUnknownTokens();
+    const unknownTokens = this.getUnknownTokens(wallet.areZeroBalanceTokensHidden());
 
     const renderTokens = () => {
       if (unknownTokens.length === 0) {
@@ -168,7 +178,7 @@ class UnknownTokens extends React.Component {
         <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
         <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
         {unknownTokens && renderTokens()}
-        <ModalAddManyTokens success={this.massiveImportSuccess} />
+        <ModalAddManyTokens success={this.massiveImportSuccess} tokensBalance={this.props.tokensBalance} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         <TokenBar {...this.props}  />
       </div>
