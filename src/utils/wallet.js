@@ -71,7 +71,8 @@ if (window.require) {
  * address: string,
  * data: string,
  * hideZeroBalanceTokens: string,
- * sentry: string
+ * sentry: string,
+ * alwaysShowTokens: string,
  * }}
  * @readonly
  */
@@ -82,6 +83,7 @@ const storageKeys = {
   sentry: 'wallet:sentry',
   notification: 'wallet:notification',
   hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
+  alwaysShowTokens: 'wallet:always_show_tokens',
 }
 
 /**
@@ -340,15 +342,14 @@ const wallet = {
    * Filters only the non-registered tokens from the allTokens list.
    * Optionally filters only those with non-zero balance.
    *
-   * @param params
-   * @param {Object[]} [params.allTokens] prop from screen
-   * @param {Object[]} [params.registeredTokens] prop from screen
-   * @param {Object[]} [params.tokensBalance] prop from screen
-   * @param {boolean} [params.hideZeroBalance] If true, omits tokens with zero balance
+   * @param {Object[]} allTokens list of all available tokens
+   * @param {Object[]} registeredTokens list of registered tokens
+   * @param {Object[]} tokensBalance data about token balances
+   * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
    * @returns {{uid:string, balance:{available:number,locked:number}}[]}
    */
-  fetchUnknownTokens(params = {}) {
-    const {allTokens, registeredTokens, tokensBalance, hideZeroBalance} = params;
+  fetchUnknownTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance) {
+    const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const unknownTokens = [];
 
     // Iterating tokens to filter unregistered ones
@@ -358,6 +359,63 @@ const wallet = {
         continue;
       }
       const balance = tokensBalance[tokenUid];
+      const tokenData = {
+        uid: tokenUid,
+        balance: balance,
+      };
+
+      // If we indicated this token should always be exhibited, add it already.
+      if (alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid)) {
+        unknownTokens.push(tokenData);
+        continue;
+      }
+
+      // If the "show only non-zero balance tokens" flag is active, filter here.
+      if (hideZeroBalance) {
+        const totalBalance = balance.available + balance.locked;
+
+        // This token has zero balance: skip it.
+        if (hideZeroBalance && totalBalance === 0) {
+          continue;
+        }
+      }
+      unknownTokens.push(tokenData);
+    }
+
+    return unknownTokens;
+  },
+
+  /**
+   * Filters only the registered tokens from the allTokens list.
+   * Optionally filters only those with non-zero balance.
+   *
+   * @param {Object[]} registeredTokens list of registered tokens
+   * @param {Object[]} tokensBalance data about token balances
+   * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
+   * @returns {object[]}
+   */
+  fetchRegisteredTokens(registeredTokens, tokensBalance, hideZeroBalance) {
+    const alwaysShowTokensArray = this.listTokensAlwaysShow();
+    const filteredTokens = [];
+
+    // Iterating tokens to filter unregistered ones
+    for (const registeredObject of registeredTokens) {
+      const tokenUid = registeredObject.uid;
+
+      // If there is no entry for this token on tokensBalance, generate an empty balance object.
+      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
+      const tokenData = {
+        ...registeredObject,
+        balance: balance,
+      };
+
+      // If we indicated this token should always be exhibited, add it already.
+      const isTokenHTR = tokenUid === hathorConstants.HATHOR_TOKEN_CONFIG.uid;
+      const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
+      if (isTokenHTR || alwaysShowThisToken) {
+        filteredTokens.push(tokenData);
+        continue;
+      }
 
       // If the "show only non-zero balance tokens" flag is active, filter here.
       if (hideZeroBalance) {
@@ -369,13 +427,10 @@ const wallet = {
         }
       }
 
-      unknownTokens.push({
-        uid: tokenUid,
-        balance: balance,
-      });
+      filteredTokens.push(tokenData);
     }
 
-    return unknownTokens;
+    return filteredTokens;
   },
 
   /**
@@ -928,6 +983,41 @@ const wallet = {
    */
   showZeroBalanceTokens() {
     storage.setItem(storageKeys.hideZeroBalanceTokens, false);
+  },
+
+  /**
+   * Defines if a token should always be shown, despite having zero balance and the "hide zero
+   * balance" setting being active.
+   * @param {string} tokenUid uid of the token to be updated
+   * @param {boolean} newValue If true, the token will always be shown
+   */
+  setTokenAlwaysShow(tokenUid, newValue) {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
+    if (!newValue) {
+      delete alwaysShowMap[tokenUid];
+    } else {
+      alwaysShowMap[tokenUid] = true;
+    }
+    storage.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
+  },
+
+  /**
+   * Returns if a token is set to always be shown despite the "hide zero balance" setting
+   * @param {string} tokenUid
+   * @returns {boolean}
+   */
+  isTokenAlwaysShow(tokenUid) {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
+    return alwaysShowMap[tokenUid] || false;
+  },
+
+  /**
+   * Returns an array containing the uids of the tokens set to always be shown
+   * @returns {string[]}
+   */
+  listTokensAlwaysShow() {
+    const alwaysShowMap = storage.getItem(storageKeys.alwaysShowTokens) || {};
+    return Object.keys(alwaysShowMap);
   },
 
   /**

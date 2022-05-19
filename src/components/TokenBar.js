@@ -57,12 +57,12 @@ class TokenBar extends React.Component {
    * @return {number} Quantity of unknown tokens
    */
   getUnknownTokens = (hideZeroBalance) => {
-    const unknownTokens = wallet.fetchUnknownTokens({
-      allTokens: this.props.allTokens,
-      registeredTokens: this.props.registeredTokens,
-      tokensBalance: this.props.tokensBalance,
+    const unknownTokens = wallet.fetchUnknownTokens(
+      this.props.allTokens,
+      this.props.registeredTokens,
+      this.props.tokensBalance,
       hideZeroBalance,
-    })
+    );
 
     return unknownTokens.length;
   }
@@ -141,15 +141,14 @@ class TokenBar extends React.Component {
     const unknownTokens = this.getUnknownTokens(shouldHideZeroBalanceTokens);
 
     const renderTokens = () => {
-      return this.props.registeredTokens.map((token) => {
-        const tokenUid = token.uid;
-        const isTokenHTR = tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
-        const totalBalance = this.getTokenBalance(tokenUid);
+      const registeredTokens = wallet.fetchRegisteredTokens(
+        this.props.registeredTokens,
+        this.props.tokensBalance,
+        shouldHideZeroBalanceTokens,
+      );
 
-        // Skip every token without balance, except HTR, if the hiding flag is active
-        if (shouldHideZeroBalanceTokens && !isTokenHTR && totalBalance === 0) {
-          return;
-        }
+      return registeredTokens.map((token) => {
+        const tokenUid = token.uid;
 
         return (
           <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
