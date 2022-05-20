@@ -169,7 +169,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 1. **Register tokens with same name**
     1. Unregister TST token but copy its configuration string and save it.
     1. Click on 'Custom tokens' and then 'Create a new token'.
-    1. Type 'Test token' in the token name, 'TST' in the symbol and 200 in the amount.
+    1. Type 'Test token' in the token name, 'test' in the symbol and 200 in the amount.
     1. Now click on 'Custom tokens', then 'Register a token'.
     1. Type 'abc'. It should show an error of invalid configuration string.
     1. Type the configuration string saved in the first step. It must appear an error that you already have a token with this name.
