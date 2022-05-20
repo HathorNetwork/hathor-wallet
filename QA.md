@@ -15,10 +15,11 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 1. **Initialization (you must be on Welcome screen)**
     1. Close and open your wallet. You must still be on the Welcome screen.
     1. Try to click 'Get started' without selecting checkbox (must show error).
+    1. Select the checkbox and click 'Get started'
     1. Choose Software Wallet.
     1. Start new wallet.
     1. Try to click 'Create my words' without selecting checkbox (must show error).
-    1. Close and open your wallet. You must see the screen to select 'New wallet' or 'Import wallet'. Select 'new wallet' and then 'create my words'.
+    1. Close and open your wallet. You must see the screen to select 'Hardware wallet' or 'Software wallet'. Select 'Software wallet' then 'new wallet' and then 'create my words'.
     1. Select to do backup now. (Really save those words, we will load this wallet later with them).
     1. Correctly select the first word but select a wrong one in the second. Check that it returns to the seed screen to restart the validation.
     1. Validate all the words correctly.
@@ -73,6 +74,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Copy the address.
     1. Click on 'Send tokens'.
     1. Send an amount of HTR and TST to the copied address.
+    1. Go back to the main screen and see the transactions list
     1. The first transaction on the list must have amount 0.00 (for both HTR and TST).
     1. Click on this transaction and check that it has inputs and outputs for both tokens. And TST must be on the token list.
 
@@ -136,7 +138,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Select the 'Always show' option and register the token.
     1. Navigate to the main screen and check that the `HIDET` token is being shown.
     1. Go to the 'About' tab. A line must be informing that the token is always being shown.
-    1. This line also contains a button to change this setting for this token. Click it.
+    1. This line also contains a link to change this setting for this token. Click it.
     1. Confirm that you do not want to always show this token.
     1. Navigate to the HTR token using the bar on the left.
     1. Check that the `HIDET` token is no longer being shown on this bar.
@@ -167,14 +169,14 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 1. **Register tokens with same name**
     1. Unregister TST token but copy its configuration string and save it.
     1. Click on 'Custom tokens' and then 'Create a new token'.
-    1. Type 'Test token' in the token name, 'Test' in the symbol and 200 in the amount.
+    1. Type 'Test token' in the token name, 'TST' in the symbol and 200 in the amount.
     1. Now click on 'Custom tokens', then 'Register a token'.
     1. Type 'abc'. It should show an error of invalid configuration string.
     1. Type the configuration string saved in the first step. It must appear an error that you already have a token with this name.
 
 1. **Try to spend same output**
     1. Click on 'Wallet' in the navigation bar, select the HTR token and copy the address (and save it).
-    1. Click on the first transaction (the one with amount 0.00).
+    1. Click on the first transaction with amount 0.00.
     1. Copy the first input from HTR and from your address (copy the transaction ID and the index).
     1. Click on 'Send tokens'.
     1. Paste the address and 1.00 as the amount. Deselect 'Choose inputs automatically' and paste the transaction ID and index copied before.
