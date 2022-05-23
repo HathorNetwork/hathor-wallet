@@ -275,7 +275,15 @@ class SendTokens extends React.Component {
       inputs: this.data.inputs,
       network: this.props.wallet.getNetworkObject(),
     });
-    this.data = this.sendTransaction.prepareTxData();
+
+    try {
+      // Errors may happen in this step ( ex.: insufficient amount of tokens )
+      this.data = this.sendTransaction.prepareTxData();
+    }
+    catch (e) {
+      this.setState({ errorMessage: e.message, ledgerStep: 0 })
+      return;
+    }
 
     // Complete data with default values
     hathorLib.transaction.completeTx(this.data);

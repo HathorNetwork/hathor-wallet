@@ -210,7 +210,7 @@ class ModalAddManyTokens extends React.Component {
                         {this.state.errorMessage}
                       </p>
                   </div>
-                  { this.state.warningMessage.length && renderWarningMessage() }
+                  { this.state.warningMessage.length > 0 && renderWarningMessage() }
                 </div>
                 { this.state.shouldExhibitAlwaysShowCheckbox && renderAlwaysShowCheckbox() }
               </form>
