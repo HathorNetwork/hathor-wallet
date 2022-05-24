@@ -21,32 +21,38 @@ const version = {
   /**
    * Checks if the API version of the server the wallet is connected is valid for this wallet version
    *
+   * @param {HathorWallet | HathorWalletServiceWallet} wallet - Current wallet instance
    * @return {Promise} Promise that resolves after getting the version and updating Redux
    *
    * @memberof Version
    * @inner
    */
-  checkApiVersion() {
-    const newPromise = new Promise((resolve, reject) => {
-      const libPromise = hathorLib.version.checkApiVersion();
-      libPromise.then((data) => {
-        // Update version allowed in redux
-        store.dispatch(isVersionAllowedUpdate({allowed: hathorLib.helpers.isVersionAllowed(data.version, hathorLib.constants.MIN_API_VERSION)}));
-        // Set network in lib to use the correct address byte
-        let network;
-        if (data.network === 'mainnet') {
-          network = 'mainnet';
-        } else {
-          // Can we assume it will be testnet? I think it's safe
-          network = 'testnet';
-        }
-        helpers.updateNetwork(network);
-        resolve({...data, network});
-      }, (error) => {
-        reject();
-      });
-    });
-    return newPromise;
+  async checkApiVersion(wallet) {
+    const data = await wallet.getVersionData();
+
+    /**
+     * Checks if the version downloaded from the backend (fullnode or wallet-service, depending on the facade)
+     * is allowed by checking it against the MIN_API_VERSION constant from the library.
+     */
+    store.dispatch(isVersionAllowedUpdate({
+      allowed: hathorLib.helpers.isVersionAllowed(
+        data.version,
+        hathorLib.constants.MIN_API_VERSION
+      ),
+    }));
+
+    // Set network in lib to use the correct address byte
+    let network = data.network;
+
+    if (data.network.startsWith('testnet')) {
+      network = 'testnet';
+    }
+
+    helpers.updateNetwork(network);
+    return {
+      ...data,
+      network,
+    };
   },
 
   /**

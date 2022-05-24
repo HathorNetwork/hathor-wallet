@@ -14,6 +14,7 @@ import hathorLib from '@hathor/wallet-lib';
 const mapStateToProps = (state) => {
   return {
     wallet: state.wallet,
+    useWalletService: state.useWalletService,
   };
 };
 
@@ -54,6 +55,14 @@ class TokenDelegate extends React.Component {
         pinCode: pin,
       }
     );
+
+    if (this.props.useWalletService) {
+      return new hathorLib.SendTransactionWalletService(this.props.wallet, {
+        transaction,
+        pin,
+      });
+    }
+
     return new hathorLib.SendTransaction({ transaction, pin, network: this.props.wallet.getNetworkObject() });
   }
 

@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
+import wallet from "../utils/wallet";
 
 
 /**
@@ -19,14 +20,36 @@ import hathorLib from '@hathor/wallet-lib';
  */
 class ModalAddToken extends React.Component {
   /**
-   * errorMessage {string} Message that will be shown to the user in case of error
+   * @property {string} errorMessage Message that will be shown to the user in case of error
+   * @property {string} warningMessage Message that will be shown to the user in warning scenarios
+   * @property {boolean} shouldExhibitAlwaysShowCheckbox Defines "always show" checkbox rendering
+   * @property {boolean} alwaysShow Defines if tokens will be added with "Always Show" setting
    */
-  state = { errorMessage: '' };
+  state = {
+    errorMessage: '',
+    warningMessage: '',
+    shouldExhibitAlwaysShowCheckbox: false,
+    alwaysShow: false,
+  };
+
+  /**
+   * Handles the click on the "Always show this token" checkbox
+   * @param {Event} e
+   */
+  handleToggleAlwaysShow = (e) => {
+    const newValue = !this.state.alwaysShow;
+    this.setState({ alwaysShow: newValue });
+  }
 
   componentDidMount = () => {
     $('#addTokenModal').on('hide.bs.modal', (e) => {
       this.refs.config.value = '';
-      this.setState({ errorMessage: '' });
+      this.setState({
+        errorMessage: '',
+        warningMessage: '',
+        shouldExhibitAlwaysShowCheckbox: false,
+        alwaysShow: false,
+      });
     })
 
     $('#addTokenModal').on('shown.bs.modal', (e) => {
@@ -40,28 +63,81 @@ class ModalAddToken extends React.Component {
   }
 
   /**
-   * Method called when user clicks the button to register the token  
+   * Method called when user clicks the button to register the token
    * Validates that the data written is valid
    *
    * @param {Object} e Event emitted when user clicks the button
    */
-  handleAdd = (e) => {
+  handleAdd = async (e) => {
     e.preventDefault();
+
+    // Validating input field contents
     if (this.refs.config.value === '') {
       this.setState({ errorMessage: t`Must provide configuration string or uid, name, and symbol` });
       return;
     }
-    const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
-    promise.then((tokenData) => {
-      tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
+
+    try {
+      const tokenData = await hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
+      const tokensBalance = this.props.tokensBalance;
+
+      const tokenUid = tokenData.uid;
+      const tokenBalance = tokensBalance[tokenUid];
+      const tokenHasZeroBalance = !tokenBalance
+        || (tokenBalance.available + tokenBalance.locked) === 0;
+
+      /*
+       * We only make this validation if the "Hide Zero-Balance Tokens" setting is active,
+       * and only do it once. If the warning message was shown, we will accept the "alwaysShow"
+       * checkbox value as the user decision already.
+       */
+      if (
+        wallet.areZeroBalanceTokensHidden()
+        && tokenHasZeroBalance
+        && !this.state.shouldExhibitAlwaysShowCheckbox
+      ) {
+        this.setState({
+          shouldExhibitAlwaysShowCheckbox: true,
+          warningMessage: t`This token has no balance on your wallet and you have the "hide zero-balance tokens" settings on.\nDo you wish to always show this token? (You can always undo this on the token info screen.)`
+        })
+        return;
+      }
+
+      // Adding the token to the wallet and returning with the success callback
+      tokens.addToken(tokenUid, tokenData.name, tokenData.symbol);
+      wallet.setTokenAlwaysShow(tokenUid, this.state.alwaysShow);
       this.props.success();
-    }, (e) => {
-      this.setState({ errorMessage: e.message });
-      return;
-    });
+    } catch (e) {
+      this.setState({errorMessage: e.message});
+    }
   }
 
   render() {
+    const renderAlwaysShowCheckbox = () => {
+      return (
+        <div className="form-check">
+          <input className="form-check-input" type="checkbox" id="alwaysShowTokenCheckbox"
+                 checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow}/>
+          <label className="form-check-label" htmlFor="alwaysShowToken">
+            {t`Always show this token`}
+          </label>
+          <i className="fa fa-question-circle pointer ml-3"
+             title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings for this token.`}>
+          </i>
+        </div>
+      );
+    }
+
+    const renderWarningMessage = () => {
+      return (
+        <div className="col-12 col-sm-12">
+          <div ref="warningText" className="alert alert-warning" role="alert">
+            {this.state.warningMessage}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="modal fade" id="addTokenModal" tabIndex="-1" role="dialog" aria-labelledby="addTokenModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
@@ -76,7 +152,9 @@ class ModalAddToken extends React.Component {
               <p>{t`To register a token that already exists, just write down its configuration string`}</p>
               <form ref="formAddToken">
                 <div className="form-group">
-                  <textarea type="text" className="form-control" ref="config" placeholder={t`Configuration string`} />
+                  <textarea type="text" className="form-control" ref="config"
+                            placeholder={t`Configuration string`}
+                            readOnly={this.state.shouldExhibitAlwaysShowCheckbox} />
                 </div>
                 <div className="row">
                   <div className="col-12 col-sm-10">
@@ -84,7 +162,9 @@ class ModalAddToken extends React.Component {
                         {this.state.errorMessage}
                       </p>
                   </div>
+                  { this.state.warningMessage.length > 0 && renderWarningMessage() }
                 </div>
+                { this.state.shouldExhibitAlwaysShowCheckbox && renderAlwaysShowCheckbox() }
               </form>
             </div>
             <div className="modal-footer">

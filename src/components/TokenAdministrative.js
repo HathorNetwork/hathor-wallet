@@ -35,6 +35,7 @@ const mapStateToProps = (state, props) => {
     tokensBalance: state.tokensBalance,
     wallet: state.wallet,
     tokenMetadata: state.tokenMetadata,
+    useWalletService: state.useWalletService,
   };
 };
 
@@ -79,34 +80,43 @@ class TokenAdministrative extends React.Component {
   }
 
   /**
-   * Upadte token info getting data from the full node (can mint, can melt, total supply)
+   * Update token info getting data from the facade (can mint, can melt, total supply, total transactions)
    */
-  updateTokenInfo = () => {
+  updateTokenInfo = async () => {
     this.setState({ errorMessage: '' });
-    hathorLib.walletApi.getGeneralTokenInfo(this.props.token.uid, (response) => {
-      if (response.success) {
-        this.setState({
-          totalSupply: response.total,
-        });
-      } else {
-        this.setState({ errorMessage: response.message });
-      }
-    });
+
+    try {
+      const tokenDetails = await this.props.wallet.getTokenDetails(this.props.token.uid);
+      const { totalSupply, totalTransactions, authorities } = tokenDetails;
+
+      this.setState({
+        totalSupply,
+        canMint: authorities.mint,
+        canMelt: authorities.melt,
+        transactionsCount: totalTransactions,
+      });
+    } catch (e) {
+      this.setState({ errorMessage: e.message });
+    }
   }
 
   /**
    * Update token state after didmount or props update
    */
-  updateWalletInfo = () => {
-    const mintUtxos = this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
-    const mintCount = mintUtxos ? mintUtxos.length : 0;
+  updateWalletInfo = async () => {
+    if (!this.props.token && !this.props.token.uid) {
+      return;
+    }
 
-    const meltUtxos = this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
-    const meltCount = meltUtxos ? meltUtxos.length : 0;
+    const mintUtxos = await this.props.wallet.getMintAuthority(this.props.token.uid, { many: true });
+    const meltUtxos = await this.props.wallet.getMeltAuthority(this.props.token.uid, { many: true });
 
-    const tokenBalance = this.props.token.uid in this.props.tokensBalance ? this.props.tokensBalance[this.props.token.uid].available : 0;
+    const mintCount = mintUtxos.length;
+    const meltCount = meltUtxos.length;
 
-    this.setState({ mintCount, meltCount, balance: tokenBalance });
+    const balance = this.props.token.uid in this.props.tokensBalance ? this.props.tokensBalance[this.props.token.uid].available : 0;
+
+    this.setState({ mintCount, meltCount, balance: balance });
   }
 
   /**

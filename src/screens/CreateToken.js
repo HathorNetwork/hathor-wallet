@@ -29,6 +29,7 @@ const mapStateToProps = (state) => {
   return {
     htrBalance,
     wallet: state.wallet,
+    useWalletService: state.useWalletService,
   };
 };
 
@@ -106,7 +107,7 @@ class CreateToken extends React.Component {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
-      address = hathorLib.wallet.getAddressToUse();
+      address = this.props.wallet.getCurrentAddress({ markAsUsed: true }).address;
     } else {
       address = this.refs.address.value;
     }
@@ -119,7 +120,20 @@ class CreateToken extends React.Component {
         wallet.decimalToInteger(this.state.amount),
         { address, pinCode: pin }
       );
-      return new hathorLib.SendTransaction({ transaction, pin, network: this.props.wallet.getNetworkObject() });
+
+      if (this.props.useWalletService) {
+        return new hathorLib.SendTransactionWalletService(this.props.wallet, {
+          transaction,
+          outputs: transaction.outputs,
+          pin,
+        });
+      }
+
+      return new hathorLib.SendTransaction({
+        transaction,
+        pin,
+        network: this.props.wallet.getNetworkObject(),
+      });
     } catch (e) {
       this.setState({ errorMessage: e.message });
     }

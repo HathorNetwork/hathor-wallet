@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { SendTransaction, ErrorMessages as errorMessagesEnum } from '@hathor/wallet-lib';
+import {
+  SendTransactionWalletService,
+  SendTransaction,
+  ErrorMessages as errorMessagesEnum,
+} from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
 
 
@@ -142,7 +146,10 @@ class SendTxHandler extends React.Component {
  * onSendError: optional method to be executed when an error happens while sending the tx
  */
 SendTxHandler.propTypes = {
-  sendTransaction: PropTypes.instanceOf(SendTransaction).isRequired,
+  sendTransaction: PropTypes.oneOfType([
+    SendTransaction,
+    SendTransactionWalletService,
+  ]).isRequired,
   onSendSuccess: PropTypes.func,
   onSendError: PropTypes.func,
 };

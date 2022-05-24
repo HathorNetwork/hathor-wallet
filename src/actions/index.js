@@ -119,13 +119,6 @@ export const loadWalletSuccess = (tokensHistory, tokensBalance, tokens) => ({ ty
  * updatedBalanceMap {Object} balance updated of each token in this tx
  * balances {Object} balance of each token in this tx for this wallet including authorities
  */
-export const newTx = (tx, updatedBalanceMap, balances) => ({ type: "new_tx", payload: { tx, updatedBalanceMap, balances } });
-
-/**
- * tx {Object} the new transaction
- * updatedBalanceMap {Object} balance updated of each token in this tx
- * balances {Object} balance of each token in this tx for this wallet including authorities
- */
 export const updateTx = (tx, updatedBalanceMap, balances) => ({ type: "update_tx", payload: { tx, updatedBalanceMap, balances } });
 
 /**
@@ -148,3 +141,23 @@ export const metadataLoaded = data => ({ type: "metadata_loaded", payload: data 
  * Remove token metadata after unregister token
  */
 export const removeTokenMetadata = data => ({ type: "remove_token_metadata", payload: data });
+
+/**
+ * Partially update history and balance
+ */
+export const partiallyUpdateHistoryAndBalance = (data) => ({ type: "partially_update_history_and_balance", payload: data });
+
+/**
+ * Flag indicating if we are using the wallet service facade
+ */
+export const setUseWalletService = (useWalletService) => ({ type: "set_use_wallet_service", payload: useWalletService });
+
+/**
+ * Action to display the locked wallet screen and resolve the passed promise after the user typed his PIN
+ */
+export const lockWalletForResult = (promise) => ({ type: "lock_wallet_for_result", payload: promise });
+
+/**
+ * This will resolve the promise and reset the lockWalletPromise state
+ */
+export const resolveLockWalletPromise = (pin) => ({ type: "resolve_lock_wallet_promise", payload: pin });

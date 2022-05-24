@@ -39,6 +39,25 @@ const helpers = {
   },
 
   /**
+   * Reloads the page loaded on electron
+   *
+   * @memberof Helpers
+   * @inner
+   */
+  reloadElectron() {
+    // If we don't have window.require, we can assume the app is running on a browser, so we can just
+    // use the regular window.location to reload
+    if (!window.require) {
+      window.location.reload();
+    }
+
+    const { getCurrentWindow } = window.require('electron').remote;
+    const currentWindow = getCurrentWindow();
+
+    currentWindow.reload();
+  },
+
+  /**
    * Update network variables in redux, storage and lib
    *
    * @params {String} network Network name
@@ -160,6 +179,29 @@ const helpers = {
       }
       return 0;
   },
+
+  /**
+   * Generates a uniqueId and stores it on localStorage to be persisted
+   * between reloads
+   *
+   * @returns {string} The generated unique identifier
+   *
+   * @memberof Helpers
+   * @inner
+   */
+  getUniqueId() {
+    const currentUniqueId = localStorage.getItem('app:uniqueId');
+
+    if (currentUniqueId) {
+      return currentUniqueId;
+    }
+
+    const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+
+    localStorage.setItem('app:uniqueId', uniqueId);
+
+    return uniqueId;
+  }
 }
 
 export default helpers;
