@@ -48,7 +48,7 @@ msgstr ""
 #: src/components/ModalSendTx.js:116
 #: src/screens/ChoosePassphrase.js:64
 #: src/screens/LockedWallet.js:75
-#: src/screens/Server.js:126
+#: src/screens/Server.js:130
 msgid "Invalid PIN"
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr ""
 
 #: src/screens/ChoosePassphrase.js:140
 #: src/screens/LockedWallet.js:134
-#: src/screens/Server.js:378
+#: src/screens/Server.js:382
 msgid "PIN"
 msgstr ""
 
@@ -454,7 +454,7 @@ msgid "Invalid custom tokens"
 msgstr ""
 
 #: src/screens/SendTokens.js:189
-#: src/screens/SendTokens.js:516
+#: src/screens/SendTokens.js:524
 msgid "Sending transaction"
 msgstr ""
 
@@ -464,7 +464,7 @@ msgstr ""
 msgid "Unverified custom tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:382
+#: src/screens/SendTokens.js:390
 #.  limit is 10 custom tokens per tx
 #, javascript-format
 msgid ""
@@ -472,39 +472,39 @@ msgid ""
 "per transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:384
+#: src/screens/SendTokens.js:392
 msgid "Token limit reached"
 msgstr ""
 
-#: src/screens/SendTokens.js:393
+#: src/screens/SendTokens.js:401
 msgid "All your tokens were already added"
 msgstr ""
 
 #: src/components/tokens/TokenAction.js:137
-#: src/screens/SendTokens.js:456
+#: src/screens/SendTokens.js:464
 msgid "Loading metadata..."
 msgstr ""
 
-#: src/screens/SendTokens.js:464
+#: src/screens/SendTokens.js:472
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:465
-#: src/screens/SendTokens.js:514
+#: src/screens/SendTokens.js:473
+#: src/screens/SendTokens.js:522
 msgid "Send Tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:477
+#: src/screens/SendTokens.js:485
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:478
+#: src/screens/SendTokens.js:486
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:497
+#: src/screens/SendTokens.js:505
 msgid ""
 "Unfortunately this feature is not supported with the Hathor app version on "
 "your Ledger device. If you need this feature, you can use it by installing "
@@ -515,7 +515,7 @@ msgstr ""
 #: src/components/ModalAlertNotSupported.js:34
 #: src/components/ModalLedgerResetTokenSignatures.js:117
 #: src/components/ModalLedgerSignToken.js:218
-#: src/screens/SendTokens.js:506
+#: src/screens/SendTokens.js:514
 msgid "Close"
 msgstr ""
 
@@ -579,62 +579,62 @@ msgstr ""
 msgid "New real-time server is not valid"
 msgstr ""
 
-#: src/screens/Server.js:199
+#: src/screens/Server.js:203
 msgid "Invalid value."
 msgstr ""
 
-#: src/screens/Server.js:312
+#: src/screens/Server.js:316
 msgid ""
 "The selected server connects you to a testnet. Beware if someone asked you "
 "to do it, the **tokens from testnet have no value**. Only continue if you "
 "know what you are doing."
 msgstr ""
 
-#: src/screens/Server.js:313
+#: src/screens/Server.js:317
 msgid ""
 "To continue with the server change you must type 'testnet' in the box below "
 "and click on 'Connect to testnet' button."
 msgstr ""
 
-#: src/screens/Server.js:324
+#: src/screens/Server.js:328
 msgid "Connect to testnet"
 msgstr ""
 
-#: src/screens/Server.js:330
+#: src/screens/Server.js:334
 msgid "Select one of the default servers to connect or choose a new one"
 msgstr ""
 
-#: src/screens/Server.js:335
-#: src/screens/Server.js:365
+#: src/screens/Server.js:339
+#: src/screens/Server.js:369
 msgid "Base server"
 msgstr ""
 
-#: src/screens/Server.js:348
-#: src/screens/Server.js:372
+#: src/screens/Server.js:352
+#: src/screens/Server.js:376
 msgid "Real-time server"
 msgstr ""
 
-#: src/screens/Server.js:360
+#: src/screens/Server.js:364
 msgid "Select a new server"
 msgstr ""
 
-#: src/screens/Server.js:368
+#: src/screens/Server.js:372
 msgid "New server"
 msgstr ""
 
-#: src/screens/Server.js:373
+#: src/screens/Server.js:377
 msgid "New real-time server"
 msgstr ""
 
-#: src/screens/Server.js:381
+#: src/screens/Server.js:385
 msgid "Connect to server"
 msgstr ""
 
-#: src/screens/Server.js:386
+#: src/screens/Server.js:390
 msgid "Confirm testnet server"
 msgstr ""
 
-#: src/screens/Server.js:388
+#: src/screens/Server.js:392
 msgid "Cancel change"
 msgstr ""
 
@@ -1093,7 +1093,7 @@ msgstr ""
 
 #: src/components/ModalAddManyTokens.js:172
 #: src/components/TokenGeneralInfo.js:210
-msgid "If selected, it will overwrite the \"Hide zero-balance tokens\" settings."
+msgid "If selected, it will override the \"Hide zero-balance tokens\" settings."
 msgstr ""
 
 #: src/components/ModalAddManyTokens.js:194
@@ -1143,8 +1143,8 @@ msgstr ""
 
 #: src/components/ModalAddToken.js:125
 msgid ""
-"If selected, it will overwrite the \"Hide zero-balance tokens\" settings "
-"for this token."
+"If selected, it will override the \"Hide zero-balance tokens\" settings for "
+"this token."
 msgstr ""
 
 #: src/components/ModalAddToken.js:146

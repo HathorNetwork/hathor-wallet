@@ -962,7 +962,7 @@ const wallet = {
    * @inner
    */
   areZeroBalanceTokensHidden() {
-    return storage.getItem(storageKeys.hideZeroBalanceTokens) !== false;
+    return storage.getItem(storageKeys.hideZeroBalanceTokens) === true;
   },
 
   /**
