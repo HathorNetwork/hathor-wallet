@@ -122,7 +122,7 @@ class ModalAddToken extends React.Component {
             {t`Always show this token`}
           </label>
           <i className="fa fa-question-circle pointer ml-3"
-             title={t`If selected, it will overwrite the "Hide zero-balance tokens" settings for this token.`}>
+             title={t`If selected, it will override the "Hide zero-balance tokens" settings for this token.`}>
           </i>
         </div>
       );

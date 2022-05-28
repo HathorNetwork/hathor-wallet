@@ -117,7 +117,7 @@ const InputNumber = React.forwardRef(
     };
 
     /**
-     * Listen paste events as the default behavior of inputs is overrided.
+     * Listen paste events as the default behavior of inputs is overridden.
      *
      * @param  {ClipboardEvent} evt Event carrying a paste text
      *
