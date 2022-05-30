@@ -450,6 +450,10 @@ svg.svg-wrapper {
   color: white;
 }
 
+.btn-hathor-loading-wrapper > .loading {
+  margin-right: 6px;
+}
+
 .settings hr {
   margin: 3rem 0;
 }
@@ -818,6 +822,11 @@ span.software {
 
 .modal-body-pin {
   min-height: 120px;
+}
+
+.input-label {
+  margin-top: 16px;
+  margin-bottom: 4px;
 }
 
 .token-nft-preview {

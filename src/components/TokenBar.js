@@ -11,6 +11,7 @@ import { connect } from "react-redux";
 import { selectToken, setWalletPrefix } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
+import wallet from "../utils/wallet";
 
 
 const mapStateToProps = (state) => {
@@ -56,16 +57,15 @@ class TokenBar extends React.Component {
    *
    * @return {number} Quantity of unknown tokens
    */
-  getUnknownTokens = () => {
-    let diff = 0;
-    for (const uid of this.props.allTokens) {
-      const index = this.props.registeredTokens.findIndex((token) => token.uid === uid);
-      if (index === -1) {
-        // Token still does not exist in registered tokens
-        diff += 1;
-      }
-    }
-    return diff;
+  getUnknownTokens = (hideZeroBalance) => {
+    const unknownTokens = wallet.fetchUnknownTokens(
+      this.props.allTokens,
+      this.props.registeredTokens,
+      this.props.tokensBalance,
+      hideZeroBalance,
+    );
+
+    return unknownTokens.length;
   }
 
   /**
@@ -77,7 +77,7 @@ class TokenBar extends React.Component {
 
   /**
    * Called when user selects another token
-   * 
+   *
    * @param {string} uid UID of token user selected
    */
   tokenSelected = (uid) => {
@@ -102,11 +102,10 @@ class TokenBar extends React.Component {
   }
 
   /**
-   * Get the balance of one token
+   * Gets the balance of one token
    *
    * @param {string} uid UID to get balance from
-   *
-   * @return {string} Available balance of token formatted
+   * @return {number} Total token balance
    */
   getTokenBalance = (uid) => {
     const balance = this.props.tokensBalance[uid];
@@ -115,6 +114,20 @@ class TokenBar extends React.Component {
       // If we don't have any transaction for the token, balance will be undefined
       total = balance.available + balance.locked;
     }
+
+    return total;
+  }
+
+  /**
+   * Gets the balance of one token formatted for exhibition
+   *
+   * @param {string} uid UID to get balance from
+   * @return {string} String formatted balance, ready for exhibition
+   */
+  getTokenBalanceFormatted = (uid) => {
+    const total = this.getTokenBalance(uid);
+
+    // Formatting to string for exhibition
     const isNFT = helpers.isTokenNFT(uid, this.props.tokenMetadata);
     return helpers.renderValue(total, isNFT);
   }
@@ -127,13 +140,22 @@ class TokenBar extends React.Component {
   }
 
   render() {
-    const unknownTokens = this.getUnknownTokens();
+    const shouldHideZeroBalanceTokens = wallet.areZeroBalanceTokensHidden();
+    const unknownTokens = this.getUnknownTokens(shouldHideZeroBalanceTokens);
 
     const renderTokens = () => {
-      return this.props.registeredTokens.map((token) => {
+      const registeredTokens = wallet.fetchRegisteredTokens(
+        this.props.registeredTokens,
+        this.props.tokensBalance,
+        shouldHideZeroBalanceTokens,
+      );
+
+      return registeredTokens.map((token) => {
+        const tokenUid = token.uid;
+
         return (
-          <div key={token.uid} className={`token-wrapper ${token.uid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(token.uid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${this.getTokenBalance(token.uid)}`}</span>
+          <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
+            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${(this.getTokenBalanceFormatted(tokenUid))}`}</span>
           </div>
         )
       });

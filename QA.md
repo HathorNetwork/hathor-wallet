@@ -15,10 +15,11 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 1. **Initialization (you must be on Welcome screen)**
     1. Close and open your wallet. You must still be on the Welcome screen.
     1. Try to click 'Get started' without selecting checkbox (must show error).
+    1. Select the checkbox and click 'Get started'
     1. Choose Software Wallet.
     1. Start new wallet.
     1. Try to click 'Create my words' without selecting checkbox (must show error).
-    1. Close and open your wallet. You must see the screen to select 'New wallet' or 'Import wallet'. Select 'new wallet' and then 'create my words'.
+    1. Close and open your wallet. You must see the screen to select 'Hardware wallet' or 'Software wallet'. Select 'Software wallet' then 'new wallet' and then 'create my words'.
     1. Select to do backup now. (Really save those words, we will load this wallet later with them).
     1. Correctly select the first word but select a wrong one in the second. Check that it returns to the seed screen to restart the validation.
     1. Validate all the words correctly.
@@ -73,6 +74,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Copy the address.
     1. Click on 'Send tokens'.
     1. Send an amount of HTR and TST to the copied address.
+    1. Go back to the main screen and see the transactions list
     1. The first transaction on the list must have amount 0.00 (for both HTR and TST).
     1. Click on this transaction and check that it has inputs and outputs for both tokens. And TST must be on the token list.
 
@@ -111,10 +113,37 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Melt 20.00 tokens. The total supply and your balance must be 130.00 now.
     1. Click on 'Balance & History' and copy your address. Then go back to 'Administrative Tools' and click to delegate mint.
     1. Type your address and delegate. Now you must have 2 mint outputs.
-    1. Click to delegate melt and deselect the option to 'Create another melt output for you?'. Delegate the authority to the address WZ7pDnkPnxbs14GHdUFivFzPbzitwNtvZo and now you must have no melt outputs.
+    1. Click to delegate melt and deselect the option to 'Create another melt output for you?'. Delegate the authority to the address `WZ7pDnkPnxbs14GHdUFivFzPbzitwNtvZo` and now you must have no melt outputs.
     1. Go back to the 'Administrative Tools', click to destroy mint and select 3. You must see an error message that you don't have 3 mint authority outputs.
     1. Select 2 and complete the destroy. You must see a message saying 'You have no more authority outputs for this token'.
     1. Go to 'About TST' tab and must see 'Can mint new tokens: No'.
+
+1. **Hide Zero-balance tokens**
+    1. Go to 'Custom Tokens', then 'Register token'
+    1. Enter the following string: (assuming you are on testnet. If not, create a custom token in another wallet for this test.)<br/>
+        `[Hiding Token Test:HIDET:009f4365268aa3083c3bbdabae377fbbf720604e132b58602f6572cf45af8bd5:43f57655]`
+    1. Go back to the Main screen and check the the token `HIDET` is now available on the token bar to the left.
+    1. Navigate to 'Settings', on the option 'Hide zero-balance tokens', and select 'Change'.
+    1. Confirm that you want to hide zero-balance tokens.
+    1. Navigate back to the tokens screen and check that the token `HIDET` is no longer on the token bar to the left.
+    1. Navigate to 'Settings' and de-select the option to 'Hide zero-balance tokens'.
+    1. Navigate back to the tokens screen and check that the token `HIDET` is being shown again.
+
+1. **Always show tokens**
+    1. Unregister the token `HIDET`
+    1. Activate the 'Hide zero-balance tokens' setting on the Settings page
+    1. Go to 'Custom Tokens', then 'Register token' and enter once again the `HIDET` configuration string from above
+    1. A message must be shown on screen alerting that you do not have balance on this token.
+    1. This message must also ask if you want to always show this token despite the 'Hide zero-balance tokens' being active
+    1. Select the 'Always show' option and register the token.
+    1. Navigate to the main screen and check that the `HIDET` token is being shown.
+    1. Go to the 'About' tab. A line must be informing that the token is always being shown.
+    1. This line also contains a link to change this setting for this token. Click it.
+    1. Confirm that you do not want to always show this token.
+    1. Navigate to the HTR token using the bar on the left.
+    1. Check that the `HIDET` token is no longer being shown on this bar.
+    1. Go to the 'Settings' screen and de-activate the 'Hide zero-balance tokens' setting
+    1. Navigate back to the main screen and check that the `HIDET` token is being displayed again on the token bar.
 
 1. **Change server**
     1. Click on the 'Wallet' navigation link, then on the settings icon and the on 'Change server'.
@@ -140,14 +169,14 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 1. **Register tokens with same name**
     1. Unregister TST token but copy its configuration string and save it.
     1. Click on 'Custom tokens' and then 'Create a new token'.
-    1. Type 'Test token' in the token name, 'Test' in the symbol and 200 in the amount.
+    1. Type 'Test token' in the token name, 'test' in the symbol and 200 in the amount.
     1. Now click on 'Custom tokens', then 'Register a token'.
     1. Type 'abc'. It should show an error of invalid configuration string.
     1. Type the configuration string saved in the first step. It must appear an error that you already have a token with this name.
 
 1. **Try to spend same output**
     1. Click on 'Wallet' in the navigation bar, select the HTR token and copy the address (and save it).
-    1. Click on the first transaction (the one with amount 0.00).
+    1. Click on the first transaction with amount 0.00.
     1. Copy the first input from HTR and from your address (copy the transaction ID and the index).
     1. Click on 'Send tokens'.
     1. Paste the address and 1.00 as the amount. Deselect 'Choose inputs automatically' and paste the transaction ID and index copied before.
@@ -155,7 +184,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 
 1. **Create NFT**
     1. Click on 'Custom tokens', then 'Create an NFT'.
-    1. Fill NFT data as 'test data', name and symbol as 'NFT Test' and 'NFTT', and amount as 100. Check only the melt authority checkbox.
+    1. Fill NFT data as `ipfs://test`, name and symbol as 'NFT Test' and 'NFTT', and amount as 100. Check only the melt authority checkbox.
     1. Double check the Fee is 0.01 HTR, the deposit is 0.01 HTR and the Total is 0.02 HTR.
     1. Create the NFT and open the transaction on the list.
     1. Validate that the first output is the data output showing `ipfs://test [Data]` with 0.01 HTR and there is one output with 1.00 of tokens, one output with the melt authority and possibly one change output of HTR.

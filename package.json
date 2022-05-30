@@ -21,10 +21,10 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.22.1",
+  "version": "0.23.1",
   "private": true,
   "dependencies": {
-    "@hathor/wallet-lib": "^0.33.1",
+    "@hathor/wallet-lib": "^0.37.0",
     "@ledgerhq/hw-transport-node-hid": "^4.73.4",
     "@sentry/electron": "^0.17.0",
     "babel-polyfill": "^6.26.0",
@@ -48,6 +48,7 @@
     "react-scripts": "^3.0.1",
     "redux": "^4.0.0",
     "ttag": "^1.7.22",
+    "unleash-proxy-client": "^1.11.0",
     "viz.js": "^2.1.2"
   },
   "main": "public/electron.js",

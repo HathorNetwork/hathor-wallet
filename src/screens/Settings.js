@@ -9,9 +9,11 @@ import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
 
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
 import { Link } from 'react-router-dom';
+import HathorAlert from '../components/HathorAlert';
 import SpanFmt from '../components/SpanFmt';
 import ModalLedgerResetTokenSignatures from '../components/ModalLedgerResetTokenSignatures';
 import ModalConfirm from '../components/ModalConfirm';
@@ -27,6 +29,7 @@ import { setWalletPrefix } from '../actions/index';
 const mapStateToProps = (state) => {
   return {
     walletPrefix: state.walletPrefix,
+    useWalletService: state.useWalletService,
   }
 }
 
@@ -51,6 +54,7 @@ class Settings extends React.Component {
   state = {
     confirmData: {},
     isNotificationOn: null,
+    zeroBalanceTokensHidden: null,
     now: new Date(),
     showTimestamp: false,
   }
@@ -59,7 +63,10 @@ class Settings extends React.Component {
   dateSetTimeoutInterval = null
 
   componentDidMount() {
-    this.setState({ isNotificationOn: wallet.isNotificationOn() });
+    this.setState({
+      isNotificationOn: wallet.isNotificationOn(),
+      zeroBalanceTokensHidden: wallet.areZeroBalanceTokensHidden()
+    });
 
     this.dateSetTimeoutInterval = setInterval(() => {
       this.setState({ now: new Date() });
@@ -148,6 +155,49 @@ class Settings extends React.Component {
   }
 
   /**
+   * Called when user clicks to change the "Hide zero-balance tokens" flag.
+   * Sets modal state, depending on the current settings and open it.
+   *
+   * @param {Object} e Event emitted on link click
+   */
+  toggleZeroBalanceTokens = (e) => {
+    e.preventDefault();
+    if (wallet.areZeroBalanceTokensHidden()) {
+      this.setState({
+        confirmData: {
+          title: t`Show zero-balance tokens`,
+          body: t`Are you sure you want to show all tokens, including those with zero balance?`,
+          handleYes: this.handleToggleZeroBalanceTokens
+        }
+      });
+    } else {
+      this.setState({
+        confirmData: {
+          title: t`Hide zero-balance tokens`,
+          body: t`Are you sure you want to hide tokens with zero balance?`,
+          handleYes: this.handleToggleZeroBalanceTokens
+        }
+      });
+    }
+    $('#confirmModal').modal('show');
+  }
+
+  /**
+   * Activates or deactivates the option to hide zero-balance tokens from the UI.
+   */
+  handleToggleZeroBalanceTokens = () => {
+    const areZeroBalanceTokensHidden = wallet.areZeroBalanceTokensHidden();
+
+    if (areZeroBalanceTokensHidden) {
+      wallet.showZeroBalanceTokens();
+    } else {
+      wallet.hideZeroBalanceTokens();
+    }
+    this.setState({ zeroBalanceTokensHidden: !areZeroBalanceTokensHidden });
+    $('#confirmModal').modal('hide');
+  }
+
+  /**
    * Called after user confirms the notification toggle action
    * Toggle user notification settings, update screen state and close the confirm modal
    */
@@ -179,9 +229,26 @@ class Settings extends React.Component {
     $('#resetTokenSignatures').modal('show');
   }
 
+  /**
+   * Method called on copy to clipboard success
+   * Show alert success message
+   *
+   * @param {string} text Text copied to clipboard
+   * @param {*} result Null in case of error
+   */
+  copied = (text, result) => {
+    if (result) {
+      // If copied with success
+      this.refs.alertCopied.show(1000);
+    }
+  }
+
   render() {
-    const serverURL = hathorLib.config.getServerUrl();
+    const serverURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
+    const wsServerURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
     const ledgerCustomTokens = hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
+    const uniqueIdentifier = helpers.getUniqueId();
+
     return (
       <div className="content-wrapper settings">
         <BackButton {...this.props} />
@@ -190,14 +257,36 @@ class Settings extends React.Component {
         </div>
         <div>
           <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
+          {
+            this.props.useWalletService && (
+              <p><SpanFmt>{t`**Real-time server:** You are connected to ${wsServerURL}`}</SpanFmt></p>
+            )
+          }
           <button className="btn btn-hathor" onClick={this.changeServer}>{t`Change server`}</button>
         </div>
         <hr />
+
         <div>
           <h4>{t`Advanced Settings`}</h4>
           <div className="d-flex flex-column align-items-start mt-4">
             <p><strong>{t`Allow notifications:`}</strong> {this.state.isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={this.toggleNotificationSettings}> {t`Change`} </a></p>
+            <p>
+              <strong>{t`Hide zero-balance tokens:`}</strong> {
+              this.state.zeroBalanceTokensHidden
+                ? <span>{t`Yes`}</span>
+                : <span>{t`No`}</span>
+              }
+              <a className="ml-3" href="true" onClick={this.toggleZeroBalanceTokens}> {t`Change`} </a>
+              <i className="fa fa-question-circle pointer ml-3"
+                 title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallet.`}>
+              </i>
+            </p>
             <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
+            <CopyToClipboard text={uniqueIdentifier} onCopy={this.copied}>
+              <span>
+                <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
+              </span>
+            </CopyToClipboard>
             <button className="btn btn-hathor" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
             {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
             <button className="btn btn-hathor mt-4" onClick={this.changeWallet}>{t`Change wallet`}</button>
@@ -216,6 +305,7 @@ class Settings extends React.Component {
             </p>
           </div>
         </ModalAlertNotSupported>
+        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
       </div>
     );
   }

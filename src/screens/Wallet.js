@@ -25,6 +25,7 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import tokens from '../utils/tokens';
 import version from '../utils/version';
+import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
 
 
@@ -38,9 +39,12 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = (state) => {
   return {
     selectedToken: state.selectedToken,
+    entireState: state,
     tokens: state.tokens,
     wallet: state.wallet,
     tokenHistory: state.tokensHistory[state.selectedToken] || [],
+    tokenBalance: state.tokensBalance[state.selectedToken] || {},
+    useWalletService: state.useWalletService,
   };
 };
 
@@ -54,11 +58,13 @@ class Wallet extends React.Component {
   /**
    * backupDone {boolean} if words backup was already done
    * successMessage {string} Message to be shown on alert success
+   * shouldShowAdministrativeTab {boolean} If we should display the Administrative Tools tab
    */
   state = {
     backupDone: true,
     successMessage: '',
     hasTokenSignature: false,
+    shouldShowAdministrativeTab: false,
   };
 
   // Reference for the TokenGeneralInfo component
@@ -88,6 +94,12 @@ class Wallet extends React.Component {
   componentWillReceiveProps(nextProps) {
     const signature = tokens.getTokenSignature(nextProps.selectedToken);
     this.setState({hasTokenSignature: !!signature});
+
+    // This will be called everytime the props are updated, so check if
+    // the selected token changed
+    if (this.props.selectedToken !== nextProps.selectedToken) {
+      this.shouldShowAdministrativeTab(nextProps.selectedToken);
+    }
   }
 
   /**
@@ -129,30 +141,42 @@ class Wallet extends React.Component {
   /**
    * When user confirms the unregister of the token, hide the modal and execute it
    */
-  unregisterConfirmed = () => {
-    const promise = tokens.unregisterToken(this.props.selectedToken);
-    promise.then(() => {
+  unregisterConfirmed = async () => {
+    const tokenUid = this.props.selectedToken;
+    try {
+      await tokens.unregisterToken(tokenUid);
+      wallet.setTokenAlwaysShow(tokenUid, false); // Remove this token from "always show"
       $('#unregisterModal').modal('hide');
-    }, (e) => {
+    } catch (e) {
       this.unregisterModalRef.current.updateErrorMessage(e.message);
-    });
+    }
   }
 
   /*
    * We show the administrative tools tab only for the users that one day had an authority output, even if it was already spent
    *
-   * @return {boolean} If should show administrative tab
+   * This will set the shouldShowAdministrativeTab state param based on the response of getMintAuthority and getMeltAuthority
    */
-  shouldShowAdministrativeTab = () => {
-    if (this.props.wallet.getMintAuthority(this.props.selectedToken, { skipSpent: false })) {
-      return true;
+  shouldShowAdministrativeTab = async (tokenId) => {
+    const mintAuthorities = await this.props.wallet.getMintAuthority(tokenId, { skipSpent: false });
+
+    if (mintAuthorities.length > 0) {
+      return this.setState({
+        shouldShowAdministrativeTab: true,
+      });
     }
 
-    if (this.props.wallet.getMeltAuthority(this.props.selectedToken, { skipSpent: false })) {
-      return true;
+    const meltAuthorities = await this.props.wallet.getMeltAuthority(tokenId, { skipSpent: false });
+
+    if (meltAuthorities.length > 0) {
+      return this.setState({
+        shouldShowAdministrativeTab: true,
+      });
     }
 
-    return false;
+    return this.setState({
+      shouldShowAdministrativeTab: false,
+    });
   }
 
   goToAllAddresses = () => {
@@ -195,7 +219,7 @@ class Wallet extends React.Component {
     }
 
     const renderTabAdmin = () => {
-      if (this.shouldShowAdministrativeTab()) {
+      if (this.state.shouldShowAdministrativeTab) {
         return (
             <li className="nav-item">
               <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">{t`Administrative Tools`}</a>
@@ -207,7 +231,7 @@ class Wallet extends React.Component {
     }
 
     const renderContentAdmin = () => {
-      if (this.shouldShowAdministrativeTab()) {
+      if (this.state.shouldShowAdministrativeTab) {
         return (
           <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
             <TokenAdministrative key={this.props.selectedToken} token={token} ref={this.administrativeRef} />

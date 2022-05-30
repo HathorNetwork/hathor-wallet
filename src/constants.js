@@ -20,7 +20,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.22.1';
+export const VERSION = '0.23.1';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
@@ -219,3 +219,30 @@ export const LEDGER_MAX_VERSION = '2.0.0';
  * First Ledger version with support for custom tokens
  */
 export const LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION = '1.1.0'
+
+
+/**
+ * Wallet service URLs
+ */
+export const WALLET_SERVICE_MAINNET_BASE_URL = 'https://wallet-service.hathor.network/';
+export const WALLET_SERVICE_MAINNET_BASE_WS_URL = 'wss://ws.wallet-service.hathor.network/';
+
+/**
+ * Default Wallet Service servers
+ */
+export const DEFAULT_WALLET_SERVICE_SERVERS = [
+  WALLET_SERVICE_MAINNET_BASE_URL,
+];
+
+/**
+ * Default Wallet Service websocket servers
+ */
+export const DEFAULT_WALLET_SERVICE_WS_SERVERS = [
+  WALLET_SERVICE_MAINNET_BASE_WS_URL,
+];
+/**
+ * Unleash constants
+ */
+export const UNLEASH_URL = 'https://unleash-proxy.b7e6a7f52ee9fefaf0c53e300cfcb014.hathor.network/proxy';
+export const UNLEASH_CLIENT_KEY = 'wKNhpEXKa39aTRgIjcNsO4Im618bRGTq';
+export const UNLEASH_POLLING_INTERVAL = 120; // seconds

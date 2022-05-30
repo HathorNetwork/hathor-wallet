@@ -18,7 +18,7 @@ const initialState = {
   // If the backend API version is allowed for this admin (boolean)
   isVersionAllowed: undefined,
   // If the connection with the server is online
-  isOnline: undefined,
+  isOnline: false,
   // Network that you are connected
   network: undefined,
   // Config of the last request that failed
@@ -53,6 +53,10 @@ const initialState = {
   metadataLoaded: false,
   // Current Wallet Prefix
   walletPrefix: '',
+  // Should we use the wallet service facade?
+  useWalletService: false,
+  // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
+  lockWalletPromise: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -104,8 +108,6 @@ const rootReducer = (state = initialState, action) => {
       return onResetWallet(state, action);
     case 'load_wallet_success':
       return onLoadWalletSuccess(state, action);
-    case 'new_tx':
-      return onNewTx(state, action);
     case 'update_tx':
       return onUpdateTx(state, action);
     case 'update_token_history':
@@ -118,6 +120,14 @@ const rootReducer = (state = initialState, action) => {
       return removeTokenMetadata(state, action);
     case 'set_wallet_prefix':
       return setWalletPrefix(state, action);
+    case 'partially_update_history_and_balance':
+      return partiallyUpdateHistoryAndBalance(state, action);
+    case 'set_use_wallet_service':
+      return onSetUseWalletService(state, action);
+    case 'lock_wallet_for_result':
+      return onLockWalletForResult(state, action);
+    case 'resolve_lock_wallet_promise':
+      return onResolveLockWalletPromise(state, action);
     default:
       return state;
   }
@@ -198,16 +208,15 @@ const onLoadWalletSuccess = (state, action) => {
   hathorLib.storage.setItem('wallet:version', VERSION);
   const { tokensHistory, tokensBalance, tokens } = action.payload;
   const allTokens = new Set(tokens);
-  const address = state.wallet.getCurrentAddress().address;
-  const addressIndex = state.wallet.getAddressIndex(address);
+  const currentAddress = state.wallet.getCurrentAddress();
 
   return {
     ...state,
     tokensHistory,
     tokensBalance,
     loadingAddresses: false,
-    lastSharedAddress: address,
-    lastSharedIndex: addressIndex,
+    lastSharedAddress: currentAddress.address,
+    lastSharedIndex: currentAddress.index,
     allTokens,
   };
 };
@@ -282,38 +291,6 @@ const onUpdateTx = (state, action) => {
   return Object.assign({}, state, {
     tokensHistory: newTokensHistory,
     tokensBalance: newTokensBalance,
-  });
-};
-
-/**
- * Updates the history and balance when a new tx arrives
- */
-const onNewTx = (state, action) => {
-  const { tx, updatedBalanceMap, balances } = action.payload;
-
-  const allTokens = state.allTokens;
-  const updatedHistoryMap = {};
-
-  // we now loop through all tokens present in the new tx to get the new history and balance
-  for (const [tokenUid, tokenTxBalance] of Object.entries(balances)) {
-    allTokens.add(tokenUid);
-    // we may not have this token yet, so state.tokensHistory[tokenUid] would return undefined
-    const currentHistory = state.tokensHistory[tokenUid] || [];
-    const newTokenHistory = addTxToSortedList(tokenUid, tx, tokenTxBalance, currentHistory);
-    updatedHistoryMap[tokenUid] = newTokenHistory;
-  }
-  const newTokensHistory = Object.assign({}, state.tokensHistory, updatedHistoryMap);
-  const newTokensBalance = Object.assign({}, state.tokensBalance, updatedBalanceMap);
-
-  const address = state.wallet.getCurrentAddress().address;
-  const addressIndex = state.wallet.getAddressIndex(address);
-
-  return Object.assign({}, state, {
-    tokensHistory: newTokensHistory,
-    tokensBalance: newTokensBalance,
-    lastSharedAddress: address,
-    lastSharedIndex: addressIndex,
-    allTokens,
   });
 };
 
@@ -400,6 +377,60 @@ const removeTokenMetadata = (state, action) => {
     ...state,
     tokenMetadata: newMeta,
   };
+};
+
+/**
+ * Partially update the token history and balance
+ */
+export const partiallyUpdateHistoryAndBalance = (state, action) => {
+  const { tokensHistory, tokensBalance } = action.payload;
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      ...tokensHistory,
+    },
+    tokensBalance: {
+      ...state.tokensBalance,
+      ...tokensBalance,
+    },
+  };
+};
+
+/**
+ * Are we using the wallet service facade?
+ */
+export const onSetUseWalletService = (state, action) => {
+  const useWalletService = action.payload;
+
+  return {
+    ...state,
+    useWalletService,
+  };
+};
+
+/**
+ * Sets the promise to be resolved after the user typed his PIN on lock screen
+ */
+export const onLockWalletForResult = (state, action) => {
+  return {
+    ...state,
+    lockWalletPromise: action.payload,
+  };
+};
+
+export const onResolveLockWalletPromise = (state, action) => {
+  // Resolve the promise with the result
+  // TODO: I don't like this, but we don't have in this project a way to use middlewares in our
+  // actions (like redux-thunk, or redux-saga). We should refactor this if we ever start using
+  // this kind of mechanism.
+  state.lockWalletPromise(action.payload);
+
+  return {
+    ...state,
+    lockWalletPromise: null,
+  }
 };
 
 export default rootReducer;
