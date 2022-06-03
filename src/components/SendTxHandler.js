@@ -147,8 +147,8 @@ class SendTxHandler extends React.Component {
  */
 SendTxHandler.propTypes = {
   sendTransaction: PropTypes.oneOfType([
-    SendTransaction,
-    SendTransactionWalletService,
+    PropTypes.instanceOf(SendTransaction),
+    PropTypes.instanceOf(SendTransactionWalletService),
   ]).isRequired,
   onSendSuccess: PropTypes.func,
   onSendError: PropTypes.func,
