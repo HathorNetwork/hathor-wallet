@@ -34,6 +34,8 @@ A transaction is displayed.
 
 ## For development
 
+You must use node v14.
+
 ### To Install
 
 `npm install`
