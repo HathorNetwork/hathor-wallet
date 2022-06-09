@@ -124,6 +124,8 @@ const rootReducer = (state = initialState, action) => {
       return onLockWalletForResult(state, action);
     case 'resolve_lock_wallet_promise':
       return onResolveLockWalletPromise(state, action);
+    case 'reset_selected_token_if_needed':
+      return resetSelectedTokenIfNeeded(state, action);
     default:
       return state;
   }
@@ -419,6 +421,27 @@ export const onResolveLockWalletPromise = (state, action) => {
     ...state,
     lockWalletPromise: null,
   }
+};
+
+/*
+ * Used When we select to hide zero balance tokens and a token with zero balance is selected
+ * In that case we must select HTR
+*/
+export const resetSelectedTokenIfNeeded = (state, action) => {
+  const tokensBalance = state.tokensBalance;
+  const selectedToken = state.selectedToken
+
+  const balance = tokensBalance[selectedToken] || { available: 0, locked: 0 };
+  const hasZeroBalance = (balance.available + balance.locked) === 0;
+
+  if (hasZeroBalance) {
+    return {
+      ...state,
+      selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+    };
+  }
+
+  return state;
 };
 
 export default rootReducer;
