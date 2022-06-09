@@ -359,7 +359,7 @@ const wallet = {
       if (registeredTokens.find((x) => x.uid === tokenUid)) {
         continue;
       }
-      const balance = tokensBalance[tokenUid];
+      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
       const tokenData = {
         uid: tokenUid,
         balance: balance,
