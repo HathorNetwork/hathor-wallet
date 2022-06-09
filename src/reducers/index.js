@@ -91,7 +91,7 @@ const rootReducer = (state = initialState, action) => {
     case 'select_token':
       return Object.assign({}, state, {selectedToken: action.payload});
     case 'new_tokens':
-      return Object.assign({}, state, {selectedToken: action.payload.uid, tokens: action.payload.tokens});
+      return onNewTokens(state, action);
     case 'loading_addresses_update':
       return Object.assign({}, state, {loadingAddresses: action.payload});
     case 'update_loaded_data':
@@ -442,6 +442,17 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   }
 
   return state;
+};
+
+export const onNewTokens = (state, action) => {
+  // Add new created token to the all tokens set
+  state.allTokens.add(action.payload.uid);
+
+  return {
+    ...state,
+    selectedToken: action.payload.uid,
+    tokens: action.payload.tokens,
+  };
 };
 
 export default rootReducer;
