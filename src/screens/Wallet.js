@@ -262,7 +262,7 @@ class Wallet extends React.Component {
                 {renderWallet()}
               </div>
               <div className="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
-                <TokenGeneralInfo token={token} showConfigString={true} errorMessage={this.state.errorMessage} ref={this.generalInfoRef} />
+                <TokenGeneralInfo token={token} showConfigString={true} errorMessage={this.state.errorMessage} ref={this.generalInfoRef} showAlwaysShowTokenCheckbox={true} />
               </div>
               {renderContentAdmin()}
             </div>
