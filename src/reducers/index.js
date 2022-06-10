@@ -429,7 +429,7 @@ export const onResolveLockWalletPromise = (state, action) => {
 */
 export const resetSelectedTokenIfNeeded = (state, action) => {
   const tokensBalance = state.tokensBalance;
-  const selectedToken = state.selectedToken
+  const selectedToken = state.selectedToken;
 
   const balance = tokensBalance[selectedToken] || { available: 0, locked: 0 };
   const hasZeroBalance = (balance.available + balance.locked) === 0;
