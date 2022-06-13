@@ -60,6 +60,7 @@ function createWindow () {
     icon: path.join(__dirname, iconOS),
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
       preload: path.join(__dirname, 'preload.js')
     }
   })
