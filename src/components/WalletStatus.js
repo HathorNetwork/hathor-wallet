@@ -7,15 +7,8 @@
 
 import React from 'react';
 import { t } from 'ttag'
-import { connect } from "react-redux";
 
 import hathorLib from '@hathor/wallet-lib';
-
-const mapStateToProps = (state) => {
-  return {
-    walletPrefix: state.walletPrefix,
-  };
-};
 
 /**
  * Component that shows the current wallet name in use
@@ -23,9 +16,8 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 function WalletStatus(props) {
-
   const listOfWallets = hathorLib.storage.store.getListOfWallets();
-  const walletName = listOfWallets[props.walletPrefix].name;
+  const walletName = listOfWallets[hathorLib.storage.store.prefix].name;
   return (
     <div className="d-flex flex-column version-wrapper align-items-center">
       <span>{t`Current Wallet`}</span>
@@ -34,4 +26,4 @@ function WalletStatus(props) {
   );
 }
 
-export default connect(mapStateToProps)(WalletStatus);
+export default WalletStatus;

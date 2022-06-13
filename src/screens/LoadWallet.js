@@ -19,7 +19,7 @@ import InitialImages from '../components/InitialImages';
 
 
 const mapStateToProps = (state) => {
-  return { password: state.password, pin: state.pin };
+  return { password: state.password, pin: state.pin, initWalletName: state.initWalletName };
 };
 
 
@@ -89,13 +89,19 @@ class LoadWallet extends React.Component {
    */
   pinSuccess = () => {
     // Getting redux variables before cleaning all data
-    const { pin, password } = this.props;
-    // First we clean what can still be there of a last wallet
-    wallet.generateWallet(this.state.words, '', pin, password, this.props.history);
-    hathorLib.wallet.markBackupAsDone();
+    const { pin, password, initWalletName } = this.props;
     // Clean pin and password from redux
     this.props.updatePassword(null);
     this.props.updatePin(null);
+    // set new wallet
+    const prefix = wallet.walletNameToPrefix(initWalletName);
+    hathorLib.storage.store.addWallet(initWalletName, prefix);
+    wallet.setWalletPrefix(prefix);
+    // Generate wallet
+    hathorLib.wallet.setWalletType('software');
+    wallet.generateWallet(this.state.words, '', pin, password, this.props.history);
+    hathorLib.wallet.markBackupAsDone();
+    hathorLib.wallet.markWalletAsStarted();
     this.props.history.push('/wallet/');
   }
 

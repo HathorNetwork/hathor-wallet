@@ -8,7 +8,7 @@
 import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
-import { selectToken, setWalletPrefix } from '../actions/index';
+import { selectToken } from '../actions/index';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
@@ -28,7 +28,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => {
   return {
     selectToken: data => dispatch(selectToken(data)),
-    setWalletPrefix: data => dispatch(setWalletPrefix(data)),
   };
 };
 
@@ -89,7 +88,6 @@ class TokenBar extends React.Component {
    */
   lockWallet = () => {
     // Select default wallet before locking
-    this.props.setWalletPrefix('');
     hathorLib.wallet.lock();
     this.props.history.push('/locked/');
   }

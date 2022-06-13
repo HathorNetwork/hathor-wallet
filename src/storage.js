@@ -76,7 +76,7 @@ class HybridStore {
    * @inner
    */
   getListOfWallets() {
-    return this.getItem('list-of-wallets') || {'': { name: 'Default' }};
+    return this.getItem('list-of-wallets') || {};
   }
 
   /**

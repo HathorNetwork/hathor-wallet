@@ -24,20 +24,12 @@ import hathorLib from '@hathor/wallet-lib';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
-import { setWalletPrefix } from '../actions/index';
 
 const mapStateToProps = (state) => {
   return {
-    walletPrefix: state.walletPrefix,
     useWalletService: state.useWalletService,
   }
 }
-
-const mapDispatchToProps = dispatch => {
-  return {
-    setWalletPrefix: (data) => dispatch(setWalletPrefix(data)),
-  };
-};
 
 /**
  * Settings screen
@@ -82,16 +74,19 @@ class Settings extends React.Component {
    */
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
-    const walletPrefix = this.props.walletPrefix;
-    if (walletPrefix !== '') {
-      // Remove from list of wallets
-      hathorLib.storage.store.removeWallet(walletPrefix);
-    }
-    // Set to the default prefix
-    this.props.setWalletPrefix('');
+    // Remove from list of wallets
+    hathorLib.storage.store.removeWallet(hathorLib.storage.store.prefix);
+    // reset data
     wallet.resetWalletData();
-    hathorLib.wallet.lock();
-    this.props.history.push('/');
+    // If there are other wallets, go to screen to choose wallet
+    const wallets = Object.keys(hathorLib.storage.store.getListOfWallets());
+    if (wallets.length > 0) {
+      wallet.setWalletPrefix(wallets[0]);
+      this.props.history.push('/choose_wallet');
+    } else {
+      wallet.setWalletPrefix(null);
+      this.props.history.push('/');
+    }
   }
 
   /**
@@ -116,7 +111,14 @@ class Settings extends React.Component {
    * Called when user clicks on "Change Wallet" button.
    */
   changeWallet = () => {
-    this.props.history.push('/wallet/list/');
+    hathorLib.wallet.cleanWallet({ cleanAccessData: false });
+    hathorLib.wallet.lock();
+
+    // if this is a hardware wallet, remove it from storage as well
+    if (hathorLib.wallet.isHardwareWallet()) {
+      hathorLib.storage.store.removeWallet(hathorLib.storage.store.prefix);
+    }
+    this.props.history.push('/choose_wallet');
   }
 
   /**
@@ -311,4 +313,4 @@ class Settings extends React.Component {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Settings);
+export default connect(mapStateToProps)(Settings);

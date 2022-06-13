@@ -143,9 +143,9 @@ export const metadataLoaded = data => ({ type: "metadata_loaded", payload: data 
 export const removeTokenMetadata = data => ({ type: "remove_token_metadata", payload: data });
 
 /**
- * Set the current wallet prefix
+ * Set the wallet name during start process
  */
-export const setWalletPrefix = prefix => ({type: "set_wallet_prefix", payload: prefix});
+export const setInitWalletName = name => ({type: "set_init_wallet_name", payload: name});
 
 /**
  * Partially update history and balance

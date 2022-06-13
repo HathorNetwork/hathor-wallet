@@ -10,7 +10,6 @@ import { t } from 'ttag';
 import { connect } from "react-redux";
 
 import ModalResetAllData from '../components/ModalResetAllData';
-import { setWalletPrefix } from '../actions/index';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
@@ -21,14 +20,12 @@ import colors from '../index.scss';
 
 const mapStateToProps = (state) => {
   return {
-    walletPrefix: state.walletPrefix,
     lockWalletPromise: state.lockWalletPromise,
   }
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    setWalletPrefix: (data) => dispatch(setWalletPrefix(data)),
     resolveLockWalletPromise: pin => dispatch(resolveLockWalletPromise(pin)),
   };
 };
@@ -52,7 +49,7 @@ class LockedWallet extends React.Component {
   }
 
   componentDidMount() {
-   this.refs.pin.focus();
+    this.refs.pin.focus();
     // Update Sentry when user started wallet now
     wallet.updateSentryState();
   }
@@ -119,53 +116,38 @@ class LockedWallet extends React.Component {
   }
 
   /**
-   * When user selects a different wallet, it will change the current selected wallet
-   *
-   * @param {Object} e Event of when the selected wallet changes
-   */
-   changeWalletHandler = (e) => {
-    e.preventDefault();
-    this.props.setWalletPrefix(e.target.value);
-  }
-
-  /**
    * When reset modal validates, then execute method to reset all data from the wallet and redirect to Welcome screen
    */
+  /*
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
     wallet.resetWalletData();
     this.props.history.push('/welcome/');
   }
+  */
+
+  handleReset = () => {
+    $('#confirmResetModal').modal('hide');
+    // Remove from list of wallets
+    hathorLib.storage.store.removeWallet(hathorLib.storage.store.prefix);
+    // reset data
+    wallet.resetWalletData();
+    // If there are other wallets, go to screen to choose wallet
+    const wallets = Object.keys(hathorLib.storage.store.getListOfWallets());
+    if (wallets.length > 0) {
+      wallet.setWalletPrefix(wallets[0]);
+      this.props.history.push('/choose_wallet');
+    } else {
+      wallet.setWalletPrefix(null);
+      this.props.history.push('/');
+    }
+  }
 
   render() {
-    const listOfWallets = hathorLib.storage.store.getListOfWallets();
-
-    const renderWalletSelect = () => {
-      const walletOptions = Object.entries(listOfWallets).filter(([prefix, walletInfo]) => {
-        // only show software wallets
-        const walletType = hathorLib.storage.store.getPrefixedItem(prefix, 'wallet:type');
-        return walletType === 'software';
-      }).map(([prefix, walletInfo]) => {
-        return (
-          <option key={prefix} value={prefix}>{walletInfo.name}</option>
-        );
-      });
-
-      return (<div className="d-flex align-items-center flex-row w-100 mt-4 form-group">
-        <label>
-          {t`Wallet`}:
-          <select defaultValue={this.props.walletPrefix} onChange={(e) => this.changeWalletHandler(e)}>
-            {walletOptions}
-          </select>
-        </label>
-      </div>);
-    }
-
     return (
       <div className="content-wrapper flex align-items-center">
         <div className="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
           <div className="d-flex align-items-start flex-column">
-            {renderWalletSelect()}
             <p>{t`Your wallet is locked. Please type your PIN to unlock it.`}</p>
             <form ref="unlockForm" className="w-100" onSubmit={this.unlockClicked}>
               <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control" />

@@ -38,7 +38,7 @@ const initialState = {
   selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
   // List of all tokens seen in transactions
   allTokens: new Set(),
-  // If is in the proccess of loading addresses transactions from the full node
+  // If is in the process of loading addresses transactions from the full node
   // When the request to load addresses fails this variable can continue true
   loadingAddresses: false,
   loadedData: { transactions: 0, addresses: 0 },
@@ -51,8 +51,8 @@ const initialState = {
   tokenMetadataErrors: [],
   // When metadata is loaded from the lib
   metadataLoaded: false,
-  // Current Wallet Prefix
-  walletPrefix: '',
+  // Variable to store the wallet name during the wallet init. Only used during init
+  initWalletName: '',
   // Should we use the wallet service facade?
   useWalletService: false,
   // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
@@ -118,8 +118,8 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {metadataLoaded: action.payload});
     case 'remove_token_metadata':
       return removeTokenMetadata(state, action);
-    case 'set_wallet_prefix':
-      return setWalletPrefix(state, action);
+    case 'set_init_wallet_name':
+      return setInitWalletName(state, action);
     case 'partially_update_history_and_balance':
       return partiallyUpdateHistoryAndBalance(state, action);
     case 'set_use_wallet_service':
@@ -133,11 +133,10 @@ const rootReducer = (state = initialState, action) => {
   }
 };
 
-const setWalletPrefix = (state, action) => {
-  hathorLib.storage.store.prefix = action.payload;
+const setInitWalletName = (state, action) => {
   return {
     ...state,
-    walletPrefix: action.payload,
+    initWalletName: action.payload,
   }
 };
 

@@ -7,13 +7,14 @@
 
 import React, { useState, useRef } from 'react';
 import { t } from 'ttag'
-import { setWalletPrefix } from '../actions/index';
 import { connect } from "react-redux";
 
 import {
   WalletAlreadyExistError,
   InvalidWalletNameError,
 } from '../errors';
+import { setWalletPrefix } from '../actions/index';
+import wallet from '../utils/wallet';
 
 import hathorLib from '@hathor/wallet-lib';
 
@@ -22,12 +23,6 @@ const mapStateToProps = (state) => {
     walletPrefix: state.walletPrefix,
   }
 }
-
-const mapDispatchToProps = dispatch => {
-  return {
-    setWalletPrefix: (data) => dispatch(setWalletPrefix(data)),
-  };
-};
 
 /**
  * Screen that has a list of wallets available.
@@ -69,7 +64,7 @@ function WalletList(props) {
     }
     const walletName = walletNameRef.current?.value;
     try {
-      hathorLib.storage.store.addWallet(walletName, walletName);
+      hathorLib.storage.store.addWallet(walletName, walletNameToPrefix(walletName));
       // This will trigger a state change which will reload the component.
       setListOfWallets(hathorLib.storage.store.getListOfWallets());
     } catch (err) {
@@ -134,4 +129,4 @@ function WalletList(props) {
   );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(WalletList);
+export default connect(mapStateToProps)(WalletList);

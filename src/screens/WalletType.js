@@ -13,11 +13,18 @@ import wallet from '../utils/wallet';
 import ledger from '../utils/ledger';
 import version from '../utils/version';
 import helpers from '../utils/helpers';
-import { LEDGER_GUIDE_URL, IPC_RENDERER, HATHOR_WEBSITE_URL, LEDGER_MIN_VERSION, LEDGER_MAX_VERSION } from '../constants';
 import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
 import { str2jsx } from '../utils/i18n';
 import hathorLib from '@hathor/wallet-lib';
+import {
+  LEDGER_GUIDE_URL,
+  IPC_RENDERER,
+  HATHOR_WEBSITE_URL,
+  LEDGER_MIN_VERSION,
+  LEDGER_MAX_VERSION,
+  HARDWARE_WALLET_NAME,
+} from '../constants';
 
 
 /**
@@ -128,8 +135,17 @@ class WalletType extends React.Component {
       const fingerprint = Buffer.from(data.slice(97, 101));
       const xpub = hathorLib.wallet.xpubFromData(compressedPubkey, chainCode, fingerprint);
 
+      // For hardware wallets, we first remove it and add again so there's no chance of wallet name
+      // conflict in case it was not properly cleaned up the last time
+      const prefix = wallet.walletNameToPrefix(HARDWARE_WALLET_NAME);
+      hathorLib.storage.store.removeWallet(prefix);
+      hathorLib.storage.store.addWallet(HARDWARE_WALLET_NAME, prefix);
+      wallet.setWalletPrefix(prefix);
+
+      hathorLib.wallet.setWalletType('hardware');
       wallet.startWallet(null, '', null, '', this.props.history, false, xpub);
       hathorLib.wallet.markBackupAsDone();
+      hathorLib.wallet.markWalletAsStarted();
 
       const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
       if (tokenSignatures) {
@@ -170,7 +186,6 @@ class WalletType extends React.Component {
    * Go to the hardware wallet screen
    */
   goToHardwareWallet = () => {
-    hathorLib.wallet.setWalletType('hardware');
     this.setState({ hardware: true }, () => {
       this.attemptNumber = 1;
       ledger.getVersion();

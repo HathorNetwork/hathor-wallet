@@ -23,6 +23,7 @@ import SentryPermission from './screens/SentryPermission';
 import UnknownTokens from './screens/UnknownTokens';
 import Signin from './screens/Signin';
 import LockedWallet from './screens/LockedWallet';
+import ChooseWallet from './screens/ChooseWallet';
 import NewWallet from './screens/NewWallet';
 import WalletType from './screens/WalletType';
 import SoftwareWalletWarning from './screens/SoftwareWalletWarning';
@@ -39,7 +40,7 @@ import RequestErrorModal from './components/RequestError';
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import {IPC_RENDERER, LEDGER_ENABLED} from './constants';
+import { IPC_RENDERER, LEDGER_ENABLED, HARDWARE_WALLET_NAME } from './constants';
 import STORE from './storageInstance';
 import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
@@ -64,8 +65,18 @@ class Root extends React.Component {
       // Event called when user quits hathor app
       IPC_RENDERER.on("ledger:closed", () => {
         if (hathorLib.wallet.loaded() && hathorLib.wallet.isHardwareWallet()) {
-          hathorLib.wallet.lock();
-          this.props.history.push('/wallet_type/');
+          const prefix = wallet.walletNameToPrefix(HARDWARE_WALLET_NAME);
+          hathorLib.storage.store.removeWallet(prefix);
+
+          // If there are other wallets, go to screen to choose wallet
+          const wallets = Object.keys(hathorLib.storage.store.getListOfWallets());
+          if (wallets.length > 0) {
+            wallet.setWalletPrefix(wallets[0]);
+            this.props.history.push('/choose_wallet');
+          } else {
+            wallet.setWalletPrefix(null);
+            this.props.history.push('/wallet_type/');
+          }
         }
       });
 
@@ -110,6 +121,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/software_warning" component={SoftwareWalletWarning} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
+        <Route exact path="/choose_wallet" component={ChooseWallet} />
         <Route exact path="/welcome" component={Welcome} />
         <Route exact path="/loading_addresses" component={LoadingAddresses} />
         <Route exact path="/permission" component={SentryPermission} />

@@ -84,7 +84,7 @@ export class FeatureFlags extends events.EventEmitter {
   /**
    * Removes the ignore flag from the storage
    */
-  static async clearIgnoreWalletServiceFlag() {
-    await localStorage.removeItem(IGNORE_WALLET_SERVICE_FLAG);
+  static clearIgnoreWalletServiceFlag() {
+    localStorage.removeItem(IGNORE_WALLET_SERVICE_FLAG);
   }
 }

@@ -763,8 +763,8 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  async resetWalletData() {
-    await FeatureFlags.clearIgnoreWalletServiceFlag();
+  resetWalletData() {
+    FeatureFlags.clearIgnoreWalletServiceFlag();
 
     this.cleanWalletRedux();
     oldWalletUtil.resetWalletData();
@@ -1036,6 +1036,35 @@ const wallet = {
    */
   decimalToInteger(value) {
     return Math.round(value*(10**hathorConstants.DECIMAL_PLACES));
+  },
+
+  /**
+   * Returns the wallet prefix given its name.
+   *
+   * @param {string} name The name of the wallet
+   *
+   * @return {string} Prefix of the wallet
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  walletNameToPrefix(name) {
+    // Currently, prefix is the same as name
+    return name;
+  },
+
+  /**
+   * Returns the wallet prefix given its name.
+   *
+   * @param {string} name The name of the wallet
+   *
+   * @return {string} Prefix of the wallet
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  setWalletPrefix(prefix) {
+    storage.store.prefix = prefix;
   },
 }
 

@@ -31,7 +31,7 @@ const mapDispatchToProps = dispatch => {
 
 
 const mapStateToProps = (state) => {
-  return { password: state.password, pin: state.pin, words: state.words };
+  return { password: state.password, pin: state.pin, words: state.words, initWalletName: state.initWalletName };
 };
 
 
@@ -103,13 +103,19 @@ class NewWallet extends React.Component {
    */
   pinSuccess = () => {
     // Getting redux variables before cleaning all data
-    const { words, pin, password } = this.props;
-    // Generate addresses and load data
-    wallet.generateWallet(words, '', pin, password, this.props.history);
+    const { words, pin, password, initWalletName } = this.props;
     // Clean pin, password and words from redux
     this.props.updatePassword(null);
     this.props.updatePin(null);
     this.props.updateWords(null);
+    // set new wallet
+    const prefix = wallet.walletNameToPrefix(initWalletName);
+    hathorLib.storage.store.addWallet(initWalletName, prefix);
+    wallet.setWalletPrefix(prefix);
+    // Generate addresses and load data
+    hathorLib.wallet.setWalletType('software');
+    wallet.generateWallet(words, '', pin, password, this.props.history);
+    hathorLib.wallet.markWalletAsStarted();
     // Go to wallet
     this.props.history.push('/wallet/');
   }
