@@ -444,6 +444,9 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   return state;
 };
 
+/*
+ * Used when registering or creating tokens to update the wallet token list.
+*/
 export const onNewTokens = (state, action) => {
   // Add new created token to the all tokens set
   state.allTokens.add(action.payload.uid);
