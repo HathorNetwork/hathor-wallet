@@ -34,6 +34,7 @@ import {
   partiallyUpdateHistoryAndBalance,
   setUseWalletService,
   lockWalletForResult,
+  resetSelectedTokenIfNeeded,
 } from '../actions/index';
 import {
   helpers,
@@ -358,7 +359,7 @@ const wallet = {
       if (registeredTokens.find((x) => x.uid === tokenUid)) {
         continue;
       }
-      const balance = tokensBalance[tokenUid];
+      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
       const tokenData = {
         uid: tokenUid,
         balance: balance,
@@ -973,6 +974,8 @@ const wallet = {
    */
   hideZeroBalanceTokens() {
     storage.setItem(storageKeys.hideZeroBalanceTokens, true);
+    // If the token selected has been hidden, then we must select HTR
+    store.dispatch(resetSelectedTokenIfNeeded());
   },
 
   /**

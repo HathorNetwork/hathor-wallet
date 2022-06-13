@@ -46,7 +46,19 @@ class LoadingAddresses extends React.Component {
   state = { canRedirect: false };
 
   componentDidMount = () => {
-    this.props.updateLoadedData({addresses: 0, transactions: 0});
+    // When the wallet was opened for the first time and the user is loading the transactions,
+    // after loading all of them (and the update will be shown in this component)
+    // the wallet will check the API version with the full node to check compatibility.
+    // While the wallet waits for the full node response, it redirects to this same component,
+    // and we were resetting the progress to 0 before changing screen, which was weird.
+    // The best approach is to check full node API version compatibility before loading
+    // the wallet data but this is a bigger refactor, so I just added a new flag when redirecting
+    // the wallet to this screen when we are waiting for version check.
+    // If this flag is true, then we don't need to reset the progress because it was already done
+    // and the wallet is just waiting, so should continue showing the latest progress
+    if (this.props.location.waitVersionCheck !== true) {
+      this.props.updateLoadedData({addresses: 0, transactions: 0});
+    }
     // To prevent only a blink in this screen when user loads the addresses really fast
     // I set that the user will see this screen at least for 2 seconds
     setTimeout(() => {

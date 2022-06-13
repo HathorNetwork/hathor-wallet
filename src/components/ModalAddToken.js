@@ -118,7 +118,7 @@ class ModalAddToken extends React.Component {
         <div className="form-check">
           <input className="form-check-input" type="checkbox" id="alwaysShowTokenCheckbox"
                  checked={this.state.alwaysShow} onChange={this.handleToggleAlwaysShow}/>
-          <label className="form-check-label" htmlFor="alwaysShowToken">
+          <label className="form-check-label" htmlFor="alwaysShowTokenCheckbox">
             {t`Always show this token`}
           </label>
           <i className="fa fa-question-circle pointer ml-3"
