@@ -138,7 +138,8 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
     version.checkApiVersion(reduxState.wallet);
     return <Redirect to={{
       pathname: '/loading_addresses/',
-      state: {path: props.match.url}
+      state: {path: props.match.url},
+      waitVersionCheck: true
     }} />;
   } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
     return <VersionError {...props} />;

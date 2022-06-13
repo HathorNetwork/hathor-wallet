@@ -161,3 +161,8 @@ export const lockWalletForResult = (promise) => ({ type: "lock_wallet_for_result
  * This will resolve the promise and reset the lockWalletPromise state
  */
 export const resolveLockWalletPromise = (pin) => ({ type: "resolve_lock_wallet_promise", payload: pin });
+
+/**
+ * This will reset the selected token if the one selected has been hidden because of zero balance
+ */
+export const resetSelectedTokenIfNeeded = () => ({ type: "reset_selected_token_if_needed" });
