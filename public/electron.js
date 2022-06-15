@@ -35,7 +35,7 @@ if (process.platform === 'darwin') {
 }
 
 const appName = 'Hathor Wallet';
-const walletVersion = '0.23.1';
+const walletVersion = '0.23.2';
 
 const debugMode = (
   process.argv.indexOf('--unsafe-mode') >= 0 &&
@@ -60,6 +60,7 @@ function createWindow () {
     icon: path.join(__dirname, iconOS),
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
       preload: path.join(__dirname, 'preload.js')
     }
   })

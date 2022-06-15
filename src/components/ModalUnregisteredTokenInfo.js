@@ -71,7 +71,7 @@ class ModalUnregisteredTokenInfo extends React.Component {
 
   render() {
     const renderTokenInfo = () => {
-      return <TokenGeneralInfo token={this.state.token} showConfigString={false} />;
+      return <TokenGeneralInfo token={this.state.token} showConfigString={false} showAlwaysShowTokenCheckbox={false} />;
     }
 
     const renderHeader = () => {

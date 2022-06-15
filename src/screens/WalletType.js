@@ -72,7 +72,7 @@ class WalletType extends React.Component {
   handleVersion = (event, arg) => {
     if (arg.success) {
       // compare ledger version with our min version
-      const version = arg.data.slice(3, 6).join('.');
+      const version = Buffer.from(arg.data).slice(3, 6).join('.');
       hathorLib.storage.setItem('ledger:version', version);
       if (
         helpers.cmpVersionString(version, LEDGER_MIN_VERSION) < 0 ||
@@ -121,11 +121,11 @@ class WalletType extends React.Component {
     }
 
     if (arg.success) {
-      const data = arg.data;
+      const data = Buffer.from(arg.data);
       const uncompressedPubkey = data.slice(0, 65);
       const compressedPubkey = hathorLib.wallet.toPubkeyCompressed(uncompressedPubkey);
-      const chainCode = Buffer.from(data.slice(65, 97));
-      const fingerprint = Buffer.from(data.slice(97, 101));
+      const chainCode = data.slice(65, 97);
+      const fingerprint = data.slice(97, 101);
       const xpub = hathorLib.wallet.xpubFromData(compressedPubkey, chainCode, fingerprint);
 
       wallet.startWallet(null, '', null, '', this.props.history, false, xpub);

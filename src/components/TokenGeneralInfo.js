@@ -199,18 +199,24 @@ class TokenGeneralInfo extends React.Component {
           <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{this.state.canMelt ? 'Yes' : 'No'}</p>
           <p className="mb-2 subtitle">{t`Indicates whether the token owner can destroy tokens, decreasing the total supply`}</p>
           <p className="mt-2 mb-4"><strong>{t`Total number of transactions:`} </strong>{this.state.transactionsCount}</p>
-          <p className="mt-2 mb-4">
-            <strong>{t`Always show this token:`}</strong> {
-            this.state.alwaysShow
-              ? <span>{t`Yes`}</span>
-              : <span>{t`No`}</span>
-          }
-            <a className="ml-3" href="true" onClick={this.toggleAlwaysShow}> {t`Change`} </a>
-            <i className="fa fa-question-circle pointer ml-3"
-               title={t`If selected, it will override the "Hide zero-balance tokens" settings.`}>
-            </i>
-          </p>
+          {this.props.showAlwaysShowTokenCheckbox && renderAlwaysShowTokenCheckbox()}
         </div>
+      );
+    }
+
+    const renderAlwaysShowTokenCheckbox = () => {
+      return (
+        <p className="mt-2 mb-4">
+          <strong>{t`Always show this token:`}</strong> {
+          this.state.alwaysShow
+            ? <span>{t`Yes`}</span>
+            : <span>{t`No`}</span>
+        }
+          <a className="ml-3" href="true" onClick={this.toggleAlwaysShow}> {t`Change`} </a>
+          <i className="fa fa-question-circle pointer ml-3"
+             title={t`If selected, it will override the "Hide zero-balance tokens" settings.`}>
+          </i>
+        </p>
       );
     }
 
@@ -258,6 +264,7 @@ TokenGeneralInfo.propTypes = {
     uid: PropTypes.string.isRequired,
   }),
   showConfigString: PropTypes.bool.isRequired,
+  showAlwaysShowTokenCheckbox: PropTypes.bool.isRequired,
 };
 
 export default connect(mapStateToProps, null, null, {forwardRef: true})(TokenGeneralInfo);
