@@ -111,7 +111,8 @@ function ModalLedgerSignToken({token, modalId, cb}) {
     setWaitingLedger(false);
     if (arg.success) {
       // save token signature on storage
-      tokens.addTokenSignature(token.uid, arg.data.toString("hex"));
+      const hexSignature = Buffer.from(arg.data).toString('hex');
+      tokens.addTokenSignature(token.uid, hexSignature);
       setOk(true);
       // Signal parent that the token signature has been added
       cb(true);
