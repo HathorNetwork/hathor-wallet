@@ -145,6 +145,12 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Go to the 'Settings' screen and de-activate the 'Hide zero-balance tokens' setting
     1. Navigate back to the main screen and check that the `HIDET` token is being displayed again on the token bar.
 
+1. **Token bar scroll**
+    1. You should have 3 tokens in your token bar, if you need more you can register the following one:<br/>
+        `[Test Coin:TSC:001c382847d8440d05da95420bee2ebeb32bc437f82a9ae47b0745c8a29a7b0d:036e4b2d]`
+    1. Reduce the height of your screen and you must see a scroll in the tokens.
+    1. You must continue seeing the lock/settings icons as usual.
+
 1. **Change server**
     1. Click on the 'Wallet' navigation link, then on the settings icon and the on 'Change server'.
     1. Select one of the default servers and connect. It will connect to the mainnet.
