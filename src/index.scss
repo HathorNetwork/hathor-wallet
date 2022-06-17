@@ -573,6 +573,10 @@ svg.svg-wrapper {
   font-size: 1.2rem;
 }
 
+.token-bar .first-child {
+  overflow: auto;
+}
+
 .token-bar .body {
   width: 100%;
   overflow-y: auto;
