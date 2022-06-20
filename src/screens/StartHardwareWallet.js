@@ -23,7 +23,7 @@ import hathorLib from '@hathor/wallet-lib';
  *
  * @memberof Screens
  */
-class WalletType extends React.Component {
+class StartHardwareWallet extends React.Component {
   // Attempt parameters when trying to connect to ledger
   // attemptNumber: current attempt
   // attemptLimit: maximum number of attempts
@@ -228,4 +228,4 @@ class WalletType extends React.Component {
   }
 }
 
-export default WalletType;
+export default StartHardwareWallet;
