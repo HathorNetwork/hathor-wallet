@@ -25,6 +25,7 @@ import LockedWallet from './screens/LockedWallet';
 import NewWallet from './screens/NewWallet';
 import WalletType from './screens/WalletType';
 import SoftwareWalletWarning from './screens/SoftwareWalletWarning';
+import StartHardwareWallet from './screens/StartHardwareWallet';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
@@ -107,6 +108,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet_type" component={WalletType} loaded={false} />
         <StartedRoute exact path="/software_warning" component={SoftwareWalletWarning} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
+        <StartedRoute exact path="/hardware_wallet" component={StartHardwareWallet} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/welcome" component={Welcome} />
         <Route exact path="/loading_addresses" component={LoadingAddresses} />
