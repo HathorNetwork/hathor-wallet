@@ -12,6 +12,7 @@ import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
 import TokenBar from '../components/TokenBar';
 import ModalAddManyTokens from '../components/ModalAddManyTokens';
+import ModalRegisterAllTokens from '../components/ModalRegisterAllTokens';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
@@ -134,6 +135,13 @@ class UnknownTokens extends React.Component {
     });
   }
 
+  /**
+   * Triggered when user clicks to register all tokens
+   */
+  openModalRegisterAll = () => {
+    $('#registerAllTokensModal').modal('show');
+  }
+
   render = () => {
     const unknownTokens = this.getUnknownTokens(wallet.areZeroBalanceTokensHidden());
 
@@ -174,11 +182,13 @@ class UnknownTokens extends React.Component {
         <div className="d-flex flex-row align-items-center mb-4 mt-4">
           <h3 className="mr-4">{t`Unknown Tokens`}</h3>
           <button onClick={this.massiveImport} className="btn btn-hathor">{t`Register Tokens`}</button>
+          <button onClick={this.openModalRegisterAll} className="ml-3 btn btn-hathor">{t`Register All Tokens`}</button>
         </div>
         <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
         <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
         {unknownTokens && renderTokens()}
         <ModalAddManyTokens success={this.massiveImportSuccess} tokensBalance={this.props.tokensBalance} />
+        <ModalRegisterAllTokens allTokens={this.props.allTokens} tokensBalance={this.props.tokensBalance} registeredTokens={this.props.registeredTokens} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         <TokenBar {...this.props}  />
       </div>
