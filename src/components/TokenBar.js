@@ -179,7 +179,7 @@ class TokenBar extends React.Component {
 
     return (
       <div className={`d-flex flex-column align-items-center justify-content-between token-bar ${this.state.opened ? 'opened' : 'closed'}`}>
-        <div className='d-flex flex-column align-items-center justify-content-between w-100'>
+        <div className='d-flex flex-column align-items-center justify-content-between w-100 first-child'>
           <div className='header d-flex align-items-center justify-content-center w-100' onClick={this.toggleExpand}>
             {this.state.opened ? renderExpandedHeader() : <i className='fa fa-chevron-right' title='Expand bar'></i>}
           </div>

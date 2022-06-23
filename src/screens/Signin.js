@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'ttag'
 
 import logo from '../assets/images/hathor-logo.png';
+import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import { setInitWalletName } from '../actions/index';
 import { connect } from "react-redux";
@@ -27,25 +28,49 @@ const mapDispatchToProps = dispatch => {
  */
 class Signin extends React.Component {
   /**
+   * errorMessage {string} Message to be shown when an error happens
+   */
+  state = { errorMessage: '' };
+
+  /**
+   * Validate wallet name
+   */
+  validateWalletName = (name) => {
+    let errorMessage = null;
+    if (!name) {
+      errorMessage = t`Wallet name is required`;
+    }
+    const walletNames = Object.values(hathorLib.storage.store.getListOfWallets()).map(walletInfo => walletInfo.name);
+    if (walletNames.includes(name)) {
+      errorMessage = t`Wallet name is already in use`;
+    }
+    return errorMessage;
+  }
+
+  /**
    * Go to the new wallet screen
    */
   goToNewWallet = () => {
-    if (this.name) {
-      // TODO validate name is not in use already
-      this.props.setInitWalletName(this.name);
-      this.props.history.push('/new_wallet/');
+    const errorMessage = this.validateWalletName(this.name);
+    if (errorMessage) {
+      this.setState({ errorMessage });
+      return;
     }
+    this.props.setInitWalletName(this.name);
+    this.props.history.push('/new_wallet/');
   }
 
   /**
    * Go to the load wallet screen
    */
   goToLoadWallet = () => {
-    if (this.name) {
-      // TODO validate name is not in use already
-      this.props.setInitWalletName(this.name);
-      this.props.history.push('/load_wallet/');
+    const errorMessage = this.validateWalletName(this.name);
+    if (errorMessage) {
+      this.setState({ errorMessage });
+      return;
     }
+    this.props.setInitWalletName(this.name);
+    this.props.history.push('/load_wallet/');
   }
 
   handleNameChange = (name) => {
@@ -58,7 +83,11 @@ class Signin extends React.Component {
         <div className="inside-white-wrapper col-sm-12 col-md-8">
           <div className="d-flex align-items-center flex-column inside-div">
             <img className="hathor-logo" src={logo} alt="" />
-            <input className="w-100 form-control mt-4" required ref="walletName" type="text" maxLength="50" autoComplete="off" placeholder={t`Walet name`} onChange={(e) => {this.handleNameChange(e.target.value)}}/>
+            <p className="mb-2 mt-4 w-100">
+              {t`You may have different wallets started at the same time. You should have a name for each wallet.`}
+            </p>
+            <input className="w-100 form-control" required ref="walletName" type="text" maxLength="50" autoComplete="off" placeholder={t`Wallet name`} onChange={(e) => {this.handleNameChange(e.target.value)}}/>
+            {this.state.errorMessage && <p className="mb-2 mt-2 w-100 text-danger">{this.state.errorMessage}</p>}
             <p className="mt-4 mb-4">{t`You can start a new wallet or import data from a wallet that already exists.`}</p>
             <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
               <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>

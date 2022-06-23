@@ -93,7 +93,7 @@ const rootReducer = (state = initialState, action) => {
     case 'select_token':
       return Object.assign({}, state, {selectedToken: action.payload});
     case 'new_tokens':
-      return Object.assign({}, state, {selectedToken: action.payload.uid, tokens: action.payload.tokens});
+      return onNewTokens(state, action);
     case 'loading_addresses_update':
       return Object.assign({}, state, {loadingAddresses: action.payload});
     case 'update_loaded_data':
@@ -128,6 +128,8 @@ const rootReducer = (state = initialState, action) => {
       return onLockWalletForResult(state, action);
     case 'resolve_lock_wallet_promise':
       return onResolveLockWalletPromise(state, action);
+    case 'reset_selected_token_if_needed':
+      return resetSelectedTokenIfNeeded(state, action);
     default:
       return state;
   }
@@ -430,6 +432,41 @@ export const onResolveLockWalletPromise = (state, action) => {
     ...state,
     lockWalletPromise: null,
   }
+};
+
+/*
+ * Used When we select to hide zero balance tokens and a token with zero balance is selected
+ * In that case we must select HTR
+*/
+export const resetSelectedTokenIfNeeded = (state, action) => {
+  const tokensBalance = state.tokensBalance;
+  const selectedToken = state.selectedToken;
+
+  const balance = tokensBalance[selectedToken] || { available: 0, locked: 0 };
+  const hasZeroBalance = (balance.available + balance.locked) === 0;
+
+  if (hasZeroBalance) {
+    return {
+      ...state,
+      selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+    };
+  }
+
+  return state;
+};
+
+/*
+ * Used when registering or creating tokens to update the wallet token list.
+*/
+export const onNewTokens = (state, action) => {
+  // Add new created token to the all tokens set
+  state.allTokens.add(action.payload.uid);
+
+  return {
+    ...state,
+    selectedToken: action.payload.uid,
+    tokens: action.payload.tokens,
+  };
 };
 
 export default rootReducer;

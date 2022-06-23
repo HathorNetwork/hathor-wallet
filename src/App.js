@@ -27,6 +27,7 @@ import ChooseWallet from './screens/ChooseWallet';
 import NewWallet from './screens/NewWallet';
 import WalletType from './screens/WalletType';
 import SoftwareWalletWarning from './screens/SoftwareWalletWarning';
+import StartHardwareWallet from './screens/StartHardwareWallet';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
@@ -40,7 +41,7 @@ import RequestErrorModal from './components/RequestError';
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import { IPC_RENDERER, LEDGER_ENABLED, HARDWARE_WALLET_NAME } from './constants';
+import { IPC_RENDERER, LEDGER_ENABLED } from './constants';
 import STORE from './storageInstance';
 import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
@@ -65,13 +66,12 @@ class Root extends React.Component {
       // Event called when user quits hathor app
       IPC_RENDERER.on("ledger:closed", () => {
         if (hathorLib.wallet.loaded() && hathorLib.wallet.isHardwareWallet()) {
-          const prefix = wallet.walletNameToPrefix(HARDWARE_WALLET_NAME);
-          hathorLib.storage.store.removeWallet(prefix);
+          wallet.removeHardwareWalletFromStorage();
 
           // If there are other wallets, go to screen to choose wallet
-          const wallets = Object.keys(hathorLib.storage.store.getListOfWallets());
-          if (wallets.length > 0) {
-            wallet.setWalletPrefix(wallets[0]);
+          const firstWallet = wallet.getFirstWalletPrefix();
+          if (firstWallet) {
+            wallet.setWalletPrefix(firstWallet);
             this.props.history.push('/choose_wallet');
           } else {
             wallet.setWalletPrefix(null);
@@ -120,6 +120,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet_type" component={WalletType} loaded={false} />
         <StartedRoute exact path="/software_warning" component={SoftwareWalletWarning} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
+        <StartedRoute exact path="/hardware_wallet" component={StartHardwareWallet} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/choose_wallet" component={ChooseWallet} />
         <Route exact path="/welcome" component={Welcome} />
@@ -152,7 +153,8 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
     version.checkApiVersion(reduxState.wallet);
     return <Redirect to={{
       pathname: '/loading_addresses/',
-      state: {path: props.match.url}
+      state: {path: props.match.url},
+      waitVersionCheck: true
     }} />;
   } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
     return <VersionError {...props} />;
@@ -250,10 +252,15 @@ const StartedRoute = ({component: Component, ...rest}) => (
 const returnDefaultComponent = (Component, props) => {
   if (version.checkWalletVersion()) {
     if (props.location.pathname === '/locked/' && hathorLib.wallet.isHardwareWallet()) {
-      // This will redirect the page to Wallet Type screen
       wallet.cleanWallet();
+      wallet.removeHardwareWalletFromStorage();
       hathorLib.wallet.unlock();
-      return <Redirect to={{ pathname: '/wallet_type/' }} />;
+      const firstWallet = wallet.getFirstWalletPrefix();
+      if (firstWallet) {
+        return <Redirect to={{ pathname: '/choose_wallet/' }} />;
+      } else {
+        return <Redirect to={{ pathname: '/wallet_type/' }} />;
+      }
     } else {
       return (
         <div className="component-div h-100">

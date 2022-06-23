@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { connect } from "react-redux";
 
 import wallet from '../utils/wallet';
 import hathorLib from '@hathor/wallet-lib';
@@ -42,6 +41,15 @@ class ChooseWallet extends React.Component {
     this.props.history.push('/signin');
   }
 
+  /**
+   * Called when user clicks on "Hardware Wallet" button.
+   */
+  goToHardwareWallet = () => {
+    wallet.setWalletPrefix(null);
+    hathorLib.wallet.cleanWallet({ cleanAccessData: false });
+    this.props.history.push('/hardware_wallet');
+  }
+
   render() {
     const walletTable = Object.entries(hathorLib.storage.store.getListOfWallets()).map(([prefix, walletInfo]) => {
       const onclick = (e) => this.goToWallet(e, prefix);
@@ -59,7 +67,7 @@ class ChooseWallet extends React.Component {
             <div className="d-flex mb-4 align-items-center flex-column">
               <img className="hathor-logo" src={logo} alt="" />
             </div>
-            <p>{t`Select a software wallet or connect to a hardware wallet. You may also start a new software wallet.`}</p>
+            <p>{t`Select a Software Wallet or connect to a Hardware Wallet. You may also start a new Software Wallet.`}</p>
             <div className="d-flex align-items-start flex-column">
               <div className="table-responsive">
                 <table className="mt-3 table table-striped">
@@ -69,7 +77,10 @@ class ChooseWallet extends React.Component {
                 </table>
               </div>
             </div>
-            <button className="btn btn-hathor mt-4" onClick={this.addWallet}>{t`Add software wallet`}</button>
+            <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
+              <button className="btn btn-hathor mr-3" onClick={this.goToHardwareWallet}>{t`Hardware Wallet`}</button>
+              <button className="btn btn-hathor" onClick={this.addWallet}>{t`Add Software Wallet`}</button>
+            </div>
           </div>
           <InitialImages />
         </div>

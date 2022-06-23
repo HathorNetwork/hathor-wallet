@@ -13,7 +13,6 @@ import {
   WalletAlreadyExistError,
   InvalidWalletNameError,
 } from '../errors';
-import { setWalletPrefix } from '../actions/index';
 import wallet from '../utils/wallet';
 
 import hathorLib from '@hathor/wallet-lib';
@@ -46,7 +45,7 @@ function WalletList(props) {
   const goToWallet = (e, prefix) => {
     e.preventDefault();
     setError(null);
-    props.setWalletPrefix(prefix);
+    wallet.setWalletPrefix(prefix);
     hathorLib.wallet.lock();
     props.history.push('/');
   }
@@ -64,7 +63,7 @@ function WalletList(props) {
     }
     const walletName = walletNameRef.current?.value;
     try {
-      hathorLib.storage.store.addWallet(walletName, walletNameToPrefix(walletName));
+      hathorLib.storage.store.addWallet(walletName, wallet.walletNameToPrefix(walletName));
       // This will trigger a state change which will reload the component.
       setListOfWallets(hathorLib.storage.store.getListOfWallets());
     } catch (err) {

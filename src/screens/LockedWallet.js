@@ -133,9 +133,9 @@ class LockedWallet extends React.Component {
     // reset data
     wallet.resetWalletData();
     // If there are other wallets, go to screen to choose wallet
-    const wallets = Object.keys(hathorLib.storage.store.getListOfWallets());
-    if (wallets.length > 0) {
-      wallet.setWalletPrefix(wallets[0]);
+    const firstWallet = wallet.getFirstWalletPrefix();
+    if (firstWallet) {
+      wallet.setWalletPrefix(firstWallet);
       this.props.history.push('/choose_wallet');
     } else {
       wallet.setWalletPrefix(null);

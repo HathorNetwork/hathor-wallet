@@ -79,9 +79,9 @@ class Settings extends React.Component {
     // reset data
     wallet.resetWalletData();
     // If there are other wallets, go to screen to choose wallet
-    const wallets = Object.keys(hathorLib.storage.store.getListOfWallets());
-    if (wallets.length > 0) {
-      wallet.setWalletPrefix(wallets[0]);
+    const firstWallet = wallet.getFirstWalletPrefix();
+    if (firstWallet) {
+      wallet.setWalletPrefix(firstWallet);
       this.props.history.push('/choose_wallet');
     } else {
       wallet.setWalletPrefix(null);
@@ -108,9 +108,9 @@ class Settings extends React.Component {
   }
 
   /**
-   * Called when user clicks on "Change Wallet" button.
+   * Go to change wallet
    */
-  changeWallet = () => {
+  handleChangeWallet = () => {
     hathorLib.wallet.cleanWallet({ cleanAccessData: false });
     hathorLib.wallet.lock();
 
@@ -119,6 +119,21 @@ class Settings extends React.Component {
       hathorLib.storage.store.removeWallet(hathorLib.storage.store.prefix);
     }
     this.props.history.push('/choose_wallet');
+    $('#confirmModal').modal('hide');
+  }
+
+  /**
+   * Called when user clicks on "Change Wallet" button.
+   */
+  changeWallet = () => {
+    this.setState({
+      confirmData: {
+        title: t`Change wallet`,
+        body: t`Change to a different wallet? You may also connect to a hardware wallet.`,
+        handleYes: this.handleChangeWallet
+      }
+    });
+    $('#confirmModal').modal('show');
   }
 
   /**

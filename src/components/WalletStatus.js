@@ -16,6 +16,9 @@ import hathorLib from '@hathor/wallet-lib';
  * @memberof Components
  */
 function WalletStatus(props) {
+  if (hathorLib.wallet.isHardwareWallet()) {
+    return null;
+  }
   const listOfWallets = hathorLib.storage.store.getListOfWallets();
   const walletName = listOfWallets[hathorLib.storage.store.prefix].name;
   return (

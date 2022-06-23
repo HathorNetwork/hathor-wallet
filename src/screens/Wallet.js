@@ -89,6 +89,9 @@ class Wallet extends React.Component {
         this.administrativeRef.current.updateTokenInfo();
       }
     });
+
+    // First time the screen is mounted we must also check if we should show administrative tab
+    this.shouldShowAdministrativeTab(this.props.selectedToken);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -262,7 +265,7 @@ class Wallet extends React.Component {
                 {renderWallet()}
               </div>
               <div className="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
-                <TokenGeneralInfo token={token} showConfigString={true} errorMessage={this.state.errorMessage} ref={this.generalInfoRef} />
+                <TokenGeneralInfo token={token} showConfigString={true} errorMessage={this.state.errorMessage} ref={this.generalInfoRef} showAlwaysShowTokenCheckbox={true} />
               </div>
               {renderContentAdmin()}
             </div>

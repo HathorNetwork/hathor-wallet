@@ -12,6 +12,7 @@ import {
   METADATA_CONCURRENT_DOWNLOAD,
   WALLET_SERVICE_MAINNET_BASE_URL,
   WALLET_SERVICE_MAINNET_BASE_WS_URL,
+  HARDWARE_WALLET_NAME,
 } from '../constants';
 import { FeatureFlags } from '../featureFlags';
 import STORE from '../storageInstance';
@@ -34,6 +35,7 @@ import {
   partiallyUpdateHistoryAndBalance,
   setUseWalletService,
   lockWalletForResult,
+  resetSelectedTokenIfNeeded,
 } from '../actions/index';
 import {
   helpers,
@@ -358,7 +360,7 @@ const wallet = {
       if (registeredTokens.find((x) => x.uid === tokenUid)) {
         continue;
       }
-      const balance = tokensBalance[tokenUid];
+      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
       const tokenData = {
         uid: tokenUid,
         balance: balance,
@@ -973,6 +975,8 @@ const wallet = {
    */
   hideZeroBalanceTokens() {
     storage.setItem(storageKeys.hideZeroBalanceTokens, true);
+    // If the token selected has been hidden, then we must select HTR
+    store.dispatch(resetSelectedTokenIfNeeded());
   },
 
   /**
@@ -1065,6 +1069,40 @@ const wallet = {
    */
   setWalletPrefix(prefix) {
     storage.store.prefix = prefix;
+  },
+
+  /**
+   * Remove the hardware wallet from storage. It first checks it's actually there.
+   *
+   * @return {boolean} If the hardware wallet was present on storage
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  removeHardwareWalletFromStorage() {
+    try {
+      storage.store.removeWallet(HARDWARE_WALLET_NAME);
+      return true;
+    } catch (WalletDoesNotExistError) {
+      return false;
+    }
+  },
+
+  /**
+   * Get the prefix of the first wallet in storage.
+   *
+   * @return {string} Prefix of the first wallet in storage or null if none present
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getFirstWalletPrefix() {
+    const wallets = Object.keys(storage.store.getListOfWallets());
+    if (wallets.length > 0) {
+      return wallets[0];
+    } else {
+      return null;
+    }
   },
 }
 
