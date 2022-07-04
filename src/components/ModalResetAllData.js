@@ -117,6 +117,7 @@ class ModalResetAllData extends React.Component {
             </div>
             <div className="modal-body">
               <p>{getFirstMessage()}</p>
+              <p>{t`You will need to register all your tokens again when your import your words. If you prefer, you can go to Settings > Export Registered Tokens, in order to have a list of your tokens, so you don't need to register them one by one after you start your wallet again.`}</p>
               <p><SpanFmt>{t`If you still wanna do it, we need your password and for you to write down **'${CONFIRM_RESET_MESSAGE}'** to confirm the operation.`}</SpanFmt></p>
               <form ref="formConfirm">
                 <div className="form-group">
