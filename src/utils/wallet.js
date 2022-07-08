@@ -314,6 +314,23 @@ const wallet = {
   },
 
   /**
+   * Updates the local database with known token metadata.
+   *
+   * When a token is created on the application (e.g. an NFT), we do not need to wait until the
+   * metadata service validates it to have some of its information that we already know. ( e.g.:
+   * hide the decimals on amount of tokens exhibition )
+   *
+   * @param {string} tokenUid Token hash
+   * @param {Object} metadata Metadata to be inserted for this token
+   */
+  setLocalTokenMetadata(tokenUid, metadata) {
+    const metadataPerToken = {};
+    metadataPerToken[tokenUid] = metadata;
+
+    store.dispatch(tokenMetadataUpdated(metadataPerToken, []));
+  },
+
+  /**
    * Fetches both history and balance for the affected tokens in updatedBalanceMap
    *
    * @param {HathorWallet} wallet object

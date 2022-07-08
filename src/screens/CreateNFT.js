@@ -170,6 +170,11 @@ class CreateNFT extends React.Component {
     tokens.addToken(token.uid, name, symbol);
     // Must update the shared address, in case we have used one for the change
     wallet.updateSharedAddress();
+    // Also update the local storage with the NFT metadata for correct exhibition on all screens
+    wallet.setLocalTokenMetadata(token.uid, {
+      id: token.uid,
+      nft: true,
+    });
     this.showAlert(token);
   }
 
@@ -252,7 +257,7 @@ class CreateNFT extends React.Component {
     // so this must be 0.01 (the text will show 0.01%) because the amount to create for NFTs is an integer.
     // Then to create 100 units, the deposit is 0.01 HTR, to create 1,000 units the deposit is 0.1 HTR
     const htrDeposit = hathorLib.tokens.getDepositPercentage();
-    const depositAmount = hathorLib.tokens.getDepositAmount(this.state.amount); 
+    const depositAmount = hathorLib.tokens.getDepositAmount(this.state.amount);
     const nftFee = hathorLib.helpers.prettyValue(tokens.getNFTFee());
 
     return (
