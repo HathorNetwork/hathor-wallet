@@ -170,7 +170,7 @@ class CreateNFT extends React.Component {
     tokens.addToken(token.uid, name, symbol);
     // Must update the shared address, in case we have used one for the change
     wallet.updateSharedAddress();
-    // Also update the local storage with the NFT metadata for correct exhibition on all screens
+    // Also update the redux state with the NFT metadata for correct exhibition on all screens
     wallet.setLocalTokenMetadata(token.uid, {
       id: token.uid,
       nft: true,
