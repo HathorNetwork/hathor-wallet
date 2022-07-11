@@ -646,7 +646,10 @@ const wallet = {
       } else {
         isOnline = false;
       }
-      store.dispatch(isOnlineUpdate({ isOnline }));
+      const storeState = store.getState();
+      if (storeState.isOnline !== isOnline) {
+        store.dispatch(isOnlineUpdate({ isOnline }));
+      }
     });
 
     connection.on('wallet-load-partial-update', (data) => {

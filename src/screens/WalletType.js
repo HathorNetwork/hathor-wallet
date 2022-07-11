@@ -13,6 +13,7 @@ import wallet from '../utils/wallet';
 import { HATHOR_WEBSITE_URL } from '../constants';
 import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
+import HathorAlert from '../components/HathorAlert';
 import { str2jsx } from '../utils/i18n';
 import hathorLib from '@hathor/wallet-lib';
 
@@ -23,6 +24,16 @@ import hathorLib from '@hathor/wallet-lib';
  * @memberof Screens
  */
 class WalletType extends React.Component {
+  constructor(props) {
+    super(props);
+
+    if(this.props.location.hash === '#ledger:closed') {
+      setTimeout(() => {
+        this.refs.ledgerClosedAlert.show(-1);
+      }, 1000);
+    }
+  }
+
   componentDidMount() {
     // Update Sentry when user started wallet now
     wallet.updateSentryState();
@@ -70,6 +81,7 @@ class WalletType extends React.Component {
           </div>
           <InitialImages />
         </div>
+        <HathorAlert ref='ledgerClosedAlert' type='warning' extraClasses='hathor-floating-alert' text={t`Ledger disconnected! Either the app was closed or the connection was lost!`} />
       </div>
     )
   }

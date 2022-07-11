@@ -65,7 +65,7 @@ class Root extends React.Component {
       IPC_RENDERER.on("ledger:closed", () => {
         if (hathorLib.wallet.loaded() && hathorLib.wallet.isHardwareWallet()) {
           hathorLib.wallet.lock();
-          this.props.history.push('/wallet_type/');
+          this.props.history.push('/wallet_type/#ledger:closed');
         }
       });
 
@@ -191,7 +191,7 @@ const returnStartedRoute = (Component, props, rest) => {
   if (hathorLib.wallet.loaded()) {
     // Wallet is locked, go to locked screen
     if (hathorLib.wallet.isLocked()) {
-      return <Redirect to={{pathname: '/locked/'}}/>;
+      return <Redirect to={{pathname: '/locked/', hash: rest.location.hash}}/>;
     }
 
     // Route requires the wallet to be loaded, render it
@@ -242,7 +242,7 @@ const returnDefaultComponent = (Component, props) => {
       // This will redirect the page to Wallet Type screen
       wallet.cleanWallet();
       hathorLib.wallet.unlock();
-      return <Redirect to={{ pathname: '/wallet_type/' }} />;
+      return <Redirect to={{ pathname: '/wallet_type/', hash: props.location.hash }} />;
     } else {
       return (
         <div className="component-div h-100">
