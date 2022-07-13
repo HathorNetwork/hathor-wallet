@@ -43,7 +43,7 @@ class LoadingAddresses extends React.Component {
   /**
    * canRedirect {boolean} set if can already redirect to the screen after loading
    */
-  state = { canRedirect: false, timeoutId: null };
+  state = { canRedirect: false };
 
   componentDidMount = () => {
     // When the wallet was opened for the first time and the user is loading the transactions,
@@ -61,15 +61,13 @@ class LoadingAddresses extends React.Component {
     }
     // To prevent only a blink in this screen when user loads the addresses really fast
     // I set that the user will see this screen at least for 2 seconds
-    const timeoutId = setTimeout(() => {
+    this.timeoutId = setTimeout(() => {
       this.setState({ canRedirect: true });
     }, 2000);
-    this.setState({ timeoutId });
   }
 
   componentWillUnmount = () => {
-    clearTimeout(this.state.timeoutId);
-    this.setState({ timeoutId: null });
+    clearTimeout(this.timeoutId);
   }
 
   render() {

@@ -168,6 +168,8 @@ export const resolveLockWalletPromise = (pin) => ({ type: "resolve_lock_wallet_p
 export const resetSelectedTokenIfNeeded = () => ({ type: "reset_selected_token_if_needed" });
 
 /**
- * This will be used then the Ledger app closes to warn the user, and after the user is notified.
+ * This will be used when the Ledger app closes and after the user is notified.
+ *
+ * @param {boolean} data If the Ledger device has disconnected.
  */
 export const updateLedgerClosed = data => ({ type: "set_ledger_was_closed", payload: data });
