@@ -166,3 +166,8 @@ export const resolveLockWalletPromise = (pin) => ({ type: "resolve_lock_wallet_p
  * This will reset the selected token if the one selected has been hidden because of zero balance
  */
 export const resetSelectedTokenIfNeeded = () => ({ type: "reset_selected_token_if_needed" });
+
+/**
+ * This will be used then the Ledger app closes to warn the user, and after the user is notified.
+ */
+export const updateLedgerClosed = data => ({ type: "set_ledger_was_closed", payload: data });

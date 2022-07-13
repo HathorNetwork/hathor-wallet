@@ -43,10 +43,16 @@ class HathorAlert extends React.Component {
    */
   show = (duration) => {
     this.setState({ show: true });
-    if (duration !== -1) {
+    if (duration >= 0) {
       this.timer = setTimeout(() => {
         this.setState({ show: false });
       }, duration);
+    }
+  }
+
+  dismiss = () => {
+    if (this.props.onDismiss) {
+      this.props.onDismiss();
     }
   }
 
@@ -54,7 +60,7 @@ class HathorAlert extends React.Component {
     return (
       <div ref="alertDiv" className={`hathor-alert alert alert-${this.props.type} alert-dismissible fade ${ this.props.extraClasses || 'col-10 col-sm-3' } ${this.state.show ? 'show' : ''}`} role="alert">
         {this.props.text}
-        <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+        <button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={this.dismiss}>
           <span aria-hidden="true">&times;</span>
         </button>
       </div>

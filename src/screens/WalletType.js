@@ -15,8 +15,21 @@ import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
 import HathorAlert from '../components/HathorAlert';
 import { str2jsx } from '../utils/i18n';
+import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
+import { updateLedgerClosed } from '../actions/index';
 
+const mapStateToProps = (state) => {
+  return {
+    ledgerClosed: state.ledgerWasClosed,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    updateLedgerClosed: data => dispatch(updateLedgerClosed(data)),
+  };
+};
 
 /**
  * Screen used to select between hardware wallet or software wallet
@@ -24,19 +37,14 @@ import hathorLib from '@hathor/wallet-lib';
  * @memberof Screens
  */
 class WalletType extends React.Component {
-  constructor(props) {
-    super(props);
-
-    if(this.props.location.hash === '#ledger:closed') {
-      setTimeout(() => {
-        this.refs.ledgerClosedAlert.show(-1);
-      }, 1000);
-    }
-  }
-
   componentDidMount() {
     // Update Sentry when user started wallet now
     wallet.updateSentryState();
+  }
+
+  componentWillUnmount() {
+    // In case the user has not dismissed the alert, we will reset the state.
+    this.props.updateLedgerClosed(false);
   }
 
   /**
@@ -81,10 +89,18 @@ class WalletType extends React.Component {
           </div>
           <InitialImages />
         </div>
-        <HathorAlert ref='ledgerClosedAlert' type='warning' extraClasses='hathor-floating-alert' text={t`Ledger disconnected! Either the app was closed or the connection was lost!`} />
+        {this.props.ledgerClosed &&
+          <HathorAlert
+            ref='ledgerClosedAlert'
+            type='warning'
+            extraClasses='hathor-floating-alert show'
+            onDismiss={() => { this.props.updateLedgerClosed(false) }}
+            text={t`Ledger disconnected! Either the app was closed or the connection was lost!`}
+          />
+        }
       </div>
     )
   }
 }
 
-export default WalletType;
+export default connect(mapStateToProps, mapDispatchToProps)(WalletType);
