@@ -128,8 +128,10 @@ class Ledger {
           this.hathorAppOpened = false;
           // If we don't close it when changing the app we get an error
           // https://github.com/LedgerHQ/ledgerjs/issues/22
-          this.transport.device.close();
-          this.transport = null;
+          if (this.transport) {
+            this.transport.device.close();
+            this.transport = null;
+          }
         }
       },
       error: error => {},
@@ -170,6 +172,11 @@ class Ledger {
         this.checkSendQueue();
       });
     } else {
+      // no more commands on queue, we can release the transport connection
+      if (this.transport) {
+        this.transport.device.close();
+        this.transport = null;
+      }
       this.canSend = true;
     }
   }

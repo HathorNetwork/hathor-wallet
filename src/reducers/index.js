@@ -55,6 +55,8 @@ const initialState = {
   useWalletService: false,
   // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
   lockWalletPromise: null,
+  // Track if the Ledger device app was closed while the wallet was loaded.
+  ledgerWasClosed: false,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -126,6 +128,8 @@ const rootReducer = (state = initialState, action) => {
       return onResolveLockWalletPromise(state, action);
     case 'reset_selected_token_if_needed':
       return resetSelectedTokenIfNeeded(state, action);
+    case 'set_ledger_was_closed':
+      return Object.assign({}, state, { ledgerWasClosed: action.payload });
     default:
       return state;
   }
@@ -297,6 +301,7 @@ const onCleanData = (state, action) => {
   return Object.assign({}, initialState, {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
+    ledgerWasClosed: state.ledgerWasClosed,
   });
 };
 
