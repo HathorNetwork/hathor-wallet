@@ -201,6 +201,20 @@ const helpers = {
     localStorage.setItem('app:uniqueId', uniqueId);
 
     return uniqueId;
+  },
+
+  /**
+   * Returns the xPubKey from the wallet access data
+   *
+   * @returns {string} The Extended Public Key (xpubkey)
+   *
+   * @memberof Helpers
+   * @inner
+   */
+  getXPubKeyFromAccessData() {
+    const walletAccessData = hathorLib.wallet.getWalletAccessData();
+
+    return walletAccessData.xpubkey;
   }
 }
 

@@ -48,6 +48,7 @@ class Settings extends React.Component {
     zeroBalanceTokensHidden: null,
     now: new Date(),
     showTimestamp: false,
+    showExtendedPubKey: false
   }
 
   // Stores the setTimeout interval of the date update
@@ -159,6 +160,20 @@ class Settings extends React.Component {
   }
 
   /**
+   * Called when user clicks to change the "Show Extended Pub Key" flag.
+   * Toggles the state of showExtendedPubKey
+   *
+   * @param {Object} e Event emitted on link click
+   */
+  toggleShowExtendedPubKey = (e) => {
+    e.preventDefault();
+
+    this.setState({
+      showExtendedPubKey: !this.state.showExtendedPubKey
+    });
+  }
+
+  /**
    * Activates or deactivates the option to hide zero-balance tokens from the UI.
    */
   handleToggleZeroBalanceTokens = () => {
@@ -224,6 +239,7 @@ class Settings extends React.Component {
     const wsServerURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
     const ledgerCustomTokens = hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
     const uniqueIdentifier = helpers.getUniqueId();
+    const xPubKey = helpers.getXPubKeyFromAccessData();
 
     return (
       <div className="content-wrapper settings">
@@ -263,7 +279,14 @@ class Settings extends React.Component {
                 <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
               </span>
             </CopyToClipboard>
-            <button className="btn btn-hathor" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
+            <p>
+              <strong>{t`Extended Public Key (xpubkey)`}:</strong>
+              <a className="ml-3" href="" onClick={this.toggleShowExtendedPubKey}> {this.state.showExtendedPubKey ? t`Hide` : t`Show`} </a>
+              <CopyToClipboard text={xPubKey} onCopy={this.copied}>
+                <span><i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}> </i> <span className="text-break">{this.state.showExtendedPubKey && xPubKey}</span> </span>
+              </CopyToClipboard>
+            </p>
+            <button className="btn btn-hathor mt-2" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
             {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
