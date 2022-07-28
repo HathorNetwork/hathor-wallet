@@ -16,7 +16,7 @@ const ledgerCLA = 0xe0;
 const ledgerOK = Buffer.from('9000', 'hex');
 
 class Ledger {
-  
+
   static parseLedgerError(e) {
     const errorMap = {
       0x6a86:  "WRONG_P1P2",
@@ -154,62 +154,64 @@ class Ledger {
     this.sendQueue = [];
 
     // If can send command to ledger
-    this.canSend = true;
+    this.runningQueue = false;
   }
 
   /**
    * Send a command to ledger if there's anything on the send queue.
+   * If the queue is empty, close the transport.
    */
   checkSendQueue = () => {
-    if (this.sendQueue.length > 0) {
-      const { transport, command, p1, p2, data, resolve, reject } = this.sendQueue.shift();
-      const promise = transport.send(ledgerCLA, command, p1, p2, data);
-      promise.then((response) => {
-        resolve(response);
-      }, (error) => {
-        reject(error);
-      }).finally(() => {
-        this.checkSendQueue();
-      });
-    } else {
-      // no more commands on queue, we can release the transport connection
-      if (this.transport) {
+    if (this.sendQueue.length === 0) {
+      console.log('closing transport!');
+      this.runningQueue = false;
+      // queue is exausted, close transport and stop
+      if(this.transport) {
         this.transport.device.close();
         this.transport = null;
       }
-      this.canSend = true;
+      return;
     }
+
+    const { command, p1, p2, data, resolve, reject } = this.sendQueue.shift();
+    const promise = this.getTransport().then(transport => transport.send(ledgerCLA, command, p1, p2, data));
+    promise.then((response) => {
+      resolve(response);
+    }, (error) => {
+      reject(error);
+    }).finally(() => {
+      // When done, check the queue again
+      this.checkSendQueue();
+    });
   }
 
   /**
-   * Send the command to Ledger. If we're still waiting for the response of a previous
-   * command, add this to the send queue.
+   * Add the command to the send queue.
+   * If the queue is not being processed we start processing.
    *
    * @return {Promise} Promise resolved when there's a response from Ledger
    */
-  sendToLedgerOrQueue = (transport, command, p1, p2, data) => {
-    if (this.canSend) {
-      this.canSend = false;
-      const promise = transport.send(ledgerCLA, command, p1, p2, data);
-      promise.finally(() => {
+  sendToQueue = (command, p1, p2, data) => {
+    console.log('sending to Ledger:', command, p1, p2);
+    const promise = new Promise((resolve, reject) => {
+      const element = {
+        command,
+        p1,
+        p2,
+        data,
+        resolve,
+        reject
+      }
+      this.sendQueue.push(element);
+      console.log('queue status', this.runningQueue);
+      if (!this.runningQueue) {
+        console.log('running queue!');
+        this.runningQueue = true;
         this.checkSendQueue();
-      });
-      return promise;
-    } else {
-      const promise = new Promise((resolve, reject) => {
-        const element = {
-          transport,
-          command,
-          p1,
-          p2,
-          data,
-          resolve,
-          reject
-        }
-        this.sendQueue.push(element);
-      });
-      return promise;
-    }
+      }
+    });
+
+    return promise;
   }
 
   /**
@@ -254,8 +256,7 @@ class Ledger {
   getVersion = async () => {
     let result;
     try {
-      const transport = await this.getTransport();
-      result = await this.sendToLedgerOrQueue(transport, this.commands.VERSION, 0, 0);
+      result = await this.sendToQueue(this.commands.VERSION, 0, 0);
     } catch (e) {
       throw Ledger.parseLedgerError(e);
     }
@@ -275,8 +276,7 @@ class Ledger {
    */
   getPublicKeyData = async () => {
     try {
-      const transport = await this.getTransport();
-      return await this.sendToLedgerOrQueue(transport, this.commands.PUBLIC_KEY_DATA, 0, 0, Ledger.formatPathData());
+      return await this.sendToQueue(this.commands.PUBLIC_KEY_DATA, 0, 0, Ledger.formatPathData());
     } catch (e) {
       throw Ledger.parseLedgerError(e);
     }
@@ -293,8 +293,7 @@ class Ledger {
    */
   checkAddress = async (index) => {
     try {
-      const transport = await this.getTransport();
-      const result = await this.sendToLedgerOrQueue(transport, this.commands.ADDRESS, 0, 0, Ledger.formatPathData(index));
+      const result = await this.sendToQueue(this.commands.ADDRESS, 0, 0, Ledger.formatPathData(index));
       return result;
     } catch (e) {
       throw Ledger.parseLedgerError(e);
@@ -321,11 +320,10 @@ class Ledger {
   sendTx = async (data) => {
     let offset = 0;
     try {
-      const transport = await this.getTransport();
       let i=0;
       while (offset < data.length) {
         const toSend = data.slice(offset, offset + maxLedgerBuffer);
-        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 0, i++, toSend);
+        await this.sendToQueue(this.commands.SEND_TX, 0, i++, toSend);
         offset += maxLedgerBuffer;
       }
     } catch (e) {
@@ -353,9 +351,8 @@ class Ledger {
   getSignatures = async (indexes) => {
     const values = [];
     try {
-      const transport = await this.getTransport();
       for (const index of indexes) {
-        const value = await this.sendToLedgerOrQueue(transport, this.commands.SEND_TX, 1, 0, Ledger.formatPathData(index));
+        const value = await this.sendToQueue(this.commands.SEND_TX, 1, 0, Ledger.formatPathData(index));
         // we remove the last 2 bytes as they're just control bytes from ledger to say if
         // the communication was successful or not
         values.push(value.slice(0, -2));
@@ -364,8 +361,7 @@ class Ledger {
     } catch (e) {
       throw Ledger.parseLedgerError(e);
     } finally {
-      const transport = await this.getTransport();
-      await transport.send(ledgerCLA, this.commands.SEND_TX, 2, 0);
+      await this.sendToQueue(this.commands.SEND_TX, 2, 0);
     }
   }
 
@@ -379,8 +375,7 @@ class Ledger {
    */
   signToken = async (data) => {
     try {
-      const transport = await this.getTransport();
-      const result = await this.sendToLedgerOrQueue(transport, this.commands.SIGN_TOKEN, 0, 0, data);
+      const result = await this.sendToQueue(this.commands.SIGN_TOKEN, 0, 0, data);
       return result.slice(0, -2);
     } catch (e) {
       throw Ledger.parseLedgerError(e);
@@ -398,11 +393,10 @@ class Ledger {
    */
   sendTokens = async (tokenMap) => {
     const values = [];
-    const transport = await this.getTransport();
     let i = 0;
     for (let [uid, data] of Object.entries(tokenMap)) {
       try {
-        await this.sendToLedgerOrQueue(transport, this.commands.SEND_TOKEN, i, 0, data);
+        await this.sendToQueue(this.commands.SEND_TOKEN, i, 0, data);
       } catch (e) {
         // only return failures
         values.push(uid);
@@ -423,8 +417,7 @@ class Ledger {
    */
   verifyTokenSignature = async (data) => {
     try {
-      const transport = await this.getTransport();
-      await this.sendToLedgerOrQueue(transport, this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
+      await this.sendToQueue(this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
     } catch (e) {
       throw Ledger.parseLedgerError(e);
     }
@@ -441,10 +434,9 @@ class Ledger {
    */
   verifyManyTokenSignatures = async (tokenMap) => {
     const values = [];
-    const transport = await this.getTransport();
     for (let [uid, data] of Object.entries(tokenMap)) {
       try {
-        await this.sendToLedgerOrQueue(transport, this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
+        await this.sendToQueue(this.commands.VERIFY_TOKEN_SIGNATURE, 0, 0, data);
       } catch (e) {
         // only return failures
         values.push(uid);
@@ -460,8 +452,7 @@ class Ledger {
    */
   resetTokenSignatures = async () => {
     try {
-      const transport = await this.getTransport();
-      await this.sendToLedgerOrQueue(transport, this.commands.RESET_TOKEN_SIGNATURES, 0, 0);
+      await this.sendToQueue(this.commands.RESET_TOKEN_SIGNATURES, 0, 0);
     } catch (e) {
       throw Ledger.parseLedgerError(e);
     }
