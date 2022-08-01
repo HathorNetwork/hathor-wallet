@@ -77,7 +77,7 @@
   "devDependencies": {
     "@sentry/browser": "^5.0.5",
     "@sentry/cli": "^1.40.0",
-    "electron": "13.6.9",
+    "electron": "15.5.5",
     "electron-builder": "^23.0.3",
     "electron-devtools-installer": "^2.2.4",
     "electron-notarize": "^0.1.1",
