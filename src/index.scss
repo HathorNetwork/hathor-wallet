@@ -228,6 +228,11 @@ i.pointer {
   bottom: 1rem;
 }
 
+.hathor-floating-alert {
+  right: auto;
+  left: auto;
+}
+
 .navigation-search i {
   color: #fff;
 }
@@ -571,6 +576,10 @@ svg.svg-wrapper {
 
 .token-bar .header i {
   font-size: 1.2rem;
+}
+
+.token-bar .first-child {
+  overflow: auto;
 }
 
 .token-bar .body {

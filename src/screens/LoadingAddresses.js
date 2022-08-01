@@ -61,9 +61,13 @@ class LoadingAddresses extends React.Component {
     }
     // To prevent only a blink in this screen when user loads the addresses really fast
     // I set that the user will see this screen at least for 2 seconds
-    setTimeout(() => {
+    this.timeoutId = setTimeout(() => {
       this.setState({ canRedirect: true });
     }, 2000);
+  }
+
+  componentWillUnmount = () => {
+    clearTimeout(this.timeoutId);
   }
 
   render() {

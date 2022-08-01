@@ -25,6 +25,7 @@ import LockedWallet from './screens/LockedWallet';
 import NewWallet from './screens/NewWallet';
 import WalletType from './screens/WalletType';
 import SoftwareWalletWarning from './screens/SoftwareWalletWarning';
+import StartHardwareWallet from './screens/StartHardwareWallet';
 import Settings from './screens/Settings';
 import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
@@ -44,6 +45,7 @@ import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
+import { updateLedgerClosed } from './actions/index';
 
 
 hathorLib.storage.setStore(STORE);
@@ -52,10 +54,25 @@ const mapStateToProps = (state) => {
   return {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
+    ledgerClosed: state.ledgerWasClosed,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    updateLedgerClosed: data => dispatch(updateLedgerClosed(data)),
   };
 };
 
 class Root extends React.Component {
+  componentDidUpdate(prevProps) {
+    // When Ledger device loses connection or the app is closed
+    if (this.props.ledgerClosed && !prevProps.ledgerClosed) {
+      hathorLib.wallet.lock();
+      this.props.history.push('/wallet_type/');
+    }
+  }
+
   componentDidMount() {
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
 
@@ -63,8 +80,7 @@ class Root extends React.Component {
       // Event called when user quits hathor app
       IPC_RENDERER.on("ledger:closed", () => {
         if (hathorLib.wallet.loaded() && hathorLib.wallet.isHardwareWallet()) {
-          hathorLib.wallet.lock();
-          this.props.history.push('/wallet_type/');
+          this.props.updateLedgerClosed(true);
         }
       });
 
@@ -107,6 +123,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet_type" component={WalletType} loaded={false} />
         <StartedRoute exact path="/software_warning" component={SoftwareWalletWarning} loaded={false} />
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
+        <StartedRoute exact path="/hardware_wallet" component={StartHardwareWallet} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
         <Route exact path="/welcome" component={Welcome} />
         <Route exact path="/loading_addresses" component={LoadingAddresses} />
@@ -271,4 +288,4 @@ const NavigationRoute = ({ component: Component, ...rest }) => (
   )} />
 )
 
-export default connect(mapStateToProps)(Root);
+export default connect(mapStateToProps, mapDispatchToProps)(Root);

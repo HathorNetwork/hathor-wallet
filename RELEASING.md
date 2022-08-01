@@ -1,8 +1,8 @@
 # Bumping up the version
 
-The following files must be updated: `src/constants.js`, `public/electron.js`, and `package.json`.
+The following files must be updated: `src/constants.js`, `public/electron.js`, `package.json`, and `package-lock.json`.
 
-In the `package.json`, the field `version` must be updated.
+In the `package.json` and `package-lock.json`, the field `version` must be updated.
 
 In the `src/constants.js`, the variable named `VERSION` must be updated.
 

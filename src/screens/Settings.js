@@ -27,6 +27,7 @@ import { connect } from "react-redux";
 const mapStateToProps = (state) => {
   return {
     useWalletService: state.useWalletService,
+    registeredTokens: state.tokens,
   };
 };
 
@@ -93,6 +94,35 @@ class Settings extends React.Component {
     } else {
       this.props.history.push('/wallet/passphrase/');
     }
+  }
+
+  /**
+   * When user clicks Export Registered Tokens button, then we save all config strings in a txt file
+   */
+  exportTokens = () => {
+    // The file text will be the configuration strings of each registered token, one each line
+    //
+    // First we get all token configs from registered tokens array,
+    // remove the HTR token with filter, then map to each configuration string
+    const configurationStrings = this.props.registeredTokens.filter((token) => {
+      return token.uid !== hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+    }).map((token) => {
+      return hathorLib.tokens.getConfigurationString(token.uid, token.name, token.symbol);
+    });
+
+    // The text will be all the configuration strings, one for each line
+    const text = configurationStrings.join('\n');
+
+    // Create the hidden a element to trigger the download
+    const element = document.createElement('a');
+    const file = new Blob([text], {
+      type: 'text/plain'
+    });
+    element.href = URL.createObjectURL(file);
+    element.download = 'Hathor Wallet - Tokens.txt';
+    document.body.appendChild(element);
+    element.click();
+    element.remove();
   }
 
   /**
@@ -263,7 +293,8 @@ class Settings extends React.Component {
                 <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
               </span>
             </CopyToClipboard>
-            <button className="btn btn-hathor" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
+            <button className="btn btn-hathor" onClick={this.exportTokens}>{t`Export Registered Tokens`}</button>
+            <button className="btn btn-hathor mt-4" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
             {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
