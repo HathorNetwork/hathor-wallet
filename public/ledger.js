@@ -174,12 +174,10 @@ class Ledger {
     }
 
     const { command, p1, p2, data, resolve, reject } = this.sendQueue.shift();
-    const promise = this.getTransport().then(transport => transport.send(ledgerCLA, command, p1, p2, data));
-    promise.then((response) => {
-      resolve(response);
-    }, (error) => {
-      reject(error);
-    }).finally(() => {
+    this.getTransport()
+      .then(transport => transport.send(ledgerCLA, command, p1, p2, data))
+      .then((response) => { resolve(response) }, (error) => { reject(error) })
+      .finally(() => {
       // When done, check the queue again
       this.checkSendQueue();
     });
