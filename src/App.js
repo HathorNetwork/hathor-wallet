@@ -47,6 +47,7 @@ import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
+import { updateLedgerClosed } from './actions/index';
 
 
 hathorLib.storage.setStore(STORE);
@@ -55,10 +56,34 @@ const mapStateToProps = (state) => {
   return {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
+    ledgerClosed: state.ledgerWasClosed,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    updateLedgerClosed: data => dispatch(updateLedgerClosed(data)),
   };
 };
 
 class Root extends React.Component {
+  componentDidUpdate(prevProps) {
+    // When Ledger device loses connection or the app is closed
+    if (this.props.ledgerClosed && !prevProps.ledgerClosed) {
+      wallet.removeHardwareWalletFromStorage();
+
+      // If there are other wallets, go to screen to choose wallet
+      const firstWallet = wallet.getFirstWalletPrefix();
+      if (firstWallet) {
+        wallet.setWalletPrefix(firstWallet);
+        this.props.history.push('/choose_wallet');
+      } else {
+        wallet.setWalletPrefix(null);
+        this.props.history.push('/wallet_type/');
+      }
+    }
+  }
+
   componentDidMount() {
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
 
@@ -66,17 +91,7 @@ class Root extends React.Component {
       // Event called when user quits hathor app
       IPC_RENDERER.on("ledger:closed", () => {
         if (hathorLib.wallet.loaded() && hathorLib.wallet.isHardwareWallet()) {
-          wallet.removeHardwareWalletFromStorage();
-
-          // If there are other wallets, go to screen to choose wallet
-          const firstWallet = wallet.getFirstWalletPrefix();
-          if (firstWallet) {
-            wallet.setWalletPrefix(firstWallet);
-            this.props.history.push('/choose_wallet');
-          } else {
-            wallet.setWalletPrefix(null);
-            this.props.history.push('/wallet_type/');
-          }
+          this.props.updateLedgerClosed(true);
         }
       });
 
@@ -137,9 +152,9 @@ class Root extends React.Component {
  * Validate if version is allowed for the loaded wallet
  */
 const returnLoadedWalletComponent = (Component, props, rest) => {
-  // If was closed and is loaded we need to redirect to locked screen
+  // If was closed and is loaded we need to redirect to choose wallet screen
   if (hathorLib.wallet.wasClosed()) {
-    return <Redirect to={{ pathname: '/locked/' }} />;
+    return <Redirect to={{ pathname: '/choose_wallet/' }} />;
   }
 
   // For server screen we don't need to check version
@@ -202,9 +217,9 @@ const returnStartedRoute = (Component, props, rest) => {
   // The wallet is already loaded
   const routeRequiresWalletToBeLoaded = rest.loaded;
   if (hathorLib.wallet.loaded()) {
-    // Wallet is locked, go to locked screen
+    // Wallet is locked, go to choose_wallet screen
     if (hathorLib.wallet.isLocked()) {
-      return <Redirect to={{pathname: '/locked/'}}/>;
+      return <Redirect to={{pathname: '/choose_wallet/'}}/>;
     }
 
     // Route requires the wallet to be loaded, render it
@@ -214,6 +229,11 @@ const returnStartedRoute = (Component, props, rest) => {
 
     // Route does not require wallet to be loaded. Redirect to wallet "home" screen
     return <Redirect to={{pathname: '/wallet/'}}/>;
+  }
+
+  const firstWallet = wallet.getFirstWalletPrefix();
+  if (firstWallet && hathorLib.storage.store.prefix === '') {
+    return <Redirect to={{pathname: '/choose_wallet/'}}/>;
   }
 
   // Wallet is not loaded, but it is still loading addresses. Go to the loading screen
@@ -251,7 +271,7 @@ const StartedRoute = ({component: Component, ...rest}) => (
  */
 const returnDefaultComponent = (Component, props) => {
   if (version.checkWalletVersion()) {
-    if (props.location.pathname === '/locked/' && hathorLib.wallet.isHardwareWallet()) {
+    if (props.location.pathname === '/choose_wallet/' && hathorLib.wallet.isHardwareWallet()) {
       wallet.cleanWallet();
       wallet.removeHardwareWalletFromStorage();
       hathorLib.wallet.unlock();
@@ -291,4 +311,4 @@ const NavigationRoute = ({ component: Component, ...rest }) => (
   )} />
 )
 
-export default connect(mapStateToProps)(Root);
+export default connect(mapStateToProps, mapDispatchToProps)(Root);

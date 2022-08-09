@@ -37,21 +37,30 @@ class HathorAlert extends React.Component {
 
   /**
    * Show the alert. Change state and set a new state change for the future
+   * Duration of -1 will not auto hide the alert.
    *
    * @param {number} Duration that the alert will appear on the screen (in milliseconds)
    */
   show = (duration) => {
     this.setState({ show: true });
-    this.timer = setTimeout(() => {
-      this.setState({ show: false });
-    }, duration);
+    if (duration >= 0) {
+      this.timer = setTimeout(() => {
+        this.setState({ show: false });
+      }, duration);
+    }
+  }
+
+  dismiss = () => {
+    if (this.props.onDismiss) {
+      this.props.onDismiss();
+    }
   }
 
   render() {
     return (
-      <div ref="alertDiv" className={`hathor-alert alert alert-${this.props.type} alert-dismissible fade col-10 col-sm-3 ${this.state.show ? 'show' : ''}`} role="alert">
+      <div ref="alertDiv" className={`hathor-alert alert alert-${this.props.type} alert-dismissible fade ${ this.props.extraClasses || 'col-10 col-sm-3' } ${this.state.show ? 'show' : ''}`} role="alert">
         {this.props.text}
-        <button type="button" className="close" data-dismiss="alert" aria-label="Close">
+        <button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={this.dismiss}>
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
