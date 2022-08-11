@@ -33,7 +33,7 @@ class Signin extends React.Component {
   state = { errorMessage: '' };
 
   /**
-   * Validate wallet name
+   * Check wallet name is not blank or already in use
    */
   validateWalletName = (name) => {
     let errorMessage = null;
@@ -86,7 +86,7 @@ class Signin extends React.Component {
             <p className="mb-2 mt-4 w-100">
               {t`You may have different wallets started at the same time. You should have a name for each wallet.`}
             </p>
-            <input className="w-100 form-control" required ref="walletName" type="text" maxLength="50" autoComplete="off" placeholder={t`Wallet name`} onChange={(e) => {this.handleNameChange(e.target.value)}}/>
+            <input className="w-100 form-control" required ref="walletName" type="text" maxLength="24" autoComplete="off" placeholder={t`Wallet name`} onChange={(e) => {this.handleNameChange(e.target.value)}}/>
             {this.state.errorMessage && <p className="mb-2 mt-2 w-100 text-danger">{this.state.errorMessage}</p>}
             <p className="mt-4 mb-4">{t`You can start a new wallet or import data from a wallet that already exists.`}</p>
             <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">

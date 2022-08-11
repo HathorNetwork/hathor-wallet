@@ -16,7 +16,6 @@ import TransactionDetail from './screens/TransactionDetail';
 import LoadingAddresses from './screens/LoadingAddresses';
 import Server from './screens/Server';
 import ChoosePassphrase from './screens/ChoosePassphrase';
-import WalletList from './screens/WalletList';
 import CustomTokens from './screens/CustomTokens';
 import Welcome from './screens/Welcome';
 import SentryPermission from './screens/SentryPermission';
@@ -126,7 +125,6 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} />
         <StartedRoute exact path="/settings" component={Settings} loaded={true} />
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
-        <StartedRoute exact path="/wallet/list" component={WalletList} loaded={true} />
         <StartedRoute exact path="/server" component={Server} loaded={true} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} />
         <StartedRoute exact path="/addresses" component={AddressList} loaded={true} />

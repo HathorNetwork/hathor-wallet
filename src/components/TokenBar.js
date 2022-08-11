@@ -87,9 +87,11 @@ class TokenBar extends React.Component {
    * Called when user clicks to lock wallet, then redirects to locked screen
    */
   lockWallet = () => {
-    // Select default wallet before locking
     hathorLib.wallet.lock();
-    this.props.history.push('/locked/');
+    if (hathorLib.wallet.isHardwareWallet()) {
+      wallet.removeHardwareWalletFromStorage();
+    }
+    this.props.history.push('/choose_wallet/');
   }
 
   /**

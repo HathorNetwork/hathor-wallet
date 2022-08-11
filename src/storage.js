@@ -12,6 +12,7 @@ import {
   WalletAlreadyExistError,
   InvalidWalletNameError,
 } from './errors';
+import { DEBUG_LOCAL_DATA_KEYS } from './constants';
 
 class LocalStorageStore {
   getItem(key) {
@@ -66,6 +67,35 @@ class HybridStore {
     this.persistentStore = new LocalStorageStore();
     this.prefix = '';
     this.nonPrefixedKeys = new Set(HybridStore.nonPrefixedKeyList);
+  }
+
+  /*
+   * Upgrades an old version of the storage, which did not support multiple wallets
+   *
+   * @param {String} walletPrefix Prefix used to identify the wallet.
+   * @param {String} walletName Name used to identify the wallet.
+   *
+   * @memberof HybridStore
+   * @inner
+   */
+  upgradeStorage(walletPrefix, walletName) {
+    this.addWallet(walletName, walletPrefix);
+
+    const keys = [
+      ...DEBUG_LOCAL_DATA_KEYS,
+      'wallet:accessData',
+      'wallet:network',
+      'wallet:sentry',
+      'wallet:type',
+      'wallet:version',
+      'wallet:multisig',
+    ];
+    keys.forEach((key) => {
+      const item = this.getPrefixedItem(null, key);
+      this.setPrefixedItem(walletPrefix, key, item);
+      this.removePrefixedItem(null, key);
+      this.setPrefixedItem(null, 'wallet:started', true);
+    })
   }
 
   /**

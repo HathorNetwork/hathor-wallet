@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import { CONFIRM_RESET_MESSAGE } from '../constants';
 import SpanFmt from './SpanFmt';
+import $ from 'jquery';
 
 
 /**
@@ -24,6 +25,13 @@ class ModalResetAllData extends React.Component {
    * @property {boolean} [forgotPassword] Identifies if the user has forgotten their password
    */
   state = { errorMessage: '', forgotPassword: false };
+
+  componentDidMount() {
+    // when the modal closes, make sures the fields are reset
+    $('#confirmResetModal').on('hide.bs.modal', () => {
+      this.onDismiss();
+    });
+  }
 
   /**
    * Method to be called when user clicks the button to confirm  

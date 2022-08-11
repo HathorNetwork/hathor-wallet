@@ -118,14 +118,6 @@ class LockedWallet extends React.Component {
   /**
    * When reset modal validates, then execute method to reset all data from the wallet and redirect to Welcome screen
    */
-  /*
-  handleReset = () => {
-    $('#confirmResetModal').modal('hide');
-    wallet.resetWalletData();
-    this.props.history.push('/welcome/');
-  }
-  */
-
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
     // Remove from list of wallets
