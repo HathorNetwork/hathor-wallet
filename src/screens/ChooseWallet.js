@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 
 import wallet from '../utils/wallet';
+import helpers from '../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
 import logo from '../assets/images/hathor-logo.png';
 import InitialImages from '../components/InitialImages';
@@ -129,6 +130,11 @@ class ChooseWallet extends React.Component {
       return;
     }
     this.setState({ errorMessage: null, loading: true });
+
+    // Make sure the correct network is used. The storage has already been set to the new
+    // wallet, so fetching the info from storage will get the correct network
+    const currentNetwork = hathorLib.storage.getItem('wallet:network') || 'mainnet';
+    helpers.updateNetwork(currentNetwork);
 
     // The last parameter being true means that we are going to start the wallet from an xpriv
     // that's already in localStorage encrypted. Because of that we don't need to send the
