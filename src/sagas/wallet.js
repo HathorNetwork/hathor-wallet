@@ -220,11 +220,11 @@ export function* startWallet(action) {
     }
   }
 
-  yield put(loadWalletSuccess({}, {}, dataToken));
-
   yield call(loadTokens);
-
+  yield put(loadWalletSuccess({}, {}, dataToken));
   yield put(loadingAddresses(false));
+
+  routerHistory.push('/wallet/');
 
   // The way the redux-saga fork model works is that if a saga has `forked`
   // another saga (using the `fork` effect), it will remain active until all
