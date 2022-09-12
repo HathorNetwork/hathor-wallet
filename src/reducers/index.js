@@ -7,6 +7,8 @@
 
 import hathorLib from '@hathor/wallet-lib';
 import { VERSION } from '../constants';
+import { types } from '../actions';
+import { get } from 'lodash';
 
 const initialState = {
   tokensHistory: {},
@@ -57,6 +59,10 @@ const initialState = {
   lockWalletPromise: null,
   // Track if the Ledger device app was closed while the wallet was loaded.
   ledgerWasClosed: false,
+  serverInfo: {
+    network: null,
+    version: null,
+  },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -130,6 +136,33 @@ const rootReducer = (state = initialState, action) => {
       return resetSelectedTokenIfNeeded(state, action);
     case 'set_ledger_was_closed':
       return Object.assign({}, state, { ledgerWasClosed: action.payload });
+    // TODO: Refactor all the above to use `types.` syntax
+    case types.SET_SERVER_INFO:
+      return onSetServerInfo(state, action);
+    case types.TOKEN_FETCH_BALANCE_REQUESTED:
+      return onTokenFetchBalanceRequested(state, action);
+    case types.TOKEN_FETCH_BALANCE_SUCCESS:
+      return onTokenFetchBalanceSuccess(state, action);
+    case types.TOKEN_FETCH_BALANCE_FAILED:
+      return onTokenFetchBalanceFailed(state, action);
+    case types.TOKEN_FETCH_HISTORY_REQUESTED:
+      return onTokenFetchHistoryRequested(state, action);
+    case types.TOKEN_FETCH_HISTORY_SUCCESS:
+      return onTokenFetchHistorySuccess(state, action);
+    case types.TOKEN_FETCH_HISTORY_FAILED:
+      return onTokenFetchHistoryFailed(state, action);
+    case types.TOKEN_INVALIDATE_HISTORY:
+      return onTokenInvalidateHistory(state, action);
+    case types.TOKEN_INVALIDATE_BALANCE:
+      return onTokenInvalidateBalance(state, action);
+    case types.ON_START_WALLET_LOCK:
+      return onStartWalletLock(state);
+    case types.START_WALLET_SUCCESS:
+      return onStartWalletSuccess(state);
+    case types.START_WALLET_FAILED:
+      return onStartWalletFailed(state);
+    case types.WALLET_BEST_BLOCK_UPDATE:
+      return onWalletBestBlockUpdate(state, action);
     default:
       return state;
   }
@@ -462,5 +495,164 @@ export const onNewTokens = (state, action) => {
     tokens: action.payload.tokens,
   };
 };
+
+export const onTokenFetchBalanceRequested = (state, action) => {
+  const { tokenId } = action;
+  const oldState = get(state.tokensBalance, tokenId, {});
+
+  return {
+    ...state,
+    tokensBalance: {
+      ...state.tokensBalance,
+      [tokenId]: {
+        ...oldState,
+        status: 'loading',
+        oldStatus: oldState.status,
+      },
+    },
+  };
+};
+
+export const onTokenFetchBalanceSuccess = (state, action) => {
+  const { tokenId, data } = action;
+
+  return {
+    ...state,
+    tokensBalance: {
+      ...state.tokensBalance,
+      [tokenId]: {
+        status: 'ready',
+        updatedAt: new Date().getTime(),
+        data,
+      },
+    },
+  };
+};
+
+export const onTokenFetchBalanceFailed = (state, action) => {
+  const { tokenId } = action;
+
+  return {
+    ...state,
+    tokensBalance: {
+      ...state.tokensBalance,
+      [tokenId]: {
+        status: 'failed',
+      },
+    },
+  };
+};
+
+export const onTokenFetchHistorySuccess = (state, action) => {
+  const { tokenId, data } = action;
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      [tokenId]: {
+        status: 'ready',
+        updatedAt: new Date().getTime(),
+        data,
+      },
+    },
+  };
+};
+
+export const onTokenFetchHistoryFailed = (state, action) => {
+  const { tokenId } = action;
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      [tokenId]: {
+        status: 'failed',
+        data: [],
+      },
+    },
+  };
+};
+
+export const onTokenFetchHistoryRequested = (state, action) => {
+  const { tokenId } = action;
+
+  const oldState = get(state.tokensHistory, tokenId, {});
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      [tokenId]: {
+        ...oldState,
+        status: 'loading',
+        oldStatus: oldState.status,
+      },
+    },
+  };
+};
+
+export const onStartWalletFailed = (state) => ({
+  ...state,
+  walletStartError: true,
+  walletStartState: 'error',
+});
+
+export const onStartWalletLock = (state) => ({
+  ...state,
+  walletStartError: false,
+  walletStartState: 'loading',
+});
+
+export const onStartWalletSuccess = (state) => ({
+  ...state,
+  walletStartError: false,
+  walletStartState: 'ready',
+});
+
+export const onTokenInvalidateBalance = (state, action) => {
+  const { tokenId } = action;
+
+  return {
+    ...state,
+    tokensBalance: {
+      ...state.tokensBalance,
+      [tokenId]: {
+        status: 'invalidated',
+      },
+    },
+  };
+};
+
+export const onTokenInvalidateHistory = (state, action) => {
+  const { tokenId } = action;
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      [tokenId]: {
+        status: 'invalidated',
+      },
+    },
+  };
+};
+
+export const onWalletBestBlockUpdate = (state, action) => {
+  const { data } = action;
+
+  return {
+    ...state,
+    height: data,
+  };
+};
+
+const onSetServerInfo = (state, action) => ({
+  ...state,
+  serverInfo: {
+    network: action.payload.network,
+    version: action.payload.version,
+  },
+});
 
 export default rootReducer;

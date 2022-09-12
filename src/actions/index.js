@@ -10,6 +10,28 @@
  * @module ReduxActions
  */
 
+export const types = {
+  TOKEN_FETCH_METADATA_REQUESTED: 'TOKEN_FETCH_METADATA_REQUESTED',
+  TOKEN_FETCH_METADATA_SUCCESS: 'TOKEN_FETCH_METADATA_SUCCESS',
+  TOKEN_FETCH_METADATA_FAILED: 'TOKEN_FETCH_METADATA_FAILED',
+  TOKEN_FETCH_BALANCE_REQUESTED: 'TOKEN_FETCH_BALANCE_REQUESTED',
+  TOKEN_FETCH_BALANCE_SUCCESS: 'TOKEN_FETCH_BALANCE_SUCCESS',
+  TOKEN_FETCH_BALANCE_FAILED: 'TOKEN_FETCH_BALANCE_FAILED',
+  TOKEN_INVALIDATE_BALANCE: 'TOKEN_INVALIDATE_BALANCE',
+  TOKEN_FETCH_HISTORY_REQUESTED: 'TOKEN_FETCH_HISTORY_REQUESTED',
+  TOKEN_FETCH_HISTORY_SUCCESS: 'TOKEN_FETCH_HISTORY_SUCCESS',
+  TOKEN_FETCH_HISTORY_FAILED: 'TOKEN_FETCH_HISTORY_FAILED',
+  TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
+  ON_START_WALLET_LOCK: 'ON_START_WALLET_LOCK',
+  START_WALLET_REQUESTED: 'START_WALLET_REQUESTED',
+  START_WALLET_SUCCESS: 'START_WALLET_SUCCESS',
+  START_WALLET_FAILED: 'START_WALLET_FAILED',
+  WALLET_STATE_READY: 'WALLET_STATE_READY',
+  WALLET_STATE_ERROR: 'WALLET_STATE_ERROR',
+  WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
+  SET_SERVER_INFO: 'SET_SERVER_INFO',
+};
+
 /**
  * Update transaction history
  */
@@ -173,3 +195,110 @@ export const resetSelectedTokenIfNeeded = () => ({ type: "reset_selected_token_i
  * @param {boolean} data If the Ledger device has disconnected.
  */
 export const updateLedgerClosed = data => ({ type: "set_ledger_was_closed", payload: data });
+
+/**
+ * tokenId: The tokenId to request history from
+ * force: Should we ignore the stored data?
+ */
+export const tokenFetchHistoryRequested = (tokenId, force) => ({
+  type: types.TOKEN_FETCH_HISTORY_REQUESTED,
+  tokenId,
+  force,
+});
+
+/**
+ * tokenId: The tokenId to store history data
+ * data: The downloaded history data
+ */
+export const tokenFetchHistorySuccess = (tokenId, data) => ({
+  type: types.TOKEN_FETCH_HISTORY_SUCCESS,
+  tokenId,
+  data,
+});
+
+/**
+ * tokenId: The tokenId of the history request
+ */
+export const tokenFetchHistoryFailed = (tokenId) => ({
+  type: types.TOKEN_FETCH_HISTORY_FAILED,
+  tokenId,
+});
+
+/**
+ * tokenId: The tokenId of the invalidate history request
+ */
+export const tokenInvalidateHistory = (tokenId) => ({
+  type: types.TOKEN_INVALIDATE_HISTORY,
+  tokenId,
+});
+
+/**
+ * tokenId: The tokenId to request balance from
+ * force: Should we ignore the stored data?
+ */
+export const tokenFetchBalanceRequested = (tokenId, force) => ({
+  type: types.TOKEN_FETCH_BALANCE_REQUESTED,
+  tokenId,
+  force,
+});
+
+/**
+ * tokenId: The tokenId to store balance data
+ * data: The downloaded history data
+ */
+export const tokenFetchBalanceSuccess = (tokenId, data) => ({
+  type: types.TOKEN_FETCH_BALANCE_SUCCESS,
+  tokenId,
+  data,
+});
+
+/**
+ * tokenId: The tokenId of the balance request
+ */
+export const tokenFetchBalanceFailed = (tokenId) => ({
+  type: types.TOKEN_FETCH_BALANCE_FAILED,
+  tokenId,
+});
+
+export const tokenInvalidateBalance = (tokenId) => ({
+  type: types.TOKEN_INVALIDATE_BALANCE,
+  tokenId,
+});
+
+export const startWalletRequested = (payload) => ({
+  type: types.START_WALLET_REQUESTED,
+  payload,
+});
+
+export const startWalletFailed = () => ({
+  type: types.START_WALLET_FAILED,
+});
+
+export const startWalletSuccess = () => ({
+  type: types.START_WALLET_SUCCESS,
+});
+
+export const onStartWalletLock = () => ({
+  type: types.ON_START_WALLET_LOCK,
+});
+
+export const walletStateError = () => ({
+  type: types.WALLET_STATE_ERROR,
+});
+
+export const walletStateReady = () => ({
+  type: types.WALLET_STATE_READY,
+});
+
+export const walletReloadData = () => ({
+  type: types.WALLET_RELOAD_DATA,
+});
+
+/**
+ * version {str} version of the connected server (e.g., 0.26.0-beta)
+ * network {str} network of the connected server (e.g., mainnet, testnet)
+ * */
+export const setServerInfo = ({ version, network }) => (
+  { type: types.SET_SERVER_INFO, payload: { version, network } }
+);
+
