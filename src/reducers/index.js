@@ -233,59 +233,17 @@ const isAllAuthority = (tx) => {
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
   hathorLib.storage.setItem('wallet:version', VERSION);
-  const { tokensHistory, tokensBalance, tokens } = action.payload;
+  const { tokens } = action.payload;
   const allTokens = new Set(tokens);
   const currentAddress = state.wallet.getCurrentAddress();
 
   return {
     ...state,
-    tokensHistory,
-    tokensBalance,
     loadingAddresses: false,
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
     allTokens,
   };
-};
-
-/**
- * This method adds a new tx to the history of a token (we have one history per token)
- *
- * tokenUid {string} uid of the token being updated
- * tx {Object} the new transaction
- * tokenBalance {int} balance of this token in the new transaction
- * currentHistory {Array} currenty history of the token, sorted by timestamp descending
- */
-const addTxToSortedList = (tokenUid, tx, txTokenBalance, currentHistory) => {
-  let index = 0;
-  for (let i = 0; i < currentHistory.length; i += 1) {
-    if (tx.tx_id === currentHistory[i].txId) {
-      // If is_voided changed, we update the tx in the history
-      // otherwise we just return the currentHistory without change
-      if (tx.is_voided !== currentHistory[i].isVoided) {
-        const txHistory = getTxHistoryFromWSTx(tx, tokenUid, txTokenBalance);
-        // return new object so redux triggers update
-        const newHistory = [...currentHistory];
-        newHistory[i] = txHistory;
-        return newHistory;
-      }
-      return currentHistory;
-    }
-    if (tx.timestamp > currentHistory[i].timestamp) {
-      // we're past the timestamp from this new tx, so stop the search
-      break;
-    } else if (currentHistory[i].timestamp > tx.timestamp) {
-      // we only update the index in this situation beacause we want to add the new tx to the
-      // beginning of the list if it has the same timestamp as others. We cannot break the
-      // first time the timestamp matches because we gotta check if it's not a duplicate tx
-      index = i + 1;
-    }
-  }
-  const txHistory = getTxHistoryFromWSTx(tx, tokenUid, txTokenBalance);
-  // return new object so redux triggers update
-  const newHistory = [...currentHistory];
-  newHistory.splice(index, 0, txHistory);
-  return newHistory;
 };
 
 /**
@@ -326,7 +284,7 @@ const onUpdateLoadedData = (state, action) => ({
   loadedData: action.payload,
 });
 
-const onCleanData = (state, action) => {
+const onCleanData = (state) => {
   if (state.wallet) {
     state.wallet.stop();
   }
