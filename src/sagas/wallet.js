@@ -71,10 +71,10 @@ export function* startWallet(action) {
   oldWalletUtil.unlock();
 
   const network = config.getNetwork();
-  const dataToken = tokensUtils.getTokens();
+  const registeredTokens = tokensUtils.getTokens();
 
   // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
-  yield put(reloadData({ tokens: dataToken }));
+  yield put(reloadData({ tokens: registeredTokens }));
 
   // We are offline, the connection object is yet to be created
   yield put(isOnlineUpdate({ isOnline: false }));
@@ -212,8 +212,14 @@ export function* startWallet(action) {
     }
   }
 
+
   yield call(loadTokens);
-  yield put(loadWalletSuccess(dataToken));
+
+  // Fetch all tokens, including the ones that are not registered yet
+  const allTokens = yield call(wallet.getTokens.bind(wallet));
+
+  // Store all tokens on redux
+  yield put(loadWalletSuccess(allTokens));
   yield put(loadingAddresses(false));
 
   routerHistory.push('/wallet/');
@@ -251,8 +257,6 @@ export function* loadTokens() {
   // ...and history
   yield put(tokenFetchHistoryRequested(htrUid));
   yield take(specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_SUCCESS, { tokenId: htrUid }));
-
-  const { tokensHistory, tokensBalance } = yield select((state) => state);
 
   const registeredTokens = tokensUtils
     .getTokens()
