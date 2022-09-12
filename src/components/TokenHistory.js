@@ -20,7 +20,7 @@ import { get } from 'lodash';
 const mapStateToProps = (state, props) => {
   let history = [];
   if (props.selectedToken) {
-    history = state.tokensHistory[props.selectedToken];
+    history = get(state.tokensHistory, `${props.selectedToken}`, { status: 'loading', data: [] }).data;
   }
   return { 
     tokensHistory: history,
