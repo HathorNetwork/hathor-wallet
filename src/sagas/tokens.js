@@ -12,6 +12,7 @@ import { metadataApi, } from '@hathor/wallet-lib';
 import { channel } from 'redux-saga';
 import { get } from 'lodash';
 import { specificTypeAndPayload } from './helpers';
+import { METADATA_CONCURRENT_DOWNLOAD } from '../constants';
 import {
   types,
   tokenFetchBalanceSuccess,
@@ -85,7 +86,6 @@ function* fetchTokenBalance(action) {
       return;
     }
 
-    yield delay(1500);
     const response = yield call(wallet.getBalance.bind(wallet), tokenId);
     const token = get(response, 0, {
       balance: {
@@ -115,7 +115,7 @@ function* fetchTokenMetadataQueue() {
   const fetchTokenMetadataChannel = yield call(channel);
 
   // Fork CONCURRENT_FETCH_REQUESTS threads to download token balances
-  for (let i = 0; i < CONCURRENT_FETCH_REQUESTS; i += 1) {
+  for (let i = 0; i < METADATA_CONCURRENT_DOWNLOAD; i += 1) {
     yield fork(fetchTokenMetadataConsumer, fetchTokenMetadataChannel);
   }
 
