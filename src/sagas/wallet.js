@@ -17,6 +17,7 @@ import {
   select,
   cancel,
   cancelled,
+  delay,
   all,
   put,
   call,
@@ -70,7 +71,6 @@ export function* startWallet(action) {
   } = action.payload;
 
   yield put(loadingAddresses(true));
-  // yield put(metadataLoaded(false));
 
   // When we start a wallet from the locked screen, we need to unlock it in the storage
   oldWalletUtil.unlock();
@@ -83,9 +83,6 @@ export function* startWallet(action) {
 
   // We are offline, the connection object is yet to be created
   yield put(isOnlineUpdate({ isOnline: false }));
-
-  // Fetch metadata of all tokens registered
-  // this.fetchTokensMetadata(dataToken.map((token) => token.uid), network.name);
 
   const uniqueDeviceId = walletHelpers.getUniqueId();
   const featureFlags = new FeatureFlags(uniqueDeviceId, network.name);
@@ -190,8 +187,8 @@ export function* startWallet(action) {
     });
 
     yield put(setServerInfo({
-      version: null,
-      network: network.name,
+      version: serverInfo.version,
+      network: serverInfo.network,
     }));
 
   } catch(e) {
@@ -278,9 +275,6 @@ export function* loadTokens() {
     );
   }
 
-  // Hide the loading history screen
-  // yield put(startWalletSuccess());
-
   const registeredTokens = tokensUtils
     .getTokens()
     .reduce((acc, token) => {
@@ -304,67 +298,51 @@ export function* loadTokens() {
 }
 
 /**
- * Fetch a single token from the metadataApi
- *
- * @param {Array} token The token to fetch from the metadata api
- * @param {String} network Network name
- *
- * @memberof Wallet
- * @inner
- */
-export async function fetchTokenMetadata(token, network) {
-  if (token === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
-    return {};
-  }
-
-  const metadataPerToken = {};
-
-  try {
-    const data = await metadataApi.getDagMetadata(
-      token,
-      network,
-    );
-
-    // When the getDagMetadata method returns null
-    // it means that we have no metadata for this token
-    if (data) {
-      const tokenMeta = data[token];
-      metadataPerToken[token] = tokenMeta;
-    }
-  } catch (e) {
-    // Error downloading metadata.
-    // TODO: We should wait a few seconds and retry if still didn't
-    // reach the retry limit
-    // eslint-disable-next-line
-    console.log('Error downloading metadata of token', token);
-  }
-
-  return metadataPerToken;
-}
-
-/**
  * The wallet needs each token metadata to show information correctly
  * So we fetch the tokens metadata and store on redux
  */
 export function* fetchTokensMetadata(tokens) {
+  // No tokens to load
+  if (!tokens.length) {
+    yield put(metadataLoaded(true));
+    return;
+  }
+
   yield put(metadataLoaded(false));
 
-  const { network } = yield select((state) => state.serverInfo);
+  for (const token of tokens) {
+    yield put({
+      type: types.TOKEN_FETCH_METADATA_REQUESTED,
+      tokenId: token,
+    });
+  }
 
-  const tokenChunks = chunk(tokens, METADATA_CONCURRENT_DOWNLOAD);
+  const responses = yield all(
+    tokens.map((token) => take(
+      specificTypeAndPayload([
+        types.TOKEN_FETCH_METADATA_SUCCESS,
+        types.TOKEN_FETCH_METADATA_FAILED,
+      ], {
+        tokenId: token,
+      }),
+    ))
+  );
 
-  /* let tokenMetadatas = {};
-  for (const tokenChunk of tokenChunks) {
-    const responses = yield all(tokenChunk.map((token) => fetchTokenMetadata(token, network)));
-    for (const response of responses) {
-      tokenMetadatas = {
-        ...tokenMetadatas,
-        ...response,
-      };
+  const tokenMetadatas = {};
+  const errors = [];
+
+  for (const response of responses) {
+    if (response.type === types.TOKEN_FETCH_METADATA_FAILED) {
+      errors.push(response.tokenId);
+    } else if (response.type === types.TOKEN_FETCH_METADATA_SUCCESS) {
+      // When the request returns null, it means that we have no metadata for this token
+      if (response.data) {
+        tokenMetadatas[response.tokenId] = response.data;
+      }
     }
   }
 
-  yield put(tokenMetadataUpdated(tokenMetadatas)); */
+  yield put(tokenMetadataUpdated(tokenMetadatas, errors));
 }
 
 // This will create a channel to listen for featureFlag updates
@@ -547,7 +525,7 @@ export function* bestBlockUpdate({ payload }) {
 export function* onWalletConnStateUpdate({ payload }) {
   const isOnline = payload === Connection.CONNECTED;
 
-  // yield put(setIsOnline(isOnline));
+  yield put(isOnlineUpdate({ isOnline }));
 }
 
 export function* saga() {
