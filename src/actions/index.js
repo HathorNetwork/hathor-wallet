@@ -130,11 +130,9 @@ export const setWallet = (wallet) => ({ type: "set_wallet", payload: wallet });
 export const resetWallet = () => ({ type: "reset_wallet" });
 
 /**
- * tokensHistory {Object} history for each token
- * tokensBalance {Object} balance for each token
  * tokens {Array} array of token uids the the wallet has
  */
-export const loadWalletSuccess = (tokensHistory, tokensBalance, tokens) => ({ type: "load_wallet_success", payload: { tokensHistory, tokensBalance, tokens } });
+export const loadWalletSuccess = (tokens) => ({ type: "load_wallet_success", payload: { tokens } });
 
 /**
  * tx {Object} the new transaction
