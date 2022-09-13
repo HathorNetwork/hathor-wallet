@@ -251,12 +251,29 @@ export function* loadTokens() {
 
   const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
 
-  // Download hathor token balance
-  yield put(tokenFetchBalanceRequested(htrUid));
-  yield take(specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_SUCCESS, { tokenId: htrUid }));
-  // ...and history
-  yield put(tokenFetchHistoryRequested(htrUid));
-  yield take(specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_SUCCESS, { tokenId: htrUid }));
+  // Download hathor token balance:
+  const { htrBalanceError } = yield race({
+    success: take(specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_SUCCESS, {
+      tokenId: htrUid,
+    })),
+    htrBalanceError: take(specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_FAILED, {
+      tokenId: htrUid,
+    })),
+  });
+
+  // ...and history:
+  const { htrHistoryError } = yield race({
+    success: take(specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_SUCCESS, {
+      tokenId: htrUid,
+    })),
+    htrHistoryError: take(specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_FAILED, {
+      tokenId: htrUid,
+    })),
+  });
+
+  if (htrBalanceError || htrHistoryError) {
+    throw new Error('Failed to download hathor balance or history');
+  }
 
   const registeredTokens = tokensUtils
     .getTokens()
