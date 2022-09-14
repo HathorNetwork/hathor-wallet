@@ -20,7 +20,7 @@ import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import TokenAdministrative from '../components/TokenAdministrative';
 import HathorAlert from '../components/HathorAlert';
 import $ from 'jquery';
-import { updateWords } from '../actions/index';
+import { updateWords, tokenFetchHistoryRequested } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import tokens from '../utils/tokens';
@@ -32,6 +32,7 @@ import BackButton from '../components/BackButton';
 const mapDispatchToProps = dispatch => {
   return {
     updateWords: (data) => dispatch(updateWords(data)),
+    getHistory: (tokenId) => dispatch(tokenFetchHistoryRequested(tokenId)),
   };
 };
 
@@ -102,6 +103,7 @@ class Wallet extends React.Component {
     // the selected token changed
     if (this.props.selectedToken !== nextProps.selectedToken) {
       this.shouldShowAdministrativeTab(nextProps.selectedToken);
+      this.props.getHistory(nextProps.selectedToken);
     }
   }
 
