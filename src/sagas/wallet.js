@@ -212,7 +212,6 @@ export function* startWallet(action) {
     }
   }
 
-
   yield call(loadTokens);
 
   // Fetch all tokens, including the ones that are not registered yet
@@ -222,7 +221,7 @@ export function* startWallet(action) {
   yield put(loadWalletSuccess(allTokens));
   yield put(loadingAddresses(false));
 
-  routerHistory.push('/wallet/');
+  routerHistory.replace('/wallet/');
 
   // The way the redux-saga fork model works is that if a saga has `forked`
   // another saga (using the `fork` effect), it will remain active until all
@@ -245,13 +244,10 @@ export function* startWallet(action) {
  * and dispatch actions to asynchronously load all registered tokens
  */
 export function* loadTokens() {
-  // Since we are reloading the token balances and history for HTR and DEFAULT_TOKEN,
-  // we should display the loading history screen, as the current balance is now unreliable
-  // yield put(onStartWalletLock());
-
   const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
 
   // Download hathor token balance:
+  yield put(tokenFetchBalanceRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid));
   const { htrBalanceError } = yield race({
     success: take(specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_SUCCESS, {
       tokenId: htrUid,
@@ -262,6 +258,7 @@ export function* loadTokens() {
   });
 
   // ...and history:
+  yield put(tokenFetchHistoryRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid));
   const { htrHistoryError } = yield race({
     success: take(specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_SUCCESS, {
       tokenId: htrUid,
