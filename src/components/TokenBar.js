@@ -9,9 +9,12 @@ import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
 import { selectToken } from '../actions/index';
+import { get } from 'lodash';
+import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
+import colors from '../index.scss';
 
 
 const mapStateToProps = (state) => {
@@ -21,6 +24,13 @@ const mapStateToProps = (state) => {
     selectedToken: state.selectedToken,
     tokensBalance: state.tokensBalance,
     tokenMetadata: state.tokenMetadata,
+    tokenBalance: get(state.tokensBalance, `${state.selectedToken.uid}`, {
+      status: 'loading',
+      data: {
+        locked: 0,
+        available: 0,
+      },
+    }),
   };
 };
 
@@ -105,7 +115,13 @@ class TokenBar extends React.Component {
    * @return {number} Total token balance
    */
   getTokenBalance = (uid) => {
-    const balance = this.props.tokensBalance[uid];
+    const balance = get(this.props.tokensBalance, `${uid}`, {
+      status: 'loading',
+      data: {
+        locked: 0,
+        available: 0,
+      }
+    }).data;
     let total = 0;
     if (balance) {
       // If we don't have any transaction for the token, balance will be undefined
@@ -122,7 +138,15 @@ class TokenBar extends React.Component {
    * @return {string} String formatted balance, ready for exhibition
    */
   getTokenBalanceFormatted = (uid) => {
-    const total = this.getTokenBalance(uid);
+    const tokenBalance = get(this.props.tokensBalance, `${uid}`, {
+      status: 'loading',
+      data: {
+        locked: 0,
+        available: 0
+      }
+    });
+    const { locked, available } = tokenBalance.data;
+    const total = locked + available;
 
     // Formatting to string for exhibition
     const isNFT = helpers.isTokenNFT(uid, this.props.tokenMetadata);
@@ -134,6 +158,19 @@ class TokenBar extends React.Component {
    */
   unknownClicked = () => {
     this.props.history.push('/unknown_tokens/');
+  }
+
+  renderLoading = () => {
+    return (
+      <ReactLoading
+        type='spin'
+        className="loading-inline"
+        width={14}
+        height={14}
+        color={colors.purpleHathor}
+        delay={500}
+      />
+    );
   }
 
   render() {
@@ -149,10 +186,23 @@ class TokenBar extends React.Component {
 
       return registeredTokens.map((token) => {
         const tokenUid = token.uid;
+        const tokenBalance = get(this.props.tokensBalance, `${token.uid}`, {
+          status: 'loading',
+          data: {
+            locked: 0,
+            available: 0
+          }
+        });
 
         return (
           <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${(this.getTokenBalanceFormatted(tokenUid))}`}</span>
+            <span className='ellipsis'>
+              {token.symbol} {this.state.opened && ` | `}
+
+              {(tokenBalance.status === 'ready' && this.state.opened) && this.getTokenBalanceFormatted(tokenUid)}
+
+              {(tokenBalance.status === 'loading' && this.state.opened) && this.renderLoading()}
+            </span>
           </div>
         )
       });
