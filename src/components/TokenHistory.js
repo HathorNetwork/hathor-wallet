@@ -9,18 +9,20 @@ import React from 'react';
 import { t } from 'ttag';
 import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import HathorAlert from './HathorAlert';
+import ReactLoading from 'react-loading';
 import wallet from '../utils/wallet';
-import TokenPagination from './TokenPagination';
 import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
 import helpers from '../utils/helpers';
 import { get } from 'lodash';
+import colors from '../index.scss';
+import TokenPagination from './TokenPagination';
+import HathorAlert from './HathorAlert';
 
 const mapStateToProps = (state, props) => {
   let history = [];
   if (props.selectedToken) {
-    history = get(state.tokensHistory, `${props.selectedToken}`, { status: 'loading', data: [] }).data;
+    history = get(state.tokensHistory, `${props.selectedToken}`, { status: 'loading', data: [] });
   }
   return { 
     tokensHistory: history,
@@ -62,7 +64,7 @@ class TokenHistory extends React.Component {
   }
 
   componentDidUpdate = (prevProps) => {
-    if (prevProps.tokensHistory !== this.props.tokensHistory) {
+    if (prevProps.tokensHistory.data !== this.props.tokensHistory.data) {
       this.handleHistoryUpdate();
     }
   }
@@ -72,7 +74,7 @@ class TokenHistory extends React.Component {
    */
   fetchMoreHistory = async () => {
     if (this.state.shouldFetch) {
-      const newHistory = await wallet.fetchMoreHistory(this.props.wallet, this.props.selectedToken, this.props.tokensHistory);
+      const newHistory = await wallet.fetchMoreHistory(this.props.wallet, this.props.selectedToken, this.props.tokensHistory.data);
       if (newHistory.length === 0) {
         // Last page already fetched, no need to fetch anymore
         this.setState({ shouldFetch: false });
@@ -111,7 +113,7 @@ class TokenHistory extends React.Component {
    * Calculates the transactions that will be shown in the list, besides the pagination data
    */
   handleHistoryUpdate = () => {
-    const history = this.props.tokensHistory;
+    const history = this.props.tokensHistory.data;
     if (history && history.length > 0) {
       let startIndex = 0;
       let endIndex = this.props.count;
@@ -146,7 +148,7 @@ class TokenHistory extends React.Component {
     if (this.state.reference === null) {
       throw new Error('State reference cannot be null calling this method.');
     }
-    const history = this.props.tokensHistory;
+    const history = this.props.tokensHistory.data;
     const idxReference = history.findIndex((tx) =>
       tx.tx_id === this.state.reference
     )
@@ -199,6 +201,7 @@ class TokenHistory extends React.Component {
   }
 
   render() {
+    console.log('Tokens History: ', this.props.tokensHistory);
     const renderHistory = () => {
       return (
         <div className="table-responsive">
@@ -213,7 +216,7 @@ class TokenHistory extends React.Component {
               </tr>
             </thead>
             <tbody>
-              {renderHistoryData()}
+              { renderHistoryData() }
             </tbody>
           </table>
           <TokenPagination
@@ -232,6 +235,20 @@ class TokenHistory extends React.Component {
         <span className="voided-element">{t`Voided`}</span>
       );
     }
+
+    const renderLoading = () => {
+      return (
+        <div>
+          <ReactLoading
+            type='spin'
+            color={colors.purpleHathor}
+            width={24}
+            height={24}
+            delay={200} />
+          <strong>{t`Loading history...`}</strong>
+        </div>
+      )
+    };
 
     const renderHistoryData = () => {
       const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
@@ -293,7 +310,9 @@ class TokenHistory extends React.Component {
     return (
       <div>
         {this.props.showPage && renderPage()}
-        {renderHistory()}
+        {this.props.tokensHistory.status === 'ready' && renderHistory()}
+        {this.props.tokensHistory.status === 'loading' && renderLoading()}
+
         <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
       </div>
     );
