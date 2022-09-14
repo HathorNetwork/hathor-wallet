@@ -23,6 +23,13 @@ import {
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 
+export const TOKEN_DOWNLOAD_STATUS = {
+  READY: 'ready',
+  FAILED: 'failed',
+  LOADING: 'loading',
+  INVALIDATED: 'INVALIDATED',
+};
+
 const mapTokenHistory = (tx, tokenUid) => {
   return {
     tx_id: tx.txId,

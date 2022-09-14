@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
+import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
@@ -17,9 +18,11 @@ import TokenBar from '../components/TokenBar';
 import ModalAddManyTokens from '../components/ModalAddManyTokens';
 import BackButton from '../components/BackButton';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actions';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
+import colors from '../index.scss';
 
 
 const mapStateToProps = (state) => {
@@ -153,23 +156,59 @@ class UnknownTokens extends React.Component {
     });
   }
 
+  retryDownload = (e, tokenId) => {
+    e.preventDefault();
+    const balanceStatus = get(
+      this.props.tokensBalance,
+      `${tokenId}.status`,
+      TOKEN_DOWNLOAD_STATUS.LOADING,
+    );
+    const historyStatus = get(
+      this.props.tokensHistory,
+      `${tokenId}.status`,
+      TOKEN_DOWNLOAD_STATUS.LOADING,
+    );
+
+    // We should only retry the request that failed:
+
+    if (historyStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
+      this.props.getHistory(tokenId);
+    }
+
+    if (balanceStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
+      this.props.getBalance(tokenId);
+    }
+  }
+
   render = () => {
     const unknownTokens = this.getUnknownTokens(wallet.areZeroBalanceTokensHidden());
 
     const renderLoadingMessage = (tokenBalance, tokenHistory) => {
-      if (tokenBalance.status === 'loading') {
-        if (tokenHistory.status === 'loading') {
+      if (tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
+        if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
           return t`Loading token balance and history...`;
         }
 
         return t`Loading token balance...`;
       }
+
+      if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
+        return t`Loading token history...`;
+      }
     };
 
     const renderTokenBalance = (token, isNFT, tokenBalance, tokenHistory) => {
       const loadingTemplate = () => (
-        <div className="d-flex flex-row align-items-center justify-content-start w-100">
-          <span><strong>{ renderLoadingMessage(tokenBalance, tokenHistory) }</strong></span>
+        <div className="d-flex flex-row align-items-center justify-content-start w-100" style={{ lineHeight: '10px' }}>
+          <ReactLoading
+            type='spin'
+            className="loading-inline"
+            width={16}
+            height={16}
+            color={colors.purpleHathor}
+            delay={500}
+          />
+          <span style={{marginLeft: 10}}><strong>{ renderLoadingMessage(tokenBalance, tokenHistory) }</strong></span>
         </div>
       );
 
@@ -183,8 +222,26 @@ class UnknownTokens extends React.Component {
         )
       };
 
-      if (tokenHistory.status !== 'ready' || tokenBalance.status !== 'ready') {
-        if (tokenBalance.status === 'ready' && tokenHistory.status === 'not-loaded') {
+      const retryTemplate = () => {
+        return (
+          <div className="d-flex flex-row align-items-center justify-content-start w-100">
+            {t`Download failed, please`}&nbsp;
+            <a onClick={(e) => this.retryDownload(e, token.uid)} href="true">
+              {t`try again`}
+            </a>
+          </div>
+        );
+      }
+
+      if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.FAILED
+          || tokenBalance.status === TOKEN_DOWNLOAD_STATUS.FAILED) {
+        return retryTemplate();
+      }
+
+      if (tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.READY
+          || tokenBalance.status !== TOKEN_DOWNLOAD_STATUS.READY) {
+        if (tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY
+            && tokenHistory.status === TOKEN_DOWNLOAD_STATUS.INVALIDATED) {
           return balanceTemplate();
         }
 
@@ -196,36 +253,40 @@ class UnknownTokens extends React.Component {
 
     const renderTokens = () => {
       if (unknownTokens.length === 0) {
-        return <p>You don't have any unknown tokens</p>;
-      } else {
-        return unknownTokens.map((token, index) => {
-          const isNFT = helpers.isTokenNFT(token.uid, this.props.tokenMetadata);
-          const tokenBalance = get(this.props.tokensBalance, `${token.uid}`, { status: 'not-loaded' });
-          const tokenHistory = get(this.props.tokensHistory, `${token.uid}`, { status: 'not-loaded' });
+        return <p>{t`You don't have any unknown tokens`}</p>;
+      } 
 
-          return (
-            <div key={token.uid} className="unknown-token card">
-              <div className="header d-flex flex-row align-items-center justify-content-between">
-                <div className="d-flex flex-column align-items-center justify-content-center">
-                  <p>{token.uid}</p>
-                  { renderTokenBalance(token, isNFT, tokenBalance, tokenHistory) }
-                </div>
-                <div className="d-flex flex-row align-items-center">
-                  <a onClick={(e) => this.openHistory(e, index, token.uid)} ref={this.anchorOpenRefs[index]} href="true">
-                    {t`Show history`}
-                  </a>
-                  <a onClick={(e) => this.hideHistory(e, index)} ref={this.anchorHideRefs[index]} href="true" style={{display: 'none'}}>{t`Hide history`}</a>
-                </div>
+      return unknownTokens.map((token, index) => {
+        const isNFT = helpers.isTokenNFT(token.uid, this.props.tokenMetadata);
+        const tokenBalance = get(this.props.tokensBalance, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.INVALIDATED });
+        const tokenHistory = get(this.props.tokensHistory, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.INVALIDATED });
+
+        return (
+          <div key={token.uid} className="unknown-token card">
+            <div className="header d-flex flex-row align-items-center justify-content-between">
+              <div className="d-flex flex-column align-items-center justify-content-center">
+                <p>{token.uid}</p>
+                { renderTokenBalance(token, isNFT, tokenBalance, tokenHistory) }
               </div>
-              <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
-                { tokenHistory.status === 'ready' && (
-                  <TokenHistory count={WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
-                )}
+              <div className="d-flex flex-row align-items-center">
+                <a onClick={(e) => this.openHistory(e, index, token.uid)} ref={this.anchorOpenRefs[index]} href="true">
+                  {(tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.LOADING
+                    && tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.FAILED) && t`Show history`}
+                </a>
+                <a onClick={(e) => this.hideHistory(e, index)} ref={this.anchorHideRefs[index]} href="true" style={{display: 'none'}}>
+                  {(tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.LOADING
+                    && tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.FAILED) &&  t`Hide history`}
+                </a>
               </div>
             </div>
-          );
-        });
-      }
+            <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
+              { tokenHistory.status === TOKEN_DOWNLOAD_STATUS.READY && (
+                <TokenHistory count={WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
+              )}
+            </div>
+          </div>
+        );
+      });
     }
 
     return (
