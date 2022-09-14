@@ -4,9 +4,10 @@ $fa-font-path: "~font-awesome/fonts";
 */
 
 $purpleHathor: #8C46FF;
-$purpleHathorHover: #5f2eaf;
+$purpleHathorHover: #5F2EAF;
 $greenHathor: #59D73C;
-$warning: #ce9c06;
+$warning: #CE9C06;
+$error: #B00020;
 
 :export {
   purpleHathor: $purpleHathor;
@@ -755,6 +756,10 @@ svg.svg-wrapper {
   color: white;
   font-size: 0.7rem;
   float: right;
+}
+
+.text-error {
+  color: $error !important;
 }
 
 .text-warning {

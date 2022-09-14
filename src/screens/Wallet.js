@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
+import $ from 'jquery';
+import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
+import { get } from 'lodash';
+import { connect } from "react-redux";
+import ReactLoading from 'react-loading';
 
 import SpanFmt from '../components/SpanFmt';
 import WalletHistory from '../components/WalletHistory';
@@ -19,14 +24,13 @@ import TokenBar from '../components/TokenBar';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import TokenAdministrative from '../components/TokenAdministrative';
 import HathorAlert from '../components/HathorAlert';
-import $ from 'jquery';
-import { updateWords, tokenFetchHistoryRequested } from '../actions/index';
-import { connect } from "react-redux";
-import hathorLib from '@hathor/wallet-lib';
 import tokens from '../utils/tokens';
 import version from '../utils/version';
 import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
+import colors from '../index.scss';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { updateWords, tokenFetchHistoryRequested } from '../actions/index';
 
 
 const mapDispatchToProps = dispatch => {
@@ -41,10 +45,10 @@ const mapStateToProps = (state) => {
   return {
     selectedToken: state.selectedToken,
     entireState: state,
+    tokensHistory: state.tokensHistory,
+    tokensBalance: state.tokensBalance,
     tokens: state.tokens,
     wallet: state.wallet,
-    tokenHistory: state.tokensHistory[state.selectedToken] || [],
-    tokenBalance: state.tokensBalance[state.selectedToken] || {},
     useWalletService: state.useWalletService,
   };
 };
@@ -188,6 +192,30 @@ class Wallet extends React.Component {
     this.props.history.push('/addresses/');
   }
 
+  retryDownload = (e, tokenId) => {
+    e.preventDefault();
+    const balanceStatus = get(
+      this.props.tokensBalance,
+      `${tokenId}.status`,
+      TOKEN_DOWNLOAD_STATUS.LOADING,
+    );
+    const historyStatus = get(
+      this.props.tokensHistory,
+      `${tokenId}.status`,
+      TOKEN_DOWNLOAD_STATUS.LOADING,
+    );
+
+    // We should only retry the request that failed:
+
+    if (historyStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
+      this.props.getHistory(tokenId);
+    }
+
+    if (balanceStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
+      this.props.getBalance(tokenId);
+    }
+  }
+
   render() {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
 
@@ -298,16 +326,69 @@ class Wallet extends React.Component {
     }
 
     const renderUnlockedWallet = () => {
+      const tokenHistory = get(this.props.tokensHistory, this.props.selectedToken, {
+        status: TOKEN_DOWNLOAD_STATUS.LOADING,
+        data: [],
+      });
+      const tokenBalance = get(this.props.tokensBalance, this.props.selectedToken, {
+        status: TOKEN_DOWNLOAD_STATUS.LOADING,
+        data: {
+          locked: 0,
+          available: 0
+        }
+      });
+
+      let template;
+      if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING
+          || tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
+        template = (
+          <div className='token-wrapper d-flex flex-column align-items-center justify-content-center mb-3'>
+            <ReactLoading
+              type='spin'
+              width={48}
+              height={48}
+              color={colors.purpleHathor}
+              delay={500}
+            />
+            <p style={{ marginTop: 16 }}><strong>{t`Loading token information, please wait...`}</strong></p>
+          </div>
+        )
+      } else if (
+        tokenHistory.status === TOKEN_DOWNLOAD_STATUS.FAILED
+        || tokenBalance.status === TOKEN_DOWNLOAD_STATUS.FAILED) {
+        template = (
+          <div className='token-wrapper d-flex flex-column align-items-center justify-content-center mb-3'>
+            <i style={{ fontSize: 36 }} className='fa fa-solid fa-exclamation-triangle text-error' title={t`Settings`}></i>
+            <p style={{ marginTop: 16 }}>
+              <strong>
+                {t`Token load failed, please`}&nbsp;
+                <a onClick={(e) => this.retryDownload(e, token.uid)} href="true">
+                  {t`try again`}
+                </a>
+                ...
+              </strong>
+            </p>
+
+          </div>
+        )
+      } else {
+        template = (
+          <>
+            <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
+              <p className='token-name mb-0'>
+                <strong>{token ? token.name : ''}</strong>
+                {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>}
+                {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && renderSignTokenIcon()}
+              </p>
+            </div>
+            {renderTokenData(token)}
+          </>
+        )
+      }
+
       return (
         <div className='wallet-wrapper'>
-          <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
-            <p className='token-name mb-0'>
-              <strong>{token ? token.name : ''}</strong>
-              {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>}
-              {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && renderSignTokenIcon()}
-            </p>
-          </div>
-          {renderTokenData(token)}
+        { template }
         </div>
       );
     }
