@@ -200,7 +200,6 @@ class TokenBar extends React.Component {
               {token.symbol} {this.state.opened && ` | `}
 
               {(tokenBalance.status === 'ready' && this.state.opened) && this.getTokenBalanceFormatted(tokenUid)}
-
               {(tokenBalance.status === 'loading' && this.state.opened) && this.renderLoading()}
             </span>
           </div>
