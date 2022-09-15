@@ -10,51 +10,32 @@ import {
   DEBUG_LOCAL_DATA_KEYS,
   WALLET_HISTORY_COUNT,
   METADATA_CONCURRENT_DOWNLOAD,
-  WALLET_SERVICE_MAINNET_BASE_URL,
-  WALLET_SERVICE_MAINNET_BASE_WS_URL,
 } from '../constants';
 import { FeatureFlags } from '../featureFlags';
-import STORE from '../storageInstance';
 import store from '../store/index';
 import {
-  setWallet,
-  updateLoadedData,
-  isOnlineUpdate,
-  updateHeight,
-  updateTx,
   loadingAddresses,
-  loadWalletSuccess,
+  startWalletRequested,
   historyUpdate,
   sharedAddressUpdate,
   reloadData,
   cleanData,
   updateTokenHistory,
   tokenMetadataUpdated,
-  metadataLoaded,
   partiallyUpdateHistoryAndBalance,
-  setUseWalletService,
-  lockWalletForResult,
   resetSelectedTokenIfNeeded,
 } from '../actions/index';
 import {
-  helpers,
   constants as hathorConstants,
   errors as hathorErrors,
   HathorWallet,
-  HathorWalletServiceWallet,
-  Connection,
-  Network,
   wallet as oldWalletUtil,
   walletUtils,
   storage,
   tokens,
   metadataApi,
-  config,
 } from '@hathor/wallet-lib';
-import version from './version';
-import ledger from './ledger';
 import { chunk } from 'lodash';
-import walletHelpers from './helpers';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
@@ -453,10 +434,23 @@ const wallet = {
 
   async changeServer(wallet, pin, routerHistory) {
     wallet.stop({ cleanStorage: false });
+
     if (oldWalletUtil.isSoftwareWallet()) {
-      await this.startWallet(null, '', pin, '', routerHistory, true);
+      store.dispatch(startWalletRequested({
+        passphrase: '',
+        pin,
+        password: '', 
+        routerHistory,
+        fromXpriv: true,
+      }));
     } else {
-      await this.startWallet(null, '', null, '', routerHistory, false, wallet.xpub);
+      store.dispatch(startWalletRequested({
+        passphrase: '',
+        password: '', 
+        routerHistory,
+        fromXpriv: false,
+        xpub: wallet.xpub,
+      }));
     }
   },
 
