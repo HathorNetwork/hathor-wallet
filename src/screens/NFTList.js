@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { t } from 'ttag'
-import BackButton from '../components/BackButton';
+import { get } from 'lodash';
+import { connect } from "react-redux";
 import { NFT_LIST_PER_PAGE } from '../constants';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import HathorPaginate from '../components/HathorPaginate';
 import NFTListElement from '../components/NFTListElement';
-import helpers from '../utils/helpers';
-import { connect } from "react-redux";
+import BackButton from '../components/BackButton';
 
 
 const mapStateToProps = (state) => {
-  const registeredTokens = state.tokens;
   const tokenMetadata = state.tokenMetadata || {};
   const nftList = Object.values(tokenMetadata).filter((meta) => {
     return meta.nft_media && meta.nft_media.file;
@@ -29,11 +29,18 @@ const mapStateToProps = (state) => {
 
   const nftData = nftList.map((meta) => {
     const tokenConfig = tokenConfigByUid[meta.id];
-    const balance = state.tokensBalance[meta.id] || { available: 0 };
+    const tokenBalance = get(state.tokensBalance, meta.id, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: {
+        available: 0,
+        locked: 0,
+      },
+    });
+
     return {
       name: tokenConfig.name,
       symbol: tokenConfig.symbol,
-      balance: balance.available,
+      balance: tokenBalance,
       ...meta,
     };
   });
