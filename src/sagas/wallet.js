@@ -195,7 +195,7 @@ export function* startWallet(action) {
       yield call(featureFlags.ignoreWalletServiceFlag.bind(featureFlags));
 
       // Restart the whole bundle to make sure we clear all events
-      NativeModules.HTRReloadBundleModule.restart();
+      walletUtils.reloadElectron();
     }
   }
 
@@ -362,7 +362,7 @@ export function* listenForFeatureFlags(featureFlags) {
       const oldUseWalletService = yield select((state) => state.useWalletService);
 
       if (oldUseWalletService && oldUseWalletService !== newUseWalletService) {
-        NativeModules.HTRReloadBundleModule.restart();
+        walletHelpers.reloadElectron();
       }
     }
   } finally {
