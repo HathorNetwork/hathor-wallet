@@ -121,7 +121,13 @@ const wallet = {
       }
     }
 
-    return this.startWallet(words, passphrase, pin, password, routerHistory);
+    store.dispatch(startWalletRequested({
+      words,
+      passphrase,
+      pin,
+      password,
+      routerHistory,
+    }))
   },
 
   /**
