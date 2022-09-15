@@ -223,13 +223,13 @@ function* routeTokenChange(action) {
 
   switch (action.type) {
     default:
-    case 'SET_TOKENS':
-      for (const token of action.payload) {
-        yield put({ type: types.TOKEN_FETCH_BALANCE_REQUESTED, tokenId: token.uid });
+    case 'new_tokens':
+      for (const token of action.payload.tokens) {
+        yield put({
+          type: types.TOKEN_FETCH_BALANCE_REQUESTED,
+          tokenId: token.uid,
+        });
       }
-      break;
-    case 'NEW_TOKEN':
-      yield put({ type: types.TOKEN_FETCH_HISTORY_REQUESTED, tokenId: action.payload.uid });
       break;
   }
 }
@@ -239,5 +239,6 @@ export function* saga() {
     fork(fetchTokenMetadataQueue),
     fork(fetchTokenBalanceQueue),
     takeEvery(types.TOKEN_FETCH_HISTORY_REQUESTED, fetchTokenHistory),
+    takeEvery('new_tokens', routeTokenChange),
   ]);
 }
