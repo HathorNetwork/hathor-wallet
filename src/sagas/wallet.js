@@ -40,17 +40,14 @@ import {
   setUseWalletService,
   updateLoadedData,
   setWallet,
-  // -- 
   tokenFetchBalanceRequested,
   tokenFetchHistoryRequested,
   tokenInvalidateHistory,
   setServerInfo,
-  // setIsOnline,
 } from '../actions';
+import { specificTypeAndPayload, } from './helpers';
 import walletHelpers from '../utils/helpers';
-import {
-  specificTypeAndPayload,
-} from './helpers';
+import walletUtils from '../utils/wallet';
 
 export function* startWallet(action) {
   yield put(loadingAddresses(true));
@@ -195,7 +192,7 @@ export function* startWallet(action) {
       yield call(featureFlags.ignoreWalletServiceFlag.bind(featureFlags));
 
       // Restart the whole bundle to make sure we clear all events
-      walletUtils.reloadElectron();
+      walletHelpers.reloadElectron();
     }
   }
 
@@ -428,16 +425,31 @@ export function* handleTx(action) {
   const stateTokens = yield select((state) => state.tokens);
   const registeredTokens = stateTokens.map((token) => token.uid);
 
+  let message = '';
+  if (helpers.isBlock(tx)) {
+    message = 'You\'ve found a new block! Click to open it.';
+  } else {
+    message = 'You\'ve received a new transaction! Click to open it.'
+  }
+
+  const notification = walletUtils.sendNotification(message);
+
+  // Set the notification click, in case we have sent one
+  if (notification !== undefined) {
+    notification.onclick = () => {
+      routerHistory.push(`/transaction/${tx.tx_id}/`);
+    }
+  }
+
   // We should download the **balance** for every token involved in the transaction
-  // and history for hathor and DEFAULT_TOKEN
+  // and history for hathor
   for (const [tokenUid] of Object.entries(balances)) {
     if (registeredTokens.indexOf(tokenUid) === -1) {
       continue;
     }
     yield put(tokenFetchBalanceRequested(tokenUid, true));
 
-    if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid
-        || tokenUid === '00') {
+    if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
       yield put(tokenFetchHistoryRequested(tokenUid, true));
     } else {
       // Invalidate the history so it will get requested the next time
