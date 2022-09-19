@@ -447,15 +447,9 @@ export function* handleTx(action) {
     if (registeredTokens.indexOf(tokenUid) === -1) {
       continue;
     }
-    yield put(tokenFetchBalanceRequested(tokenUid, true));
 
-    if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
-      yield put(tokenFetchHistoryRequested(tokenUid, true));
-    } else {
-      // Invalidate the history so it will get requested the next time
-      // the user enters the history screen
-      yield put(tokenInvalidateHistory(tokenUid));
-    }
+    yield put(tokenFetchBalanceRequested(tokenUid, true));
+    yield put(tokenFetchHistoryRequested(tokenUid, true));
   }
 }
 
