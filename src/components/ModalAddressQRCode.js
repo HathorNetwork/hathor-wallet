@@ -37,8 +37,6 @@ class ModalAddressQRCode extends React.Component {
   }
 
   componentWillUnmount = () => {
-    console.log('Will unmount');
-
     $('#addressQRCodeModal').modal('hide');
     // Preventing calling setState when the component is not mounted
     if (this.timer) {

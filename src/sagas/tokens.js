@@ -263,10 +263,32 @@ export function* fetchTokenData(tokenId) {
   }
 }
 
+/**
+ * This saga will monitor for all actions that mutate the selectedToken and will
+ * dispatch fetch history and balance actions.
+ */
+export function* monitorSelectedToken() {
+  const selector = (state) => state.selectedToken;
+  let previous = yield select(selector);
+
+  while (true) {
+    yield take('*');
+    const next = yield select(selector);
+
+    if (next !== previous) {
+      yield put(tokenFetchHistoryRequested(next));
+      yield put(tokenFetchBalanceRequested(next));
+    }
+
+    previous = next;
+  }
+}
+
 export function* saga() {
   yield all([
     fork(fetchTokenMetadataQueue),
     fork(fetchTokenBalanceQueue),
+    fork(monitorSelectedToken),
     takeEvery(types.TOKEN_FETCH_HISTORY_REQUESTED, fetchTokenHistory),
     takeEvery('new_tokens', routeTokenChange),
   ]);

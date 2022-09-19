@@ -11,7 +11,6 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
 import ModalAddressQRCode from './ModalAddressQRCode';
 import ModalAlert from './ModalAlert';
-import wallet from '../utils/wallet';
 import $ from 'jquery';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
