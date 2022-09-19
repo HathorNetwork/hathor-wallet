@@ -181,7 +181,7 @@ class WalletAddress extends React.Component {
         {renderAddress()}
         <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
         <HathorAlert ref="alertError" text={t`You must use an old address before generating new ones`} type="danger" />
-        <ModalAddressQRCode  />
+        <ModalAddressQRCode />
         <ModalAlert id="ledgerAlert" title={t`Validate address on Ledger`} showFooter={false} body={renderAlertBody()} />
       </div>
     );
