@@ -8,15 +8,17 @@ import {
   all,
   put,
 } from 'redux-saga/effects';
-import { metadataApi, } from '@hathor/wallet-lib';
+import { metadataApi } from '@hathor/wallet-lib';
 import { channel } from 'redux-saga';
 import { get } from 'lodash';
-import { specificTypeAndPayload } from './helpers';
+import { specificTypeAndPayload, dispatchAndWait } from './helpers';
 import { METADATA_CONCURRENT_DOWNLOAD } from '../constants';
 import {
   types,
+  tokenFetchBalanceRequested,
   tokenFetchBalanceSuccess,
   tokenFetchBalanceFailed,
+  tokenFetchHistoryRequested,
   tokenFetchHistorySuccess,
   tokenFetchHistoryFailed,
 } from '../actions';
@@ -231,6 +233,33 @@ function* routeTokenChange(action) {
         });
       }
       break;
+  }
+}
+
+export function* fetchTokenData(tokenId) {
+  const fetchBalanceResponse = yield call(
+    dispatchAndWait,
+    tokenFetchBalanceRequested(tokenId, true),
+    specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_SUCCESS, {
+      tokenId,
+    }),
+    specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_FAILED, {
+      tokenId,
+    }),
+  );
+  const fetchHistoryResponse = yield call(
+    dispatchAndWait,
+    tokenFetchHistoryRequested(tokenId, true),
+    specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_SUCCESS, {
+      tokenId,
+    }),
+    specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_FAILED, {
+      tokenId,
+    }),
+  );
+
+  if (fetchHistoryResponse.failure || fetchBalanceResponse.failure) {
+    throw new Error(`Error loading HTR history or balance for token ${tokenId}`);
   }
 }
 

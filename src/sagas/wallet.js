@@ -42,10 +42,10 @@ import {
   setWallet,
   tokenFetchBalanceRequested,
   tokenFetchHistoryRequested,
-  tokenInvalidateHistory,
   setServerInfo,
 } from '../actions';
 import { specificTypeAndPayload, } from './helpers';
+import { fetchTokenData } from './tokens';
 import walletHelpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
 
@@ -243,31 +243,7 @@ export function* startWallet(action) {
 export function* loadTokens() {
   const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
 
-  // Download hathor token balance:
-  yield put(tokenFetchBalanceRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid, true));
-  const { htrBalanceError } = yield race({
-    success: take(specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_SUCCESS, {
-      tokenId: htrUid,
-    })),
-    htrBalanceError: take(specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_FAILED, {
-      tokenId: htrUid,
-    })),
-  });
-
-  // ...and history:
-  yield put(tokenFetchHistoryRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid, true));
-  const { htrHistoryError } = yield race({
-    success: take(specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_SUCCESS, {
-      tokenId: htrUid,
-    })),
-    htrHistoryError: take(specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_FAILED, {
-      tokenId: htrUid,
-    })),
-  });
-
-  if (htrBalanceError || htrHistoryError) {
-    throw new Error('Failed to download hathor balance or history');
-  }
+  yield call(fetchTokenData, htrUid);
 
   const registeredTokens = tokensUtils
     .getTokens()
