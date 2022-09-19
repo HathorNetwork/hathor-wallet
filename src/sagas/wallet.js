@@ -244,7 +244,7 @@ export function* loadTokens() {
   const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
 
   // Download hathor token balance:
-  yield put(tokenFetchBalanceRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid));
+  yield put(tokenFetchBalanceRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid, true));
   const { htrBalanceError } = yield race({
     success: take(specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_SUCCESS, {
       tokenId: htrUid,
@@ -255,7 +255,7 @@ export function* loadTokens() {
   });
 
   // ...and history:
-  yield put(tokenFetchHistoryRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid));
+  yield put(tokenFetchHistoryRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid, true));
   const { htrHistoryError } = yield race({
     success: take(specificTypeAndPayload(types.TOKEN_FETCH_HISTORY_SUCCESS, {
       tokenId: htrUid,
