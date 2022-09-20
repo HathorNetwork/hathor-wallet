@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
+import ReactLoading from 'react-loading';
+import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
 import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import ReactLoading from 'react-loading';
-import wallet from '../utils/wallet';
-import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
-import helpers from '../utils/helpers';
 import { get } from 'lodash';
+import wallet from '../utils/wallet';
+import helpers from '../utils/helpers';
 import colors from '../index.scss';
 import TokenPagination from './TokenPagination';
 import HathorAlert from './HathorAlert';
@@ -78,7 +78,11 @@ class TokenHistory extends React.Component {
    */
   fetchMoreHistory = async () => {
     if (this.state.shouldFetch) {
-      const newHistory = await wallet.fetchMoreHistory(this.props.wallet, this.props.selectedToken, this.props.tokensHistory.data);
+      const newHistory = await wallet.fetchMoreHistory(
+        this.props.wallet,
+        this.props.selectedToken,
+        this.props.tokensHistory.data
+      );
       if (newHistory.length === 0) {
         // Last page already fetched, no need to fetch anymore
         this.setState({ shouldFetch: false });
@@ -117,8 +121,8 @@ class TokenHistory extends React.Component {
    * Calculates the transactions that will be shown in the list, besides the pagination data
    */
   handleHistoryUpdate = () => {
-    const history = this.props.tokensHistory.data;
-    if (history && history.length > 0) {
+    const history = get(this.props.tokensHistory, data, []);
+    if (history.length > 0) {
       let startIndex = 0;
       let endIndex = this.props.count;
       if (this.state.reference !== null) {
@@ -152,10 +156,10 @@ class TokenHistory extends React.Component {
     if (this.state.reference === null) {
       throw new Error('State reference cannot be null calling this method.');
     }
-    const history = this.props.tokensHistory.data;
+    const history = get(this.props.tokensHistory, data, []);
     const idxReference = history.findIndex((tx) =>
       tx.tx_id === this.state.reference
-    )
+    );
     return idxReference;
   }
 
