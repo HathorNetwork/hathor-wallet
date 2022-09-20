@@ -18,11 +18,15 @@ import { get } from 'lodash';
 import colors from '../index.scss';
 import TokenPagination from './TokenPagination';
 import HathorAlert from './HathorAlert';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 const mapStateToProps = (state, props) => {
   let history = [];
   if (props.selectedToken) {
-    history = get(state.tokensHistory, `${props.selectedToken}`, { status: 'loading', data: [] });
+    history = get(state.tokensHistory, `${props.selectedToken}`, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: [],
+    });
   }
   return { 
     tokensHistory: history,
@@ -201,7 +205,6 @@ class TokenHistory extends React.Component {
   }
 
   render() {
-    console.log('Tokens History: ', this.props.tokensHistory);
     const renderHistory = () => {
       return (
         <div className="table-responsive">
@@ -310,8 +313,8 @@ class TokenHistory extends React.Component {
     return (
       <div>
         {this.props.showPage && renderPage()}
-        {this.props.tokensHistory.status === 'ready' && renderHistory()}
-        {this.props.tokensHistory.status === 'loading' && renderLoading()}
+        {this.props.tokensHistory.status === TOKEN_DOWNLOAD_STATUS.READY && renderHistory()}
+        {this.props.tokensHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING && renderLoading()}
 
         <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
       </div>

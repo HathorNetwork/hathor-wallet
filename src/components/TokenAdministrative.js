@@ -58,7 +58,7 @@ class TokenAdministrative extends React.Component {
     errorMessage: '',
     totalSupply: null,
     balance: {
-      status: 'loading',
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
       data: {
         available: 0,
         locked: 0,
@@ -117,7 +117,7 @@ class TokenAdministrative extends React.Component {
     const meltCount = meltUtxos.length;
 
     const tokenBalance = get(this.props.tokensBalance, this.props.token.uid, {
-      status: 'loading',
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
       data: {
         available: 0,
         locked: 0,

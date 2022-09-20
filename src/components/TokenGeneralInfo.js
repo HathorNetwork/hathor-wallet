@@ -91,7 +91,9 @@ class TokenGeneralInfo extends React.Component {
         alwaysShow,
       });
     } catch (e) {
-      this.setState({ errorMessage: e.message });
+      this.setState({
+        errorMessage: e.message,
+      });
     }
   }
 

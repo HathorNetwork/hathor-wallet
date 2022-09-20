@@ -8,7 +8,7 @@
 import React from 'react';
 import { t } from 'ttag'
 import { get } from 'lodash';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import { NFT_LIST_PER_PAGE } from '../constants';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import HathorPaginate from '../components/HathorPaginate';

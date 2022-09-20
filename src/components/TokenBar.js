@@ -15,6 +15,7 @@ import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
 import colors from '../index.scss';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 
 const mapStateToProps = (state) => {
@@ -25,7 +26,7 @@ const mapStateToProps = (state) => {
     tokensBalance: state.tokensBalance,
     tokenMetadata: state.tokenMetadata,
     tokenBalance: get(state.tokensBalance, `${state.selectedToken.uid}`, {
-      status: 'loading',
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
       data: {
         locked: 0,
         available: 0,
@@ -116,7 +117,7 @@ class TokenBar extends React.Component {
    */
   getTokenBalance = (uid) => {
     const balance = get(this.props.tokensBalance, `${uid}`, {
-      status: 'loading',
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
       data: {
         locked: 0,
         available: 0,
@@ -139,7 +140,7 @@ class TokenBar extends React.Component {
    */
   getTokenBalanceFormatted = (uid) => {
     const tokenBalance = get(this.props.tokensBalance, `${uid}`, {
-      status: 'loading',
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
       data: {
         locked: 0,
         available: 0
@@ -187,7 +188,7 @@ class TokenBar extends React.Component {
       return registeredTokens.map((token) => {
         const tokenUid = token.uid;
         const tokenBalance = get(this.props.tokensBalance, `${token.uid}`, {
-          status: 'loading',
+          status: TOKEN_DOWNLOAD_STATUS.LOADING,
           data: {
             locked: 0,
             available: 0
@@ -199,8 +200,8 @@ class TokenBar extends React.Component {
             <span className='ellipsis'>
               {token.symbol} {this.state.opened && ` | `}
 
-              {(tokenBalance.status === 'ready' && this.state.opened) && this.getTokenBalanceFormatted(tokenUid)}
-              {(tokenBalance.status === 'loading' && this.state.opened) && this.renderLoading()}
+              {(tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && this.state.opened) && this.getTokenBalanceFormatted(tokenUid)}
+              {(tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING  && this.state.opened) && this.renderLoading()}
             </span>
           </div>
         )

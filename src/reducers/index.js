@@ -9,6 +9,8 @@ import hathorLib from '@hathor/wallet-lib';
 import { VERSION } from '../constants';
 import { types } from '../actions';
 import { get } from 'lodash';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { WALLET_STATUS } from '../sagas/wallet';
 
 const initialState = {
   tokensHistory: {},
@@ -464,7 +466,7 @@ export const onTokenFetchBalanceRequested = (state, action) => {
       ...state.tokensBalance,
       [tokenId]: {
         ...oldState,
-        status: 'loading',
+        status: TOKEN_DOWNLOAD_STATUS.LOADING,
         oldStatus: oldState.status,
       },
     },
@@ -479,7 +481,7 @@ export const onTokenFetchBalanceSuccess = (state, action) => {
     tokensBalance: {
       ...state.tokensBalance,
       [tokenId]: {
-        status: 'ready',
+        status: TOKEN_DOWNLOAD_STATUS.READY,
         updatedAt: new Date().getTime(),
         data,
       },
@@ -495,7 +497,7 @@ export const onTokenFetchBalanceFailed = (state, action) => {
     tokensBalance: {
       ...state.tokensBalance,
       [tokenId]: {
-        status: 'failed',
+        status: TOKEN_DOWNLOAD_STATUS.FAILED,
       },
     },
   };
@@ -509,7 +511,7 @@ export const onTokenFetchHistorySuccess = (state, action) => {
     tokensHistory: {
       ...state.tokensHistory,
       [tokenId]: {
-        status: 'ready',
+        status: TOKEN_DOWNLOAD_STATUS.READY,
         updatedAt: new Date().getTime(),
         data,
       },
@@ -525,7 +527,7 @@ export const onTokenFetchHistoryFailed = (state, action) => {
     tokensHistory: {
       ...state.tokensHistory,
       [tokenId]: {
-        status: 'failed',
+        status: TOKEN_DOWNLOAD_STATUS.FAILED,
         data: [],
       },
     },
@@ -543,7 +545,7 @@ export const onTokenFetchHistoryRequested = (state, action) => {
       ...state.tokensHistory,
       [tokenId]: {
         ...oldState,
-        status: 'loading',
+        status: TOKEN_DOWNLOAD_STATUS.LOADING,
         oldStatus: oldState.status,
       },
     },
@@ -552,20 +554,17 @@ export const onTokenFetchHistoryRequested = (state, action) => {
 
 export const onStartWalletFailed = (state) => ({
   ...state,
-  walletStartError: true,
-  walletStartState: 'error',
+  walletStartState: WALLET_STATUS.FAILED,
 });
 
 export const onStartWalletLock = (state) => ({
   ...state,
-  walletStartError: false,
-  walletStartState: 'loading',
+  walletStartState: WALLET_STATUS.LOADING,
 });
 
 export const onStartWalletSuccess = (state) => ({
   ...state,
-  walletStartError: false,
-  walletStartState: 'ready',
+  walletStartState: WALLET_STATUS.READY,
 });
 
 export const onTokenInvalidateBalance = (state, action) => {
@@ -576,7 +575,7 @@ export const onTokenInvalidateBalance = (state, action) => {
     tokensBalance: {
       ...state.tokensBalance,
       [tokenId]: {
-        status: 'invalidated',
+        status: TOKEN_DOWNLOAD_STATUS.INVALIDATED,
       },
     },
   };
@@ -590,7 +589,7 @@ export const onTokenInvalidateHistory = (state, action) => {
     tokensHistory: {
       ...state.tokensHistory,
       [tokenId]: {
-        status: 'invalidated',
+        status: TOKEN_DOWNLOAD_STATUS.INVALIDATED,
       },
     },
   };

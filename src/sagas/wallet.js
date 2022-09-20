@@ -43,11 +43,18 @@ import {
   tokenFetchBalanceRequested,
   tokenFetchHistoryRequested,
   setServerInfo,
+  startWalletFailed,
 } from '../actions';
 import { specificTypeAndPayload, } from './helpers';
 import { fetchTokenData } from './tokens';
 import walletHelpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
+
+export const WALLET_STATUS = {
+  READY: 'ready',
+  FAILED: 'failed',
+  LOADING: 'loading',
+};
 
 export function* startWallet(action) {
   yield put(loadingAddresses(true));
@@ -178,9 +185,17 @@ export function* startWallet(action) {
       password,
     });
 
+    let version;
+    let networkName = network.name;
+
+    if (serverInfo) {
+      version = serverInfo.version;
+      networkName = serverInfo.network;
+    }
+
     yield put(setServerInfo({
-      version: serverInfo.version,
-      network: serverInfo.network,
+      version,
+      network: networkName,
     }));
 
   } catch(e) {
@@ -204,7 +219,7 @@ export function* startWallet(action) {
     });
 
     if (error) {
-      // yield put(startWalletFailed());
+      yield put(startWalletFailed());
       return;
     }
   }
