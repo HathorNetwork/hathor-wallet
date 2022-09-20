@@ -65,7 +65,10 @@ function* fetchTokenBalanceConsumer(fetchTokenBalanceChannel) {
     yield fork(fetchTokenBalance, action);
     // Wait until the success action is dispatched before consuming another action
     yield take(
-      specificTypeAndPayload(types.TOKEN_FETCH_BALANCE_SUCCESS, {
+      specificTypeAndPayload([
+        types.TOKEN_FETCH_BALANCE_SUCCESS,
+        types.TOKEN_FETCH_BALANCE_FAILED,
+      ], {
         tokenId: action.tokenId,
       }),
     );
