@@ -44,6 +44,8 @@ import {
   tokenFetchHistoryRequested,
   setServerInfo,
   startWalletFailed,
+  walletStateError,
+  walletStateReady,
 } from '../actions';
 import { specificTypeAndPayload, } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -221,8 +223,8 @@ export function* startWallet(action) {
   // Wallet might be already ready at this point
   if (!wallet.isReady()) {
     const { error } = yield race({
-      success: take('WALLET_STATE_READY'),
-      error: take('WALLET_STATE_ERROR'),
+      success: take(types.WALLET_STATE_READY),
+      error: take(types.WALLET_STATE_ERROR),
     });
 
     if (error) {
@@ -255,7 +257,7 @@ export function* startWallet(action) {
   // https://redux-saga.js.org/docs/advanced/ForkModel
   // So, if a new START_WALLET_REQUESTED action is dispatched, we need to cleanup
   // all attached forks (that will cause the event listeners to be cleaned).
-  yield take('START_WALLET_REQUESTED');
+  yield take(types.START_WALLET_REQUESTED);
   yield cancel(threads);
 }
 
@@ -387,15 +389,11 @@ export function* listenForWalletReady(wallet) {
       const message = yield take(channel);
 
       if (message === HathorWallet.ERROR) {
-        yield put({
-          type: 'WALLET_STATE_ERROR',
-        });
+        yield put(walletStateError());
         yield cancel();
       } else {
         if (wallet.isReady()) {
-          yield put({
-            type: 'WALLET_STATE_READY',
-          });
+          yield put(walletStateReady());
           yield cancel();
         }
 
@@ -532,7 +530,7 @@ export function* onWalletConnStateUpdate({ payload }) {
 
 export function* saga() {
   yield all([
-    takeLatest('START_WALLET_REQUESTED', startWallet),
+    takeLatest(types.START_WALLET_REQUESTED, startWallet),
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
     takeEvery('WALLET_NEW_TX', handleTx),
     takeEvery('WALLET_UPDATE_TX', handleTx),
