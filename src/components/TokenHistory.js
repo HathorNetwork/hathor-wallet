@@ -121,7 +121,7 @@ class TokenHistory extends React.Component {
    * Calculates the transactions that will be shown in the list, besides the pagination data
    */
   handleHistoryUpdate = () => {
-    const history = get(this.props.tokensHistory, data, []);
+    const history = get(this.props.tokensHistory, 'data', []);
     if (history.length > 0) {
       let startIndex = 0;
       let endIndex = this.props.count;
@@ -156,7 +156,7 @@ class TokenHistory extends React.Component {
     if (this.state.reference === null) {
       throw new Error('State reference cannot be null calling this method.');
     }
-    const history = get(this.props.tokensHistory, data, []);
+    const history = get(this.props.tokensHistory, 'data', []);
     const idxReference = history.findIndex((tx) =>
       tx.tx_id === this.state.reference
     );

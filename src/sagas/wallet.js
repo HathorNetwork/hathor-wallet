@@ -57,8 +57,6 @@ export const WALLET_STATUS = {
 };
 
 export function* startWallet(action) {
-  yield put(loadingAddresses(true));
-
   const {
     words,
     passphrase,
@@ -211,6 +209,15 @@ export function* startWallet(action) {
     }
   }
 
+  // Wallet start called, we need to show the loading addresses screen
+  routerHistory.replace('/loading_addresses');
+
+  const threads = [
+    walletListenerThread,
+    walletReadyThread,
+    featureFlagsThread
+  ];
+
   // Wallet might be already ready at this point
   if (!wallet.isReady()) {
     const { error } = yield race({
@@ -220,11 +227,20 @@ export function* startWallet(action) {
 
     if (error) {
       yield put(startWalletFailed());
+      yield cancel(threads);
       return;
     }
   }
 
-  yield call(loadTokens);
+  try {
+    yield call(loadTokens);
+  } catch(e) {
+    yield put(startWalletFailed());
+    yield cancel(threads);
+    return;
+  }
+
+  routerHistory.replace('/wallet/');
 
   // Fetch all tokens, including the ones that are not registered yet
   const allTokens = yield call(wallet.getTokens.bind(wallet));
@@ -233,22 +249,14 @@ export function* startWallet(action) {
   yield put(loadWalletSuccess(allTokens));
   yield put(loadingAddresses(false));
 
-  routerHistory.replace('/wallet/');
-
   // The way the redux-saga fork model works is that if a saga has `forked`
   // another saga (using the `fork` effect), it will remain active until all
   // the forks are terminated. You can read more details at
   // https://redux-saga.js.org/docs/advanced/ForkModel
   // So, if a new START_WALLET_REQUESTED action is dispatched, we need to cleanup
   // all attached forks (that will cause the event listeners to be cleaned).
-  while (true) {
-    yield take('START_WALLET_REQUESTED');
-    yield cancel([
-      walletListenerThread,
-      walletReadyThread,
-      featureFlagsThread
-    ]);
-  }
+  yield take('START_WALLET_REQUESTED');
+  yield cancel(threads);
 }
 
 /**
@@ -407,7 +415,6 @@ export function* handleTx(action) {
   const wallet = yield select((state) => state.wallet);
 
   if (!wallet.isReady()) {
-    console.log('Got tx but wallet is not ready, ignoring.', action);
     return;
   }
 
@@ -509,7 +516,6 @@ export function* bestBlockUpdate({ payload }) {
   const wallet = yield select((state) => state.wallet);
 
   if (!wallet.isReady()) {
-    console.log('Got best block update but wallet is not ready, ignoring.');
     return;
   }
 

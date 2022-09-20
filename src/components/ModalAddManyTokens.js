@@ -12,7 +12,7 @@ import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import tokens from '../utils/tokens';
 import wallet from "../utils/wallet";
-import {TOKEN_DOWNLOAD_STATUS} from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 
 /**

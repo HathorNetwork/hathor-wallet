@@ -13,7 +13,7 @@ import {
   VIDEO_MEDIA_TYPES_BY_EXTENSION,
   AUDIO_MEDIA_TYPES_BY_EXTENSION,
 } from '../constants';
-import { TOKEN_DOWNLOAD_STATUS, } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import helpers from '../utils/helpers';
 import colors from '../index.scss';
 
@@ -39,7 +39,6 @@ class NFTListElement extends React.Component {
 
   render = () => {
     const nftType = this.props.nftElement.nft_media.type && this.props.nftElement.nft_media.type.toUpperCase();
-
     const file = this.props.nftElement.nft_media.file;
 
     // The metadata may have the media mime type (useful for videos and audios) because many times the file does not have an extension.

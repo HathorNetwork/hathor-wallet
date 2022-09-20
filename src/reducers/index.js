@@ -65,6 +65,9 @@ const initialState = {
     network: null,
     version: null,
   },
+  // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
+  // in case the START_WALLET saga fails
+  startWalletAction: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -159,6 +162,8 @@ const rootReducer = (state = initialState, action) => {
       return onTokenInvalidateBalance(state, action);
     case types.ON_START_WALLET_LOCK:
       return onStartWalletLock(state);
+    case types.START_WALLET_REQUESTED:
+      return onStartWalletRequested(state, action);
     case types.START_WALLET_SUCCESS:
       return onStartWalletSuccess(state);
     case types.START_WALLET_FAILED:
@@ -552,19 +557,26 @@ export const onTokenFetchHistoryRequested = (state, action) => {
   };
 };
 
-export const onStartWalletFailed = (state) => ({
-  ...state,
-  walletStartState: WALLET_STATUS.FAILED,
-});
-
 export const onStartWalletLock = (state) => ({
   ...state,
   walletStartState: WALLET_STATUS.LOADING,
 });
 
+export const onStartWalletRequested = (state, action) => ({
+  ...state,
+  walletStartState: WALLET_STATUS.LOADING,
+  startWalletAction: action,
+});
+
 export const onStartWalletSuccess = (state) => ({
   ...state,
   walletStartState: WALLET_STATUS.READY,
+  startWalletAction: null, // Remove the action (that contains private data) from memory
+});
+
+export const onStartWalletFailed = (state) => ({
+  ...state,
+  walletStartState: WALLET_STATUS.FAILED,
 });
 
 export const onTokenInvalidateBalance = (state, action) => {
