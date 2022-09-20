@@ -12,6 +12,7 @@ import { metadataApi } from '@hathor/wallet-lib';
 import { channel } from 'redux-saga';
 import { get } from 'lodash';
 import { specificTypeAndPayload, dispatchAndWait } from './helpers';
+import helpers from '../utils/helpers';
 import { METADATA_CONCURRENT_DOWNLOAD } from '../constants';
 import {
   types,
@@ -31,18 +32,6 @@ export const TOKEN_DOWNLOAD_STATUS = {
   FAILED: 'failed',
   LOADING: 'loading',
   INVALIDATED: 'invalidated',
-};
-
-const mapTokenHistory = (tx, tokenUid) => {
-  return {
-    tx_id: tx.txId,
-    timestamp: tx.timestamp,
-    tokenUid,
-    balance: tx.balance,
-    // in wallet service this comes as 0/1 and in the full node comes with true/false
-    is_voided: Boolean(tx.voided),
-    version: tx.version,
-  };
 };
 
 /**
@@ -207,7 +196,7 @@ function* fetchTokenHistory(action) {
     }
 
     const response = yield call(wallet.getTxHistory.bind(wallet), { token_id: tokenId });
-    const data = response.map((txHistory) => mapTokenHistory(txHistory, tokenId));
+    const data = response.map((txHistory) => helpers.mapTokenHistory(txHistory, tokenId));
 
     yield put(tokenFetchHistorySuccess(tokenId, data));
   } catch (e) {

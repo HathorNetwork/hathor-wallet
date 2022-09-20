@@ -36,6 +36,7 @@ import {
   metadataApi,
 } from '@hathor/wallet-lib';
 import { chunk } from 'lodash';
+import helpers from '../utils/helpers';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
@@ -131,24 +132,6 @@ const wallet = {
   },
 
   /**
-   * Map token history object to the expected object in the wallet redux data
-   *
-   * tx {Object} history data element
-   * tokenUid {String} token uid
-   */
-  mapTokenHistory(tx, tokenUid) {
-    return {
-      tx_id: tx.txId,
-      timestamp: tx.timestamp,
-      tokenUid,
-      balance: tx.balance,
-      // in wallet service this comes as 0/1 and in the full node comes with true/false
-      is_voided: Boolean(tx.voided),
-      version: tx.version,
-    };
-  },
-
-  /**
    * Get all tokens that this wallet has any transaction and fetch balance/history for each of them
    * We could do a lazy history load only when the user selects to see the token
    * but this would change the behaviour of the wallet and was not the goal of this moment
@@ -168,7 +151,7 @@ const wallet = {
       // We fetch history count of 5 pages and then we fetch a new page each 'Next' button clicked
       const history = await wallet.getTxHistory({ token_id: token, count: 5 * WALLET_HISTORY_COUNT });
       tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
-      tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
+      tokensHistory[token] = history.map((element) => helpers.mapTokenHistory(element, token));
       /* eslint-enable no-await-in-loop */
     }
 
@@ -185,7 +168,7 @@ const wallet = {
    */
   async fetchMoreHistory(wallet, token, history) {
     const newHistory = await wallet.getTxHistory({ token_id: token, skip: history.length, count: WALLET_HISTORY_COUNT });
-    const newHistoryObjects = newHistory.map((element) => this.mapTokenHistory(element, token));
+    const newHistoryObjects = newHistory.map((element) => helpers.mapTokenHistory(element, token));
 
     if (newHistoryObjects.length) {
       store.dispatch(updateTokenHistory(token, newHistoryObjects));
@@ -336,7 +319,7 @@ const wallet = {
       const history = await wallet.getTxHistory({ token_id: token });
 
       tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
-      tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
+      tokensHistory[token] = history.map((element) => helpers.mapTokenHistory(element, token));
       /* eslint-enable no-await-in-loop */
     }
 

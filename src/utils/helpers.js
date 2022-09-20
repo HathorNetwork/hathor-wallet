@@ -201,6 +201,24 @@ const helpers = {
     localStorage.setItem('app:uniqueId', uniqueId);
 
     return uniqueId;
+  },
+
+  /**
+   * Map token history object to the expected object in the wallet redux data
+   *
+   * tx {Object} history data element
+   * tokenUid {String} token uid
+   */
+  mapTokenHistory(tx, tokenUid) {
+    return {
+      tx_id: tx.txId,
+      timestamp: tx.timestamp,
+      tokenUid,
+      balance: tx.balance,
+      // in wallet service this comes as 0/1 and in the full node comes with true/false
+      is_voided: Boolean(tx.voided),
+      version: tx.version,
+    };
   }
 }
 
