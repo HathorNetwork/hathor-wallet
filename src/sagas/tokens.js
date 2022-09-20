@@ -24,6 +24,7 @@ import {
 } from '../actions';
 
 const CONCURRENT_FETCH_REQUESTS = 5;
+const METADATA_MAX_RETRIES = 3;
 
 export const TOKEN_DOWNLOAD_STATUS = {
   READY: 'ready',
@@ -159,31 +160,34 @@ function* fetchTokenMetadataConsumer(fetchTokenMetadataChannel) {
 /**
  * Fetch a single token from the metadataApi
  *
- * @param {Array} token The token to fetch from the metadata api
- * @param {String} network Network name
- *
- * @memberof Wallet
- * @inner
+ * @param {String} action.tokenId The token to fetch from the metadata api
  */
 export function* fetchTokenMetadata({ tokenId }) {
   const { network } = yield select((state) => state.serverInfo);
 
   try {
-    const data = yield call(metadataApi.getDagMetadata, tokenId, network);
+    // Retry mechanism
+    for (let i = 0; i <= METADATA_MAX_RETRIES; i += 1) {
+      try {
+        const data = yield call(metadataApi.getDagMetadata, tokenId, network);
 
-    yield put({
-      type: types.TOKEN_FETCH_METADATA_SUCCESS,
-      tokenId,
-      data: get(data, tokenId, null),
-    });
+        yield put({
+          type: types.TOKEN_FETCH_METADATA_SUCCESS,
+          tokenId,
+          data: get(data, tokenId, null),
+        });
+        return;
+      } catch (e) {
+        yield delay(1000); // Wait 1s before trying again
+      }
+    }
+
+    throw new Error(`Max retries requesting metadata for ${tokenId}`);
   } catch (e) {
     yield put({
       type: types.TOKEN_FETCH_METADATA_FAILED,
       tokenId,
     });
-    // Error downloading metadata.
-    // TODO: We should wait a few seconds and retry if still didn't
-    // reach the retry limit
     // eslint-disable-next-line
     console.log('Error downloading metadata of token', tokenId);
   }
