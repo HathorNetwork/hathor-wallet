@@ -13,7 +13,26 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 
 const initialState = {
+  /**
+   * tokensHistory {Object} stores the history for each token (Dict[tokenUid: str, {
+   *    status: string,
+   *    oldStatus: string,
+   *    updatedAt: int,
+   *    data: 
+   * }])
+   */
   tokensHistory: {},
+  /**
+   * tokensBalance {Object} stores the balance for each token (Dict[tokenUid: str, {
+   *    status: string,
+   *    oldStatus: string,
+   *    updatedAt: int,
+   *    data: {
+   *      available: int,
+   *      locked: int
+   *    }
+   * }])
+   */
   tokensBalance: {},
   // Address to be used and is shown in the screen
   lastSharedAddress: null,
@@ -308,14 +327,19 @@ const onCleanData = (state) => {
  */
 const onUpdateTokenHistory = (state, action) => {
   const { token, newHistory } = action.payload;
-  const currentHistory = state.tokensHistory[token] || [];
 
-  const updatedHistoryMap = {};
-  updatedHistoryMap[token] = [...currentHistory, ...newHistory];
-  const newTokensHistory = Object.assign({}, state.tokensHistory, updatedHistoryMap);
   return {
     ...state,
-    tokensHistory: newTokensHistory,
+    tokensHistory: {
+      ...state.tokensHistory,
+      [token]: {
+        ...state.tokensHistory[token],
+        data: [
+          ...state.tokensHistory[token].data,
+          ...newHistory,
+        ]
+      }
+    },
   };
 };
 
