@@ -485,6 +485,9 @@ export const onNewTokens = (state, action) => {
   };
 };
 
+/**
+ * @param {String} action.tokenId - The tokenId to mark as loading
+ */
 export const onTokenFetchBalanceRequested = (state, action) => {
   const { tokenId } = action;
   const oldState = get(state.tokensBalance, tokenId, {});
@@ -502,6 +505,10 @@ export const onTokenFetchBalanceRequested = (state, action) => {
   };
 };
 
+/**
+ * @param {String} action.tokenId - The tokenId to mark as success
+ * @param {Object} action.data - The token balance information to store on redux
+ */
 export const onTokenFetchBalanceSuccess = (state, action) => {
   const { tokenId, data } = action;
 
@@ -518,6 +525,9 @@ export const onTokenFetchBalanceSuccess = (state, action) => {
   };
 };
 
+/**
+ * @param {String} action.tokenId - The tokenId to mark as failure
+ */
 export const onTokenFetchBalanceFailed = (state, action) => {
   const { tokenId } = action;
 
@@ -532,6 +542,10 @@ export const onTokenFetchBalanceFailed = (state, action) => {
   };
 };
 
+/**
+ * @param {String} action.tokenId - The tokenId to mark as success
+ * @param {Object} action.data - The token history information to store on redux
+ */
 export const onTokenFetchHistorySuccess = (state, action) => {
   const { tokenId, data } = action;
 
@@ -548,6 +562,9 @@ export const onTokenFetchHistorySuccess = (state, action) => {
   };
 };
 
+/**
+ * @param {String} action.tokenId - The tokenId to mark as failed
+ */
 export const onTokenFetchHistoryFailed = (state, action) => {
   const { tokenId } = action;
 
@@ -563,6 +580,9 @@ export const onTokenFetchHistoryFailed = (state, action) => {
   };
 };
 
+/**
+ * @param {String} action.tokenId - The tokenId to fetch history
+ */
 export const onTokenFetchHistoryRequested = (state, action) => {
   const { tokenId } = action;
 
@@ -586,6 +606,10 @@ export const onStartWalletLock = (state) => ({
   walletStartState: WALLET_STATUS.LOADING,
 });
 
+/**
+ * @param {String} action.words - The wallet's words
+ * @param {String} action.pin - The wallet's pinCode
+ */
 export const onStartWalletRequested = (state, action) => ({
   ...state,
   walletStartState: WALLET_STATUS.LOADING,
@@ -603,6 +627,9 @@ export const onStartWalletFailed = (state) => ({
   walletStartState: WALLET_STATUS.FAILED,
 });
 
+/**
+ * @param {String} action.tokenId - The tokenId to invalidate
+ */
 export const onTokenInvalidateBalance = (state, action) => {
   const { tokenId } = action;
 
@@ -617,6 +644,9 @@ export const onTokenInvalidateBalance = (state, action) => {
   };
 };
 
+/**
+ * @param {String} action.tokenId - The tokenId to invalidate
+ */
 export const onTokenInvalidateHistory = (state, action) => {
   const { tokenId } = action;
 
@@ -631,6 +661,9 @@ export const onTokenInvalidateHistory = (state, action) => {
   };
 };
 
+/**
+ * @param {Number} action.data Best block height
+ */
 export const onWalletBestBlockUpdate = (state, action) => {
   const { data } = action;
 
