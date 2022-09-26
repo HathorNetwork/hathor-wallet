@@ -109,20 +109,12 @@ class TokenBar extends React.Component {
    * @return {number} Total token balance
    */
   getTokenBalance = (uid) => {
-    const balance = get(this.props.tokensBalance, `${uid}`, {
-      status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      data: {
-        locked: 0,
-        available: 0,
-      }
-    }).data;
-    let total = 0;
-    if (balance) {
-      // If we don't have any transaction for the token, balance will be undefined
-      total = balance.available + balance.locked;
-    }
+    const { available, locked } = get(this.props.tokensBalance, `${uid}.data`, {
+      available: 0,
+      locked: 0,
+    });
 
-    return total;
+    return available + locked;
   }
 
   /**
@@ -132,15 +124,7 @@ class TokenBar extends React.Component {
    * @return {string} String formatted balance, ready for exhibition
    */
   getTokenBalanceFormatted = (uid) => {
-    const tokenBalance = get(this.props.tokensBalance, `${uid}`, {
-      status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      data: {
-        locked: 0,
-        available: 0
-      }
-    });
-    const { locked, available } = tokenBalance.data;
-    const total = locked + available;
+    const total = this.getTokenBalance(uid);
 
     // Formatting to string for exhibition
     const isNFT = helpers.isTokenNFT(uid, this.props.tokenMetadata);
