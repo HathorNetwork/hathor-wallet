@@ -12,7 +12,6 @@ import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import tokens from '../utils/tokens';
 import wallet from "../utils/wallet";
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 
 /**
@@ -109,14 +108,11 @@ class ModalAddManyTokens extends React.Component {
       // All promises succeeded, validating token balances
       for (const config of toAdd) {
         const tokenUid = config.uid;
-        const tokenBalance = get(tokensBalance, tokenUid, {
-          status: TOKEN_DOWNLOAD_STATUS.LOADING,
-          data: {
-            available: 0,
-            locked: 0,
-          },
+        const { available, locked } = get(tokensBalance, `${tokenUid}.data`, {
+          available: 0,
+          locked: 0,
         });
-        const tokenHasZeroBalance = (tokenBalance.available + tokenBalance.locked) === 0;
+        const tokenHasZeroBalance = (available + locked) === 0;
 
         /*
          * We only make this validation if the "Hide Zero-Balance Tokens" setting is active,
