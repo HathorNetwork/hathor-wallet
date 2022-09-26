@@ -42,13 +42,15 @@ const mapStateToProps = (state) => {
  */
 class TokenAdministrative extends React.Component {
   /**
-   * mintCount {number} Quantity of mint authorities available
-   * meltCount {number} Quantity of melt authorities available
-   * action {string} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
-   * successMessage {string} success message to show
+   * mintCount {Number} Quantity of mint authorities available
+   * meltCount {Number} Quantity of melt authorities available
+   * action {String} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
+   * successMessage {String} success message to show
    * errorMessage {String} Message to show in case of error getting token info
-   * totalSupply {number} Token total supply
-   * balance {number} Amount available of selected token
+   * totalSupply {Number} Token total supply
+   * balance.status {String} The current status of the token balance download
+   * balance.data.available {Number} Amount available of the current token
+   * balance.data.locked {Number} Amount locked of the current token
    */
   state = {
     mintCount: 0,
