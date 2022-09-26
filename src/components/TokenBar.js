@@ -25,13 +25,6 @@ const mapStateToProps = (state) => {
     selectedToken: state.selectedToken,
     tokensBalance: state.tokensBalance,
     tokenMetadata: state.tokenMetadata,
-    tokenBalance: get(state.tokensBalance, `${state.selectedToken.uid}`, {
-      status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      data: {
-        locked: 0,
-        available: 0,
-      },
-    }),
   };
 };
 
