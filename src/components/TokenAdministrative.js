@@ -204,7 +204,7 @@ class TokenAdministrative extends React.Component {
         default:
           return null;
       }
-    }
+    };
 
     const renderMeltLinks = () => {
       return (
@@ -215,7 +215,7 @@ class TokenAdministrative extends React.Component {
           <a className={`${this.state.action === 'destroy-melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-melt')} href="true">{t`Destroy melt`} <i className="fa fa-trash ml-1" title={t`Destroy melt`}></i></a>
         </div>
       );
-    }
+    };
 
     const renderMintLinks = () => {
       return (
@@ -226,7 +226,7 @@ class TokenAdministrative extends React.Component {
           <a className={`${this.state.action === 'destroy-mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-mint')} href="true">{t`Destroy mint`} <i className="fa fa-trash ml-1" title={t`Destroy mint`}></i></a>
         </div>
       );
-    }
+    };
 
     const renderMintMeltWrapper = () => {
       if (this.state.mintCount === 0 && this.state.meltCount === 0) {
@@ -247,7 +247,16 @@ class TokenAdministrative extends React.Component {
           </div>
         </div>
       );
-    }
+    };
+
+    const renderReadyBalance = () => (
+      <>
+        { helpers.renderValue(this.state.balance.data.available, isNFT) }
+        &nbsp;
+        { this.props.token.symbol }
+      </>
+    );
+
 
     const isNFT = helpers.isTokenNFT(get(this.props, 'token.uid'), this.props.tokenMetadata);
 
@@ -256,7 +265,7 @@ class TokenAdministrative extends React.Component {
         <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.state.totalSupply ? helpers.renderValue(this.state.totalSupply, isNFT) : '-'} {this.props.token.symbol}</p>
         <div className="mt-2 mb-2">
           <strong>{t`Your balance available:`} </strong>
-          {this.state.balance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
+          { this.state.balance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
             <ReactLoading
               type='spin'
               className="loading-inline"
@@ -265,10 +274,8 @@ class TokenAdministrative extends React.Component {
               color={colors.purpleHathor}
               delay={500}
             />
-          )}
-          {this.state.balance.status === TOKEN_DOWNLOAD_STATUS.READY && helpers.renderValue(this.state.balance.data.available, isNFT)}
-          &nbsp;
-          {this.state.balance.status === TOKEN_DOWNLOAD_STATUS.READY && this.props.token.symbol}
+          ) }
+          { this.state.balance.status === TOKEN_DOWNLOAD_STATUS.READY && renderReadyBalance() }
         </div>
         <div className="token-detail-wallet-info">
           {renderMintMeltWrapper()}
