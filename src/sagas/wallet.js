@@ -437,8 +437,8 @@ export function* handleTx(action) {
     }
   }
 
-  // We should download the **balance** for every token involved in the transaction
-  // and history for hathor
+  // We should download the **balance** and **history** for every token involved
+  // in the transaction
   for (const [tokenUid] of Object.entries(balances)) {
     if (registeredTokens.indexOf(tokenUid) === -1) {
       continue;
