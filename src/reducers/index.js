@@ -335,7 +335,7 @@ const onUpdateTokenHistory = (state, action) => {
       [token]: {
         ...state.tokensHistory[token],
         data: [
-          ...state.tokensHistory[token].data,
+          ...get(state.tokensHistory, `${token}.data`, []),
           ...newHistory,
         ]
       }
