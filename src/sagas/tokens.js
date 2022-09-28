@@ -208,9 +208,9 @@ function* fetchTokenHistory(action) {
 }
 
 /**
- * This saga will route the actions dispatched from SET_TOKEN and NEW_TOKEN to the
- * TOKEN_FETCH_BALANCE_REQUESTED saga, the idea is to load the balance for new tokens
- * registered or created on the app.
+ * This saga will monitor the `new_tokens` actions to detect new tokens being registered
+ * on the wallet and dispatch the TOKEN_FETCH_BALANCE_REQUESTED action so the balance
+ * for this token gets downloaded
  */
 function* routeTokenChange(action) {
   const wallet = yield select((state) => state.wallet);
