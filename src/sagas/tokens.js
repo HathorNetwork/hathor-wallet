@@ -255,7 +255,7 @@ export function* fetchTokenData(tokenId) {
   );
 
   if (fetchHistoryResponse.failure || fetchBalanceResponse.failure) {
-    throw new Error(`Error loading HTR history or balance for token ${tokenId}`);
+    throw new Error(`Error loading history or balance for token ${tokenId}`);
   }
 }
 
