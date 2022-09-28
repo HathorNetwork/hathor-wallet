@@ -18,7 +18,7 @@ const initialState = {
    *    status: string,
    *    oldStatus: string,
    *    updatedAt: int,
-   *    data: 
+   *    data: TxHistory[],
    * }])
    */
   tokensHistory: {},
