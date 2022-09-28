@@ -258,8 +258,8 @@ class UnknownTokens extends React.Component {
 
       return unknownTokens.map((token, index) => {
         const isNFT = helpers.isTokenNFT(token.uid, this.props.tokenMetadata);
-        const tokenBalance = get(this.props.tokensBalance, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.INVALIDATED });
-        const tokenHistory = get(this.props.tokensHistory, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.INVALIDATED });
+        const tokenBalance = get(this.props.tokensBalance, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.LOADING });
+        const tokenHistory = get(this.props.tokensHistory, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.LOADING });
 
         return (
           <div key={token.uid} className="unknown-token card">
