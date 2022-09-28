@@ -262,8 +262,8 @@ export function* startWallet(action) {
 }
 
 /**
- * This saga will load both HTR and DEFAULT_TOKEN (if they are different)
- * and dispatch actions to asynchronously load all registered tokens
+ * This saga will load HTR history and balance and dispatch actions
+ * to asynchronously load all registered tokens
  */
 export function* loadTokens() {
   const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
@@ -274,7 +274,7 @@ export function* loadTokens() {
     .getTokens()
     .reduce((acc, token) => {
       // remove htr since we will always download the HTR token
-      if (token.uid === '00') {
+      if (token.uid === htrUid) {
         return acc;
       }
 
