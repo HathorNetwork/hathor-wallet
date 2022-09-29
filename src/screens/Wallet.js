@@ -30,13 +30,18 @@ import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
 import colors from '../index.scss';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
-import { updateWords, tokenFetchHistoryRequested } from '../actions/index';
+import {
+  updateWords,
+  tokenFetchHistoryRequested,
+  tokenFetchBalanceRequested,
+} from '../actions/index';
 
 
 const mapDispatchToProps = dispatch => {
   return {
     updateWords: (data) => dispatch(updateWords(data)),
     getHistory: (tokenId) => dispatch(tokenFetchHistoryRequested(tokenId)),
+    getBalance: (tokenId) => dispatch(tokenFetchBalanceRequested(tokenId)),
   };
 };
 
