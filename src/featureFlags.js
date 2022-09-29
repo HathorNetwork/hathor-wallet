@@ -8,6 +8,10 @@ import {
 
 const IGNORE_WALLET_SERVICE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 
+export const Events = {
+  WALLET_SERVICE_ENABLED: 'wallet-service-enabled',
+};
+
 export class FeatureFlags extends events.EventEmitter {
   constructor(userId, network) {
     super();
@@ -33,7 +37,7 @@ export class FeatureFlags extends events.EventEmitter {
         this.walletServiceEnabled !== walletServiceEnabled
       )) {
         this.walletServiceEnabled = walletServiceEnabled;
-        this.emit('wallet-service-enabled', walletServiceEnabled);
+        this.emit(Events.WALLET_SERVICE_ENABLED, walletServiceEnabled);
       }
     });
   }

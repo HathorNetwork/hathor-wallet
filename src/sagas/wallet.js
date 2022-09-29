@@ -27,7 +27,10 @@ import {
   WALLET_SERVICE_MAINNET_BASE_WS_URL,
   WALLET_SERVICE_MAINNET_BASE_URL,
 } from '../constants';
-import { FeatureFlags } from '../featureFlags';
+import {
+  FeatureFlags,
+  Events as FeatureFlagEvents,
+} from '../featureFlags';
 import {
   types,
   isOnlineUpdate,
@@ -344,7 +347,7 @@ export function* fetchTokensMetadata(tokens) {
 export function* listenForFeatureFlags(featureFlags) {
   const channel = eventChannel((emitter) => {
     const listener = (state) => emitter(state);
-    featureFlags.on('wallet-service-enabled', (state) => {
+    featureFlags.on(FeatureFlagEvents.WALLET_SERVICE_ENABLED, (state) => {
       emitter(state);
     });
 
