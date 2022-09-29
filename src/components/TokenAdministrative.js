@@ -192,7 +192,7 @@ class TokenAdministrative extends React.Component {
         case 'mint':
           return <TokenMint htrBalance={this.props.htrBalance} action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} />
         case 'melt':
-          return <TokenMelt action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} walletAmount={this.state.balance.data.available} />
+          return <TokenMelt action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} tokenBalance={this.state.balance} />
         case 'delegate-mint':
           return <TokenDelegate action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} />
         case 'delegate-melt':
