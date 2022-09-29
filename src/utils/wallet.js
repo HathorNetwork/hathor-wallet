@@ -178,30 +178,6 @@ const wallet = {
   },
 
   /**
-   * After a new transaction arrives in the websocket we must
-   * fetch the new balance for each token on it and use
-   * this new data to update redux info
-   *
-   * wallet {HathorWallet} wallet object
-   * tx {Object} full transaction object from the websocket
-   */
-  async fetchNewTxTokenBalance(wallet, tx) {
-    if (!wallet.isReady()) {
-      return null;
-    }
-
-    const updatedBalanceMap = {};
-    const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
-
-    // we now loop through all tokens present in the new tx to get the new balance
-    for (const [tokenUid] of Object.entries(balances)) {
-      /* eslint-disable no-await-in-loop */
-      updatedBalanceMap[tokenUid] = await this.fetchTokenBalance(wallet, tokenUid);
-    }
-    return updatedBalanceMap;
-  },
-
-  /**
    * Method that fetches the balance of a token
    * and pre process for the expected format
    *
@@ -228,19 +204,6 @@ const wallet = {
       mint,
       melt,
     };
-  },
-
-  /**
-   * Fetch HTR balance
-   *
-   * wallet {HathorWallet} wallet object
-   */
-  async fetchNewHTRBalance(wallet) {
-    if (wallet.isReady()) {
-      // Need to update tokensBalance if wallet is ready
-      const { uid } = hathorConstants.HATHOR_TOKEN_CONFIG;
-      return await this.fetchTokenBalance(wallet, uid);
-    }
   },
 
   /**
@@ -298,32 +261,6 @@ const wallet = {
     metadataPerToken[tokenUid] = metadata;
 
     store.dispatch(tokenMetadataUpdated(metadataPerToken, []));
-  },
-
-  /**
-   * Fetches both history and balance for the affected tokens in updatedBalanceMap
-   *
-   * @param {HathorWallet} wallet object
-   * @param {Object} updatedBalanceMap An object containing tokens as the keys and their updated balances as values
-   *
-   * @memberof Wallet
-   * @inner
-   **/
-  async handlePartialUpdate (wallet, updatedBalanceMap) {
-    const tokens = Object.keys(updatedBalanceMap);
-    const tokensHistory = {};
-    const tokensBalance = {};
-
-    for (const token of tokens) {
-      /* eslint-disable no-await-in-loop */
-      const history = await wallet.getTxHistory({ token_id: token });
-
-      tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
-      tokensHistory[token] = history.map((element) => helpers.mapTokenHistory(element, token));
-      /* eslint-enable no-await-in-loop */
-    }
-
-    store.dispatch(partiallyUpdateHistoryAndBalance({ tokensHistory, tokensBalance }));
   },
 
   /**
