@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactLoading from 'react-loading';
 import PropTypes from 'prop-types';
 import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
@@ -17,8 +16,8 @@ import TokenMint from '../components/tokens/TokenMint';
 import TokenMelt from '../components/tokens/TokenMelt';
 import TokenDelegate from '../components/tokens/TokenDelegate';
 import TokenDestroy from '../components/tokens/TokenDestroy';
+import Loading from '../components/Loading';
 import helpers from '../utils/helpers';
-import colors from '../index.scss';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 const mapStateToProps = (state) => {
@@ -266,14 +265,7 @@ class TokenAdministrative extends React.Component {
         <div className="mt-2 mb-2">
           <strong>{t`Your balance available:`} </strong>
           { this.state.balance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
-            <ReactLoading
-              type='spin'
-              className="loading-inline"
-              width={14}
-              height={14}
-              color={colors.purpleHathor}
-              delay={500}
-            />
+            <Loading width={14} height={14} />
           ) }
           { this.state.balance.status === TOKEN_DOWNLOAD_STATUS.READY && renderReadyBalance() }
         </div>

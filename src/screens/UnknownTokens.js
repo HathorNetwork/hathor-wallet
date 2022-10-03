@@ -9,7 +9,6 @@ import React from 'react';
 import { t } from 'ttag';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
@@ -22,8 +21,7 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
-import colors from '../index.scss';
-
+import Loading from '../components/Loading';
 
 const mapStateToProps = (state) => {
   return {
@@ -200,14 +198,7 @@ class UnknownTokens extends React.Component {
     const renderTokenBalance = (token, isNFT, tokenBalance, tokenHistory) => {
       const loadingTemplate = () => (
         <div className="d-flex flex-row align-items-center justify-content-start w-100" style={{ lineHeight: '10px' }}>
-          <ReactLoading
-            type='spin'
-            className="loading-inline"
-            width={16}
-            height={16}
-            color={colors.purpleHathor}
-            delay={500}
-          />
+          <Loading width={16} height={16} />
           <span style={{marginLeft: 10}}><strong>{ renderLoadingMessage(tokenBalance, tokenHistory) }</strong></span>
         </div>
       );

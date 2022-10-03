@@ -10,11 +10,10 @@ import { t } from 'ttag';
 import { connect } from "react-redux";
 import { selectToken } from '../actions/index';
 import { get } from 'lodash';
-import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
-import colors from '../index.scss';
+import Loading from '../components/Loading';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 
@@ -140,14 +139,7 @@ class TokenBar extends React.Component {
 
   renderLoading = () => {
     return (
-      <ReactLoading
-        type='spin'
-        className="loading-inline"
-        width={14}
-        height={14}
-        color={colors.purpleHathor}
-        delay={500}
-      />
+      <Loading width={14} height={14} />
     );
   }
 

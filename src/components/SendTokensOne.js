@@ -12,13 +12,12 @@ import { t } from 'ttag';
 import { get } from 'lodash';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
-import ReactLoading from 'react-loading';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
 import version from '../utils/version';
-import colors from '../index.scss';
-import OutputsWrapper from '../components/OutputsWrapper'
-import InputsWrapper from '../components/InputsWrapper'
+import OutputsWrapper from '../components/OutputsWrapper';
+import InputsWrapper from '../components/InputsWrapper';
+import Loading from '../components/Loading';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 
@@ -219,14 +218,7 @@ class SendTokensOne extends React.Component {
           (
             {t`Balance available: `}
             { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
-              <ReactLoading
-                type='spin'
-                className="loading-inline"
-                width={18}
-                height={18}
-                color={colors.purpleHathor}
-                delay={500}
-              />
+              <Loading />
             )}
             { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && helpers.renderValue(tokenBalance.data.available, this.isNFT()) }
           )

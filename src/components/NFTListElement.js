@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import ReactLoading from 'react-loading';
 import { t } from 'ttag'
 import {
   NFT_MEDIA_TYPES,
@@ -15,7 +14,7 @@ import {
 } from '../constants';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import helpers from '../utils/helpers';
-import colors from '../index.scss';
+import Loading from '../components/Loading';
 
 
 /**
@@ -105,14 +104,7 @@ class NFTListElement extends React.Component {
               <strong>Balance: </strong>
               { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && helpers.renderValue(this.props.nftElement.balance.data.available, true) }
               { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
-                <ReactLoading
-                  type='spin'
-                  className="loading-inline"
-                  width={18}
-                  height={18}
-                  color={colors.purpleHathor}
-                  delay={500}
-                />
+                <Loading />
               )}
               &nbsp;
               { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && this.props.nftElement.symbol }
