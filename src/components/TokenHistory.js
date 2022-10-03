@@ -21,15 +21,17 @@ import HathorAlert from './HathorAlert';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 const mapStateToProps = (state, props) => {
-  let history = [];
+  const defaultTokenHistory = {
+    status: TOKEN_DOWNLOAD_STATUS.LOADING,
+    data: [],
+  };
+  let history = defaultTokenHistory;
   if (props.selectedToken) {
-    history = get(state.tokensHistory, `${props.selectedToken}`, {
-      status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      data: [],
-    });
+    history = get(state.tokensHistory, `${props.selectedToken}`, defaultTokenHistory);
   }
+
   return { 
-    tokensHistory: history,
+    tokenHistory: history,
     wallet: state.wallet,
     tokenMetadata: state.tokenMetadata,
   };
@@ -68,7 +70,7 @@ class TokenHistory extends React.Component {
   }
 
   componentDidUpdate = (prevProps) => {
-    if (prevProps.tokensHistory.data !== this.props.tokensHistory.data) {
+    if (prevProps.tokenHistory.data !== this.props.tokenHistory.data) {
       this.handleHistoryUpdate();
     }
   }
@@ -81,7 +83,7 @@ class TokenHistory extends React.Component {
       const newHistory = await wallet.fetchMoreHistory(
         this.props.wallet,
         this.props.selectedToken,
-        this.props.tokensHistory.data
+        this.props.tokenHistory.data
       );
       if (newHistory.length === 0) {
         // Last page already fetched, no need to fetch anymore
@@ -121,7 +123,7 @@ class TokenHistory extends React.Component {
    * Calculates the transactions that will be shown in the list, besides the pagination data
    */
   handleHistoryUpdate = () => {
-    const history = get(this.props.tokensHistory, 'data', []);
+    const history = get(this.props.tokenHistory, 'data', []);
     if (history.length > 0) {
       let startIndex = 0;
       let endIndex = this.props.count;
@@ -156,7 +158,7 @@ class TokenHistory extends React.Component {
     if (this.state.reference === null) {
       throw new Error('State reference cannot be null calling this method.');
     }
-    const history = get(this.props.tokensHistory, 'data', []);
+    const history = get(this.props.tokenHistory, 'data', []);
     const idxReference = history.findIndex((tx) =>
       tx.tx_id === this.state.reference
     );
@@ -227,7 +229,7 @@ class TokenHistory extends React.Component {
             </tbody>
           </table>
           <TokenPagination
-            history={this.props.tokensHistory}
+            history={this.props.tokenHistory}
             hasBefore={this.state.hasBefore}
             hasAfter={this.state.hasAfter}
             nextClicked={this.nextClicked}
@@ -260,7 +262,7 @@ class TokenHistory extends React.Component {
     const renderHistoryData = () => {
       const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
 
-      return this.state.transactions.map((tx, idx) => {
+      return this.state.transactions.map((tx) => {
         let statusElement = '';
         let trClass = '';
         let value = helpers.renderValue(tx.balance, isNFT);
@@ -317,8 +319,8 @@ class TokenHistory extends React.Component {
     return (
       <div>
         {this.props.showPage && renderPage()}
-        {this.props.tokensHistory.status === TOKEN_DOWNLOAD_STATUS.READY && renderHistory()}
-        {this.props.tokensHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING && renderLoading()}
+        {this.props.tokenHistory.status === TOKEN_DOWNLOAD_STATUS.READY && renderHistory()}
+        {this.props.tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING && renderLoading()}
 
         <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
       </div>
