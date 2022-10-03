@@ -229,7 +229,7 @@ class TokenHistory extends React.Component {
             </tbody>
           </table>
           <TokenPagination
-            history={this.props.tokenHistory}
+            history={this.props.tokenHistory.data}
             hasBefore={this.state.hasBefore}
             hasAfter={this.state.hasAfter}
             nextClicked={this.nextClicked}
