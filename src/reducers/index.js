@@ -12,26 +12,35 @@ import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 
+/**
+ * @typedef TokenHistory
+ * Stores the history for a token
+ * @property {string} status
+ * @property {string} oldStatus
+ * @property {number} updatedAt
+ * @property {TxHistory[]} data
+ */
+
+/**
+ * @typedef TokenBalance
+ * Stores the balance for a token
+ * @property {string} status
+ * @property {string} oldStatus
+ * @property {number} updatedAt
+ * @property data
+ * @property {number} data.available
+ * @property {number} data.locked
+ */
+
 const initialState = {
   /**
-   * tokensHistory {Object} stores the history for each token (Dict[tokenUid: str, {
-   *    status: string,
-   *    oldStatus: string,
-   *    updatedAt: int,
-   *    data: TxHistory[],
-   * }])
+   * Stores the history for each token
+   * @type Record<string, TokenHistory>
    */
   tokensHistory: {},
   /**
-   * tokensBalance {Object} stores the balance for each token (Dict[tokenUid: str, {
-   *    status: string,
-   *    oldStatus: string,
-   *    updatedAt: int,
-   *    data: {
-   *      available: int,
-   *      locked: int
-   *    }
-   * }])
+   * Stores the balance for each token
+   * @type Record<string, TokenBalance>
    */
   tokensBalance: {},
   // Address to be used and is shown in the screen
