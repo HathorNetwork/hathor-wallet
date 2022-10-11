@@ -14,7 +14,7 @@ import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
-import { resolveLockWalletPromise } from '../actions';
+import { resolveLockWalletPromise, startWalletRequested } from '../actions';
 import colors from '../index.scss';
 
 
@@ -27,6 +27,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => {
   return {
     resolveLockWalletPromise: pin => dispatch(resolveLockWalletPromise(pin)),
+    startWallet: (payload) => dispatch(startWalletRequested(payload)),
   };
 };
 
@@ -89,16 +90,12 @@ class LockedWallet extends React.Component {
         loading: true,
       });
 
-      // The last parameter being true means that we are going to start the wallet from an xpriv
-      // that's already in localStorage encrypted. Because of that we don't need to send the
-      // seed (first parameter) neither the password (second parameter).
-      const promise = wallet.startWallet(null, '', pin, '', this.props.history, true);
-
-      promise.then(() => {
-        this.setState({
-          loading: false,
-        });
-        this.props.history.push('/wallet/');
+      // Start the wallet from an xpriv that's already encrypted in localStorage.
+      // Because of that we don't need to send the seed neither the password.
+      this.props.startWallet({
+        pin,
+        routerHistory: this.props.history,
+        fromXpriv: true,
       });
     } else {
       this.refs.unlockForm.classList.add('was-validated')

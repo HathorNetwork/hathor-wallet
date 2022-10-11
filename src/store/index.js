@@ -5,9 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { createStore } from "redux";
-import rootReducer from "../reducers/index";
+import { createStore, applyMiddleware } from "redux";
+import thunk from 'redux-thunk';
+import createSagaMiddleware from 'redux-saga';
+import rootReducer from '../reducers/index';
+import rootSagas from '../sagas';
 
-const store = createStore(rootReducer);
+
+const saga = createSagaMiddleware();
+const middlewares = [saga, thunk];
+
+const store = createStore(rootReducer, applyMiddleware(...middlewares));
+
+saga.run(rootSagas);
 
 export default store;

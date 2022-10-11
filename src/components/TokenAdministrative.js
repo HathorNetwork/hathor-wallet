@@ -6,29 +6,24 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
+import { connect } from "react-redux";
+import { get } from 'lodash';
 import HathorAlert from '../components/HathorAlert';
 import TokenMint from '../components/tokens/TokenMint';
 import TokenMelt from '../components/tokens/TokenMelt';
 import TokenDelegate from '../components/tokens/TokenDelegate';
 import TokenDestroy from '../components/tokens/TokenDestroy';
-import { connect } from "react-redux";
-import hathorLib from '@hathor/wallet-lib';
-import PropTypes from 'prop-types';
+import Loading from '../components/Loading';
 import helpers from '../utils/helpers';
-import { get } from 'lodash';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
-const mapStateToProps = (state, props) => {
+const mapStateToProps = (state) => {
   const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
-  let htrBalance = 0;
-  if (HTR_UID in state.tokensBalance) {
-    htrBalance = state.tokensBalance[HTR_UID].available;
-  }
+  const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
 
-  let history = [];
-  if (props.selectedToken) {
-    history = state.tokensHistory[props.selectedToken];
-  }
   return {
     htrBalance,
     tokensHistory: state.tokensHistory,
@@ -46,13 +41,15 @@ const mapStateToProps = (state, props) => {
  */
 class TokenAdministrative extends React.Component {
   /**
-   * mintCount {number} Quantity of mint authorities available
-   * meltCount {number} Quantity of melt authorities available
-   * action {string} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
-   * successMessage {string} success message to show
+   * mintCount {Number} Quantity of mint authorities available
+   * meltCount {Number} Quantity of melt authorities available
+   * action {String} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
+   * successMessage {String} success message to show
    * errorMessage {String} Message to show in case of error getting token info
-   * totalSupply {number} Token total supply
-   * balance {number} Amount available of selected token
+   * totalSupply {Number} Token total supply
+   * balance.status {String} The current status of the token balance download
+   * balance.data.available {Number} Amount available of the current token
+   * balance.data.locked {Number} Amount locked of the current token
    */
   state = {
     mintCount: 0,
@@ -61,7 +58,13 @@ class TokenAdministrative extends React.Component {
     successMessage: '',
     errorMessage: '',
     totalSupply: null,
-    balance: 0,
+    balance: {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: {
+        available: 0,
+        locked: 0,
+      },
+    },
   };
 
   componentDidMount() {
@@ -114,9 +117,19 @@ class TokenAdministrative extends React.Component {
     const mintCount = mintUtxos.length;
     const meltCount = meltUtxos.length;
 
-    const balance = this.props.token.uid in this.props.tokensBalance ? this.props.tokensBalance[this.props.token.uid].available : 0;
+    const tokenBalance = get(this.props.tokensBalance, this.props.token.uid, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: {
+        available: 0,
+        locked: 0,
+      },
+    });
 
-    this.setState({ mintCount, meltCount, balance: balance });
+    this.setState({
+      mintCount,
+      meltCount,
+      balance: tokenBalance,
+    });
   }
 
   /**
@@ -178,7 +191,7 @@ class TokenAdministrative extends React.Component {
         case 'mint':
           return <TokenMint htrBalance={this.props.htrBalance} action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} />
         case 'melt':
-          return <TokenMelt action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} walletAmount={this.state.balance} />
+          return <TokenMelt action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} tokenBalance={this.state.balance} />
         case 'delegate-mint':
           return <TokenDelegate action={this.state.action} cancelAction={this.cancelAction} token={this.props.token} showSuccess={this.showSuccess} />
         case 'delegate-melt':
@@ -190,7 +203,7 @@ class TokenAdministrative extends React.Component {
         default:
           return null;
       }
-    }
+    };
 
     const renderMeltLinks = () => {
       return (
@@ -201,7 +214,7 @@ class TokenAdministrative extends React.Component {
           <a className={`${this.state.action === 'destroy-melt' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-melt')} href="true">{t`Destroy melt`} <i className="fa fa-trash ml-1" title={t`Destroy melt`}></i></a>
         </div>
       );
-    }
+    };
 
     const renderMintLinks = () => {
       return (
@@ -212,7 +225,7 @@ class TokenAdministrative extends React.Component {
           <a className={`${this.state.action === 'destroy-mint' && 'font-weight-bold'}`} onClick={(e) => this.actionClicked(e, 'destroy-mint')} href="true">{t`Destroy mint`} <i className="fa fa-trash ml-1" title={t`Destroy mint`}></i></a>
         </div>
       );
-    }
+    };
 
     const renderMintMeltWrapper = () => {
       if (this.state.mintCount === 0 && this.state.meltCount === 0) {
@@ -233,14 +246,29 @@ class TokenAdministrative extends React.Component {
           </div>
         </div>
       );
-    }
+    };
+
+    const renderReadyBalance = () => (
+      <>
+        { helpers.renderValue(this.state.balance.data.available, isNFT) }
+        &nbsp;
+        { this.props.token.symbol }
+      </>
+    );
+
 
     const isNFT = helpers.isTokenNFT(get(this.props, 'token.uid'), this.props.tokenMetadata);
 
     return (
       <div className="flex align-items-center">
         <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.state.totalSupply ? helpers.renderValue(this.state.totalSupply, isNFT) : '-'} {this.props.token.symbol}</p>
-        <p className="mt-2 mb-2"><strong>{t`Your balance available:`} </strong>{helpers.renderValue(this.state.balance, isNFT)} {this.props.token.symbol}</p>
+        <div className="mt-2 mb-2">
+          <strong>{t`Your balance available:`} </strong>
+          { this.state.balance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
+            <Loading width={14} height={14} />
+          ) }
+          { this.state.balance.status === TOKEN_DOWNLOAD_STATUS.READY && renderReadyBalance() }
+        </div>
         <div className="token-detail-wallet-info">
           {renderMintMeltWrapper()}
         </div>

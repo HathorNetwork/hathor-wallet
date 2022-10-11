@@ -15,7 +15,6 @@ import colors from '../index.scss';
 import helpers from '../utils/helpers';
 import path from 'path';
 
-
 /**
  * Shows the detail of a transaction or block
  *

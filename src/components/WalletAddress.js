@@ -11,7 +11,6 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
 import ModalAddressQRCode from './ModalAddressQRCode';
 import ModalAlert from './ModalAlert';
-import wallet from '../utils/wallet';
 import $ from 'jquery';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
@@ -181,7 +180,7 @@ class WalletAddress extends React.Component {
         {renderAddress()}
         <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
         <HathorAlert ref="alertError" text={t`You must use an old address before generating new ones`} type="danger" />
-        <ModalAddressQRCode  />
+        <ModalAddressQRCode />
         <ModalAlert id="ledgerAlert" title={t`Validate address on Ledger`} showFooter={false} body={renderAlertBody()} />
       </div>
     );

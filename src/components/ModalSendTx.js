@@ -165,12 +165,15 @@ class ModalSendTx extends React.Component {
             </form>
           </div>
         );
-      } else {
-        return <SendTxHandler
-                sendTransaction={this.sendTransaction}
-                onSendSuccess={this.onSendSuccess}
-                onSendError={this.onSendError} />
       }
+
+      return (
+        <SendTxHandler
+          sendTransaction={this.sendTransaction}
+          onSendSuccess={this.onSendSuccess}
+          onSendError={this.onSendError}
+        />
+      );
     }
 
     const renderTitle = () => {

@@ -7,25 +7,27 @@
 
 import React from 'react';
 import $ from 'jquery';
+import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag'
-import { str2jsx } from '../utils/i18n';
+import { connect } from "react-redux";
+import { get } from 'lodash';
 
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
 import ModalSendTx from '../components/ModalSendTx';
 import ModalAlert from '../components/ModalAlert';
-import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
-import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
+import { str2jsx } from '../utils/i18n';
 import { NFT_GUIDE_URL, NFT_STANDARD_RFC_URL, NFT_DATA_MAX_SIZE } from '../constants';
 import InputNumber from '../components/InputNumber';
 
 
 const mapStateToProps = (state) => {
   const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
-  const htrBalance = HTR_UID in state.tokensBalance ? state.tokensBalance[HTR_UID].available : 0;
+  const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
+
   return {
     htrBalance,
     wallet: state.wallet,

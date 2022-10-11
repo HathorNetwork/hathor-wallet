@@ -4,9 +4,10 @@ $fa-font-path: "~font-awesome/fonts";
 */
 
 $purpleHathor: #8C46FF;
-$purpleHathorHover: #5f2eaf;
+$purpleHathorHover: #5F2EAF;
 $greenHathor: #59D73C;
-$warning: #ce9c06;
+$warning: #CE9C06;
+$error: #B00020;
 
 :export {
   purpleHathor: $purpleHathor;
@@ -757,6 +758,10 @@ svg.svg-wrapper {
   float: right;
 }
 
+.text-error {
+  color: $error !important;
+}
+
 .text-warning {
   color: $warning !important;
 }
@@ -870,4 +875,10 @@ span.software {
       border-bottom: 0;
     }
   }
+}
+
+.loading-inline {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
 }

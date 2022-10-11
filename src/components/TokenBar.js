@@ -9,9 +9,12 @@ import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
 import { selectToken } from '../actions/index';
+import { get } from 'lodash';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
+import Loading from '../components/Loading';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 
 const mapStateToProps = (state) => {
@@ -105,14 +108,12 @@ class TokenBar extends React.Component {
    * @return {number} Total token balance
    */
   getTokenBalance = (uid) => {
-    const balance = this.props.tokensBalance[uid];
-    let total = 0;
-    if (balance) {
-      // If we don't have any transaction for the token, balance will be undefined
-      total = balance.available + balance.locked;
-    }
+    const { available, locked } = get(this.props.tokensBalance, `${uid}.data`, {
+      available: 0,
+      locked: 0,
+    });
 
-    return total;
+    return available + locked;
   }
 
   /**
@@ -136,6 +137,12 @@ class TokenBar extends React.Component {
     this.props.history.push('/unknown_tokens/');
   }
 
+  renderLoading = () => {
+    return (
+      <Loading width={14} height={14} />
+    );
+  }
+
   render() {
     const shouldHideZeroBalanceTokens = wallet.areZeroBalanceTokensHidden();
     const unknownTokens = this.getUnknownTokens(shouldHideZeroBalanceTokens);
@@ -149,10 +156,22 @@ class TokenBar extends React.Component {
 
       return registeredTokens.map((token) => {
         const tokenUid = token.uid;
+        const tokenBalance = get(this.props.tokensBalance, `${token.uid}`, {
+          status: TOKEN_DOWNLOAD_STATUS.LOADING,
+          data: {
+            locked: 0,
+            available: 0
+          }
+        });
 
         return (
           <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${(this.getTokenBalanceFormatted(tokenUid))}`}</span>
+            <span className='ellipsis'>
+              {token.symbol} {this.state.opened && ` | `}
+
+              {(tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && this.state.opened) && this.getTokenBalanceFormatted(tokenUid)}
+              {(tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING  && this.state.opened) && this.renderLoading()}
+            </span>
           </div>
         )
       });

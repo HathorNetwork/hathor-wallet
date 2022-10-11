@@ -106,6 +106,7 @@ class ModalAddToken extends React.Component {
       // Adding the token to the wallet and returning with the success callback
       tokens.addToken(tokenUid, tokenData.name, tokenData.symbol);
       wallet.setTokenAlwaysShow(tokenUid, this.state.alwaysShow);
+
       this.props.success();
     } catch (e) {
       this.setState({errorMessage: e.message});

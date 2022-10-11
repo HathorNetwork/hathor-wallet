@@ -31,10 +31,12 @@ class WalletBalance extends React.Component {
   render = () => {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
     const symbol = token ? token.symbol : '';
+
+    const tokenBalance = get(this.props.tokensBalance, `${token.uid}.data`, { available: 0, locked: 0 });
     const balance = {
-      available: token.uid in this.props.tokensBalance ? this.props.tokensBalance[token.uid].available : 0,
-      locked: token.uid in this.props.tokensBalance ? this.props.tokensBalance[token.uid].locked : 0,
-    }
+      available: tokenBalance.available,
+      locked: tokenBalance.locked,
+    };
 
     const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
 

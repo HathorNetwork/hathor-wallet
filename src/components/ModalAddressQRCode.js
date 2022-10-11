@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import $ from 'jquery';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { connect } from "react-redux";
@@ -36,6 +37,7 @@ class ModalAddressQRCode extends React.Component {
   }
 
   componentWillUnmount = () => {
+    $('#addressQRCodeModal').modal('hide');
     // Preventing calling setState when the component is not mounted
     if (this.timer) {
       clearTimeout(this.timer);
