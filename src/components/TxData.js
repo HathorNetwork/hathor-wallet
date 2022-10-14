@@ -862,6 +862,17 @@ class TxData extends React.Component {
       return helpers.isTokenNFT(createdToken.uid, this.props.tokenMetadata);
     }
 
+    const renderNCData = () => {
+      return (
+        <div className="f-flex flex-column align-items-start common-div bordered-wrapper mr-3">
+          <div><label>{t`Nano Contract ID:`}</label> <Link to={`/nano_contract/detail/${this.props.transaction.nc_id}`}> {this.props.transaction.nc_id}</Link></div>
+          <div><label>{t`Public Key:`}</label> {this.props.transaction.nc_pubkey}</div>
+          <div><label>{t`Method:`}</label> {this.props.transaction.nc_method}</div>
+          <div><label>{t`Arguments:`}</label> {this.props.transaction.nc_args}</div>
+        </div>
+      );
+    }
+
     const loadTxData = () => {
       return (
         <div className="tx-data-wrapper">
@@ -882,6 +893,9 @@ class TxData extends React.Component {
               {!hathorLib.transactionUtils.isBlock(this.props.transaction) && renderAccWeightDiv()}
               {!hathorLib.transactionUtils.isBlock(this.props.transaction) && renderConfirmationLevel()}
             </div>
+          </div>
+          <div className="d-flex flex-row align-items-start mb-3">
+            {this.props.transaction.version === hathorLib.constants.NANO_CONTRACTS_VERSION && renderNCData()}
           </div>
           <div className="d-flex flex-row align-items-start mb-3">
             <div className="f-flex flex-column align-items-start common-div bordered-wrapper mr-3">

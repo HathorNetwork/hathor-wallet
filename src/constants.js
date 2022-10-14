@@ -263,10 +263,12 @@ export const IGNORE_WS_TOGGLE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
  */
 export const WALLET_SERVICE_FEATURE_TOGGLE = 'wallet-service-desktop.rollout';
 export const ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE = 'atomic-swap-service-desktop.rollout';
+export const NANO_CONTRACTS_FEATURE_TOGGLE = 'nano-contracts-desktop.rollout';
 
 export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
   [ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE]: false,
+  [NANO_CONTRACTS_FEATURE_TOGGLE]: true, // TODO move to false when feature is set on unleash
 };
 
 /**
@@ -277,3 +279,9 @@ export const FEATURE_TOGGLE_DEFAULTS = {
 export const colors = {
   purpleHathor: scssColors.purpleHathor,
 }
+
+/**
+ * Number of elements in the list of addresses
+ * when changing the addres of a nano contract
+ */
+export const CHANGE_ADDRESS_LIST_COUNT = 5;
