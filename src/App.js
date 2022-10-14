@@ -10,6 +10,11 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
+import BlueprintList from './screens/nano/BlueprintList';
+import NanoContractList from './screens/nano/NanoContractList';
+import NanoContractCreate from './screens/nano/NanoContractCreate';
+import NanoContractDetail from './screens/nano/NanoContractDetail';
+import NanoContractExecuteMethod from './screens/nano/NanoContractExecuteMethod';
 import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import TransactionDetail from './screens/TransactionDetail';
@@ -51,6 +56,7 @@ import EditSwap from './screens/atomic-swap/EditSwap';
 import NewSwap from './screens/atomic-swap/NewSwap';
 import ImportExisting from './screens/atomic-swap/ImportExisting';
 import LOCAL_STORE from './storage';
+import AllAddresses from './screens/AllAddresses';
 
 const mapStateToProps = (state) => {
   return {
@@ -130,6 +136,10 @@ class Root extends React.Component {
 
     return (
       <Switch>
+        <StartedRoute exact path="/nano_contract/:nc_id/execute_method/:method" component={NanoContractExecuteMethod} loaded={true} />
+        <StartedRoute exact path="/nano_contract/detail/:nc_id" component={NanoContractDetail} loaded={true} />
+        <StartedRoute exact path="/nano_contract/create/" component={NanoContractCreate} loaded={true} />
+        <StartedRoute exact path="/nano_contract/" component={NanoContractList} loaded={true} />
         <StartedRoute exact path="/nft" component={NFTList} loaded={true} />
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
         <StartedRoute exact path="/create_nft" component={CreateNFT} loaded={true} />
@@ -145,7 +155,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />
         <StartedRoute exact path="/server" component={Server} loaded={true} />
         <StartedRoute exact path="/transaction/:id" component={TransactionDetail} loaded={true} />
-        <StartedRoute exact path="/addresses" component={AddressList} loaded={true} />
+        <StartedRoute exact path="/addresses" component={AllAddresses} loaded={true} />
         <StartedRoute exact path="/new_wallet" component={NewWallet} loaded={false} />
         <StartedRoute exact path="/load_wallet" component={LoadWallet} loaded={false} />
         <StartedRoute exact path="/wallet_type" component={WalletType} loaded={false} />

@@ -890,3 +890,14 @@ span.software {
 .htr-color {
   color: $purpleHathor
 }
+
+.nc-detail-wrapper {
+  padding: 1rem;
+  border: 1px solid;
+}
+
+.nc-detail-wrapper > hr {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  border-top: 1px solid;
+}
