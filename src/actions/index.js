@@ -293,6 +293,11 @@ export const walletReloadData = () => ({
   type: types.WALLET_RELOAD_DATA,
 });
 
+export const storeRouterHistory = (routerHistory) => ({
+  type: types.STORE_ROUTER_HISTORY,
+  routerHistory,
+});
+
 /**
  * @param {RouterHistory} routerHistory History object from react-dom-navigation
  */
