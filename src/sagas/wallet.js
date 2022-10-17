@@ -49,6 +49,7 @@ import {
   startWalletFailed,
   walletStateError,
   walletStateReady,
+  storeRouterHistory,
 } from '../actions';
 import { specificTypeAndPayload, } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -73,6 +74,7 @@ export function* startWallet(action) {
   } = action.payload;
 
   yield put(loadingAddresses(true));
+  yield put(storeRouterHistory(routerHistory));
 
   // When we start a wallet from the locked screen, we need to unlock it in the storage
   oldWalletUtil.unlock();
@@ -414,6 +416,7 @@ export function* listenForWalletReady(wallet) {
 export function* handleTx(action) {
   const tx = action.payload;
   const wallet = yield select((state) => state.wallet);
+  const routerHistory = yield select((state) => state.routerHistory);
 
   if (!wallet.isReady()) {
     return;
@@ -436,6 +439,10 @@ export function* handleTx(action) {
   // Set the notification click, in case we have sent one
   if (notification !== undefined) {
     notification.onclick = () => {
+      if (!routerHistory) {
+        return;
+      }
+
       routerHistory.push(`/transaction/${tx.tx_id}/`);
     }
   }
