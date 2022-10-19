@@ -240,7 +240,9 @@ export function* startWallet(action) {
   }
 
   try {
-    yield call(loadTokens);
+    const { allTokens } = yield call(loadTokens);
+    // Store all tokens on redux
+    yield put(loadWalletSuccess(allTokens));
   } catch(e) {
     yield put(startWalletFailed());
     yield cancel(threads);
@@ -249,11 +251,6 @@ export function* startWallet(action) {
 
   routerHistory.replace('/wallet/');
 
-  // Fetch all tokens, including the ones that are not registered yet
-  const allTokens = yield call(wallet.getTokens.bind(wallet));
-
-  // Store all tokens on redux
-  yield put(loadWalletSuccess(allTokens));
   yield put(loadingAddresses(false));
 
   // The way the redux-saga fork model works is that if a saga has `forked`
@@ -274,7 +271,10 @@ export function* loadTokens() {
   const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
 
   yield call(fetchTokenData, htrUid);
+  const wallet = yield select((state) => state.wallet);
 
+  // Fetch all tokens, including the ones that are not registered yet
+  const allTokens = yield call(wallet.getTokens.bind(wallet));
   const registeredTokens = tokensUtils
     .getTokens()
     .reduce((acc, token) => {
@@ -289,12 +289,17 @@ export function* loadTokens() {
   // We don't need to wait for the metadatas response, so just fork it
   yield fork(fetchTokensMetadata, registeredTokens);
 
-  // Since we already know here what tokens are registered, we can dispatch actions
-  // to asynchronously load the balances of each one. The `put` effect will just dispatch
-  // and continue, loading the tokens asynchronously
-  for (const token of registeredTokens) {
+  // Dispatch actions to asynchronously load the balances of each token the wallet has
+  // ever interacted with. The `put` effect will just dispatch and continue, loading
+  // the tokens asynchronously.
+  //
+  // Note: We need to download the balance of all the tokens from the wallet so we can
+  // hide zero-balance tokens
+  for (const token of allTokens) {
     yield put(tokenFetchBalanceRequested(token));
   }
+
+  return { allTokens, registeredTokens };
 }
 
 /**
