@@ -1,7 +1,5 @@
 ## Install
 
-Must use node v8.9.0
-
 ## Running on Electron
 
 Before running electron you have to execute `npm run electron-deps` to install dependencies.
