@@ -74,7 +74,8 @@
     "electron-dev": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .",
     "electron-dev-concurrently": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .'",
     "locale-update-pot": "ttag extract -o ./locale/texts.pot ./src/",
-    "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps && patch-package"
+    "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps && patch-package",
+    "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0"
   },
   "devDependencies": {
     "@sentry/browser": "^5.0.5",
