@@ -34,17 +34,45 @@ A transaction is displayed.
 
 ## For development
 
-You must use node v14.
+### Prerequisites
+
+* Install node v14
+* If you are using `WSL`:
+    * Make sure you have the vesion 2
+        ```
+        wsl -l -v
+        ```
+    * Make sure to install the WSL driver for your GPU, see at [Prerequisites](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#prerequisites)
+    * Make sure to update the WSL after install the GPU driver, see at [Existing WSL Install](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#existing-wsl-install)
+    * Once the `WSL` is updated you are ready to go
 
 ### To Install
 
-`npm install`
+```
+npm install
+```
 
 ### To Run
 
-`npm start` and it will start running in the browser in http://localhost:3000
+```
+npm start
+```
+
+It will start running in the browser in http://localhost:3000
 
 > **NOTE:** to use Hathor Wallet with Ledger, you need to run it in Electron.
+
+> **NOTE:** use the electron wallet for a more complete experience.
+
+### Quick start to Electron
+
+Run the electron besides the react app. Open a new instance of the terminal and run the following command:
+
+```
+npm run electron-dev
+```
+
+If you get some error like this `error while loading shared libraries: libxshmfence.so.1: cannot open shared object file: No such file or directory` refer to the [throubleshooting](#troubleshooting) section.
 
 ### To Build
 
@@ -59,13 +87,15 @@ You can change this anytime in the 'Change Server' screen inside the wallet.
 
 To generate a html page with the documentation from the code comments run:
 
-`jsdoc -c jsdoc.json -r src/. README.md`
+```
+npm run generate-doc
+```
 
-and it will generate a `index.html` file in `out/index.html`
+It will generate a `index.html` file in `out/index.html`
 
 ## Run Electron
 
-Refer to ELECTRON.md
+Refer to [ELECTRON.md](/ELECTRON.md)
 
 ## Sentry
 
