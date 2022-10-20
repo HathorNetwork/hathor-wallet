@@ -138,6 +138,26 @@ Then, you can increase your memory limit running:
 
     export NODE_OPTIONS=--max_old_space_size=4096
 
+### WSL Ubuntu 18 distro
+
+Run the following command to install necessary packages:
+
+```
+sudo apt install libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev libasound2
+```
+
+### WSL Debian distro
+
+Run the following command to install necessary packages:
+
+```
+sudo apt install libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev libasound2 libusb-1.0-0
+```
+
+### WSL
+
+If you still can't run, see this [article](https://www.beekeeperstudio.io/blog/building-electron-windows-ubuntu-wsl2).
+
 ## TODO
 
 - The algorithm to automatically choose the unspent transactions when sending tokens is naive. For now we do not consider any anonymity factor.
