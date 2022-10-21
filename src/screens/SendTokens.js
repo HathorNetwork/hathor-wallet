@@ -26,13 +26,13 @@ import colors from '../index.scss';
 
 const mapStateToProps = (state) => {
   return {
+    selectedToken: state.selectedToken,
     tokens: state.tokens,
     wallet: state.wallet,
     metadataLoaded: state.metadataLoaded,
     useWalletService: state.useWalletService,
   };
 };
-
 
 /**
  * Screen used to send tokens to another wallet.
@@ -41,6 +41,16 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class SendTokens extends React.Component {
+  /**
+   * Get the selected token on the TokenBar.
+   * 
+   * @param {mapStateToProps} props
+   * @returns {Object} Token selected
+   */
+  static getSelectedToken(props) {
+    return props.tokens.filter(t => t.uid === props.selectedToken)
+  }
+
   constructor(props) {
     super(props);
 
@@ -60,7 +70,7 @@ class SendTokens extends React.Component {
      */
     this.state = {
       errorMessage: '',
-      txTokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
+      txTokens: [...SendTokens.getSelectedToken(this.props)],
       ledgerStep: 0,
       ledgerModalTitle: t`Validate outputs on Ledger`,
       ledgerAlertModalTitle: null,
