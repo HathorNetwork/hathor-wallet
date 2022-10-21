@@ -56,6 +56,8 @@ class WalletAddress extends React.Component {
       // Removing ipc renderer listeners
       IPC_RENDERER.removeAllListeners("ledger:address");
     }
+
+    $('#ledgerAlert').modal('hide');
   }
 
   /**
