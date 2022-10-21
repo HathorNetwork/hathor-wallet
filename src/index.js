@@ -10,6 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ErrorWrapper from './ErrorWrapper';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { GlobalModal } from './components/GlobalModal';
 
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,9 +22,11 @@ import { Provider } from "react-redux";
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router>
-      <Route path="/" component={ErrorWrapper} />
-    </Router>
+    <GlobalModal>
+      <Router>
+        <Route path="/" component={ErrorWrapper} />
+      </Router>
+    </GlobalModal>
   </Provider>,
   document.getElementById('root')
 );

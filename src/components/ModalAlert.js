@@ -21,6 +21,16 @@ class ModalAlert extends React.Component {
     showFooter: true,
   }
 
+  componentDidMount() {
+    const id = this.props.id;
+    $(`#${id}`).modal('show');
+  }
+
+  componentWillUnmount() {
+    const id = this.props.id;
+    $(`#${id}`).modal('hide');
+  }
+
   /**
    * On modal button click
    * Can't set this as default props because it depends on another props (and I don't have access to this.props in defaultProps)

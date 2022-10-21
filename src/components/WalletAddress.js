@@ -17,13 +17,13 @@ import hathorLib from '@hathor/wallet-lib';
 import ledger from '../utils/ledger';
 import { IPC_RENDERER } from '../constants';
 import { sharedAddressUpdate } from '../actions/index';
+import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 
 const mapDispatchToProps = dispatch => {
   return {
     sharedAddressUpdate: (data) => dispatch(sharedAddressUpdate(data)),
   };
 };
-
 
 const mapStateToProps = (state) => {
   return {
@@ -40,11 +40,13 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 class WalletAddress extends React.Component {
+  static contextType = GlobalModalContext;
+
   componentDidMount() {
     if (IPC_RENDERER) {
       IPC_RENDERER.on("ledger:address", (event, arg) => {
         if (arg.success) {
-          $('#ledgerAlert').modal('hide');
+          this.context.hideModal();
         }
         // XXX is there any error handling here?
       });
@@ -56,8 +58,6 @@ class WalletAddress extends React.Component {
       // Removing ipc renderer listeners
       IPC_RENDERER.removeAllListeners("ledger:address");
     }
-
-    $('#ledgerAlert').modal('hide');
   }
 
   /**
@@ -83,7 +83,13 @@ class WalletAddress extends React.Component {
     e.preventDefault();
 
     if (hathorLib.wallet.isHardwareWallet()) {
-      $('#ledgerAlert').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT, {
+        title: t`Validate address on Ledger`,
+        id: 'ledgerAlert',
+        showFooter: false,
+        body: this.renderAlertBody(),
+      });
+
       ledger.checkAddress(this.props.lastSharedIndex);
     }
   }
@@ -121,6 +127,16 @@ class WalletAddress extends React.Component {
   seeAllAddresses = (e) => {
     e.preventDefault();
     this.props.goToAllAddresses();
+  }
+
+  renderAlertBody() {
+    return (
+      <div>
+        <p>{t`Validate that the address below is the same presented on the Ledger screen.`}</p>
+        <p>{t`Press both buttons on your Ledger in case the address is valid.`}</p>
+        <p><strong>{this.props.lastSharedAddress}</strong></p>
+      </div>
+    );
   }
 
   render() {
@@ -167,23 +183,9 @@ class WalletAddress extends React.Component {
       }
     }
 
-    const renderAlertBody = () => {
-      return (
-        <div>
-          <p>{t`Validate that the address below is the same presented on the Ledger screen.`}</p>
-          <p>{t`Press both buttons on your Ledger in case the address is valid.`}</p>
-          <p><strong>{this.props.lastSharedAddress}</strong></p>
-        </div>
-      );
-    }
-
     return (
       <div>
         {renderAddress()}
-        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
-        <HathorAlert ref="alertError" text={t`You must use an old address before generating new ones`} type="danger" />
-        <ModalAddressQRCode />
-        <ModalAlert id="ledgerAlert" title={t`Validate address on Ledger`} showFooter={false} body={renderAlertBody()} />
       </div>
     );
   }
