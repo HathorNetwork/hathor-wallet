@@ -101,7 +101,7 @@ class WalletAddress extends React.Component {
    */
   showQRCode = (e) => {
     e.preventDefault();
-    $('#addressQRCodeModal').modal('show');
+    this.context.showModal(MODAL_TYPES.ADDRESS_QR_CODE)
   }
 
   /**
@@ -186,6 +186,9 @@ class WalletAddress extends React.Component {
     return (
       <div>
         {renderAddress()}
+
+        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
+        <HathorAlert ref="alertError" text={t`You must use an old address before generating new ones`} type="danger" />
       </div>
     );
   }

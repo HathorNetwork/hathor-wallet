@@ -9,12 +9,12 @@ import React from 'react';
 import { t } from 'ttag'
 
 import SpanFmt from '../components/SpanFmt';
-import ModalAddToken from '../components/ModalAddToken';
 import HathorAlert from '../components/HathorAlert';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
 import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { NFT_ENABLED } from '../constants';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
 
@@ -35,11 +35,13 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class CustomTokens extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * Called when a new token was registered with success, then close the modal and show alert success
    */
   newTokenSuccess = () => {
-    $('#addTokenModal').modal('hide');
+    this.context.hideModal();
     this.refs.alertSuccess.show(1000);
   }
 
@@ -47,7 +49,10 @@ class CustomTokens extends React.Component {
    * Triggered when user clicks to do the register a token, then opens the new token modal
    */
   registerTokenClicked = () => {
-    $('#addTokenModal').modal('show');
+    this.context.showModal('MODAL_ADD_TOKEN', {
+      success: this.newTokenSuccess,
+      tokensBalance: this.props.tokensBalance,
+    });
   }
 
   /**
@@ -85,7 +90,6 @@ class CustomTokens extends React.Component {
           { NFT_ENABLED && <button className="btn btn-hathor mr-4" onClick={this.createNFTClicked}>{t`Create an NFT`}</button> }
           <button className="btn btn-hathor" onClick={this.registerTokenClicked}>{t`Register a token`}</button>
         </div>
-        <ModalAddToken success={this.newTokenSuccess} tokensBalance={this.props.tokensBalance} />
         <HathorAlert ref="alertSuccess" text={t`Token registered with success!`} type="success" />
         <ModalAlertNotSupported />
       </div>

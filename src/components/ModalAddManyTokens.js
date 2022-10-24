@@ -45,6 +45,7 @@ class ModalAddManyTokens extends React.Component {
   }
 
   componentDidMount = () => {
+    $('#addManyTokensModal').modal('show');
     $('#addManyTokensModal').on('hide.bs.modal', (e) => {
       this.refs.configs.value = '';
       this.setState({
@@ -54,6 +55,7 @@ class ModalAddManyTokens extends React.Component {
         alwaysShow: false,
         tokensToAdd: '',
       });
+      this.props.onClose();
     })
 
     $('#addManyTokensModal').on('shown.bs.modal', (e) => {
@@ -64,6 +66,7 @@ class ModalAddManyTokens extends React.Component {
   componentWillUnmount = () => {
     // Removing all event listeners
     $('#addManyTokensModal').off();
+    $('#addManyTokensModal').modal('hide');
   }
 
   /**

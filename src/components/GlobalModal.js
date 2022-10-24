@@ -1,5 +1,8 @@
 import React, { useState, createContext, useContext } from 'react';
 import ModalAlert from './ModalAlert';
+import ModalAddressQRCode from './ModalAddressQRCode';
+import ModalAddToken from './ModalAddToken';
+import ModalAddManyTokens from './ModalAddManyTokens';
 
 const initialState = {
   showModal: () => {},
@@ -9,11 +12,16 @@ const initialState = {
 
 export const MODAL_TYPES = {
   'ADDRESS_QR_CODE': 'ADDRESS_QR_CODE',
+  'MODAL_ADD_TOKEN': 'MODAL_ADD_TOKEN',
+  'ADD_MANY_TOKENS': 'ADD_MANY_TOKENS',
   'ALERT': 'ALERT',
 };
 
 export const MODAL_COMPONENTS = {
   [MODAL_TYPES.ALERT]: ModalAlert,
+  [MODAL_TYPES.ADDRESS_QR_CODE]: ModalAddressQRCode,
+  [MODAL_TYPES.MODAL_ADD_TOKEN]: ModalAddToken,
+  [MODAL_TYPES.ADD_MANY_TOKENS]: ModalAddManyTokens,
 };
 
 export const GlobalModalContext = createContext(initialState);
@@ -47,13 +55,22 @@ export const GlobalModal = ({ children }) => {
       return null;
     }
 
+    const componentProps = {
+      ...store.modalProps,
+      onClose: hideModal,
+    };
+
     return (
-      <ModalComponent {...store.modalProps} />
+      <ModalComponent {...componentProps} />
     );
   };
 
   return (
-    <GlobalModalContext.Provider value={{ store, showModal, hideModal }}>
+    <GlobalModalContext.Provider value={{
+      store,
+      showModal,
+      hideModal,
+    }}>
       {renderComponent()}
       { children }
     </GlobalModalContext.Provider>
