@@ -1,6 +1,6 @@
 # Hathor Wallet
 
-Welcome to Hathor Light Wallet. To view the source code of the project access [Github](https://github.com/HathorNetwork/hathor-wallet).
+Welcome to Hathor Desktop Wallet. To view the source code of the project access [Github](https://github.com/HathorNetwork/hathor-wallet).
 
 ## Architecture
 
