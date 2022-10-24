@@ -37,7 +37,7 @@ A transaction is displayed.
 ### Prerequisites
 
 * Install node v14
-* If you are using `WSL`:
+* If you are using `WSL` (Windows Subsystem for Linux):
     * Make sure you have the vesion 2
         ```
         wsl -l -v
