@@ -17,9 +17,6 @@ import SpanFmt from '../components/SpanFmt';
 import WalletHistory from '../components/WalletHistory';
 import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
-import ModalBackupWords from '../components/ModalBackupWords';
-import ModalConfirm from '../components/ModalConfirm';
-import ModalLedgerSignToken from '../components/ModalLedgerSignToken';
 import TokenBar from '../components/TokenBar';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import TokenAdministrative from '../components/TokenAdministrative';
@@ -162,7 +159,15 @@ class Wallet extends React.Component {
    * Called when user clicks to sign the token, then opens the modal
    */
   signClicked = () => {
-    $('#signTokenDataModal').modal('show');
+    const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
+
+    if (hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed()) {
+      this.context.showModal(MODAL_TYPES.LEDGER_SIGN_TOKEN, {
+        token,
+        modalId: 'signTokenDataModal',
+        cb: this.updateTokenSignature,
+      })
+    }
   }
 
   /**
@@ -208,6 +213,13 @@ class Wallet extends React.Component {
 
   goToAllAddresses = () => {
     this.props.history.push('/addresses/');
+  }
+
+  // Trigger a render when we sign a token
+  updateTokenSignature = (value) => {
+    this.setState({
+      hasTokenSignature: value,
+    });
   }
 
   retryDownload = (e, tokenId) => {
@@ -412,11 +424,6 @@ class Wallet extends React.Component {
       );
     }
 
-    // Trigger a render when we sign a token
-    const updateTokenSignature = (value) => {
-      this.setState({hasTokenSignature: value});
-    }
-
     return (
       <div id="wallet-div">
         {!this.state.backupDone && renderBackupAlert()}
@@ -432,7 +439,6 @@ class Wallet extends React.Component {
         </div>
         <TokenBar {...this.props} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && <ModalLedgerSignToken token={token} modalId="signTokenDataModal" cb={updateTokenSignature} />}
       </div>
     );
   }

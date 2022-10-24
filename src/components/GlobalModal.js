@@ -9,6 +9,7 @@ import ModalConfirm from './ModalConfirm';
 import ModalBackupWords from './ModalBackupWords';
 import ModalLedgerResetTokenSignatures from './ModalLedgerResetTokenSignatures';
 import ModalResetAllData from './ModalResetAllData';
+import ModalLedgerSignToken from './ModalLedgerSignToken';
 
 const initialState = {
   showModal: () => {},
@@ -26,6 +27,7 @@ export const MODAL_TYPES = {
   'BACKUP_WORDS': 'BACKUP_WORDS',
   'RESET_TOKEN_SIGNATURES': 'RESET_TOKEN_SIGNATURES',
   'RESET_ALL_DATA': 'RESET_ALL_DATA',
+  'LEDGER_SIGN_TOKEN': 'LEDGER_SIGN_TOKEN',
 };
 
 export const MODAL_COMPONENTS = {
@@ -38,6 +40,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.BACKUP_WORDS]: ModalBackupWords,
   [MODAL_TYPES.RESET_TOKEN_SIGNATURES]: ModalLedgerResetTokenSignatures,
   [MODAL_TYPES.RESET_ALL_DATA]: ModalResetAllData,
+  [MODAL_TYPES.LEDGER_SIGN_TOKEN]: ModalLedgerSignToken,
 };
 
 export const GlobalModalContext = createContext(initialState);
