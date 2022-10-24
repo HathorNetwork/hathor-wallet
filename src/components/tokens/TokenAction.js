@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import $ from 'jquery';
-import ModalSendTx from '../../components/ModalSendTx';
 import ReactLoading from 'react-loading';
 import colors from '../../index.scss';
 import { connect } from "react-redux";
+import { MODAL_TYPES, GlobalModalContext } from '../../components/GlobalModal';
 
 
 const mapStateToProps = (state) => {
@@ -27,6 +26,8 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 class TokenAction extends React.Component {
+  static contextType = GlobalModalContext;
+
   constructor(props) {
     super(props);
 
@@ -93,15 +94,19 @@ class TokenAction extends React.Component {
    * Opens the PIN modal
    */
   openPinModal = () => {
-    $('#pinModal').modal('show');
+    this.context.showModal(MODAL_TYPES.SEND_TX, {
+      title: this.props.modalTitle,
+       prepareSendTransaction: this.onPrepareSendTransaction,
+       onSendSuccess: this.onSendSuccess,
+       onSendError: this.onSendError,
+       bodyTop: this.props.pinBodyTop,
+    });
   }
 
   /**
    * Method executed when transaction is sent and the action is done
-   *
-   * @param {Object} tx Transaction data object
    */
-  onSendSuccess = (tx) => {
+  onSendSuccess = () => {
     const successMessage = this.props.getSuccessMessage();
     this.props.cancelAction();
     this.props.showSuccess(successMessage);
@@ -159,13 +164,6 @@ class TokenAction extends React.Component {
           {this.props.renderForm()}
         </form>
         {renderButtons(this.props.validateForm, this.props.buttonName)}
-        <ModalSendTx
-         title={this.props.modalTitle}
-         prepareSendTransaction={this.onPrepareSendTransaction}
-         onSendSuccess={this.onSendSuccess}
-         onSendError={this.onSendError}
-         bodyTop={this.props.pinBodyTop}
-        />
       </div>
     )
   }
