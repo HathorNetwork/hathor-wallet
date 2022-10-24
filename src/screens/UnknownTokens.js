@@ -152,6 +152,7 @@ class UnknownTokens extends React.Component {
    * @param {number} count Quantity of tokens that were added
    */
   massiveImportSuccess = (count) => {
+    this.context.hideModal();
     const message = `${count} ${hathorLib.helpers.plural(count, 'token was', 'tokens were')} added!`;
     this.setState({ successMessage: message }, () => {
       this.refs.alertSuccess.show(3000);
