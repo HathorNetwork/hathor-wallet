@@ -9,7 +9,7 @@ import React from 'react';
 import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { connect } from "react-redux";
 import ReactLoading from 'react-loading';
 
@@ -47,9 +47,17 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = (state) => {
   return {
     selectedToken: state.selectedToken,
-    entireState: state,
-    tokensHistory: state.tokensHistory,
-    tokensBalance: state.tokensBalance,
+    tokenHistory: get(state.tokensHistory, `${state.selectedToken}`, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: [],
+    }),
+    tokenBalance: get(state.tokensBalance, `${state.selectedToken}`, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: {
+        locked: 0,
+        available: 0,
+      },
+    }),
     tokens: state.tokens,
     wallet: state.wallet,
     useWalletService: state.useWalletService,
@@ -75,36 +83,50 @@ class Wallet extends React.Component {
     successMessage: '',
     hasTokenSignature: false,
     shouldShowAdministrativeTab: false,
+    totalSupply: null,
+    canMint: false,
+    canMelt: false,
+    transactionsCount: null,
+    mintCount: null,
+    meltCount: null,
   };
-
-  // Reference for the TokenGeneralInfo component
-  generalInfoRef = React.createRef();
-
-  // Reference for the TokenAdministrative component
-  administrativeRef = React.createRef();
 
   // Reference for the unregister confirm modal
   unregisterModalRef = React.createRef();
 
-  componentDidMount = () => {
+  componentDidMount = async () => {
     this.setState({
       backupDone: hathorLib.wallet.isBackupDone()
     });
 
-    $('#wallet-div').on('show.bs.tab', 'a[data-toggle="tab"]', (e) => {
-      // On tab show we reload token data from the server for each component
-      if (e.target.id === 'token-tab') {
-        this.generalInfoRef.current.updateTokenInfo();
-      } else if (e.target.id === 'administrative-tab') {
-        this.administrativeRef.current.updateTokenInfo();
-      }
-    });
+    await this.updateTokenInfo(this.props.selectedToken);
 
+    this.updateWalletInfo();
     // First time the screen is mounted we must also check if we should show administrative tab
     this.shouldShowAdministrativeTab(this.props.selectedToken);
   }
 
-  componentWillReceiveProps(nextProps) {
+  /**
+   * Update token state after didmount or props update
+   */
+  updateWalletInfo = async () => {
+    if (!this.props.selectedToken) {
+      return;
+    }
+
+    const mintUtxos = await this.props.wallet.getMintAuthority(this.props.selectedToken, { many: true });
+    const meltUtxos = await this.props.wallet.getMeltAuthority(this.props.selectedToken, { many: true });
+
+    const mintCount = mintUtxos.length;
+    const meltCount = meltUtxos.length;
+
+    this.setState({
+      mintCount,
+      meltCount,
+    });
+  }
+
+  async componentWillReceiveProps(nextProps) {
     const signature = tokens.getTokenSignature(nextProps.selectedToken);
     this.setState({hasTokenSignature: !!signature});
 
@@ -112,6 +134,36 @@ class Wallet extends React.Component {
     if (this.props.selectedToken !== nextProps.selectedToken) {
       this.shouldShowAdministrativeTab(nextProps.selectedToken);
     }
+
+    // if the new selected token history changed, we should fetch the token details again
+    const nextTokenHistory = nextProps.tokenHistory;
+    const currentTokenHistory = this.props.tokenHistory;
+
+    if (nextTokenHistory === null) {
+      return;
+    }
+
+    if (nextTokenHistory.status !== TOKEN_DOWNLOAD_STATUS.READY) {
+      return;
+    }
+
+
+    if (!isEqual(nextTokenHistory.data, currentTokenHistory.data)) {
+      this.updateTokenInfo(nextProps.selectedToken);
+      this.updateWalletInfo();
+    } 
+  }
+
+  async updateTokenInfo(tokenUid) {
+    const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
+    const { totalSupply, totalTransactions, authorities } = tokenDetails;
+
+    this.setState({
+      totalSupply,
+      canMint: authorities.mint,
+      canMelt: authorities.melt,
+      transactionsCount: totalTransactions,
+    });
   }
 
   /**
@@ -145,7 +197,6 @@ class Wallet extends React.Component {
    * Called when user clicks to unregister the token, then opens the modal
    */
   unregisterClicked = () => {
-    console.log('Unregister clicked');
     this.context.showModal(MODAL_TYPES.CONFIRM, {
       ref: this.unregisterModalRef,
       modalID: 'unregisterModal',
@@ -225,13 +276,13 @@ class Wallet extends React.Component {
   retryDownload = (e, tokenId) => {
     e.preventDefault();
     const balanceStatus = get(
-      this.props.tokensBalance,
-      `${tokenId}.status`,
+      this.props.tokenBalance,
+      'status',
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
     const historyStatus = get(
-      this.props.tokensHistory,
-      `${tokenId}.status`,
+      this.props.tokenHistory,
+      'status',
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
 
@@ -305,18 +356,6 @@ class Wallet extends React.Component {
       }
     }
 
-    const renderContentAdmin = () => {
-      if (this.state.shouldShowAdministrativeTab) {
-        return (
-          <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-            <TokenAdministrative key={this.props.selectedToken} token={token} ref={this.administrativeRef} />
-          </div>
-        );
-      } else {
-        return null;
-      }
-    }
-
     const renderTokenData = (token) => {
       if (hathorLib.tokens.isHathorToken(this.props.selectedToken)) {
         return renderWallet();
@@ -337,9 +376,34 @@ class Wallet extends React.Component {
                 {renderWallet()}
               </div>
               <div className="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
-                <TokenGeneralInfo token={token} showConfigString={true} errorMessage={this.state.errorMessage} ref={this.generalInfoRef} showAlwaysShowTokenCheckbox={true} />
+                <TokenGeneralInfo
+                  token={token}
+                  showConfigString={true}
+                  errorMessage={this.state.errorMessage}
+                  showAlwaysShowTokenCheckbox={true}
+                  totalSupply={this.state.totalSupply}
+                  canMint={this.state.canMint}
+                  canMelt={this.state.canMelt}
+                  transactionsCount={this.state.transactionsCount}
+                />
               </div>
-              {renderContentAdmin()}
+              {
+                this.shouldShowAdministrativeTab && (
+                  <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
+                    <TokenAdministrative
+                      key={this.props.selectedToken}
+                      token={token}
+                      totalSupply={this.state.totalSupply}
+                      canMint={this.state.canMint}
+                      canMelt={this.state.canMelt}
+                      mintCount={this.state.mintCount}
+                      meltCount={this.state.meltCount}
+                      tokenBalance={this.props.tokenBalance}
+                      transactionsCount={this.state.transactionsCount}
+                    />
+                  </div>
+                )
+              }
             </div>
           </div>
         );
@@ -357,17 +421,8 @@ class Wallet extends React.Component {
     }
 
     const renderUnlockedWallet = () => {
-      const tokenHistory = get(this.props.tokensHistory, this.props.selectedToken, {
-        status: TOKEN_DOWNLOAD_STATUS.LOADING,
-        data: [],
-      });
-      const tokenBalance = get(this.props.tokensBalance, this.props.selectedToken, {
-        status: TOKEN_DOWNLOAD_STATUS.LOADING,
-        data: {
-          locked: 0,
-          available: 0
-        }
-      });
+      const tokenHistory = this.props.tokenHistory;
+      const tokenBalance = this.props.tokenBalance;
 
       let template;
       if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING

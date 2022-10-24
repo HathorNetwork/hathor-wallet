@@ -42,7 +42,6 @@ class TokenGeneralInfo extends React.Component {
    * @property {boolean} canMint If this token can still be minted
    * @property {boolean} canMelt If this token can still be melted
    * @property {number} transactionsCount Total number of transactions of this token
-   * @property {boolean} alwaysShow Indicates if this token is always shown even without balance
    * @property {{
    *  title:string,
    *  body:string,
@@ -55,50 +54,12 @@ class TokenGeneralInfo extends React.Component {
     canMint: null,
     canMelt: null,
     transactionsCount: 0,
-    alwaysShow: false,
     confirmData: {
       title: '',
       body: '',
       handleYes: () => {},
     }
   };
-
-  componentDidMount() {
-    this.updateTokenInfo();
-  }
-
-
-  componentDidUpdate = (prevProps) => {
-    if (this.props.token.uid !== prevProps.token.uid) {
-      this.updateTokenInfo();
-    }
-  }
-
-  /**
-   * Update token info getting data from the facade (can mint, can melt, total supply and total transactions)
-   */
-  updateTokenInfo = async () => {
-    this.setState({ errorMessage: '' });
-
-    try {
-      const tokenUid = this.props.token.uid;
-      const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
-      const alwaysShow = wallet.isTokenAlwaysShow(tokenUid);
-      const { totalSupply, totalTransactions, authorities } = tokenDetails;
-
-      this.setState({
-        totalSupply,
-        canMint: authorities.mint,
-        canMelt: authorities.melt,
-        transactionsCount: totalTransactions,
-        alwaysShow,
-      });
-    } catch (e) {
-      this.setState({
-        errorMessage: e.message,
-      });
-    }
-  }
 
   /**
    * Handles the click on the "Always show this token" link
@@ -107,7 +68,7 @@ class TokenGeneralInfo extends React.Component {
   toggleAlwaysShow = (e) => {
     e.preventDefault();
     let newState = {};
-    if (this.state.alwaysShow) {
+    if (wallet.isTokenAlwaysShow(this.props.token.uid)) {
       newState = {
         confirmData: {
           title: t`Disable always show`,
@@ -138,9 +99,8 @@ class TokenGeneralInfo extends React.Component {
    * Activates or deactivates always show on this token
    */
   handleToggleAlwaysShow = () => {
-    const newValue = !this.state.alwaysShow;
+    const newValue = !wallet.isTokenAlwaysShow(this.props.token.uid);
     wallet.setTokenAlwaysShow(this.props.token.uid, newValue);
-    this.setState({ alwaysShow: newValue });
     $('#confirmModal').modal('hide');
   }
 
@@ -206,12 +166,12 @@ class TokenGeneralInfo extends React.Component {
           <p className="mt-2 mb-2"><strong>{t`Type:`} </strong>{isNFT ? 'NFT' : 'Custom Token'}</p>
           <p className="mt-2 mb-2"><strong>{t`Name:`} </strong>{this.props.token.name}</p>
           <p className="mt-2 mb-2"><strong>{t`Symbol:`} </strong>{this.props.token.symbol}</p>
-          <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{helpers.renderValue(this.state.totalSupply, isNFT)} {this.props.token.symbol}</p>
-          <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{this.state.canMint ? 'Yes' : 'No'}</p>
+          <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{helpers.renderValue(this.props.totalSupply, isNFT)} {this.props.token.symbol}</p>
+          <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{this.props.canMint ? 'Yes' : 'No'}</p>
           <p className="mb-2 subtitle">{t`Indicates whether the token owner can create new tokens, increasing the total supply`}</p>
-          <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{this.state.canMelt ? 'Yes' : 'No'}</p>
+          <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{this.props.canMelt ? 'Yes' : 'No'}</p>
           <p className="mb-2 subtitle">{t`Indicates whether the token owner can destroy tokens, decreasing the total supply`}</p>
-          <p className="mt-2 mb-4"><strong>{t`Total number of transactions:`} </strong>{this.state.transactionsCount}</p>
+          <p className="mt-2 mb-4"><strong>{t`Total number of transactions:`} </strong>{this.props.transactionsCount}</p>
           {this.props.showAlwaysShowTokenCheckbox && renderAlwaysShowTokenCheckbox()}
         </div>
       );
@@ -221,7 +181,7 @@ class TokenGeneralInfo extends React.Component {
       return (
         <p className="mt-2 mb-4">
           <strong>{t`Always show this token:`}</strong> {
-          this.state.alwaysShow
+          wallet.isTokenAlwaysShow(this.props.token.uid)
             ? <span>{t`Yes`}</span>
             : <span>{t`No`}</span>
         }
