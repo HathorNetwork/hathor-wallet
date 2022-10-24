@@ -3,6 +3,7 @@ import ModalAlert from './ModalAlert';
 import ModalAddressQRCode from './ModalAddressQRCode';
 import ModalAddToken from './ModalAddToken';
 import ModalAddManyTokens from './ModalAddManyTokens';
+import ModalAlertNotSupported from './ModalAlertNotSupported';
 
 const initialState = {
   showModal: () => {},
@@ -14,6 +15,7 @@ export const MODAL_TYPES = {
   'ADDRESS_QR_CODE': 'ADDRESS_QR_CODE',
   'MODAL_ADD_TOKEN': 'MODAL_ADD_TOKEN',
   'ADD_MANY_TOKENS': 'ADD_MANY_TOKENS',
+  'ALERT_NOT_SUPPORTED': 'ALERT_NOT_SUPPORTED',
   'ALERT': 'ALERT',
 };
 
@@ -22,6 +24,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.ADDRESS_QR_CODE]: ModalAddressQRCode,
   [MODAL_TYPES.MODAL_ADD_TOKEN]: ModalAddToken,
   [MODAL_TYPES.ADD_MANY_TOKENS]: ModalAddManyTokens,
+  [MODAL_TYPES.ALERT_NOT_SUPPORTED]: ModalAlertNotSupported,
 };
 
 export const GlobalModalContext = createContext(initialState);

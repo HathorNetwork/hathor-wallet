@@ -60,7 +60,7 @@ class CustomTokens extends React.Component {
    */
   createTokenClicked = () => {
     if (hathorLib.wallet.isHardwareWallet()) {
-      $('#notSupported').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED);
     } else {
       this.props.history.push('/create_token/');
     }
@@ -71,7 +71,7 @@ class CustomTokens extends React.Component {
    */
   createNFTClicked = () => {
     if (hathorLib.wallet.isHardwareWallet()) {
-      $('#notSupported').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED);
     } else {
       this.props.history.push('/create_nft/');
     }
@@ -91,7 +91,6 @@ class CustomTokens extends React.Component {
           <button className="btn btn-hathor" onClick={this.registerTokenClicked}>{t`Register a token`}</button>
         </div>
         <HathorAlert ref="alertSuccess" text={t`Token registered with success!`} type="success" />
-        <ModalAlertNotSupported />
       </div>
     );
   }
