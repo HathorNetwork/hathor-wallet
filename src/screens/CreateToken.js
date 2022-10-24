@@ -15,8 +15,6 @@ import { connect } from "react-redux";
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
-import ModalSendTx from '../components/ModalSendTx';
-import ModalAlert from '../components/ModalAlert';
 import BackButton from '../components/BackButton';
 import helpers from '../utils/helpers';
 import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
@@ -98,7 +96,11 @@ class CreateToken extends React.Component {
     }
 
     this.setState({ errorMessage: '' });
-    $('#pinModal').modal('show');
+    this.context.showModal(MODAL_TYPES.SEND_TX, {
+      prepareSendTransaction: this.prepareSendTransaction,
+      onSendSuccess: this.onTokenCreateSuccess,
+      title: 'Creating token',
+    });
   }
 
   /**
@@ -304,7 +306,6 @@ class CreateToken extends React.Component {
           <button type="button" className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
-        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onTokenCreateSuccess} title="Creating token" />
       </div>
     );
   }

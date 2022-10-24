@@ -7,15 +7,11 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import $ from 'jquery';
-import ModalSendTx from '../components/ModalSendTx';
 import SendTokensOne from '../components/SendTokensOne';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
-import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
-import ModalAlert from '../components/ModalAlert';
 import SendTxHandler from '../components/SendTxHandler';
 import ledger, { LedgerError } from '../utils/ledger';
 import tokens from '../utils/tokens';
@@ -342,7 +338,12 @@ class SendTokens extends React.Component {
     try {
       this.data = data;
       if (hathorLib.wallet.isSoftwareWallet()) {
-        $('#pinModal').modal('show');
+        this.context.showModal(MODAL_TYPES.SEND_TX, {
+          prepareSendTransaction: this.prepareSendTransaction,
+          onSendSuccess: this.onSendSuccess,
+          onSendError: this.onSendError,
+          title: t`Sending transaction`,
+        });
       } else {
         this.beforeSendLedger();
       }
@@ -532,7 +533,6 @@ class SendTokens extends React.Component {
         <BackButton {...this.props} />
         <h3 className="mt-4 mb-4">{t`Send Tokens`}</h3>
         {renderPage()}
-        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} title={t`Sending transaction`} />
       </div>
     );
   }

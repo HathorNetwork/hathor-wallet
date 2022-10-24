@@ -15,7 +15,6 @@ import { get } from 'lodash';
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
-import ModalSendTx from '../components/ModalSendTx';
 import BackButton from '../components/BackButton';
 import helpers from '../utils/helpers';
 import { str2jsx } from '../utils/i18n';
@@ -102,7 +101,11 @@ class CreateNFT extends React.Component {
     }
 
     this.setState({ errorMessage: '' });
-    $('#pinModal').modal('show');
+    this.context.showModal(MODAL_TYPES.SEND_TX, {
+      prepareSendTransaction: this.prepareSendTransaction,
+      onSendSuccess: this.onTokenCreateSuccess,
+      title: 'Creating NFT',
+    });
   }
 
   /**
@@ -202,9 +205,6 @@ class CreateNFT extends React.Component {
             <p><strong>{this.state.configurationString}</strong></p>
           </div>
         ),
-        onClose: () => {
-          this.props.history.push('/wallet/');
-        },
       });
     });
   }
@@ -214,6 +214,7 @@ class CreateNFT extends React.Component {
    */
   alertButtonClick = () => {
     this.context.hideModal();
+    this.props.history.push('/wallet/');
   }
 
   /**
@@ -352,7 +353,6 @@ class CreateNFT extends React.Component {
           <button type="button" className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
-        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onTokenCreateSuccess} title="Creating NFT" />
       </div>
     );
   }
