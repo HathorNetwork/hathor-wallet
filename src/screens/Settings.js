@@ -23,6 +23,7 @@ import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { connect } from "react-redux";
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
 const mapStateToProps = (state) => {
   return {
@@ -37,6 +38,8 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class Settings extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * confirmData {Object} data for the notification confirm modal (title, body and handleYes)
    * isNotificationOne {boolean} state to update if notification is turned on or off
@@ -232,7 +235,7 @@ class Settings extends React.Component {
    * Called when user clicks to untrust all tokens, then opens the modal
    */
   untrustClicked = () => {
-    $('#resetTokenSignatures').modal('show');
+    this.context.showModal(MODAL_TYPES.RESET_TOKEN_SIGNATURES);
   }
 
   /**
@@ -299,7 +302,6 @@ class Settings extends React.Component {
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
         </div>
-        {ledgerCustomTokens && <ModalLedgerResetTokenSignatures />}
         <ModalResetAllData success={this.handleReset} />
         <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
         <ModalAlertNotSupported title={t`Complete action on your hardware wallet`}>

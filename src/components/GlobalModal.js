@@ -7,6 +7,7 @@ import ModalAddManyTokens from './ModalAddManyTokens';
 import ModalAlertNotSupported from './ModalAlertNotSupported';
 import ModalConfirm from './ModalConfirm';
 import ModalBackupWords from './ModalBackupWords';
+import ModalLedgerResetTokenSignatures from './ModalLedgerResetTokenSignatures';
 
 const initialState = {
   showModal: () => {},
@@ -19,6 +20,7 @@ export const MODAL_TYPES = {
   'MODAL_ADD_TOKEN': 'MODAL_ADD_TOKEN',
   'ADD_MANY_TOKENS': 'ADD_MANY_TOKENS',
   'ALERT_NOT_SUPPORTED': 'ALERT_NOT_SUPPORTED',
+  'RESET_TOKEN_SIGNATURES': 'RESET_TOKEN_SIGNATURES',
   'BACKUP_WORDS': 'BACKUP_WORDS',
   'ALERT': 'ALERT',
   'CONFIRM': 'CONFIRM',
@@ -32,6 +34,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.ALERT_NOT_SUPPORTED]: ModalAlertNotSupported,
   [MODAL_TYPES.CONFIRM]: ModalConfirm,
   [MODAL_TYPES.BACKUP_WORDS]: ModalBackupWords,
+  [MODAL_TYPES.RESET_TOKEN_SIGNATURES]: ModalLedgerResetTokenSignatures,
 };
 
 export const GlobalModalContext = createContext(initialState);
@@ -40,14 +43,6 @@ export const useGlobalModalContext = () => useContext(GlobalModalContext);
 
 export const GlobalModal = ({ children }) => {
   const [store, setStore] = useState();
-
-  const showModal = (modalType, modalProps = {}) => {
-    setStore({
-      ...store,
-      modalType,
-      modalProps,
-    });
-  };
 
   const hideModal = () => {
     setStore({
@@ -61,6 +56,19 @@ export const GlobalModal = ({ children }) => {
     // a bug where the backdrop some times gets stuck even after the
     // modal is closed, we can just remove it:
     $('.modal-backdrop').fadeOut(150);
+  };
+
+  const showModal = (modalType, modalProps = {}) => {
+    setStore({
+      ...store,
+      modalType,
+      modalProps,
+    });
+
+    // Sometimes the modal backdrop won't show up again after being
+    // removed forcefully by the hideModal, so we should just show it
+    // again.
+    $('.modal-backdrop').fadeIn(150);
   };
 
   const renderComponent = () => {

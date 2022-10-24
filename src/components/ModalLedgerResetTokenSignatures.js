@@ -17,14 +17,15 @@ import { t } from 'ttag';
  *
  * @memberof Components
  */
-function ModalLedgerResetTokenSignatures() {
-  const modalId = "resetTokenSignatures";
+function ModalLedgerResetTokenSignatures({ onClose }) {
+  const modalId = 'resetTokenSignatures';
   const [waitingLedger, setWaitingLedger] = useState(false);
   const [showOk, setOk] = useState(false);
   const [errorMessage, setError] = useState(null);
 
   const closeModal = () => {
     $(`#${modalId}`).modal('hide');
+    onClose();
   }
 
   const initialState = () => {
@@ -77,25 +78,29 @@ function ModalLedgerResetTokenSignatures() {
 
   // useEffect second parameter [] ensures this runs only once
   useEffect(() => {
+    $(`#${modalId}`).modal('show');
     $(`#${modalId}`).on('hidden.bs.modal', (e) => {
       // clean state when closing
       initialState();
       // remove ledger listeners when closing
       if (IPC_RENDERER) {
-        IPC_RENDERER.removeAllListeners("ledger:tokenSignatureReset");
+        IPC_RENDERER.removeAllListeners('ledger:tokenSignatureReset');
       }
+
+      onClose();
     });
 
     $(`#${modalId}`).on('shown.bs.modal', (e) => {
       // ledger listeners
       if (IPC_RENDERER) {
-        IPC_RENDERER.on("ledger:tokenSignatureReset", handleSignatureReset);
+        IPC_RENDERER.on('ledger:tokenSignatureReset', handleSignatureReset);
       }
     });
 
     return () => {
       // remove all listeners on unmount
       $(`#${modalId}`).off();
+      $(`#${modalId}`).modal('hide');
     }
   }, []);
 
