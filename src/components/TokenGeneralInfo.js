@@ -249,7 +249,6 @@ class TokenGeneralInfo extends React.Component {
           {this.props.showConfigString && renderConfigString()}
         </div>
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
       </div>
     )
   }

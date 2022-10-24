@@ -30,6 +30,7 @@ import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
 import colors from '../index.scss';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import {
   updateWords,
   tokenFetchHistoryRequested,
@@ -65,6 +66,8 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class Wallet extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * backupDone {boolean} if words backup was already done
    * successMessage {string} Message to be shown on alert success
@@ -140,7 +143,14 @@ class Wallet extends React.Component {
    * Called when user clicks to unregister the token, then opens the modal
    */
   unregisterClicked = () => {
-    $('#unregisterModal').modal('show');
+    console.log('Unregister clicked');
+    this.context.showModal(MODAL_TYPES.CONFIRM, {
+      ref: this.unregisterModalRef,
+      modalID: 'unregisterModal',
+      title: t`Unregister token`,
+      body: this.getUnregisterBody(),
+      handleYes: this.unregisterConfirmed,
+    });
   }
 
   /**
@@ -158,7 +168,7 @@ class Wallet extends React.Component {
     try {
       await tokens.unregisterToken(tokenUid);
       wallet.setTokenAlwaysShow(tokenUid, false); // Remove this token from "always show"
-      $('#unregisterModal').modal('hide');
+      this.context.hideModal();
     } catch (e) {
       this.unregisterModalRef.current.updateErrorMessage(e.message);
     }
@@ -217,6 +227,18 @@ class Wallet extends React.Component {
     if (balanceStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
       this.props.getBalance(tokenId);
     }
+  }
+
+  getUnregisterBody() {
+    const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
+    if (token === undefined) return null;
+
+    return (
+      <div>
+        <p><SpanFmt>{t`Are you sure you want to unregister the token **${token.name} (${token.symbol})**?`}</SpanFmt></p>
+        <p>{t`You won't lose your tokens, you just won't see this token on the side bar anymore.`}</p>
+      </div>
+    )
   }
 
   render() {
@@ -305,17 +327,6 @@ class Wallet extends React.Component {
           </div>
         );
       }
-    }
-
-    const getUnregisterBody = () => {
-      if (token === undefined) return null;
-
-      return (
-        <div>
-          <p><SpanFmt>{t`Are you sure you want to unregister the token **${token.name} (${token.symbol})**?`}</SpanFmt></p>
-          <p>{t`You won't lose your tokens, you just won't see this token on the side bar anymore.`}</p>
-        </div>
-      )
     }
 
     const renderSignTokenIcon = () => {
@@ -417,7 +428,6 @@ class Wallet extends React.Component {
         <TokenBar {...this.props} />
         <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title={t`Unregister token`} body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
         {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && <ModalLedgerSignToken token={token} modalId="signTokenDataModal" cb={updateTokenSignature} />}
       </div>
     );
