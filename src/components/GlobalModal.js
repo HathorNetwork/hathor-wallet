@@ -8,6 +8,7 @@ import ModalAlertNotSupported from './ModalAlertNotSupported';
 import ModalConfirm from './ModalConfirm';
 import ModalBackupWords from './ModalBackupWords';
 import ModalLedgerResetTokenSignatures from './ModalLedgerResetTokenSignatures';
+import ModalResetAllData from './ModalResetAllData';
 
 const initialState = {
   showModal: () => {},
@@ -16,14 +17,15 @@ const initialState = {
 };
 
 export const MODAL_TYPES = {
+  'ALERT': 'ALERT',
   'ADDRESS_QR_CODE': 'ADDRESS_QR_CODE',
   'MODAL_ADD_TOKEN': 'MODAL_ADD_TOKEN',
   'ADD_MANY_TOKENS': 'ADD_MANY_TOKENS',
   'ALERT_NOT_SUPPORTED': 'ALERT_NOT_SUPPORTED',
-  'RESET_TOKEN_SIGNATURES': 'RESET_TOKEN_SIGNATURES',
-  'BACKUP_WORDS': 'BACKUP_WORDS',
-  'ALERT': 'ALERT',
   'CONFIRM': 'CONFIRM',
+  'BACKUP_WORDS': 'BACKUP_WORDS',
+  'RESET_TOKEN_SIGNATURES': 'RESET_TOKEN_SIGNATURES',
+  'RESET_ALL_DATA': 'RESET_ALL_DATA',
 };
 
 export const MODAL_COMPONENTS = {
@@ -35,6 +37,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.CONFIRM]: ModalConfirm,
   [MODAL_TYPES.BACKUP_WORDS]: ModalBackupWords,
   [MODAL_TYPES.RESET_TOKEN_SIGNATURES]: ModalLedgerResetTokenSignatures,
+  [MODAL_TYPES.RESET_ALL_DATA]: ModalResetAllData,
 };
 
 export const GlobalModalContext = createContext(initialState);

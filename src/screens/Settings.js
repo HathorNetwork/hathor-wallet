@@ -13,13 +13,11 @@ import helpers from '../utils/helpers';
 import { Link } from 'react-router-dom';
 import HathorAlert from '../components/HathorAlert';
 import SpanFmt from '../components/SpanFmt';
-import ModalLedgerResetTokenSignatures from '../components/ModalLedgerResetTokenSignatures';
 import ModalConfirm from '../components/ModalConfirm';
 import ModalResetAllData from '../components/ModalResetAllData';
 import $ from 'jquery';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
-import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { connect } from "react-redux";
@@ -77,6 +75,7 @@ class Settings extends React.Component {
    */
   handleReset = () => {
     $('#confirmResetModal').modal('hide');
+    this.context.hideModal();
     wallet.resetWalletData();
     this.props.history.push('/welcome/');
   }
@@ -85,7 +84,9 @@ class Settings extends React.Component {
    * When user clicks Reset button we open a modal to confirm it
    */
   resetClicked = () => {
-    $('#confirmResetModal').modal('show');
+    this.context.showModal(MODAL_TYPES.RESET_ALL_DATA, {
+      success: this.handleReset,
+    });
   }
 
   /**
@@ -93,7 +94,18 @@ class Settings extends React.Component {
    */
   addPassphrase = () => {
     if (hathorLib.wallet.isHardwareWallet()) {
-      $('#notSupported').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
+        title: t`Complete action on your hardware wallet`,
+        children: (
+          <div>
+            <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
+            <p>
+              {str2jsx(t`|fn:More info| about this on Ledger.`,
+                       {fn: (x, i) => <a key={i} onClick={this.openLedgerLink} href="true">{x}</a>})}
+            </p>
+          </div>
+        )
+      });
     } else {
       this.props.history.push('/wallet/passphrase/');
     }
@@ -302,17 +314,7 @@ class Settings extends React.Component {
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
         </div>
-        <ModalResetAllData success={this.handleReset} />
         <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
-        <ModalAlertNotSupported title={t`Complete action on your hardware wallet`}>
-          <div>
-            <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
-            <p>
-              {str2jsx(t`|fn:More info| about this on Ledger.`,
-                       {fn: (x, i) => <a key={i} onClick={this.openLedgerLink} href="true">{x}</a>})}
-            </p>
-          </div>
-        </ModalAlertNotSupported>
         <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
       </div>
     );
