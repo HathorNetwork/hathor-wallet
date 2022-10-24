@@ -23,6 +23,7 @@ import version from '../utils/version';
 import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT } from '../constants';
 import ReactLoading from 'react-loading';
 import colors from '../index.scss';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
 const mapStateToProps = (state) => {
   return {
@@ -41,6 +42,8 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class SendTokens extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * Get the selected token on the TokenBar.
    * 
@@ -72,9 +75,6 @@ class SendTokens extends React.Component {
       errorMessage: '',
       txTokens: [...SendTokens.getSelectedToken(this.props)],
       ledgerStep: 0,
-      ledgerModalTitle: t`Validate outputs on Ledger`,
-      ledgerAlertModalTitle: null,
-      ledgerAlertModalBody: null,
       data: null,
     };
   }
@@ -101,7 +101,7 @@ class SendTokens extends React.Component {
    * @param {IpcRendererEvent} event May be used to reply to the event
    * @param {Object} arg Data returned from the send tx call
    */
-  handleTxSent = (event, arg) => {
+  handleTxSent = (_event, arg) => {
     if (arg.success) {
       this.getSignatures();
     } else {
@@ -115,7 +115,7 @@ class SendTokens extends React.Component {
    * @param {IpcRendererEvent} event May be used to reply to the event
    * @param {Object} arg Data returned from the get signatures call
    */
-  handleSignatures = (event, arg) => {
+  handleSignatures = (_event, arg) => {
     if (arg.success) {
       this.onLedgerSuccess(arg.data);
     } else {
@@ -130,7 +130,7 @@ class SendTokens extends React.Component {
    * @param {IpcRendererEvent} event May be used to reply to the event
    * @param {Object} arg Data returned from the send token data call
    */
-  handleSendToken = (event, arg) => {
+  handleSendToken = (_event, arg) => {
     // If a token does not pass:
     // modal to warn and either sign or cancel (use component)
     if (arg.success) {
@@ -142,11 +142,11 @@ class SendTokens extends React.Component {
       }
       // some token was invalid, it will be on arg, which ones
       const tokenList = this.state.txTokens.filter(t => arg.data.includes(t.uid))
-      this.setState({
-        ledgerAlertModalTitle: t`Invalid custom tokens`,
-        ledgerAlertModalBody: this.renderAlertTokenList(tokenList),
-      });
-      $("#ledgerAlertModal").modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT, {
+        id: 'ledgerAlertModal',
+        title: t`Invalid custom tokens`,
+        body: this.renderAlertTokenList(tokenList),
+      })
     } else {
       this.handleSendError(new LedgerError(arg.error.message));
     }
@@ -196,7 +196,16 @@ class SendTokens extends React.Component {
         arr.push(Buffer.from(signatures[i]));
       }
       this.sendTransaction.prepareTxFrom(arr);
-      this.setState({ ledgerStep: 1, ledgerModalTitle: t`Sending transaction` });
+      this.setState({
+        ledgerStep: 1,
+      }, () => {
+        this.context.showModal(MODAL_TYPES.ALERT, {
+          id: 'ledgerAlertModal',
+          title: t`Validate outputs on Ledger`,
+          body: this.renderAlertBody(),
+          showFooter: false,
+        });
+      });
     } catch(e) {
       this.handleSendError(e);
     }
@@ -216,7 +225,7 @@ class SendTokens extends React.Component {
    * @param {Object} tx Transaction sent data
    */
   onSendSuccess = (tx) => {
-    $('#alertModal').modal('hide');
+    this.context.hideModal();
     // Must update the shared address, in case we have used one for the change
     wallet.updateSharedAddress();
     this.props.history.push('/wallet/');
@@ -228,7 +237,7 @@ class SendTokens extends React.Component {
    * @param {String} message Error message
    */
   onSendError = (message) => {
-    $('#alertModal').modal('hide');
+    this.context.hideModal();
     this.setState({ errorMessage: message, ledgerStep: 0 });
   }
 
@@ -254,11 +263,12 @@ class SendTokens extends React.Component {
     if (missingSigs.length !== 0) {
       // there are tokens without signatures, missingSigs
       // set tittle and content
-      this.setState({
-        ledgerAlertModalTitle: t`Unverified custom tokens`,
-        ledgerAlertModalBody: this.renderAlertTokenList(missingSigs),
+      this.context.showModal(MODAL_TYPES.ALERT, {
+        id: 'ledgerAlertModal',
+        title: t`Unverified custom tokens`,
+        body: this.renderAlertTokenList(missingSigs),
+        buttonName: 'Ok',
       });
-      $("#ledgerAlertModal").modal('show');
       return;
     }
 
@@ -312,7 +322,11 @@ class SendTokens extends React.Component {
     const useOldProtocol = !version.isLedgerCustomTokenAllowed();
 
     ledger.sendTx(this.data, changeInfo, useOldProtocol);
-    $('#alertModal').modal('show');
+    this.context.showModal(MODAL_TYPES.ALERT, {
+      title: t`Validate outputs on Ledger`,
+      body: this.renderAlertBody(),
+      showFooter: false,
+    });
   }
 
   /**
@@ -366,7 +380,7 @@ class SendTokens extends React.Component {
         e instanceof hathorLib.errors.MaximumNumberOutputsError ||
         e instanceof hathorLib.errors.MaximumNumberInputsError ||
         e instanceof LedgerError) {
-      $('#alertModal').modal('hide');
+      this.context.hideModal();
       this.setState({ errorMessage: e.message, ledgerStep: 0 });
     } else {
       // Unhandled error
@@ -392,17 +406,24 @@ class SendTokens extends React.Component {
     if (hathorLib.wallet.isHardwareWallet()) {
       if (!version.isLedgerCustomTokenAllowed()) {
         // Custom token not allowed for this Ledger version
-        $('#notSupported').modal('show');
+        this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
+          children: (
+            <div>
+              <p>{t`Unfortunately this feature is not supported with the Hathor app version on your Ledger device. If you need this feature, you can use it by installing the most recent Hathor app.`}</p>
+            </div>
+          )
+        })
         return;
       }
       if (this.state.txTokens.filter(t => !hathorLib.tokens.isHathorToken(t.uid)).length === LEDGER_TX_CUSTOM_TOKEN_LIMIT) {
         // limit is 10 custom tokens per tx
         const modalBody = <p>{t`Ledger has a limit of ${LEDGER_TX_CUSTOM_TOKEN_LIMIT} different tokens per transaction.`}</p>
-        this.setState({
-          ledgerAlertModalTitle: t`Token limit reached`,
-          ledgerAlertModalBody: modalBody,
+        this.context.showModal(MODAL_TYPES.ALERT, {
+          id: 'ledgerAlertModal',
+          title: t`Token limit reached`,
+          body: modalBody,
+          buttonName: 'Ok',
         });
-        $("#ledgerAlertModal").modal('show');
         return;
       }
     }
@@ -462,6 +483,24 @@ class SendTokens extends React.Component {
     return <ul>{rows}</ul>
   }
 
+  renderAlertBody = () => {
+    if (this.state.ledgerStep === 0) {
+      return (
+        <div>
+          <p>{t`Please go to you Ledger and validate each output of your transaction. Press both buttons in case the output is correct.`}</p>
+          <p>{t`In the end, a final screen will ask you to confirm sending the transaction.`}</p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="d-flex flex-row">
+          <SendTxHandler sendTransaction={this.sendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} />
+          <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
+        </div>
+      )
+    }
+  }
+
   render = () => {
     const renderOnePage = () => {
       return this.state.txTokens.map((token, index) => {
@@ -488,51 +527,12 @@ class SendTokens extends React.Component {
       );
     }
 
-    const renderAlertBody = () => {
-      if (this.state.ledgerStep === 0) {
-        return (
-          <div>
-            <p>{t`Please go to you Ledger and validate each output of your transaction. Press both buttons in case the output is correct.`}</p>
-            <p>{t`In the end, a final screen will ask you to confirm sending the transaction.`}</p>
-          </div>
-        );
-      } else {
-        return (
-          <div className="d-flex flex-row">
-            <SendTxHandler sendTransaction={this.sendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} />
-            <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
-          </div>
-        )
-      }
-    }
-
-    const renderLedgerModals = () => {
-      if (hathorLib.wallet.isSoftwareWallet()) return null;
-
-      let notSupportedModal = (
-        <ModalAlertNotSupported>
-          <div>
-            <p>{t`Unfortunately this feature is not supported with the Hathor app version on your Ledger device. If you need this feature, you can use it by installing the most recent Hathor app.`}</p>
-          </div>
-        </ModalAlertNotSupported>
-      );
-
-      return (
-        <div>
-          {hathorLib.wallet.isHardwareWallet() && !version.isLedgerCustomTokenAllowed() && notSupportedModal}
-          <ModalAlert title={this.state.ledgerModalTitle} showFooter={false} body={renderAlertBody()} />
-          <ModalAlert id="ledgerAlertModal" title={this.state.ledgerAlertModalTitle} body={this.state.ledgerAlertModalBody} buttonName={t`Close`} />
-        </div>
-      );
-    }
-
     return (
       <div className="content-wrapper flex align-items-center">
         <BackButton {...this.props} />
         <h3 className="mt-4 mb-4">{t`Send Tokens`}</h3>
         {renderPage()}
         <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} title={t`Sending transaction`} />
-        {renderLedgerModals()}
       </div>
     );
   }

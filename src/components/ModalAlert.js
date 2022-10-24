@@ -24,7 +24,7 @@ class ModalAlert extends React.Component {
   componentDidMount() {
     const id = this.props.id;
     $(`#${id}`).modal('show');
-    $(`#${id}`).on('hidden.bs.modal', this.props.close);
+    $(`#${id}`).on('hidden.bs.modal', this.props.onClose);
   }
 
   componentWillUnmount() {
