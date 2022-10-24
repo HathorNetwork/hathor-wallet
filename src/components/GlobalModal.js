@@ -6,6 +6,7 @@ import ModalAddToken from './ModalAddToken';
 import ModalAddManyTokens from './ModalAddManyTokens';
 import ModalAlertNotSupported from './ModalAlertNotSupported';
 import ModalConfirm from './ModalConfirm';
+import ModalBackupWords from './ModalBackupWords';
 
 const initialState = {
   showModal: () => {},
@@ -18,6 +19,7 @@ export const MODAL_TYPES = {
   'MODAL_ADD_TOKEN': 'MODAL_ADD_TOKEN',
   'ADD_MANY_TOKENS': 'ADD_MANY_TOKENS',
   'ALERT_NOT_SUPPORTED': 'ALERT_NOT_SUPPORTED',
+  'BACKUP_WORDS': 'BACKUP_WORDS',
   'ALERT': 'ALERT',
   'CONFIRM': 'CONFIRM',
 };
@@ -29,6 +31,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.ADD_MANY_TOKENS]: ModalAddManyTokens,
   [MODAL_TYPES.ALERT_NOT_SUPPORTED]: ModalAlertNotSupported,
   [MODAL_TYPES.CONFIRM]: ModalConfirm,
+  [MODAL_TYPES.BACKUP_WORDS]: ModalBackupWords,
 };
 
 export const GlobalModalContext = createContext(initialState);

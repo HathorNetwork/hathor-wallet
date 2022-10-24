@@ -124,15 +124,20 @@ class Wallet extends React.Component {
    */
   backupClicked = (e) => {
     e.preventDefault();
-    $('#backupWordsModal').modal('show');
+
+    this.context.showModal(MODAL_TYPES.BACKUP_WORDS, {
+      needPassword: true,
+      validationSuccess: this.backupSuccess,
+    });
   }
 
   /**
    * Called when the backup of words was done with success, then close the modal and show alert success
    */
   backupSuccess = () => {
-    $('#backupWordsModal').modal('hide');
+    this.context.hideModal();
     hathorLib.wallet.markBackupAsDone();
+
     this.props.updateWords(null);
     this.setState({ backupDone: true, successMessage: t`Backup completed!` }, () => {
       this.refs.alertSuccess.show(3000);
@@ -426,7 +431,6 @@ class Wallet extends React.Component {
           {renderUnlockedWallet()}
         </div>
         <TokenBar {...this.props} />
-        <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && <ModalLedgerSignToken token={token} modalId="signTokenDataModal" cb={updateTokenSignature} />}
       </div>
