@@ -16,12 +16,12 @@ import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
 import ModalSendTx from '../components/ModalSendTx';
-import ModalAlert from '../components/ModalAlert';
 import BackButton from '../components/BackButton';
 import helpers from '../utils/helpers';
 import { str2jsx } from '../utils/i18n';
 import { NFT_GUIDE_URL, NFT_STANDARD_RFC_URL, NFT_DATA_MAX_SIZE } from '../constants';
 import InputNumber from '../components/InputNumber';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
 
 const mapStateToProps = (state) => {
@@ -42,6 +42,8 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class CreateNFT extends React.Component {
+  static contextType = GlobalModalContext;
+
   constructor(props) {
     super(props);
 
@@ -188,7 +190,22 @@ class CreateNFT extends React.Component {
    */
   showAlert = (token) => {
     this.setState({ name: token.name, configurationString: hathorLib.tokens.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
-      $('#alertModal').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT, {
+        title: t`NFT ${this.state.name} created`,
+        handleButton: this.alertButtonClick,
+        buttonName: 'Ok',
+        body: (
+          <div>
+            <p>{t`Your NFT has been successfully created!`}</p>
+            <p>{t`You can share the following configuration string with other people to let them register your brand new NFT in their wallets.`}</p>
+            <p><SpanFmt>{t`Remember to **make a backup** of this configuration string.`}</SpanFmt></p>
+            <p><strong>{this.state.configurationString}</strong></p>
+          </div>
+        ),
+        onClose: () => {
+          this.props.history.push('/wallet/');
+        },
+      });
     });
   }
 
@@ -196,10 +213,7 @@ class CreateNFT extends React.Component {
    * Method called after clicking the button in the alert modal, then redirects to the wallet screen
    */
   alertButtonClick = () => {
-    $('#alertModal').on('hidden.bs.modal', (e) => {
-      this.props.history.push('/wallet/');
-    });
-    $('#alertModal').modal('hide');
+    this.context.hideModal();
   }
 
   /**
@@ -244,17 +258,6 @@ class CreateNFT extends React.Component {
   }
 
   render = () => {
-    const getAlertBody = () => {
-      return (
-        <div>
-          <p>{t`Your NFT has been successfully created!`}</p>
-          <p>{t`You can share the following configuration string with other people to let them register your brand new NFT in their wallets.`}</p>
-          <p><SpanFmt>{t`Remember to **make a backup** of this configuration string.`}</SpanFmt></p>
-          <p><strong>{this.state.configurationString}</strong></p>
-        </div>
-      )
-    }
-
     // This htrDeposit variable will be used only in the explanation text
     // so this must be 0.01 (the text will show 0.01%) because the amount to create for NFTs is an integer.
     // Then to create 100 units, the deposit is 0.01 HTR, to create 1,000 units the deposit is 0.1 HTR
@@ -350,7 +353,6 @@ class CreateNFT extends React.Component {
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
         <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onTokenCreateSuccess} title="Creating NFT" />
-        <ModalAlert title={t`NFT ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
       </div>
     );
   }
