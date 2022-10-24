@@ -18,6 +18,7 @@ import { get } from 'lodash';
 import wallet from "../utils/wallet";
 import ModalConfirm from "./ModalConfirm";
 import $ from "jquery";
+import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 
 
 const mapStateToProps = (state) => {
@@ -33,6 +34,8 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 class TokenGeneralInfo extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * @property {string} errorMessage Message to show in case of error getting token info
    * @property {number} totalSupply Token total supply
@@ -103,24 +106,32 @@ class TokenGeneralInfo extends React.Component {
    */
   toggleAlwaysShow = (e) => {
     e.preventDefault();
+    let newState = {};
     if (this.state.alwaysShow) {
-      this.setState({
+      newState = {
         confirmData: {
           title: t`Disable always show`,
           body: t`Are you sure you don't want to always show token ${this.props.token.symbol}? If you continue you won't see this token if it has zero balance and you selected to hide zero balance tokens.`,
           handleYes: this.handleToggleAlwaysShow,
         }
-      });
+      };
     } else {
-      this.setState({
+      newState = {
         confirmData: {
           title: t`Enable always show`,
           body: t`Are you sure you want to always show token ${this.props.token.symbol}?`,
           handleYes: this.handleToggleAlwaysShow,
         }
-      });
+      };
     }
-    $('#confirmModal').modal('show');
+
+    this.setState(newState, () => {
+      this.context.showModal(MODAL_TYPES.CONFIRM, {
+        title: this.state.confirmData.title,
+        body: this.state.confirmData.body,
+        handleYes: this.state.confirmData.handleYes,
+      });
+    })
   }
 
   /**
