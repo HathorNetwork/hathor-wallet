@@ -31,6 +31,7 @@ export const types = {
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
   SET_SERVER_INFO: 'SET_SERVER_INFO',
   STORE_ROUTER_HISTORY: 'STORE_ROUTER_HISTORY',
+  WALLET_RELOADING: 'WALLET_RELOADING',
 };
 
 /**
@@ -296,6 +297,10 @@ export const walletReloadData = () => ({
 export const storeRouterHistory = (routerHistory) => ({
   type: types.STORE_ROUTER_HISTORY,
   routerHistory,
+});
+
+export const reloadingWallet = () => ({
+  type: types.WALLET_RELOADING,
 });
 
 /**

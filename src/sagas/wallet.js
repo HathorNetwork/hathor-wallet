@@ -50,6 +50,7 @@ import {
   walletStateError,
   walletStateReady,
   storeRouterHistory,
+  reloadingWallet,
 } from '../actions';
 import { specificTypeAndPayload, } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -157,6 +158,7 @@ export function* startWallet(action) {
 
     const beforeReloadCallback = () => {
       dispatch(loadingAddresses(true));
+      dispatch(reloadingWallet());
     };
 
     const walletConfig = {
@@ -543,10 +545,32 @@ export function* onWalletConnStateUpdate({ payload }) {
   yield put(isOnlineUpdate({ isOnline }));
 }
 
+export function* walletReloading() {
+  const wallet = yield select((state) => state.wallet);
+  const routerHistory = yield select((state) => state.routerHistory);
+
+  // Since we close the channel after a walletReady event is received,
+  // we must fork this saga again so we setup listeners again.
+  yield fork(listenForWalletReady, wallet);
+
+  // Wait until the wallet is ready
+  yield take(types.WALLET_STATE_READY);
+
+  // Store all tokens on redux as we might have lost tokens during the disconnected
+  // period.
+  const { allTokens } = yield call(loadTokens);
+
+  // Load success, we can send the user back to the wallet screen
+  yield put(loadWalletSuccess(allTokens));
+  routerHistory.replace('/wallet/');
+  yield put(loadingAddresses(false));
+}
+
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, startWallet),
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
+    takeLatest('WALLET_RELOADING', walletReloading),
     takeEvery('WALLET_NEW_TX', handleTx),
     takeEvery('WALLET_UPDATE_TX', handleTx),
     takeEvery('WALLET_BEST_BLOCK_UPDATE', bestBlockUpdate),
