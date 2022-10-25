@@ -1,5 +1,7 @@
 ## Install
 
+Must use node v14
+
 ## Running on Electron
 
 Before running electron you have to execute `npm run electron-deps` to install dependencies.
