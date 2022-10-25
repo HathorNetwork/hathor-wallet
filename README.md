@@ -37,14 +37,6 @@ A transaction is displayed.
 ### Prerequisites
 
 * Install node v14
-* If you are using `WSL` (Windows Subsystem for Linux):
-    * Make sure you have the vesion 2
-        ```
-        wsl -l -v
-        ```
-    * Make sure to install the WSL driver for your GPU, see at [Prerequisites](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#prerequisites)
-    * Make sure to update the WSL after install the GPU driver, see at [Existing WSL Install](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#existing-wsl-install)
-    * Once the `WSL` is updated you are ready to go
 
 ### To Install
 
@@ -138,6 +130,18 @@ Then, you can increase your memory limit running:
 
     export NODE_OPTIONS=--max_old_space_size=4096
 
+### WSL (Windows Subsystem for Linux)
+
+* Make sure you have the vesion 2
+    ```
+    wsl -l -v
+    ```
+* Make sure to install the WSL driver for your GPU, see at [Prerequisites](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#prerequisites)
+* Make sure to update the WSL after install the GPU driver, see at [Existing WSL Install](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#existing-wsl-install)
+* Once the `WSL` is updated you are ready to go
+
+If you still can't run, see this [article](https://www.beekeeperstudio.io/blog/building-electron-windows-ubuntu-wsl2).
+
 ### WSL Ubuntu 18 distro
 
 Run the following command to install necessary packages:
@@ -153,10 +157,6 @@ Run the following command to install necessary packages:
 ```
 sudo apt install libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev libasound2 libusb-1.0-0
 ```
-
-### WSL
-
-If you still can't run, see this [article](https://www.beekeeperstudio.io/blog/building-electron-windows-ubuntu-wsl2).
 
 ## TODO
 
