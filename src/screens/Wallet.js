@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
-import { get, isEqual } from 'lodash';
+import { get } from 'lodash';
 import { connect } from "react-redux";
 import ReactLoading from 'react-loading';
 
@@ -47,17 +46,8 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = (state) => {
   return {
     selectedToken: state.selectedToken,
-    tokenHistory: get(state.tokensHistory, `${state.selectedToken}`, {
-      status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      data: [],
-    }),
-    tokenBalance: get(state.tokensBalance, `${state.selectedToken}`, {
-      status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      data: {
-        locked: 0,
-        available: 0,
-      },
-    }),
+    tokensHistory: state.tokensHistory,
+    tokensBalance: state.tokensBalance,
     tokens: state.tokens,
     wallet: state.wallet,
     useWalletService: state.useWalletService,
@@ -110,10 +100,6 @@ class Wallet extends React.Component {
    * Update token state after didmount or props update
    */
   updateWalletInfo = async () => {
-    if (!this.props.selectedToken) {
-      return;
-    }
-
     const mintUtxos = await this.props.wallet.getMintAuthority(this.props.selectedToken, { many: true });
     const meltUtxos = await this.props.wallet.getMeltAuthority(this.props.selectedToken, { many: true });
 
@@ -126,32 +112,34 @@ class Wallet extends React.Component {
     });
   }
 
-  async componentWillReceiveProps(nextProps) {
-    const signature = tokens.getTokenSignature(nextProps.selectedToken);
-    this.setState({hasTokenSignature: !!signature});
-
+  componentDidUpdate(prevProps) {
     // the selected token changed
-    if (this.props.selectedToken !== nextProps.selectedToken) {
-      this.shouldShowAdministrativeTab(nextProps.selectedToken);
+    if (this.props.selectedToken !== prevProps.selectedToken) {
+      const signature = tokens.getTokenSignature(this.props.selectedToken);
+      this.setState({hasTokenSignature: !!signature});
+
+      this.shouldShowAdministrativeTab(this.props.selectedToken);
+      this.updateWalletInfo();
+      this.updateTokenInfo(this.props.selectedToken);
+      return;
     }
 
     // if the new selected token history changed, we should fetch the token details again
-    const nextTokenHistory = nextProps.tokenHistory;
-    const currentTokenHistory = this.props.tokenHistory;
+    const prevTokenHistory = get(prevProps.tokensHistory, this.props.selectedToken, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      updatedAt: -1,
+      data: [],
+    });
+    const currentTokenHistory = get(this.props.tokensHistory, this.props.selectedToken, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      updatedAt: -1,
+      data: [],
+    });
 
-    if (nextTokenHistory === null) {
-      return;
-    }
-
-    if (nextTokenHistory.status !== TOKEN_DOWNLOAD_STATUS.READY) {
-      return;
-    }
-
-
-    if (!isEqual(nextTokenHistory.data, currentTokenHistory.data)) {
-      this.updateTokenInfo(nextProps.selectedToken);
+    if (prevTokenHistory.updatedAt !== currentTokenHistory.updatedAt) {
+      this.updateTokenInfo(this.props.selectedToken);
       this.updateWalletInfo();
-    } 
+    }
   }
 
   async updateTokenInfo(tokenUid) {
@@ -277,12 +265,12 @@ class Wallet extends React.Component {
     e.preventDefault();
     const balanceStatus = get(
       this.props.tokenBalance,
-      'status',
+      `${this.props.selectedToken}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
     const historyStatus = get(
       this.props.tokenHistory,
-      'status',
+      `${this.props.selectedToken}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
 
@@ -311,6 +299,17 @@ class Wallet extends React.Component {
 
   render() {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
+    const tokenHistory = get(this.props.tokensHistory, this.props.selectedToken, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: [],
+    });
+    const tokenBalance = get(this.props.tokensBalance, this.props.selectedToken, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: {
+        available: 0,
+        locked: 0,
+      },
+    });
 
     const renderBackupAlert = () => {
       return (
@@ -398,7 +397,7 @@ class Wallet extends React.Component {
                       canMelt={this.state.canMelt}
                       mintCount={this.state.mintCount}
                       meltCount={this.state.meltCount}
-                      tokenBalance={this.props.tokenBalance}
+                      tokenBalance={tokenBalance}
                       transactionsCount={this.state.transactionsCount}
                     />
                   </div>
@@ -421,9 +420,6 @@ class Wallet extends React.Component {
     }
 
     const renderUnlockedWallet = () => {
-      const tokenHistory = this.props.tokenHistory;
-      const tokenBalance = this.props.tokenBalance;
-
       let template;
       if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING
           || tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING) {

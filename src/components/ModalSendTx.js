@@ -55,6 +55,7 @@ class ModalSendTx extends React.Component {
   componentDidMount = () => {
     $('#pinModal').modal('show');
     $('#pinModal').on('hidden.bs.modal', (e) => {
+      this.props.onClose();
       if (this.tx && this.props.onSendSuccess) {
         // If succeeded to send tx and has method to execute
         this.props.onSendSuccess(this.tx);
@@ -71,9 +72,7 @@ class ModalSendTx extends React.Component {
       this.setState({ errorMessage: '', step: 0 }, () => {
         this.refs.pinInput.refs.pin.value = '';
       });
-
-      this.props.onClose();
-    })
+    });
 
     $('#pinModal').on('shown.bs.modal', (e) => {
       this.refs.pinInput.refs.pin.focus();
