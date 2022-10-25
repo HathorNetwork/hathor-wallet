@@ -556,14 +556,19 @@ export function* walletReloading() {
   // Wait until the wallet is ready
   yield take(types.WALLET_STATE_READY);
 
-  // Store all tokens on redux as we might have lost tokens during the disconnected
-  // period.
-  const { allTokens } = yield call(loadTokens);
+  try {
+    // Store all tokens on redux as we might have lost tokens during the disconnected
+    // period.
+    const { allTokens } = yield call(loadTokens);
 
-  // Load success, we can send the user back to the wallet screen
-  yield put(loadWalletSuccess(allTokens));
-  routerHistory.replace('/wallet/');
-  yield put(loadingAddresses(false));
+    // Load success, we can send the user back to the wallet screen
+    yield put(loadWalletSuccess(allTokens));
+    routerHistory.replace('/wallet/');
+    yield put(loadingAddresses(false));
+  } catch (e) {
+    yield put(startWalletFailed());
+    return;
+  }
 }
 
 export function* saga() {
