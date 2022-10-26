@@ -547,6 +547,7 @@ export function* onWalletConnStateUpdate({ payload }) {
 }
 
 export function* walletReloading() {
+  console.log('Wallet reloading.');
   const wallet = yield select((state) => state.wallet);
   const routerHistory = yield select((state) => state.routerHistory);
 
