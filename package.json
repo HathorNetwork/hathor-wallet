@@ -62,7 +62,7 @@
     "start": "npm-run-all -p watch-css start-js",
     "build-js": "react-scripts build",
     "build": "npm-run-all build-css build-js",
-    "test": "react-scripts test --env=node",
+    "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 .",
     "electron-deps": "electron-builder install-app-deps",
