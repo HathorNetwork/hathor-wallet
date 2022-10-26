@@ -70,7 +70,7 @@ export function* startWallet(action) {
     words,
     passphrase,
     pin,
-    password, 
+    password,
     routerHistory,
     fromXpriv,
     xpub,
