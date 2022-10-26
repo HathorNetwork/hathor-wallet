@@ -51,6 +51,7 @@ import {
   walletStateReady,
   storeRouterHistory,
   reloadingWallet,
+  tokenInvalidateHistory,
 } from '../actions';
 import { specificTypeAndPayload, } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -546,6 +547,7 @@ export function* onWalletConnStateUpdate({ payload }) {
 }
 
 export function* walletReloading() {
+  console.log('Wallet reloading.');
   const wallet = yield select((state) => state.wallet);
   const routerHistory = yield select((state) => state.routerHistory);
 
@@ -560,6 +562,15 @@ export function* walletReloading() {
     // Store all tokens on redux as we might have lost tokens during the disconnected
     // period.
     const { allTokens } = yield call(loadTokens);
+
+    // We might have lost transactions during the reload, so we must invalidate the
+    // token histories:
+    for (const tokenUid of allTokens) {
+      if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
+        continue;
+      }
+      yield put(tokenInvalidateHistory(tokenUid));
+    }
 
     // Load success, we can send the user back to the wallet screen
     yield put(loadWalletSuccess(allTokens));
