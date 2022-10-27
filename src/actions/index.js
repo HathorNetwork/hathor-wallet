@@ -298,10 +298,6 @@ export const reloadingWallet = () => ({
   type: types.WALLET_RELOADING,
 });
 
-export const reloadingWallet = () => ({
-  type: types.WALLET_RELOADING,
-});
-
 /**
  * @param {RouterHistory} routerHistory History object from react-dom-navigation
  */
