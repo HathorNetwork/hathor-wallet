@@ -30,6 +30,7 @@ export const types = {
   WALLET_STATE_ERROR: 'WALLET_STATE_ERROR',
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
   SET_SERVER_INFO: 'SET_SERVER_INFO',
+  STORE_ROUTER_HISTORY: 'STORE_ROUTER_HISTORY',
 };
 
 /**
@@ -290,6 +291,14 @@ export const walletStateReady = () => ({
 
 export const walletReloadData = () => ({
   type: types.WALLET_RELOAD_DATA,
+});
+
+/**
+ * @param {RouterHistory} routerHistory History object from react-dom-navigation
+ */
+export const storeRouterHistory = (routerHistory) => ({
+  type: types.STORE_ROUTER_HISTORY,
+  routerHistory,
 });
 
 /**

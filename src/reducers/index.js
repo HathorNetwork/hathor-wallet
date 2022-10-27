@@ -96,6 +96,8 @@ const initialState = {
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
   startWalletAction: null,
+  // RouterHistory object
+  routerHistory: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -198,6 +200,8 @@ const rootReducer = (state = initialState, action) => {
       return onStartWalletFailed(state);
     case types.WALLET_BEST_BLOCK_UPDATE:
       return onWalletBestBlockUpdate(state, action);
+    case types.STORE_ROUTER_HISTORY:
+      return onStoreRouterHistory(state, action);
     default:
       return state;
   }
@@ -679,6 +683,18 @@ export const onWalletBestBlockUpdate = (state, action) => {
   return {
     ...state,
     height: data,
+  };
+};
+
+/**
+ * @param {RouterHistory} action.routerHistory History object from react-dom-navigation
+ */
+export const onStoreRouterHistory = (state, action) => {
+  const { routerHistory } = action;
+
+  return {
+    ...state,
+    routerHistory,
   };
 };
 
