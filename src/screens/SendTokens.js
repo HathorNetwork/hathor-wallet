@@ -424,7 +424,7 @@ class SendTokens extends React.Component {
           id: 'ledgerAlertModal',
           title: t`Token limit reached`,
           body: modalBody,
-          buttonName: 'Ok',
+          buttonName: t`Close`,
         });
         return;
       }
