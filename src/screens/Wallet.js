@@ -89,11 +89,16 @@ class Wallet extends React.Component {
       backupDone: hathorLib.wallet.isBackupDone()
     });
 
-    await this.updateTokenInfo(this.props.selectedToken);
-
-    this.updateWalletInfo();
     // First time the screen is mounted we must also check if we should show administrative tab
     this.shouldShowAdministrativeTab(this.props.selectedToken);
+
+    // No need to download token info and wallet info if the token is hathor
+    if (this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+      return;
+    }
+
+    await this.updateTokenInfo(this.props.selectedToken);
+    this.updateWalletInfo();
   }
 
   /**
