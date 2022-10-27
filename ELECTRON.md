@@ -1,6 +1,6 @@
 ## Install
 
-Must use node v8.9.0
+Must use node v14
 
 ## Running on Electron
 
