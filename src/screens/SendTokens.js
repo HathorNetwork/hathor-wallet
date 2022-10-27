@@ -141,6 +141,7 @@ class SendTokens extends React.Component {
       this.context.showModal(MODAL_TYPES.ALERT, {
         id: 'ledgerAlertModal',
         title: t`Invalid custom tokens`,
+        buttonName: t`Close`,
         body: this.renderAlertTokenList(tokenList),
       })
     } else {
