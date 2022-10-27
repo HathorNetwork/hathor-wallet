@@ -11,7 +11,10 @@ export default function ModalConfirmTestnet({ onClose, success }) {
     $('#modalConfirmTestnet').modal('show');
     $('#modalConfirmTestnet').on('hidden.bs.modal', onClose);
 
-    return () => $('#modalConfirmTestnet').modal('hide');
+    return () => {
+      $('#modalConfirmTestnet').modal('hide');
+      $('#modalConfirmTestnet').off();
+    };
   }, []);
 
   const confirmTestnetServer = useCallback(() => {
