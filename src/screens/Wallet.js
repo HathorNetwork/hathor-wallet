@@ -269,12 +269,12 @@ class Wallet extends React.Component {
   retryDownload = (e, tokenId) => {
     e.preventDefault();
     const balanceStatus = get(
-      this.props.tokenBalance,
+      this.props.tokensBalance,
       `${this.props.selectedToken}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
     const historyStatus = get(
-      this.props.tokenHistory,
+      this.props.tokensHistory,
       `${this.props.selectedToken}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
