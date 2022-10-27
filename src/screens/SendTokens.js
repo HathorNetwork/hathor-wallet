@@ -264,7 +264,7 @@ class SendTokens extends React.Component {
         id: 'ledgerAlertModal',
         title: t`Unverified custom tokens`,
         body: this.renderAlertTokenList(missingSigs),
-        buttonName: 'Ok',
+        buttonName: t`Close`,
       });
       return;
     }
