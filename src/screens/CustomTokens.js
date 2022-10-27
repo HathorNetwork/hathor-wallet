@@ -10,9 +10,7 @@ import { t } from 'ttag'
 
 import SpanFmt from '../components/SpanFmt';
 import HathorAlert from '../components/HathorAlert';
-import $ from 'jquery';
 import BackButton from '../components/BackButton';
-import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { NFT_ENABLED } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import hathorLib from '@hathor/wallet-lib';
@@ -49,7 +47,7 @@ class CustomTokens extends React.Component {
    * Triggered when user clicks to do the register a token, then opens the new token modal
    */
   registerTokenClicked = () => {
-    this.context.showModal('MODAL_ADD_TOKEN', {
+    this.context.showModal(MODAL_TYPES.MODAL_ADD_TOKEN, {
       success: this.newTokenSuccess,
       tokensBalance: this.props.tokensBalance,
     });
