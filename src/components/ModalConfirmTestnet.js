@@ -52,7 +52,7 @@ export default function ModalConfirmTestnet({ onClose, success }) {
               {t`Connect to testnet`}
             </button>
             <button onClick={onClose} type="button" className="btn btn-hathor">
-              { t`Ok` }
+              { t`Cancel change` }
             </button>
           </div>
         </div>
