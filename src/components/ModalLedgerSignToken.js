@@ -206,7 +206,7 @@ function ModalLedgerSignToken({token, modalId, cb, onClose}) {
 
   const renderSendButton = () => {
     return (
-        <button type="button" className="btn btn-hathor" onClick={handleSend}>{t`Sign token`}</button>
+      <button type="button" className="btn btn-hathor" onClick={handleSend}>{t`Sign token`}</button>
     );
   }
 

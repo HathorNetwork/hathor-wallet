@@ -75,9 +75,9 @@ class ModalBackupWords extends React.Component {
       if (this.refs.password) {
         this.refs.password.value = '';
       }
-
-      this.props.onClose();
     });
+
+    $('#backupWordsModal').on('hidden.bs.modal', this.props.onClose);
 
     $('#backupWordsModal').on('shown.bs.modal', (e) => {
       if (this.refs.password) {

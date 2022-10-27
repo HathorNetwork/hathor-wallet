@@ -55,8 +55,11 @@ class ModalAddManyTokens extends React.Component {
         alwaysShow: false,
         tokensToAdd: '',
       });
+    });
+
+    $('#addManyTokensModal').on('hidden.bs.modal', (e) => {
       this.props.onClose();
-    })
+    });
 
     $('#addManyTokensModal').on('shown.bs.modal', (e) => {
       this.refs.configs.focus();
