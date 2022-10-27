@@ -12,7 +12,6 @@ import createRequestInstance from '../api/axiosInstance';
 import SpanFmt from './SpanFmt';
 import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
-import url from 'url';
 import wallet from '../utils/wallet';
 
 
@@ -78,8 +77,8 @@ class RequestErrorModal extends React.Component {
    * @return {boolean} true if was address history request, false otherwise
    */
   isAddressHistoryRequest = () => {
-    const serverURL = hathorLib.helpers.getServerURL();
-    const addressHistoryURL = url.resolve(serverURL, 'thin_wallet/address_history');
+    const addressHistoryURL = 'thin_wallet/address_history';
+
     if (this.props.lastFailedRequest && addressHistoryURL === this.props.lastFailedRequest.url) {
       return true;
     } else {
