@@ -89,7 +89,7 @@ class ModalAddressQRCode extends React.Component {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="exampleModalLabel">{t`Address to receive tokens`}</h5>
-              <button type="button" className="close" onClick={this.close} data-dismiss="modal" aria-label="Close">
+              <button type="button" className="close" onClick={this.props.onClose} data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
