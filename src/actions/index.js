@@ -294,14 +294,6 @@ export const walletReloadData = () => ({
   type: types.WALLET_RELOAD_DATA,
 });
 
-/**
- * routerHistory: The RouterHistory object to store
- */
-export const storeRouterHistory = (routerHistory) => ({
-  type: types.STORE_ROUTER_HISTORY,
-  routerHistory,
-});
-
 export const reloadingWallet = () => ({
   type: types.WALLET_RELOADING,
 });
