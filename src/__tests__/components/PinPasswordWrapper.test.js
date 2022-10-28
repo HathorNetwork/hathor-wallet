@@ -19,7 +19,6 @@ afterEach(() => {
 });
 
 it('renders without crashing', () => {
-  const div = document.createElement('div');
   render(
     <PinPasswordWrapper
       message={(<div/>)}
@@ -30,11 +29,11 @@ it('renders without crashing', () => {
       button={`Next`}
       pattern={'arbitrary_pattern'}
     />,
-    div);
+    container);
 });
 
 it('calls change handler method on change', async () => {
-  expect.assertions(2);
+  expect.assertions();
 
   const changeHandler = jest.fn();
   // Render the element
@@ -47,7 +46,7 @@ it('calls change handler method on change', async () => {
         handleChange={changeHandler}
         field={`Password`}
         button={`Next`}
-        pattern={'\\'}
+        pattern={'*'}
       />,
       container
     )
@@ -58,4 +57,41 @@ it('calls change handler method on change', async () => {
   await userEvent.type(passInput, 'abc123');
   expect(changeHandler).toHaveBeenCalledTimes(6);
   expect(changeHandler).toHaveBeenLastCalledWith('abc123')
+})
+
+it('ensures the field pattern is applied', async () => {
+  expect.assertions();
+  const validationPattern = '[0-9]+';
+  const failingText = 'abc';
+  const passingText = '123';
+
+  // Render the element
+  act(() => {
+    render(
+      <PinPasswordWrapper
+        message={(<div/>)}
+        success={jest.fn()}
+        back={jest.fn()}
+        handleChange={jest.fn()}
+        field={`Password`}
+        button={`Next`}
+        pattern={validationPattern}
+      />,
+      container
+    )
+  });
+
+  expect(new RegExp(validationPattern).test(failingText)).toStrictEqual(false);
+  expect(new RegExp(validationPattern).test(passingText)).toStrictEqual(true);
+
+  /** @type HTMLElement */
+  const passInput = screen.getByPlaceholderText('Password');
+  await userEvent.type(passInput, failingText);
+  expect(passInput.validity.patternMismatch).toStrictEqual(true);
+  expect(passInput.checkValidity()).toStrictEqual(false);
+
+  await userEvent.clear(passInput);
+  await userEvent.type(passInput, passingText);
+  expect(passInput.validity.patternMismatch).toStrictEqual(false);
+  expect(passInput.checkValidity()).toStrictEqual(true);
 })
