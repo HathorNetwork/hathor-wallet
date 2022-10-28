@@ -16,7 +16,6 @@ import { connect } from 'react-redux';
 import helpers from '../utils/helpers';
 import { get } from 'lodash';
 import wallet from "../utils/wallet";
-import ModalConfirm from "./ModalConfirm";
 import $ from "jquery";
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 
@@ -101,7 +100,7 @@ class TokenGeneralInfo extends React.Component {
   handleToggleAlwaysShow = () => {
     const newValue = !wallet.isTokenAlwaysShow(this.props.token.uid);
     wallet.setTokenAlwaysShow(this.props.token.uid, newValue);
-    $('#confirmModal').modal('hide');
+    this.context.hideModal();
   }
 
   /**
@@ -132,7 +131,7 @@ class TokenGeneralInfo extends React.Component {
    * @param {string} text Text copied to clipboard
    * @param {*} result Null in case of error
    */
-  copied = (text, result) => {
+  copied = (_text, result) => {
     if (result) {
       // If copied with success
       this.showSuccess(t`Configuration string copied to clipboard!`);
