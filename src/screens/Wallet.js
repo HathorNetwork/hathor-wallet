@@ -42,7 +42,6 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-
 const mapStateToProps = (state) => {
   return {
     selectedToken: state.selectedToken,
@@ -89,44 +88,13 @@ class Wallet extends React.Component {
       backupDone: hathorLib.wallet.isBackupDone()
     });
 
-    // First time the screen is mounted we must also check if we should show administrative tab
-    this.shouldShowAdministrativeTab(this.props.selectedToken);
-
-    // No need to download token info and wallet info if the token is hathor
-    if (this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
-      return;
-    }
-
-    await this.updateTokenInfo(this.props.selectedToken);
-    this.updateWalletInfo();
-  }
-
-  /**
-   * Update token state after didmount or props update
-   */
-  updateWalletInfo = async () => {
-    const mintUtxos = await this.props.wallet.getMintAuthority(this.props.selectedToken, { many: true });
-    const meltUtxos = await this.props.wallet.getMeltAuthority(this.props.selectedToken, { many: true });
-
-    const mintCount = mintUtxos.length;
-    const meltCount = meltUtxos.length;
-
-    this.setState({
-      mintCount,
-      meltCount,
-    });
+    this.initializeWalletScreen();
   }
 
   componentDidUpdate(prevProps) {
-    // the selected token changed
+    // the selected token changed, we should re-initialize the screen
     if (this.props.selectedToken !== prevProps.selectedToken) {
-      const signature = tokens.getTokenSignature(this.props.selectedToken);
-      this.setState({hasTokenSignature: !!signature});
-
-      this.shouldShowAdministrativeTab(this.props.selectedToken);
-      this.updateWalletInfo();
-      this.updateTokenInfo(this.props.selectedToken);
-      return;
+      this.initializeWalletScreen();
     }
 
     // if the new selected token history changed, we should fetch the token details again
@@ -142,13 +110,67 @@ class Wallet extends React.Component {
     });
 
     if (prevTokenHistory.updatedAt !== currentTokenHistory.updatedAt) {
-      this.updateTokenInfo(this.props.selectedToken);
+      this.updateTokenInfo();
       this.updateWalletInfo();
     }
   }
 
-  async updateTokenInfo(tokenUid) {
+  /**
+   * Resets the state data and triggers token information requests
+   */
+  async initializeWalletScreen() {
+    this.shouldShowAdministrativeTab(this.props.selectedToken);
+    const signature = tokens.getTokenSignature(this.props.selectedToken);
+
+    this.setState({
+      hasTokenSignature: !!signature,
+      totalSupply: null,
+      canMint: false,
+      canMelt: false,
+      transactionsCount: null,
+      shouldShowAdministrativeTab: false,
+    });
+
+    // No need to download token info and wallet info if the token is hathor
+    if (this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+      return;
+    }
+
+    await this.updateTokenInfo();
+    await this.updateWalletInfo();
+  }
+
+  /**
+   * Update token state after didmount or props update
+   */
+  updateWalletInfo = async () => {
+    const tokenUid = this.props.selectedToken;
+    const mintUtxos = await this.props.wallet.getMintAuthority(tokenUid, { many: true });
+    const meltUtxos = await this.props.wallet.getMeltAuthority(tokenUid, { many: true });
+
+    // The user might have changed token while we are downloading, we should ignore
+    if (this.props.selectedToken !== tokenUid) {
+      return;
+    }
+
+    const mintCount = mintUtxos.length;
+    const meltCount = meltUtxos.length;
+
+    this.setState({
+      mintCount,
+      meltCount,
+    });
+  }
+
+  async updateTokenInfo() {
+    const tokenUid = this.props.selectedToken;
     const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
+
+    // The user might have changed token while we are downloading, we should ignore
+    if (this.props.selectedToken !== tokenUid) {
+      return;
+    }
+
     const { totalSupply, totalTransactions, authorities } = tokenDetails;
 
     this.setState({
