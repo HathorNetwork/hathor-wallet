@@ -154,8 +154,7 @@ class ModalAddToken extends React.Component {
                 type="button"
                 className="close"
                 data-dismiss="modal"
-                aria-label="Close"
-                onClick={this.props.onClose}>
+                aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
