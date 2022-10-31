@@ -42,6 +42,8 @@ class ModalAddToken extends React.Component {
   }
 
   componentDidMount = () => {
+    $('#addTokenModal').modal('show');
+
     $('#addTokenModal').on('hide.bs.modal', (e) => {
       this.refs.config.value = '';
       this.setState({
@@ -50,15 +52,18 @@ class ModalAddToken extends React.Component {
         shouldExhibitAlwaysShowCheckbox: false,
         alwaysShow: false,
       });
-    })
+    });
 
     $('#addTokenModal').on('shown.bs.modal', (e) => {
       this.refs.config.focus();
-    })
+    });
+
+    $('#addTokenModal').on('hidden.bs.modal', this.props.onClose);
   }
 
   componentWillUnmount = () => {
     // Removing all event listeners
+    $('#addTokenModal').modal('hide');
     $('#addTokenModal').off();
   }
 
@@ -145,7 +150,11 @@ class ModalAddToken extends React.Component {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="exampleModalLabel">{t`Register a new token`}</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -169,7 +178,9 @@ class ModalAddToken extends React.Component {
               </form>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`Cancel`}</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal">
+                {t`Cancel`}
+              </button>
               <button onClick={this.handleAdd} type="button" className="btn btn-hathor">{t`Register`}</button>
             </div>
           </div>

@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { VERSION, LEDGER_ENABLED } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
 import $ from 'jquery';
+import { VERSION, LEDGER_ENABLED } from '../constants';
+import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
+import SoftwareWalletWarningMessage from './SoftwareWalletWarningMessage';
 
 
 /**
@@ -18,6 +20,7 @@ import $ from 'jquery';
  * @memberof Components
  */
 class Version extends React.Component {
+  static contextType = GlobalModalContext;
   /**
    * If it's software wallet show modal warning
    */
@@ -25,6 +28,12 @@ class Version extends React.Component {
     if (LEDGER_ENABLED) {
       if (hathorLib.wallet.isSoftwareWallet()) {
         $('#softwareWalletWarningModal').modal('show');
+        this.context.showModal(MODAL_TYPES.ALERT, {
+          body: <SoftwareWalletWarningMessage />,
+          buttonName: 'Ok',
+          id: 'softwareWalletWarningModal',
+          title: 'Software wallet warning',
+        });
       }
     }
   }

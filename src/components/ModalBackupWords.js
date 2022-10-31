@@ -61,6 +61,7 @@ class ModalBackupWords extends React.Component {
   }
 
   componentDidMount = () => {
+    $('#backupWordsModal').modal('show');
     $('#backupWordsModal').on('hide.bs.modal', (e) => {
       this.setState({
         errorMessage: '',
@@ -76,6 +77,8 @@ class ModalBackupWords extends React.Component {
       }
     });
 
+    $('#backupWordsModal').on('hidden.bs.modal', this.props.onClose);
+
     $('#backupWordsModal').on('shown.bs.modal', (e) => {
       if (this.refs.password) {
         this.refs.password.focus();
@@ -84,6 +87,7 @@ class ModalBackupWords extends React.Component {
   };
 
   componentWillUnmount = () => {
+    $('#backupWordsModal').modal('hide');
     // Removing all event listeners
     $('#backupWordsModal').off();
   };

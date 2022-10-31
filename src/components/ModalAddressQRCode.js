@@ -10,7 +10,7 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 
 
 const mapStateToProps = (state) => {
@@ -36,8 +36,14 @@ class ModalAddressQRCode extends React.Component {
     this.timer = null;
   }
 
-  componentWillUnmount = () => {
+  componentDidMount() {
+    $('#addressQRCodeModal').modal('show');
+    $('#addressQRCodeModal').on('hidden.bs.modal', this.props.onClose);
+  }
+
+  componentWillUnmount() {
     $('#addressQRCodeModal').modal('hide');
+    $('#addressQRCodeModal').off();
     // Preventing calling setState when the component is not mounted
     if (this.timer) {
       clearTimeout(this.timer);
@@ -83,7 +89,7 @@ class ModalAddressQRCode extends React.Component {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="exampleModalLabel">{t`Address to receive tokens`}</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+              <button type="button" className="close" onClick={this.props.onClose} data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -99,7 +105,12 @@ class ModalAddressQRCode extends React.Component {
               <p className="text-success mt-4">{this.state.successMessage}</p>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`Close`}</button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal">
+                {t`Close`}
+              </button>
               <button onClick={this.download} type="button" className="btn btn-hathor">{t`Download`}</button>
             </div>
           </div>

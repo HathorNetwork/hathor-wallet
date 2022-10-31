@@ -16,8 +16,8 @@ import { connect } from 'react-redux';
 import helpers from '../utils/helpers';
 import { get } from 'lodash';
 import wallet from "../utils/wallet";
-import ModalConfirm from "./ModalConfirm";
 import $ from "jquery";
+import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 
 
 const mapStateToProps = (state) => {
@@ -33,13 +33,14 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 class TokenGeneralInfo extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * @property {string} errorMessage Message to show in case of error getting token info
    * @property {number} totalSupply Token total supply
    * @property {boolean} canMint If this token can still be minted
    * @property {boolean} canMelt If this token can still be melted
    * @property {number} transactionsCount Total number of transactions of this token
-   * @property {boolean} alwaysShow Indicates if this token is always shown even without balance
    * @property {{
    *  title:string,
    *  body:string,
@@ -52,7 +53,6 @@ class TokenGeneralInfo extends React.Component {
     canMint: null,
     canMelt: null,
     transactionsCount: 0,
-    alwaysShow: false,
     confirmData: {
       title: '',
       body: '',
@@ -60,77 +60,47 @@ class TokenGeneralInfo extends React.Component {
     }
   };
 
-  componentDidMount() {
-    this.updateTokenInfo();
-  }
-
-
-  componentDidUpdate = (prevProps) => {
-    if (this.props.token.uid !== prevProps.token.uid) {
-      this.updateTokenInfo();
-    }
-  }
-
-  /**
-   * Update token info getting data from the facade (can mint, can melt, total supply and total transactions)
-   */
-  updateTokenInfo = async () => {
-    this.setState({ errorMessage: '' });
-
-    try {
-      const tokenUid = this.props.token.uid;
-      const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
-      const alwaysShow = wallet.isTokenAlwaysShow(tokenUid);
-      const { totalSupply, totalTransactions, authorities } = tokenDetails;
-
-      this.setState({
-        totalSupply,
-        canMint: authorities.mint,
-        canMelt: authorities.melt,
-        transactionsCount: totalTransactions,
-        alwaysShow,
-      });
-    } catch (e) {
-      this.setState({
-        errorMessage: e.message,
-      });
-    }
-  }
-
   /**
    * Handles the click on the "Always show this token" link
    * @param {Event} e
    */
   toggleAlwaysShow = (e) => {
     e.preventDefault();
-    if (this.state.alwaysShow) {
-      this.setState({
+    let newState = {};
+    if (wallet.isTokenAlwaysShow(this.props.token.uid)) {
+      newState = {
         confirmData: {
           title: t`Disable always show`,
           body: t`Are you sure you don't want to always show token ${this.props.token.symbol}? If you continue you won't see this token if it has zero balance and you selected to hide zero balance tokens.`,
           handleYes: this.handleToggleAlwaysShow,
         }
-      });
+      };
     } else {
-      this.setState({
+      newState = {
         confirmData: {
           title: t`Enable always show`,
           body: t`Are you sure you want to always show token ${this.props.token.symbol}?`,
           handleYes: this.handleToggleAlwaysShow,
         }
-      });
+      };
     }
-    $('#confirmModal').modal('show');
+
+    this.setState(newState, () => {
+      this.context.showModal(MODAL_TYPES.CONFIRM, {
+        title: this.state.confirmData.title,
+        body: this.state.confirmData.body,
+        handleYes: this.state.confirmData.handleYes,
+      });
+    })
   }
 
   /**
    * Activates or deactivates always show on this token
    */
   handleToggleAlwaysShow = () => {
-    const newValue = !this.state.alwaysShow;
+    const newValue = !wallet.isTokenAlwaysShow(this.props.token.uid);
     wallet.setTokenAlwaysShow(this.props.token.uid, newValue);
-    this.setState({ alwaysShow: newValue });
-    $('#confirmModal').modal('hide');
+    this.context.hideModal();
   }
 
   /**
@@ -161,7 +131,7 @@ class TokenGeneralInfo extends React.Component {
    * @param {string} text Text copied to clipboard
    * @param {*} result Null in case of error
    */
-  copied = (text, result) => {
+  copied = (_text, result) => {
     if (result) {
       // If copied with success
       this.showSuccess(t`Configuration string copied to clipboard!`);
@@ -195,12 +165,12 @@ class TokenGeneralInfo extends React.Component {
           <p className="mt-2 mb-2"><strong>{t`Type:`} </strong>{isNFT ? 'NFT' : 'Custom Token'}</p>
           <p className="mt-2 mb-2"><strong>{t`Name:`} </strong>{this.props.token.name}</p>
           <p className="mt-2 mb-2"><strong>{t`Symbol:`} </strong>{this.props.token.symbol}</p>
-          <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{helpers.renderValue(this.state.totalSupply, isNFT)} {this.props.token.symbol}</p>
-          <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{this.state.canMint ? 'Yes' : 'No'}</p>
+          <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{helpers.renderValue(this.props.totalSupply, isNFT)} {this.props.token.symbol}</p>
+          <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{this.props.canMint ? 'Yes' : 'No'}</p>
           <p className="mb-2 subtitle">{t`Indicates whether the token owner can create new tokens, increasing the total supply`}</p>
-          <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{this.state.canMelt ? 'Yes' : 'No'}</p>
+          <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{this.props.canMelt ? 'Yes' : 'No'}</p>
           <p className="mb-2 subtitle">{t`Indicates whether the token owner can destroy tokens, decreasing the total supply`}</p>
-          <p className="mt-2 mb-4"><strong>{t`Total number of transactions:`} </strong>{this.state.transactionsCount}</p>
+          <p className="mt-2 mb-4"><strong>{t`Total number of transactions:`} </strong>{this.props.transactionsCount}</p>
           {this.props.showAlwaysShowTokenCheckbox && renderAlwaysShowTokenCheckbox()}
         </div>
       );
@@ -210,7 +180,7 @@ class TokenGeneralInfo extends React.Component {
       return (
         <p className="mt-2 mb-4">
           <strong>{t`Always show this token:`}</strong> {
-          this.state.alwaysShow
+          wallet.isTokenAlwaysShow(this.props.token.uid)
             ? <span>{t`Yes`}</span>
             : <span>{t`No`}</span>
         }
@@ -249,7 +219,6 @@ class TokenGeneralInfo extends React.Component {
           {this.props.showConfigString && renderConfigString()}
         </div>
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
       </div>
     )
   }

@@ -431,7 +431,15 @@ export function* handleTx(action) {
   }
 
   // find tokens affected by the transaction
-  const balances = yield call(wallet.getTxBalance.bind(wallet), tx);
+  const affectedTokens = new Set();
+
+  for (const output of tx.outputs) {
+    affectedTokens.add(output.token);
+  }
+
+  for (const input of tx.inputs) {
+    affectedTokens.add(input.token);
+  }
   const stateTokens = yield select((state) => state.tokens);
   const registeredTokens = stateTokens.map((token) => token.uid);
 
@@ -457,7 +465,7 @@ export function* handleTx(action) {
 
   // We should download the **balance** and **history** for every token involved
   // in the transaction
-  for (const [tokenUid] of Object.entries(balances)) {
+  for (const tokenUid of affectedTokens) {
     if (registeredTokens.indexOf(tokenUid) === -1) {
       continue;
     }

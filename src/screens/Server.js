@@ -9,7 +9,6 @@ import React from 'react';
 import { t } from 'ttag';
 import SpanFmt from '../components/SpanFmt';
 import $ from 'jquery';
-import version from '../utils/version';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
 import ReactLoading from 'react-loading';
@@ -20,8 +19,8 @@ import {
   DEFAULT_WALLET_SERVICE_WS_SERVERS,
 } from '../constants';
 import colors from '../index.scss';
-import ModalAlert from '../components/ModalAlert';
 import { connect } from "react-redux";
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
 const mapStateToProps = (state) => {
   return {
@@ -37,6 +36,8 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class Server extends React.Component {
+  static contextType = GlobalModalContext;
+
   constructor(props) {
     super(props);
 
@@ -48,7 +49,6 @@ class Server extends React.Component {
      * selectedServer {string} Server that the user wants to connect
      * selectedWsServer {string} Websocket Server that the user wants to connect (only used when on the wallet-service facade)
      * selectedNetwork {string} Network that the user wants to connect
-     * testnetError {string} Message to be shown in case of error when changing to a testnet server.
      */
     this.state = {
       newServer: false,
@@ -58,18 +58,17 @@ class Server extends React.Component {
       selectedServer: '',
       selectedWsServer: '',
       selectedNetwork: null,
-      testnetError: '',
     }
   }
 
   componentDidMount = () => {
     $('#requestErrorModal').on('hidden.bs.modal', (e) => {
-      this.setState({ loading: false });
+      this.setState({
+        loading: false,
+      });
     });
 
     $('#alertModal').on('hidden.bs.modal', (e) => {
-      this.setState({ testnetError: '' });
-      this.refs.testnetTest.value = '';
     });
   }
 
@@ -176,7 +175,9 @@ class Server extends React.Component {
         if (this.props.useWalletService) {
           this.props.wallet.changeWsServer(currentWsServer);
         }
-        $('#alertModal').modal('show');
+        this.context.showModal(MODAL_TYPES.CONFIRM_TESTNET, {
+          success: this.confirmTestnetServer,
+        });
         this.setState({ loading: false });
       } else {
         // We are on mainnet, so set the network on the singleton and storage
@@ -195,15 +196,11 @@ class Server extends React.Component {
   }
 
   /**
-   * Method called when user confirms that wants to connect to a testnet server
-   * Validate that the user has written 'testnet' on the input and then execute the change
+   * Method called when user confirms that wants to connect to a testnet server and
+   * we successfully validated that the user has written 'testnet' on the input
+   * so we can execute the change
    */
   confirmTestnetServer = () => {
-    if (this.refs.testnetTest.value.toLowerCase() !== 'testnet') {
-      this.setState({ testnetError: t`Invalid value.` });
-      return;
-    }
-
     this.props.wallet.changeServer(this.state.selectedServer);
     if (this.props.useWalletService) {
       hathorLib.config.setWalletServiceBaseWsUrl(this.state.selectedWsServer);
@@ -213,11 +210,11 @@ class Server extends React.Component {
     hathorLib.config.setNetwork(this.state.selectedNetwork);
     // Store on localStorage
     helpers.updateNetwork(this.state.selectedNetwork);
-    $('#alertModal').on('hidden.bs.modal', (e) => {
-      this.setState({ loading: true });
-      this.executeServerChange();
+    this.context.hideModal();
+    this.setState({
+      loading: true,
     });
-    $('#alertModal').modal('hide');
+    this.executeServerChange();
   }
 
   /**
@@ -310,25 +307,6 @@ class Server extends React.Component {
       return mapServerToOption(DEFAULT_WALLET_SERVICE_WS_SERVERS);
     };
 
-    const renderConfirmBody = () => {
-      return (
-        <div>
-          <p><SpanFmt>{t`The selected server connects you to a testnet. Beware if someone asked you to do it, the **tokens from testnet have no value**. Only continue if you know what you are doing.`}</SpanFmt></p>
-          <p>{t`To continue with the server change you must type 'testnet' in the box below and click on 'Connect to testnet' button.`}</p>
-          <div ref="testnetWrapper" className="mt-2 d-flex flex-row align-items-center">
-            <input type="text" ref="testnetTest" className="form-control col-4" />
-            <span className="text-danger ml-2">{this.state.testnetError}</span>
-          </div>
-        </div>
-      );
-    }
-
-    const renderSecondaryModalButton = () => {
-      return (
-        <button onClick={this.confirmTestnetServer} type="button" className="btn btn-secondary">{t`Connect to testnet`}</button>
-      );
-    }
-
     return (
       <div className="content-wrapper">
         <p><strong>{t`Select one of the default servers to connect or choose a new one`}</strong></p>
@@ -386,12 +364,6 @@ class Server extends React.Component {
           {this.state.loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
         </div>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
-        <ModalAlert
-          title={t`Confirm testnet server`}
-          body={renderConfirmBody()}
-          buttonName={t`Cancel change`}
-          handleButton={() => $('#alertModal').modal('hide')}
-          secondaryButton={renderSecondaryModalButton()} />
       </div>
     )
   }

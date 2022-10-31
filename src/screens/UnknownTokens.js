@@ -14,11 +14,11 @@ import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
 import TokenBar from '../components/TokenBar';
-import ModalAddManyTokens from '../components/ModalAddManyTokens';
 import BackButton from '../components/BackButton';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actions';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_HISTORY_COUNT } from '../constants';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
 import Loading from '../components/Loading';
@@ -45,6 +45,8 @@ const mapDispatchToProps = (dispatch) => ({
  * @memberof Screens
  */
 class UnknownTokens extends React.Component {
+  static contextType = GlobalModalContext;
+
   constructor(props) {
     super(props);
 
@@ -138,7 +140,10 @@ class UnknownTokens extends React.Component {
    * Triggered when user clicks to do a bulk import
    */
   massiveImport = () => {
-    $('#addManyTokensModal').modal('show');
+    this.context.showModal(MODAL_TYPES.ADD_MANY_TOKENS, {
+      success: this.massiveImportSuccess,
+      tokensBalance: this.props.tokensBalance,
+    });
   }
 
   /**
@@ -147,7 +152,7 @@ class UnknownTokens extends React.Component {
    * @param {number} count Quantity of tokens that were added
    */
   massiveImportSuccess = (count) => {
-    $('#addManyTokensModal').modal('hide');
+    this.context.hideModal();
     const message = `${count} ${hathorLib.helpers.plural(count, 'token was', 'tokens were')} added!`;
     this.setState({ successMessage: message }, () => {
       this.refs.alertSuccess.show(3000);
@@ -292,7 +297,6 @@ class UnknownTokens extends React.Component {
         <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
         <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
         {unknownTokens && renderTokens()}
-        <ModalAddManyTokens success={this.massiveImportSuccess} tokensBalance={this.props.tokensBalance} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
         <TokenBar {...this.props}  />
       </div>

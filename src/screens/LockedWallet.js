@@ -14,6 +14,7 @@ import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { resolveLockWalletPromise, startWalletRequested } from '../actions';
 import colors from '../index.scss';
 
@@ -37,6 +38,8 @@ const mapDispatchToProps = dispatch => {
  * @memberof Screens
  */
 class LockedWallet extends React.Component {
+  static contextType = GlobalModalContext;
+
   constructor(props) {
     super(props);
 
@@ -109,14 +112,17 @@ class LockedWallet extends React.Component {
    */
   resetClicked = (e) => {
     e.preventDefault();
-    $('#confirmResetModal').modal('show');
+    this.context.showModal(MODAL_TYPES.RESET_ALL_DATA, {
+      success: this.handleReset,
+    });
   }
 
   /**
    * When reset modal validates, then execute method to reset all data from the wallet and redirect to Welcome screen
    */
   handleReset = () => {
-    $('#confirmResetModal').modal('hide');
+    this.context.hideModal();
+
     wallet.resetWalletData();
     this.props.history.push('/welcome/');
   }
@@ -148,7 +154,6 @@ class LockedWallet extends React.Component {
             </div>
           </div>
         </div>
-        <ModalResetAllData success={this.handleReset} />
         <RequestErrorModal {...this.props} />
       </div>
     )

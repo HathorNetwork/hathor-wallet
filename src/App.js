@@ -271,13 +271,6 @@ const returnDefaultComponent = (Component, props) => {
           <Navigation {...props}/>
           <Component {...props} />
           <RequestErrorModal {...props} />
-           {/* At first I added this ModalAlert in the Version component (where I think it should be)
-             * however this component is inside the Navigation component, that has position fixed.
-             * The bootstrap modal does not work fine inside a wrapper with position fixed
-             * so the backdrop was being rendered above the modal.
-             * That's why the best solution was to add this modal here (so I can use in all screens that have the Navigation)
-             */}
-          <ModalAlert title='Software wallet warning' body={<SoftwareWalletWarningMessage />} buttonName='Ok' id='softwareWalletWarningModal' />
         </div>
       );
     }

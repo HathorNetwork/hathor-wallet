@@ -185,7 +185,6 @@ msgstr ""
 msgid "ipfs://..."
 msgstr ""
 
-#: src/components/ModalEditToken.js:87
 #: src/screens/CreateNFT.js:293
 #: src/screens/CreateToken.js:264
 msgid "Short name"
@@ -196,7 +195,6 @@ msgstr ""
 msgid "MyCoin"
 msgstr ""
 
-#: src/components/ModalEditToken.js:90
 #: src/screens/CreateNFT.js:297
 #: src/screens/CreateToken.js:268
 msgid "Symbol"
@@ -1113,7 +1111,6 @@ msgstr ""
 #: src/components/ModalAddManyTokens.js:219
 #: src/components/ModalAddToken.js:171
 #: src/components/ModalBackupWords.js:201
-#: src/components/ModalEditToken.js:95
 #: src/components/ModalSendTx.js:196
 #: src/components/ModalUnregisteredTokenInfo.js:113
 #: src/components/tokens/TokenAction.js:145
@@ -1232,19 +1229,6 @@ msgstr ""
 msgid ""
 "To make sure you saved, please select the word that corresponds to the "
 "number below."
-msgstr ""
-
-#: src/components/ModalEditToken.js:78
-msgid "Edit token"
-msgstr ""
-
-#: src/components/ModalEditToken.js:84
-#, javascript-format
-msgid "You are editing the token with uid **(${ this.props.token.uid })**"
-msgstr ""
-
-#: src/components/ModalEditToken.js:96
-msgid "Save"
 msgstr ""
 
 #: src/components/ModalLedgerResetTokenSignatures.js:110

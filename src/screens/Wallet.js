@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
 import { get } from 'lodash';
@@ -17,9 +16,6 @@ import SpanFmt from '../components/SpanFmt';
 import WalletHistory from '../components/WalletHistory';
 import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
-import ModalBackupWords from '../components/ModalBackupWords';
-import ModalConfirm from '../components/ModalConfirm';
-import ModalLedgerSignToken from '../components/ModalLedgerSignToken';
 import TokenBar from '../components/TokenBar';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import TokenAdministrative from '../components/TokenAdministrative';
@@ -30,6 +26,7 @@ import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
 import colors from '../index.scss';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import {
   updateWords,
   tokenFetchHistoryRequested,
@@ -45,11 +42,9 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-
 const mapStateToProps = (state) => {
   return {
     selectedToken: state.selectedToken,
-    entireState: state,
     tokensHistory: state.tokensHistory,
     tokensBalance: state.tokensBalance,
     tokens: state.tokens,
@@ -65,6 +60,8 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class Wallet extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * backupDone {boolean} if words backup was already done
    * successMessage {string} Message to be shown on alert success
@@ -75,43 +72,113 @@ class Wallet extends React.Component {
     successMessage: '',
     hasTokenSignature: false,
     shouldShowAdministrativeTab: false,
+    totalSupply: null,
+    canMint: false,
+    canMelt: false,
+    transactionsCount: null,
+    mintCount: null,
+    meltCount: null,
   };
-
-  // Reference for the TokenGeneralInfo component
-  generalInfoRef = React.createRef();
-
-  // Reference for the TokenAdministrative component
-  administrativeRef = React.createRef();
 
   // Reference for the unregister confirm modal
   unregisterModalRef = React.createRef();
 
-  componentDidMount = () => {
+  componentDidMount = async () => {
     this.setState({
       backupDone: hathorLib.wallet.isBackupDone()
     });
 
-    $('#wallet-div').on('show.bs.tab', 'a[data-toggle="tab"]', (e) => {
-      // On tab show we reload token data from the server for each component
-      if (e.target.id === 'token-tab') {
-        this.generalInfoRef.current.updateTokenInfo();
-      } else if (e.target.id === 'administrative-tab') {
-        this.administrativeRef.current.updateTokenInfo();
-      }
-    });
-
-    // First time the screen is mounted we must also check if we should show administrative tab
-    this.shouldShowAdministrativeTab(this.props.selectedToken);
+    this.initializeWalletScreen();
   }
 
-  componentWillReceiveProps(nextProps) {
-    const signature = tokens.getTokenSignature(nextProps.selectedToken);
-    this.setState({hasTokenSignature: !!signature});
-
-    // the selected token changed
-    if (this.props.selectedToken !== nextProps.selectedToken) {
-      this.shouldShowAdministrativeTab(nextProps.selectedToken);
+  componentDidUpdate(prevProps) {
+    // the selected token changed, we should re-initialize the screen
+    if (this.props.selectedToken !== prevProps.selectedToken) {
+      this.initializeWalletScreen();
     }
+
+    // if the new selected token history changed, we should fetch the token details again
+    const prevTokenHistory = get(prevProps.tokensHistory, this.props.selectedToken, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      updatedAt: -1,
+      data: [],
+    });
+    const currentTokenHistory = get(this.props.tokensHistory, this.props.selectedToken, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      updatedAt: -1,
+      data: [],
+    });
+
+    if (prevTokenHistory.updatedAt !== currentTokenHistory.updatedAt) {
+      this.updateTokenInfo();
+      this.updateWalletInfo();
+    }
+  }
+
+  /**
+   * Resets the state data and triggers token information requests
+   */
+  async initializeWalletScreen() {
+    this.shouldShowAdministrativeTab(this.props.selectedToken);
+    const signature = tokens.getTokenSignature(this.props.selectedToken);
+
+    this.setState({
+      hasTokenSignature: !!signature,
+      totalSupply: null,
+      canMint: false,
+      canMelt: false,
+      transactionsCount: null,
+      shouldShowAdministrativeTab: false,
+    });
+
+    // No need to download token info and wallet info if the token is hathor
+    if (this.props.selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+      return;
+    }
+
+    await this.updateTokenInfo();
+    await this.updateWalletInfo();
+  }
+
+  /**
+   * Update token state after didmount or props update
+   */
+  updateWalletInfo = async () => {
+    const tokenUid = this.props.selectedToken;
+    const mintUtxos = await this.props.wallet.getMintAuthority(tokenUid, { many: true });
+    const meltUtxos = await this.props.wallet.getMeltAuthority(tokenUid, { many: true });
+
+    // The user might have changed token while we are downloading, we should ignore
+    if (this.props.selectedToken !== tokenUid) {
+      return;
+    }
+
+    const mintCount = mintUtxos.length;
+    const meltCount = meltUtxos.length;
+
+    this.setState({
+      mintCount,
+      meltCount,
+    });
+  }
+
+  async updateTokenInfo() {
+    const tokenUid = this.props.selectedToken;
+    const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
+
+    // The user might have changed token while we are downloading, we should ignore
+    if (this.props.selectedToken !== tokenUid) {
+      return;
+    }
+
+    const { totalSupply, totalTransactions, authorities } = tokenDetails;
+
+    this.setState({
+      totalSupply,
+      canMint: authorities.mint,
+      canMelt: authorities.melt,
+      transactionsCount: totalTransactions,
+    });
   }
 
   /**
@@ -121,15 +188,20 @@ class Wallet extends React.Component {
    */
   backupClicked = (e) => {
     e.preventDefault();
-    $('#backupWordsModal').modal('show');
+
+    this.context.showModal(MODAL_TYPES.BACKUP_WORDS, {
+      needPassword: true,
+      validationSuccess: this.backupSuccess,
+    });
   }
 
   /**
    * Called when the backup of words was done with success, then close the modal and show alert success
    */
   backupSuccess = () => {
-    $('#backupWordsModal').modal('hide');
+    this.context.hideModal();
     hathorLib.wallet.markBackupAsDone();
+
     this.props.updateWords(null);
     this.setState({ backupDone: true, successMessage: t`Backup completed!` }, () => {
       this.refs.alertSuccess.show(3000);
@@ -140,14 +212,28 @@ class Wallet extends React.Component {
    * Called when user clicks to unregister the token, then opens the modal
    */
   unregisterClicked = () => {
-    $('#unregisterModal').modal('show');
+    this.context.showModal(MODAL_TYPES.CONFIRM, {
+      ref: this.unregisterModalRef,
+      modalID: 'unregisterModal',
+      title: t`Unregister token`,
+      body: this.getUnregisterBody(),
+      handleYes: this.unregisterConfirmed,
+    });
   }
 
   /**
    * Called when user clicks to sign the token, then opens the modal
    */
   signClicked = () => {
-    $('#signTokenDataModal').modal('show');
+    const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
+
+    if (hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed()) {
+      this.context.showModal(MODAL_TYPES.LEDGER_SIGN_TOKEN, {
+        token,
+        modalId: 'signTokenDataModal',
+        cb: this.updateTokenSignature,
+      })
+    }
   }
 
   /**
@@ -158,7 +244,7 @@ class Wallet extends React.Component {
     try {
       await tokens.unregisterToken(tokenUid);
       wallet.setTokenAlwaysShow(tokenUid, false); // Remove this token from "always show"
-      $('#unregisterModal').modal('hide');
+      this.context.hideModal();
     } catch (e) {
       this.unregisterModalRef.current.updateErrorMessage(e.message);
     }
@@ -195,16 +281,23 @@ class Wallet extends React.Component {
     this.props.history.push('/addresses/');
   }
 
+  // Trigger a render when we sign a token
+  updateTokenSignature = (value) => {
+    this.setState({
+      hasTokenSignature: value,
+    });
+  }
+
   retryDownload = (e, tokenId) => {
     e.preventDefault();
     const balanceStatus = get(
       this.props.tokensBalance,
-      `${tokenId}.status`,
+      `${this.props.selectedToken}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
     const historyStatus = get(
       this.props.tokensHistory,
-      `${tokenId}.status`,
+      `${this.props.selectedToken}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
 
@@ -219,8 +312,31 @@ class Wallet extends React.Component {
     }
   }
 
+  getUnregisterBody() {
+    const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
+    if (token === undefined) return null;
+
+    return (
+      <div>
+        <p><SpanFmt>{t`Are you sure you want to unregister the token **${token.name} (${token.symbol})**?`}</SpanFmt></p>
+        <p>{t`You won't lose your tokens, you just won't see this token on the side bar anymore.`}</p>
+      </div>
+    )
+  }
+
   render() {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
+    const tokenHistory = get(this.props.tokensHistory, this.props.selectedToken, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: [],
+    });
+    const tokenBalance = get(this.props.tokensBalance, this.props.selectedToken, {
+      status: TOKEN_DOWNLOAD_STATUS.LOADING,
+      data: {
+        available: 0,
+        locked: 0,
+      },
+    });
 
     const renderBackupAlert = () => {
       return (
@@ -266,18 +382,6 @@ class Wallet extends React.Component {
       }
     }
 
-    const renderContentAdmin = () => {
-      if (this.state.shouldShowAdministrativeTab) {
-        return (
-          <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
-            <TokenAdministrative key={this.props.selectedToken} token={token} ref={this.administrativeRef} />
-          </div>
-        );
-      } else {
-        return null;
-      }
-    }
-
     const renderTokenData = (token) => {
       if (hathorLib.tokens.isHathorToken(this.props.selectedToken)) {
         return renderWallet();
@@ -298,24 +402,38 @@ class Wallet extends React.Component {
                 {renderWallet()}
               </div>
               <div className="tab-pane fade" id="token" role="tabpanel" aria-labelledby="token-tab">
-                <TokenGeneralInfo token={token} showConfigString={true} errorMessage={this.state.errorMessage} ref={this.generalInfoRef} showAlwaysShowTokenCheckbox={true} />
+                <TokenGeneralInfo
+                  token={token}
+                  showConfigString={true}
+                  errorMessage={this.state.errorMessage}
+                  showAlwaysShowTokenCheckbox={true}
+                  totalSupply={this.state.totalSupply}
+                  canMint={this.state.canMint}
+                  canMelt={this.state.canMelt}
+                  transactionsCount={this.state.transactionsCount}
+                />
               </div>
-              {renderContentAdmin()}
+              {
+                this.shouldShowAdministrativeTab && (
+                  <div className="tab-pane fade" id="administrative" role="tabpanel" aria-labelledby="administrative-tab">
+                    <TokenAdministrative
+                      key={this.props.selectedToken}
+                      token={token}
+                      totalSupply={this.state.totalSupply}
+                      canMint={this.state.canMint}
+                      canMelt={this.state.canMelt}
+                      mintCount={this.state.mintCount}
+                      meltCount={this.state.meltCount}
+                      tokenBalance={tokenBalance}
+                      transactionsCount={this.state.transactionsCount}
+                    />
+                  </div>
+                )
+              }
             </div>
           </div>
         );
       }
-    }
-
-    const getUnregisterBody = () => {
-      if (token === undefined) return null;
-
-      return (
-        <div>
-          <p><SpanFmt>{t`Are you sure you want to unregister the token **${token.name} (${token.symbol})**?`}</SpanFmt></p>
-          <p>{t`You won't lose your tokens, you just won't see this token on the side bar anymore.`}</p>
-        </div>
-      )
     }
 
     const renderSignTokenIcon = () => {
@@ -329,18 +447,6 @@ class Wallet extends React.Component {
     }
 
     const renderUnlockedWallet = () => {
-      const tokenHistory = get(this.props.tokensHistory, this.props.selectedToken, {
-        status: TOKEN_DOWNLOAD_STATUS.LOADING,
-        data: [],
-      });
-      const tokenBalance = get(this.props.tokensBalance, this.props.selectedToken, {
-        status: TOKEN_DOWNLOAD_STATUS.LOADING,
-        data: {
-          locked: 0,
-          available: 0
-        }
-      });
-
       let template;
       if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING
           || tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
@@ -396,11 +502,6 @@ class Wallet extends React.Component {
       );
     }
 
-    // Trigger a render when we sign a token
-    const updateTokenSignature = (value) => {
-      this.setState({hasTokenSignature: value});
-    }
-
     return (
       <div id="wallet-div">
         {!this.state.backupDone && renderBackupAlert()}
@@ -415,10 +516,7 @@ class Wallet extends React.Component {
           {renderUnlockedWallet()}
         </div>
         <TokenBar {...this.props} />
-        <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
         <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
-        <ModalConfirm ref={this.unregisterModalRef} modalID="unregisterModal" title={t`Unregister token`} body={getUnregisterBody()} handleYes={this.unregisterConfirmed} />
-        {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && <ModalLedgerSignToken token={token} modalId="signTokenDataModal" cb={updateTokenSignature} />}
       </div>
     );
   }

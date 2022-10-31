@@ -8,11 +8,11 @@
 import React from 'react';
 import { t } from 'ttag'
 
-import ModalConfirm from '../components/ModalConfirm';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
 
 /**
@@ -21,6 +21,8 @@ import hathorLib from '@hathor/wallet-lib';
  * @memberof Screens
  */
 class ChoosePassphrase extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * errorMessage {string} Message to show when error happens on the form
    * firstStep {boolean} If should show the first step of the form, or the second one
@@ -31,7 +33,7 @@ class ChoosePassphrase extends React.Component {
    * Method called after confirming modal that changes addresses in the wallet and redirects to the main wallet screen
    */
   handlePassphrase = () => {
-    $('#confirmModal').modal('hide');
+    this.context.hideModal();
     wallet.addPassphrase(this.refs.passphrase.value, this.refs.pin.value, this.refs.password.value, this.props.history);
     this.props.history.push('/wallet/');
   }
@@ -67,7 +69,15 @@ class ChoosePassphrase extends React.Component {
 
       this.setState({ errorMessage: '' });
       // Everything is fine, so show confirm modal
-      $('#confirmModal').modal('show');
+      this.context.showModal(MODAL_TYPES.CONFIRM, {
+        title: t`Set a passphrase`,
+        handleYes: this.handlePassphrase,
+        body: (
+          <div>
+            <p>{t`Are you sure you want to change your whole wallet setting this passphrase?`}</p>
+          </div>
+        )
+      });
     } else {
       this.refs.passphraseForm.classList.add('was-validated')
     }
@@ -99,14 +109,6 @@ class ChoosePassphrase extends React.Component {
   }
 
   render() {
-    const getModalBody = () => {
-      return (
-        <div>
-          <p>{t`Are you sure you want to change your whole wallet setting this passphrase?`}</p>
-        </div>
-      )
-    }
-
     const renderFirstForm = () => {
       return (
         <form ref="confirmForm" className="w-100">
@@ -158,7 +160,6 @@ class ChoosePassphrase extends React.Component {
               <button onClick={this.continueClicked} type="button" className="btn btn-hathor mt-5">{t`Continue`}</button> :
               <button onClick={this.addClicked} type="button" className="btn btn-hathor mt-5">{t`Confirm`}</button>}
         </div>
-        <ModalConfirm title={t`Set a passphrase`} body={getModalBody()} handleYes={this.handlePassphrase} />
       </div>
     )
   }
