@@ -56,7 +56,7 @@ it('renders with the specified placeholder text', () => {
 
   // Get the element
   const passInput = screen.getByPlaceholderText(placeholderText);
-  expect(passInput instanceof HTMLElement).toStrictEqual(true);
+  expect(passInput).toBeInstanceOf(HTMLElement);
 });
 
 it('renders with the specified message', () => {
@@ -201,6 +201,53 @@ it('ensures the field pattern is applied', async () => {
   expect(passInput.checkValidity()).toStrictEqual(true);
 });
 
+it('validates password confirmation on button click', async () => {
+  expect.assertions();
+
+  const successHandler = jest.fn();
+  // Render the element
+  act(() => {
+    render(
+      <PinPasswordWrapper
+        message={(<div/>)}
+        success={successHandler}
+        back={jest.fn()}
+        handleChange={jest.fn()}
+        field={`Password`}
+        button={`Next`}
+        pattern={'[0-9]+'} // Only numbers are allowed
+      />,
+      container
+    )
+  });
+
+  // Get the elements
+  const nextButton = screen.getByText('Next');
+  const passInput = screen.getByPlaceholderText('Password');
+  const confirmPassInput = screen.getByPlaceholderText(/^Confirm/);
+
+  // Fill password field with invalid data and click
+  await userEvent.type(passInput, 'abc');
+  await userEvent.click(nextButton);
+  expect(passInput.parentElement.classList).toContain('was-validated');
+  expect(successHandler).not.toHaveBeenCalled();
+
+  // Fill confirmation field with invalid data and click
+  await userEvent.clear(passInput);
+  await userEvent.type(passInput, '123');
+  await userEvent.type(confirmPassInput, 'abc');
+  expect(passInput.parentElement.classList).toContain('was-validated');
+  expect(successHandler).not.toHaveBeenCalled();
+
+  // Fill both with valid data, but not matching
+  await userEvent.clear(confirmPassInput);
+  await userEvent.type(confirmPassInput, '321');
+  await userEvent.click(nextButton);
+  expect(passInput.parentElement.classList).not.toContain('was-validated');
+  expect(screen.getByText('Both fields must be equal')).toBeInstanceOf(HTMLElement);
+  expect(successHandler).not.toHaveBeenCalled();
+});
+
 it('calls success handler method on button click', async () => {
   expect.assertions();
 
@@ -226,22 +273,9 @@ it('calls success handler method on button click', async () => {
   const passInput = screen.getByPlaceholderText('Password');
   const confirmPassInput = screen.getByPlaceholderText(/^Confirm/);
 
-  // Fill with invalid data and click
-  await userEvent.type(passInput, 'abc');
-  await userEvent.click(nextButton);
-  expect(passInput.parentElement.classList).toContain('was-validated');
-  expect(successHandler).not.toHaveBeenCalled();
-
-  // Fill with correct data, but with invalid confirmation and click
-  await userEvent.clear(passInput);
   await userEvent.type(passInput, '123');
-  await userEvent.click(nextButton);
-  expect(passInput.parentElement.classList).toContain('was-validated');
-  expect(successHandler).not.toHaveBeenCalled();
-
-  // Confirm with correct data and click
   await userEvent.type(confirmPassInput, '123');
   await userEvent.click(nextButton);
   expect(passInput.parentElement.classList).not.toContain('was-validated');
   expect(successHandler).toHaveBeenCalledTimes(1);
-})
+});
