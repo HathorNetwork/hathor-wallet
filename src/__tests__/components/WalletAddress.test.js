@@ -18,23 +18,20 @@ jest.mock('../../components/ModalAddressQRCode', () => () => {
 
 // Mocking the underlying hathor wallet to better manage the tests
 let oldWallet;
-beforeAll(() => {
-  oldWallet = hathorLib.wallet;
-  hathorLib.wallet = {
-    isSoftwareWallet: () => true,
-    isHardwareWallet: () => false
-  }
-});
-
-afterAll(() => {
-  hathorLib.wallet = oldWallet;
-});
 
 let container = null;
 beforeEach(() => {
   // setup a DOM element as a render target
   container = document.createElement("div");
   document.body.appendChild(container);
+
+  // Mock the oldWallet object
+  oldWallet = hathorLib.wallet;
+  hathorLib.wallet = {
+    isHardwareWallet: () => false
+  }
+  hathorLib.wallet.isSoftwareWallet =
+    () => !hathorLib.wallet.isHardwareWallet()
 });
 
 afterEach(() => {
@@ -42,6 +39,9 @@ afterEach(() => {
   unmountComponentAtNode(container);
   container.remove();
   container = null;
+
+  // Revert mocked oldWallet
+  hathorLib.wallet = oldWallet;
 });
 
 describe('rendering tests', () => {
@@ -64,12 +64,17 @@ describe('rendering tests', () => {
       />,
       container);
 
+    // Ensure we found the full address text
     const elements = screen.getAllByText(sampleAddress);
-    expect(elements).toHaveProperty('length'); // Just to know we've found something
+    expect(elements).toHaveProperty('length');
+
+    // No obscured addresses on screen
+    const obscuredAddress = `${sampleAddress.substring(0, 10)}...`
+    const element = screen.queryByText(obscuredAddress);
+    expect(element).toBeNull();
   });
 
   it('renders the correct address on a hardware wallet', () => {
-    hathorLib.wallet.isSoftwareWallet = () => false;
     hathorLib.wallet.isHardwareWallet = () => true;
 
     render(
@@ -80,10 +85,43 @@ describe('rendering tests', () => {
       />,
       container);
 
+    // Ensure the address is obscured
     const obscuredAddress = `${sampleAddress.substring(0, 10)}...`
+    const obscuredElement = screen.getByText(obscuredAddress);
+    expect(obscuredElement instanceof HTMLElement).toStrictEqual(true);
 
-    const element = screen.getByText(obscuredAddress);
+    // Ensure we found the full address text only on protected ledger modal
+    const clearElement = screen.getByText(sampleAddress);
+    expect(clearElement).toHaveProperty('id', 'ledgerComparisonAddress');
+  });
+
+  it('renders the "see all addresses" option on a software wallet', () => {
+    render(
+      <WalletAddress
+        goToAllAddresses={jest.fn()}
+        lastSharedAddress={sampleAddress}
+        lastSharedIndex={''}
+      />,
+      container);
+
+    // Ensure we found the full address text
+    const element = screen.getByText('See all addresses');
     expect(element instanceof HTMLElement).toStrictEqual(true);
   });
 
+  it('does not render the "see all addresses" option on a hardware wallet', () => {
+    hathorLib.wallet.isHardwareWallet = () => true;
+
+    render(
+      <WalletAddress
+        goToAllAddresses={jest.fn()}
+        lastSharedAddress={sampleAddress}
+        lastSharedIndex={''}
+      />,
+      container);
+
+    // Ensure we found the full address text
+    const element = screen.queryByText('See all addresses');
+    expect(element).toBeNull();
+  });
 });
