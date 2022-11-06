@@ -90,9 +90,9 @@ describe('rendering tests', () => {
     const obscuredElement = screen.getByText(obscuredAddress);
     expect(obscuredElement instanceof HTMLElement).toStrictEqual(true);
 
-    // Ensure we found the full address text only on protected ledger modal
-    const clearElement = screen.getByText(sampleAddress);
-    expect(clearElement).toHaveProperty('id', 'ledgerComparisonAddress');
+    // Ensure the full address text is not shown
+    const clearElement = screen.queryByText(sampleAddress);
+    expect(clearElement).toBeNull();
   });
 
   it('renders the "see all addresses" option on a software wallet', () => {
