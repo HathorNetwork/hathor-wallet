@@ -14,8 +14,9 @@
       }
     },
     "coverageReporters": [
-      "html",
-      "text"
+      "text-summary",
+      "lcov",
+      "clover"
     ]
   },
   "productName": "Hathor Wallet",
