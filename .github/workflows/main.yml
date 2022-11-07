@@ -35,6 +35,10 @@ jobs:
       run: make check_po
     - name: i18n
       run: make i18n
+    - name: Unit tests
+      run: npm tun test -- --coverage
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
     - name: Start
       run: npm start & npx wait-on http://localhost:3000
       env:

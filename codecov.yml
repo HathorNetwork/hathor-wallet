@@ -1,0 +1,20 @@
+codecov:
+  branch: dev
+
+coverage:
+  status:
+    project:
+      default:
+        # minimum coverage ratio that the commit must meet to be considered a success
+        target: 0% # tests are below 1% at the moment
+        if_ci_failed: error
+        only_pulls: true
+    patch:
+      default:
+        # minimum coverage ratio that the commit must meet to be considered a success
+        target: 70%
+        if_ci_failed: error
+        only_pulls: true
+
+github_checks:
+  annotations: true
