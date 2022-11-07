@@ -36,7 +36,7 @@ jobs:
     - name: i18n
       run: make i18n
     - name: Unit tests
-      run: npm tun test -- --coverage
+      run: npm run test -- --coverage
     - name: Upload coverage
       uses: codecov/codecov-action@v3
     - name: Start
