@@ -25,13 +25,19 @@ beforeEach(() => {
   container = document.createElement("div");
   document.body.appendChild(container);
 
-  // Mock the oldWallet object
+  // Replace the oldWallet object with a mock focused on validating wallet type
   oldWallet = hathorLib.wallet;
-  hathorLib.wallet = {
-    isHardwareWallet: () => false
-  }
-  hathorLib.wallet.isSoftwareWallet =
-    () => !hathorLib.wallet.isHardwareWallet()
+  hathorLib.wallet = (() => {
+    let walletType = 'software';
+
+    return {
+      /** @param {'software'|'hardware'} type */
+      setMockType: (type) => walletType = type,
+
+      isHardwareWallet: () => walletType === 'hardware',
+      isSoftwareWallet: () => walletType === 'software',
+    }
+  })()
 });
 
 afterEach(() => {
@@ -75,7 +81,7 @@ describe('rendering tests', () => {
   });
 
   it('renders the correct address on a hardware wallet', () => {
-    hathorLib.wallet.isHardwareWallet = () => true;
+    hathorLib.wallet.setMockType("hardware")
 
     render(
       <WalletAddress
@@ -110,7 +116,7 @@ describe('rendering tests', () => {
   });
 
   it('does not render the "see all addresses" option on a hardware wallet', () => {
-    hathorLib.wallet.isHardwareWallet = () => true;
+    hathorLib.wallet.setMockType('hardware')
 
     render(
       <WalletAddress
