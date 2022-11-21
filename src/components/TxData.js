@@ -25,7 +25,8 @@ import helpers from '../utils/helpers';
 const mapStateToProps = (state) => {
   return {
     tokens: state.tokens,
-    tokenMetadata: state.tokenMetadata || {}
+    tokenMetadata: state.tokenMetadata || {},
+    wallet: state.wallet,
   };
 };
 
@@ -53,6 +54,7 @@ class TxData extends React.Component {
     children: false,
     tokens: [],
     tokenClicked: null,
+    walletAddressesMap: {},
   };
 
   // Array of token uid that was already found to show the symbol
@@ -61,6 +63,7 @@ class TxData extends React.Component {
   componentDidMount = () => {
     this.calculateTokens();
     this.updateGraphs();
+    this.fetchWalletAddressesMap();
   }
 
   /**
@@ -91,6 +94,26 @@ class TxData extends React.Component {
         document.getElementById('graph-verification').appendChild(element);
       });
     });
+  }
+
+  fetchWalletAddressesMap = async () => {
+    const inputs = this.props.transaction.inputs;
+    const outputs = this.props.transaction.outputs;
+
+    const addresses = [
+      ...inputs.map((input) => input.decoded.address),
+      ...outputs.map((output) => output.decoded.address),
+    ];
+
+    try {
+      const walletAddressesMap = await this.props.wallet.checkAddressesMine(addresses);
+      this.setState({
+        walletAddressesMap,
+      });
+    } catch(_e) {
+      // If the request fails for some reason, the only side effect is that we won't display the badge
+      // indicating that the address belongs to the user wallet. I think it is safe to ignore it.
+    }
   }
 
   /**
@@ -277,6 +300,10 @@ class TxData extends React.Component {
     this.props.history.push('/wallet/');
   }
 
+  isAddressMine = (address) => {
+    return address in this.state.walletAddressesMap;
+  }
+
   render() {
     const renderBlockOrTransaction = () => {
       if (hathorLib.helpers.isBlock(this.props.transaction)) {
@@ -292,7 +319,7 @@ class TxData extends React.Component {
       return inputs.map((input, idx) => {
         return (
           <div key={`${input.tx_id}${input.index}`}>
-            <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && hathorLib.wallet.isAddressMine(input.decoded.address) && renderAddressBadge()}
+            <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && this.isAddressMine(input.decoded.address) && renderAddressBadge()}
             {renderOutput(input, 0, false)}
           </div>
         );
@@ -330,7 +357,7 @@ class TxData extends React.Component {
     const renderOutput = (output, idx, addBadge) => {
       return (
         <div key={idx}>
-          <div>{outputValue(output)} {renderOutputToken(output)} {output.decoded && addBadge && hathorLib.wallet.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
+          <div>{outputValue(output)} {renderOutputToken(output)} {output.decoded && addBadge && this.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
           <div>
             {renderDecodedScript(output)}
             {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>{t`Spent`}</Link>)</span> : ''}
