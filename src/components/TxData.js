@@ -301,7 +301,10 @@ class TxData extends React.Component {
   }
 
   isAddressMine = (address) => {
-    return address in this.state.walletAddressesMap;
+    return (
+      address in this.state.walletAddressesMap
+      && this.state.walletAddressesMap[address]
+    );
   }
 
   render() {
