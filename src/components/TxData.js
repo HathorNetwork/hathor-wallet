@@ -15,6 +15,7 @@ import SpanFmt from './SpanFmt';
 import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
 import { selectToken } from '../actions/index';
 import { connect } from "react-redux";
+import { get } from 'lodash';
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
 import hathorLib from '@hathor/wallet-lib';
@@ -100,9 +101,19 @@ class TxData extends React.Component {
     const inputs = this.props.transaction.inputs;
     const outputs = this.props.transaction.outputs;
 
+    const addressWithoutUndecoded = (acc, io) => {
+      const address = get(io, 'decoded.address');
+
+      if (!address) {
+        return acc;
+      }
+
+      return [...acc, address];
+    };
+
     const addresses = [
-      ...inputs.map((input) => input.decoded.address),
-      ...outputs.map((output) => output.decoded.address),
+      ...inputs.reduce(addressWithoutUndecoded, []),
+      ...outputs.reduce(addressWithoutUndecoded, []),
     ];
 
     try {
