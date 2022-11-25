@@ -101,7 +101,7 @@ class TxData extends React.Component {
     const inputs = this.props.transaction.inputs;
     const outputs = this.props.transaction.outputs;
 
-    const addressWithoutUndecoded = (acc, io) => {
+    const getDecodedAddresses = (acc, io) => {
       const address = get(io, 'decoded.address');
 
       if (!address) {
@@ -112,8 +112,8 @@ class TxData extends React.Component {
     };
 
     const addresses = [
-      ...inputs.reduce(addressWithoutUndecoded, []),
-      ...outputs.reduce(addressWithoutUndecoded, []),
+      ...inputs.reduce(getDecodedAddresses, []),
+      ...outputs.reduce(getDecodedAddresses, []),
     ];
 
     try {
