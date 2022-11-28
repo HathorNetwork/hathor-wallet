@@ -21,6 +21,7 @@ import { useSelector } from 'react-redux';
  */
 function Navigation() {
   const useAtomicSwap = useSelector(state => state.useAtomicSwap);
+  const fullNodeVersionData = useSelector(state => state.fullNodeVersionData);
 
   /**
    * Method called when user clicked on Explorer menu
@@ -30,6 +31,18 @@ function Navigation() {
   const goToExplorer = (e) => {
     e.preventDefault();
     helpers.openExternalURL(helpers.getExplorerURL());
+  }
+
+  const renderNCNavigation = () => {
+    if (fullNodeVersionData.capabilities && fullNodeVersionData.capabilities.indexOf('nano-contract') > -1) {
+      return (
+        <li className="nav-item">
+          <NavLink to="/nano_contract/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Nano Contract`}</NavLink>
+        </li>
+      );
+    }
+
+    return null;
   }
 
   return (
@@ -63,44 +76,16 @@ function Navigation() {
             <li className="nav-item">
               <a className="nav-link" href="true" onClick={goToExplorer}>{t`Public Explorer`}</a>
             </li>
+            {renderNCNavigation()}
           </ul>
           <div className="navbar-right d-flex flex-row align-items-center navigation-search">
             <ServerStatus />
             <Version />
           </div>
-          <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon" />
-          </button>
-          <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav mr-auto">
-              <li className="nav-item">
-                <NavLink to="/wallet/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Wallet`}</NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink to="/wallet/send_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Send tokens`}</NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink to="/custom_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Custom tokens`}</NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink to="/nft/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`NFTs`}</NavLink>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="true" onClick={this.goToExplorer}>{t`Public Explorer`}</a>
-              </li>
-              <li className="nav-item">
-                <NavLink to="/nano_contract/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Nano Contract`}</NavLink>
-              </li>
-            </ul>
-            <div className="navbar-right d-flex flex-row align-items-center navigation-search">
-              <ServerStatus />
-              <Version />
-            </div>
-          </div>
-        </nav>
-      </div>
-    );
-  }
+        </div>
+      </nav>
+    </div>
+  );
 };
 
 export default Navigation;

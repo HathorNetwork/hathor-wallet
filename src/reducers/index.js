@@ -133,6 +133,8 @@ const initialState = {
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
+  // Full node version data from /version API
+  fullNodeVersionData: {},
   nanoContracts: {},
 };
 
@@ -207,6 +209,8 @@ const rootReducer = (state = initialState, action) => {
       return resetSelectedTokenIfNeeded(state, action);
     case 'set_ledger_was_closed':
       return Object.assign({}, state, { ledgerWasClosed: action.payload });
+    case 'set_full_node_version_data':
+      return setFullNodeVersionData(state, action);
     case 'save_nano_contract':
       return onSaveNanoContract(state, action);
     case 'save_nano_contract_history':
@@ -545,6 +549,17 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
 
   return state;
 };
+
+/*
+ * Used when the wallet connects to a new full node and it save the new version data
+*/
+export const setFullNodeVersionData = (state, action) => {
+  return {
+    ...state,
+    fullNodeVersionData: action.payload,
+  };
+};
+
 
 /*
  * Used when registering or creating tokens to update the wallet token list.

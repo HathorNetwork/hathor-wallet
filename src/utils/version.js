@@ -6,7 +6,7 @@
  */
 
 import store from '../store/index';
-import { isVersionAllowedUpdate } from '../actions/index';
+import { isVersionAllowedUpdate, setFullNodeVersionData } from '../actions/index';
 import { FIRST_WALLET_COMPATIBLE_VERSION, LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION } from '../constants';
 import helpers from './helpers';
 import hathorLib from '@hathor/wallet-lib';
@@ -44,6 +44,8 @@ const version = {
         hathorLib.constants.MIN_API_VERSION
       ),
     }));
+
+    store.dispatch(setFullNodeVersionData(data));
 
     // Set network in lib to use the correct address byte
     let network = data.network;

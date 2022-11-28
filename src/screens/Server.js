@@ -23,7 +23,6 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';
 
-
 /**
  * Screen to change the server that the wallet is connected
  *
@@ -156,6 +155,11 @@ function Server() {
 
     try {
       const versionData = await wallet.getVersionData();
+
+      // Store full node version data
+      // We don't set redux state yet because the server change might
+      // not be completed if it's testnet (the user needs to confirm the change in the screen)
+      this.fullNodeVersionData = versionData;
 
       if (versionData.network !== 'mainnet') {
         const network = versionData.network;

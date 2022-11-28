@@ -508,6 +508,13 @@ export const changeWalletState = (newState) => ({
 });
 
 /**
+ * This will set the full node data after we get it from /version API
+ *
+ * @param {Object} data Object with response data from full node /version
+ */
+export const setFullNodeVersionData = data => ({ type: "set_full_node_version_data", payload: data });
+
+/**
  * Save Nano Contract in redux
  *
  * @param {string} id Nano contract id
