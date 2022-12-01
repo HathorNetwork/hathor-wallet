@@ -20,6 +20,7 @@ import {
   race,
   take,
   fork,
+  spawn,
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import STORE from '../storageInstance';
@@ -289,8 +290,11 @@ export function* loadTokens() {
       return [...acc, token.uid];
     }, []);
 
-  // We don't need to wait for the metadatas response, so just fork it
-  yield fork(fetchTokensMetadata, registeredTokens);
+  // We don't need to wait for the metadatas response, so we can just
+  // spawn a new "thread" to handle it.
+  //
+  // `spawn` is similar to `fork`, but it creates a `detached` fork
+  yield spawn(fetchTokensMetadata, registeredTokens);
 
   // Dispatch actions to asynchronously load the balances of each token the wallet has
   // ever interacted with. The `put` effect will just dispatch and continue, loading
