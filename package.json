@@ -7,15 +7,16 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 15,
-        "functions": 5,
-        "lines": 25,
-        "statements": 25
+        "branches": 1,
+        "functions": 2,
+        "lines": 5,
+        "statements": 5
       }
     },
     "coverageReporters": [
-      "html",
-      "text"
+      "text-summary",
+      "lcov",
+      "clover"
     ]
   },
   "productName": "Hathor Wallet",
@@ -62,7 +63,8 @@
     "start": "npm-run-all -p watch-css start-js",
     "build-js": "react-scripts build",
     "build": "npm-run-all build-css build-js",
-    "test": "react-scripts test --env=node",
+    "test": "react-scripts test",
+    "e2e": "cypress run",
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 .",
     "electron-deps": "electron-builder install-app-deps",
@@ -80,10 +82,16 @@
   "devDependencies": {
     "@sentry/browser": "^5.0.5",
     "@sentry/cli": "^1.40.0",
+    "@testing-library/cypress": "^8.0.7",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^12.1.5",
+    "@testing-library/user-event": "^13.5.0",
+    "cypress": "^11.2.0",
     "electron": "13.6.9",
     "electron-builder": "^23.0.3",
     "electron-devtools-installer": "^2.2.4",
     "electron-notarize": "^0.1.1",
+    "eslint-plugin-cypress": "^2.12.1",
     "jsdoc": "^3.6.2",
     "nodemon": "^2.0.0",
     "sass": "^1.52.2",
@@ -123,5 +131,15 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
+  ],
+  "overrides": [
+    {
+      "extends": [
+        "plugin:cypress/recommended"
+      ],
+      "files": [
+        "cypress/**/*.js"
+      ]
+    }
   ]
 }

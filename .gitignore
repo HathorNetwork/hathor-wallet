@@ -6,6 +6,9 @@ src/**/*.css
 
 # testing
 /coverage
+# Cypress
+cypress/screenshots/
+cypress/videos/
 
 # production
 /build

@@ -36,7 +36,7 @@ const mapStateToProps = (state) => {
  *
  * @memberof Components
  */
-class WalletAddress extends React.Component {
+export class WalletAddress extends React.Component {
   static contextType = GlobalModalContext;
 
   componentDidMount() {
@@ -102,7 +102,7 @@ class WalletAddress extends React.Component {
   }
 
   /**
-   * Method called on copy to clipboard success  
+   * Method called on copy to clipboard success
    * Show alert success message
    *
    * @param {string} text Text copied to clipboard
@@ -144,7 +144,7 @@ class WalletAddress extends React.Component {
           {showAddressString()}
           <div className="d-flex flex-row align-items-center">
             <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">{t`Generate new address`} <i className="fa fa-refresh ml-1" title={t`Get new address`}></i></a>
-            {hathorLib.wallet.isSoftwareWallet() &&   // hide the QR code for hardware wallet 
+            {hathorLib.wallet.isSoftwareWallet() &&   // hide the QR code for hardware wallet
               <div>
                 <span className="ml-3 mr-3">|</span>
                 <a href="true" onClick={(e) => this.showQRCode(e)}>{t`QR Code`} <i className="fa fa-qrcode ml-1" title={t`Get qrcode`}></i></a>
