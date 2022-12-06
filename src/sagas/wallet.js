@@ -53,6 +53,7 @@ import {
   storeRouterHistory,
   reloadingWallet,
   tokenInvalidateHistory,
+  sharedAddressUpdate,
 } from '../actions';
 import { specificTypeAndPayload, } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -467,6 +468,15 @@ export function* handleTx(action) {
     }
   }
 
+  // We should refresh the available addresses.
+  // Since we have already received the transaction at this point, the wallet
+  // instance will already have updated its current address, we should just
+  // fetch it and update the redux-store
+  const newAddress = wallet.getCurrentAddress();
+  yield put(sharedAddressUpdate({
+    lastSharedAddress: newAddress.address,
+    lastSharedIndex: newAddress.index,
+  }));
   // We should download the **balance** and **history** for every token involved
   // in the transaction
   for (const tokenUid of affectedTokens) {
