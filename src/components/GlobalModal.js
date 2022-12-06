@@ -75,6 +75,10 @@ export const GlobalModal = ({ children }) => {
     // a bug where the backdrop some times gets stuck even after the
     // modal is closed, we can just remove it:
     $('.modal-backdrop').fadeOut(150);
+
+    // Same problem happens with the class jquery adds to the body,
+    // causing the app to stop scrolling. We can just remove it
+    $('body').removeClass('modal-open');
   };
 
   const showModal = (modalType, modalProps = {}) => {
