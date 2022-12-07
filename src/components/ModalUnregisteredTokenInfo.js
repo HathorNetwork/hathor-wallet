@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { connect } from 'react-redux';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import SpanFmt from './SpanFmt';
@@ -14,6 +15,11 @@ import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import hathorLib from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
 
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+  };
+};
 
 /**
  * Component that shows a modal with information about an unregistered token
@@ -26,21 +32,44 @@ class ModalUnregisteredTokenInfo extends React.Component {
    * errorMessage {String} Message to show in case of an error when registering the token
    * formValidated {boolean} If register form was already validated
    */
-  state = { token: null, errorMessage: '', formValidated: false };
+  state = {
+    errorMessage: '',
+    formValidated: false,
+    totalSupply: 0,
+    canMint: false,
+    canMelt: false,
+    transactionsCount: 0,
+  };
 
   // Reference to the form
   form = React.createRef();
 
   componentDidMount() {
+    console.log('Did mount.');
+    $('#unregisteredTokenInfoModal').modal('show');
+
     $('#unregisteredTokenInfoModal').on('hidden.bs.modal', () => {
       this.setState({ errorMessage: '', formValidated: false });
+      this.props.onClose();
     });
+
+    this.updateTokenInfo();
   }
 
-  componentDidUpdate = (prevProps) => {
-    if (prevProps.token !== this.props.token) {
-      this.setState({ token: this.props.token });
-    }
+  async updateTokenInfo() {
+    const tokenUid = this.props.token.uid;
+    const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
+
+    const { totalSupply, totalTransactions, authorities } = tokenDetails;
+
+    console.log('Token details: ', tokenDetails);
+
+    this.setState({
+      totalSupply,
+      canMint: authorities.mint,
+      canMelt: authorities.melt,
+      transactionsCount: totalTransactions,
+    });
   }
 
   /**
@@ -49,20 +78,24 @@ class ModalUnregisteredTokenInfo extends React.Component {
    * @param {Object} e Event emitted when user clicks the button
    */
   register = (e) => {
-    if (!this.state.token) return;
+    if (!this.props.token) return;
 
     e.preventDefault();
 
     const isValid = this.form.current.checkValidity();
     this.setState({ formValidated: true, errorMessage: '' });
     if (isValid) {
-      const configurationString = hathorLib.tokens.getConfigurationString(this.state.token.uid, this.state.token.name, this.state.token.symbol);
+      const configurationString = hathorLib.tokens.getConfigurationString(
+        this.props.token.uid,
+        this.props.token.name,
+        this.props.token.symbol,
+      );
 
       const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(configurationString, null);
       promise.then((tokenData) => {
         tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
         $('#unregisteredTokenInfoModal').modal('hide');
-        this.props.tokenRegistered(this.state.token);
+        this.props.tokenRegistered(this.props.token);
       }, (e) => {
         this.setState({ errorMessage: e.message });
       });
@@ -71,22 +104,31 @@ class ModalUnregisteredTokenInfo extends React.Component {
 
   render() {
     const renderTokenInfo = () => {
-      return <TokenGeneralInfo token={this.state.token} showConfigString={false} showAlwaysShowTokenCheckbox={false} />;
-    }
+      return (
+        <TokenGeneralInfo
+          token={this.props.token}
+          showConfigString={false}
+          canMint={this.state.canMint}
+          canMelt={this.state.canMelt}
+          transactionsCount={this.state.transactionsCount}
+          totalSupply={this.state.totalSupply}
+          showAlwaysShowTokenCheckbox={false} />
+      );
+    };
 
     const renderHeader = () => {
       return (
         <div className="modal-header">
           <div className="d-flex flex-row">
-            <h5 className="modal-title">{this.state.token.name} ({this.state.token.symbol})</h5>
+            <h5 className="modal-title">{this.props.token.name} ({this.props.token.symbol})</h5>
             <span className='ml-2 unregistered-token-badge'> {t`Unregistered token`} </span>
           </div>
           <button type="button" className="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-      )
-    }
+      );
+    };
 
     const renderModalContent = () => {
       return (
@@ -114,18 +156,17 @@ class ModalUnregisteredTokenInfo extends React.Component {
             </div>
           </div>
       );
-    }
+    };
 
     return (
       <div className="modal fade" id="unregisteredTokenInfoModal" tabIndex="-1" role="dialog" aria-labelledby="unregisteredTokenInfoModal" aria-hidden="true">
         <div className="modal-dialog modal-lg" role="document">
-          {this.state.token && renderModalContent()}
+          {renderModalContent()}
         </div>
       </div>
     )
   }
 }
-
 
 /*
  * token: Token to show general information {name, symbol, uid}
@@ -136,4 +177,4 @@ ModalUnregisteredTokenInfo.propTypes = {
   tokenRegistered: PropTypes.func.isRequired,
 };
 
-export default ModalUnregisteredTokenInfo;
+export default connect(mapStateToProps)(ModalUnregisteredTokenInfo);

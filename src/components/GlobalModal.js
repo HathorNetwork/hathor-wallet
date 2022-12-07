@@ -19,6 +19,7 @@ import ModalResetAllData from './ModalResetAllData';
 import ModalLedgerSignToken from './ModalLedgerSignToken';
 import ModalConfirmTestnet from './ModalConfirmTestnet';
 import ModalSendTx from './ModalSendTx';
+import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
 
 const initialState = {
   showModal: () => {},
@@ -39,6 +40,7 @@ export const MODAL_TYPES = {
   'LEDGER_SIGN_TOKEN': 'LEDGER_SIGN_TOKEN',
   'CONFIRM_TESTNET': 'CONFIRM_TESTNET',
   'SEND_TX': 'SEND_TX',
+  'UNREGISTERED_TOKEN_INFO': 'UNREGISTERED_TOKEN_INFO',
 };
 
 export const MODAL_COMPONENTS = {
@@ -54,6 +56,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.LEDGER_SIGN_TOKEN]: ModalLedgerSignToken,
   [MODAL_TYPES.CONFIRM_TESTNET]: ModalConfirmTestnet,
   [MODAL_TYPES.SEND_TX]: ModalSendTx,
+  [MODAL_TYPES.UNREGISTERED_TOKEN_INFO]: ModalUnregisteredTokenInfo,
 };
 
 export const GlobalModalContext = createContext(initialState);

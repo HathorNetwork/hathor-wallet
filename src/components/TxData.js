@@ -12,7 +12,6 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom'
 import HathorAlert from './HathorAlert';
 import SpanFmt from './SpanFmt';
-import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
 import { selectToken } from '../actions/index';
 import { connect } from "react-redux";
 import { get } from 'lodash';
@@ -21,6 +20,7 @@ import { Module, render } from 'viz.js/full.render.js';
 import hathorLib from '@hathor/wallet-lib';
 import { MAX_GRAPH_LEVEL } from '../constants';
 import helpers from '../utils/helpers';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
 
 const mapStateToProps = (state) => {
@@ -44,6 +44,8 @@ const mapDispatchToProps = dispatch => {
  * @memberof Components
  */
 class TxData extends React.Component {
+  static contextType = GlobalModalContext;
+
   /**
    * raw {boolean} if should show raw transaction
    * children {boolean} if should show children (default is hidden but user can show with a click)
@@ -285,8 +287,13 @@ class TxData extends React.Component {
    */
   showUnregisteredTokenInfo = (e, token) => {
     e.preventDefault();
+
     this.setState({ tokenClicked: token }, () => {
-      $('#unregisteredTokenInfoModal').modal('show');
+      console.log('Showing modal');
+      this.context.showModal(MODAL_TYPES.UNREGISTERED_TOKEN_INFO, {
+        token: this.state.tokenClicked,
+        tokenRegistered: this.tokenRegistered,
+      });
     });
   }
 
@@ -769,7 +776,6 @@ class TxData extends React.Component {
       <div>
         {loadTxData()}
         <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
-        <ModalUnregisteredTokenInfo token={this.state.tokenClicked} tokenRegistered={this.tokenRegistered} />
       </div>
     );
   }
