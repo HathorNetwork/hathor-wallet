@@ -61,7 +61,9 @@ class NewWallet extends React.Component {
       step2: false,
       askPassword: false,
       askPIN: false,
-    }
+    };
+
+    this.alertSuccessRef = React.createRef();
   }
 
   componentDidMount = () => {
@@ -209,7 +211,7 @@ class NewWallet extends React.Component {
           </div>
           <InitialImages />
         </div>
-        <HathorAlert ref="alertSuccess" text={t`Backup completed!`} type="success" />
+        <HathorAlert ref={this.alertSuccessRef} text={t`Backup completed!`} type="success" />
       </div>
     )
   }

@@ -40,6 +40,12 @@ const mapStateToProps = (state) => {
  * @memberof Components
  */
 class TokenAdministrative extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.alertSuccessRef = React.createRef();
+  }
+
   /**
    * mintCount {Number} Quantity of mint authorities available
    * meltCount {Number} Quantity of melt authorities available
@@ -210,7 +216,7 @@ class TokenAdministrative extends React.Component {
         <div className='token-detail-bottom'>
           {renderBottom()}
         </div>
-        <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
+        <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />
       </div>
     )
   }

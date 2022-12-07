@@ -46,6 +46,12 @@ const mapDispatchToProps = dispatch => {
 class TxData extends React.Component {
   static contextType = GlobalModalContext;
 
+  constructor(props) {
+    super(props);
+
+    this.alertCopiedRef = React.createRef();
+  }
+
   /**
    * raw {boolean} if should show raw transaction
    * children {boolean} if should show children (default is hidden but user can show with a click)
@@ -289,7 +295,6 @@ class TxData extends React.Component {
     e.preventDefault();
 
     this.setState({ tokenClicked: token }, () => {
-      console.log('Showing modal');
       this.context.showModal(MODAL_TYPES.UNREGISTERED_TOKEN_INFO, {
         token: this.state.tokenClicked,
         tokenRegistered: this.tokenRegistered,
@@ -775,7 +780,7 @@ class TxData extends React.Component {
     return (
       <div>
         {loadTxData()}
-        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
+        <HathorAlert ref={this.alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
       </div>
     );
   }

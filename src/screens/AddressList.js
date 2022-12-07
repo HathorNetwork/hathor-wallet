@@ -28,6 +28,12 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class AddressList extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.alertErrorRef = React.createRef();
+  }
   /**
    * addresses {Array} All wallet addresses data {'address', 'index', 'numberOfTransactions'}
    * filteredAddresses {Array} addresses state after search
@@ -189,7 +195,7 @@ class AddressList extends React.Component {
           </div>
           {loadPagination()}
         </div>
-        <HathorAlert ref="alertError" text="Invalid address" type="danger" />
+        <HathorAlert ref={this.alertErrorRef} text="Invalid address" type="danger" />
       </div>
     )
   }

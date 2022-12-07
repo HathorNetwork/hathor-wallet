@@ -91,7 +91,6 @@ class WalletType extends React.Component {
         </div>
         {this.props.ledgerClosed &&
           <HathorAlert
-            ref='ledgerClosedAlert'
             type='warning'
             extraClasses='hathor-floating-alert show'
             onDismiss={() => { this.props.updateLedgerClosed(false) }}

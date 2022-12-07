@@ -62,6 +62,12 @@ const mapStateToProps = (state) => {
 class Wallet extends React.Component {
   static contextType = GlobalModalContext;
 
+  constructor(props) {
+    super(props);
+
+    this.alertSuccessRef = React.createRef();
+  }
+
   /**
    * backupDone {boolean} if words backup was already done
    * successMessage {string} Message to be shown on alert success
@@ -204,7 +210,7 @@ class Wallet extends React.Component {
 
     this.props.updateWords(null);
     this.setState({ backupDone: true, successMessage: t`Backup completed!` }, () => {
-      this.refs.alertSuccess.show(3000);
+      this.alertSuccessRef.current.show(3000);
     });
   }
 
@@ -515,8 +521,8 @@ class Wallet extends React.Component {
           <BackButton {...this.props} />
           {renderUnlockedWallet()}
         </div>
-        <TokenBar {...this.props} />
-        <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
+        <TokenBar {...this.props} />,
+        <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />
       </div>
     );
   }

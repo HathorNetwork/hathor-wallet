@@ -91,7 +91,7 @@ export default function TokenGeneralInfo ({
    */
   const showSuccess = (message) => {
     setSuccessMessage(message);
-    // this.refs.alertSuccess.show(3000);
+    alertSuccessRef.current.show(3000);
   };
 
   /**
@@ -106,7 +106,7 @@ export default function TokenGeneralInfo ({
       // If copied with success
       showSuccess(t`Configuration string copied to clipboard!`);
     }
-  }
+  };
 
   if (errorMessage) {
     return (

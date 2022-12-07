@@ -45,7 +45,6 @@ class ModalUnregisteredTokenInfo extends React.Component {
   form = React.createRef();
 
   componentDidMount() {
-    console.log('Did mount.');
     $('#unregisteredTokenInfoModal').modal('show');
 
     $('#unregisteredTokenInfoModal').on('hidden.bs.modal', () => {
@@ -61,8 +60,6 @@ class ModalUnregisteredTokenInfo extends React.Component {
     const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
 
     const { totalSupply, totalTransactions, authorities } = tokenDetails;
-
-    console.log('Token details: ', tokenDetails);
 
     this.setState({
       totalSupply,

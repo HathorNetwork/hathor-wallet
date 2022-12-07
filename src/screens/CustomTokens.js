@@ -35,12 +35,18 @@ const mapStateToProps = (state) => {
 class CustomTokens extends React.Component {
   static contextType = GlobalModalContext;
 
+  constructor(props) {
+    super(props);
+
+    this.alertSuccessRef = React.createRef();
+  }
+
   /**
    * Called when a new token was registered with success, then close the modal and show alert success
    */
   newTokenSuccess = () => {
     this.context.hideModal();
-    this.refs.alertSuccess.show(1000);
+    this.alertSuccessRef.current.show(1000);
   }
 
   /**
@@ -88,7 +94,7 @@ class CustomTokens extends React.Component {
           { NFT_ENABLED && <button className="btn btn-hathor mr-4" onClick={this.createNFTClicked}>{t`Create an NFT`}</button> }
           <button className="btn btn-hathor" onClick={this.registerTokenClicked}>{t`Register a token`}</button>
         </div>
-        <HathorAlert ref="alertSuccess" text={t`Token registered with success!`} type="success" />
+        <HathorAlert ref={this.alertSuccessRef} text={t`Token registered with success!`} type="success" />
       </div>
     );
   }

@@ -39,6 +39,13 @@ const mapStateToProps = (state) => {
 export class WalletAddress extends React.Component {
   static contextType = GlobalModalContext;
 
+  constructor(props) {
+    super(props);
+
+    this.alertCopiedRef = React.createRef();
+    this.alertErrorRef = React.createRef();
+  }
+
   componentDidMount() {
     if (IPC_RENDERER) {
       IPC_RENDERER.on("ledger:address", (event, arg) => {
@@ -67,7 +74,7 @@ export class WalletAddress extends React.Component {
     const address = this.props.wallet.getNextAddress();
 
     if (address.address === this.props.lastSharedAddress) {
-      this.refs.alertError.show(3000);
+      this.alertErrorRef.current.show(3000);
     } else {
       this.props.sharedAddressUpdate({
         lastSharedAddress: address.address,
@@ -108,10 +115,10 @@ export class WalletAddress extends React.Component {
    * @param {string} text Text copied to clipboard
    * @param {*} result Null in case of error
    */
-  copied = (text, result) => {
+  copied = (_text, result) => {
     if (result) {
       // If copied with success
-      this.refs.alertCopied.show(1000);
+      this.alertCopiedRef.current.show(1000);
     }
   }
 
@@ -184,8 +191,8 @@ export class WalletAddress extends React.Component {
       <div>
         {renderAddress()}
 
-        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
-        <HathorAlert ref="alertError" text={t`You must use an old address before generating new ones`} type="danger" />
+        <HathorAlert ref={this.alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
+        <HathorAlert ref={this.alertErrorRef} text={t`You must use an old address before generating new ones`} type="danger" />
       </div>
     );
   }

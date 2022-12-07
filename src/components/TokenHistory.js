@@ -44,6 +44,11 @@ const mapStateToProps = (state, props) => {
  * @memberof Components
  */
 class TokenHistory extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.alertCopiedRef = React.createRef();
+  }
   /**
    * hasAfter {boolean} if should activate 'Next' button in pagination
    * hasBefore {boolean} if should activate 'Previous' button in pagination
@@ -172,10 +177,10 @@ class TokenHistory extends React.Component {
    * @param {string} text Text copied to clipboard
    * @param {*} result Null in case of error
    */
-  copied = (text, result) => {
+  copied = (_text, result) => {
     if (result) {
       // If copied with success
-      this.refs.alertCopied.show(1000);
+      this.alertCopiedRef.current.show(1000);
     }
   }
 
@@ -322,7 +327,7 @@ class TokenHistory extends React.Component {
         {this.props.tokenHistory.status === TOKEN_DOWNLOAD_STATUS.READY && renderHistory()}
         {this.props.tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING && renderLoading()}
 
-        <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
+        <HathorAlert ref={this.alertCopiedRef} text="Copied to clipboard!" type="success" />
       </div>
     );
   }

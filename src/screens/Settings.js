@@ -35,6 +35,12 @@ const mapStateToProps = (state) => {
 class Settings extends React.Component {
   static contextType = GlobalModalContext;
 
+  constructor(props) {
+    super(props);
+
+    this.alertCopiedRef = React.createRef();
+  }
+
   /**
    * confirmData {Object} data for the notification confirm modal (title, body and handleYes)
    * isNotificationOne {boolean} state to update if notification is turned on or off
@@ -327,7 +333,7 @@ class Settings extends React.Component {
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
         </div>
-        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
+        <HathorAlert ref={this.alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
       </div>
     );
   }
