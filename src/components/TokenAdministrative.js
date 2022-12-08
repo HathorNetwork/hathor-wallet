@@ -80,8 +80,8 @@ class TokenAdministrative extends React.Component {
    */
   showSuccess = (message) => {
     this.setState({ successMessage: message }, () => {
-      this.refs.alertSuccess.show(3000);
-    })
+      this.alertSuccessRef.current.show(3000);
+    });
   }
 
   /**
