@@ -51,7 +51,7 @@ class TokenDelegate extends React.Component {
       type.toLowerCase(),
       this.delegateAddress.current.value,
       {
-        createAnother: this.delegateCreateAnother.current.checked,
+        createAnotherAuthority: this.delegateCreateAnother.current.checked,
         pinCode: pin,
       }
     );
