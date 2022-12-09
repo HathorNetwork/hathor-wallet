@@ -13,7 +13,6 @@ import hathorLib from '@hathor/wallet-lib';
 import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
-import TokenBar from '../components/TokenBar';
 import BackButton from '../components/BackButton';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actions';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
@@ -300,7 +299,6 @@ class UnknownTokens extends React.Component {
         <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
         {unknownTokens && renderTokens()}
         <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />
-        <TokenBar {...this.props}  />
       </div>
     );
   }
