@@ -28,6 +28,8 @@ const HathorAlert = forwardRef(({ text, onDismiss, type, extraClasses }, ref) =>
     }
   }, [onDismiss]);
 
+  // This allows us to customize the exported ref, more details in 
+  // https://reactjs.org/docs/hooks-reference.html#useimperativehandle
   useImperativeHandle(ref, () => ({
     show: (duration) => {
       setShow(true);
