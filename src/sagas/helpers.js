@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { put, race, take } from 'redux-saga/effects';
+import { put, call, race, take } from 'redux-saga/effects';
 
 /**
  * Helper method to be used on take saga effect, will wait until an action
@@ -47,4 +47,22 @@ export function* dispatchAndWait(action, successAction, failureAction) {
     success: take(successAction),
     falure: take(failureAction),
   });
+}
+
+/**
+ * Handles errors thrown from the main saga (started with call) by yielding
+ * an action passed as a parameter
+ *
+ * @param action - The action to call
+ * @param failureAction - Yields this action (with put) if the main action throws
+ */
+export function errorHandler(saga, failureAction) {
+  return function* handleAction(action) {
+    try {
+      yield call(saga, action);
+    } catch (e) {
+      console.error(`Captured error handling ${action.type}`, e);
+      yield put(failureAction);
+    }
+  };
 }

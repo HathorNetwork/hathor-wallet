@@ -55,7 +55,7 @@ import {
   reloadingWallet,
   tokenInvalidateHistory,
 } from '../actions';
-import { specificTypeAndPayload, } from './helpers';
+import { specificTypeAndPayload, errorHandler } from './helpers';
 import { fetchTokenData } from './tokens';
 import walletHelpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
@@ -609,7 +609,7 @@ export function* walletReloading() {
 
 export function* saga() {
   yield all([
-    takeLatest(types.START_WALLET_REQUESTED, startWallet),
+    takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
     takeLatest('WALLET_RELOADING', walletReloading),
     takeEvery('WALLET_NEW_TX', handleTx),
