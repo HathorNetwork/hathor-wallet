@@ -188,6 +188,12 @@ export function* startWallet(action) {
   // Thread to listen for feature flags from Unleash
   const featureFlagsThread = yield fork(listenForFeatureFlags, featureFlags);
 
+  const threads = [
+    walletListenerThread,
+    walletReadyThread,
+    featureFlagsThread
+  ];
+
   try {
     const serverInfo = yield call(wallet.start.bind(wallet), {
       pinCode: pin,
@@ -215,19 +221,16 @@ export function* startWallet(action) {
       // the feature flag
       yield call(featureFlags.ignoreWalletServiceFlag.bind(featureFlags));
 
-      // Restart the whole bundle to make sure we clear all events
-      walletHelpers.reloadElectron();
+      // Cleanup all listeners
+      yield cancel(threads);
+
+      // Yield the same action so it will now load on the old facade
+      yield put(action);
     }
   }
 
   // Wallet start called, we need to show the loading addresses screen
   routerHistory.replace('/loading_addresses');
-
-  const threads = [
-    walletListenerThread,
-    walletReadyThread,
-    featureFlagsThread
-  ];
 
   // Wallet might be already ready at this point
   if (!wallet.isReady()) {
