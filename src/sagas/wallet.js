@@ -51,6 +51,7 @@ import {
   walletStateError,
   walletStateReady,
   storeRouterHistory,
+  reloadWalletRequested,
   reloadingWallet,
   tokenInvalidateHistory,
 } from '../actions';
@@ -212,7 +213,6 @@ export function* startWallet(action) {
       version,
       network: networkName,
     }));
-
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from
@@ -264,10 +264,21 @@ export function* startWallet(action) {
   // another saga (using the `fork` effect), it will remain active until all
   // the forks are terminated. You can read more details at
   // https://redux-saga.js.org/docs/advanced/ForkModel
-  // So, if a new START_WALLET_REQUESTED action is dispatched, we need to cleanup
-  // all attached forks (that will cause the event listeners to be cleaned).
-  yield take(types.START_WALLET_REQUESTED);
+  // So, if a new START_WALLET_REQUESTED action is dispatched or a RELOAD_WALLET_REQUESTED
+  // is dispatched, we need to cleanup all attached forks (that will cause the event
+  // listeners to be cleaned).
+  const { reload } = yield race({
+    start: take(types.START_WALLET_REQUESTED),
+    reload: take(types.RELOAD_WALLET_REQUESTED),
+  });
+
+  // We need to cancel threads on both reload and start
   yield cancel(threads);
+
+  if (reload) {
+    // Yield the same action again to reload the wallet
+    yield put(action);
+  }
 }
 
 /**
@@ -380,7 +391,7 @@ export function* listenForFeatureFlags(featureFlags) {
       const oldUseWalletService = yield select((state) => state.useWalletService);
 
       if (oldUseWalletService && oldUseWalletService !== newUseWalletService) {
-        walletHelpers.reloadElectron();
+        yield put(reloadWalletRequested());
       }
     }
   } finally {
