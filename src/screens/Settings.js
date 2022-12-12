@@ -279,7 +279,7 @@ class Settings extends React.Component {
   copied = (text, result) => {
     if (result) {
       // If copied with success
-      this.refs.alertCopied.show(1000);
+      this.alertCopiedRef.current.show(1000);
     }
   }
 

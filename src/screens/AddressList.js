@@ -114,7 +114,7 @@ class AddressList extends React.Component {
         this.setState({ filtered: true, filteredAddresses: [], totalPages: 1, page: 1 });
       } else {
         // Invalid address
-        this.refs.alertError.show(3000);
+        this.alertErrorRef.current.show(3000);
       }
     } else {
       if (this.state.filtered) {
