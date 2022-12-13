@@ -521,7 +521,7 @@ class Wallet extends React.Component {
           <BackButton {...this.props} />
           {renderUnlockedWallet()}
         </div>
-        <TokenBar {...this.props} />,
+        <TokenBar {...this.props} />
         <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />
       </div>
     );
