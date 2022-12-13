@@ -32,7 +32,7 @@ export default function TokenBar () {
   const tokens = useSelector((state) => state.tokens);
   const allTokens = useSelector((state) => state.allTokens);
   const selectedToken = useSelector((state) => state.selectedToken);
-  const tokensBalance= useSelector((state) => state.tokensBalance);
+  const tokensBalance = useSelector((state) => state.tokensBalance);
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
 
   // If the current route is not in the whitelist, we should not render the tokenbar
