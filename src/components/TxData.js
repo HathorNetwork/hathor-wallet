@@ -21,6 +21,7 @@ import hathorLib from '@hathor/wallet-lib';
 import { MAX_GRAPH_LEVEL } from '../constants';
 import helpers from '../utils/helpers';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import Loading from '../components/Loading';
 
 
 const mapStateToProps = (state) => {
@@ -61,6 +62,7 @@ class TxData extends React.Component {
   state = {
     raw: false,
     children: false,
+    unregisteredLoading: false,
     tokens: [],
     tokenClicked: null,
     walletAddressesMap: {},
@@ -222,7 +224,7 @@ class TxData extends React.Component {
   copied = (text, result) => {
     if (result) {
       // If copied with success
-      this.refs.alertCopied.show(1000);
+      this.alertCopiedRef.current.show(1000);
     }
   }
 
@@ -294,11 +296,25 @@ class TxData extends React.Component {
   showUnregisteredTokenInfo = (e, token) => {
     e.preventDefault();
 
-    this.setState({ tokenClicked: token }, () => {
+    this.setState({
+      tokenClicked: token,
+      unregisteredLoading: true,
+    }, async () => {
+      const tokenDetails = await this.props.wallet.getTokenDetails(token.uid);
+
+      const { totalSupply, totalTransactions, authorities } = tokenDetails;
+
       this.context.showModal(MODAL_TYPES.UNREGISTERED_TOKEN_INFO, {
         token: this.state.tokenClicked,
         tokenRegistered: this.tokenRegistered,
+        totalSupply,
+        canMint: authorities.mint,
+        canMelt: authorities.melt,
+        transactionsCount: totalTransactions,
+        tokenMetadata: this.props.tokenMetadata,
       });
+
+      this.setState({ unregisteredLoading: false });
     });
   }
 
@@ -594,7 +610,20 @@ class TxData extends React.Component {
         if (token.uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
           return <span>token.uid</span>;
         } else if (token.unknown) {
-          return <a href="true" onClick={(e) => this.showUnregisteredTokenInfo(e, token)}>{token.uid}</a>
+          return (
+            <div className="unregistered-token-loading-wrapper">
+              <a href="true" onClick={(e) => this.showUnregisteredTokenInfo(e, token)}>
+                {token.uid}
+              </a>
+              {this.state.unregisteredLoading && (
+                <Loading
+                  type='spin'
+                  width={16}
+                  height={16}
+                  delay={200} />
+              )}
+            </div>
+          )
         } else {
           return <a href="true" onClick={(e) => this.registeredTokenClicked(e, token)}>{token.uid}</a>
         }

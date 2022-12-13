@@ -6,14 +6,11 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { t } from 'ttag';
 import QRCode from 'qrcode.react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import hathorLib from '@hathor/wallet-lib';
 import HathorAlert from '../components/HathorAlert';
-import helpers from '../utils/helpers';
-import { get } from 'lodash';
 import wallet from "../utils/wallet";
 import { useGlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import TokenInfoBox from './TokenInfoBox';
@@ -31,13 +28,13 @@ export default function TokenGeneralInfo ({
   canMint,
   canMelt,
   transactionsCount,
+  tokenMetadata,
   totalSupply,
   showConfigString,
   errorMessage,
 }) {
   const [successMessage, setSuccessMessage]  = useState('');
 
-  const tokenMetadata = useSelector((state) => state.tokenMetadata);
   const context = useGlobalModalContext();
 
   const alertSuccessRef = useRef();

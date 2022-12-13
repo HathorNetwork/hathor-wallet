@@ -47,6 +47,7 @@ const mapStateToProps = (state) => {
     selectedToken: state.selectedToken,
     tokensHistory: state.tokensHistory,
     tokensBalance: state.tokensBalance,
+    tokenMetadata: state.tokenMetadata || {},
     tokens: state.tokens,
     wallet: state.wallet,
     useWalletService: state.useWalletService,
@@ -417,6 +418,7 @@ class Wallet extends React.Component {
                   canMint={this.state.canMint}
                   canMelt={this.state.canMelt}
                   transactionsCount={this.state.transactionsCount}
+                  tokenMetadata={this.props.tokenMetadata}
                 />
               </div>
               {

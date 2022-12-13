@@ -7,19 +7,12 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { connect } from 'react-redux';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import SpanFmt from './SpanFmt';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import hathorLib from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
-
-const mapStateToProps = (state) => {
-  return {
-    wallet: state.wallet,
-  };
-};
 
 /**
  * Component that shows a modal with information about an unregistered token
@@ -35,10 +28,6 @@ class ModalUnregisteredTokenInfo extends React.Component {
   state = {
     errorMessage: '',
     formValidated: false,
-    totalSupply: 0,
-    canMint: false,
-    canMelt: false,
-    transactionsCount: 0,
   };
 
   // Reference to the form
@@ -50,22 +39,6 @@ class ModalUnregisteredTokenInfo extends React.Component {
     $('#unregisteredTokenInfoModal').on('hidden.bs.modal', () => {
       this.setState({ errorMessage: '', formValidated: false });
       this.props.onClose();
-    });
-
-    this.updateTokenInfo();
-  }
-
-  async updateTokenInfo() {
-    const tokenUid = this.props.token.uid;
-    const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
-
-    const { totalSupply, totalTransactions, authorities } = tokenDetails;
-
-    this.setState({
-      totalSupply,
-      canMint: authorities.mint,
-      canMelt: authorities.melt,
-      transactionsCount: totalTransactions,
     });
   }
 
@@ -105,10 +78,11 @@ class ModalUnregisteredTokenInfo extends React.Component {
         <TokenGeneralInfo
           token={this.props.token}
           showConfigString={false}
-          canMint={this.state.canMint}
-          canMelt={this.state.canMelt}
-          transactionsCount={this.state.transactionsCount}
-          totalSupply={this.state.totalSupply}
+          canMint={this.props.canMint}
+          canMelt={this.props.canMelt}
+          transactionsCount={this.props.transactionsCount}
+          tokenMetadata={this.props.tokenMetadata}
+          totalSupply={this.props.totalSupply}
           showAlwaysShowTokenCheckbox={false} />
       );
     };
@@ -172,6 +146,11 @@ class ModalUnregisteredTokenInfo extends React.Component {
 ModalUnregisteredTokenInfo.propTypes = {
   token: PropTypes.object,
   tokenRegistered: PropTypes.func.isRequired,
+  canMelt: PropTypes.bool,
+  canMint: PropTypes.bool,
+  transactionsCount: PropTypes.number,
+  tokenMetadata: PropTypes.object,
+  totalSupply: PropTypes.number,
 };
 
-export default connect(mapStateToProps)(ModalUnregisteredTokenInfo);
+export default ModalUnregisteredTokenInfo;
