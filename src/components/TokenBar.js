@@ -29,6 +29,7 @@ export default function TokenBar () {
   const history = useHistory();
   const location = useLocation();
 
+  // These are all tokens that are currently registered on the wallet
   const tokens = useSelector((state) => state.tokens);
   const allTokens = useSelector((state) => state.allTokens);
   const selectedToken = useSelector((state) => state.selectedToken);
