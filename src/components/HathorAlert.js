@@ -12,6 +12,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Component to show an alert on the bottom right corner of the screen
@@ -58,5 +59,12 @@ const HathorAlert = forwardRef(({ text, onDismiss, type, extraClasses }, ref) =>
     </div>
   );
 });
+
+HathorAlert.propTypes = {
+  text: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+  onDismiss: PropTypes.func,
+  extraClasses: PropTypes.string,
+};
 
 export default HathorAlert;
