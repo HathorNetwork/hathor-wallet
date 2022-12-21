@@ -11,7 +11,6 @@ import ReactDOM from 'react-dom';
 import ErrorWrapper from './ErrorWrapper';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { GlobalModal } from './components/GlobalModal';
-import TokenBar from './components/TokenBar';
 
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -25,7 +24,6 @@ ReactDOM.render(
   <Provider store={store}>
     <GlobalModal>
       <Router>
-        <TokenBar />
         <Route path="/" component={ErrorWrapper} />
       </Router>
     </GlobalModal>
