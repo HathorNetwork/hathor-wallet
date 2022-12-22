@@ -61,7 +61,7 @@ class WalletVersionError extends React.Component {
     this.context.hideModal();
     hathorLib.wallet.markBackupAsDone();
     this.props.updateWords(null);
-    this.alertSuccess.current.show(3000);
+    this.alertSuccessRef.current.show(3000);
   }
 
   /**
