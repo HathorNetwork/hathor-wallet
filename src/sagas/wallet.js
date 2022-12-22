@@ -189,6 +189,8 @@ export function* startWallet(action) {
   // Thread to listen for feature flags from Unleash
   const featureFlagsThread = yield fork(listenForFeatureFlags, featureFlags);
 
+  // Keep track of the forked threads so we can cancel them later. We are currently
+  // using this to start the startWallet saga again during a reload
   const threads = [
     walletListenerThread,
     walletReadyThread,
