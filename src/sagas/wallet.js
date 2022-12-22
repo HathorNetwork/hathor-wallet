@@ -227,6 +227,10 @@ export function* startWallet(action) {
 
       // Yield the same action so it will now load on the old facade
       yield put(action);
+
+      // takeLatest will stop running the generator if a new START_WALLET_REQUESTED
+      // action is dispatched, but returning so the code is clearer
+      return;
     }
   }
 
