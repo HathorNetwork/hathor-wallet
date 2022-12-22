@@ -107,8 +107,12 @@ export function* startWallet(action) {
     dispatch = _dispatch;
   });
 
-  let wallet, connection;
+  // If we've lost redux data, we could not properly stop the wallet object
+  // then we don't know if we've cleaned up the wallet data in the storage
+  // If it's fromXpriv, then we can't clean access data because we need that
+  oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv });
 
+  let wallet, connection;
   if (useWalletService) {
     let xpriv = null;
 
@@ -143,11 +147,6 @@ export function* startWallet(action) {
     wallet = new HathorWalletServiceWallet(walletConfig);
     connection = wallet.conn;
   } else {
-    // If we've lost redux data, we could not properly stop the wallet object
-    // then we don't know if we've cleaned up the wallet data in the storage
-    // If it's fromXpriv, then we can't clean access data because we need that
-    oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
-
     let xpriv = null;
 
     if (fromXpriv) {
