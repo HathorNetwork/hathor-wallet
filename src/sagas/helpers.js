@@ -53,7 +53,7 @@ export function* dispatchAndWait(action, successAction, failureAction) {
  * Handles errors thrown from the main saga (started with call) by yielding
  * an action passed as a parameter
  *
- * @param action - The action to call
+ * @param saga - The saga to call (synchronously)
  * @param failureAction - Yields this action (with put) if the main action throws
  */
 export function errorHandler(saga, failureAction) {
