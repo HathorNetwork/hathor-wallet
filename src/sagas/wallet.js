@@ -51,10 +51,11 @@ import {
   walletStateError,
   walletStateReady,
   storeRouterHistory,
+  reloadWalletRequested,
   reloadingWallet,
   tokenInvalidateHistory,
 } from '../actions';
-import { specificTypeAndPayload, } from './helpers';
+import { specificTypeAndPayload, errorHandler } from './helpers';
 import { fetchTokenData } from './tokens';
 import walletHelpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
@@ -106,8 +107,12 @@ export function* startWallet(action) {
     dispatch = _dispatch;
   });
 
-  let wallet, connection;
+  // If we've lost redux data, we could not properly stop the wallet object
+  // then we don't know if we've cleaned up the wallet data in the storage
+  // If it's fromXpriv, then we can't clean access data because we need that
+  oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv });
 
+  let wallet, connection;
   if (useWalletService) {
     let xpriv = null;
 
@@ -142,11 +147,6 @@ export function* startWallet(action) {
     wallet = new HathorWalletServiceWallet(walletConfig);
     connection = wallet.conn;
   } else {
-    // If we've lost redux data, we could not properly stop the wallet object
-    // then we don't know if we've cleaned up the wallet data in the storage
-    // If it's fromXpriv, then we can't clean access data because we need that
-    oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
-
     let xpriv = null;
 
     if (fromXpriv) {
@@ -188,6 +188,14 @@ export function* startWallet(action) {
   // Thread to listen for feature flags from Unleash
   const featureFlagsThread = yield fork(listenForFeatureFlags, featureFlags);
 
+  // Keep track of the forked threads so we can cancel them later. We are currently
+  // using this to start the startWallet saga again during a reload
+  const threads = [
+    walletListenerThread,
+    walletReadyThread,
+    featureFlagsThread
+  ];
+
   try {
     const serverInfo = yield call(wallet.start.bind(wallet), {
       pinCode: pin,
@@ -206,7 +214,6 @@ export function* startWallet(action) {
       version,
       network: networkName,
     }));
-
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from
@@ -215,19 +222,20 @@ export function* startWallet(action) {
       // the feature flag
       yield call(featureFlags.ignoreWalletServiceFlag.bind(featureFlags));
 
-      // Restart the whole bundle to make sure we clear all events
-      walletHelpers.reloadElectron();
+      // Cleanup all listeners
+      yield cancel(threads);
+
+      // Yield the same action so it will now load on the old facade
+      yield put(action);
+
+      // takeLatest will stop running the generator if a new START_WALLET_REQUESTED
+      // action is dispatched, but returning so the code is clearer
+      return;
     }
   }
 
   // Wallet start called, we need to show the loading addresses screen
   routerHistory.replace('/loading_addresses');
-
-  const threads = [
-    walletListenerThread,
-    walletReadyThread,
-    featureFlagsThread
-  ];
 
   // Wallet might be already ready at this point
   if (!wallet.isReady()) {
@@ -261,10 +269,21 @@ export function* startWallet(action) {
   // another saga (using the `fork` effect), it will remain active until all
   // the forks are terminated. You can read more details at
   // https://redux-saga.js.org/docs/advanced/ForkModel
-  // So, if a new START_WALLET_REQUESTED action is dispatched, we need to cleanup
-  // all attached forks (that will cause the event listeners to be cleaned).
-  yield take(types.START_WALLET_REQUESTED);
+  // So, if a new START_WALLET_REQUESTED action is dispatched or a RELOAD_WALLET_REQUESTED
+  // is dispatched, we need to cleanup all attached forks (that will cause the event
+  // listeners to be cleaned).
+  const { reload } = yield race({
+    start: take(types.START_WALLET_REQUESTED),
+    reload: take(types.RELOAD_WALLET_REQUESTED),
+  });
+
+  // We need to cancel threads on both reload and start
   yield cancel(threads);
+
+  if (reload) {
+    // Yield the same action again to reload the wallet
+    yield put(action);
+  }
 }
 
 /**
@@ -377,7 +396,7 @@ export function* listenForFeatureFlags(featureFlags) {
       const oldUseWalletService = yield select((state) => state.useWalletService);
 
       if (oldUseWalletService && oldUseWalletService !== newUseWalletService) {
-        walletHelpers.reloadElectron();
+        yield put(reloadWalletRequested());
       }
     }
   } finally {
@@ -595,7 +614,7 @@ export function* walletReloading() {
 
 export function* saga() {
   yield all([
-    takeLatest(types.START_WALLET_REQUESTED, startWallet),
+    takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
     takeLatest('WALLET_RELOADING', walletReloading),
     takeEvery('WALLET_NEW_TX', handleTx),
