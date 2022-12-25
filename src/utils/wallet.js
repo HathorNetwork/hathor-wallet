@@ -35,7 +35,7 @@ import {
   tokens,
   metadataApi,
 } from '@hathor/wallet-lib';
-import { chunk } from 'lodash';
+import { chunk, get } from 'lodash';
 import helpers from '../utils/helpers';
 
 let Sentry = null;
@@ -328,7 +328,7 @@ const wallet = {
       const tokenUid = registeredObject.uid;
 
       // If there is no entry for this token on tokensBalance, generate an empty balance object.
-      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
+      const balance = get(tokensBalance, `${tokenUid}.data`, { available: 0, locked: 0 });
       const tokenData = {
         ...registeredObject,
         balance: balance,
@@ -337,6 +337,7 @@ const wallet = {
       // If we indicated this token should always be exhibited, add it already.
       const isTokenHTR = tokenUid === hathorConstants.HATHOR_TOKEN_CONFIG.uid;
       const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
+
       if (isTokenHTR || alwaysShowThisToken) {
         filteredTokens.push(tokenData);
         continue;

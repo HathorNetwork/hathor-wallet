@@ -54,6 +54,8 @@ class UnknownTokens extends React.Component {
     this.anchorOpenRefs = [];
     this.historyRefs = [];
 
+    this.alertSuccessRef = React.createRef();
+
     /**
      * uidSelected {string} UID of the token the user clicked to add
      * successMessage {string} Message to be shown in the alert in case of success
@@ -155,7 +157,7 @@ class UnknownTokens extends React.Component {
     this.context.hideModal();
     const message = `${count} ${hathorLib.helpers.plural(count, 'token was', 'tokens were')} added!`;
     this.setState({ successMessage: message }, () => {
-      this.refs.alertSuccess.show(3000);
+      this.alertSuccessRef.current.show(3000);
     });
   }
 
@@ -297,7 +299,7 @@ class UnknownTokens extends React.Component {
         <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
         <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
         {unknownTokens && renderTokens()}
-        <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
+        <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />
         <TokenBar {...this.props}  />
       </div>
     );

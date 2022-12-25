@@ -61,7 +61,9 @@ class NewWallet extends React.Component {
       step2: false,
       askPassword: false,
       askPIN: false,
-    }
+    };
+
+    this.alertSuccessRef = React.createRef();
   }
 
   componentDidMount = () => {
@@ -126,7 +128,7 @@ class NewWallet extends React.Component {
   validationSuccess = () => {
     this.context.hideModal();
     hathorLib.wallet.markBackupAsDone();
-    this.refs.alertSuccess.show(3000);
+    this.alertSuccessRef.current.show(3000);
     this.setState({ askPassword: true });
   }
 
@@ -209,7 +211,7 @@ class NewWallet extends React.Component {
           </div>
           <InitialImages />
         </div>
-        <HathorAlert ref="alertSuccess" text={t`Backup completed!`} type="success" />
+        <HathorAlert ref={this.alertSuccessRef} text={t`Backup completed!`} type="success" />
       </div>
     )
   }
