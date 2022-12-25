@@ -47,6 +47,7 @@ const mapStateToProps = (state) => {
     selectedToken: state.selectedToken,
     tokensHistory: state.tokensHistory,
     tokensBalance: state.tokensBalance,
+    tokenMetadata: state.tokenMetadata || {},
     tokens: state.tokens,
     wallet: state.wallet,
     useWalletService: state.useWalletService,
@@ -61,6 +62,12 @@ const mapStateToProps = (state) => {
  */
 class Wallet extends React.Component {
   static contextType = GlobalModalContext;
+
+  constructor(props) {
+    super(props);
+
+    this.alertSuccessRef = React.createRef();
+  }
 
   /**
    * backupDone {boolean} if words backup was already done
@@ -204,7 +211,7 @@ class Wallet extends React.Component {
 
     this.props.updateWords(null);
     this.setState({ backupDone: true, successMessage: t`Backup completed!` }, () => {
-      this.refs.alertSuccess.show(3000);
+      this.alertSuccessRef.current.show(3000);
     });
   }
 
@@ -411,6 +418,7 @@ class Wallet extends React.Component {
                   canMint={this.state.canMint}
                   canMelt={this.state.canMelt}
                   transactionsCount={this.state.transactionsCount}
+                  tokenMetadata={this.props.tokenMetadata}
                 />
               </div>
               {
@@ -516,7 +524,7 @@ class Wallet extends React.Component {
           {renderUnlockedWallet()}
         </div>
         <TokenBar {...this.props} />
-        <HathorAlert ref="alertSuccess" text={this.state.successMessage} type="success" />
+        <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />
       </div>
     );
   }

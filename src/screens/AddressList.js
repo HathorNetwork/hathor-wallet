@@ -28,6 +28,12 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class AddressList extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.alertErrorRef = React.createRef();
+  }
   /**
    * addresses {Array} All wallet addresses data {'address', 'index', 'numberOfTransactions'}
    * filteredAddresses {Array} addresses state after search
@@ -108,7 +114,7 @@ class AddressList extends React.Component {
         this.setState({ filtered: true, filteredAddresses: [], totalPages: 1, page: 1 });
       } else {
         // Invalid address
-        this.refs.alertError.show(3000);
+        this.alertErrorRef.current.show(3000);
       }
     } else {
       if (this.state.filtered) {
@@ -189,7 +195,7 @@ class AddressList extends React.Component {
           </div>
           {loadPagination()}
         </div>
-        <HathorAlert ref="alertError" text="Invalid address" type="danger" />
+        <HathorAlert ref={this.alertErrorRef} text="Invalid address" type="danger" />
       </div>
     )
   }

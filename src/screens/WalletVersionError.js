@@ -34,6 +34,11 @@ const mapDispatchToProps = dispatch => {
  */
 class WalletVersionError extends React.Component {
   static contextType = GlobalModalContext;
+  constructor(props) {
+    super(props);
+
+    this.alertSuccessRef = React.createRef();
+  }
 
   /**
    * Called if user clicks the button to do the words backup
@@ -56,7 +61,7 @@ class WalletVersionError extends React.Component {
     this.context.hideModal();
     hathorLib.wallet.markBackupAsDone();
     this.props.updateWords(null);
-    this.refs.alertSuccess.show(3000);
+    this.alertSuccessRef.current.show(3000);
   }
 
   /**
@@ -106,7 +111,7 @@ class WalletVersionError extends React.Component {
           <button className="btn btn-secondary" onClick={(e) => this.backupClicked(e)}>{t`Backup Words`}</button>
           <button className="btn btn-hathor ml-3" onClick={(e) => this.resetClicked(e)}>{t`Reset Wallet`}</button>
         </div>
-        <HathorAlert ref="alertSuccess" text={t`Backup done with success!`} type="success" />
+        <HathorAlert ref={this.alertSuccessRef} text={t`Backup done with success!`} type="success" />
       </div>
     );
   }
