@@ -16,7 +16,6 @@ import SpanFmt from '../components/SpanFmt';
 import WalletHistory from '../components/WalletHistory';
 import WalletBalance from '../components/WalletBalance';
 import WalletAddress from '../components/WalletAddress';
-import TokenBar from '../components/TokenBar';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import TokenAdministrative from '../components/TokenAdministrative';
 import HathorAlert from '../components/HathorAlert';
@@ -523,7 +522,6 @@ class Wallet extends React.Component {
           <BackButton {...this.props} />
           {renderUnlockedWallet()}
         </div>
-        <TokenBar {...this.props} />
         <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />
       </div>
     );
