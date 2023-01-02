@@ -13,7 +13,9 @@ import logo from '../assets/images/hathor-logo.png';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
 import InitialImages from '../components/InitialImages';
-import { LEDGER_ENABLED } from '../constants';
+import { LEDGER_ENABLED, TERMS_OF_SERVICE_URL, PRIVACY_POLICY_URL } from '../constants';
+import { str2jsx } from '../utils/i18n';
+import helpers from '../utils/helpers';
 
 
 /**
@@ -46,6 +48,26 @@ class Welcome extends React.Component {
     }
   }
 
+  /**
+   * Method called when user clicked to see the Terms of Service
+   *
+   * @param {Object} e Event for the click
+   */
+  goToTermsOfService = (e) => {
+    e.preventDefault();
+    helpers.openExternalURL(TERMS_OF_SERVICE_URL);
+  }
+
+  /**
+   * Method called when user clicked to see the Privacy Policy
+   *
+   * @param {Object} e Event for the click
+   */
+  goToPrivacyPolicy = (e) => {
+    e.preventDefault();
+    helpers.openExternalURL(PRIVACY_POLICY_URL);
+  }
+
   render() {
     return (
       <div className="outside-content-wrapper">
@@ -62,7 +84,15 @@ class Welcome extends React.Component {
           <form ref="agreeForm" className={`w-100 mb-4 ${this.state.formValidated ? 'was-validated' : ''}`}>
             <div className="form-check">
               <input required type="checkbox" className="form-check-input" id="confirmAgree" />
-              <label className="form-check-label" htmlFor="confirmAgree"> {t`I understand that I am fully responsible for keeping my tokens safe and that it is not possible to revert transactions after they are executed.`}</label>
+              <label className="form-check-label" htmlFor="confirmAgree">
+                {str2jsx(
+                  t` I agree with the |link1:Terms of Service| and |link2:Privacy Policy| and understand that I am fully responsible for keeping my tokens safe and that it is not possible to revert transactions after they are executed.`,
+                  {
+                    link1: (x, i) => <a key={i} href="true" onClick={this.goToTermsOfService}>{x}</a>,
+                    link2: (x, i) => <a key={i} href="true" onClick={this.goToPrivacyPolicy}>{x}</a>,
+                  }
+                )}
+              </label>
             </div>
           </form>
             <div className="d-flex align-items-center flex-column">
