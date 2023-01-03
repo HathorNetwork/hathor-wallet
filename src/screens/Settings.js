@@ -19,6 +19,7 @@ import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { connect } from "react-redux";
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../constants';
 
 const mapStateToProps = (state) => {
   return {
@@ -283,6 +284,26 @@ class Settings extends React.Component {
     }
   }
 
+  /**
+   * Method called to open Terms of Service URL
+   *
+   * @param {Object} e Event for the click
+   */
+  goToTermsOfService = (e) => {
+    e.preventDefault();
+    helpers.openExternalURL(TERMS_OF_SERVICE_URL);
+  }
+
+  /**
+   * Method called to open Privacy Policy URL
+   *
+   * @param {Object} e Event for the click
+   */
+  goToPrivacyPolicy = (e) => {
+    e.preventDefault();
+    helpers.openExternalURL(PRIVACY_POLICY_URL);
+  }
+
   render() {
     const serverURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
     const wsServerURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
@@ -332,6 +353,12 @@ class Settings extends React.Component {
             {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
+        </div>
+        <hr />
+
+        <div className="pb-5">
+          <div><a href="true" onClick={this.goToTermsOfService}>Terms of Service</a></div>
+          <div><a href="true" onClick={this.goToPrivacyPolicy}>Privacy Policy</a></div>
         </div>
         <HathorAlert ref={this.alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
       </div>
