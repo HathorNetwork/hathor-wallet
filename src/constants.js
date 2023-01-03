@@ -190,6 +190,16 @@ export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';
 export const NFT_GUIDE_URL = 'https://hathor.network/nft-guide';
 
 /**
+ * URL for the Terms of Service
+ */
+export const TERMS_OF_SERVICE_URL = 'https://hathor.network/terms-and-conditions/';
+
+/**
+ * URL for the Privacy Policy
+ */
+export const PRIVACY_POLICY_URL = 'https://hathor.network/privacy-policy/';
+
+/**
  * How many token meta we are downloading concurrently
  */
 export const METADATA_CONCURRENT_DOWNLOAD = 10;
