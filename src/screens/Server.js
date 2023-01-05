@@ -203,6 +203,7 @@ class Server extends React.Component {
   confirmTestnetServer = () => {
     this.props.wallet.changeServer(this.state.selectedServer);
     if (this.props.useWalletService) {
+      this.props.wallet.changeWsServer(this.state.selectedWsServer);
       hathorLib.config.setWalletServiceBaseWsUrl(this.state.selectedWsServer);
     }
 
