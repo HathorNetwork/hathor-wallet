@@ -12,6 +12,7 @@ import { t } from 'ttag'
 import { get } from 'lodash';
 import { connect } from "react-redux";
 
+import { walletRefreshSharedAddress } from '../actions';
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
@@ -34,6 +35,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+const mapDispatchToProps = (dispatch) => ({
+  walletRefreshSharedAddress: () => dispatch(walletRefreshSharedAddress()),
+});
 
 /**
  * Create a new token
@@ -162,8 +166,9 @@ class CreateToken extends React.Component {
 
     // Update redux with added token
     tokens.addToken(token.uid, name, symbol);
+
     // Must update the shared address, in case we have used one for the change
-    wallet.updateSharedAddress();
+    this.props.walletRefreshSharedAddress();
     this.showAlert(token);
   }
 
@@ -311,4 +316,4 @@ class CreateToken extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(CreateToken);
+export default connect(mapStateToProps, mapDispatchToProps)(CreateToken);

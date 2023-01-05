@@ -622,6 +622,17 @@ export function* walletReloading() {
   }
 }
 
+export function* refreshSharedAddress() {
+  const wallet = yield select((state) => state.wallet);
+
+  const { address, index } = wallet.getCurrentAddress();
+
+  yield put(sharedAddressUpdate({
+    lastSharedAddress: address,
+    lastSharedIndex: index,
+  }));
+}
+
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
@@ -632,5 +643,6 @@ export function* saga() {
     takeEvery('WALLET_BEST_BLOCK_UPDATE', bestBlockUpdate),
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
     takeEvery('WALLET_RELOAD_DATA', loadTokens),
+    takeEvery('WALLET_REFRESH_SHARED_ADDRESS', refreshSharedAddress),
   ]);
 }
