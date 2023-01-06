@@ -56,7 +56,7 @@ class TransactionDetail extends React.Component {
    */
   getConfirmationData = async () => {
     try {
-      const data = await this.props.wallet.proxyGetTxConfirmationData(this.props.match.params.id);
+      const data = await this.props.wallet.getTxConfirmationData(this.props.match.params.id);
       this.setState({
         confirmationData: data,
       });
@@ -71,9 +71,19 @@ class TransactionDetail extends React.Component {
    */
   txReceived(data) {
     if (data.success) {
-      this.setState({ transaction: data.tx, meta: data.meta, spentOutputs: data.spent_outputs, loaded: true, success: true });
+      this.setState({
+        transaction: data.tx,
+        meta: data.meta,
+        spentOutputs: data.spent_outputs,
+        loaded: true,
+        success: true,
+      });
     } else {
-      this.setState({ loaded: true, success: false, transaction: null });
+      this.setState({
+        loaded: true,
+        success: false,
+        transaction: null,
+      });
     }
   }
 
@@ -82,7 +92,7 @@ class TransactionDetail extends React.Component {
    */
   async getTx() {
     try {
-      const data = await this.props.wallet.proxyGetTxById(this.props.match.params.id);
+      const data = await this.props.wallet.getFullTxById(this.props.match.params.id);
       this.txReceived(data);
       if (data.success && !hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();

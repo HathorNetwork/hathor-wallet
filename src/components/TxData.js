@@ -83,12 +83,12 @@ class TxData extends React.Component {
   updateGraphs = async () => {
     const viz = new Viz({ Module, render });
 
-    const fundsData = await this.props.wallet.proxyGraphvizNeighboursQuery(
+    const fundsData = await this.props.wallet.graphvizNeighborsQuery(
       this.props.transaction.hash,
       'funds',
       MAX_GRAPH_LEVEL,
     );
-    const verificationData = await this.props.wallet.proxyGraphvizNeighboursQuery(
+    const verificationData = await this.props.wallet.graphvizNeighborsQuery(
       this.props.transaction.hash,
       'verification',
       MAX_GRAPH_LEVEL,
