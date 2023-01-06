@@ -81,25 +81,30 @@ class TxData extends React.Component {
    * Update graphs on the screen to add the ones from the server
    */
   updateGraphs = async () => {
-    const viz = new Viz({ Module, render });
+    try {
+      const viz = new Viz({ Module, render });
 
-    const fundsData = await this.props.wallet.graphvizNeighborsQuery(
-      this.props.transaction.hash,
-      'funds',
-      MAX_GRAPH_LEVEL,
-    );
-    const verificationData = await this.props.wallet.graphvizNeighborsQuery(
-      this.props.transaction.hash,
-      'verification',
-      MAX_GRAPH_LEVEL,
-    );
+      const fundsData = await this.props.wallet.graphvizNeighborsQuery(
+        this.props.transaction.hash,
+        'funds',
+        MAX_GRAPH_LEVEL,
+      );
+      const verificationData = await this.props.wallet.graphvizNeighborsQuery(
+        this.props.transaction.hash,
+        'verification',
+        MAX_GRAPH_LEVEL,
+      );
 
-    viz.renderSVGElement(fundsData).then((element) => {
-      document.getElementById('graph-funds').appendChild(element);
-    });
-    viz.renderSVGElement(verificationData).then((element) => {
-      document.getElementById('graph-verification').appendChild(element);
-    });
+      viz.renderSVGElement(fundsData).then((element) => {
+        document.getElementById('graph-funds').appendChild(element);
+      });
+      viz.renderSVGElement(verificationData).then((element) => {
+        document.getElementById('graph-verification').appendChild(element);
+      });
+    } catch(e) {
+      // Log and ignore error so we don't break the screen
+      console.log('Got error downloading graphviz digraph');
+    }
   }
 
   fetchWalletAddressesMap = async () => {
