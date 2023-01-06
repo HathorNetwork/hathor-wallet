@@ -78,32 +78,27 @@ class TxData extends React.Component {
   }
 
   /**
-   * Returns the url to get the graph for each type
-   *
-   * @param {string} hash ID of the transaction to get the graph
-   * @param {string} type Type of graph to be returned (funds or verification)
-   */
-  graphURL = (hash, type) => {
-    return `${hathorLib.helpers.getServerURL()}graphviz/neighbours.dot/?tx=${hash}&graph_type=${type}&max_level=${MAX_GRAPH_LEVEL}`;
-  }
-
-  /**
    * Update graphs on the screen to add the ones from the server
    */
-  updateGraphs = () => {
+  updateGraphs = async () => {
     const viz = new Viz({ Module, render });
-    const url1 = this.graphURL(this.props.transaction.hash, 'funds');
-    const url2 = this.graphURL(this.props.transaction.hash, 'verification');
-    hathorLib.txApi.getGraphviz(url1, (response) => {
-      viz.renderSVGElement(response).then((element) => {
-        document.getElementById('graph-funds').appendChild(element);
-      });
-    });
 
-    hathorLib.txApi.getGraphviz(url2, (response) => {
-      viz.renderSVGElement(response).then((element) => {
-        document.getElementById('graph-verification').appendChild(element);
-      });
+    const fundsData = await this.props.wallet.proxyGraphvizNeighboursQuery(
+      this.props.transaction.hash,
+      'funds',
+      MAX_GRAPH_LEVEL,
+    );
+    const verificationData = await this.props.wallet.proxyGraphvizNeighboursQuery(
+      this.props.transaction.hash,
+      'verification',
+      MAX_GRAPH_LEVEL,
+    );
+
+    viz.renderSVGElement(fundsData).then((element) => {
+      document.getElementById('graph-funds').appendChild(element);
+    });
+    viz.renderSVGElement(verificationData).then((element) => {
+      document.getElementById('graph-verification').appendChild(element);
     });
   }
 

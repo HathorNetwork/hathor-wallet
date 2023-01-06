@@ -170,6 +170,9 @@ class Wallet extends React.Component {
 
   async updateTokenInfo() {
     const tokenUid = this.props.selectedToken;
+    if (tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+      return;
+    }
     const tokenDetails = await this.props.wallet.getTokenDetails(tokenUid);
 
     // The user might have changed token while we are downloading, we should ignore
