@@ -44,6 +44,7 @@ class TransactionDetail extends React.Component {
       loaded: false,
       success: null,
       confirmationData: null,
+      confirmationDataError: false,
     }
   }
 
@@ -59,30 +60,15 @@ class TransactionDetail extends React.Component {
       const data = await this.props.wallet.getTxConfirmationData(this.props.match.params.id);
       this.setState({
         confirmationData: data,
+        confirmationDataError: false,
       });
     } catch(e) {
       // Error in request
       console.log(e);
-    }
-  }
 
-  /**
-   * Update state after receiving the transaction response back from the server
-   */
-  txReceived(data) {
-    if (data.success) {
       this.setState({
-        transaction: data.tx,
-        meta: data.meta,
-        spentOutputs: data.spent_outputs,
-        loaded: true,
-        success: true,
-      });
-    } else {
-      this.setState({
-        loaded: true,
-        success: false,
-        transaction: null,
+        confirmationData: null,
+        confirmationDataError: true,
       });
     }
   }
@@ -93,13 +79,31 @@ class TransactionDetail extends React.Component {
   async getTx() {
     try {
       const data = await this.props.wallet.getFullTxById(this.props.match.params.id);
-      this.txReceived(data);
-      if (data.success && !hathorLib.helpers.isBlock(data.tx)) {
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      if (!hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();
       }
+
+      this.setState({
+        transaction: data.tx,
+        meta: data.meta,
+        spentOutputs: data.spent_outputs,
+        loaded: true,
+        success: true,
+      });
     } catch(e) {
       // Error in request
       console.log('E: ', e);
+
+      this.setState({
+        loaded: true,
+        success: false,
+        transaction: null,
+      });
     }
   }
 
@@ -133,6 +137,7 @@ class TransactionDetail extends React.Component {
               key={this.state.transaction.hash}
               transaction={this.state.transaction}
               confirmationData={this.state.confirmationData}
+              confirmationDataError={this.state.confirmationDataError}
               spentOutputs={this.state.spentOutputs}
               meta={this.state.meta}
               showRaw={true}

@@ -577,6 +577,10 @@ class TxData extends React.Component {
     }
 
     const renderAccumulatedWeight = () => {
+      if (this.props.confirmationDataError) {
+        return t`Error retrieving accumulated weight data...`;
+      }
+
       if (this.props.confirmationData) {
         let acc = hathorLib.helpers.roundFloat(this.props.confirmationData.accumulated_weight);
         if (this.props.confirmationData.accumulated_bigger) {
@@ -720,13 +724,25 @@ class TxData extends React.Component {
     }
 
     const renderConfirmationLevel = () => {
+      const renderConfirmationLevelMessage = () => {
+        if (this.props.confirmationDataError) {
+          return t`Error retrieving confirmation level...`;
+        }
+
+        if (this.props.confirmationData) {
+          return `${hathorLib.helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%`;
+        }
+
+        return t`Retrieving confirmation level data...`;
+      };
+
       return (
         <div>
           <label>{t`Confirmation level:`}</label>
-          {this.props.confirmationData ? `${hathorLib.helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%` : 'Retrieving confirmation level data...'}
+          {renderConfirmationLevelMessage()}
         </div>
       );
-    }
+    };
 
     const isNFTCreation = () => {
       if (this.props.transaction.version !== hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
