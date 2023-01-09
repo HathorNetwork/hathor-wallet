@@ -82,7 +82,7 @@ msgstr ""
 
 #: src/screens/ChoosePassphrase.js:142
 #: src/screens/LockedWallet.js:137
-#: src/screens/Server.js:361
+#: src/screens/Server.js:360
 msgid "PIN"
 msgstr ""
 
@@ -580,33 +580,33 @@ msgstr ""
 msgid "New real-time server is not valid"
 msgstr ""
 
-#: src/screens/Server.js:313
+#: src/screens/Server.js:312
 msgid "Select one of the default servers to connect or choose a new one"
 msgstr ""
 
-#: src/screens/Server.js:318
-#: src/screens/Server.js:348
+#: src/screens/Server.js:317
+#: src/screens/Server.js:347
 msgid "Base server"
 msgstr ""
 
-#: src/screens/Server.js:331
-#: src/screens/Server.js:355
+#: src/screens/Server.js:330
+#: src/screens/Server.js:354
 msgid "Real-time server"
 msgstr ""
 
-#: src/screens/Server.js:343
+#: src/screens/Server.js:342
 msgid "Select a new server"
 msgstr ""
 
-#: src/screens/Server.js:351
+#: src/screens/Server.js:350
 msgid "New server"
 msgstr ""
 
-#: src/screens/Server.js:356
+#: src/screens/Server.js:355
 msgid "New real-time server"
 msgstr ""
 
-#: src/screens/Server.js:364
+#: src/screens/Server.js:363
 msgid "Connect to server"
 msgstr ""
 
@@ -736,7 +736,7 @@ msgstr ""
 msgid "Untrust all tokens on Ledger"
 msgstr ""
 
-#: src/components/TxData.js:812
+#: src/components/TxData.js:828
 #: src/components/WalletAddress.js:194
 #: src/screens/Settings.js:363
 msgid "Copied to clipboard!"
@@ -789,13 +789,13 @@ msgstr ""
 msgid "Connecting to Ledger"
 msgstr ""
 
-#: src/screens/TransactionDetail.js:144
+#: src/screens/TransactionDetail.js:149
 #, javascript-format
 msgid "Transaction with hash ${ _this2.props.match.params.id } not found"
 msgstr ""
 
 #: src/components/NFTListElement.js:112
-#: src/screens/TransactionDetail.js:163
+#: src/screens/TransactionDetail.js:168
 msgid "See on explorer"
 msgstr ""
 
@@ -1800,7 +1800,7 @@ msgid "Page ${ page }"
 msgstr ""
 
 #: src/components/TokenInfoBox.js:27
-#: src/components/TxData.js:748
+#: src/components/TxData.js:764
 msgid "Type:"
 msgstr ""
 
@@ -1913,109 +1913,121 @@ msgstr ""
 msgid "Conflicts with: "
 msgstr ""
 
-#: src/components/TxData.js:583
+#: src/components/TxData.js:581
+msgid "Error retrieving accumulated weight data..."
+msgstr ""
+
+#: src/components/TxData.js:587
 #, javascript-format
 msgid "Over ${ acc }"
 msgstr ""
 
-#: src/components/TxData.js:588
+#: src/components/TxData.js:592
 msgid "Retrieving accumulated weight data..."
 msgstr ""
 
-#: src/components/TxData.js:640
+#: src/components/TxData.js:644
 msgid "Tokens:"
 msgstr ""
 
-#: src/components/TxData.js:654
+#: src/components/TxData.js:658
 msgid "Your address"
 msgstr ""
 
-#: src/components/TxData.js:668
+#: src/components/TxData.js:672
 #, javascript-format
 msgid "**${ tokenSymbol }:** Received"
 msgstr ""
 
-#: src/components/TxData.js:674
+#: src/components/TxData.js:678
 msgid "**${ tokenSymbol }:** Sent"
 msgstr ""
 
-#: src/components/TxData.js:698
+#: src/components/TxData.js:702
 msgid "Balance:"
 msgstr ""
 
-#: src/components/TxData.js:707
+#: src/components/TxData.js:711
 msgid "First block:"
 msgstr ""
 
-#: src/components/TxData.js:716
+#: src/components/TxData.js:720
 msgid "Accumulated weight:"
 msgstr ""
 
-#: src/components/TxData.js:725
+#: src/components/TxData.js:729
+msgid "Error retrieving confirmation level..."
+msgstr ""
+
+#: src/components/TxData.js:736
+msgid "Retrieving confirmation level data..."
+msgstr ""
+
+#: src/components/TxData.js:741
 msgid "Confirmation level:"
 msgstr ""
 
-#: src/components/TxData.js:744
+#: src/components/TxData.js:760
 msgid "Block"
 msgstr ""
 
-#: src/components/TxData.js:744
+#: src/components/TxData.js:760
 msgid "Transaction"
 msgstr ""
 
-#: src/components/TxData.js:749
+#: src/components/TxData.js:765
 msgid "Time:"
 msgstr ""
 
-#: src/components/TxData.js:750
+#: src/components/TxData.js:766
 msgid "Nonce:"
 msgstr ""
 
-#: src/components/TxData.js:751
+#: src/components/TxData.js:767
 msgid "Weight:"
 msgstr ""
 
-#: src/components/TxData.js:763
+#: src/components/TxData.js:779
 msgid "Inputs:"
 msgstr ""
 
-#: src/components/TxData.js:767
+#: src/components/TxData.js:783
 msgid "Outputs:"
 msgstr ""
 
-#: src/components/TxData.js:774
+#: src/components/TxData.js:790
 msgid "Parents:"
 msgstr ""
 
-#: src/components/TxData.js:778
+#: src/components/TxData.js:794
 msgid "Children:"
 msgstr ""
 
-#: src/components/TxData.js:778
+#: src/components/TxData.js:794
 msgid "Click to hide"
 msgstr ""
 
-#: src/components/TxData.js:778
+#: src/components/TxData.js:794
 msgid "Click to show"
 msgstr ""
 
-#: src/components/TxData.js:783
+#: src/components/TxData.js:799
 msgid "Verification neighbors"
 msgstr ""
 
-#: src/components/TxData.js:786
+#: src/components/TxData.js:802
 msgid "Funds neighbors"
 msgstr ""
 
-#: src/components/TxData.js:798
+#: src/components/TxData.js:814
 msgid "Hide raw transaction"
 msgstr ""
 
-#: src/components/TxData.js:798
+#: src/components/TxData.js:814
 msgid "Show raw transaction"
 msgstr ""
 
-#: src/components/TxData.js:801
+#: src/components/TxData.js:817
 msgid "Copy raw tx to clipboard"
 msgstr ""
 
