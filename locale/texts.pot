@@ -830,6 +830,7 @@ msgstr ""
 msgid "Download failed, please"
 msgstr ""
 
+#: src/components/TxData.js:642
 #: src/screens/UnknownTokens.js:227
 #: src/screens/Wallet.js:485
 msgid "try again"

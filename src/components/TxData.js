@@ -639,7 +639,7 @@ class TxData extends React.Component {
             <div>{t`Download failed`}, <a href="true" onClick={(e) => {
               e.preventDefault();
               retryCallback();
-            }}>try again</a></div>
+            }}>{t`try again`}</a></div>
           )}
         </div>
       );
