@@ -66,6 +66,10 @@ class TxData extends React.Component {
     tokens: [],
     tokenClicked: null,
     walletAddressesMap: {},
+    graphvizFundsRequestLoading: false,
+    graphvizFundsRequestFailed: false,
+    graphvizVerificationRequestFailed: false,
+    graphvizVerificationRequestLoading: false,
   };
 
   // Array of token uid that was already found to show the symbol
@@ -73,37 +77,77 @@ class TxData extends React.Component {
 
   componentDidMount = () => {
     this.calculateTokens();
-    this.updateGraphs();
     this.fetchWalletAddressesMap();
+    this.queryVerificationData();
+    this.queryFundsData();
   }
 
   /**
-   * Update graphs on the screen to add the ones from the server
+   * Receives an Viz instance, a documentId and data and renders a
+   * graphviz graph
    */
-  updateGraphs = async () => {
-    try {
-      const viz = new Viz({ Module, render });
+  renderGraph(viz, documentId, data) {
+    viz.renderSVGElement(data)
+      .then(element => document
+        .getElementById(documentId)
+        .appendChild(element));
+  }
 
+  queryFundsData = async () => {
+    const viz = new Viz({
+      Module,
+      render,
+    });
+
+    this.setState({
+      graphvizFundsRequestFailed: false,
+      graphvizFundsRequestLoading: true,
+    });
+
+    try {
       const fundsData = await this.props.wallet.graphvizNeighborsQuery(
+        this.props.transaction.hash,
+      );
+
+      this.renderGraph(viz, 'graph-funds', fundsData);
+      this.setState({
+        graphvizFundsRequestLoading: false,
+      });
+    } catch(e) {
+      this.setState({
+        graphvizFundsRequestFailed: true,
+        graphvizFundsRequestLoading: false,
+      });
+    }
+  }
+
+  queryVerificationData = async () => {
+    const viz = new Viz({
+      Module,
+      render,
+    });
+
+    this.setState({
+      graphvizVerificationRequestFailed: false,
+      graphvizVerificationRequestLoading: true,
+    });
+
+    try {
+      const verificationData = await this.props.wallet.graphvizNeighborsQuery(
         this.props.transaction.hash,
         'funds',
         MAX_GRAPH_LEVEL,
       );
-      const verificationData = await this.props.wallet.graphvizNeighborsQuery(
-        this.props.transaction.hash,
-        'verification',
-        MAX_GRAPH_LEVEL,
-      );
 
-      viz.renderSVGElement(fundsData).then((element) => {
-        document.getElementById('graph-funds').appendChild(element);
-      });
-      viz.renderSVGElement(verificationData).then((element) => {
-        document.getElementById('graph-verification').appendChild(element);
+      this.renderGraph(viz, 'graph-verification', verificationData);
+      this.setState({
+        graphvizVerificationRequestLoading: false,
       });
     } catch(e) {
-      // Log and ignore error so we don't break the screen
-      console.log('Got error downloading graphviz digraph');
+      this.setState({
+        graphvizVerificationRequestFailed: true,
+        graphvizVerificationRequestLoading: false,
+      });
     }
   }
 
@@ -568,13 +612,36 @@ class TxData extends React.Component {
       )
     }
 
-    const renderGraph = (label, type) => {
+    const renderGraph = (
+      label,
+      type,
+      failed,
+      loading,
+      retryCallback,
+    ) => {
+      if (!this.props.showGraphs) {
+        return;
+      }
+
       return (
         <div className="mt-3 graph-div" id={`graph-${type}`} key={`graph-${type}-${this.props.transaction.hash}`}>
           <label className="graph-label">{label}:</label>
+          { loading && (
+            <Loading
+              type='spin'
+              width={16}
+              height={16}
+              delay={200} />
+          )}
+          { !loading && failed && (
+            <div>{t`Download failed`}, <a href="true" onClick={(e) => {
+              e.preventDefault();
+              retryCallback();
+            }}>try again</a></div>
+          )}
         </div>
       );
-    }
+    };
 
     const renderAccumulatedWeight = () => {
       if (this.props.confirmationDataError) {
@@ -796,10 +863,22 @@ class TxData extends React.Component {
             </div>
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
-            {this.props.showGraphs && renderGraph(t`Verification neighbors`, 'verification')}
+            {renderGraph(
+              t`Verification neighbors`,
+              'verification',
+              this.state.graphvizVerificationRequestFailed,
+              this.state.graphvizVerificationRequestLoading,
+              this.queryVerificationData,
+            )}
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
-            {this.props.showGraphs && renderGraph(t`Funds neighbors`, 'funds')}
+            {renderGraph(
+              t`Funds neighbors`,
+              'funds',
+              this.state.graphvizFundsRequestFailed,
+              this.state.graphvizFundsRequestLoading,
+              this.queryFundsData,
+            )}
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
             {this.props.showRaw ? showRawWrapper() : null}

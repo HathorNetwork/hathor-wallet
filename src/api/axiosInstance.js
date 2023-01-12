@@ -9,6 +9,11 @@ import store from '../store/index';
 import { lastFailedRequest, updateRequestErrorStatusCode } from '../actions/index';
 import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
+import url from 'url';
+
+const URL_WHITELIST = [
+  '/v1a/graphviz/neighbours.dot',
+];
 
 /**
  * Create axios instance settings base URL and content type  
@@ -29,6 +34,13 @@ const createRequestInstance = (resolve, timeout) => {
   instance.interceptors.response.use((response) => {
     return response;
   }, (error) => {
+    const parsedUrl = url.parse(error.config.url);
+    // URLs in this whitelist won't be handled by the
+    // request error interceptor.
+    if (URL_WHITELIST.indexOf(parsedUrl.pathname) > -1) {
+      return;
+    }
+
     // Update status code of the last failed request in redux
     // Adding conditional because if the server forgets to send back the CORS
     // headers, error.response will be undefined
