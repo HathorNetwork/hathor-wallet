@@ -107,6 +107,8 @@ class TxData extends React.Component {
     try {
       const fundsData = await this.props.wallet.graphvizNeighborsQuery(
         this.props.transaction.hash,
+        'funds',
+        MAX_GRAPH_LEVEL,
       );
 
       this.renderGraph(viz, 'graph-funds', fundsData);
@@ -135,7 +137,7 @@ class TxData extends React.Component {
     try {
       const verificationData = await this.props.wallet.graphvizNeighborsQuery(
         this.props.transaction.hash,
-        'funds',
+        'verification',
         MAX_GRAPH_LEVEL,
       );
 
