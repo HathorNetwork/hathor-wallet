@@ -647,7 +647,16 @@ class TxData extends React.Component {
 
     const renderAccumulatedWeight = () => {
       if (this.props.confirmationDataError) {
-        return t`Error retrieving accumulated weight data...`;
+        const onRetryClick = (e) => {
+          e.preventDefault();
+          this.props.confirmationDataRetry();
+        };
+        return (
+          <>
+            {t`Error retrieving accumulated weight data...`}&nbsp;
+            <a href="true" onClick={onRetryClick}>{t`try again`}</a>
+          </>
+        )
       }
 
       if (this.props.confirmationData) {
@@ -795,7 +804,16 @@ class TxData extends React.Component {
     const renderConfirmationLevel = () => {
       const renderConfirmationLevelMessage = () => {
         if (this.props.confirmationDataError) {
-          return t`Error retrieving confirmation level...`;
+          const onRetryClick = (e) => {
+            e.preventDefault();
+            this.props.confirmationDataRetry();
+          };
+          return (
+            <>
+              {t`Error retrieving confirmation level...`}&nbsp;
+              <a href="true" onClick={onRetryClick}>{t`try again`}</a>
+            </>
+          )
         }
 
         if (this.props.confirmationData) {

@@ -56,6 +56,11 @@ class TransactionDetail extends React.Component {
    * Get accumulated weight and confirmation level of the transaction
    */
   getConfirmationData = async () => {
+    this.setState({
+      confirmationData: null,
+      confirmationDataError: false,
+    });
+
     try {
       const data = await this.props.wallet.getTxConfirmationData(this.props.match.params.id);
       this.setState({
@@ -138,6 +143,7 @@ class TransactionDetail extends React.Component {
               transaction={this.state.transaction}
               confirmationData={this.state.confirmationData}
               confirmationDataError={this.state.confirmationDataError}
+              confirmationDataRetry={this.getConfirmationData}
               spentOutputs={this.state.spentOutputs}
               meta={this.state.meta}
               showRaw={true}
