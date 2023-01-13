@@ -82,12 +82,16 @@ class TransactionDetail extends React.Component {
    * Get transaction in the server when mounting the page
    */
   async getTx() {
+    this.setState({
+      loaded: false,
+      transaction: null,
+      meta: null,
+      spentOutputs: null,
+      success: null,
+    });
+
     try {
       const data = await this.props.wallet.getFullTxById(this.props.match.params.id);
-
-      if (!data.success) {
-        throw new Error(data.message);
-      }
 
       if (!hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();
@@ -152,7 +156,10 @@ class TransactionDetail extends React.Component {
               history={this.props.history} />
           ) : (
             <p className="text-danger">
-              {t`Transaction with hash ${this.props.match.params.id} not found`}
+              {t`Transaction with hash ${this.props.match.params.id} not found`}. <a href="true" onClick={(e) => {
+                e.preventDefault();
+                this.getTx();
+              }}>{t`Try again`}</a>
             </p>
           )}
         </div>

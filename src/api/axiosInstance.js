@@ -12,7 +12,8 @@ import hathorLib from '@hathor/wallet-lib';
 import url from 'url';
 
 const URL_WHITELIST = [
-  '/v1a/graphviz/neighbours.dot',
+  'graphviz/neighbours.dot',
+  'transaction',
 ];
 
 /**
