@@ -88,9 +88,18 @@ class TxData extends React.Component {
    */
   renderGraph(viz, documentId, data) {
     viz.renderSVGElement(data)
-      .then(element => document
-        .getElementById(documentId)
-        .appendChild(element));
+      .then((element) => {
+        const domElement = document.getElementById(documentId);
+
+        // If the user click "back" before the request is complete,
+        // the component will be killed and this will be undefined,
+        // causing an error on the wallet.
+        if (!domElement) {
+          return;
+        }
+
+        domElement.appendChild(element);
+      });
   }
 
   queryFundsData = async () => {
