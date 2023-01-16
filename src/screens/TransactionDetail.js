@@ -45,6 +45,7 @@ class TransactionDetail extends React.Component {
       success: null,
       confirmationData: null,
       confirmationDataError: false,
+      isTxNotFound: false,
     }
   }
 
@@ -88,6 +89,7 @@ class TransactionDetail extends React.Component {
       meta: null,
       spentOutputs: null,
       success: null,
+      isTxNotFound: false,
     });
 
     try {
@@ -103,15 +105,20 @@ class TransactionDetail extends React.Component {
         spentOutputs: data.spent_outputs,
         loaded: true,
         success: true,
+        isTxNotFound: false,
       });
     } catch(e) {
+      let isTxNotFound = false;
       // Error in request
-      console.log('E: ', e);
+      if (e instanceof hathorLib.errors.TxNotFoundError) {
+        isTxNotFound = true;
+      }
 
       this.setState({
         loaded: true,
         success: false,
         transaction: null,
+        isTxNotFound,
       });
     }
   }
@@ -156,10 +163,17 @@ class TransactionDetail extends React.Component {
               history={this.props.history} />
           ) : (
             <p className="text-danger">
-              {t`Transaction with hash ${this.props.match.params.id} not found`}. <a href="true" onClick={(e) => {
-                e.preventDefault();
-                this.getTx();
-              }}>{t`Try again`}</a>
+              {this.state.isTxNotFound ? (
+                <>{t`Transaction with hash ${this.props.match.params.id} not found`}.</>
+              ) : (
+                <>
+                  {t`Error retrieving transaction ${this.props.match.params.id}`}.&nbsp;
+                  <a href="true" onClick={(e) => {
+                    e.preventDefault();
+                    this.getTx();
+                  }}>{t`Try again`}</a>
+                </>
+              )}
             </p>
           )}
         </div>
