@@ -14,6 +14,7 @@ import url from 'url';
 const URL_WHITELIST = [
   'graphviz/neighbours.dot',
   'transaction',
+  'transaction_acc_weight',
 ];
 
 /**
