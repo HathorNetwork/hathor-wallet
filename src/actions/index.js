@@ -30,6 +30,7 @@ export const types = {
   WALLET_STATE_READY: 'WALLET_STATE_READY',
   WALLET_STATE_ERROR: 'WALLET_STATE_ERROR',
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
+  WALLET_REFRESH_SHARED_ADDRESS: 'WALLET_REFRESH_SHARED_ADDRESS',
   SET_SERVER_INFO: 'SET_SERVER_INFO',
   STORE_ROUTER_HISTORY: 'STORE_ROUTER_HISTORY',
   WALLET_RELOADING: 'WALLET_RELOADING',
@@ -297,6 +298,10 @@ export const walletStateReady = () => ({
 
 export const walletReloadData = () => ({
   type: types.WALLET_RELOAD_DATA,
+});
+
+export const walletRefreshSharedAddress = () => ({
+  type: types.WALLET_REFRESH_SHARED_ADDRESS,
 });
 
 export const reloadingWallet = () => ({

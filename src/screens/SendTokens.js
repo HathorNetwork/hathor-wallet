@@ -11,7 +11,7 @@ import SendTokensOne from '../components/SendTokensOne';
 import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
-import wallet from '../utils/wallet';
+import { walletRefreshSharedAddress } from '../actions';
 import SendTxHandler from '../components/SendTxHandler';
 import ledger, { LedgerError } from '../utils/ledger';
 import tokens from '../utils/tokens';
@@ -30,6 +30,10 @@ const mapStateToProps = (state) => {
     useWalletService: state.useWalletService,
   };
 };
+
+const mapDispatchToProps = (dispatch) => ({
+  walletRefreshSharedAddress: () => dispatch(walletRefreshSharedAddress()),
+});
 
 /**
  * Screen used to send tokens to another wallet.
@@ -223,8 +227,9 @@ class SendTokens extends React.Component {
    */
   onSendSuccess = (tx) => {
     this.context.hideModal();
+
     // Must update the shared address, in case we have used one for the change
-    wallet.updateSharedAddress();
+    this.props.walletRefreshSharedAddress();
     this.props.history.push('/wallet/');
   }
 
@@ -539,4 +544,4 @@ class SendTokens extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(SendTokens);
+export default connect(mapStateToProps, mapDispatchToProps)(SendTokens);

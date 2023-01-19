@@ -7,6 +7,7 @@
 
 import React from 'react';
 import ReactLoading from 'react-loading';
+import { connect } from 'react-redux';
 import { t } from 'ttag';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
@@ -14,6 +15,10 @@ import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
 import helpers from '../utils/helpers';
 import path from 'path';
+
+const mapStateToProps = (state) => ({
+  wallet: state.wallet,
+});
 
 /**
  * Shows the detail of a transaction or block
@@ -39,6 +44,8 @@ class TransactionDetail extends React.Component {
       loaded: false,
       success: null,
       confirmationData: null,
+      confirmationDataError: false,
+      isTxNotFound: false,
     }
   }
 
@@ -49,45 +56,77 @@ class TransactionDetail extends React.Component {
   /**
    * Get accumulated weight and confirmation level of the transaction
    */
-  getConfirmationData = () => {
-    hathorLib.txApi.getConfirmationData(this.props.match.params.id, (data) => {
-      this.setState({ confirmationData: data });
-    }, (e) => {
+  getConfirmationData = async () => {
+    this.setState({
+      confirmationData: null,
+      confirmationDataError: false,
+    });
+
+    try {
+      const data = await this.props.wallet.getTxConfirmationData(this.props.match.params.id);
+      this.setState({
+        confirmationData: data,
+        confirmationDataError: false,
+      });
+    } catch(e) {
       // Error in request
       console.log(e);
-    });
-  }
 
-  /**
-   * Update state after receiving the transaction response back from the server
-   */
-  txReceived(data) {
-    if (data.success) {
-      this.setState({ transaction: data.tx, meta: data.meta, spentOutputs: data.spent_outputs, loaded: true, success: true });
-    } else {
-      this.setState({ loaded: true, success: false, transaction: null });
+      this.setState({
+        confirmationData: null,
+        confirmationDataError: true,
+      });
     }
   }
 
   /**
    * Get transaction in the server when mounting the page
    */
-  getTx() {
-    hathorLib.txApi.getTransaction(this.props.match.params.id, (data) => {
-      this.txReceived(data);
-      if (data.success && !hathorLib.helpers.isBlock(data.tx)) {
+  async getTx() {
+    this.setState({
+      loaded: false,
+      transaction: null,
+      meta: null,
+      spentOutputs: null,
+      success: null,
+      isTxNotFound: false,
+    });
+
+    try {
+      const data = await this.props.wallet.getFullTxById(this.props.match.params.id);
+
+      if (!hathorLib.helpers.isBlock(data.tx)) {
         this.getConfirmationData();
       }
-    }, (e) => {
+
+      this.setState({
+        transaction: data.tx,
+        meta: data.meta,
+        spentOutputs: data.spent_outputs,
+        loaded: true,
+        success: true,
+        isTxNotFound: false,
+      });
+    } catch(e) {
+      let isTxNotFound = false;
       // Error in request
-      console.log(e);
-    });
+      if (e instanceof hathorLib.errors.TxNotFoundError) {
+        isTxNotFound = true;
+      }
+
+      this.setState({
+        loaded: true,
+        success: false,
+        transaction: null,
+        isTxNotFound,
+      });
+    }
   }
 
   /**
    * When transaction changed in the page we need to load the new one and the new confirmation data
    */
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (this.props.match.params.id !== prevProps.match.params.id) {
       this.getTx();
     }
@@ -109,7 +148,34 @@ class TransactionDetail extends React.Component {
       return (
         <div>
           {renderLinks()}
-          {this.state.transaction ? <TxData key={this.state.transaction.hash} transaction={this.state.transaction} confirmationData={this.state.confirmationData} spentOutputs={this.state.spentOutputs} meta={this.state.meta} showRaw={true} showConflicts={true} showGraphs={true} history={this.props.history} /> : <p className="text-danger">{t`Transaction with hash ${this.props.match.params.id} not found`}</p>}
+          {this.state.transaction ? (
+            <TxData
+              key={this.state.transaction.hash}
+              transaction={this.state.transaction}
+              confirmationData={this.state.confirmationData}
+              confirmationDataError={this.state.confirmationDataError}
+              confirmationDataRetry={this.getConfirmationData}
+              spentOutputs={this.state.spentOutputs}
+              meta={this.state.meta}
+              showRaw={true}
+              showConflicts={true}
+              showGraphs={true}
+              history={this.props.history} />
+          ) : (
+            <p className="text-danger">
+              {this.state.isTxNotFound ? (
+                <>{t`Transaction with hash ${this.props.match.params.id} not found`}.</>
+              ) : (
+                <>
+                  {t`Error retrieving transaction ${this.props.match.params.id}`}.&nbsp;
+                  <a href="true" onClick={(e) => {
+                    e.preventDefault();
+                    this.getTx();
+                  }}>{t`Try again`}</a>
+                </>
+              )}
+            </p>
+          )}
         </div>
       );
     }
@@ -140,4 +206,4 @@ class TransactionDetail extends React.Component {
   }
 }
 
-export default TransactionDetail;
+export default connect(mapStateToProps)(TransactionDetail);

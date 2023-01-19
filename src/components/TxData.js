@@ -66,6 +66,10 @@ class TxData extends React.Component {
     tokens: [],
     tokenClicked: null,
     walletAddressesMap: {},
+    graphvizFundsRequestLoading: false,
+    graphvizFundsRequestFailed: false,
+    graphvizVerificationRequestFailed: false,
+    graphvizVerificationRequestLoading: false,
   };
 
   // Array of token uid that was already found to show the symbol
@@ -73,38 +77,89 @@ class TxData extends React.Component {
 
   componentDidMount = () => {
     this.calculateTokens();
-    this.updateGraphs();
     this.fetchWalletAddressesMap();
+    this.queryVerificationData();
+    this.queryFundsData();
   }
 
   /**
-   * Returns the url to get the graph for each type
-   *
-   * @param {string} hash ID of the transaction to get the graph
-   * @param {string} type Type of graph to be returned (funds or verification)
+   * Receives an Viz instance, a documentId and data and renders a
+   * graphviz graph
    */
-  graphURL = (hash, type) => {
-    return `${hathorLib.helpers.getServerURL()}graphviz/neighbours.dot/?tx=${hash}&graph_type=${type}&max_level=${MAX_GRAPH_LEVEL}`;
+  renderGraph(viz, documentId, data) {
+    viz.renderSVGElement(data)
+      .then((element) => {
+        const domElement = document.getElementById(documentId);
+
+        // If the user click "back" before the request is complete,
+        // the component will be killed and this will be undefined,
+        // causing an error on the wallet.
+        if (!domElement) {
+          return;
+        }
+
+        domElement.appendChild(element);
+      });
   }
 
-  /**
-   * Update graphs on the screen to add the ones from the server
-   */
-  updateGraphs = () => {
-    const viz = new Viz({ Module, render });
-    const url1 = this.graphURL(this.props.transaction.hash, 'funds');
-    const url2 = this.graphURL(this.props.transaction.hash, 'verification');
-    hathorLib.txApi.getGraphviz(url1, (response) => {
-      viz.renderSVGElement(response).then((element) => {
-        document.getElementById('graph-funds').appendChild(element);
-      });
+  queryFundsData = async () => {
+    const viz = new Viz({
+      Module,
+      render,
     });
 
-    hathorLib.txApi.getGraphviz(url2, (response) => {
-      viz.renderSVGElement(response).then((element) => {
-        document.getElementById('graph-verification').appendChild(element);
-      });
+    this.setState({
+      graphvizFundsRequestFailed: false,
+      graphvizFundsRequestLoading: true,
     });
+
+    try {
+      const fundsData = await this.props.wallet.graphvizNeighborsQuery(
+        this.props.transaction.hash,
+        'funds',
+        MAX_GRAPH_LEVEL,
+      );
+
+      this.renderGraph(viz, 'graph-funds', fundsData);
+      this.setState({
+        graphvizFundsRequestLoading: false,
+      });
+    } catch(e) {
+      this.setState({
+        graphvizFundsRequestFailed: true,
+        graphvizFundsRequestLoading: false,
+      });
+    }
+  }
+
+  queryVerificationData = async () => {
+    const viz = new Viz({
+      Module,
+      render,
+    });
+
+    this.setState({
+      graphvizVerificationRequestFailed: false,
+      graphvizVerificationRequestLoading: true,
+    });
+
+    try {
+      const verificationData = await this.props.wallet.graphvizNeighborsQuery(
+        this.props.transaction.hash,
+        'verification',
+        MAX_GRAPH_LEVEL,
+      );
+
+      this.renderGraph(viz, 'graph-verification', verificationData);
+      this.setState({
+        graphvizVerificationRequestLoading: false,
+      });
+    } catch(e) {
+      this.setState({
+        graphvizVerificationRequestFailed: true,
+        graphvizVerificationRequestLoading: false,
+      });
+    }
   }
 
   fetchWalletAddressesMap = async () => {
@@ -568,15 +623,51 @@ class TxData extends React.Component {
       )
     }
 
-    const renderGraph = (label, type) => {
+    const renderGraph = (
+      label,
+      type,
+      failed,
+      loading,
+      retryCallback,
+    ) => {
+      if (!this.props.showGraphs) {
+        return;
+      }
+
       return (
         <div className="mt-3 graph-div" id={`graph-${type}`} key={`graph-${type}-${this.props.transaction.hash}`}>
           <label className="graph-label">{label}:</label>
+          { loading && (
+            <Loading
+              type='spin'
+              width={16}
+              height={16}
+              delay={200} />
+          )}
+          { !loading && failed && (
+            <div>{t`Download failed`}, <a href="true" onClick={(e) => {
+              e.preventDefault();
+              retryCallback();
+            }}>{t`try again`}</a></div>
+          )}
         </div>
       );
-    }
+    };
 
     const renderAccumulatedWeight = () => {
+      if (this.props.confirmationDataError) {
+        const onRetryClick = (e) => {
+          e.preventDefault();
+          this.props.confirmationDataRetry();
+        };
+        return (
+          <>
+            {t`Error retrieving accumulated weight data...`}&nbsp;
+            <a href="true" onClick={onRetryClick}>{t`try again`}</a>
+          </>
+        )
+      }
+
       if (this.props.confirmationData) {
         let acc = hathorLib.helpers.roundFloat(this.props.confirmationData.accumulated_weight);
         if (this.props.confirmationData.accumulated_bigger) {
@@ -720,13 +811,34 @@ class TxData extends React.Component {
     }
 
     const renderConfirmationLevel = () => {
+      const renderConfirmationLevelMessage = () => {
+        if (this.props.confirmationDataError) {
+          const onRetryClick = (e) => {
+            e.preventDefault();
+            this.props.confirmationDataRetry();
+          };
+          return (
+            <>
+              {t`Error retrieving confirmation level...`}&nbsp;
+              <a href="true" onClick={onRetryClick}>{t`try again`}</a>
+            </>
+          )
+        }
+
+        if (this.props.confirmationData) {
+          return `${hathorLib.helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%`;
+        }
+
+        return t`Retrieving confirmation level data...`;
+      };
+
       return (
         <div>
           <label>{t`Confirmation level:`}</label>
-          {this.props.confirmationData ? `${hathorLib.helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%` : 'Retrieving confirmation level data...'}
+          {renderConfirmationLevelMessage()}
         </div>
       );
-    }
+    };
 
     const isNFTCreation = () => {
       if (this.props.transaction.version !== hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
@@ -780,10 +892,22 @@ class TxData extends React.Component {
             </div>
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
-            {this.props.showGraphs && renderGraph(t`Verification neighbors`, 'verification')}
+            {renderGraph(
+              t`Verification neighbors`,
+              'verification',
+              this.state.graphvizVerificationRequestFailed,
+              this.state.graphvizVerificationRequestLoading,
+              this.queryVerificationData,
+            )}
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
-            {this.props.showGraphs && renderGraph(t`Funds neighbors`, 'funds')}
+            {renderGraph(
+              t`Funds neighbors`,
+              'funds',
+              this.state.graphvizFundsRequestFailed,
+              this.state.graphvizFundsRequestLoading,
+              this.queryFundsData,
+            )}
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
             {this.props.showRaw ? showRawWrapper() : null}
