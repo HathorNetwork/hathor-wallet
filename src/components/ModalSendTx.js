@@ -53,7 +53,9 @@ class ModalSendTx extends React.Component {
   sendErrorMessage = '';
 
   componentDidMount = () => {
+    $('#pinModal').modal('show');
     $('#pinModal').on('hidden.bs.modal', (e) => {
+      this.props.onClose();
       if (this.tx && this.props.onSendSuccess) {
         // If succeeded to send tx and has method to execute
         this.props.onSendSuccess(this.tx);
@@ -70,16 +72,17 @@ class ModalSendTx extends React.Component {
       this.setState({ errorMessage: '', step: 0 }, () => {
         this.refs.pinInput.refs.pin.value = '';
       });
-    })
+    });
 
     $('#pinModal').on('shown.bs.modal', (e) => {
       this.refs.pinInput.refs.pin.focus();
-    })
+    });
   }
 
   componentWillUnmount = () => {
     // Removing all event listeners
     $('#pinModal').off();
+    $('#pinModal').modal('hide');
   }
 
   /**
@@ -165,12 +168,15 @@ class ModalSendTx extends React.Component {
             </form>
           </div>
         );
-      } else {
-        return <SendTxHandler
-                sendTransaction={this.sendTransaction}
-                onSendSuccess={this.onSendSuccess}
-                onSendError={this.onSendError} />
       }
+
+      return (
+        <SendTxHandler
+          sendTransaction={this.sendTransaction}
+          onSendSuccess={this.onSendSuccess}
+          onSendError={this.onSendError}
+        />
+      );
     }
 
     const renderTitle = () => {

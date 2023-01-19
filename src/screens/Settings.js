@@ -13,16 +13,13 @@ import helpers from '../utils/helpers';
 import { Link } from 'react-router-dom';
 import HathorAlert from '../components/HathorAlert';
 import SpanFmt from '../components/SpanFmt';
-import ModalLedgerResetTokenSignatures from '../components/ModalLedgerResetTokenSignatures';
-import ModalConfirm from '../components/ModalConfirm';
-import ModalResetAllData from '../components/ModalResetAllData';
-import $ from 'jquery';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
-import ModalAlertNotSupported from '../components/ModalAlertNotSupported';
 import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { connect } from "react-redux";
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../constants';
 
 const mapStateToProps = (state) => {
   return {
@@ -37,6 +34,14 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class Settings extends React.Component {
+  static contextType = GlobalModalContext;
+
+  constructor(props) {
+    super(props);
+
+    this.alertCopiedRef = React.createRef();
+  }
+
   /**
    * confirmData {Object} data for the notification confirm modal (title, body and handleYes)
    * isNotificationOne {boolean} state to update if notification is turned on or off
@@ -73,7 +78,7 @@ class Settings extends React.Component {
    * Method called when user confirmed the reset, then we reset all data and redirect to Welcome screen
    */
   handleReset = () => {
-    $('#confirmResetModal').modal('hide');
+    this.context.hideModal();
     wallet.resetWalletData();
     this.props.history.push('/welcome/');
   }
@@ -82,7 +87,9 @@ class Settings extends React.Component {
    * When user clicks Reset button we open a modal to confirm it
    */
   resetClicked = () => {
-    $('#confirmResetModal').modal('show');
+    this.context.showModal(MODAL_TYPES.RESET_ALL_DATA, {
+      success: this.handleReset,
+    });
   }
 
   /**
@@ -90,7 +97,18 @@ class Settings extends React.Component {
    */
   addPassphrase = () => {
     if (hathorLib.wallet.isHardwareWallet()) {
-      $('#notSupported').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
+        title: t`Complete action on your hardware wallet`,
+        children: (
+          <div>
+            <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
+            <p>
+              {str2jsx(t`|fn:More info| about this on Ledger.`,
+                       {fn: (x, i) => <a key={i} onClick={this.openLedgerLink} href="true">{x}</a>})}
+            </p>
+          </div>
+        )
+      });
     } else {
       this.props.history.push('/wallet/passphrase/');
     }
@@ -140,24 +158,32 @@ class Settings extends React.Component {
    */
   toggleNotificationSettings = (e) => {
     e.preventDefault();
+    let newState = {};
     if (wallet.isNotificationOn()) {
-      this.setState({
+      newState = {
         confirmData: {
           title: t`Turn notifications off`,
           body: t`Are you sure you don't want to receive wallet notifications?`,
           handleYes: this.handleToggleNotificationSettings
         }
-      });
+      };
     } else {
-      this.setState({
+      newState = {
         confirmData: {
           title: t`Turn notifications on`,
           body: t`Are you sure you want to receive wallet notifications?`,
           handleYes: this.handleToggleNotificationSettings
         }
-      });
+      };
     }
-    $('#confirmModal').modal('show');
+
+    this.setState(newState, () => {
+      this.context.showModal(MODAL_TYPES.CONFIRM, {
+        title: this.state.confirmData.title,
+        body: this.state.confirmData.body,
+        handleYes: this.state.confirmData.handleYes,
+      });
+    })
   }
 
   /**
@@ -168,24 +194,33 @@ class Settings extends React.Component {
    */
   toggleZeroBalanceTokens = (e) => {
     e.preventDefault();
+    let newState = {};
+
     if (wallet.areZeroBalanceTokensHidden()) {
-      this.setState({
+      newState = {
         confirmData: {
           title: t`Show zero-balance tokens`,
           body: t`Are you sure you want to show all tokens, including those with zero balance?`,
           handleYes: this.handleToggleZeroBalanceTokens
-        }
-      });
+        },
+      };
     } else {
-      this.setState({
+      newState = {
         confirmData: {
           title: t`Hide zero-balance tokens`,
           body: t`Are you sure you want to hide tokens with zero balance?`,
           handleYes: this.handleToggleZeroBalanceTokens
-        }
-      });
+        },
+      };
     }
-    $('#confirmModal').modal('show');
+
+    this.setState(newState, () => {
+      this.context.showModal(MODAL_TYPES.CONFIRM, {
+        title: this.state.confirmData.title,
+        body: this.state.confirmData.body,
+        handleYes: this.state.confirmData.handleYes,
+      });
+    });
   }
 
   /**
@@ -200,7 +235,7 @@ class Settings extends React.Component {
       wallet.hideZeroBalanceTokens();
     }
     this.setState({ zeroBalanceTokensHidden: !areZeroBalanceTokensHidden });
-    $('#confirmModal').modal('hide');
+    this.context.hideModal();
   }
 
   /**
@@ -214,7 +249,7 @@ class Settings extends React.Component {
       wallet.turnNotificationOn();
     }
     this.setState({ isNotificationOn: wallet.isNotificationOn() });
-    $('#confirmModal').modal('hide');
+    this.context.hideModal();
   }
 
   /**
@@ -232,7 +267,7 @@ class Settings extends React.Component {
    * Called when user clicks to untrust all tokens, then opens the modal
    */
   untrustClicked = () => {
-    $('#resetTokenSignatures').modal('show');
+    this.context.showModal(MODAL_TYPES.RESET_TOKEN_SIGNATURES);
   }
 
   /**
@@ -245,8 +280,28 @@ class Settings extends React.Component {
   copied = (text, result) => {
     if (result) {
       // If copied with success
-      this.refs.alertCopied.show(1000);
+      this.alertCopiedRef.current.show(1000);
     }
+  }
+
+  /**
+   * Method called to open Terms of Service URL
+   *
+   * @param {Object} e Event for the click
+   */
+  goToTermsOfService = (e) => {
+    e.preventDefault();
+    helpers.openExternalURL(TERMS_OF_SERVICE_URL);
+  }
+
+  /**
+   * Method called to open Privacy Policy URL
+   *
+   * @param {Object} e Event for the click
+   */
+  goToPrivacyPolicy = (e) => {
+    e.preventDefault();
+    helpers.openExternalURL(PRIVACY_POLICY_URL);
   }
 
   render() {
@@ -299,19 +354,13 @@ class Settings extends React.Component {
             <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
           </div>
         </div>
-        {ledgerCustomTokens && <ModalLedgerResetTokenSignatures />}
-        <ModalResetAllData success={this.handleReset} />
-        <ModalConfirm title={this.state.confirmData.title} body={this.state.confirmData.body} handleYes={this.state.confirmData.handleYes} />
-        <ModalAlertNotSupported title={t`Complete action on your hardware wallet`}>
-          <div>
-            <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
-            <p>
-              {str2jsx(t`|fn:More info| about this on Ledger.`,
-                       {fn: (x, i) => <a key={i} onClick={this.openLedgerLink} href="true">{x}</a>})}
-            </p>
-          </div>
-        </ModalAlertNotSupported>
-        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
+        <hr />
+
+        <div className="pb-5">
+          <div><a href="true" onClick={this.goToTermsOfService}>Terms of Service</a></div>
+          <div><a href="true" onClick={this.goToPrivacyPolicy}>Privacy Policy</a></div>
+        </div>
+        <HathorAlert ref={this.alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
       </div>
     );
   }

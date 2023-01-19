@@ -18,6 +18,7 @@ import { updatePassword, updatePin, updateWords } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import $ from 'jquery';
 
 
@@ -46,6 +47,8 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class NewWallet extends React.Component {
+  static contextType = GlobalModalContext;
+
   constructor(props) {
     super(props);
 
@@ -58,7 +61,9 @@ class NewWallet extends React.Component {
       step2: false,
       askPassword: false,
       askPIN: false,
-    }
+    };
+
+    this.alertSuccessRef = React.createRef();
   }
 
   componentDidMount = () => {
@@ -88,7 +93,10 @@ class NewWallet extends React.Component {
    * When user decides to do the backup now (opens backup modal)
    */
   backupNow = () => {
-    $('#backupWordsModal').modal('show');
+    this.context.showModal(MODAL_TYPES.BACKUP_WORDS, {
+      needPassword: false,
+      validationSuccess: this.validationSuccess,
+    });
   }
 
   /**
@@ -118,12 +126,10 @@ class NewWallet extends React.Component {
    * After user backed up the words with success we mark it as done and show the component to Choose Password
    */
   validationSuccess = () => {
-    $('#backupWordsModal').on('hidden.bs.modal', (e) => {
-      hathorLib.wallet.markBackupAsDone();
-      this.refs.alertSuccess.show(3000);
-      this.setState({ askPassword: true });
-    });
-    $('#backupWordsModal').modal('hide');
+    this.context.hideModal();
+    hathorLib.wallet.markBackupAsDone();
+    this.alertSuccessRef.current.show(3000);
+    this.setState({ askPassword: true });
   }
 
   /**
@@ -205,8 +211,7 @@ class NewWallet extends React.Component {
           </div>
           <InitialImages />
         </div>
-        <HathorAlert ref="alertSuccess" text={t`Backup completed!`} type="success" />
-        <ModalBackupWords needPassword={false} validationSuccess={this.validationSuccess} />
+        <HathorAlert ref={this.alertSuccessRef} text={t`Backup completed!`} type="success" />
       </div>
     )
   }

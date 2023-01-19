@@ -73,6 +73,12 @@ class LoadingAddresses extends React.Component {
   render() {
     // If finished loading addresses we redirect back to the page was supposed to load at first
     if (this.state.canRedirect && !this.props.loadingAddresses) {
+      // If we don't have state, we should default to /wallet/, this might happen if the page
+      // was reloaded on the loading_addresses screen. This may happen during development
+      // because of the auto reload
+      if (!this.props.location.state) {
+        return <Redirect to='/wallet/' />;
+      }
       return <Redirect to={{ pathname: this.props.location.state.path }} />;
     }
 

@@ -20,7 +20,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.24.0';
+export const VERSION = '0.25.0';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible  
@@ -188,6 +188,16 @@ export const LEDGER_GUIDE_URL = 'https://hathor.network/ledger-guide';
  * URL for the NFT guide
  */
 export const NFT_GUIDE_URL = 'https://hathor.network/nft-guide';
+
+/**
+ * URL for the Terms of Service
+ */
+export const TERMS_OF_SERVICE_URL = 'https://hathor.network/terms-and-conditions/';
+
+/**
+ * URL for the Privacy Policy
+ */
+export const PRIVACY_POLICY_URL = 'https://hathor.network/privacy-policy/';
 
 /**
  * How many token meta we are downloading concurrently

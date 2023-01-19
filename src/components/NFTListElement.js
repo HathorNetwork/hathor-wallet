@@ -7,8 +7,14 @@
 
 import React from 'react';
 import { t } from 'ttag'
-import { NFT_MEDIA_TYPES, VIDEO_MEDIA_TYPES_BY_EXTENSION, AUDIO_MEDIA_TYPES_BY_EXTENSION } from '../constants';
+import {
+  NFT_MEDIA_TYPES,
+  VIDEO_MEDIA_TYPES_BY_EXTENSION,
+  AUDIO_MEDIA_TYPES_BY_EXTENSION,
+} from '../constants';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import helpers from '../utils/helpers';
+import Loading from '../components/Loading';
 
 
 /**
@@ -32,7 +38,6 @@ class NFTListElement extends React.Component {
 
   render = () => {
     const nftType = this.props.nftElement.nft_media.type && this.props.nftElement.nft_media.type.toUpperCase();
-
     const file = this.props.nftElement.nft_media.file;
 
     // The metadata may have the media mime type (useful for videos and audios) because many times the file does not have an extension.
@@ -95,7 +100,15 @@ class NFTListElement extends React.Component {
             <figure className="figure flex-fill p-4 d-flex align-items-center justify-content-center">
               { media }
             </figure>
-            <p><strong>Balance: </strong>{helpers.renderValue(this.props.nftElement.balance, true)} {this.props.nftElement.symbol}</p>
+            <p>
+              <strong>Balance: </strong>
+              { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && helpers.renderValue(this.props.nftElement.balance.data.available, true) }
+              { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
+                <Loading />
+              )}
+              &nbsp;
+              { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && this.props.nftElement.symbol }
+            </p>
             <p><a href="true" onClick={(e) => this.goToTokenDetail(e, this.props.nftElement.id)}>{t`See on explorer`}</a></p>
           </div>        
         </div>

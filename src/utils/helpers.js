@@ -39,25 +39,6 @@ const helpers = {
   },
 
   /**
-   * Reloads the page loaded on electron
-   *
-   * @memberof Helpers
-   * @inner
-   */
-  reloadElectron() {
-    // If we don't have window.require, we can assume the app is running on a browser, so we can just
-    // use the regular window.location to reload
-    if (!window.require) {
-      window.location.reload();
-    }
-
-    const { getCurrentWindow } = window.require('electron').remote;
-    const currentWindow = getCurrentWindow();
-
-    currentWindow.reload();
-  },
-
-  /**
    * Update network variables in redux, storage and lib
    *
    * @params {String} network Network name
@@ -201,6 +182,24 @@ const helpers = {
     localStorage.setItem('app:uniqueId', uniqueId);
 
     return uniqueId;
+  },
+
+  /**
+   * Map token history object to the expected object in the wallet redux data
+   *
+   * tx {Object} history data element
+   * tokenUid {String} token uid
+   */
+  mapTokenHistory(tx, tokenUid) {
+    return {
+      tx_id: tx.txId,
+      timestamp: tx.timestamp,
+      tokenUid,
+      balance: tx.balance,
+      // in wallet service this comes as 0/1 and in the full node comes with true/false
+      is_voided: Boolean(tx.voided),
+      version: tx.version,
+    };
   }
 }
 

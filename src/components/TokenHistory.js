@@ -6,24 +6,32 @@
  */
 
 import React from 'react';
+import ReactLoading from 'react-loading';
+import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
 import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import HathorAlert from './HathorAlert';
-import wallet from '../utils/wallet';
-import TokenPagination from './TokenPagination';
-import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
-import helpers from '../utils/helpers';
 import { get } from 'lodash';
+import wallet from '../utils/wallet';
+import helpers from '../utils/helpers';
+import colors from '../index.scss';
+import TokenPagination from './TokenPagination';
+import HathorAlert from './HathorAlert';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 const mapStateToProps = (state, props) => {
-  let history = [];
+  const defaultTokenHistory = {
+    status: TOKEN_DOWNLOAD_STATUS.LOADING,
+    data: [],
+  };
+  let history = defaultTokenHistory;
   if (props.selectedToken) {
-    history = state.tokensHistory[props.selectedToken];
+    history = get(state.tokensHistory, `${props.selectedToken}`, defaultTokenHistory);
   }
+
   return { 
-    tokensHistory: history,
+    tokenHistory: history,
     wallet: state.wallet,
     tokenMetadata: state.tokenMetadata,
   };
@@ -36,6 +44,11 @@ const mapStateToProps = (state, props) => {
  * @memberof Components
  */
 class TokenHistory extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.alertCopiedRef = React.createRef();
+  }
   /**
    * hasAfter {boolean} if should activate 'Next' button in pagination
    * hasBefore {boolean} if should activate 'Previous' button in pagination
@@ -62,7 +75,7 @@ class TokenHistory extends React.Component {
   }
 
   componentDidUpdate = (prevProps) => {
-    if (prevProps.tokensHistory !== this.props.tokensHistory) {
+    if (prevProps.tokenHistory.data !== this.props.tokenHistory.data) {
       this.handleHistoryUpdate();
     }
   }
@@ -72,7 +85,11 @@ class TokenHistory extends React.Component {
    */
   fetchMoreHistory = async () => {
     if (this.state.shouldFetch) {
-      const newHistory = await wallet.fetchMoreHistory(this.props.wallet, this.props.selectedToken, this.props.tokensHistory);
+      const newHistory = await wallet.fetchMoreHistory(
+        this.props.wallet,
+        this.props.selectedToken,
+        this.props.tokenHistory.data
+      );
       if (newHistory.length === 0) {
         // Last page already fetched, no need to fetch anymore
         this.setState({ shouldFetch: false });
@@ -111,8 +128,8 @@ class TokenHistory extends React.Component {
    * Calculates the transactions that will be shown in the list, besides the pagination data
    */
   handleHistoryUpdate = () => {
-    const history = this.props.tokensHistory;
-    if (history && history.length > 0) {
+    const history = get(this.props.tokenHistory, 'data', []);
+    if (history.length > 0) {
       let startIndex = 0;
       let endIndex = this.props.count;
       if (this.state.reference !== null) {
@@ -146,10 +163,10 @@ class TokenHistory extends React.Component {
     if (this.state.reference === null) {
       throw new Error('State reference cannot be null calling this method.');
     }
-    const history = this.props.tokensHistory;
+    const history = get(this.props.tokenHistory, 'data', []);
     const idxReference = history.findIndex((tx) =>
       tx.tx_id === this.state.reference
-    )
+    );
     return idxReference;
   }
 
@@ -160,10 +177,10 @@ class TokenHistory extends React.Component {
    * @param {string} text Text copied to clipboard
    * @param {*} result Null in case of error
    */
-  copied = (text, result) => {
+  copied = (_text, result) => {
     if (result) {
       // If copied with success
-      this.refs.alertCopied.show(1000);
+      this.alertCopiedRef.current.show(1000);
     }
   }
 
@@ -213,11 +230,11 @@ class TokenHistory extends React.Component {
               </tr>
             </thead>
             <tbody>
-              {renderHistoryData()}
+              { renderHistoryData() }
             </tbody>
           </table>
           <TokenPagination
-            history={this.props.tokensHistory}
+            history={this.props.tokenHistory.data}
             hasBefore={this.state.hasBefore}
             hasAfter={this.state.hasAfter}
             nextClicked={this.nextClicked}
@@ -233,10 +250,24 @@ class TokenHistory extends React.Component {
       );
     }
 
+    const renderLoading = () => {
+      return (
+        <div>
+          <ReactLoading
+            type='spin'
+            color={colors.purpleHathor}
+            width={24}
+            height={24}
+            delay={200} />
+          <strong>{t`Loading history...`}</strong>
+        </div>
+      )
+    };
+
     const renderHistoryData = () => {
       const isNFT = helpers.isTokenNFT(get(this.props, 'selectedToken'), this.props.tokenMetadata);
 
-      return this.state.transactions.map((tx, idx) => {
+      return this.state.transactions.map((tx) => {
         let statusElement = '';
         let trClass = '';
         let value = helpers.renderValue(tx.balance, isNFT);
@@ -293,8 +324,10 @@ class TokenHistory extends React.Component {
     return (
       <div>
         {this.props.showPage && renderPage()}
-        {renderHistory()}
-        <HathorAlert ref="alertCopied" text="Copied to clipboard!" type="success" />
+        {this.props.tokenHistory.status === TOKEN_DOWNLOAD_STATUS.READY && renderHistory()}
+        {this.props.tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING && renderLoading()}
+
+        <HathorAlert ref={this.alertCopiedRef} text="Copied to clipboard!" type="success" />
       </div>
     );
   }

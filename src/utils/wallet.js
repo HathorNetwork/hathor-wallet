@@ -10,51 +10,33 @@ import {
   DEBUG_LOCAL_DATA_KEYS,
   WALLET_HISTORY_COUNT,
   METADATA_CONCURRENT_DOWNLOAD,
-  WALLET_SERVICE_MAINNET_BASE_URL,
-  WALLET_SERVICE_MAINNET_BASE_WS_URL,
 } from '../constants';
 import { FeatureFlags } from '../featureFlags';
-import STORE from '../storageInstance';
 import store from '../store/index';
 import {
-  setWallet,
-  updateLoadedData,
-  isOnlineUpdate,
-  updateHeight,
-  updateTx,
   loadingAddresses,
-  loadWalletSuccess,
+  startWalletRequested,
   historyUpdate,
   sharedAddressUpdate,
   reloadData,
   cleanData,
   updateTokenHistory,
   tokenMetadataUpdated,
-  metadataLoaded,
   partiallyUpdateHistoryAndBalance,
-  setUseWalletService,
-  lockWalletForResult,
   resetSelectedTokenIfNeeded,
 } from '../actions/index';
 import {
-  helpers,
   constants as hathorConstants,
   errors as hathorErrors,
   HathorWallet,
-  HathorWalletServiceWallet,
-  Connection,
-  Network,
   wallet as oldWalletUtil,
   walletUtils,
   storage,
   tokens,
   metadataApi,
-  config,
 } from '@hathor/wallet-lib';
-import version from './version';
-import ledger from './ledger';
-import { chunk } from 'lodash';
-import walletHelpers from './helpers';
+import { chunk, get } from 'lodash';
+import helpers from '../utils/helpers';
 
 let Sentry = null;
 // Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
@@ -140,25 +122,13 @@ const wallet = {
       }
     }
 
-    return this.startWallet(words, passphrase, pin, password, routerHistory);
-  },
-
-  /**
-   * Map token history object to the expected object in the wallet redux data
-   *
-   * tx {Object} history data element
-   * tokenUid {String} token uid
-   */
-  mapTokenHistory(tx, tokenUid) {
-    return {
-      tx_id: tx.txId,
-      timestamp: tx.timestamp,
-      tokenUid,
-      balance: tx.balance,
-      // in wallet service this comes as 0/1 and in the full node comes with true/false
-      is_voided: Boolean(tx.voided),
-      version: tx.version,
-    };
+    store.dispatch(startWalletRequested({
+      words,
+      passphrase,
+      pin,
+      password,
+      routerHistory,
+    }))
   },
 
   /**
@@ -181,7 +151,7 @@ const wallet = {
       // We fetch history count of 5 pages and then we fetch a new page each 'Next' button clicked
       const history = await wallet.getTxHistory({ token_id: token, count: 5 * WALLET_HISTORY_COUNT });
       tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
-      tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
+      tokensHistory[token] = history.map((element) => helpers.mapTokenHistory(element, token));
       /* eslint-enable no-await-in-loop */
     }
 
@@ -198,37 +168,13 @@ const wallet = {
    */
   async fetchMoreHistory(wallet, token, history) {
     const newHistory = await wallet.getTxHistory({ token_id: token, skip: history.length, count: WALLET_HISTORY_COUNT });
-    const newHistoryObjects = newHistory.map((element) => this.mapTokenHistory(element, token));
+    const newHistoryObjects = newHistory.map((element) => helpers.mapTokenHistory(element, token));
 
     if (newHistoryObjects.length) {
       store.dispatch(updateTokenHistory(token, newHistoryObjects));
     }
 
     return newHistoryObjects;
-  },
-
-  /**
-   * After a new transaction arrives in the websocket we must
-   * fetch the new balance for each token on it and use
-   * this new data to update redux info
-   *
-   * wallet {HathorWallet} wallet object
-   * tx {Object} full transaction object from the websocket
-   */
-  async fetchNewTxTokenBalance(wallet, tx) {
-    if (!wallet.isReady()) {
-      return null;
-    }
-
-    const updatedBalanceMap = {};
-    const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
-
-    // we now loop through all tokens present in the new tx to get the new balance
-    for (const [tokenUid] of Object.entries(balances)) {
-      /* eslint-disable no-await-in-loop */
-      updatedBalanceMap[tokenUid] = await this.fetchTokenBalance(wallet, tokenUid);
-    }
-    return updatedBalanceMap;
   },
 
   /**
@@ -258,19 +204,6 @@ const wallet = {
       mint,
       melt,
     };
-  },
-
-  /**
-   * Fetch HTR balance
-   *
-   * wallet {HathorWallet} wallet object
-   */
-  async fetchNewHTRBalance(wallet) {
-    if (wallet.isReady()) {
-      // Need to update tokensBalance if wallet is ready
-      const { uid } = hathorConstants.HATHOR_TOKEN_CONFIG;
-      return await this.fetchTokenBalance(wallet, uid);
-    }
   },
 
   /**
@@ -328,32 +261,6 @@ const wallet = {
     metadataPerToken[tokenUid] = metadata;
 
     store.dispatch(tokenMetadataUpdated(metadataPerToken, []));
-  },
-
-  /**
-   * Fetches both history and balance for the affected tokens in updatedBalanceMap
-   *
-   * @param {HathorWallet} wallet object
-   * @param {Object} updatedBalanceMap An object containing tokens as the keys and their updated balances as values
-   *
-   * @memberof Wallet
-   * @inner
-   **/
-  async handlePartialUpdate (wallet, updatedBalanceMap) {
-    const tokens = Object.keys(updatedBalanceMap);
-    const tokensHistory = {};
-    const tokensBalance = {};
-
-    for (const token of tokens) {
-      /* eslint-disable no-await-in-loop */
-      const history = await wallet.getTxHistory({ token_id: token });
-
-      tokensBalance[token] = await this.fetchTokenBalance(wallet, token);
-      tokensHistory[token] = history.map((element) => this.mapTokenHistory(element, token));
-      /* eslint-enable no-await-in-loop */
-    }
-
-    store.dispatch(partiallyUpdateHistoryAndBalance({ tokensHistory, tokensBalance }));
   },
 
   /**
@@ -421,7 +328,7 @@ const wallet = {
       const tokenUid = registeredObject.uid;
 
       // If there is no entry for this token on tokensBalance, generate an empty balance object.
-      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
+      const balance = get(tokensBalance, `${tokenUid}.data`, { available: 0, locked: 0 });
       const tokenData = {
         ...registeredObject,
         balance: balance,
@@ -430,6 +337,7 @@ const wallet = {
       // If we indicated this token should always be exhibited, add it already.
       const isTokenHTR = tokenUid === hathorConstants.HATHOR_TOKEN_CONFIG.uid;
       const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
+
       if (isTokenHTR || alwaysShowThisToken) {
         filteredTokens.push(tokenData);
         continue;
@@ -451,237 +359,25 @@ const wallet = {
     return filteredTokens;
   },
 
-  /**
-   * Start a new HD wallet with new private key
-   * Encrypt this private key and save data in localStorage
-   *
-   * @param {string} words Words to generate the HD Wallet seed
-   * @param {string} passphrase
-   * @param {string} pin
-   * @param {string} password
-   * @param {Object} routerHistory History to push new path in case of notification click
-   * @param {boolean} fromXpriv If should start the wallet from xpriv already in storage
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  async startWallet(words, passphrase, pin, password, routerHistory, fromXpriv = false, xpub = null) {
-    // Set loading addresses screen to show
-    store.dispatch(loadingAddresses(true));
-    store.dispatch(metadataLoaded(false));
-
-    // When we start a wallet from the locked screen, we need to unlock it in the storage
-    oldWalletUtil.unlock();
-
-    const network = config.getNetwork();
-    const dataToken = tokens.getTokens();
-
-    // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
-    store.dispatch(reloadData({ tokens: dataToken }));
-
-    // We are offline, the connection object is yet to be created
-    store.dispatch(isOnlineUpdate({ isOnline: false }));
-
-    // Fetch metadata of all tokens registered
-    this.fetchTokensMetadata(dataToken.map((token) => token.uid), network.name);
-
-    const uniqueDeviceId = walletHelpers.getUniqueId();
-    const featureFlags = new FeatureFlags(uniqueDeviceId, network.name);
-    const hardwareWallet = oldWalletUtil.isHardwareWallet();
-    // For now, the wallet service does not support hardware wallet, so default to the old facade
-    const useWalletService = hardwareWallet ? false : await featureFlags.shouldUseWalletService();
-
-    store.dispatch(setUseWalletService(useWalletService));
-
-    let wallet;
-    let connection;
-
-    if (useWalletService) {
-      let xpriv = null;
-
-      if (fromXpriv) {
-        xpriv = oldWalletUtil.getAcctPathXprivKey(pin);
-      }
-
-      const {
-        walletServiceBaseUrl,
-        walletServiceWsUrl,
-      } = HathorWalletServiceWallet.getServerUrlsFromStorage();
-
-      // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
-      config.setWalletServiceBaseUrl(walletServiceBaseUrl || WALLET_SERVICE_MAINNET_BASE_URL);
-      config.setWalletServiceBaseWsUrl(walletServiceWsUrl || WALLET_SERVICE_MAINNET_BASE_WS_URL);
-
-      const walletConfig = {
-        seed: words,
-        xpriv,
-        xpub,
-        requestPassword: async () => new Promise((resolve) => {
-          /**
-           * Lock screen will call `resolve` with the pin screen after validation
-           */
-          routerHistory.push('/locked/');
-          store.dispatch(lockWalletForResult(resolve));
-        }),
-        passphrase,
-        network,
-      };
-
-      wallet = new HathorWalletServiceWallet(walletConfig);
-      connection = wallet.conn;
-    } else {
-      // If we've lost redux data, we could not properly stop the wallet object
-      // then we don't know if we've cleaned up the wallet data in the storage
-      // If it's fromXpriv, then we can't clean access data because we need that
-      oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv});
-
-      let xpriv = null;
-
-      if (fromXpriv) {
-        xpriv = oldWalletUtil.getXprivKey(pin);
-      }
-
-      connection = new Connection({
-        network: network.name,
-        servers: [helpers.getServerURL()],
-      });
-
-      const beforeReloadCallback = () => {
-        store.dispatch(loadingAddresses(true));
-      };
-
-      const walletConfig = {
-        seed: words,
-        xpriv,
-        xpub,
-        store: STORE,
-        passphrase,
-        connection,
-        beforeReloadCallback,
-      };
-
-      wallet = new HathorWallet(walletConfig);
-    }
-
-    store.dispatch(setWallet(wallet));
-
-    // TODO should we save server info?
-    //store.dispatch(setServerInfo(serverInfo));
-    wallet.on('state', async (state) => {
-      if (state === HathorWallet.ERROR) {
-        // ERROR
-        // TODO Should we show an error screen and try to restart the wallet?
-      } else if (wallet.isReady()) {
-        // READY
-        const { tokensHistory, tokensBalance, tokens } = await this.fetchWalletData(wallet);
-        store.dispatch(loadWalletSuccess(tokensHistory, tokensBalance, tokens));
-      }
-    });
-
-    wallet.on('new-tx', async (tx) => {
-      let message = '';
-      if (helpers.isBlock(tx)) {
-        message = 'You\'ve found a new block! Click to open it.';
-      } else {
-        message = 'You\'ve received a new transaction! Click to open it.'
-      }
-
-      const notification = this.sendNotification(message);
-
-      // Set the notification click, in case we have sent one
-      if (notification !== undefined) {
-        notification.onclick = () => {
-          routerHistory.push(`/transaction/${tx.tx_id}/`);
-        }
-      }
-
-      this.fetchNewTxTokenBalance(wallet, tx).then(async (updatedBalanceMap) => {
-        if (updatedBalanceMap) {
-          this.handlePartialUpdate(wallet, updatedBalanceMap);
-
-          // If we are here, we have already fetched new addresses, so it's safe to
-          // call getCurrentAddress to make sure we display a new address to the user
-          const currentAddress = wallet.getCurrentAddress();
-          this.updateSharedAddressRedux(currentAddress.address, currentAddress.index);
-        }
-      });
-    });
-
-    wallet.on('update-tx', async (tx) => {
-      // `update-tx` event is not yet being emitted from the wallet-service facade as it is not implemented,
-      // we should ignore this message for now to prevent errors when we start emitting it in the future
-      if (useWalletService) {
-        return;
-      }
-      const balances = await wallet.getTxBalance(tx, { includeAuthorities: true });
-      const updatedBalanceMap = await this.fetchNewTxTokenBalance(wallet, tx);
-      store.dispatch(updateTx(tx, updatedBalanceMap, balances));
-    });
-
-    try {
-      const serverInfo = await wallet.start({ pinCode: pin, password });
-
-      this.setConnectionEvents(connection, wallet);
-    } catch(e) {
-      if (useWalletService) {
-        // Wallet Service start wallet will fail if the status returned from
-        // the service is 'error' or if the start wallet request failed.
-        // We should fallback to the old facade by storing the flag to ignore
-        // the feature flag
-        await featureFlags.ignoreWalletServiceFlag();
-
-        // Restart the page, ignoring cache to make sure events are reset
-        walletHelpers.reloadElectron();
-      }
-    }
-
-    featureFlags.on('wallet-service-enabled', (newUseWalletService) => {
-      // We should only force reset the bundle if the user was on
-      // the wallet service facade and the newflag sends him to
-      // the old facade
-      if (useWalletService && useWalletService !== newUseWalletService) {
-        walletHelpers.reloadElectron();
-      }
-    });
-  },
-
-  setConnectionEvents(connection, wallet) {
-    connection.on('best-block-update', (height) => {
-      // HTR balance might have updated because of new height
-      // and some block HTR might have unlocked
-      this.fetchNewHTRBalance(wallet).then((htrUpdatedBalance) => {
-        if (htrUpdatedBalance) {
-          store.dispatch(updateHeight(height, htrUpdatedBalance));
-        }
-      });
-    });
-
-    connection.on('state', (state) => {
-      let isOnline;
-      if (state === Connection.CONNECTED) {
-        isOnline = true;
-      } else {
-        isOnline = false;
-      }
-      const storeState = store.getState();
-      if (storeState.isOnline !== isOnline) {
-        store.dispatch(isOnlineUpdate({ isOnline }));
-      }
-    });
-
-    connection.on('wallet-load-partial-update', (data) => {
-      const transactions = Object.keys(data.historyTransactions).length;
-      const addresses = data.addressesFound;
-      store.dispatch(updateLoadedData({ transactions, addresses }));
-    });
-  },
-
   async changeServer(wallet, pin, routerHistory) {
     wallet.stop({ cleanStorage: false });
+
     if (oldWalletUtil.isSoftwareWallet()) {
-      await this.startWallet(null, '', pin, '', routerHistory, true);
+      store.dispatch(startWalletRequested({
+        passphrase: '',
+        pin,
+        password: '', 
+        routerHistory,
+        fromXpriv: true,
+      }));
     } else {
-      await this.startWallet(null, '', null, '', routerHistory, false, wallet.xpub);
+      store.dispatch(startWalletRequested({
+        passphrase: '',
+        password: '', 
+        routerHistory,
+        fromXpriv: false,
+        xpub: wallet.xpub,
+      }));
     }
   },
 
@@ -728,31 +424,6 @@ const wallet = {
     const words = oldWalletUtil.getWalletWords(password);
     this.cleanWallet()
     return this.generateWallet(words, passphrase, pin, password, routerHistory);
-  },
-
-  /**
-   * Update last shared address and index in redux
-   *
-   * @param {string} address Last shared address
-   * @param {number} index Last shared index
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  updateSharedAddressRedux(address, index) {
-    store.dispatch(sharedAddressUpdate({ lastSharedAddress: address, lastSharedIndex: index}));
-  },
-
-  /**
-   * Get the shared address and index from localStorage to update Redux
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  updateSharedAddress() {
-    const lastSharedIndex = oldWalletUtil.getLastSharedIndex();
-    const lastSharedAddress = storage.getItem(storageKeys.address);
-    this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
   },
 
   /*

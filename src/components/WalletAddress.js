@@ -9,22 +9,18 @@ import React from 'react';
 import { t } from 'ttag';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
-import ModalAddressQRCode from './ModalAddressQRCode';
-import ModalAlert from './ModalAlert';
-import wallet from '../utils/wallet';
-import $ from 'jquery';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import ledger from '../utils/ledger';
 import { IPC_RENDERER } from '../constants';
 import { sharedAddressUpdate } from '../actions/index';
+import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 
 const mapDispatchToProps = dispatch => {
   return {
     sharedAddressUpdate: (data) => dispatch(sharedAddressUpdate(data)),
   };
 };
-
 
 const mapStateToProps = (state) => {
   return {
@@ -40,12 +36,21 @@ const mapStateToProps = (state) => {
  *
  * @memberof Components
  */
-class WalletAddress extends React.Component {
+export class WalletAddress extends React.Component {
+  static contextType = GlobalModalContext;
+
+  constructor(props) {
+    super(props);
+
+    this.alertCopiedRef = React.createRef();
+    this.alertErrorRef = React.createRef();
+  }
+
   componentDidMount() {
     if (IPC_RENDERER) {
       IPC_RENDERER.on("ledger:address", (event, arg) => {
         if (arg.success) {
-          $('#ledgerAlert').modal('hide');
+          this.context.hideModal();
         }
         // XXX is there any error handling here?
       });
@@ -69,7 +74,7 @@ class WalletAddress extends React.Component {
     const address = this.props.wallet.getNextAddress();
 
     if (address.address === this.props.lastSharedAddress) {
-      this.refs.alertError.show(3000);
+      this.alertErrorRef.current.show(3000);
     } else {
       this.props.sharedAddressUpdate({
         lastSharedAddress: address.address,
@@ -82,7 +87,13 @@ class WalletAddress extends React.Component {
     e.preventDefault();
 
     if (hathorLib.wallet.isHardwareWallet()) {
-      $('#ledgerAlert').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT, {
+        title: t`Validate address on Ledger`,
+        id: 'ledgerAlert',
+        showFooter: false,
+        body: this.renderAlertBody(),
+      });
+
       ledger.checkAddress(this.props.lastSharedIndex);
     }
   }
@@ -94,20 +105,20 @@ class WalletAddress extends React.Component {
    */
   showQRCode = (e) => {
     e.preventDefault();
-    $('#addressQRCodeModal').modal('show');
+    this.context.showModal(MODAL_TYPES.ADDRESS_QR_CODE)
   }
 
   /**
-   * Method called on copy to clipboard success  
+   * Method called on copy to clipboard success
    * Show alert success message
    *
    * @param {string} text Text copied to clipboard
    * @param {*} result Null in case of error
    */
-  copied = (text, result) => {
+  copied = (_text, result) => {
     if (result) {
       // If copied with success
-      this.refs.alertCopied.show(1000);
+      this.alertCopiedRef.current.show(1000);
     }
   }
 
@@ -122,6 +133,16 @@ class WalletAddress extends React.Component {
     this.props.goToAllAddresses();
   }
 
+  renderAlertBody() {
+    return (
+      <div>
+        <p>{t`Validate that the address below is the same presented on the Ledger screen.`}</p>
+        <p>{t`Press both buttons on your Ledger in case the address is valid.`}</p>
+        <p><strong>{this.props.lastSharedAddress}</strong></p>
+      </div>
+    );
+  }
+
   render() {
     const renderAddress = () => {
       return (
@@ -130,7 +151,7 @@ class WalletAddress extends React.Component {
           {showAddressString()}
           <div className="d-flex flex-row align-items-center">
             <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">{t`Generate new address`} <i className="fa fa-refresh ml-1" title={t`Get new address`}></i></a>
-            {hathorLib.wallet.isSoftwareWallet() &&   // hide the QR code for hardware wallet 
+            {hathorLib.wallet.isSoftwareWallet() &&   // hide the QR code for hardware wallet
               <div>
                 <span className="ml-3 mr-3">|</span>
                 <a href="true" onClick={(e) => this.showQRCode(e)}>{t`QR Code`} <i className="fa fa-qrcode ml-1" title={t`Get qrcode`}></i></a>
@@ -166,23 +187,12 @@ class WalletAddress extends React.Component {
       }
     }
 
-    const renderAlertBody = () => {
-      return (
-        <div>
-          <p>{t`Validate that the address below is the same presented on the Ledger screen.`}</p>
-          <p>{t`Press both buttons on your Ledger in case the address is valid.`}</p>
-          <p><strong>{this.props.lastSharedAddress}</strong></p>
-        </div>
-      );
-    }
-
     return (
       <div>
         {renderAddress()}
-        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
-        <HathorAlert ref="alertError" text={t`You must use an old address before generating new ones`} type="danger" />
-        <ModalAddressQRCode  />
-        <ModalAlert id="ledgerAlert" title={t`Validate address on Ledger`} showFooter={false} body={renderAlertBody()} />
+
+        <HathorAlert ref={this.alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
+        <HathorAlert ref={this.alertErrorRef} text={t`You must use an old address before generating new ones`} type="danger" />
       </div>
     );
   }

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag'
+import { connect } from 'react-redux';
 
 import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
@@ -14,9 +15,15 @@ import ledger from '../utils/ledger';
 import version from '../utils/version';
 import helpers from '../utils/helpers';
 import { LEDGER_GUIDE_URL, IPC_RENDERER, LEDGER_MIN_VERSION, LEDGER_MAX_VERSION } from '../constants';
+import { startWalletRequested } from '../actions';
 import InitialImages from '../components/InitialImages';
 import hathorLib from '@hathor/wallet-lib';
 
+const mapDispatchToProps = dispatch => {
+  return {
+    startWallet: (payload) => dispatch(startWalletRequested(payload)),
+  };
+};
 
 /**
  * Screen used to select between hardware wallet or software wallet
@@ -113,7 +120,15 @@ class StartHardwareWallet extends React.Component {
       const xpub = hathorLib.wallet.xpubFromData(compressedPubkey, chainCode, fingerprint);
 
       hathorLib.wallet.setWalletType('hardware');
-      wallet.startWallet(null, '', null, '', this.props.history, false, xpub);
+      this.props.startWallet({
+        words: null,
+        passphrase: '',
+        pin: null,
+        password: '',
+        routerHistory: this.props.history,
+        fromXpriv: false,
+        xpub,
+      });
       hathorLib.wallet.markBackupAsDone();
 
       const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
@@ -228,4 +243,4 @@ class StartHardwareWallet extends React.Component {
   }
 }
 
-export default StartHardwareWallet;
+export default connect(null, mapDispatchToProps)(StartHardwareWallet);

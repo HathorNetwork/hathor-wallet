@@ -24,7 +24,7 @@ import LedgerSignTokenInfo from './LedgerSignTokenInfo';
  *
  * @memberof Components
  */
-function ModalLedgerSignToken({token, modalId, cb}) {
+function ModalLedgerSignToken({token, modalId, cb, onClose}) {
   const [errorMessage, setError] = useState(null);
   const [showOk, setOk] = useState(false);
   const [showSend, canSend] = useState(true);
@@ -154,6 +154,7 @@ function ModalLedgerSignToken({token, modalId, cb}) {
 
   // token change -> go to begin and verify it
   useEffect(() => {
+    $(`#${modalId}`).modal('show');
 
     $(`#${modalId}`).on('hidden.bs.modal', (e) => {
       // clean state when closing
@@ -163,6 +164,8 @@ function ModalLedgerSignToken({token, modalId, cb}) {
         IPC_RENDERER.removeAllListeners("ledger:tokenSignature");
         IPC_RENDERER.removeAllListeners("ledger:tokenSignatureValid");
       }
+
+      onClose();
     });
 
     $(`#${modalId}`).on('shown.bs.modal', (e) => {
@@ -178,6 +181,8 @@ function ModalLedgerSignToken({token, modalId, cb}) {
     $(`#${modalId}`).modal('hide');
 
     return () => {
+      $(`#${modalId}`).modal('hide');
+
       // remove ledger listeners when closing
       if (IPC_RENDERER) {
         IPC_RENDERER.removeAllListeners("ledger:tokenSignature");
@@ -185,7 +190,7 @@ function ModalLedgerSignToken({token, modalId, cb}) {
       }
       $(`#${modalId}`).off();
     };
-  }, [token]);
+  }, []);
 
   /**
    * Render
@@ -201,7 +206,7 @@ function ModalLedgerSignToken({token, modalId, cb}) {
 
   const renderSendButton = () => {
     return (
-        <button type="button" className="btn btn-hathor" onClick={handleSend}>{t`Sign token`}</button>
+      <button type="button" className="btn btn-hathor" onClick={handleSend}>{t`Sign token`}</button>
     );
   }
 

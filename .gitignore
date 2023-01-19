@@ -6,6 +6,9 @@ src/**/*.css
 
 # testing
 /coverage
+# Cypress
+cypress/screenshots/
+cypress/videos/
 
 # production
 /build
@@ -16,6 +19,9 @@ mac_production.provisionprofile
 
 # locale compiled files
 src/locale/
+
+# doc
+/out
 
 # misc
 .DS_Store

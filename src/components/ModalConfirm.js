@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import $ from 'jquery';
 
 
 /**
@@ -21,13 +22,29 @@ class ModalConfirm extends React.Component {
     errorMessage: '',
   }
 
-  updateErrorMessage = (errorMessage) => {
+  componentDidMount() {
+    const modalId = this.props.modalID ? this.props.modalID : 'confirmModal';
+
+    $(`#${modalId}`).modal('show');
+    $(`#${modalId}`).on('hidden.bs.modal', this.props.onClose);
+  }
+
+  componentWillUnmount() {
+    const modalId = this.props.modalID ? this.props.modalID : 'confirmModal';
+
+    $(`#${modalId}`).modal('hide');
+    $(`#${modalId}`).off();
+  }
+
+  updateErrorMessage(errorMessage) {
     this.setState({ errorMessage });
   }
 
   render() {
+    const modalId = this.props.modalID ? this.props.modalID : 'confirmModal';
+
     return (
-      <div className="modal fade" id={this.props.modalID ? this.props.modalID : "confirmModal"} tabIndex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">
+      <div className="modal fade" id={modalId} tabIndex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">

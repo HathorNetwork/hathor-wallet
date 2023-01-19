@@ -12,8 +12,11 @@ import TokenAction from './TokenAction';
 import wallet from '../../utils/wallet';
 import helpers from '../../utils/helpers';
 import InputNumber from '../InputNumber';
+import ReactLoading from 'react-loading';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
+import { TOKEN_DOWNLOAD_STATUS } from '../../sagas/tokens';
+import colors from '../../index.scss';
 
 const mapStateToProps = (state) => {
   return {
@@ -98,8 +101,10 @@ class TokenMelt extends React.Component {
    */
   melt = () => {
     const amountValue = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
-    if (amountValue > this.props.walletAmount) {
-      const prettyWalletAmount = helpers.renderValue(this.props.walletAmount, this.isNFT());
+    const walletAmount = get(this.props.tokenBalance, 'data.available', 0);
+
+    if (amountValue > walletAmount) {
+      const prettyWalletAmount = helpers.renderValue(walletAmount, this.isNFT());
       return t`The total amount you have is only ${prettyWalletAmount}.`;
     }
   }
@@ -157,6 +162,18 @@ class TokenMelt extends React.Component {
             </div>
           </div>
         </div>
+      )
+    }
+
+    if (this.props.tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
+      return (
+        <ReactLoading
+          type='spin'
+          color={colors.purpleHathor}
+          width={32}
+          height={32}
+          delay={200}
+        />
       )
     }
 

@@ -9,7 +9,6 @@ import React from 'react';
 import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
 import wallet from '../utils/wallet';
-import ModalResetAllData from '../components/ModalResetAllData';
 import Version from '../components/Version';
 import $ from 'jquery';
 import ModalBackupWords from '../components/ModalBackupWords';
@@ -17,6 +16,7 @@ import HathorAlert from '../components/HathorAlert';
 import { updateWords } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
 
 const mapDispatchToProps = dispatch => {
@@ -33,6 +33,13 @@ const mapDispatchToProps = dispatch => {
  * @memberof Screens
  */
 class WalletVersionError extends React.Component {
+  static contextType = GlobalModalContext;
+  constructor(props) {
+    super(props);
+
+    this.alertSuccessRef = React.createRef();
+  }
+
   /**
    * Called if user clicks the button to do the words backup
    *
@@ -40,17 +47,21 @@ class WalletVersionError extends React.Component {
    */
   backupClicked = (e) => {
     e.preventDefault();
-    $('#backupWordsModal').modal('show');
+
+    this.context.showModal(MODAL_TYPES.BACKUP_WORDS, {
+      needPassword: true,
+      validationSuccess: this.backupSuccess,
+    });
   }
 
   /**
    * Called when backup of words succeed, then close modal and show success message
    */
   backupSuccess = () => {
-    $('#backupWordsModal').modal('hide');
+    this.context.hideModal();
     hathorLib.wallet.markBackupAsDone();
     this.props.updateWords(null);
-    this.refs.alertSuccess.show(3000);
+    this.alertSuccessRef.current.show(3000);
   }
 
   /**
@@ -60,14 +71,16 @@ class WalletVersionError extends React.Component {
    */
   resetClicked = (e) => {
     e.preventDefault();
-    $('#confirmResetModal').modal('show');
+    this.context.showModal(MODAL_TYPES.RESET_ALL_DATA, {
+      success: this.handleReset,
+    });
   }
 
   /**
    * Called when reset wallet succeed, then close modal and go to welcome screen
    */
   handleReset = () => {
-    $('#confirmResetModal').modal('hide');
+    this.context.hideModal();
     wallet.resetWalletData();
     this.props.history.push('/welcome/');
   }
@@ -98,9 +111,7 @@ class WalletVersionError extends React.Component {
           <button className="btn btn-secondary" onClick={(e) => this.backupClicked(e)}>{t`Backup Words`}</button>
           <button className="btn btn-hathor ml-3" onClick={(e) => this.resetClicked(e)}>{t`Reset Wallet`}</button>
         </div>
-        <ModalResetAllData success={this.handleReset} />
-        <ModalBackupWords needPassword={true} validationSuccess={this.backupSuccess} />
-        <HathorAlert ref="alertSuccess" text={t`Backup done with success!`} type="success" />
+        <HathorAlert ref={this.alertSuccessRef} text={t`Backup done with success!`} type="success" />
       </div>
     );
   }

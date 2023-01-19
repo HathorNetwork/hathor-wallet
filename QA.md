@@ -68,7 +68,10 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Click on the transaction that has the token deposit (this is the transaction responsible for creating the new token).
     1. Validate it has an input of HTR, an output of the total amount created for the new token, a mint and melt authority output and it might have a change HTR output (depending on the input spent).
     1. Validate it has the new created token in the token list.
+    1. Validate that all the inputs and outputs from this transaction are from/to addresses that belong to your wallet by checking the "Your address" tag
     1. Click on the token uid and should redirect to the wallet main screen with TST selected.
+    1. Send 0.01 HTR to the address `WZ7pDnkPnxbs14GHdUFivFzPbzitwNtvZo`
+    1. Click on the sent transaction and validate that the 0.01 HTR output does not have the "Your address" tag and that the input and the change output do have
 
 1. **Send tokens**
     1. Copy the address.

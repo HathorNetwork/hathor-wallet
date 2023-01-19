@@ -14,7 +14,8 @@ import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
-import { resolveLockWalletPromise } from '../actions';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import { resolveLockWalletPromise, startWalletRequested } from '../actions';
 import colors from '../index.scss';
 
 
@@ -27,6 +28,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => {
   return {
     resolveLockWalletPromise: pin => dispatch(resolveLockWalletPromise(pin)),
+    startWallet: (payload) => dispatch(startWalletRequested(payload)),
   };
 };
 
@@ -36,6 +38,8 @@ const mapDispatchToProps = dispatch => {
  * @memberof Screens
  */
 class LockedWallet extends React.Component {
+  static contextType = GlobalModalContext;
+
   constructor(props) {
     super(props);
 
@@ -89,16 +93,12 @@ class LockedWallet extends React.Component {
         loading: true,
       });
 
-      // The last parameter being true means that we are going to start the wallet from an xpriv
-      // that's already in localStorage encrypted. Because of that we don't need to send the
-      // seed (first parameter) neither the password (second parameter).
-      const promise = wallet.startWallet(null, '', pin, '', this.props.history, true);
-
-      promise.then(() => {
-        this.setState({
-          loading: false,
-        });
-        this.props.history.push('/wallet/');
+      // Start the wallet from an xpriv that's already encrypted in localStorage.
+      // Because of that we don't need to send the seed neither the password.
+      this.props.startWallet({
+        pin,
+        routerHistory: this.props.history,
+        fromXpriv: true,
       });
     } else {
       this.refs.unlockForm.classList.add('was-validated')
@@ -112,14 +112,17 @@ class LockedWallet extends React.Component {
    */
   resetClicked = (e) => {
     e.preventDefault();
-    $('#confirmResetModal').modal('show');
+    this.context.showModal(MODAL_TYPES.RESET_ALL_DATA, {
+      success: this.handleReset,
+    });
   }
 
   /**
    * When reset modal validates, then execute method to reset all data from the wallet and redirect to Welcome screen
    */
   handleReset = () => {
-    $('#confirmResetModal').modal('hide');
+    this.context.hideModal();
+
     wallet.resetWalletData();
     this.props.history.push('/welcome/');
   }
@@ -151,7 +154,6 @@ class LockedWallet extends React.Component {
             </div>
           </div>
         </div>
-        <ModalResetAllData success={this.handleReset} />
         <RequestErrorModal {...this.props} />
       </div>
     )

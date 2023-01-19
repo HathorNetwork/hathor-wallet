@@ -6,16 +6,19 @@
  */
 
 import React from 'react';
-import { t } from 'ttag';
 import $ from 'jquery';
-import OutputsWrapper from '../components/OutputsWrapper'
-import InputsWrapper from '../components/InputsWrapper'
-import { connect } from "react-redux";
 import _ from 'lodash';
+import { t } from 'ttag';
+import { get } from 'lodash';
+import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
 import version from '../utils/version';
+import OutputsWrapper from '../components/OutputsWrapper';
+import InputsWrapper from '../components/InputsWrapper';
+import Loading from '../components/Loading';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 
 const mapStateToProps = (state) => {
@@ -23,8 +26,8 @@ const mapStateToProps = (state) => {
   // when the network height updates and the wallet had a reward locked block
   return {
     tokensBalance: state.tokensBalance,
+    tokenMetadata: state.tokenMetadata,
     height: state.height,
-    tokenMetadata: state.tokenMetadata
   };
 };
 
@@ -202,11 +205,25 @@ class SendTokensOne extends React.Component {
     }
 
     const renderBalance = () => {
-      let availableBalance = 0;
-      if (this.state.selected.uid in this.props.tokensBalance) {
-        availableBalance = this.props.tokensBalance[this.state.selected.uid].available;
-      }
-      return <span className="ml-3">({t`Balance available: `}{helpers.renderValue(availableBalance, this.isNFT())})</span>;
+      const tokenBalance = get(this.props.tokensBalance, this.state.selected.uid, {
+        status: TOKEN_DOWNLOAD_STATUS.LOADING,
+        data: {
+          available: 0,
+          locked: 0,
+        },
+      });
+
+      return (
+        <span className="ml-3">
+          (
+            {t`Balance available: `}
+            { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
+              <Loading />
+            )}
+            { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && helpers.renderValue(tokenBalance.data.available, this.isNFT()) }
+          )
+        </span>
+      );
     }
 
     const renderNFTHelper = () => {

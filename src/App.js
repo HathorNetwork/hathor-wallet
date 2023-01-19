@@ -31,6 +31,7 @@ import LoadWallet from './screens/LoadWallet';
 import Page404 from './screens/Page404';
 import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
+import LoadWalletFailed from './screens/LoadWalletFailed';
 import version from './utils/version';
 import wallet from './utils/wallet';
 import tokens from './utils/tokens';
@@ -39,13 +40,14 @@ import RequestErrorModal from './components/RequestError';
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import {IPC_RENDERER, LEDGER_ENABLED} from './constants';
+import { IPC_RENDERER, LEDGER_ENABLED } from './constants';
 import STORE from './storageInstance';
 import ModalAlert from './components/ModalAlert';
 import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
 import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
 import { updateLedgerClosed } from './actions/index';
+import {WALLET_STATUS} from './sagas/wallet';
 
 
 hathorLib.storage.setStore(STORE);
@@ -55,6 +57,7 @@ const mapStateToProps = (state) => {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
     ledgerClosed: state.ledgerWasClosed,
+    walletStartState: state.walletStartState,
   };
 };
 
@@ -104,6 +107,10 @@ class Root extends React.Component {
   }
 
   render() {
+    if (this.props.walletStartState === WALLET_STATUS.FAILED) {
+      return <LoadWalletFailed />;
+    }
+
     return (
       <Switch>
         <StartedRoute exact path="/nft" component={NFTList} loaded={true} />
@@ -264,13 +271,6 @@ const returnDefaultComponent = (Component, props) => {
           <Navigation {...props}/>
           <Component {...props} />
           <RequestErrorModal {...props} />
-           {/* At first I added this ModalAlert in the Version component (where I think it should be)
-             * however this component is inside the Navigation component, that has position fixed.
-             * The bootstrap modal does not work fine inside a wrapper with position fixed
-             * so the backdrop was being rendered above the modal.
-             * That's why the best solution was to add this modal here (so I can use in all screens that have the Navigation)
-             */}
-          <ModalAlert title='Software wallet warning' body={<SoftwareWalletWarningMessage />} buttonName='Ok' id='softwareWalletWarningModal' />
         </div>
       );
     }

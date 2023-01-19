@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import { CONFIRM_RESET_MESSAGE } from '../constants';
 import SpanFmt from './SpanFmt';
@@ -24,6 +25,16 @@ class ModalResetAllData extends React.Component {
    * @property {boolean} [forgotPassword] Identifies if the user has forgotten their password
    */
   state = { errorMessage: '', forgotPassword: false };
+
+  componentDidMount() {
+    $('#confirmResetModal').modal('show');
+    $('#confirmResetModal').on('hidden.bs.modal', this.props.onClose);
+  }
+
+  componentWillUnmount() {
+    $('#confirmResetModal').modal('hide');
+    $('#confirmResetModal').off();
+  }
 
   /**
    * Method to be called when user clicks the button to confirm  
@@ -110,7 +121,9 @@ class ModalResetAllData extends React.Component {
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">{t`Reset all data`}</h5>
+              <h5 className="modal-title" id="exampleModalLabel">
+                {t`Reset all data`}
+              </h5>
               <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>

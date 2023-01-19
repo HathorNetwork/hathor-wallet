@@ -1,6 +1,6 @@
 # Hathor Wallet
 
-Welcome to Hathor Light Wallet. To view the source code of the project access [Github](https://github.com/HathorNetwork/hathor-wallet). You can follow the progress of our next tasks in our [Trello board](https://trello.com/b/kNWB1v5e/hathor-wallet).
+Welcome to Hathor Desktop Wallet. To view the source code of the project access [Github](https://github.com/HathorNetwork/hathor-wallet).
 
 ## Architecture
 
@@ -34,17 +34,37 @@ A transaction is displayed.
 
 ## For development
 
-You must use node v14.
+### Prerequisites
+
+* Install node v14
 
 ### To Install
 
-`npm install`
+```
+npm install
+```
 
 ### To Run
 
-`npm start` and it will start running in the browser in http://localhost:3000
+```
+npm start
+```
+
+It will start running in the browser in http://localhost:3000
 
 > **NOTE:** to use Hathor Wallet with Ledger, you need to run it in Electron.
+
+> **NOTE:** use the electron wallet for a more complete experience.
+
+### Quick start to Electron
+
+Run the electron besides the react app. Open a new instance of the terminal and run the following command:
+
+```
+npm run electron-dev
+```
+
+If you get some error like this `error while loading shared libraries: libxshmfence.so.1: cannot open shared object file: No such file or directory` refer to the [throubleshooting](#troubleshooting) section.
 
 ### To Build
 
@@ -59,13 +79,15 @@ You can change this anytime in the 'Change Server' screen inside the wallet.
 
 To generate a html page with the documentation from the code comments run:
 
-`jsdoc -c jsdoc.json -r src/. README.md`
+```
+npm run generate-doc
+```
 
-and it will generate a `index.html` file in `out/index.html`
+It will generate a `index.html` file in `out/index.html`
 
 ## Run Electron
 
-Refer to ELECTRON.md
+Refer to [ELECTRON.md](/ELECTRON.md)
 
 ## Sentry
 
@@ -107,6 +129,34 @@ When building, if you get the following error message:
 Then, you can increase your memory limit running:
 
     export NODE_OPTIONS=--max_old_space_size=4096
+
+### WSL (Windows Subsystem for Linux)
+
+* Make sure you have the vesion 2
+    ```
+    wsl -l -v
+    ```
+* Make sure to install the WSL driver for your GPU, see at [Prerequisites](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#prerequisites)
+* Make sure to update the WSL after install the GPU driver, see at [Existing WSL Install](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#existing-wsl-install)
+* Once the `WSL` is updated you are ready to go
+
+If you still can't run, see this [article](https://www.beekeeperstudio.io/blog/building-electron-windows-ubuntu-wsl2).
+
+### WSL Ubuntu 18 distro
+
+Run the following command to install necessary packages:
+
+```
+sudo apt install libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev libasound2
+```
+
+### WSL Debian distro
+
+Run the following command to install necessary packages:
+
+```
+sudo apt install libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev libasound2 libusb-1.0-0
+```
 
 ## TODO
 

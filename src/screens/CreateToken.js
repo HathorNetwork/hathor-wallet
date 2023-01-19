@@ -7,25 +7,27 @@
 
 import React from 'react';
 import $ from 'jquery';
+import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag'
-import { str2jsx } from '../utils/i18n';
+import { get } from 'lodash';
+import { connect } from "react-redux";
 
+import { walletRefreshSharedAddress } from '../actions';
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
-import ModalSendTx from '../components/ModalSendTx';
-import ModalAlert from '../components/ModalAlert';
-import { connect } from "react-redux";
 import BackButton from '../components/BackButton';
-import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
 import InputNumber from '../components/InputNumber';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import { str2jsx } from '../utils/i18n';
 
 
 const mapStateToProps = (state) => {
   const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
-  const htrBalance = HTR_UID in state.tokensBalance ? state.tokensBalance[HTR_UID].available : 0;
+  const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
+
   return {
     htrBalance,
     wallet: state.wallet,
@@ -33,6 +35,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+const mapDispatchToProps = (dispatch) => ({
+  walletRefreshSharedAddress: () => dispatch(walletRefreshSharedAddress()),
+});
 
 /**
  * Create a new token
@@ -40,6 +45,8 @@ const mapStateToProps = (state) => {
  * @memberof Screens
  */
 class CreateToken extends React.Component {
+  static contextType = GlobalModalContext;
+
   constructor(props) {
     super(props);
 
@@ -93,7 +100,11 @@ class CreateToken extends React.Component {
     }
 
     this.setState({ errorMessage: '' });
-    $('#pinModal').modal('show');
+    this.context.showModal(MODAL_TYPES.SEND_TX, {
+      prepareSendTransaction: this.prepareSendTransaction,
+      onSendSuccess: this.onTokenCreateSuccess,
+      title: 'Creating token',
+    });
   }
 
   /**
@@ -155,8 +166,9 @@ class CreateToken extends React.Component {
 
     // Update redux with added token
     tokens.addToken(token.uid, name, symbol);
+
     // Must update the shared address, in case we have used one for the change
-    wallet.updateSharedAddress();
+    this.props.walletRefreshSharedAddress();
     this.showAlert(token);
   }
 
@@ -168,7 +180,12 @@ class CreateToken extends React.Component {
    */
   showAlert = (token) => {
     this.setState({ name: token.name, configurationString: hathorLib.tokens.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
-      $('#alertModal').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT, {
+        title: t`Token ${this.state.name} created`,
+        body: this.getAlertBody(),
+        handleButton: this.alertButtonClick,
+        buttonName: 'Ok',
+      });
     });
   }
 
@@ -176,10 +193,8 @@ class CreateToken extends React.Component {
    * Method called after clicking the button in the alert modal, then redirects to the wallet screen
    */
   alertButtonClick = () => {
-    $('#alertModal').on('hidden.bs.modal', (e) => {
-      this.props.history.push('/wallet/');
-    });
-    $('#alertModal').modal('hide');
+    this.context.hideModal();
+    this.props.history.push('/wallet/');
   }
 
   /**
@@ -227,18 +242,18 @@ class CreateToken extends React.Component {
     helpers.openExternalURL(TOKEN_DEPOSIT_RFC_URL);
   }
 
-  render = () => {
-    const getAlertBody = () => {
-      return (
-        <div>
-          <p>{t`Your token has been successfully created!`}</p>
-          <p>{t`You can share the following configuration string with other people to let them use your brand new token.`}</p>
-          <p><SpanFmt>{t`Remember to **make a backup** of this configuration string.`}</SpanFmt></p>
-          <p><strong>{this.state.configurationString}</strong></p>
-        </div>
-      )
-    }
+  getAlertBody = () => {
+    return (
+      <div>
+        <p>{t`Your token has been successfully created!`}</p>
+        <p>{t`You can share the following configuration string with other people to let them use your brand new token.`}</p>
+        <p><SpanFmt>{t`Remember to **make a backup** of this configuration string.`}</SpanFmt></p>
+        <p><strong>{this.state.configurationString}</strong></p>
+      </div>
+    )
+  }
 
+  render = () => {
     const htrDeposit = hathorLib.tokens.getDepositPercentage() * 100;
 
     return (
@@ -296,11 +311,9 @@ class CreateToken extends React.Component {
           <button type="button" className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>
-        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onTokenCreateSuccess} title="Creating token" />
-        <ModalAlert title={t`Token ${this.state.name} created`} body={getAlertBody()} handleButton={this.alertButtonClick} buttonName="Ok" />
       </div>
     );
   }
 }
 
-export default connect(mapStateToProps)(CreateToken);
+export default connect(mapStateToProps, mapDispatchToProps)(CreateToken);

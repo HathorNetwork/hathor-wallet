@@ -5,50 +5,40 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { t } from 'ttag';
-import { connect } from "react-redux";
+import { useSelector, useDispatch } from 'react-redux';
 import { selectToken } from '../actions/index';
+import { get } from 'lodash';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
+import Loading from '../components/Loading';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { useHistory, useLocation } from 'react-router-dom';
 
+// Routes that should display the TokenBar
+const ROUTE_WHITELIST = [
+  '/unknown_tokens/',
+  '/wallet/',
+];
 
-const mapStateToProps = (state) => {
-  return {
-    registeredTokens: state.tokens,
-    allTokens: state.allTokens,
-    selectedToken: state.selectedToken,
-    tokensBalance: state.tokensBalance,
-    tokenMetadata: state.tokenMetadata,
-  };
-};
+export default function TokenBar () {
+  const [opened, setOpened] = useState(false);
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const location = useLocation();
 
+  // These are all tokens that are currently registered on the wallet
+  const tokens = useSelector((state) => state.tokens);
+  const allTokens = useSelector((state) => state.allTokens);
+  const selectedToken = useSelector((state) => state.selectedToken);
+  const tokensBalance = useSelector((state) => state.tokensBalance);
+  const tokenMetadata = useSelector((state) => state.tokenMetadata);
 
-const mapDispatchToProps = dispatch => {
-  return {
-    selectToken: data => dispatch(selectToken(data)),
-  };
-};
-
-
-/**
- * Component that shows the left bar of tokens
- *
- * @memberof Components
- */
-class TokenBar extends React.Component {
-  constructor(props) {
-    super(props);
-
-    /**
-     * opened {boolean} If bar is opened or not (default is false)
-     * selected {string} Symbol of the selected token (default is 'HTR')
-     */
-    this.state = {
-      opened: false,
-      selected: 'HTR',
-    }
+  // If the current route is not in the whitelist, we should not render the tokenbar
+  if (ROUTE_WHITELIST.indexOf(location.pathname) < 0) {
+    return null;
   }
 
   /**
@@ -56,47 +46,45 @@ class TokenBar extends React.Component {
    *
    * @return {number} Quantity of unknown tokens
    */
-  getUnknownTokens = (hideZeroBalance) => {
+  const getUnknownTokens = (hideZeroBalance) => {
     const unknownTokens = wallet.fetchUnknownTokens(
-      this.props.allTokens,
-      this.props.registeredTokens,
-      this.props.tokensBalance,
+      allTokens,
+      tokens,
+      tokensBalance,
       hideZeroBalance,
     );
 
     return unknownTokens.length;
-  }
+  };
 
   /**
    * Called when user clicked to expand bar
    */
-  toggleExpand = () => {
-    this.setState({ opened: !this.state.opened });
-  }
+  const toggleExpand = () => {
+    setOpened(!opened);
+  };
 
   /**
    * Called when user selects another token
    *
    * @param {string} uid UID of token user selected
    */
-  tokenSelected = (uid) => {
-    this.props.selectToken(uid);
-  }
+  const tokenSelected = (uid) => dispatch(selectToken(uid));
 
   /**
    * Called when user clicks to lock wallet, then redirects to locked screen
    */
-  lockWallet = () => {
+  const lockWallet = () => {
     hathorLib.wallet.lock();
-    this.props.history.push('/locked/');
-  }
+    history.push('/locked/');
+  };
 
   /**
    * Called when user clicks to go to settings, then redirects to settings screen
    */
-  goToSettings = () => {
-    this.props.history.push('/settings/');
-  }
+  const goToSettings = () => {
+    history.push('/settings/');
+  };
 
   /**
    * Gets the balance of one token
@@ -104,16 +92,14 @@ class TokenBar extends React.Component {
    * @param {string} uid UID to get balance from
    * @return {number} Total token balance
    */
-  getTokenBalance = (uid) => {
-    const balance = this.props.tokensBalance[uid];
-    let total = 0;
-    if (balance) {
-      // If we don't have any transaction for the token, balance will be undefined
-      total = balance.available + balance.locked;
-    }
+  const getTokenBalance = (uid) => {
+    const { available, locked } = get(tokensBalance, `${uid}.data`, {
+      available: 0,
+      locked: 0,
+    });
 
-    return total;
-  }
+    return available + locked;
+  };
 
   /**
    * Gets the balance of one token formatted for exhibition
@@ -121,85 +107,103 @@ class TokenBar extends React.Component {
    * @param {string} uid UID to get balance from
    * @return {string} String formatted balance, ready for exhibition
    */
-  getTokenBalanceFormatted = (uid) => {
-    const total = this.getTokenBalance(uid);
+  const getTokenBalanceFormatted = (uid) => {
+    const total = getTokenBalance(uid);
 
     // Formatting to string for exhibition
-    const isNFT = helpers.isTokenNFT(uid, this.props.tokenMetadata);
+    const isNFT = helpers.isTokenNFT(uid, tokenMetadata);
     return helpers.renderValue(total, isNFT);
-  }
+  };
 
   /**
    * Called when user clicks in the unknown tokens number, then redirects to unknown tokens screen
    */
-  unknownClicked = () => {
-    this.props.history.push('/unknown_tokens/');
-  }
+  const unknownClicked = () => {
+    history.push('/unknown_tokens/');
+  };
 
-  render() {
-    const shouldHideZeroBalanceTokens = wallet.areZeroBalanceTokensHidden();
-    const unknownTokens = this.getUnknownTokens(shouldHideZeroBalanceTokens);
+  const renderLoading = () => (
+    <Loading width={14} height={14} />
+  );
 
-    const renderTokens = () => {
-      const registeredTokens = wallet.fetchRegisteredTokens(
-        this.props.registeredTokens,
-        this.props.tokensBalance,
-        shouldHideZeroBalanceTokens,
-      );
+  const shouldHideZeroBalanceTokens = wallet.areZeroBalanceTokensHidden();
+  const unknownTokens = getUnknownTokens(shouldHideZeroBalanceTokens);
 
-      return registeredTokens.map((token) => {
-        const tokenUid = token.uid;
+  const renderTokens = () => {
+    // Will fetch registered state.tokens respecting both the shouldHideZeroBalanceTokens setting and
+    // the individual alwaysShowToken option for each token.
+    const registeredTokens = wallet.fetchRegisteredTokens(
+      tokens,
+      tokensBalance,
+      shouldHideZeroBalanceTokens,
+    );
 
-        return (
-          <div key={tokenUid} className={`token-wrapper ${tokenUid === this.props.selectedToken ? 'selected' : ''}`} onClick={(e) => {this.tokenSelected(tokenUid)}}>
-            <span className='ellipsis'>{token.symbol} {this.state.opened && ` | ${(this.getTokenBalanceFormatted(tokenUid))}`}</span>
-          </div>
-        )
+    return registeredTokens.map((token) => {
+      const tokenUid = token.uid;
+      const tokenBalance = get(tokensBalance, `${token.uid}`, {
+        status: TOKEN_DOWNLOAD_STATUS.LOADING,
+        data: {
+          locked: 0,
+          available: 0
+        }
       });
-    }
 
-    const renderExpandedHeader = () => {
       return (
-        <div className='d-flex align-items-center justify-content-between flex-row w-100'>
-          <span>{t`Tokens`}</span>
-          <i className='fa fa-chevron-left' title='Close bar'></i>
+        <div
+          key={tokenUid}
+          className={`token-wrapper ${tokenUid === selectedToken ? 'selected' : ''}`}
+          onClick={() => {tokenSelected(tokenUid)}}>
+          <span className='ellipsis'>
+            {token.symbol} {opened && ` | `}
+
+            {(tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && opened) && getTokenBalanceFormatted(tokenUid)}
+            {(tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING  && opened) && renderLoading()}
+          </span>
         </div>
       )
-    }
+    });
+  };
 
-    const renderUnknownTokens = () => {
-      return (
-        <div title={`${unknownTokens} unknown ${hathorLib.helpers.plural(unknownTokens, 'token', 'tokens')}`} className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.unknownClicked}>
-          <div className="unknown-symbol d-flex flex-row align-items-center justify-content-center">{unknownTokens}</div>
-          {this.state.opened && <span className='ellipsis'>Unknown {hathorLib.helpers.plural(unknownTokens, 'token', 'tokens')}</span>}
-        </div>
-      );
-    }
-
+  const renderExpandedHeader = () => {
     return (
-      <div className={`d-flex flex-column align-items-center justify-content-between token-bar ${this.state.opened ? 'opened' : 'closed'}`}>
-        <div className='d-flex flex-column align-items-center justify-content-between w-100 first-child'>
-          <div className='header d-flex align-items-center justify-content-center w-100' onClick={this.toggleExpand}>
-            {this.state.opened ? renderExpandedHeader() : <i className='fa fa-chevron-right' title='Expand bar'></i>}
-          </div>
-          <div className='body'>
-            {renderTokens()}
-            {unknownTokens > 0 ? renderUnknownTokens() : null}
-          </div>
-        </div>
-        <div className='footer d-flex align-items-center justify-content-center flex-column'>
-          <div className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.lockWallet}>
-            <i className='fa fa-lock token-icon' title={t`Lock wallet`}></i>
-            {this.state.opened && <span className='ellipsis'>{t`Lock wallet`}</span>}
-          </div>
-          <div className={`d-flex align-items-center icon-wrapper ${this.state.opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={this.goToSettings}>
-            <i className='fa fa-cog token-icon' title={t`Settings`}></i>
-            {this.state.opened && <span className='ellipsis'>{t`Settings`}</span>}
-          </div>
-        </div>
+      <div className='d-flex align-items-center justify-content-between flex-row w-100'>
+        <span>{t`Tokens`}</span>
+        <i className='fa fa-chevron-left' title='Close bar'></i>
+      </div>
+    )
+  };
+
+  const renderUnknownTokens = () => {
+    return (
+      <div title={`${unknownTokens} unknown ${hathorLib.helpers.plural(unknownTokens, 'token', 'tokens')}`} className={`d-flex align-items-center icon-wrapper ${opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={unknownClicked}>
+        <div className="unknown-symbol d-flex flex-row align-items-center justify-content-center">{unknownTokens}</div>
+        {opened && <span className='ellipsis'>Unknown {hathorLib.helpers.plural(unknownTokens, 'token', 'tokens')}</span>}
       </div>
     );
-  }
-}
+  };
 
-export default connect(mapStateToProps, mapDispatchToProps)(TokenBar);
+  return (
+    <div className={`d-flex flex-column align-items-center justify-content-between token-bar ${opened ? 'opened' : 'closed'}`}>
+      <div className='d-flex flex-column align-items-center justify-content-between w-100 first-child'>
+        <div className='header d-flex align-items-center justify-content-center w-100' onClick={toggleExpand}>
+          {opened ? renderExpandedHeader() : <i className='fa fa-chevron-right' title='Expand bar'></i>}
+        </div>
+        <div className='body'>
+          {renderTokens()}
+          {unknownTokens > 0 ? renderUnknownTokens() : null}
+        </div>
+      </div>
+      <div className='footer d-flex align-items-center justify-content-center flex-column'>
+        <div className={`d-flex align-items-center icon-wrapper ${opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={lockWallet}>
+          <i className='fa fa-lock token-icon' title={t`Lock wallet`}></i>
+          {opened && <span className='ellipsis'>{t`Lock wallet`}</span>}
+        </div>
+        <div className={`d-flex align-items-center icon-wrapper ${opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={goToSettings}>
+          <i className='fa fa-cog token-icon' title={t`Settings`}></i>
+          {opened && <span className='ellipsis'>{t`Settings`}</span>}
+        </div>
+      </div>
+    </div>
+  );
+
+};

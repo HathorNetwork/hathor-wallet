@@ -12,20 +12,23 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom'
 import HathorAlert from './HathorAlert';
 import SpanFmt from './SpanFmt';
-import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
 import { selectToken } from '../actions/index';
 import { connect } from "react-redux";
+import { get } from 'lodash';
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
 import hathorLib from '@hathor/wallet-lib';
 import { MAX_GRAPH_LEVEL } from '../constants';
 import helpers from '../utils/helpers';
+import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import Loading from '../components/Loading';
 
 
 const mapStateToProps = (state) => {
   return {
     tokens: state.tokens,
-    tokenMetadata: state.tokenMetadata || {}
+    tokenMetadata: state.tokenMetadata || {},
+    wallet: state.wallet,
   };
 };
 
@@ -42,6 +45,14 @@ const mapDispatchToProps = dispatch => {
  * @memberof Components
  */
 class TxData extends React.Component {
+  static contextType = GlobalModalContext;
+
+  constructor(props) {
+    super(props);
+
+    this.alertCopiedRef = React.createRef();
+  }
+
   /**
    * raw {boolean} if should show raw transaction
    * children {boolean} if should show children (default is hidden but user can show with a click)
@@ -51,8 +62,14 @@ class TxData extends React.Component {
   state = {
     raw: false,
     children: false,
+    unregisteredLoading: false,
     tokens: [],
     tokenClicked: null,
+    walletAddressesMap: {},
+    graphvizFundsRequestLoading: false,
+    graphvizFundsRequestFailed: false,
+    graphvizVerificationRequestFailed: false,
+    graphvizVerificationRequestLoading: false,
   };
 
   // Array of token uid that was already found to show the symbol
@@ -60,37 +77,119 @@ class TxData extends React.Component {
 
   componentDidMount = () => {
     this.calculateTokens();
-    this.updateGraphs();
+    this.fetchWalletAddressesMap();
+    this.queryVerificationData();
+    this.queryFundsData();
   }
 
   /**
-   * Returns the url to get the graph for each type
-   *
-   * @param {string} hash ID of the transaction to get the graph
-   * @param {string} type Type of graph to be returned (funds or verification)
+   * Receives an Viz instance, a documentId and data and renders a
+   * graphviz graph
    */
-  graphURL = (hash, type) => {
-    return `${hathorLib.helpers.getServerURL()}graphviz/neighbours.dot/?tx=${hash}&graph_type=${type}&max_level=${MAX_GRAPH_LEVEL}`;
+  renderGraph(viz, documentId, data) {
+    viz.renderSVGElement(data)
+      .then((element) => {
+        const domElement = document.getElementById(documentId);
+
+        // If the user click "back" before the request is complete,
+        // the component will be killed and this will be undefined,
+        // causing an error on the wallet.
+        if (!domElement) {
+          return;
+        }
+
+        domElement.appendChild(element);
+      });
   }
 
-  /**
-   * Update graphs on the screen to add the ones from the server
-   */
-  updateGraphs = () => {
-    const viz = new Viz({ Module, render });
-    const url1 = this.graphURL(this.props.transaction.hash, 'funds');
-    const url2 = this.graphURL(this.props.transaction.hash, 'verification');
-    hathorLib.txApi.getGraphviz(url1, (response) => {
-      viz.renderSVGElement(response).then((element) => {
-        document.getElementById('graph-funds').appendChild(element);
-      });
+  queryFundsData = async () => {
+    const viz = new Viz({
+      Module,
+      render,
     });
 
-    hathorLib.txApi.getGraphviz(url2, (response) => {
-      viz.renderSVGElement(response).then((element) => {
-        document.getElementById('graph-verification').appendChild(element);
-      });
+    this.setState({
+      graphvizFundsRequestFailed: false,
+      graphvizFundsRequestLoading: true,
     });
+
+    try {
+      const fundsData = await this.props.wallet.graphvizNeighborsQuery(
+        this.props.transaction.hash,
+        'funds',
+        MAX_GRAPH_LEVEL,
+      );
+
+      this.renderGraph(viz, 'graph-funds', fundsData);
+      this.setState({
+        graphvizFundsRequestLoading: false,
+      });
+    } catch(e) {
+      this.setState({
+        graphvizFundsRequestFailed: true,
+        graphvizFundsRequestLoading: false,
+      });
+    }
+  }
+
+  queryVerificationData = async () => {
+    const viz = new Viz({
+      Module,
+      render,
+    });
+
+    this.setState({
+      graphvizVerificationRequestFailed: false,
+      graphvizVerificationRequestLoading: true,
+    });
+
+    try {
+      const verificationData = await this.props.wallet.graphvizNeighborsQuery(
+        this.props.transaction.hash,
+        'verification',
+        MAX_GRAPH_LEVEL,
+      );
+
+      this.renderGraph(viz, 'graph-verification', verificationData);
+      this.setState({
+        graphvizVerificationRequestLoading: false,
+      });
+    } catch(e) {
+      this.setState({
+        graphvizVerificationRequestFailed: true,
+        graphvizVerificationRequestLoading: false,
+      });
+    }
+  }
+
+  fetchWalletAddressesMap = async () => {
+    const inputs = this.props.transaction.inputs;
+    const outputs = this.props.transaction.outputs;
+
+    const getDecodedAddresses = (acc, io) => {
+      const address = get(io, 'decoded.address');
+
+      if (!address) {
+        return acc;
+      }
+
+      return [...acc, address];
+    };
+
+    const addresses = [
+      ...inputs.reduce(getDecodedAddresses, []),
+      ...outputs.reduce(getDecodedAddresses, []),
+    ];
+
+    try {
+      const walletAddressesMap = await this.props.wallet.checkAddressesMine(addresses);
+      this.setState({
+        walletAddressesMap,
+      });
+    } catch(_e) {
+      // If the request fails for some reason, the only side effect is that we won't display the badge
+      // indicating that the address belongs to the user wallet. I think it is safe to ignore it.
+    }
   }
 
   /**
@@ -180,7 +279,7 @@ class TxData extends React.Component {
   copied = (text, result) => {
     if (result) {
       // If copied with success
-      this.refs.alertCopied.show(1000);
+      this.alertCopiedRef.current.show(1000);
     }
   }
 
@@ -251,8 +350,26 @@ class TxData extends React.Component {
    */
   showUnregisteredTokenInfo = (e, token) => {
     e.preventDefault();
-    this.setState({ tokenClicked: token }, () => {
-      $('#unregisteredTokenInfoModal').modal('show');
+
+    this.setState({
+      tokenClicked: token,
+      unregisteredLoading: true,
+    }, async () => {
+      const tokenDetails = await this.props.wallet.getTokenDetails(token.uid);
+
+      const { totalSupply, totalTransactions, authorities } = tokenDetails;
+
+      this.context.showModal(MODAL_TYPES.UNREGISTERED_TOKEN_INFO, {
+        token: this.state.tokenClicked,
+        tokenRegistered: this.tokenRegistered,
+        totalSupply,
+        canMint: authorities.mint,
+        canMelt: authorities.melt,
+        transactionsCount: totalTransactions,
+        tokenMetadata: this.props.tokenMetadata,
+      });
+
+      this.setState({ unregisteredLoading: false });
     });
   }
 
@@ -277,6 +394,13 @@ class TxData extends React.Component {
     this.props.history.push('/wallet/');
   }
 
+  isAddressMine = (address) => {
+    return (
+      address in this.state.walletAddressesMap
+      && this.state.walletAddressesMap[address]
+    );
+  }
+
   render() {
     const renderBlockOrTransaction = () => {
       if (hathorLib.helpers.isBlock(this.props.transaction)) {
@@ -292,7 +416,7 @@ class TxData extends React.Component {
       return inputs.map((input, idx) => {
         return (
           <div key={`${input.tx_id}${input.index}`}>
-            <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && hathorLib.wallet.isAddressMine(input.decoded.address) && renderAddressBadge()}
+            <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && this.isAddressMine(input.decoded.address) && renderAddressBadge()}
             {renderOutput(input, 0, false)}
           </div>
         );
@@ -330,7 +454,7 @@ class TxData extends React.Component {
     const renderOutput = (output, idx, addBadge) => {
       return (
         <div key={idx}>
-          <div>{outputValue(output)} {renderOutputToken(output)} {output.decoded && addBadge && hathorLib.wallet.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
+          <div>{outputValue(output)} {renderOutputToken(output)} {output.decoded && addBadge && this.isAddressMine(output.decoded.address) && renderAddressBadge()}</div>
           <div>
             {renderDecodedScript(output)}
             {idx in this.props.spentOutputs ? <span> (<Link to={`/transaction/${this.props.spentOutputs[idx]}`}>{t`Spent`}</Link>)</span> : ''}
@@ -499,15 +623,51 @@ class TxData extends React.Component {
       )
     }
 
-    const renderGraph = (label, type) => {
+    const renderGraph = (
+      label,
+      type,
+      failed,
+      loading,
+      retryCallback,
+    ) => {
+      if (!this.props.showGraphs) {
+        return;
+      }
+
       return (
         <div className="mt-3 graph-div" id={`graph-${type}`} key={`graph-${type}-${this.props.transaction.hash}`}>
           <label className="graph-label">{label}:</label>
+          { loading && (
+            <Loading
+              type='spin'
+              width={16}
+              height={16}
+              delay={200} />
+          )}
+          { !loading && failed && (
+            <div>{t`Download failed`}, <a href="true" onClick={(e) => {
+              e.preventDefault();
+              retryCallback();
+            }}>{t`try again`}</a></div>
+          )}
         </div>
       );
-    }
+    };
 
     const renderAccumulatedWeight = () => {
+      if (this.props.confirmationDataError) {
+        const onRetryClick = (e) => {
+          e.preventDefault();
+          this.props.confirmationDataRetry();
+        };
+        return (
+          <>
+            {t`Error retrieving accumulated weight data...`}&nbsp;
+            <a href="true" onClick={onRetryClick}>{t`try again`}</a>
+          </>
+        )
+      }
+
       if (this.props.confirmationData) {
         let acc = hathorLib.helpers.roundFloat(this.props.confirmationData.accumulated_weight);
         if (this.props.confirmationData.accumulated_bigger) {
@@ -541,7 +701,20 @@ class TxData extends React.Component {
         if (token.uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
           return <span>token.uid</span>;
         } else if (token.unknown) {
-          return <a href="true" onClick={(e) => this.showUnregisteredTokenInfo(e, token)}>{token.uid}</a>
+          return (
+            <div className="unregistered-token-loading-wrapper">
+              <a href="true" onClick={(e) => this.showUnregisteredTokenInfo(e, token)}>
+                {token.uid}
+              </a>
+              {this.state.unregisteredLoading && (
+                <Loading
+                  type='spin'
+                  width={16}
+                  height={16}
+                  delay={200} />
+              )}
+            </div>
+          )
         } else {
           return <a href="true" onClick={(e) => this.registeredTokenClicked(e, token)}>{token.uid}</a>
         }
@@ -638,13 +811,34 @@ class TxData extends React.Component {
     }
 
     const renderConfirmationLevel = () => {
+      const renderConfirmationLevelMessage = () => {
+        if (this.props.confirmationDataError) {
+          const onRetryClick = (e) => {
+            e.preventDefault();
+            this.props.confirmationDataRetry();
+          };
+          return (
+            <>
+              {t`Error retrieving confirmation level...`}&nbsp;
+              <a href="true" onClick={onRetryClick}>{t`try again`}</a>
+            </>
+          )
+        }
+
+        if (this.props.confirmationData) {
+          return `${hathorLib.helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%`;
+        }
+
+        return t`Retrieving confirmation level data...`;
+      };
+
       return (
         <div>
           <label>{t`Confirmation level:`}</label>
-          {this.props.confirmationData ? `${hathorLib.helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%` : 'Retrieving confirmation level data...'}
+          {renderConfirmationLevelMessage()}
         </div>
       );
-    }
+    };
 
     const isNFTCreation = () => {
       if (this.props.transaction.version !== hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
@@ -698,10 +892,22 @@ class TxData extends React.Component {
             </div>
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
-            {this.props.showGraphs && renderGraph(t`Verification neighbors`, 'verification')}
+            {renderGraph(
+              t`Verification neighbors`,
+              'verification',
+              this.state.graphvizVerificationRequestFailed,
+              this.state.graphvizVerificationRequestLoading,
+              this.queryVerificationData,
+            )}
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
-            {this.props.showGraphs && renderGraph(t`Funds neighbors`, 'funds')}
+            {renderGraph(
+              t`Funds neighbors`,
+              'funds',
+              this.state.graphvizFundsRequestFailed,
+              this.state.graphvizFundsRequestLoading,
+              this.queryFundsData,
+            )}
           </div>
           <div className="d-flex flex-row align-items-start mb-3 common-div bordered-wrapper">
             {this.props.showRaw ? showRawWrapper() : null}
@@ -727,8 +933,7 @@ class TxData extends React.Component {
     return (
       <div>
         {loadTxData()}
-        <HathorAlert ref="alertCopied" text={t`Copied to clipboard!`} type="success" />
-        <ModalUnregisteredTokenInfo token={this.state.tokenClicked} tokenRegistered={this.tokenRegistered} />
+        <HathorAlert ref={this.alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
       </div>
     );
   }
