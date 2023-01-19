@@ -12,6 +12,7 @@ import { t } from 'ttag'
 import { connect } from "react-redux";
 import { get } from 'lodash';
 
+import { walletRefreshSharedAddress } from '../actions';
 import wallet from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
@@ -33,6 +34,10 @@ const mapStateToProps = (state) => {
     useWalletService: state.useWalletService,
   };
 };
+
+const mapDispatchToProps = (dispatch) => ({
+  walletRefreshSharedAddress: () => dispatch(walletRefreshSharedAddress()),
+});
 
 
 /**
@@ -176,7 +181,7 @@ class CreateNFT extends React.Component {
     // Update redux with added token
     tokens.addToken(token.uid, name, symbol);
     // Must update the shared address, in case we have used one for the change
-    wallet.updateSharedAddress();
+    this.props.walletRefreshSharedAddress();
     // Also update the redux state with the NFT metadata for correct exhibition on all screens
     wallet.setLocalTokenMetadata(token.uid, {
       id: token.uid,
@@ -358,4 +363,4 @@ class CreateNFT extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(CreateNFT);
+export default connect(mapStateToProps, mapDispatchToProps)(CreateNFT);

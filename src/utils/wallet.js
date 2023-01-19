@@ -426,31 +426,6 @@ const wallet = {
     return this.generateWallet(words, passphrase, pin, password, routerHistory);
   },
 
-  /**
-   * Update last shared address and index in redux
-   *
-   * @param {string} address Last shared address
-   * @param {number} index Last shared index
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  updateSharedAddressRedux(address, index) {
-    store.dispatch(sharedAddressUpdate({ lastSharedAddress: address, lastSharedIndex: index}));
-  },
-
-  /**
-   * Get the shared address and index from localStorage to update Redux
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  updateSharedAddress() {
-    const lastSharedIndex = oldWalletUtil.getLastSharedIndex();
-    const lastSharedAddress = storage.getItem(storageKeys.address);
-    this.updateSharedAddressRedux(lastSharedAddress, lastSharedIndex);
-  },
-
   /*
    * Clean all data before logout wallet
    * - Clean local storage
