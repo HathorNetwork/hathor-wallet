@@ -49,6 +49,8 @@ import NFTList from './screens/NFTList';
 import { updateLedgerClosed } from './actions/index';
 import {WALLET_STATUS} from './sagas/wallet';
 import ProposalList from "./screens/atomic-swap/ProposalList";
+import NewSwap from "./screens/atomic-swap/NewSwap";
+import ImportExisting from "./screens/atomic-swap/ImportExisting";
 
 
 hathorLib.storage.setStore(STORE);
@@ -121,6 +123,8 @@ class Root extends React.Component {
         <StartedRoute exact path="/unknown_tokens" component={UnknownTokens} loaded={true} />
         <StartedRoute exact path="/wallet/send_tokens" component={SendTokens} loaded={true} />
         <StartedRoute exact path="/wallet/atomic_swap" component={ProposalList} loaded={true} />
+        <StartedRoute exact path="/wallet/atomic_swap/proposal/create" component={NewSwap} loaded={true} />
+        <StartedRoute exact path="/wallet/atomic_swap/proposal/import" component={ImportExisting} loaded={true} />
         <StartedRoute exact path="/wallet" component={Wallet} loaded={true} />
         <StartedRoute exact path="/settings" component={Settings} loaded={true} />
         <StartedRoute exact path="/wallet/passphrase" component={ChoosePassphrase} loaded={true} />

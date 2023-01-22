@@ -24,7 +24,9 @@ export const types = {
   PROPOSAL_FETCH_REQUESTED: 'PROPOSAL_FETCH_REQUESTED',
   PROPOSAL_FETCH_SUCCESS: 'PROPOSAL_FETCH_SUCCESS',
   PROPOSAL_FETCH_FAILED: 'PROPOSAL_FETCH_FAILED',
+  PROPOSAL_GENERATED: 'PROPOSAL_GENERATED',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
+  PROPOSAL_ADDED: 'PROPOSAL_ADDED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
   ON_START_WALLET_LOCK: 'ON_START_WALLET_LOCK',
   RELOAD_WALLET_REQUESTED: 'RELOAD_WALLET_REQUESTED',
@@ -300,10 +302,32 @@ export const proposalFetchFailed = (proposalId, errorMessage) => ({
 
 /**
  * @param {string} proposalId
+ * @param {string} password
+ * @param {ProposalData} data The generated proposal object
+ */
+export const proposalGenerated = (proposalId, password, data) => ({
+  type: types.PROPOSAL_GENERATED,
+  proposalId,
+  password,
+  data,
+});
+
+/**
+ * @param {string} proposalId
  */
 export const proposalRemoved = (proposalId) => ({
   type: types.PROPOSAL_REMOVED,
   proposalId,
+});
+
+/**
+ * @param {string} proposalId
+ * @param {string} password
+ */
+export const addProposal = (proposalId, password) => ({
+  type: types.PROPOSAL_ADDED,
+  proposalId,
+  password,
 });
 
 export const tokenInvalidateBalance = (tokenId) => ({
