@@ -21,8 +21,9 @@ import {
   tokenFetchBalanceFailed,
   tokenFetchHistoryRequested,
   tokenFetchHistorySuccess,
-  tokenFetchHistoryFailed,
+  tokenFetchHistoryFailed, proposalTokenFetchSuccess, proposalTokenFetchFailed,
 } from '../actions';
+import { getRandomInt } from "../utils/proposals";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 const METADATA_MAX_RETRIES = 3;
@@ -280,6 +281,42 @@ export function* monitorSelectedToken() {
   }
 }
 
+/**
+ *
+ * @param {string} action.tokenUid Token identifier to fetch data from
+ * @returns {Generator<*, void, *>}
+ */
+function* fetchProposalTokenData(action) {
+  const { tokenUid } = action;
+
+  try {
+    // Checking for tokens already cached
+    const cachedToken = yield select((state) => get(state.tokensCache, tokenUid));
+    if (cachedToken && cachedToken.oldStatus === TOKEN_DOWNLOAD_STATUS.READY) {
+      yield put(proposalTokenFetchSuccess(tokenUid, cachedToken));
+      return;
+    }
+
+    yield delay(getRandomInt(2000,5000));
+
+    // Checking for registered tokens
+    const registeredToken = yield select((state) => state.tokens.find(t => t.uid === tokenUid));
+    if (registeredToken) {
+      yield put(proposalTokenFetchSuccess(tokenUid, registeredToken));
+      return;
+    }
+
+    const wallet = yield select((state) => state.wallet);
+
+    // Fetching from the fullnode
+    const updatedTokenDetails = yield wallet.getTokenDetails(tokenUid);
+    yield put(proposalTokenFetchSuccess(tokenUid, updatedTokenDetails.tokenInfo));
+  } catch (e){
+    console.error(`${tokenUid} fetchProposalTokenData error:`, e.message, e.stack, e);
+    yield put(proposalTokenFetchFailed(tokenUid, e.message));
+  }
+}
+
 export function* saga() {
   yield all([
     fork(fetchTokenMetadataQueue),
@@ -287,5 +324,6 @@ export function* saga() {
     fork(monitorSelectedToken),
     takeEvery(types.TOKEN_FETCH_HISTORY_REQUESTED, fetchTokenHistory),
     takeEvery('new_tokens', routeTokenChange),
+    takeEvery(types.PROPOSAL_TOKEN_FETCH_REQUESTED, fetchProposalTokenData)
   ]);
 }

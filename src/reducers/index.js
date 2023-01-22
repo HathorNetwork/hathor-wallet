@@ -227,6 +227,12 @@ const rootReducer = (state = initialState, action) => {
       return onProposalFetchSuccess(state, action);
     case types.PROPOSAL_FETCH_FAILED:
       return onProposalFetchFailed(state, action);
+    case types.PROPOSAL_TOKEN_FETCH_REQUESTED:
+      return onProposalTokenFetchRequested(state, action);
+    case types.PROPOSAL_TOKEN_FETCH_SUCCESS:
+      return onProposalTokenFetchSuccess(state, action);
+    case types.PROPOSAL_TOKEN_FETCH_FAILED:
+      return onProposalTokenFetchFailed(state, action);
     case types.PROPOSAL_GENERATED:
       return onNewProposalGeneration(state, action);
     case types.PROPOSAL_REMOVED:
@@ -724,6 +730,75 @@ export const onProposalFetchFailed = (state, action) => {
         status: PROPOSAL_DOWNLOAD_STATUS.FAILED,
         errorMessage: errorMessage,
         updatedAt: new Date().getTime(),
+      },
+    },
+  };
+};
+
+/**
+ * @param {String} action.tokenUid The token identifier to fetch
+ */
+export const onProposalTokenFetchRequested = (state, action) => {
+  const { tokenUid } = action
+
+  const oldState = get(state.tokensCache, tokenUid, {
+    tokenUid,
+    symbol: '',
+    name: '',
+    status: TOKEN_DOWNLOAD_STATUS.LOADING,
+  })
+
+  return {
+    ...state,
+    tokensCache: {
+      ...state.tokensCache,
+      [tokenUid]: {
+        ...oldState,
+        status: TOKEN_DOWNLOAD_STATUS.LOADING,
+        oldStatus: oldState.status,
+      }
+    }
+  }
+}
+
+/**
+ * @param {String} action.tokenUid - The tokenUid to mark as success
+ * @param {Object} action.data - The token information to store on redux
+ */
+export const onProposalTokenFetchSuccess = (state, action) => {
+  const { tokenUid, data } = action;
+
+  return {
+    ...state,
+    tokensCache: {
+      ...state.tokensCache,
+      [tokenUid]: {
+        tokenUid,
+        symbol: data.symbol,
+        name: data.name,
+        status: TOKEN_DOWNLOAD_STATUS.READY,
+      },
+    },
+  };
+};
+
+/**
+ * @param {String} action.tokenUid - The tokenUid to mark as failed
+ * @param {String} action.errorMessage - Error message
+ */
+export const onProposalTokenFetchFailed = (state, action) => {
+  const { tokenUid, errorMessage } = action;
+
+  return {
+    ...state,
+    tokensCache: {
+      ...state.tokensCache,
+      [tokenUid]: {
+        id: tokenUid,
+        symbol: '',
+        name: '',
+        status: TOKEN_DOWNLOAD_STATUS.FAILED,
+        errorMessage: errorMessage,
       },
     },
   };

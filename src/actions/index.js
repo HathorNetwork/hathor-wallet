@@ -24,6 +24,9 @@ export const types = {
   PROPOSAL_FETCH_REQUESTED: 'PROPOSAL_FETCH_REQUESTED',
   PROPOSAL_FETCH_SUCCESS: 'PROPOSAL_FETCH_SUCCESS',
   PROPOSAL_FETCH_FAILED: 'PROPOSAL_FETCH_FAILED',
+  PROPOSAL_TOKEN_FETCH_REQUESTED: 'PROPOSAL_TOKEN_FETCH_REQUESTED',
+  PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
+  PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
   PROPOSAL_GENERATED: 'PROPOSAL_GENERATED',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
   PROPOSAL_ADDED: 'PROPOSAL_ADDED',
@@ -297,6 +300,34 @@ export const proposalFetchSuccess = (proposalId, data) => ({
 export const proposalFetchFailed = (proposalId, errorMessage) => ({
   type: types.PROPOSAL_FETCH_FAILED,
   proposalId,
+  errorMessage,
+});
+
+/**
+ * @param {string} tokenUid The token identifier to fetch
+ */
+export const proposalTokenFetchRequested = (tokenUid) => ({
+  type: types.PROPOSAL_TOKEN_FETCH_REQUESTED,
+  tokenUid
+});
+
+/**
+ * @param {string} tokenUid The token identifier fetched
+ * @param {unknown} data The downloaded proposal data
+ */
+export const proposalTokenFetchSuccess = (tokenUid, data) => ({
+  type: types.PROPOSAL_TOKEN_FETCH_SUCCESS,
+  tokenUid,
+  data,
+});
+
+/**
+ * @param {string} tokenUid The token identifier fetched
+ * @param {string} errorMessage The error found on proposal fetching
+ */
+export const proposalTokenFetchFailed = (tokenUid, errorMessage) => ({
+  type: types.PROPOSAL_TOKEN_FETCH_FAILED,
+  tokenUid,
   errorMessage,
 });
 
