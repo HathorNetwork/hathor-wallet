@@ -21,6 +21,10 @@ export const types = {
   TOKEN_FETCH_HISTORY_REQUESTED: 'TOKEN_FETCH_HISTORY_REQUESTED',
   TOKEN_FETCH_HISTORY_SUCCESS: 'TOKEN_FETCH_HISTORY_SUCCESS',
   TOKEN_FETCH_HISTORY_FAILED: 'TOKEN_FETCH_HISTORY_FAILED',
+  PROPOSAL_FETCH_REQUESTED: 'PROPOSAL_FETCH_REQUESTED',
+  PROPOSAL_FETCH_SUCCESS: 'PROPOSAL_FETCH_SUCCESS',
+  PROPOSAL_FETCH_FAILED: 'PROPOSAL_FETCH_FAILED',
+  PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
   ON_START_WALLET_LOCK: 'ON_START_WALLET_LOCK',
   RELOAD_WALLET_REQUESTED: 'RELOAD_WALLET_REQUESTED',
@@ -260,6 +264,46 @@ export const tokenFetchBalanceSuccess = (tokenId, data) => ({
 export const tokenFetchBalanceFailed = (tokenId) => ({
   type: types.TOKEN_FETCH_BALANCE_FAILED,
   tokenId,
+});
+
+/**
+ * @param {string} proposalId The proposalId to request data
+ * @param {string} password The proposal's password to decode its data
+ * @param {boolean} [force=false] Should we ignore the stored data?
+ */
+export const proposalFetchRequested = (proposalId, password, force) => ({
+  type: types.PROPOSAL_FETCH_REQUESTED,
+  proposalId,
+  password,
+  force,
+});
+
+/**
+ * @param {string} proposalId The proposalId to store data
+ * @param {unknown} data The downloaded proposal data
+ */
+export const proposalFetchSuccess = (proposalId, data) => ({
+  type: types.PROPOSAL_FETCH_SUCCESS,
+  proposalId,
+  data,
+});
+
+/**
+ * @param {string} proposalId The proposalId of the fetch request
+ * @param {string} errorMessage The error found on proposal fetching
+ */
+export const proposalFetchFailed = (proposalId, errorMessage) => ({
+  type: types.PROPOSAL_FETCH_FAILED,
+  proposalId,
+  errorMessage,
+});
+
+/**
+ * @param {string} proposalId
+ */
+export const proposalRemoved = (proposalId) => ({
+  type: types.PROPOSAL_REMOVED,
+  proposalId,
 });
 
 export const tokenInvalidateBalance = (tokenId) => ({

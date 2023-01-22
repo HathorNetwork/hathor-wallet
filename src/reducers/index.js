@@ -11,6 +11,8 @@ import { types } from '../actions';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
+import { PROPOSAL_DOWNLOAD_STATUS } from "../utils/proposals";
+import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
 
 /**
  * @typedef TokenHistory
@@ -98,6 +100,39 @@ const initialState = {
   startWalletAction: null,
   // RouterHistory object
   routerHistory: null,
+
+  /**
+   * @type {Record<string,ReduxProposalData>}
+   */
+  proposals: {
+    '5e005d48-13e3-4974-9bb4-c7e884466d24': { // Debug: Sample transaction with ready test data always available
+      id: '5e005d48-13e3-4974-9bb4-c7e884466d24',
+      password: 'pass2',
+      status: PROPOSAL_DOWNLOAD_STATUS.READY,
+      data: {
+        amountTokens: 3,
+        signatureStatus: 'Open',
+        partialTx: 'PartialTx|0001010102002f91917e63ce0f9d21a6b50adc45539f0ffe1d35b9a68ec4b476ac131ad17b000007909b6c4d0d7f3a6f338e01018901c63316135808cabd0481ff4dc8ea870000000000183800001976a914a45db589c43d2f6adb09fe89b3339aadb4710eeb88ac0000000101001976a914a45db589c43d2f6adb09fe89b3339aadb4710eeb88ac000000000000000063c062af0000000000|WTjhJXzQJETVx7BVXdyZmvk396DRRsubdw,00,0,1900|0',
+        signatures: '',
+        timestamp: 1672764572199
+      },
+    },
+  },
+  /**
+   * A local cache of the minimum token identifying data from all sources:
+   * - Those that were registered by the user
+   * - Those that have at least one transaction on this wallet
+   * - Those that were present in at least one proposal in which this wallet participated
+   * @type {Record<string,{ tokenUid: string, symbol: string, name: string, status: string, oldStatus?: string }>}
+   */
+  tokensCache: {
+    '00': {
+      tokenUid: HATHOR_TOKEN_CONFIG.uid,
+      symbol: HATHOR_TOKEN_CONFIG.symbol,
+      name: HATHOR_TOKEN_CONFIG.name,
+      status: TOKEN_DOWNLOAD_STATUS.READY
+    }
+  },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -186,6 +221,14 @@ const rootReducer = (state = initialState, action) => {
       return onTokenFetchHistorySuccess(state, action);
     case types.TOKEN_FETCH_HISTORY_FAILED:
       return onTokenFetchHistoryFailed(state, action);
+    case types.PROPOSAL_FETCH_REQUESTED:
+      return onProposalFetchRequested(state, action);
+    case types.PROPOSAL_FETCH_SUCCESS:
+      return onProposalFetchSuccess(state, action);
+    case types.PROPOSAL_FETCH_FAILED:
+      return onProposalFetchFailed(state, action);
+    case types.PROPOSAL_REMOVED:
+      return onProposalRemoved(state, action);
     case types.TOKEN_INVALIDATE_HISTORY:
       return onTokenInvalidateHistory(state, action);
     case types.TOKEN_INVALIDATE_BALANCE:
@@ -611,6 +654,91 @@ export const onTokenFetchHistoryRequested = (state, action) => {
         oldStatus: oldState.status,
       },
     },
+  };
+};
+
+/**
+ * @param {String} action.proposalId The proposal id to fetch from the backend
+ */
+export const onProposalFetchRequested = (state, action) => {
+  const { proposalId } = action
+
+  const oldState = get(state.proposals, proposalId, { id: proposalId })
+
+  return {
+    ...state,
+    proposals: {
+      ...state.proposals,
+      [proposalId]: {
+        ...oldState,
+        status: PROPOSAL_DOWNLOAD_STATUS.LOADING,
+        oldStatus: oldState.status,
+      }
+    }
+  }
+}
+
+/**
+ * @param {String} action.proposalId - The proposalId to mark as success
+ * @param {Object} action.data - The proposal history information to store on redux
+ */
+export const onProposalFetchSuccess = (state, action) => {
+  const { proposalId, data } = action;
+
+  const oldState = get(state.proposals, proposalId, { id: proposalId })
+
+  return {
+    ...state,
+    proposals: {
+      ...state.proposals,
+      [proposalId]: {
+        ...oldState,
+        status: PROPOSAL_DOWNLOAD_STATUS.READY,
+        updatedAt: new Date().getTime(),
+        data,
+      },
+    },
+  };
+};
+
+/**
+ * @param {String} action.proposalId - The proposalId to mark as failed
+ * @param {String} action.errorMessage - Error message
+ */
+export const onProposalFetchFailed = (state, action) => {
+  const { proposalId, errorMessage } = action;
+
+  const { password } = get(state.proposals, proposalId, { id: proposalId })
+
+  return {
+    ...state,
+    proposals: {
+      ...state.proposals,
+      [proposalId]: {
+        id: proposalId,
+        password,
+        status: PROPOSAL_DOWNLOAD_STATUS.FAILED,
+        errorMessage: errorMessage,
+        updatedAt: new Date().getTime(),
+      },
+    },
+  };
+};
+
+/**
+ * @param {String} action.proposalId - The new proposalId to store
+ */
+export const onProposalRemoved = (state, action) => {
+  const { proposalId } = action;
+
+  const newProposals = {
+    ...state.proposals,
+  };
+  delete newProposals[proposalId];
+
+  return {
+    ...state,
+    proposals: newProposals,
   };
 };
 

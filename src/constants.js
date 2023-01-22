@@ -23,7 +23,7 @@ export const WALLET_HISTORY_COUNT = 10;
 export const VERSION = '0.25.0';
 
 /**
- * Before this version the data in localStorage from the wallet is not compatible  
+ * Before this version the data in localStorage from the wallet is not compatible
  * So we must reset the wallet to continue using it
  */
 export const FIRST_WALLET_COMPATIBLE_VERSION = '0.11.0';
@@ -54,8 +54,8 @@ export const CONFIRM_RESET_MESSAGE = t`I want to reset my wallet`;
 export const PASSWORD_PATTERN = "(?=^.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^0-9a-zA-Z]).*$"
 
 /**
- * Local storage data useful for debugging purposes.  
- * WARNING: we cannot include any arbitrarily large fields (e.g. wallet:data) on Sentry request.  
+ * Local storage data useful for debugging purposes.
+ * WARNING: we cannot include any arbitrarily large fields (e.g. wallet:data) on Sentry request.
  * WARNING: the request has a max size of 200kb and if it is bigger than this it'll be denied by Sentry.
  */
 export const DEBUG_LOCAL_DATA_KEYS = [
@@ -140,6 +140,11 @@ export const LEDGER_ENABLED = true;
  * Flag to hide/show create NFT button
  */
 export const NFT_ENABLED = true;
+
+/**
+ * Flag to hide/show the Atomic Swap feature
+ */
+export const ATOMIC_SWAP_ENABLED = false;
 
 /**
  * Maximum size of NFT data length

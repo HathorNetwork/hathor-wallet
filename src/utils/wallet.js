@@ -67,6 +67,7 @@ const storageKeys = {
   notification: 'wallet:notification',
   hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
   alwaysShowTokens: 'wallet:always_show_tokens',
+  atomicProposals: 'wallet:atomic_swap_proposals',
 }
 
 /**
@@ -366,14 +367,14 @@ const wallet = {
       store.dispatch(startWalletRequested({
         passphrase: '',
         pin,
-        password: '', 
+        password: '',
         routerHistory,
         fromXpriv: true,
       }));
     } else {
       store.dispatch(startWalletRequested({
         passphrase: '',
-        password: '', 
+        password: '',
         routerHistory,
         fromXpriv: false,
         xpub: wallet.xpub,
@@ -730,6 +731,18 @@ const wallet = {
    */
   decimalToInteger(value) {
     return Math.round(value*(10**hathorConstants.DECIMAL_PLACES));
+  },
+
+  getListenedProposalList() {
+    const serializedList = storage.getItem(storageKeys.atomicProposals);
+    return serializedList || {};
+  },
+
+  /**
+   * @param {Record<string,ReduxProposalData>} proposalList
+   */
+  setListenedProposalList(proposalList) {
+    storage.setItem(storageKeys.atomicProposals, proposalList);
   },
 }
 

@@ -12,6 +12,7 @@ import logo from '../assets/images/hathor-white-logo.png';
 import Version from './Version';
 import ServerStatus from './ServerStatus';
 import helpers from '../utils/helpers';
+import { ATOMIC_SWAP_ENABLED } from "../constants";
 
 /**
  * Component that shows a navigation bar with the menu options
@@ -56,6 +57,9 @@ class Navigation extends React.Component {
               <li className="nav-item">
                 <NavLink to="/nft/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`NFTs`}</NavLink>
               </li>
+              {ATOMIC_SWAP_ENABLED && <li className="nav-item">
+                <NavLink to="/wallet/atomic_swap/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Atomic Swap`}</NavLink>
+              </li>}
               <li className="nav-item">
                 <a className="nav-link" href="true" onClick={this.goToExplorer}>{t`Public Explorer`}</a>
               </li>
