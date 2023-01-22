@@ -20,6 +20,10 @@ import ModalLedgerSignToken from './ModalLedgerSignToken';
 import ModalConfirmTestnet from './ModalConfirmTestnet';
 import ModalSendTx from './ModalSendTx';
 import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
+import { ModalAtomicSend } from "./atomic-swap/ModalAtomicSend";
+import { ModalAtomicReceive } from "./atomic-swap/ModalAtomicReceive";
+import { ModalAtomicPin } from "./atomic-swap/PinModal";
+import { ModalAtomicExternalChange } from "./atomic-swap/ExternalChangeModal";
 
 const initialState = {
   showModal: () => {},
@@ -41,6 +45,10 @@ export const MODAL_TYPES = {
   'CONFIRM_TESTNET': 'CONFIRM_TESTNET',
   'SEND_TX': 'SEND_TX',
   'UNREGISTERED_TOKEN_INFO': 'UNREGISTERED_TOKEN_INFO',
+  'ATOMIC_SEND': 'ATOMIC_SEND',
+  'ATOMIC_RECEIVE': 'ATOMIC_RECEIVE',
+  'ATOMIC_PIN': 'ATOMIC_PIN',
+  'ATOMIC_EXTERNAL_CHANGE': 'ATOMIC_EXTERNAL_CHANGE',
 };
 
 export const MODAL_COMPONENTS = {
@@ -57,6 +65,10 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.CONFIRM_TESTNET]: ModalConfirmTestnet,
   [MODAL_TYPES.SEND_TX]: ModalSendTx,
   [MODAL_TYPES.UNREGISTERED_TOKEN_INFO]: ModalUnregisteredTokenInfo,
+  [MODAL_TYPES.ATOMIC_SEND]: ModalAtomicSend,
+  [MODAL_TYPES.ATOMIC_RECEIVE]: ModalAtomicReceive,
+  [MODAL_TYPES.ATOMIC_PIN]: ModalAtomicPin,
+  [MODAL_TYPES.ATOMIC_EXTERNAL_CHANGE]: ModalAtomicExternalChange,
 };
 
 export const GlobalModalContext = createContext(initialState);
@@ -66,7 +78,10 @@ export const useGlobalModalContext = () => useContext(GlobalModalContext);
 export const GlobalModal = ({ children }) => {
   const [store, setStore] = useState();
 
-  const hideModal = () => {
+  /**
+   * @param {string|unknown} [domSelector] Optional parameter, will attempt to hide this modal if informed with a string
+   */
+  const hideModal = (domSelector) => {
     setStore({
       ...store,
       modalType: null,
@@ -82,6 +97,12 @@ export const GlobalModal = ({ children }) => {
     // Same problem happens with the class jquery adds to the body,
     // causing the app to stop scrolling. We can just remove it
     $('body').removeClass('modal-open');
+
+    // Managing the modal lifecycle, if the string parameter is offered
+    if (typeof domSelector === 'string') {
+      const domElement = $(domSelector);
+      domElement.modal('hide');
+    }
   };
 
   const showModal = (modalType, modalProps = {}) => {
@@ -97,6 +118,25 @@ export const GlobalModal = ({ children }) => {
     $('.modal-backdrop').fadeIn(150);
   };
 
+  /**
+   * Helper method to handle the modal's DOM lifecycle: showing the modal and
+   * treating its hide and dispose methods properly.
+   * @param {string} domSelector jQuery selector to find the modal's DOM
+   */
+  const manageDomLifecycle = (domSelector) => {
+    const domElement = $(domSelector);
+
+    // First, show the modal
+    domElement.modal('show');
+
+    domElement.on('shown.bs.modal', (e) => {
+      // When it is properly shown, configure its teardown
+      domElement.on('hidden.bs.modal', (e) => {
+        hideModal();
+      });
+    });
+  }
+
   const renderComponent = () => {
     const { modalType } = store || {};
     const ModalComponent = MODAL_COMPONENTS[modalType];
@@ -107,6 +147,7 @@ export const GlobalModal = ({ children }) => {
 
     const componentProps = {
       onClose: hideModal,
+      manageDomLifecycle,
       ...store.modalProps,
     };
 
