@@ -319,16 +319,6 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
                                 }
                             </div>
                             <div className="row mt-2">
-                                <label htmlFor="change-address" className="col-3 my-auto">{t`Address`}: </label>
-                                <input type="text"
-                                       placeholder={`${t`Change Address`} ${t`(Optional)`}`}
-                                       name="change-address"
-                                       value={changeAddress}
-                                       onChange={e => setChangeAddress(e.target.value)}
-                                       className="form-control output-address col-6"
-                                />
-                            </div>
-                            <div className="row mt-2">
                                 <label htmlFor="amount" className="col-3 my-auto">{t`Amount`}: </label>
                                 <InputNumber key="value"
                                              name="amount"
@@ -337,6 +327,16 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
                                              placeholder={hathorLib.helpers.prettyValue(0)}
                                              onValueChange={value => setAmount(value)}
                                              className="form-control output-value col-3"/>
+                            </div>
+                            <div className="row mt-2">
+                                <label htmlFor="change-address" className="col-3 my-auto">{t`Address`}: </label>
+                                <input type="text"
+                                       placeholder={`${t`Change Address`} ${t`(Optional)`}`}
+                                       name="change-address"
+                                       value={changeAddress}
+                                       onChange={e => setChangeAddress(e.target.value)}
+                                       className="form-control output-address col-6"
+                                />
                             </div>
                             <div className={`form-check checkbox-wrapper mt-4 mb-2`}>
                                 <input className={`form-check-input ${utxoError && 'is-invalid'}`}

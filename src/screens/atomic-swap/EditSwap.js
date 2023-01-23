@@ -425,7 +425,7 @@ export default function EditSwap(props) {
         }
 
         modalContext.showModal(MODAL_TYPES.CONFIRM, {
-            title: 'Remove all interactions',
+            title: 'Remove all my inputs and outputs',
             body: confirmationMessage,
             handleYes: () => {
                 // Unlocking the utxo for this wallet session
@@ -534,7 +534,7 @@ export default function EditSwap(props) {
             { hasWalletInteraction && <button type="button"
                      onClick={handleRemoveInteractions}
                      className="btn btn-secondary col-2 mr-3">
-                {t`Remove all interactions`}
+                {t`Remove all my inputs and outputs`}
             </button>}
             { showSignButton &&
             <button type="button"
