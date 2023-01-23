@@ -12,14 +12,13 @@ import hathorLib from "@hathor/wallet-lib";
 export function ModalAtomicPin ({ confirmClickHandler, manageDomLifecycle, onClose }) {
     const [pin, setPin] = useState('');
     const [errMessage, setErrMessage] = useState('');
-    const modalDomId = 'atomicSendModal';
+    const modalDomId = 'atomicPinModal';
 
     /**
      * Validates form fields and return true if all are valid
      * @returns {boolean}
      */
     const validateForm = () => {
-        // Validating optional address
         if (pin.length !== 6) {
             setErrMessage(t`Invalid PIN.`)
             return false;

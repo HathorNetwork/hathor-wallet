@@ -65,6 +65,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
             return;
         }
 
+        // On success, clean error message and return user input
         setErrMessage('');
         sendClickHandler({ selectedToken, address, amount: getIntTokenAmount(amount) });
         onClose(`#${modalDomId}`);

@@ -179,16 +179,18 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
             return false;
         }
 
-        // Validating optional address
+        // Validating optional change address
         const addressObj = new Address(changeAddress);
-        if (changeAddress.length > 0 && !addressObj.isValid()) {
-            setErrMessage(t`Invalid change address.`)
-            return false;
-        }
+        if (changeAddress.length > 0) {
+            if (!addressObj.isValid()) {
+                setErrMessage(t`Invalid change address.`)
+                return false;
+            }
 
-        if (!wallet.isAddressMine(changeAddress)) {
-            setErrMessage(t`Change address does not belong to this wallet`);
-            return false;
+            if (!wallet.isAddressMine(changeAddress)) {
+                setErrMessage(t`Change address does not belong to this wallet`);
+                return false;
+            }
         }
 
         // Validating mandatory amount
