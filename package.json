@@ -105,19 +105,17 @@
     "win": {
       "icon": "build/icon.png",
       "target": "nsis",
-      "publisherName": "Hathor Labs"
+      "publisherName": "Hathor Labs",
+      "sign": "./scripts/win-ev-sign.js"
     },
     "mac": {
-      "provisioningProfile": "mac_production.provisionprofile",
+      "provisioningProfile": "keys/mac_production.provisionprofile",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "build/icon.icns",
-      "target": [
-        "dmg",
-        "pkg"
-      ]
+      "target": "dmg"
     },
     "linux": {
       "target": [

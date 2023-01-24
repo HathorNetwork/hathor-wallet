@@ -53,3 +53,36 @@ For Windows, you need to create the following environment variables:
     export WIN_CSC_KEY_PASSWORD=your_certificate_password
 
 Then, just build it.
+
+### Windows EV Code Signing
+
+To sign using an EV Code Signing Certificate in a YubiKey, [follow this guide](https://www.electron.build/tutorials/code-signing-windows-apps-on-unix.html).
+
+Use [JSign](https://ebourg.github.io/jsign/) to sign files; use osslsigncode to verify the signature.
+
+On macOS, you should install the following: `brew install yubico-piv-tool osslsigncode1`.
+
+You can use the following commands to test whether it is working on your computer:
+
+```bash
+
+# First, sign the exe.
+java \
+  --add-exports jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED \
+  --add-exports jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED \
+  --add-opens java.base/java.security=ALL-UNNAMED \
+  -jar jsign-4.2.jar \
+  --storetype YUBIKEY \
+  --certfile "$WIN_EV_CERTIFICATE_FILE" \
+  --storepass "$WIN_EV_TOKEN_PASSWORD" \
+  --alias "$WIN_EV_CERTIFICATE_NAME" \
+  ./dist/Hathor\ Wallet\ Setup\ 0.24.0.exe
+
+# Then, verify the signature is correct.
+osslsigncode verify dist/Hathor\ Wallet\ Setup\ 0.24.0.exe
+```
+
+#### Troubleshooting:
+
+Error: YubiKey PKCS11 module (ykcs11) is not installed
+Fix: `brew install yubico-piv-tool`
