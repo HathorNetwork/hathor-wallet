@@ -55,6 +55,7 @@ import {
   reloadingWallet,
   tokenInvalidateHistory,
   sharedAddressUpdate,
+  walletRefreshSharedAddress,
 } from '../actions';
 import { specificTypeAndPayload, errorHandler } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -160,7 +161,6 @@ export function* startWallet(action) {
     });
 
     const beforeReloadCallback = () => {
-      dispatch(loadingAddresses(true));
       dispatch(reloadingWallet());
     };
 
@@ -588,15 +588,22 @@ export function* onWalletConnStateUpdate({ payload }) {
 }
 
 export function* walletReloading() {
+  yield put(loadingAddresses(true));
+
   const wallet = yield select((state) => state.wallet);
+  const useWalletService = yield select((state) => state.useWalletService);
   const routerHistory = yield select((state) => state.routerHistory);
 
-  // Since we close the channel after a walletReady event is received,
-  // we must fork this saga again so we setup listeners again.
-  yield fork(listenForWalletReady, wallet);
+  // If we are using the wallet-service, we don't need to wait until the addresses
+  // are reloaded since they are stored on the wallet-service itself.
+  if (!useWalletService) {
+    // Since we close the channel after a walletReady event is received,
+    // we must fork this saga again so we setup listeners again.
+    yield fork(listenForWalletReady, wallet);
 
-  // Wait until the wallet is ready
-  yield take(types.WALLET_STATE_READY);
+    // Wait until the wallet is ready
+    yield take(types.WALLET_STATE_READY);
+  }
 
   try {
     // Store all tokens on redux as we might have lost tokens during the disconnected
@@ -611,6 +618,17 @@ export function* walletReloading() {
       }
       yield put(tokenInvalidateHistory(tokenUid));
     }
+
+    // If we are on the wallet-service, we also need to refresh the
+    // facade instance internal addresses
+    if (useWalletService) {
+      yield call(wallet.getNewAddresses.bind(wallet));
+    }
+
+    // dispatch the refreshSharedAddress so our redux store is potentially
+    // updated with the new addresses that we missed during the disconnection
+    // time
+    yield put(walletRefreshSharedAddress());
 
     // Load success, we can send the user back to the wallet screen
     yield put(loadWalletSuccess(allTokens));
@@ -642,7 +660,7 @@ export function* saga() {
     takeEvery('WALLET_UPDATE_TX', handleTx),
     takeEvery('WALLET_BEST_BLOCK_UPDATE', bestBlockUpdate),
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
-    takeEvery('WALLET_RELOAD_DATA', loadTokens),
+    takeEvery('WALLET_RELOAD_DATA', walletReloading),
     takeEvery('WALLET_REFRESH_SHARED_ADDRESS', refreshSharedAddress),
   ]);
 }
