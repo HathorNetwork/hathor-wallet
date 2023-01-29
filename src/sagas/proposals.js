@@ -5,16 +5,23 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { all, call, delay, fork, put, select, take, } from 'redux-saga/effects';
+import { all, call, delay, fork, put, select, take, takeEvery } from 'redux-saga/effects';
 import { channel } from "redux-saga";
-import { proposalFetchFailed, proposalFetchSuccess, types } from "../actions";
+import {
+    proposalFetchFailed, proposalFetchRequested,
+    proposalFetchSuccess,
+    proposalGenerateFailed,
+    types
+} from "../actions";
 import { specificTypeAndPayload } from "./helpers";
-import { get, sample } from 'lodash';
+import { get } from 'lodash';
 import {
     getRandomInt,
     PROPOSAL_DOWNLOAD_STATUS,
     PROPOSAL_SIGNATURE_STATUS
 } from "../utils/proposals";
+import { swapService } from '@hathor/wallet-lib';
+import { t } from "ttag";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 
@@ -93,21 +100,47 @@ function* fetchProposalData(action) {
         const signatureStatusNames = Object.entries(PROPOSAL_SIGNATURE_STATUS).map(e => e[1])
         const mockResponse = {
             id: proposalId,
-            amountTokens: getRandomInt(2,6),
-            signatureStatus: sample(signatureStatusNames)
+            partialTx: 'PartialTx|0001000000000000000000000063d184550000000000||',
+            signatures: null,
+            amountTokens: 0,
+            signatureStatus: PROPOSAL_SIGNATURE_STATUS.OPEN,
+            timestamp: undefined,
+            history: []
         };
 
         yield put(proposalFetchSuccess(proposalId, mockResponse));
     } catch (e) {
         console.error(`Proposal fetching error`, e);
-        yield put(proposalFetchFailed(proposalId, 'An error occurred while fetching this proposal.'));
+        yield put(proposalFetchFailed(proposalId, t`An error occurred while fetching this proposal.`));
     }
 }
 
+/**
+ * @param {string} action.partialTx Serialized partialTx to send to the backend
+ * @param {string} action.password Unencrypted password
+ * @returns {Generator<*, void, *>}
+ */
+function* createProposal(action) {
+    const { partialTx, password } = action;
 
+    try {
+        const newProposal = yield swapService.create(partialTx, password);
+        if (!newProposal.success) {
+            yield put(proposalGenerateFailed(t`An error occurred while creating this proposal`));
+            return;
+        }
+        const proposalId = newProposal.id;
+        yield put(proposalFetchRequested(proposalId, password));
+    }
+    catch (e) {
+        console.error(`Error on create proposal`, e);
+        yield put(proposalGenerateFailed(t`An error occurred while creating this proposal`));
+    }
+}
 
 export function* saga() {
     yield all([
         fork(fetchProposalDataQueue),
+        takeEvery(types.PROPOSAL_GENERATE_REQUESTED, createProposal)
     ]);
 }

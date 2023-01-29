@@ -86,26 +86,14 @@ export function getIntTokenAmount(floatAmount) {
 
 /**
  * Generates an empty proposal for storing on redux
- * @param {string} password
  * @param {HathorWallet} wallet Current wallet in use
- * @return {{id:string, password:string, data:ProposalData}}
+ * @return {{partialTx:PartialTx}}
  */
-export function generateEmptyProposalFromPassword(password, wallet) {
+export function generateEmptyProposalFromPassword(wallet) {
     const partialTx = new PartialTx(wallet.getNetworkObject());
-    const pId = v4();
 
     return {
-        id: pId,
-        password,
-        data: {
-            id: pId,
-            partialTx: partialTx.serialize(),
-            signatures: null,
-            amountTokens: 0,
-            signatureStatus: PROPOSAL_SIGNATURE_STATUS.OPEN,
-            timestamp: undefined,
-            history: []
-        },
+        partialTx,
     };
 }
 

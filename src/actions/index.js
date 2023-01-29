@@ -27,7 +27,8 @@ export const types = {
   PROPOSAL_TOKEN_FETCH_REQUESTED: 'PROPOSAL_TOKEN_FETCH_REQUESTED',
   PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
   PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
-  PROPOSAL_GENERATED: 'PROPOSAL_GENERATED',
+  PROPOSAL_GENERATE_REQUESTED: 'PROPOSAL_GENERATE_REQUESTED',
+  PROPOSAL_GENERATE_FAILED: 'PROPOSAL_GENERATE_FAILED',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
   PROPOSAL_ADDED: 'PROPOSAL_ADDED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
@@ -274,13 +275,14 @@ export const tokenFetchBalanceFailed = (tokenId) => ({
 /**
  * @param {string} proposalId The proposalId to request data
  * @param {string} password The proposal's password to decode its data
- * @param {boolean} [force=false] Should we ignore the stored data?
+ * @param [options]
+ * @param {boolean} [options.force=false] Should we ignore the stored data?
  */
-export const proposalFetchRequested = (proposalId, password, force) => ({
+export const proposalFetchRequested = (proposalId, password, options) => ({
   type: types.PROPOSAL_FETCH_REQUESTED,
   proposalId,
   password,
-  force,
+  options,
 });
 
 /**
@@ -332,15 +334,21 @@ export const proposalTokenFetchFailed = (tokenUid, errorMessage) => ({
 });
 
 /**
- * @param {string} proposalId
- * @param {string} password
- * @param {ProposalData} data The generated proposal object
+ * @param {string} partialTx Serialized partialTx
+ * @param {string} password Unencrypted password
  */
-export const proposalGenerated = (proposalId, password, data) => ({
-  type: types.PROPOSAL_GENERATED,
-  proposalId,
+export const proposalGenerateRequested = (partialTx, password) => ({
+  type: types.PROPOSAL_GENERATE_REQUESTED,
+  partialTx,
   password,
-  data,
+});
+
+/**
+ * @param {string} errorMessage The error found on proposal creation
+ */
+export const proposalGenerateFailed = (errorMessage) => ({
+  type: types.PROPOSAL_GENERATE_FAILED,
+  errorMessage,
 });
 
 /**

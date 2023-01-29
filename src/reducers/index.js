@@ -233,8 +233,8 @@ const rootReducer = (state = initialState, action) => {
       return onProposalTokenFetchSuccess(state, action);
     case types.PROPOSAL_TOKEN_FETCH_FAILED:
       return onProposalTokenFetchFailed(state, action);
-    case types.PROPOSAL_GENERATED:
-      return onNewProposalGeneration(state, action);
+    case types.PROPOSAL_GENERATE_REQUESTED:
+      return onProposalGenerateRequested(state, action);
     case types.PROPOSAL_REMOVED:
       return onProposalRemoved(state, action);
     case types.PROPOSAL_ADDED:
@@ -807,10 +807,9 @@ export const onProposalTokenFetchFailed = (state, action) => {
 /**
  * @param {String} action.proposalId - The new proposalId to store
  * @param {String} action.password - The proposal password
- * @param {Object} action.data - The proposal history information to store on redux
  */
-export const onNewProposalGeneration = (state, action) => {
-  const { proposalId, password, data } = action;
+export const onProposalGenerateRequested = (state, action) => {
+  const { proposalId, password } = action;
 
   return {
     ...state,
@@ -819,9 +818,8 @@ export const onNewProposalGeneration = (state, action) => {
       [proposalId]: {
         id: proposalId,
         password,
-        status: PROPOSAL_DOWNLOAD_STATUS.READY,
-        updatedAt: new Date().getTime(),
-        data
+        status: PROPOSAL_DOWNLOAD_STATUS.INVALIDATED,
+        isNewProposal: true,
       },
     },
   };

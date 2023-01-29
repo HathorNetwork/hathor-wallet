@@ -15,13 +15,7 @@ import { proposalFetchRequested, proposalRemoved } from "../../actions";
 import { PROPOSAL_DOWNLOAD_STATUS, updatePersistentStorage } from "../../utils/proposals";
 import walletUtil from "../../utils/wallet";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
-
-const SWAP_TYPE = {
-    UNSELECTED: 'UNSELECTED',
-    IMPORTED_STRING: 'IMPORTED_STRING',
-    IMPORTED_PROPOSAL: 'IMPORTED_PROPOSAL',
-    NEW_PROPOSAL: 'NEW_PROPOSAL'
-};
+import { config } from "@hathor/wallet-lib";
 
 export default function ProposalList (props) {
     const history = useHistory();
@@ -130,6 +124,10 @@ export default function ProposalList (props) {
         // Make sure all proposals are loaded
         Object.entries(startingProposalList)
             .forEach(([pId, p]) => dispatch(proposalFetchRequested(pId, p.password)));
+
+        // Initializing the atomic swap service
+        // TODO: Move this to a wallet initialization phase instead of here
+        config.setSwapServiceBaseUrl('http://localhost:3001/dev');
     }, []);
 
     return (

@@ -9,9 +9,13 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from 'react-router-dom';
 import { t } from "ttag";
 import Loading from "../../components/Loading";
-import { generateEmptyProposalFromPassword, updatePersistentStorage } from "../../utils/proposals";
+import {
+    generateEmptyProposalFromPassword,
+    PROPOSAL_DOWNLOAD_STATUS,
+    updatePersistentStorage
+} from "../../utils/proposals";
 import { useDispatch, useSelector } from "react-redux";
-import { proposalGenerated } from "../../actions";
+import { proposalGenerateRequested } from "../../actions";
 
 export default function NewSwap (props) {
     const [proposalId, setProposalId] = useState('');
@@ -35,18 +39,42 @@ export default function NewSwap (props) {
         }
 
         setIsLoading(true);
-        const { data, id } = generateEmptyProposalFromPassword(password, wallet);
-        setProposalId(id);
-        dispatch(proposalGenerated(id, password, data))
+        const { partialTx } = generateEmptyProposalFromPassword(wallet);
+        dispatch(proposalGenerateRequested(partialTx.serialize(), password));
     }
 
     useEffect(() => {
-        // If this proposal exists, navigate to it immediately
-        if (allProposals[proposalId]) {
-            updatePersistentStorage(allProposals);
-            navigateToProposal(proposalId);
+        // This effect is only necessary when waiting for the proposal creation
+        if (!isLoading) {
+            return;
         }
-    })
+
+        // Finding the new proposal's identifier, if it's still unknown
+        let foundProposalId = proposalId || '';
+        if (!proposalId) {
+            for (const [pId, proposal] of Object.entries(allProposals)) {
+                if (proposal.isNewProposal) {
+                    foundProposalId = pId; // Setting id locally, in case the proposal status is ready
+                    setProposalId(pId); // Setting id on state, in case the proposal status is not ready
+                    break;
+                }
+            }
+
+            // If it wasn't found yet, wait for another pass of this effect
+            if (!foundProposalId) {
+                return; //
+            }
+        }
+
+        // The proposal id is known, but it's not ready yet
+        if (allProposals[foundProposalId].status !== PROPOSAL_DOWNLOAD_STATUS.READY) {
+            return;
+        }
+
+        // The proposal data is loaded already, navigate to it immediately
+        updatePersistentStorage(allProposals);
+        navigateToProposal(proposalId);
+    }, [allProposals])
 
     return <div className="content-wrapper flex align-items-center">
         <BackButton {...props} />
