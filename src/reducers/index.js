@@ -118,6 +118,7 @@ const initialState = {
       },
     },
   },
+  generatedProposal: {},
   /**
    * A local cache of the minimum token identifying data from all sources:
    * - Those that were registered by the user
@@ -235,6 +236,10 @@ const rootReducer = (state = initialState, action) => {
       return onProposalTokenFetchFailed(state, action);
     case types.PROPOSAL_GENERATE_REQUESTED:
       return onProposalGenerateRequested(state, action);
+    case types.PROPOSAL_GENERATE_SUCCESS:
+      return onProposalGenerateSuccess(state, action);
+    case types.PROPOSAL_GENERATE_FAILED:
+      return onProposalGenerateFailed(state, action);
     case types.PROPOSAL_REMOVED:
       return onProposalRemoved(state, action);
     case types.PROPOSAL_ADDED:
@@ -805,22 +810,48 @@ export const onProposalTokenFetchFailed = (state, action) => {
 };
 
 /**
- * @param {String} action.proposalId - The new proposalId to store
  * @param {String} action.password - The proposal password
  */
 export const onProposalGenerateRequested = (state, action) => {
-  const { proposalId, password } = action;
+  const { password } = action;
 
   return {
     ...state,
-    proposals: {
-      ...state.proposals,
-      [proposalId]: {
-        id: proposalId,
-        password,
-        status: PROPOSAL_DOWNLOAD_STATUS.INVALIDATED,
-        isNewProposal: true,
-      },
+    generatedProposal: {
+      password,
+      status: PROPOSAL_DOWNLOAD_STATUS.LOADING,
+    },
+  };
+};
+
+/**
+ * @param {String} action.proposalId - The generated proposal identifier
+ */
+export const onProposalGenerateSuccess = (state, action) => {
+  const { proposalId } = action;
+
+  return {
+    ...state,
+    generatedProposal: {
+      ...state.generatedProposal,
+      proposalId,
+      status: PROPOSAL_DOWNLOAD_STATUS.READY,
+    },
+  };
+};
+
+/**
+ * @param {String} action.errorMessage - The reason the generation failed
+ */
+export const onProposalGenerateFailed = (state, action) => {
+  const { errorMessage } = action;
+
+  return {
+    ...state,
+    generatedProposal: {
+      ...state.generatedProposal,
+      errorMessage,
+      status: PROPOSAL_DOWNLOAD_STATUS.FAILED,
     },
   };
 };

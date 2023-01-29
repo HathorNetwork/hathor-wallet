@@ -28,6 +28,7 @@ export const types = {
   PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
   PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
   PROPOSAL_GENERATE_REQUESTED: 'PROPOSAL_GENERATE_REQUESTED',
+  PROPOSAL_GENERATE_SUCCESS: 'PROPOSAL_GENERATE_SUCCESS',
   PROPOSAL_GENERATE_FAILED: 'PROPOSAL_GENERATE_FAILED',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
   PROPOSAL_ADDED: 'PROPOSAL_ADDED',
@@ -349,6 +350,14 @@ export const proposalGenerateRequested = (partialTx, password) => ({
 export const proposalGenerateFailed = (errorMessage) => ({
   type: types.PROPOSAL_GENERATE_FAILED,
   errorMessage,
+});
+
+/**
+ * @param {string} proposalId The error found on proposal creation
+ */
+export const proposalGenerateSuccess = (proposalId) => ({
+  type: types.PROPOSAL_GENERATE_SUCCESS,
+  proposalId,
 });
 
 /**

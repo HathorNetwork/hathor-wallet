@@ -10,7 +10,7 @@ import { channel } from "redux-saga";
 import {
     proposalFetchFailed, proposalFetchRequested,
     proposalFetchSuccess,
-    proposalGenerateFailed,
+    proposalGenerateFailed, proposalGenerateSuccess,
     types
 } from "../actions";
 import { specificTypeAndPayload } from "./helpers";
@@ -130,6 +130,7 @@ function* createProposal(action) {
             return;
         }
         const proposalId = newProposal.id;
+        yield put(proposalGenerateSuccess(proposalId));
         yield put(proposalFetchRequested(proposalId, password));
     }
     catch (e) {

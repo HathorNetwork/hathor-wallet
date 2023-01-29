@@ -21,6 +21,7 @@ export default function NewSwap (props) {
     const [proposalId, setProposalId] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const generatedProposal = useSelector(state => state.generatedProposal);
     const allProposals = useSelector(state => state.proposals);
     const wallet = useSelector(state => state.wallet);
     const history = useHistory();
@@ -43,35 +44,46 @@ export default function NewSwap (props) {
         dispatch(proposalGenerateRequested(partialTx.serialize(), password));
     }
 
+    // This effect monitors the generated proposal status on the backend
     useEffect(() => {
         // This effect is only necessary when waiting for the proposal creation
         if (!isLoading) {
             return;
         }
 
-        // Finding the new proposal's identifier, if it's still unknown
-        let foundProposalId = proposalId || '';
-        if (!proposalId) {
-            for (const [pId, proposal] of Object.entries(allProposals)) {
-                if (proposal.isNewProposal) {
-                    foundProposalId = pId; // Setting id locally, in case the proposal status is ready
-                    setProposalId(pId); // Setting id on state, in case the proposal status is not ready
-                    break;
-                }
-            }
-
-            // If it wasn't found yet, wait for another pass of this effect
-            if (!foundProposalId) {
-                return; //
-            }
-        }
-
-        // The proposal id is known, but it's not ready yet
-        if (allProposals[foundProposalId].status !== PROPOSAL_DOWNLOAD_STATUS.READY) {
+        if (generatedProposal.status === PROPOSAL_DOWNLOAD_STATUS.FAILED) {
+            setErrorMessage(generatedProposal.errorMessage);
+            setIsLoading(false);
             return;
         }
 
-        // The proposal data is loaded already, navigate to it immediately
+        if (generatedProposal.status === PROPOSAL_DOWNLOAD_STATUS.READY) {
+            setProposalId(generatedProposal.proposalId);
+        }
+
+    }, [generatedProposal]);
+
+    // This effect monitors all proposals to check if the generated proposal is ready for editing
+    useEffect(() => {
+        // This effect is only necessary when the proposalId is known
+        if (!proposalId) {
+            return;
+        }
+        const newProposal = allProposals[proposalId];
+
+        // If a failure happened, inform the user
+        if (newProposal.status === PROPOSAL_DOWNLOAD_STATUS.FAILED) {
+            const redirectionMessage = `${newProposal.errorMessage}\n${t`Please copy the proposal identifier above and navigate back to retry loading the proposal.`}`
+            setErrorMessage(redirectionMessage);
+            setIsLoading(false);
+            return;
+        }
+        // It the proposal is still not ready, ignore it for now
+        if (newProposal.status !== PROPOSAL_DOWNLOAD_STATUS.READY) {
+            return;
+        }
+
+        // The proposal data is loaded already, navigate to it
         updatePersistentStorage(allProposals);
         navigateToProposal(proposalId);
     }, [allProposals])
@@ -86,7 +98,7 @@ export default function NewSwap (props) {
                 <input
                     type="text"
                     name="proposalIdentifierField"
-                    value="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                    value={proposalId || "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"}
                     disabled={true}
                     className="form-control"
                 />
@@ -117,7 +129,7 @@ export default function NewSwap (props) {
                 <button
                     type="button"
                     className="btn btn-hathor col-2"
-                    disabled={isLoading}
+                    disabled={isLoading || proposalId}
                     onClick={createClickHandler}>
                     {t`Create`}
                 </button>
