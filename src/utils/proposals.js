@@ -193,10 +193,10 @@ export function calculateExhibitionData(partialTx, cachedTokens, wallet) {
 }
 
 /**
- *
- * @param {PartialTx} partialTx
- * @param {string} currentSignatures
- * @returns {PartialTxInputData}
+ * Generates a PartialTxInputData class instance with all the signatures from the parameter.
+ * @param {PartialTx} partialTx PartialTx class instance
+ * @param {string} currentSignatures Serialized signatures
+ * @returns {PartialTxInputData} Newly created instance with all the signatures
  */
 export function calculateSignaturesObject(partialTx, currentSignatures) {
     const inputData = new PartialTxInputData(
