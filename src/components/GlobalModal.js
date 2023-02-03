@@ -102,6 +102,7 @@ export const GlobalModal = ({ children }) => {
     if (typeof domSelector === 'string') {
       const domElement = $(domSelector);
       domElement.modal('hide');
+      domElement.off();
     }
   };
 
@@ -132,7 +133,7 @@ export const GlobalModal = ({ children }) => {
     domElement.on('shown.bs.modal', (e) => {
       // When it is properly shown, configure its teardown
       domElement.on('hidden.bs.modal', (e) => {
-        hideModal();
+        hideModal(domSelector);
       });
     });
   }
