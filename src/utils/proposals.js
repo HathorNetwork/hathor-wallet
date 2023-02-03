@@ -72,8 +72,6 @@ export const PROPOSAL_SIGNATURE_STATUS = {
     SENT: 'Sent',
 }
 
-
-
 /**
  * The amount from the InputNumber component is represented in a float format, with an amount of decimal
  * cases defined by a lib's constant. This helper function converts it back to an integer.
