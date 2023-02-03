@@ -313,7 +313,7 @@ export const proposalTokenFetchRequested = (tokenUid) => ({
 
 /**
  * @param {string} tokenUid The token identifier fetched
- * @param {unknown} data The downloaded proposal data
+ * @param {unknown} data The downloaded token data
  */
 export const proposalTokenFetchSuccess = (tokenUid, data) => ({
   type: types.PROPOSAL_TOKEN_FETCH_SUCCESS,
@@ -323,7 +323,7 @@ export const proposalTokenFetchSuccess = (tokenUid, data) => ({
 
 /**
  * @param {string} tokenUid The token identifier fetched
- * @param {string} errorMessage The error found on proposal fetching
+ * @param {string} errorMessage The error found on token fetching
  */
 export const proposalTokenFetchFailed = (tokenUid, errorMessage) => ({
   type: types.PROPOSAL_TOKEN_FETCH_FAILED,

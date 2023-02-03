@@ -56,6 +56,7 @@ if (window.require) {
  * hideZeroBalanceTokens: string,
  * sentry: string,
  * alwaysShowTokens: string,
+ * atomicProposals: string,
  * }}
  * @readonly
  */
@@ -733,13 +734,18 @@ const wallet = {
     return Math.round(value*(10**hathorConstants.DECIMAL_PLACES));
   },
 
+  /**
+   * Returns a string map containing the identifiers for proposals currently being watched.
+   * @returns {Record<string,{ id:string, password:string }>}
+   */
   getListenedProposalList() {
-    const serializedList = storage.getItem(storageKeys.atomicProposals);
-    return serializedList || {};
+    const proposalMap = storage.getItem(storageKeys.atomicProposals);
+    return proposalMap || {};
   },
 
   /**
-   * @param {Record<string,ReduxProposalData>} proposalList
+   * Stores a string map containing the identifiers for proposals currently being watched.
+   * @param {Record<string,{ id:string, password:string }>} proposalList
    */
   setListenedProposalList(proposalList) {
     storage.setItem(storageKeys.atomicProposals, proposalList);
