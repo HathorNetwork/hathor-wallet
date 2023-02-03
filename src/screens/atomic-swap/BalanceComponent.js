@@ -36,10 +36,10 @@ export function BalanceComponent ({ partialTx, wallet, balance }) {
             const receiveAtIndex = receivingBalances[rowIndex] || {};
 
             let row = <tr key={rowIndex}>
-                <td className="text-left my-address-spend">
+                <td className="text-left">
                     {renderOne(sendAtIndex.sending,sendAtIndex.symbol)}
                 </td>
-                <td className="text-right my-address-income">
+                <td className="text-right">
                     {renderOne(receiveAtIndex.receiving,receiveAtIndex.symbol)}
                 </td>
             </tr>

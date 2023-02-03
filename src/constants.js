@@ -144,7 +144,7 @@ export const NFT_ENABLED = true;
 /**
  * Flag to hide/show the Atomic Swap feature
  */
-export const ATOMIC_SWAP_ENABLED = false;
+export const ATOMIC_SWAP_ENABLED = true;
 
 /**
  * Maximum size of NFT data length

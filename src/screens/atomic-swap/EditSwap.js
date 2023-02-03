@@ -120,9 +120,8 @@ export default function EditSwap(props) {
     // Will render all the inputs and outputs for all the tokens involved in this proposal
     const renderAllTokenInputsAndOutputs = () => {
         const renderInputs = (inputs) => {
-            return inputs.map((input, index) => {
-                const rowClass = input.isMine ? 'my-address-spend' : '';
-                return <tr key={`${input.hash}-${input.index}`} className={rowClass}>
+            return inputs.map((input) => {
+                return <tr key={`${input.hash}-${input.index}`}>
                     <td>
                         {input.hash}
                         {input.isSigned && <i
@@ -147,8 +146,7 @@ export default function EditSwap(props) {
 
         const renderOutputs = (outputs) => {
             return outputs.map((output,index) => {
-                const rowClass = output.isMine ? 'my-address-income' : '';
-                return <tr key={`${output.address}-${index}`} className={rowClass}>
+                return <tr key={`${output.address}-${index}`}>
                     <td>{output.address}</td>
                     <td className="text-right">{helpers.renderValue(output.value)}</td>
                     <td className="text-center">
