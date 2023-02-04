@@ -170,8 +170,8 @@ export function calculateExhibitionData(partialTx, cachedTokens, wallet) {
         return cachedTokens[tokenUid];
     }
 
-    const TxProposal = new PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.getNetworkObject());
-    const balance = TxProposal.calculateBalance(wallet);
+    const txProposal = new PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.getNetworkObject());
+    const balance = txProposal.calculateBalance(wallet);
 
     // Calculating the difference between them both
     const balanceArr = [];
