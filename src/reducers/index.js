@@ -237,8 +237,8 @@ const rootReducer = (state = initialState, action) => {
       return onNewProposalGeneration(state, action);
     case types.PROPOSAL_REMOVED:
       return onProposalRemoved(state, action);
-    case types.PROPOSAL_ADDED:
-      return onProposalAdded(state, action);
+    case types.PROPOSAL_IMPORTED:
+      return onProposalImported(state, action);
     case types.TOKEN_INVALIDATE_HISTORY:
       return onTokenInvalidateHistory(state, action);
     case types.TOKEN_INVALIDATE_BALANCE:
@@ -830,7 +830,7 @@ export const onNewProposalGeneration = (state, action) => {
 /**
  * @param {String} action.proposalId - The new proposalId to store
  */
-export const onProposalAdded = (state, action) => {
+export const onProposalImported = (state, action) => {
   const { proposalId, password } = action;
 
   return {

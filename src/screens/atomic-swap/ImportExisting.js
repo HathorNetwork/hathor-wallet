@@ -10,7 +10,7 @@ import Loading from "../../components/Loading";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { addProposal, proposalFetchRequested } from "../../actions";
+import { importProposal, proposalFetchRequested } from "../../actions";
 import { PROPOSAL_DOWNLOAD_STATUS } from "../../utils/proposals";
 
 export default function ImportExisting(props) {
@@ -31,7 +31,7 @@ export default function ImportExisting(props) {
 
     const importClickHandler = () => {
         setIsLoading(true);
-        dispatch(addProposal(proposalId, password));
+        dispatch(importProposal(proposalId, password));
         dispatch(proposalFetchRequested(proposalId, password, true));
     }
 

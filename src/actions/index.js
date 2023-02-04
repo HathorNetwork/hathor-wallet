@@ -29,7 +29,7 @@ export const types = {
   PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
   PROPOSAL_GENERATED: 'PROPOSAL_GENERATED',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
-  PROPOSAL_ADDED: 'PROPOSAL_ADDED',
+  PROPOSAL_IMPORTED: 'PROPOSAL_IMPORTED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
   ON_START_WALLET_LOCK: 'ON_START_WALLET_LOCK',
   RELOAD_WALLET_REQUESTED: 'RELOAD_WALLET_REQUESTED',
@@ -355,8 +355,8 @@ export const proposalRemoved = (proposalId) => ({
  * @param {string} proposalId
  * @param {string} password
  */
-export const addProposal = (proposalId, password) => ({
-  type: types.PROPOSAL_ADDED,
+export const importProposal = (proposalId, password) => ({
+  type: types.PROPOSAL_IMPORTED,
   proposalId,
   password,
 });
