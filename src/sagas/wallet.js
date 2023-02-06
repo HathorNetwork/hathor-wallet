@@ -54,7 +54,7 @@ import {
   reloadWalletRequested,
   reloadingWallet,
   tokenInvalidateHistory,
-  sharedAddressUpdate,
+  sharedAddressUpdate, setUseAtomicSwap,
 } from '../actions';
 import { specificTypeAndPayload, errorHandler } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -99,8 +99,10 @@ export function* startWallet(action) {
 
   // For now, the wallet service does not support hardware wallet, so default to the old facade
   const useWalletService = hardwareWallet ? false : yield call(() => featureFlags.shouldUseWalletService());
+  const useAtomicSwap = yield call(() => featureFlags.shouldUseAtomicSwap());
 
   yield put(setUseWalletService(useWalletService));
+  yield put(setUseAtomicSwap(useAtomicSwap));
 
   // This is a work-around so we can dispatch actions from inside callbacks.
   let dispatch;
@@ -384,10 +386,14 @@ export function* listenForFeatureFlags(featureFlags) {
     featureFlags.on(FeatureFlagEvents.WALLET_SERVICE_ENABLED, (state) => {
       emitter(state);
     });
+    featureFlags.on(FeatureFlagEvents.ATOMIC_SWAP_ENABLED, (state) => {
+      emitter(state);
+    });
 
     // Cleanup when the channel is closed
     return () => {
-      featureFlags.removeListener('wallet-service-enabled', listener);
+      featureFlags.removeListener(FeatureFlagEvents.WALLET_SERVICE_ENABLED, listener);
+      featureFlags.removeListener(FeatureFlagEvents.ATOMIC_SWAP_ENABLED, listener);
     };
   });
 
@@ -397,6 +403,14 @@ export function* listenForFeatureFlags(featureFlags) {
       const oldUseWalletService = yield select((state) => state.useWalletService);
 
       if (oldUseWalletService && oldUseWalletService !== newUseWalletService) {
+        yield put(reloadWalletRequested());
+        return;
+      }
+
+      const newShowAtomicSwap = yield take(channel);
+      const oldShowAtomicSwap = yield select((state) => state.useAtomicSwap);
+
+      if (oldShowAtomicSwap && oldShowAtomicSwap !== newShowAtomicSwap) {
         yield put(reloadWalletRequested());
       }
     }

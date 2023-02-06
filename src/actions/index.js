@@ -21,6 +21,7 @@ export const types = {
   TOKEN_FETCH_HISTORY_REQUESTED: 'TOKEN_FETCH_HISTORY_REQUESTED',
   TOKEN_FETCH_HISTORY_SUCCESS: 'TOKEN_FETCH_HISTORY_SUCCESS',
   TOKEN_FETCH_HISTORY_FAILED: 'TOKEN_FETCH_HISTORY_FAILED',
+  SET_USE_ATOMIC_SWAP: 'SET_USE_ATOMIC_SWAP',
   PROPOSAL_FETCH_REQUESTED: 'PROPOSAL_FETCH_REQUESTED',
   PROPOSAL_FETCH_SUCCESS: 'PROPOSAL_FETCH_SUCCESS',
   PROPOSAL_FETCH_FAILED: 'PROPOSAL_FETCH_FAILED',
@@ -270,6 +271,11 @@ export const tokenFetchBalanceFailed = (tokenId) => ({
   type: types.TOKEN_FETCH_BALANCE_FAILED,
   tokenId,
 });
+
+/**
+ * Flag indicating if we are using the atomic swap feature
+ */
+export const setUseAtomicSwap = (useAtomicSwap) => ({ type: types.SET_USE_ATOMIC_SWAP, payload: useAtomicSwap });
 
 /**
  * @param {string} proposalId The proposalId to request data

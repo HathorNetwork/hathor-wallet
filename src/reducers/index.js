@@ -101,6 +101,8 @@ const initialState = {
   // RouterHistory object
   routerHistory: null,
 
+  // Should we allow using the atomic swap feature?
+  useAtomicSwap: false,
   /**
    * @type {Record<string,ReduxProposalData>}
    */
@@ -221,6 +223,8 @@ const rootReducer = (state = initialState, action) => {
       return onTokenFetchHistorySuccess(state, action);
     case types.TOKEN_FETCH_HISTORY_FAILED:
       return onTokenFetchHistoryFailed(state, action);
+    case types.SET_USE_ATOMIC_SWAP:
+      return onSetUseAtomicSwap(state, action);
     case types.PROPOSAL_FETCH_REQUESTED:
       return onProposalFetchRequested(state, action);
     case types.PROPOSAL_FETCH_SUCCESS:
@@ -664,6 +668,18 @@ export const onTokenFetchHistoryRequested = (state, action) => {
         oldStatus: oldState.status,
       },
     },
+  };
+};
+
+/**
+ * Are we using the atomic swap feature?
+ */
+export const onSetUseAtomicSwap = (state, action) => {
+  const useAtomicSwap = action.payload;
+
+  return {
+    ...state,
+    useAtomicSwap,
   };
 };
 
