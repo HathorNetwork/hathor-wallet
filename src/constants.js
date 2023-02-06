@@ -142,11 +142,6 @@ export const LEDGER_ENABLED = true;
 export const NFT_ENABLED = true;
 
 /**
- * Flag to hide/show the Atomic Swap feature
- */
-export const ATOMIC_SWAP_ENABLED = true;
-
-/**
  * Maximum size of NFT data length
  */
 export const NFT_DATA_MAX_SIZE = 150;
