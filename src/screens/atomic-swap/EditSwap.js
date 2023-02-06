@@ -19,7 +19,7 @@ import {
     deserializePartialTx,
     enrichTxData
 } from "../../utils/proposals";
-import { BalanceComponent } from "./BalanceComponent";
+import { BalanceComponent } from "../../components/atomic-swap/BalanceComponent";
 import helpers from "../../utils/helpers";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 import { PartialTxProposal, PartialTx } from "@hathor/wallet-lib";
