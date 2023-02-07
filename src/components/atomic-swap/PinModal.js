@@ -5,14 +5,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { t } from "ttag";
 import hathorLib from "@hathor/wallet-lib";
+import PinInput from "../PinInput";
 
 export function ModalAtomicPin ({ confirmClickHandler, manageDomLifecycle, onClose }) {
     const [pin, setPin] = useState('');
     const [errMessage, setErrMessage] = useState('');
     const modalDomId = 'atomicPinModal';
+    const pinRef = useRef();
 
     /**
      * Validates form fields and return true if all are valid
@@ -20,7 +22,7 @@ export function ModalAtomicPin ({ confirmClickHandler, manageDomLifecycle, onClo
      */
     const validateForm = () => {
         if (pin.length !== 6) {
-            setErrMessage(t`Invalid PIN.`)
+            setErrMessage(t`Invalid PIN`)
             return false;
         }
 
@@ -58,34 +60,38 @@ export function ModalAtomicPin ({ confirmClickHandler, manageDomLifecycle, onClo
         <div className="modal-dialog" role="document">
             <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title">{t`Insert PIN`}</h5>
+                    <h5 className="modal-title">{t`Write your PIN`}</h5>
                     <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true"><i className="fa fa-close pointer ml-1"></i></span>
                     </button>
                 </div>
                 <div className="modal-body modal-body-atomic-send">
-                    <form className="px-4">
-                        <div className="row">
-                            <input type="password"
-                                   placeholder="••••••"
-                                   name="pin"
-                                   value={pin}
-                                   onChange={e => setPin(e.target.value)}
-                                   pattern="[0-9]{6}"
-                                   inputMode="numeric"
-                                   className="form-control output-address col-3"
+                    <form
+                        onSubmit={handleConfirm}
+                        noValidate
+                        className={errMessage.length > 0 ? 'was-validated' : ''}
+                    >
+                        <div className="form-group">
+                            <PinInput
+                                ref={pinRef}
+                                handleChangePin={e => setPin(e.target.value)}
                             />
+                        </div>
+                        <div className="row">
+                            <div className="col-12 col-sm-10">
+                                <p className="error-message text-danger">
+                                    {errMessage}
+                                </p>
+                            </div>
                         </div>
                     </form>
                 </div>
                 <div className="modal-footer">
-                    {errMessage && <div className="mt-3">
-                        <p className="text-danger mt-3 white-space-pre-wrap">{errMessage}</p>
-                    </div>}
                     <div className="d-flex flex-row">
                         <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Cancel`}</button>
-                        <button onClick={handleConfirm} type="button" className="btn btn-hathor">{t`Send`}</button>
+                        <button onClick={handleConfirm} type="button" className="btn btn-hathor">{t`Go`}</button>
                     </div>
+
                 </div>
             </div>
         </div>
