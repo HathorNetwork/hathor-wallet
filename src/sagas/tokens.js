@@ -21,9 +21,8 @@ import {
   tokenFetchBalanceFailed,
   tokenFetchHistoryRequested,
   tokenFetchHistorySuccess,
-  tokenFetchHistoryFailed, proposalTokenFetchSuccess, proposalTokenFetchFailed, proposalFetchFailed,
+  tokenFetchHistoryFailed, proposalTokenFetchSuccess, proposalTokenFetchFailed,
 } from '../actions';
-import { getRandomInt } from "../utils/proposals";
 import { t } from "ttag";
 
 const CONCURRENT_FETCH_REQUESTS = 5;

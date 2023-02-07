@@ -175,7 +175,7 @@ export function calculateExhibitionData(partialTx, cachedTokens, wallet) {
 
     // Calculating the difference between them both
     const balanceArr = [];
-    Object.entries(balance).map(([tokenUid, tkBalance]) => {
+    Object.entries(balance).forEach(([tokenUid, tkBalance]) => {
         // XXX: Displaying only the unlocked balance to protect users.
         const {unlocked} = tkBalance.balance;
         const total = unlocked;

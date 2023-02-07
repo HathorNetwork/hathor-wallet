@@ -464,9 +464,7 @@ export default function EditSwap(props) {
         const balance = partialTx.calculateTokenBalance();
 
         // Requesting the symbol and name for each of them
-        Object.entries(balance).map(([tokenUid, tkBalance]) => {
-            dispatch(proposalTokenFetchRequested(tokenUid));
-        })
+        Object.entries(balance).map(([tokenUid]) => dispatch(proposalTokenFetchRequested(tokenUid)))
 
         // If there is any balance, it means we have at least one input/output for this wallet
         setHasWalletInteraction(txBalances.length > 0);

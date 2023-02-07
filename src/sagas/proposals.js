@@ -5,15 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { all, call, delay, fork, put, select, take, } from 'redux-saga/effects';
+import { all, call, fork, put, select, take, } from 'redux-saga/effects';
 import { channel } from "redux-saga";
 import { proposalFetchFailed, proposalFetchSuccess, types } from "../actions";
 import { specificTypeAndPayload } from "./helpers";
-import { get, sample } from 'lodash';
+import { get } from 'lodash';
 import {
-    getRandomInt,
     PROPOSAL_DOWNLOAD_STATUS,
-    PROPOSAL_SIGNATURE_STATUS
 } from "../utils/proposals";
 import { t } from "ttag";
 
