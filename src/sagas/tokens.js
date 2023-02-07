@@ -21,9 +21,10 @@ import {
   tokenFetchBalanceFailed,
   tokenFetchHistoryRequested,
   tokenFetchHistorySuccess,
-  tokenFetchHistoryFailed, proposalTokenFetchSuccess, proposalTokenFetchFailed,
+  tokenFetchHistoryFailed, proposalTokenFetchSuccess, proposalTokenFetchFailed, proposalFetchFailed,
 } from '../actions';
 import { getRandomInt } from "../utils/proposals";
+import { t } from "ttag";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 const METADATA_MAX_RETRIES = 3;
@@ -297,8 +298,6 @@ function* fetchProposalTokenData(action) {
       return;
     }
 
-    yield delay(getRandomInt(2000,5000));
-
     // Checking for registered tokens
     const registeredToken = yield select((state) => state.tokens.find(t => t.uid === tokenUid));
     if (registeredToken) {
@@ -312,8 +311,8 @@ function* fetchProposalTokenData(action) {
     const updatedTokenDetails = yield wallet.getTokenDetails(tokenUid);
     yield put(proposalTokenFetchSuccess(tokenUid, updatedTokenDetails.tokenInfo));
   } catch (e){
-    console.error(`${tokenUid} fetchProposalTokenData error:`, e.message, e.stack, e);
-    yield put(proposalTokenFetchFailed(tokenUid, e.message));
+    console.error(`Error downloading metadata of proposal token`, tokenUid, e.message);
+    yield put(proposalTokenFetchFailed(tokenUid, t`An error ocurred while fetching this token`));
   }
 }
 

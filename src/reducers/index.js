@@ -106,20 +106,7 @@ const initialState = {
   /**
    * @type {Record<string,ReduxProposalData>}
    */
-  proposals: {
-    '5e005d48-13e3-4974-9bb4-c7e884466d24': { // Debug: Sample transaction with ready test data always available
-      id: '5e005d48-13e3-4974-9bb4-c7e884466d24',
-      password: 'pass2',
-      status: PROPOSAL_DOWNLOAD_STATUS.READY,
-      data: {
-        amountTokens: 3,
-        signatureStatus: 'Open',
-        partialTx: 'PartialTx|0001010102002f91917e63ce0f9d21a6b50adc45539f0ffe1d35b9a68ec4b476ac131ad17b000007909b6c4d0d7f3a6f338e01018901c63316135808cabd0481ff4dc8ea870000000000183800001976a914a45db589c43d2f6adb09fe89b3339aadb4710eeb88ac0000000101001976a914a45db589c43d2f6adb09fe89b3339aadb4710eeb88ac000000000000000063c062af0000000000|WTjhJXzQJETVx7BVXdyZmvk396DRRsubdw,00,0,1900|0',
-        signatures: '',
-        timestamp: 1672764572199
-      },
-    },
-  },
+  proposals: {},
   /**
    * A local cache of the minimum token identifying data from all sources:
    * - Those that were registered by the user

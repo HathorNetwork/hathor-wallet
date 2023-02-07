@@ -15,6 +15,7 @@ import {
     PROPOSAL_DOWNLOAD_STATUS,
     PROPOSAL_SIGNATURE_STATUS
 } from "../utils/proposals";
+import { t } from "ttag";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 
@@ -77,30 +78,14 @@ function* fetchProposalData(action) {
             return;
         }
 
-        // Mocked responses
-        yield delay(getRandomInt(200,2000));
+        // TODO: Implement the actual communication with the backend
+        throw new Error(`Proposal fetching not implemented.`)
 
-        if (password?.startsWith('404')) {
-            yield put(proposalFetchFailed(proposalId, "Proposal not found"));
-            return;
-        }
-
-        if (password?.startsWith('403')) {
-            yield put(proposalFetchFailed(proposalId, "Incorrect password"));
-            return;
-        }
-
-        const signatureStatusNames = Object.entries(PROPOSAL_SIGNATURE_STATUS).map(e => e[1])
-        const mockResponse = {
-            id: proposalId,
-            amountTokens: getRandomInt(2,6),
-            signatureStatus: sample(signatureStatusNames)
-        };
-
-        yield put(proposalFetchSuccess(proposalId, mockResponse));
+        // yield put(proposalFetchFailed(proposalId, "Proposal not found"));
+        // yield put(proposalFetchFailed(proposalId, "Incorrect password"));
+        // yield put(proposalFetchSuccess(proposalId, apiResponseData));
     } catch (e) {
-        console.error(`Proposal fetching error`, e);
-        yield put(proposalFetchFailed(proposalId, 'An error occurred while fetching this proposal.'));
+        yield put(proposalFetchFailed(proposalId, t`An error occurred while fetching this proposal.`));
     }
 }
 
