@@ -6,6 +6,7 @@ import {
   UNLEASH_POLLING_INTERVAL,
   WALLET_SERVICE_FEATURE_TOGGLE,
 } from './constants';
+import helpers from './utils/helpers';
 
 const IGNORE_WALLET_SERVICE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 
@@ -60,7 +61,10 @@ export class FeatureFlags extends events.EventEmitter {
       }
       this.client.updateContext({
         userId: this.userId,
-        stage: this.network,
+        properties: {
+          stage: this.network,
+          platform: helpers.getCurrentOS(),
+        },
       });
 
       // Start polling for feature flag updates

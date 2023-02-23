@@ -200,7 +200,46 @@ const helpers = {
       is_voided: Boolean(tx.voided),
       version: tx.version,
     };
-  }
+  },
+
+  /**
+   * Returns the current OS
+   *
+   * @returns {string} 'macos', 'windows', 'linux' or 'other'
+   */
+  getCurrentOS() {
+    if (!window) {
+      return 'other';
+    }
+
+    /**
+     * Possible values for clientInformation['platform'] are:
+     * "Win32" - indicates the browser is running on a 32-bit version of Windows.
+     * "Win64" - indicates the browser is running on a 64-bit version of Windows.
+     * "MacIntel" - indicates the browser is running on an Intel-based Mac.
+     * "MacPPC" - indicates the browser is running on a PowerPC-based Mac.
+     * "Linux i686" - indicates the browser is running on a 32-bit version of Linux.
+     * "Linux x86_64" - indicates the browser is running on a 64-bit version of Linux.
+     * "Android" - indicates the browser is running on an Android device.
+     * "iPhone" - indicates the browser is running on an iPhone.
+     * "iPad" - indicates the browser is running on an iPad.
+     * "iPod" - indicates the browser is running on an iPod.
+     *
+     * Since the wallet-desktop only runs in desktops, we can return 'other' for any other
+     * platform that is not windows, mac or linux
+     */
+    const platform = window.clientInformation['platform'].toLowerCase();
+
+    if (platform.includes('win')) {
+      return 'windows';
+    } else if (platform.includes('mac')) {
+      return 'macos';
+    } else if (platform.includes('linux')) {
+      return 'linux';
+    }
+
+    return 'other';
+  },
 }
 
 export default helpers;
