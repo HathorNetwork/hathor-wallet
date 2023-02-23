@@ -62,7 +62,7 @@ export class FeatureFlags extends events.EventEmitter {
       this.client.updateContext({
         userId: this.userId,
         properties: {
-          stage: this.network,
+          network: this.network,
           platform: helpers.getCurrentOS(),
         },
       });
