@@ -46,7 +46,7 @@ class SendTokens extends React.Component {
 
   /**
    * Get the selected token on the TokenBar.
-   * 
+   *
    * @param {mapStateToProps} props
    * @returns {Object} Token selected
    */
@@ -344,12 +344,17 @@ class SendTokens extends React.Component {
     try {
       this.data = data;
       if (hathorLib.wallet.isSoftwareWallet()) {
-        this.context.showModal(MODAL_TYPES.SEND_TX, {
-          prepareSendTransaction: this.prepareSendTransaction,
-          onSendSuccess: this.onSendSuccess,
-          onSendError: this.onSendError,
-          title: t`Sending transaction`,
-        });
+        this.context.showModal(MODAL_TYPES.PIN, {
+          onSuccess: ({pin}) => {
+            this.context.showModal(MODAL_TYPES.SEND_TX, {
+              pin,
+              prepareSendTransaction: this.prepareSendTransaction,
+              onSendSuccess: this.onSendSuccess,
+              onSendError: this.onSendError,
+              title: t`Sending transaction`,
+            });
+          }
+        })
       } else {
         this.beforeSendLedger();
       }
