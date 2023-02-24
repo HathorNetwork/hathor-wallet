@@ -5,11 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import path from 'path';
+import hathorLib from '@hathor/wallet-lib';
+import { get } from 'lodash';
 import store from '../store/index';
 import { networkUpdate } from '../actions/index';
-import hathorLib from '@hathor/wallet-lib';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
-import path from 'path';
 
 let shell = null;
 if (window.require) {
@@ -228,7 +229,7 @@ const helpers = {
      * Since the wallet-desktop only runs in desktops, we can return 'other' for any other
      * platform that is not windows, mac or linux
      */
-    const platform = window.clientInformation['platform'].toLowerCase();
+    const platform = get(window, 'clientInformation.platform', 'other').toLowerCase();
 
     if (platform.includes('win')) {
       return 'windows';
