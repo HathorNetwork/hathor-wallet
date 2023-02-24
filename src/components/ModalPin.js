@@ -11,6 +11,7 @@ import { connect } from "react-redux";
 import $ from 'jquery';
 import PinInput from './PinInput';
 import hathorLib from '@hathor/wallet-lib';
+import PropTypes from "prop-types";
 
 
 const mapStateToProps = (state) => {
@@ -23,12 +24,6 @@ const mapStateToProps = (state) => {
 /**
  * Component that shows a modal with a form to ask for the user PIN
  * and when the PIN succeeds, it invokes the callback function
- * Expected props:
- * @param props
- * @param {function} props.onSuccess Handles the success and receives a "pin" parameter
- * @param {function} [props.handleChangePin] (Optional) Handles each change on the input element
- * @param {function} props.onClose Mandatory function from the GlobalModal invocation
- *
  * @memberof Components
  */
 class ModalPin extends React.Component {
@@ -38,9 +33,6 @@ class ModalPin extends React.Component {
   state = {
     errorMessage: '',
   }
-
-  // Error message when sending
-  sendErrorMessage = '';
 
   pin = '';
 
@@ -101,39 +93,26 @@ class ModalPin extends React.Component {
     $('#modalPin').modal('hide');
   }
 
-  /**
-   * Executed when tx was sent with success
-   *
-   * @param {Object} tx Transaction data
-   */
-  onSendSuccess = (tx) => {
-    this.tx = tx;
-    this.setState({ loading: false });
-  }
-
   render() {
-    const renderBody = () => {
-      return (
-        <div>
-          <form ref="formPin" onSubmit={this.handlePin} noValidate>
-            <div className="form-group">
-              <PinInput ref="pinInput" handleChangePin={this.props.handleChangePin} />
+    const renderBody = () => (<div>
+        {this.props.bodyTop}
+        <form ref="formPin" onSubmit={this.handlePin} noValidate>
+          <div className="form-group">
+            <PinInput ref="pinInput" handleChangePin={this.props.handleChangePin}/>
+          </div>
+          <div className="row">
+            <div className="col-12 col-sm-10">
+              <p className="error-message text-danger">
+                {this.state.errorMessage}
+              </p>
             </div>
-            <div className="row">
-              <div className="col-12 col-sm-10">
-                  <p className="error-message text-danger">
-                    {this.state.errorMessage}
-                  </p>
-              </div>
-            </div>
-          </form>
-        </div>
-      );
-    }
+          </div>
+        </form>
+      </div>)
 
-    return (
-      <div>
-        <div className="modal fade" id="modalPin" tabIndex="-1" role="dialog" aria-labelledby="modalPin" aria-hidden="true">
+    return <div>
+        <div className="modal fade" id="modalPin" tabIndex="-1" role="dialog" aria-labelledby="modalPin"
+             aria-hidden="true">
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
@@ -147,16 +126,33 @@ class ModalPin extends React.Component {
               </div>
               <div className="modal-footer">
                 <div className="d-flex flex-row">
-                  <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Cancel`}</button>
-                  <button onClick={this.handlePin} type="button" className="btn btn-hathor">{t`Go`}</button>
+                  <button type="button" className="btn btn-secondary mr-3"
+                          data-dismiss="modal">{t`Cancel`}</button>
+                  <button onClick={this.handlePin} type="button"
+                          className="btn btn-hathor">{t`Go`}</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    )
   }
 }
 
 export default connect(mapStateToProps)(ModalPin);
+
+
+ModalPin.propTypes = {
+  /**
+   * A React element that can optionally be rendered before the PIN input
+   */
+  bodyTop: PropTypes.element,
+  /**
+   * Callback invoked when tx is sent with success
+   */
+  onSuccess: PropTypes.func,
+  /**
+   * Callback provided by the GlobalModal helper to manage the modal lifecycle
+   */
+  onClose: PropTypes.func,
+}
