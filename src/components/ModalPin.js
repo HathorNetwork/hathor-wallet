@@ -1,0 +1,162 @@
+/**
+ * Copyright (c) Hathor Labs and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import React from 'react';
+import { t } from 'ttag';
+import { connect } from "react-redux";
+import $ from 'jquery';
+import PinInput from './PinInput';
+import hathorLib from '@hathor/wallet-lib';
+
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+    useWalletService: state.useWalletService,
+  };
+};
+
+/**
+ * Component that shows a modal with a form to ask for the user PIN
+ * and when the PIN succeeds, it invokes the callback function
+ * Expected props:
+ * @param props
+ * @param {function} props.onSuccess Handles the success and receives a "pin" parameter
+ * @param {function} [props.handleChangePin] (Optional) Handles each change on the input element
+ * @param {function} props.onClose Mandatory function from the GlobalModal invocation
+ *
+ * @memberof Components
+ */
+class ModalPin extends React.Component {
+  /**
+   * errorMessage {string} Message to be shown to the user in case of error in the form
+   */
+  state = {
+    errorMessage: '',
+  }
+
+  // Error message when sending
+  sendErrorMessage = '';
+
+  pin = '';
+
+  componentDidMount = () => {
+    $('#modalPin').modal('show');
+    $('#modalPin').on('hidden.bs.modal', (e) => {
+      // Mandatory cleanup by GlobalModal
+      this.props.onClose();
+
+      // If the correct PIN was inserted, call the `onSuccess` callback
+      if (this.pin) {
+        this.props.onSuccess({ pin: this.pin })
+      }
+    });
+
+    // Focus the PIN field on modal load
+    $('#modalPin').on('shown.bs.modal', (e) => {
+      this.refs.pinInput.refs.pin.focus();
+    });
+  }
+
+  componentWillUnmount = () => {
+    // Removing all event listeners
+    $('#modalPin').off();
+    $('#modalPin').modal('hide');
+  }
+
+  /**
+   * Method called after user clicks the 'Go' button.
+   * We validate the form and that the pin is correct, then call a method from props.
+   *
+   * @param {React.MouseEvent<HTMLElement>} e Event emitted when button is clicked
+   */
+  handlePin = async (e) => {
+    e.preventDefault();
+    // Invalid form, show error message and do nothing else
+    if (this.refs.formPin.checkValidity() === false) {
+      this.refs.formPin.classList.add('was-validated');
+      return;
+    }
+
+    // Check if the pin is correct
+    this.refs.formPin.classList.remove('was-validated');
+    const pin = this.refs.pinInput.refs.pin.value;
+
+    // Incorrect PIN, show error message and do nothing else
+    if (!hathorLib.wallet.isPinCorrect(pin)) {
+      this.setState({ errorMessage: t`Invalid PIN` })
+      return;
+    }
+
+    // Set the PIN on the instance variable and close the modal.
+    this.pin = pin;
+    // $('#modalPin').data('bs.modal')._config.backdrop = 'static';
+    // $('#modalPin').data('bs.modal')._config.keyboard = false;
+
+    // Necessary callbacks will be executed at the `onHidden` modal event
+    $('#modalPin').modal('hide');
+  }
+
+  /**
+   * Executed when tx was sent with success
+   *
+   * @param {Object} tx Transaction data
+   */
+  onSendSuccess = (tx) => {
+    this.tx = tx;
+    this.setState({ loading: false });
+  }
+
+  render() {
+    const renderBody = () => {
+      return (
+        <div>
+          <form ref="formPin" onSubmit={this.handlePin} noValidate>
+            <div className="form-group">
+              <PinInput ref="pinInput" handleChangePin={this.props.handleChangePin} />
+            </div>
+            <div className="row">
+              <div className="col-12 col-sm-10">
+                  <p className="error-message text-danger">
+                    {this.state.errorMessage}
+                  </p>
+              </div>
+            </div>
+          </form>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div className="modal fade" id="modalPin" tabIndex="-1" role="dialog" aria-labelledby="modalPin" aria-hidden="true">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="exampleModalLabel">{t`Write your PIN`}</h5>
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body modal-body-pin">
+                {renderBody()}
+              </div>
+              <div className="modal-footer">
+                <div className="d-flex flex-row">
+                  <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Cancel`}</button>
+                  <button onClick={this.handlePin} type="button" className="btn btn-hathor">{t`Go`}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+
+export default connect(mapStateToProps)(ModalPin);
