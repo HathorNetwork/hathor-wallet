@@ -17,7 +17,6 @@ import PropTypes from "prop-types";
 const mapStateToProps = (state) => {
   return {
     wallet: state.wallet,
-    useWalletService: state.useWalletService,
   };
 };
 
@@ -68,6 +67,7 @@ class ModalPin extends React.Component {
    */
   handlePin = async (e) => {
     e.preventDefault();
+
     // Invalid form, show error message and do nothing else
     if (this.refs.formPin.checkValidity() === false) {
       this.refs.formPin.classList.add('was-validated');
@@ -86,15 +86,13 @@ class ModalPin extends React.Component {
 
     // Set the PIN on the instance variable and close the modal.
     this.pin = pin;
-    // $('#modalPin').data('bs.modal')._config.backdrop = 'static';
-    // $('#modalPin').data('bs.modal')._config.keyboard = false;
 
     // Necessary callbacks will be executed at the `onHidden` modal event
     $('#modalPin').modal('hide');
   }
 
   render() {
-    const renderBody = () => (<div>
+    const renderBody = () => <div>
         {this.props.bodyTop}
         <form ref="formPin" onSubmit={this.handlePin} noValidate>
           <div className="form-group">
@@ -108,7 +106,7 @@ class ModalPin extends React.Component {
             </div>
           </div>
         </form>
-      </div>)
+      </div>
 
     return <div>
         <div className="modal fade" id="modalPin" tabIndex="-1" role="dialog" aria-labelledby="modalPin"

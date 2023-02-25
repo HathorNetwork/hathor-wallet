@@ -95,6 +95,7 @@ class TokenAction extends React.Component {
    */
   openPinModal = () => {
     this.context.showModal(MODAL_TYPES.PIN, {
+      bodyTop: this.props.pinBodyTop,
       onSuccess: ({pin}) => {
         this.context.showModal(MODAL_TYPES.SEND_TX, {
           pin,
@@ -102,7 +103,6 @@ class TokenAction extends React.Component {
           prepareSendTransaction: this.onPrepareSendTransaction,
           onSendSuccess: this.onSendSuccess,
           onSendError: this.onSendError,
-          bodyTop: this.props.pinBodyTop,
         });
       }
     })
