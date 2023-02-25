@@ -4,7 +4,9 @@ import {
   UNLEASH_URL,
   UNLEASH_CLIENT_KEY,
   UNLEASH_POLLING_INTERVAL,
+  WALLET_SERVICE_FEATURE_TOGGLE,
 } from './constants';
+import helpers from './utils/helpers';
 
 const IGNORE_WALLET_SERVICE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 
@@ -18,7 +20,7 @@ export class FeatureFlags extends events.EventEmitter {
 
     this.userId = userId;
     this.network = network;
-    this.walletServiceFlag = `wallet-service-wallet-desktop-${this.network}.rollout`;
+    this.walletServiceFlag = WALLET_SERVICE_FEATURE_TOGGLE;
     this.walletServiceEnabled = null;
     this.client = new UnleashClient({
       url: UNLEASH_URL,
@@ -57,7 +59,13 @@ export class FeatureFlags extends events.EventEmitter {
       if (shouldIgnore) {
         return false;
       }
-      this.client.updateContext({ userId: this.userId });
+      this.client.updateContext({
+        userId: this.userId,
+        properties: {
+          network: this.network,
+          platform: helpers.getCurrentOS(),
+        },
+      });
 
       // Start polling for feature flag updates
       await this.client.start();
