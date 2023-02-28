@@ -45,19 +45,6 @@ const { wallet: oldWallet } = hathorLib;
  * @property {{partialTx: string, timestamp: number}[]} history Historic data
  */
 
-/**
- * Generates a random positive integer between the maximum and minimum values,
- * with the default minimum equals zero
- * @param {number} max
- * @param {number} [min=0]
- * @returns {number} Random number
- */
-export function getRandomInt(max, min = 0) {
-    const _min = Math.ceil(min);
-    const _max = Math.floor(max);
-    return Math.floor(Math.random() * (_max - _min + 1)) + _min;
-}
-
 export const PROPOSAL_DOWNLOAD_STATUS = {
     READY: 'ready',
     FAILED: 'failed',
