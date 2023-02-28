@@ -25,7 +25,7 @@ const mapStateToProps = (state) => {
  * and when the PIN succeeds, it invokes the callback function
  * @memberof Components
  */
-class ModalPin extends React.Component {
+export class ModalPin extends React.Component {
   /**
    * errorMessage {string} Message to be shown to the user in case of error in the form
    */

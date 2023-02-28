@@ -19,7 +19,16 @@ class PinInput extends React.Component {
       <div>
         <label htmlFor="pin">Pin*</label>
         <small> (6 digits password)</small>
-        <input type="password" ref="pin" pattern="[0-9]{6}" autoComplete="off" inputMode="numeric" className="pin-input form-control" required onChange={this.props.handleChangePin} />
+        <input
+          type="password"
+          ref="pin"
+          pattern="[0-9]{6}"
+          autoComplete="off"
+          inputMode="numeric"
+          className="pin-input form-control"
+          required
+          data-testid="pin-input" // Necessary for unit tests
+          onChange={this.props.handleChangePin} />
       </div>
     )
   }
