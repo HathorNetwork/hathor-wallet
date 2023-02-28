@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { importProposal, proposalFetchRequested } from "../../actions";
-import { PROPOSAL_DOWNLOAD_STATUS } from "../../utils/proposals";
+import { PROPOSAL_DOWNLOAD_STATUS } from "../../utils/atomicSwap";
 
 export default function ImportExisting(props) {
     // Internal state

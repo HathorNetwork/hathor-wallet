@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { t } from "ttag";
 import InputNumber from "../InputNumber";
 import hathorLib, { Address } from "@hathor/wallet-lib";
-import { getIntTokenAmount, translateTxToProposalUtxo } from "../../utils/proposals";
+import { getIntTokenAmount, translateTxToProposalUtxo } from "../../utils/atomicSwap";
 import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import { get } from 'lodash';
 import Loading from "../Loading";

@@ -11,7 +11,7 @@ import { types } from '../actions';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
-import { PROPOSAL_DOWNLOAD_STATUS } from "../utils/proposals";
+import { PROPOSAL_DOWNLOAD_STATUS } from "../utils/atomicSwap";
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
 
 /**

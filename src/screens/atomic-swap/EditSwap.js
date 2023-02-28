@@ -18,7 +18,7 @@ import {
     canISign,
     deserializePartialTx,
     enrichTxData
-} from "../../utils/proposals";
+} from "../../utils/atomicSwap";
 import { BalanceComponent } from "../../components/atomic-swap/BalanceComponent";
 import helpers from "../../utils/helpers";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';

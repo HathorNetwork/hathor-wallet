@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from 'react-router-dom';
 import { t } from "ttag";
 import Loading from "../../components/Loading";
-import { generateEmptyProposalFromPassword, updatePersistentStorage } from "../../utils/proposals";
+import { generateEmptyProposalFromPassword, updatePersistentStorage } from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
 import { proposalGenerated } from "../../actions";
 

@@ -10,7 +10,7 @@ import { t } from "ttag";
 import InputNumber from "../InputNumber";
 import hathorLib, { Address } from "@hathor/wallet-lib";
 import { useSelector } from "react-redux";
-import { getIntTokenAmount } from "../../utils/proposals";
+import { getIntTokenAmount } from "../../utils/atomicSwap";
 
 export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manageDomLifecycle, onClose }) {
     /** @type HathorWallet */

@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from 'react-router-dom';
 import Loading from "../../components/Loading";
 import { proposalFetchRequested, proposalRemoved } from "../../actions";
-import { PROPOSAL_DOWNLOAD_STATUS, updatePersistentStorage } from "../../utils/proposals";
+import { PROPOSAL_DOWNLOAD_STATUS, updatePersistentStorage } from "../../utils/atomicSwap";
 import walletUtil from "../../utils/wallet";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 

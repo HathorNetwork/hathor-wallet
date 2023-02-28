@@ -12,7 +12,7 @@ import { specificTypeAndPayload } from "./helpers";
 import { get } from 'lodash';
 import {
     PROPOSAL_DOWNLOAD_STATUS,
-} from "../utils/proposals";
+} from "../utils/atomicSwap";
 import { t } from "ttag";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
