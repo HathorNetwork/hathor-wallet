@@ -60,16 +60,6 @@ export const PROPOSAL_SIGNATURE_STATUS = {
 }
 
 /**
- * The amount from the InputNumber component is represented in a float format, with an amount of decimal
- * cases defined by a lib's constant. This helper function converts it back to an integer.
- * @param {number} floatAmount
- * @returns {number}
- */
-export function getIntTokenAmount(floatAmount) {
-    return Math.floor(floatAmount * Math.pow(10, DECIMAL_PLACES));
-}
-
-/**
  * Generates an empty proposal for storing on redux
  * @param {string} password
  * @param {HathorWallet} wallet Current wallet in use

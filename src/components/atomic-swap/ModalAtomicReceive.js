@@ -10,7 +10,8 @@ import { t } from "ttag";
 import InputNumber from "../InputNumber";
 import hathorLib, { Address } from "@hathor/wallet-lib";
 import { useSelector } from "react-redux";
-import { getIntTokenAmount } from "../../utils/atomicSwap";
+import walletUtil from '../../utils/wallet';
+const { decimalToInteger } = walletUtil;
 
 export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manageDomLifecycle, onClose }) {
     /** @type HathorWallet */
@@ -67,7 +68,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
 
         // On success, clean error message and return user input
         setErrMessage('');
-        sendClickHandler({ selectedToken, address, amount: getIntTokenAmount(amount) });
+        sendClickHandler({ selectedToken, address, amount: decimalToInteger(amount) });
         onClose(`#${modalDomId}`);
     }
 

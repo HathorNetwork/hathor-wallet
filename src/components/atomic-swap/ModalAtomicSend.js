@@ -9,11 +9,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { t } from "ttag";
 import InputNumber from "../InputNumber";
 import hathorLib, { Address } from "@hathor/wallet-lib";
-import { getIntTokenAmount, translateTxToProposalUtxo } from "../../utils/atomicSwap";
+import { translateTxToProposalUtxo } from "../../utils/atomicSwap";
 import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import { get } from 'lodash';
 import Loading from "../Loading";
 import helpers from "../../utils/helpers";
+import walletUtil from '../../utils/wallet';
+const { decimalToInteger } = walletUtil;
 
 function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHandler, setErrMessage }) {
     const [txId, setTxId] = useState(utxo.tx_id || '');
@@ -200,7 +202,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         }
 
         // Validating available balance
-        const selectedAmount = getIntTokenAmount(amount);
+        const selectedAmount = decimalToInteger(amount);
         const availableAmount = selectedTokenBalance.data.available;
         if (selectedAmount > availableAmount) {
             setErrMessage(t`Insufficient balance`);
@@ -236,7 +238,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         sendClickHandler({
             selectedToken,
             changeAddress: changeAddress,
-            amount: getIntTokenAmount(amount),
+            amount: decimalToInteger(amount),
             utxos: selectedUtxos,
         });
         onClose(`#${modalDomId}`);
