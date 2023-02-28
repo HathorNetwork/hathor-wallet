@@ -46,6 +46,8 @@ describe('rendering tests', () => {
       container
     )
 
+    // Force creating the event, since the whole `modal` bootstrap class is mocked
+    $('#modalPin').trigger('shown.bs.modal');
     const element = screen.getByText('This is an extra element');
     expect(element instanceof HTMLElement).toStrictEqual(true);
   })
@@ -68,17 +70,25 @@ describe('pin validation', () => {
     expect(new RegExp(validationPattern).test(failingPin)).toStrictEqual(false);
     expect(new RegExp(validationPattern).test(passingPin)).toStrictEqual(true);
 
+    const pinMock = jest.spyOn(hathorLib.wallet, 'isPinCorrect')
+      .mockImplementation(() => false);
+
     // Get the element
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
+    const goButton = screen.getByText('Go');
     await userEvent.type(pinInput, failingPin);
+    await userEvent.click(goButton);
     expect(pinInput.validity.patternMismatch).toStrictEqual(true);
     expect(pinInput.checkValidity()).toStrictEqual(false);
 
     await userEvent.clear(pinInput);
     await userEvent.type(pinInput, passingPin);
+    await userEvent.click(goButton);
     expect(pinInput.validity.patternMismatch).toStrictEqual(false);
     expect(pinInput.checkValidity()).toStrictEqual(true);
+
+    pinMock.mockRestore();
   });
 
   it('displays error on incorrect pin', async () => {
