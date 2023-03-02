@@ -1,10 +1,10 @@
 import React from 'react';
-import { unmountComponentAtNode } from "react-dom";
+import { unmountComponentAtNode } from 'react-dom';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import $ from 'jquery'
 import hathorLib from '@hathor/wallet-lib';
-import { ModalPin } from "../../components/ModalPin";
-import userEvent from "@testing-library/user-event";
+import { ModalPin } from '../../components/ModalPin';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 let container = null;
@@ -14,7 +14,7 @@ $.fn.modal = jest.fn();
 
 beforeEach(() => {
   // setup a DOM element as a render target
-  container = document.createElement("div");
+  container = document.createElement('div');
   document.body.appendChild(container);
 });
 
