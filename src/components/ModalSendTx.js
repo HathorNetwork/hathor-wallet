@@ -170,29 +170,29 @@ ModalSendTx.propTypes = {
   /**
    * User PIN already validated
    */
-  pin: PropTypes.string,
+  pin: PropTypes.string.isRequired,
   /**
    * Title of the modal to be shown
    */
-  title: PropTypes.string,
+  title: PropTypes.string.isRequired,
   /**
    * A function that should prepare data before sending tx to be mined,
    * receiving the PIN as a parameter
    * @param {string} pin
    */
-  prepareSendTransaction: PropTypes.func,
+  prepareSendTransaction: PropTypes.func.isRequired,
   /**
    * Callback invoked when tx is sent with success
    */
-  onSendSuccess: PropTypes.func,
+  onSendSuccess: PropTypes.func.isRequired,
   /**
-   * Callback invoked when there is an error sending the tx
+   * Callback invoked when there is an error sending the tx (Recommended)
    */
   onSendError: PropTypes.func,
   /**
    * Callback provided by the GlobalModal helper to manage the modal lifecycle
    */
-  onClose: PropTypes.func,
+  onClose: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps)(ModalSendTx);

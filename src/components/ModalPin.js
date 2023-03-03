@@ -146,11 +146,15 @@ ModalPin.propTypes = {
    */
   bodyTop: PropTypes.element,
   /**
+   * An optional callback function called every time the PIN receives input
+   */
+  handleChangePin: PropTypes.func,
+  /**
    * Callback invoked when tx is sent with success
    */
-  onSuccess: PropTypes.func,
+  onSuccess: PropTypes.func.isRequired,
   /**
    * Callback provided by the GlobalModal helper to manage the modal lifecycle
    */
-  onClose: PropTypes.func,
+  onClose: PropTypes.func.isRequired,
 }
