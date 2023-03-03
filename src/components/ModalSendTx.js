@@ -79,9 +79,6 @@ class ModalSendTx extends React.Component {
    * @param {string} pin Pin received from the user
    */
   processTxWithPin = async (pin) => {
-    $('#sendTxModal').data('bs.modal')._config.backdrop = 'static';
-    $('#sendTxModal').data('bs.modal')._config.keyboard = false;
-
     // If we are using the wallet service facade, we should avail of the validated PIN
     // to renew the auth token.
     if (this.props.useWalletService) {
@@ -128,7 +125,15 @@ class ModalSendTx extends React.Component {
   render() {
     return (
       <div>
-        <div className="modal fade" id="sendTxModal" tabIndex="-1" role="dialog" aria-labelledby="sendTxModal" aria-hidden="true">
+        <div className="modal fade"
+             id="sendTxModal"
+             tabIndex="-1"
+             role="dialog"
+             aria-labelledby="sendTxModal"
+             aria-hidden="true"
+             data-backdrop="static"
+             data-keyboard="false"
+        >
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
