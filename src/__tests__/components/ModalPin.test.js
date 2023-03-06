@@ -1,6 +1,6 @@
 import React from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import $ from 'jquery'
 import hathorLib from '@hathor/wallet-lib';
 import { ModalPin } from '../../components/ModalPin';
@@ -29,7 +29,8 @@ describe('rendering tests', () => {
   it('renders without crashing', () => {
     render(
       <ModalPin
-        wallet={{ }}
+        onSuccess={jest.fn()}
+        onClose={jest.fn()}
       />,
       container
     )
@@ -40,7 +41,8 @@ describe('rendering tests', () => {
 
     render(
       <ModalPin
-        wallet={{ }}
+        onSuccess={jest.fn()}
+        onClose={jest.fn()}
         bodyTop={bodyTop}
       />,
       container
@@ -61,7 +63,8 @@ describe('pin validation', () => {
     act(() => {
       render(
         <ModalPin
-          wallet={{ }}
+          onSuccess={jest.fn()}
+          onClose={jest.fn()}
         />,
         container
       )
@@ -95,7 +98,8 @@ describe('pin validation', () => {
     act(() => {
       render(
         <ModalPin
-          wallet={{ }}
+          onSuccess={jest.fn()}
+          onClose={jest.fn()}
         />,
         container
       )
@@ -124,7 +128,6 @@ describe('pin validation', () => {
     act(() => {
       render(
         <ModalPin
-          wallet={{ }}
           onSuccess={successCallback}
           onClose={closeCallback}
         />,

@@ -7,18 +7,10 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { connect } from "react-redux";
 import $ from 'jquery';
 import PinInput from './PinInput';
 import hathorLib from '@hathor/wallet-lib';
 import PropTypes from "prop-types";
-
-
-const mapStateToProps = (state) => {
-  return {
-    wallet: state.wallet,
-  };
-};
 
 /**
  * Component that shows a modal with a form to ask for the user PIN
@@ -137,7 +129,7 @@ export class ModalPin extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(ModalPin);
+export default ModalPin;
 
 
 ModalPin.propTypes = {
