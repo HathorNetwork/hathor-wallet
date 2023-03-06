@@ -154,4 +154,43 @@ describe('pin validation', () => {
     expect(successCallback).toHaveBeenCalledWith({ pin: pinText });
     expect(closeCallback).toHaveBeenCalled();
   });
+
+  it('invokes handleChangePin callback correctly', async () => {
+    const successCallback = jest.fn();
+    const closeCallback = jest.fn();
+
+    // Validating that all inputs are correctly processed in order
+    const pinText = '123321';
+    const receivedEvents = [];
+    const expectedReceivedEvents = [
+      '1',
+      '12',
+      '123',
+      '1233',
+      '12332',
+      '123321',
+    ]
+    const changePinCallback = jest.fn().mockImplementation((e) => {
+      receivedEvents.push(e.target.value);
+    });
+
+    act(() => {
+      render(
+        <ModalPin
+          onSuccess={successCallback}
+          onClose={closeCallback}
+          handleChangePin={changePinCallback}
+        />,
+        container
+      )
+    });
+
+    // Get the pin input element
+    /** @type HTMLElement */
+    const pinInput = screen.getByTestId('pin-input');
+
+    await userEvent.type(pinInput, pinText);
+    expect(changePinCallback).toHaveBeenCalledTimes(6);
+    expect(receivedEvents).toStrictEqual(expectedReceivedEvents);
+  });
 });
