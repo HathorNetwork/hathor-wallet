@@ -76,18 +76,23 @@ describe('pin validation', () => {
     const pinMock = jest.spyOn(hathorLib.wallet, 'isPinCorrect')
       .mockImplementation(() => false);
 
-    // Get the element
+    // Gets the input element, types the pin and clicks "Go"
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
     const goButton = screen.getByText('Go');
     await userEvent.type(pinInput, failingPin);
     await userEvent.click(goButton);
+
+    // Validating form
     expect(pinInput.validity.patternMismatch).toStrictEqual(true);
     expect(pinInput.checkValidity()).toStrictEqual(false);
 
+    // Clears input, types again
     await userEvent.clear(pinInput);
     await userEvent.type(pinInput, passingPin);
     await userEvent.click(goButton);
+
+    // Validating form
     expect(pinInput.validity.patternMismatch).toStrictEqual(false);
     expect(pinInput.checkValidity()).toStrictEqual(true);
 
@@ -105,17 +110,19 @@ describe('pin validation', () => {
       )
     });
 
-    // Get the element
+    // Gets the input element, types the pin
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
     const goButton = screen.getByText('Go');
     await userEvent.type(pinInput, '123321');
 
+    // Clicks "Go"
     const pinMock = jest.spyOn(hathorLib.wallet, 'isPinCorrect')
       .mockImplementation(() => false);
     await userEvent.click(goButton);
     pinMock.mockRestore();
 
+    // Validates error message
     const element = screen.getByText('Invalid PIN');
     expect(element instanceof HTMLElement).toStrictEqual(true);
   });
@@ -135,17 +142,19 @@ describe('pin validation', () => {
       )
     });
 
-    // Get the pin input element
+    // Gets the input element, types the pin
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
     const goButton = screen.getByText('Go');
-
     await userEvent.type(pinInput, pinText);
+
+    // Clicks "Go"
     const pinMock = jest.spyOn(hathorLib.wallet, 'isPinCorrect')
       .mockImplementation(() => true);
     await userEvent.click(goButton);
     pinMock.mockRestore();
 
+    // Confirms there is no error message
     const element = screen.queryByText('Invalid PIN');
     expect(element).toBeNull();
 
@@ -185,11 +194,12 @@ describe('pin validation', () => {
       )
     });
 
-    // Get the pin input element
+    // Gets the input element, types the pin
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
-
     await userEvent.type(pinInput, pinText);
+
+    // Validates the handleChange callback results
     expect(changePinCallback).toHaveBeenCalledTimes(6);
     expect(receivedEvents).toStrictEqual(expectedReceivedEvents);
   });
