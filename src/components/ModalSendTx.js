@@ -30,19 +30,16 @@ const mapStateToProps = (state) => {
  */
 class ModalSendTx extends React.Component {
   /**
-   * errorMessage {string} Message to be shown to the user in case of error in the form
-   * loading {Boolean} If it's executing a sending tx request
+   * @property {boolean} loading If it's executing a sending tx request
+   * @property {unknown} [preparedTransaction] The prepared transaction, if any
    */
   state = {
-    errorMessage: '',
-    loading: false,
+    loading: true, // The modal is called with all the necessary parameters, so it starts already processing the tx
+    preparedTransaction: null,
   }
 
-  // SendTransaction object to handle send events
-  sendTransaction = null;
-
   // Tx send data, if succeeded
-  tx = null;
+  sentTx = null;
 
   // Error message when sending
   sendErrorMessage = '';
@@ -51,9 +48,9 @@ class ModalSendTx extends React.Component {
     $('#sendTxModal').modal('show');
     $('#sendTxModal').on('hidden.bs.modal', (e) => {
       this.props.onClose();
-      if (this.tx && this.props.onSendSuccess) {
+      if (this.sentTx && this.props.onSendSuccess) {
         // If succeeded to send tx and has method to execute
-        this.props.onSendSuccess(this.tx);
+        this.props.onSendSuccess(this.sentTx);
         return;
       }
 
@@ -85,10 +82,10 @@ class ModalSendTx extends React.Component {
       await this.props.wallet.validateAndRenewAuthToken(pin);
     }
 
-    this.sendTransaction = await this.props.prepareSendTransaction(pin);
-    if (this.sendTransaction) {
+    const preparedTx = await this.props.prepareSendTransaction(pin);
+    if (preparedTx) {
       // Show send tx handler component and start sending
-      this.setState({ loading: true });
+      this.setState({ preparedTransaction: preparedTx });
     } else {
       // Close modal and show error
       $('#sendTxModal').modal('hide');
@@ -105,10 +102,10 @@ class ModalSendTx extends React.Component {
   /**
    * Executed when tx was sent with success
    *
-   * @param {Object} tx Transaction data
+   * @param {Object} sentTx Transaction data
    */
-  onSendSuccess = (tx) => {
-    this.tx = tx;
+  sendSuccessHandler = (sentTx) => {
+    this.sentTx = sentTx;
     this.setState({ loading: false });
   }
 
@@ -117,7 +114,7 @@ class ModalSendTx extends React.Component {
    *
    * @param {String} message Error message
    */
-  onSendError = (message) => {
+  sendErrorHandler = (message) => {
     this.sendErrorMessage = message;
     this.setState({ loading: false });
   }
@@ -140,11 +137,11 @@ class ModalSendTx extends React.Component {
                 <h5 className="modal-title" id="exampleModalLabel">{this.props.title}</h5>
               </div>
               <div className="modal-body modal-body-pin">
-                { this.sendTransaction &&
+                { this.state.preparedTransaction &&
                 <SendTxHandler
-                    sendTransaction={this.sendTransaction}
-                    onSendSuccess={this.onSendSuccess}
-                    onSendError={this.onSendError}
+                    sendTransaction={this.state.preparedTransaction}
+                    onSendSuccess={this.sendSuccessHandler}
+                    onSendError={this.sendErrorHandler}
                 />
                 }
               </div>
