@@ -28,7 +28,7 @@ const mapStateToProps = (state) => {
  *
  * @memberof Components
  */
-class ModalSendTx extends React.Component {
+export class ModalSendTx extends React.Component {
   /**
    * @property {boolean} loading If it's executing a sending tx request
    * @property {unknown} [preparedTransaction] The prepared transaction, if any

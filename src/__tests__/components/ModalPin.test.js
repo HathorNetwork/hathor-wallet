@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 let container = null;
+const MODAL_ID = '#modalPin';
 
 // This allows the calls to Bootstrap's $('#modalId').modal('show') to work.
 $.fn.modal = jest.fn();
@@ -49,7 +50,7 @@ describe('rendering tests', () => {
     )
 
     // Force creating the event, since the whole `modal` bootstrap class is mocked
-    $('#modalPin').trigger('shown.bs.modal');
+    $(MODAL_ID).trigger('shown.bs.modal');
     const element = screen.getByText('This is an extra element');
     expect(element instanceof HTMLElement).toStrictEqual(true);
   })
@@ -159,7 +160,7 @@ describe('pin validation', () => {
     expect(element).toBeNull();
 
     // Force creating the event, since the whole `modal` bootstrap class is mocked
-    $('#modalPin').trigger('hidden.bs.modal');
+    $(MODAL_ID).trigger('hidden.bs.modal');
     expect(successCallback).toHaveBeenCalledWith({ pin: pinText });
     expect(closeCallback).toHaveBeenCalled();
   });
