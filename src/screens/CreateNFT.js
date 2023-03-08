@@ -106,11 +106,16 @@ class CreateNFT extends React.Component {
     }
 
     this.setState({ errorMessage: '' });
-    this.context.showModal(MODAL_TYPES.SEND_TX, {
-      prepareSendTransaction: this.prepareSendTransaction,
-      onSendSuccess: this.onTokenCreateSuccess,
-      title: 'Creating NFT',
-    });
+    this.context.showModal(MODAL_TYPES.PIN, {
+      onSuccess: ({pin}) => {
+        this.context.showModal(MODAL_TYPES.SEND_TX, {
+          pin,
+          prepareSendTransaction: this.prepareSendTransaction,
+          onSendSuccess: this.onTokenCreateSuccess,
+          title: t`Creating NFT`,
+        });
+      }
+    })
   }
 
   /**
@@ -268,7 +273,7 @@ class CreateNFT extends React.Component {
     // so this must be 0.01 (the text will show 0.01%) because the amount to create for NFTs is an integer.
     // Then to create 100 units, the deposit is 0.01 HTR, to create 1,000 units the deposit is 0.1 HTR
     const htrDeposit = hathorLib.tokens.getDepositPercentage();
-    const depositAmount = hathorLib.tokens.getDepositAmount(this.state.amount); 
+    const depositAmount = hathorLib.tokens.getDepositAmount(this.state.amount);
     const nftFee = hathorLib.helpers.prettyValue(tokens.getNFTFee());
 
     return (

@@ -94,13 +94,18 @@ class TokenAction extends React.Component {
    * Opens the PIN modal
    */
   openPinModal = () => {
-    this.context.showModal(MODAL_TYPES.SEND_TX, {
-      title: this.props.modalTitle,
-       prepareSendTransaction: this.onPrepareSendTransaction,
-       onSendSuccess: this.onSendSuccess,
-       onSendError: this.onSendError,
-       bodyTop: this.props.pinBodyTop,
-    });
+    this.context.showModal(MODAL_TYPES.PIN, {
+      bodyTop: this.props.pinBodyTop,
+      onSuccess: ({pin}) => {
+        this.context.showModal(MODAL_TYPES.SEND_TX, {
+          pin,
+          title: this.props.modalTitle,
+          prepareSendTransaction: this.onPrepareSendTransaction,
+          onSendSuccess: this.onSendSuccess,
+          onSendError: this.onSendError,
+        });
+      }
+    })
   }
 
   /**

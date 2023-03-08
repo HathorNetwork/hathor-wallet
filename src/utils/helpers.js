@@ -241,6 +241,20 @@ const helpers = {
 
     return 'other';
   },
+
+  /**
+   * Generates a promise that resolves only after a specified time
+   * @param {number} [ms=1000] Time in milliseconds
+   * @return {Promise<unknown>}
+   */
+  async delay(ms = 1000) {
+    return new Promise((resolve) => {
+      setTimeout(
+        () => resolve(),
+        ms
+      )
+    })
+  }
 }
 
 export default helpers;

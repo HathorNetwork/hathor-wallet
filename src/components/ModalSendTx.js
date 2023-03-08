@@ -9,8 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
 import $ from 'jquery';
-import PinInput from './PinInput';
-import hathorLib from '@hathor/wallet-lib';
+import PropTypes from "prop-types";
 import SendTxHandler from '../components/SendTxHandler';
 import ReactLoading from 'react-loading';
 import colors from '../index.scss';
@@ -29,95 +28,67 @@ const mapStateToProps = (state) => {
  *
  * @memberof Components
  */
-class ModalSendTx extends React.Component {
+export class ModalSendTx extends React.Component {
   /**
-   * errorMessage {string} Message to be shown to the user in case of error in the form
-   * step {Number} 0 if asking PIN and 1 if sending tx
-   * loading {Boolean} If it's executing a sending tx request
-   * errorMessage {string} Message to be shown to the user in case of error in the form
-   * errorMessage {string} Message to be shown to the user in case of error in the form
+   * @property {boolean} loading If it's executing a sending tx request
+   * @property {unknown} [preparedTransaction] The prepared transaction, if any
    */
   state = {
-    errorMessage: '',
-    step: 0,
-    loading: false,
+    loading: true, // The modal is called with all the necessary parameters, so it starts already processing the tx
+    preparedTransaction: null,
   }
 
-  // SendTransaction object to handle send events
-  sendTransaction = null;
-
   // Tx send data, if succeeded
-  tx = null;
+  sentTx = null;
 
   // Error message when sending
   sendErrorMessage = '';
 
   componentDidMount = () => {
-    $('#pinModal').modal('show');
-    $('#pinModal').on('hidden.bs.modal', (e) => {
+    $('#sendTxModal').modal('show');
+    $('#sendTxModal').on('hidden.bs.modal', (e) => {
       this.props.onClose();
-      if (this.tx && this.props.onSendSuccess) {
+      if (this.sentTx && this.props.onSendSuccess) {
         // If succeeded to send tx and has method to execute
-        this.props.onSendSuccess(this.tx);
+        this.props.onSendSuccess(this.sentTx);
         return;
       }
 
       if (this.sendErrorMessage && this.props.onSendError) {
         // If had an error sending and have an error method
         this.props.onSendError(this.sendErrorMessage);
-        this.setState({ step: 0 });
-        return;
       }
-
-      this.setState({ errorMessage: '', step: 0 }, () => {
-        this.refs.pinInput.refs.pin.value = '';
-      });
     });
 
-    $('#pinModal').on('shown.bs.modal', (e) => {
-      this.refs.pinInput.refs.pin.focus();
-    });
+    // Start the promise and ignore its results
+    this.processTxWithPin(this.props.pin);
   }
 
   componentWillUnmount = () => {
     // Removing all event listeners
-    $('#pinModal').off();
-    $('#pinModal').modal('hide');
+    $('#sendTxModal').off();
+    $('#sendTxModal').modal('hide');
   }
 
   /**
    * Method called after user clicks the 'Go' button. We validate the form and that the pin is correct, then call a method from props
    *
-   * @param {Object} e Event emitted when button is clicked
+   * @param {string} pin Pin received from the user
    */
-  handlePin = async (e) => {
-    e.preventDefault();
-    if (this.refs.formPin.checkValidity() === false) {
-      this.refs.formPin.classList.add('was-validated');
+  processTxWithPin = async (pin) => {
+    // If we are using the wallet service facade, we should avail of the validated PIN
+    // to renew the auth token.
+    if (this.props.useWalletService) {
+      await this.props.wallet.validateAndRenewAuthToken(pin);
+    }
+
+    const preparedTx = await this.props.prepareSendTransaction(pin);
+    if (preparedTx) {
+      // Show send tx handler component and start sending
+      this.setState({ preparedTransaction: preparedTx });
     } else {
-      this.refs.formPin.classList.remove('was-validated');
-      const pin = this.refs.pinInput.refs.pin.value;
-      if (hathorLib.wallet.isPinCorrect(pin)) {
-        $('#pinModal').data('bs.modal')._config.backdrop = 'static';
-        $('#pinModal').data('bs.modal')._config.keyboard = false;
-
-        // If we are using the wallet service facade, we should avail of the validated PIN
-        // to renew the auth token.
-        if (this.props.useWalletService) {
-          await this.props.wallet.validateAndRenewAuthToken(pin);
-        }
-
-        this.sendTransaction = await this.props.prepareSendTransaction(pin);
-        if (this.sendTransaction) {
-          // Show send tx handler component and start sending
-          this.setState({ step: 1, loading: true });
-        } else {
-          // Close modal and show error
-          $('#pinModal').modal('hide');
-        }
-      } else {
-        this.setState({errorMessage: t`Invalid PIN`})
-      }
+      // Close modal and show error
+      $('#sendTxModal').modal('hide');
     }
   }
 
@@ -125,16 +96,16 @@ class ModalSendTx extends React.Component {
    * Executed when used clicked ok after tx is sent (or an error happened)
    */
   onClickOk = () => {
-    $('#pinModal').modal('hide');
+    $('#sendTxModal').modal('hide');
   }
 
   /**
    * Executed when tx was sent with success
    *
-   * @param {Object} tx Transaction data
+   * @param {Object} sentTx Transaction data
    */
-  onSendSuccess = (tx) => {
-    this.tx = tx;
+  sendSuccessHandler = (sentTx) => {
+    this.sentTx = sentTx;
     this.setState({ loading: false });
   }
 
@@ -143,90 +114,46 @@ class ModalSendTx extends React.Component {
    *
    * @param {String} message Error message
    */
-  onSendError = (message) => {
+  sendErrorHandler = (message) => {
     this.sendErrorMessage = message;
     this.setState({ loading: false });
   }
 
   render() {
-    const renderBody = () => {
-      if (this.state.step === 0) {
-        return (
-          <div>
-            {this.props.bodyTop}
-            <form ref="formPin" onSubmit={this.handlePin} noValidate>
-              <div className="form-group">
-                <PinInput ref="pinInput" handleChangePin={this.props.handleChangePin} />
-              </div>
-              <div className="row">
-                <div className="col-12 col-sm-10">
-                    <p className="error-message text-danger">
-                      {this.state.errorMessage}
-                    </p>
-                </div>
-              </div>
-            </form>
-          </div>
-        );
-      }
-
-      return (
-        <SendTxHandler
-          sendTransaction={this.sendTransaction}
-          onSendSuccess={this.onSendSuccess}
-          onSendError={this.onSendError}
-        />
-      );
-    }
-
-    const renderTitle = () => {
-      if (this.state.step === 0) {
-        return "Write your PIN";
-      } else {
-        return this.props.title;
-      }
-    }
-
-    const renderCloseButton = () => {
-      return (
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      );
-    }
-
-    const renderFooter = () => {
-      if (this.state.step === 0) {
-        return (
-          <div className="d-flex flex-row">
-            <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Cancel`}</button>
-            <button onClick={this.handlePin} type="button" className="btn btn-hathor">{t`Go`}</button>
-          </div>
-        );
-      } else {
-        return (
-          <div className="d-flex flex-row align-items-center">
-            {this.state.loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
-            <button type="button" className="btn btn-hathor ml-3" onClick={this.onClickOk} disabled={this.state.loading}>{t`Ok`}</button>
-          </div>
-        );
-      }
-    }
-
     return (
       <div>
-        <div className="modal fade" id="pinModal" tabIndex="-1" role="dialog" aria-labelledby="pinModal" aria-hidden="true">
+        <div className="modal fade"
+             id="sendTxModal"
+             tabIndex="-1"
+             role="dialog"
+             aria-labelledby="sendTxModal"
+             aria-hidden="true"
+             data-backdrop="static"
+             data-keyboard="false"
+        >
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">{renderTitle()}</h5>
-                {this.state.step === 0 && renderCloseButton()}
+                <h5 className="modal-title" id="exampleModalLabel">{this.props.title}</h5>
               </div>
               <div className="modal-body modal-body-pin">
-                {renderBody()}
+                { this.state.preparedTransaction &&
+                <SendTxHandler
+                    sendTransaction={this.state.preparedTransaction}
+                    onSendSuccess={this.sendSuccessHandler}
+                    onSendError={this.sendErrorHandler}
+                />
+                }
               </div>
               <div className="modal-footer">
-                {renderFooter()}
+                {<div className="d-flex flex-row align-items-center">
+                  {this.state.loading &&  <ReactLoading
+                      type='spin'
+                      color={colors.purpleHathor}
+                      width={24} height={24} delay={200}/>}
+                  <button type="button" className="btn btn-hathor ml-3" onClick={this.onClickOk}
+                          disabled={this.state.loading}>{t`Ok`}</button>
+                </div>}
               </div>
             </div>
           </div>
@@ -234,6 +161,35 @@ class ModalSendTx extends React.Component {
       </div>
     )
   }
+}
+
+ModalSendTx.propTypes = {
+  /**
+   * User PIN already validated
+   */
+  pin: PropTypes.string.isRequired,
+  /**
+   * Title of the modal to be shown
+   */
+  title: PropTypes.string.isRequired,
+  /**
+   * A function that should prepare data before sending tx to be mined,
+   * receiving the PIN as a parameter
+   * @param {string} pin
+   */
+  prepareSendTransaction: PropTypes.func.isRequired,
+  /**
+   * Callback invoked when tx is sent with success
+   */
+  onSendSuccess: PropTypes.func.isRequired,
+  /**
+   * Callback invoked when there is an error sending the tx (Recommended)
+   */
+  onSendError: PropTypes.func,
+  /**
+   * Callback provided by the GlobalModal helper to manage the modal lifecycle
+   */
+  onClose: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps)(ModalSendTx);
