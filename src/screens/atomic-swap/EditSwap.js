@@ -370,8 +370,8 @@ export default function EditSwap(props) {
     }
 
     const handleSignButton = () => {
-        modalContext.showModal(MODAL_TYPES.ATOMIC_PIN, {
-            confirmClickHandler: signOperationHandler,
+        modalContext.showModal(MODAL_TYPES.PIN, {
+            onSuccess: signOperationHandler,
         });
     }
 
