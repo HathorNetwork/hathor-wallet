@@ -20,9 +20,9 @@ import ModalLedgerSignToken from './ModalLedgerSignToken';
 import ModalConfirmTestnet from './ModalConfirmTestnet';
 import ModalSendTx from './ModalSendTx';
 import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
+import ModalPin from "./ModalPin";
 import { ModalAtomicSend } from "./atomic-swap/ModalAtomicSend";
 import { ModalAtomicReceive } from "./atomic-swap/ModalAtomicReceive";
-import { ModalAtomicPin } from "./atomic-swap/PinModal";
 import { ModalAtomicExternalChange } from "./atomic-swap/ExternalChangeModal";
 
 const initialState = {
@@ -45,9 +45,9 @@ export const MODAL_TYPES = {
   'CONFIRM_TESTNET': 'CONFIRM_TESTNET',
   'SEND_TX': 'SEND_TX',
   'UNREGISTERED_TOKEN_INFO': 'UNREGISTERED_TOKEN_INFO',
+  'PIN': 'PIN',
   'ATOMIC_SEND': 'ATOMIC_SEND',
   'ATOMIC_RECEIVE': 'ATOMIC_RECEIVE',
-  'ATOMIC_PIN': 'ATOMIC_PIN',
   'ATOMIC_EXTERNAL_CHANGE': 'ATOMIC_EXTERNAL_CHANGE',
 };
 
@@ -65,9 +65,9 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.CONFIRM_TESTNET]: ModalConfirmTestnet,
   [MODAL_TYPES.SEND_TX]: ModalSendTx,
   [MODAL_TYPES.UNREGISTERED_TOKEN_INFO]: ModalUnregisteredTokenInfo,
+  [MODAL_TYPES.PIN]: ModalPin,
   [MODAL_TYPES.ATOMIC_SEND]: ModalAtomicSend,
   [MODAL_TYPES.ATOMIC_RECEIVE]: ModalAtomicReceive,
-  [MODAL_TYPES.ATOMIC_PIN]: ModalAtomicPin,
   [MODAL_TYPES.ATOMIC_EXTERNAL_CHANGE]: ModalAtomicExternalChange,
 };
 
