@@ -5,6 +5,7 @@ import {
   UNLEASH_CLIENT_KEY,
   UNLEASH_POLLING_INTERVAL,
   WALLET_SERVICE_FEATURE_TOGGLE,
+  ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
 } from './constants';
 import helpers from './utils/helpers';
 
@@ -22,7 +23,7 @@ export class FeatureFlags extends events.EventEmitter {
     this.userId = userId;
     this.network = network;
     this.walletServiceFlag = WALLET_SERVICE_FEATURE_TOGGLE;
-    this.atomicSwapFlag = `atomic-swap-wallet-desktop-${this.network}.rollout`;
+    this.atomicSwapFlag = ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE;
     this.walletServiceEnabled = null;
     this.atomicSwapEnabled = null;
     this.client = new UnleashClient({
@@ -119,7 +120,13 @@ export class FeatureFlags extends events.EventEmitter {
    */
   async isAtomicSwapEnabled() {
     try {
-      await this.client.updateContext({ userId: this.userId });
+      await this.client.updateContext({
+        userId: this.userId,
+        properties: {
+          network: this.network,
+          platform: helpers.getCurrentOS(),
+        },
+      });
 
       // Start polling for feature flag updates
       await this.client.start();
@@ -129,8 +136,8 @@ export class FeatureFlags extends events.EventEmitter {
 
       return this.atomicSwapEnabled;
     } catch (e) {
-      // If our feature flag service is unavailable, we default to the
-      // old facade
+      // If unleash is unavailable, this is the fallback result
+      // XXX: After the Atomic Swap feature is released, this should be changed to `true`
       return false;
     }
   }

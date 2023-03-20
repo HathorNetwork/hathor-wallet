@@ -261,3 +261,4 @@ export const UNLEASH_POLLING_INTERVAL = 120; // seconds
  * The feature toggle configured in Unleash
  */
 export const WALLET_SERVICE_FEATURE_TOGGLE = 'wallet-service-desktop.rollout';
+export const ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE = 'atomic-swap-service-desktop.rollout';
