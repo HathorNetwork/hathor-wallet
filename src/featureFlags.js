@@ -117,7 +117,7 @@ export class FeatureFlags extends events.EventEmitter {
    *
    * @return {boolean} The result from the unleash feature flag
    */
-  async shouldUseAtomicSwap() {
+  async isAtomicSwapEnabled() {
     try {
       await this.client.updateContext({ userId: this.userId });
 

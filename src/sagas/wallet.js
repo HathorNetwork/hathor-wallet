@@ -56,7 +56,7 @@ import {
   tokenInvalidateHistory,
   sharedAddressUpdate,
   walletRefreshSharedAddress,
-  setUseAtomicSwap,
+  setEnableAtomicSwap,
 } from '../actions';
 import { specificTypeAndPayload, errorHandler } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -101,10 +101,10 @@ export function* startWallet(action) {
 
   // For now, the wallet service does not support hardware wallet, so default to the old facade
   const useWalletService = hardwareWallet ? false : yield call(() => featureFlags.shouldUseWalletService());
-  const useAtomicSwap = yield call(() => featureFlags.shouldUseAtomicSwap());
+  const enableAtomicSwap = yield call(() => featureFlags.isAtomicSwapEnabled());
 
   yield put(setUseWalletService(useWalletService));
-  yield put(setUseAtomicSwap(useAtomicSwap));
+  yield put(setEnableAtomicSwap(enableAtomicSwap));
 
   // This is a work-around so we can dispatch actions from inside callbacks.
   let dispatch;
