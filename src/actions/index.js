@@ -538,3 +538,10 @@ export const saveNCHistory = (id, history) => ({ type: "save_nano_contract_histo
  * @param {string} address New address of the nano contract
  */
 export const editAddressNC = (id, address) => ({ type: "edit_address_nano_contract", payload: { id, address } });
+
+/**
+ * Save NC data from selected NC
+ *
+ * @param {Object} data Select NC data
+ */
+export const selectNC = (data) => ({ type: "select_nano_contract", payload: data });

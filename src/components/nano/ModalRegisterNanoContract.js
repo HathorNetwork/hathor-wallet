@@ -66,6 +66,7 @@ class ModalRegisterNanoContract extends React.Component {
     const isValid = this.refs.formRegisterNC.checkValidity();
     if (!isValid) {
       this.refs.formRegisterNC.classList.add('was-validated')
+      return;
     }
 
     // Check if this NC is already registered

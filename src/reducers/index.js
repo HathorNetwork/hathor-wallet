@@ -136,6 +136,11 @@ const initialState = {
   // Full node version data from /version API
   fullNodeVersionData: {},
   nanoContracts: {},
+  // Nano contract data after a NC is selected
+  // and we get the information from the full node
+  // Useful for executing actions for the NC without
+  // requesting data from the full node again
+  selectedNC: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -217,6 +222,8 @@ const rootReducer = (state = initialState, action) => {
       return onSaveNanoContractHistory(state, action);
     case 'edit_address_nano_contract':
       return onEditAddressNanoContract(state, action);
+    case 'select_nano_contract':
+      return onSelectNanoContract(state, action);
     // TODO: Refactor all the above to use `types.` syntax
     case types.SET_SERVER_INFO:
       return onSetServerInfo(state, action);
@@ -1140,5 +1147,17 @@ export const onWalletStateChanged = (state, { payload }) => ({
   ...state,
   walletState: payload,
 });
+
+/*
+ * Used when selecting a Nano Contract
+*/
+export const onSelectNanoContract = (state, action) => {
+  const data = action.payload;
+
+  return {
+    ...state,
+    selectedNC: data,
+  };
+};
 
 export default rootReducer;

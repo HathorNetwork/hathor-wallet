@@ -10,7 +10,7 @@ import { t } from 'ttag'
 import BackButton from '../../components/BackButton';
 import ModalSendTx from '../../components/ModalSendTx';
 import $ from 'jquery';
-import { bufferUtils, wallet, BetTransactionBuilder, dateFormatter, SendTransaction } from '@hathor/wallet-lib';
+import { bufferUtils, wallet, BetTransactionBuilder, dateFormatter, SendTransaction, Address, P2PKH, P2SH } from '@hathor/wallet-lib';
 import { HDPrivateKey, crypto } from 'bitcore-lib';
 import { connect } from "react-redux";
 import { saveNC, saveNCHistory } from '../../actions/index';
@@ -25,6 +25,7 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = (state) => {
   return {
     wallet: state.wallet,
+    registeredTokens: state.tokens,
   };
 }
 
@@ -65,29 +66,12 @@ class NanoContractCreate extends React.Component {
    * @return {hathorLib.SendTransaction} SendTransaction object
    */
   prepareSendTransaction = async (pin) => {
-    const accessData = wallet.getWalletAccessData();
-    const encryptedPrivateKey = accessData.mainKey;
-    const privateKeyStr = wallet.decryptData(encryptedPrivateKey, pin);
-    const key = HDPrivateKey(privateKeyStr)
-    // We create and register the Nano Contracts associated with address at index 0 by default
-    const derivedKey = key.deriveNonCompliantChild(0);
-    const privateKey = derivedKey.privateKey;
-    const pubkey = privateKey.publicKey.toBuffer();
-
-    const oracleScript = bufferUtils.hexToBuffer(this.refs.oracle.value); // TODO handle hex invalid error
-    const tokenId = this.refs.token.value;
+    const tokenUid = this.refs.token.value;
     const dateLastDeposit = dateFormatter.dateToTimestamp(new Date(this.refs.dateLastDeposit.value));
+    const oracle = this.refs.oracle.value;
 
-    const builder = new BetTransactionBuilder();
-    const bet = builder.createBetNC(pubkey, oracleScript, tokenId, dateLastDeposit);
-    const dataToSignHash = bet.getDataToSignHash();
-    const sig = crypto.ECDSA.sign(dataToSignHash, privateKey, 'little').set({
-      nhashtype: crypto.Signature.SIGHASH_ALL
-    });
-    bet.signature = sig.toDER();
-    bet.prepareToSend();
-
-    return new SendTransaction({ transaction: bet });
+    // We create and register the Nano Contracts associated with address at index 0 by default
+    return this.props.wallet.createBetNanoContract(tokenUid, dateLastDeposit, oracle, 0, { pinCode: pin });
   }
 
   /**
@@ -103,28 +87,44 @@ class NanoContractCreate extends React.Component {
   }
 
   render() {
+    const renderTokenOptions = () => {
+      return this.props.registeredTokens.map((token) => {
+        return <option value={token.uid} key={token.uid}>{token.name} ({token.symbol})</option>;
+      })
+    }
+
+    const renderSelectToken = () => {
+      return (
+        <div>
+          <select ref="token" title={t`Select token`}>
+            {renderTokenOptions()}
+          </select>
+        </div>
+      );
+    }
+
     return (
       <div className="content-wrapper">
         <BackButton {...this.props} />
-        <h3 className="mt-4">{t`Blueprint: Bet`}</h3>
+        <h3 className="my-4">{t`Blueprint: Bet`}</h3>
         <div>
           <form ref="formCreateNC" id="formCreateNC">
             <div className="row">
               <div className="form-group col-6">
-                <label>{t`Token UID`}</label>
-                <input required ref="token" placeholder={t`00`} type="text" className="form-control" />
-              </div>
-            </div>
-            <div className="row">
-              <div className="form-group col-6">
-                <label>{t`Oracle`}</label>
-                <input required ref="oracle" placeholder={t`Oracle script in hex`} type="text" className="form-control" />
+                <label>{t`Token`}</label>
+                {renderSelectToken()}
               </div>
             </div>
             <div className="row">
               <div className="form-group col-6">
                 <label>{t`Date of the last deposit`}</label>
                 <input required ref="dateLastDeposit" type="datetime-local" placeholder={t`Date and time in GMT`} step="1" className="form-control" />
+              </div>
+            </div>
+            <div className="row">
+              <div className="form-group col-6">
+                <label>{t`Oracle`}</label>
+                <input required ref="oracle" placeholder={t`Oracle's Hathor address or custom script in hex`} type="text" className="form-control" />
               </div>
             </div>
             <button type="button" className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>

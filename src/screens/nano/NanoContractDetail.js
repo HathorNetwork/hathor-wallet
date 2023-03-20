@@ -15,6 +15,13 @@ import ModalChangeAddress from '../../components/nano/ModalChangeAddress';
 import { connect } from 'react-redux';
 import helpers from '../../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
+import { selectNC } from '../../actions/index';
+
+const mapDispatchToProps = dispatch => {
+  return {
+    selectNC: (data) => dispatch(selectNC(data)),
+  };
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -67,6 +74,7 @@ class NanoContractDetail extends React.Component {
     this.setState({ loading: true, data: null });
     hathorLib.ncApi.getNanoContractState(this.props.match.params.nc_id, address, (data) => {
       this.setState({ loading: false, data });
+      this.props.selectNC({ ...data, address, nc_id: this.props.match.params.nc_id });
     }, (e) => {
       // Error in request
       this.setState({ loading: false, errorMessage: 'Error getting nano contract state.' });
@@ -157,4 +165,4 @@ class NanoContractDetail extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(NanoContractDetail);
+export default connect(mapStateToProps, mapDispatchToProps)(NanoContractDetail);

@@ -10,17 +10,19 @@ import { t } from 'ttag'
 import BackButton from '../../components/BackButton';
 import ModalSendTx from '../../components/ModalSendTx';
 import $ from 'jquery';
-import { transaction as transactionOld, constants, helpers, wallet as walletLib, BetTransactionBuilder, SendTransaction, Address, config, Input, Output, P2PKH } from '@hathor/wallet-lib';
+import { Serializer, bufferUtils, scriptsUtils, transactionUtils, transaction as transactionOld, constants, helpersUtils, wallet as walletLib, BetTransactionBuilder, SendTransaction, Address, config, Input, Output, P2PKH, P2SH } from '@hathor/wallet-lib';
 import { HDPrivateKey, crypto } from 'bitcore-lib';
 import { connect } from "react-redux";
 import { saveNC } from '../../actions/index';
 import InputNumber from '../../components/InputNumber';
 import wallet from '../../utils/wallet';
 import { replace, capitalize } from 'lodash';
+import buffer from 'buffer';
 
 const mapStateToProps = (state) => {
   return {
-    nanoContract: state.nanoContract,
+    selectedNC: state.selectedNC,
+    wallet: state.wallet,
   };
 };
 
@@ -31,6 +33,7 @@ const mapStateToProps = (state) => {
  */
 class NanoContractExecuteMethod extends React.Component {
   valueRef = React.createRef();
+  resultRef = React.createRef();
 
   /**
    * Opens PIN modal if form is valid
@@ -57,6 +60,48 @@ class NanoContractExecuteMethod extends React.Component {
     return isValid;
   }
 
+  prepareSendTransactionSetResult = async (pin) => {
+    const ncId = this.props.match.params.nc_id;
+    const ncAddress = this.props.selectedNC.address;
+    const result = this.refs.result.value;
+    const oracleScriptHex = this.props.selectedNC.nc_data.oracle;
+
+    // TODO get this value from input if not an address of the wallet
+    const oracleInputData = null;
+
+    return this.props.wallet.setBetResult(ncId, ncAddress, result, oracleScriptHex, oracleInputData, { pinCode: pin });
+  }
+
+  prepareSendTransactionBet = async (pin) => {
+    const ncId = this.props.match.params.nc_id;
+    const ncAddress = this.props.selectedNC.address;
+    const betAddress = this.refs.address.value;
+    const result = this.refs.result.value;
+
+    const amountStr = (this.valueRef.current.value || "").replace(/,/g, '');
+    //const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
+    // TODO handle NFT as well
+    const amount = wallet.decimalToInteger(amountStr);
+
+    // XXX Get token from nc
+    return this.props.wallet.makeBet(ncId, ncAddress, betAddress, result, amount, '00', { pinCode: pin });
+  }
+
+  prepareSendTransactionWithdraw = async (pin) => {
+    const ncId = this.props.match.params.nc_id;
+    const ncAddress = this.props.selectedNC.address;
+
+    const amountStr = (this.valueRef.current.value || "").replace(/,/g, '');
+    //const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
+    // TODO handle NFT as well
+    const amount = wallet.decimalToInteger(amountStr);
+    // TODO handle custom token
+    const tokenData = 0;
+
+    return this.props.wallet.makeWithdrawal(ncId, ncAddress, amount, tokenData, { pinCode: pin });
+  }
+
+
   /**
    * Prepare to create NC method execution transaction data after PIN is validated
    *
@@ -66,81 +111,34 @@ class NanoContractExecuteMethod extends React.Component {
    */
   prepareSendTransaction = async (pin) => {
     const method = this.props.match.params.method;
-    const network = config.getNetwork();
 
-    const accessData = walletLib.getWalletAccessData();
-    const encryptedPrivateKey = accessData.mainKey;
-    const privateKeyStr = walletLib.decryptData(encryptedPrivateKey, pin);
-    const key = HDPrivateKey(privateKeyStr)
-    const derivedKey = key.deriveNonCompliantChild(0);
-    const privateKey = derivedKey.privateKey;
-    const pubkey = privateKey.publicKey.toBuffer();
-
-    const address = this.refs.address.value;
-    const addressObj = new Address(address, { network });
-    const result = this.refs.result.value;
-
-    const amountStr = (this.valueRef.current.value || "").replace(/,/g, '');
-    //const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
-    // TODO handle NFT as well
-    const amount = wallet.decimalToInteger(amountStr);
-    // TODO get token from NC data
-    // XXX Improve how to get utxos
-    const walletData = walletLib.getWalletData();
-    const historyTxs = 'historyTransactions' in walletData ? walletData.historyTransactions : {};
-    const ret = walletLib.prepareSendTokensData({outputs: [{ value: amount }]}, { uid: '00' }, true, historyTxs, []);
-
-    // They will be used to sign tx
-    const auxInputs = [];
-    const auxOutputs = [];
-
-    const inputs = ret.data.inputs;
-    const outputsObj = [];
-    for (const output of ret.data.outputs) {
-      if (output.address) {
-        const address = new Address(output.address, { network });
-        // This will throw AddressError in case the adress is invalid
-        address.validateAddress();
-        const p2pkh = new P2PKH(address);
-        const p2pkhScript = p2pkh.createScript()
-        const outputObj = new Output(
-          output.value,
-          p2pkhScript,
-          { tokenData: output.tokenData }
-        );
-        outputsObj.push(outputObj);
-
-        auxOutputs.push({ address: output.address, value: output.value, tokenData: output.tokenData });
-      }
+    if (method === 'make_a_bet') {
+      return this.prepareSendTransactionBet(pin);
     }
 
-    const inputsObj = [];
-    for (const input of inputs) {
-      inputsObj.push(new Input(input.tx_id, input.index));
-
-      auxInputs.push({ tx_id: input.tx_id, index: input.index, address: input.address });
+    if (method === 'set-result') {
+      return this.prepareSendTransactionSetResult(pin);
     }
 
-    const builder = new BetTransactionBuilder();
-    const bet = builder.deposit(this.props.match.params.nc_id, pubkey, inputsObj, outputsObj, addressObj, result);
-    const dataToSignHash = bet.getDataToSignHash();
-    const sig = crypto.ECDSA.sign(dataToSignHash, privateKey, 'little').set({
-      nhashtype: crypto.Signature.SIGHASH_ALL
-    });
-    bet.signature = sig.toDER();
+    if (method === 'withdraw') {
+      return this.prepareSendTransactionWithdraw(pin);
+    }
+  }
 
-    // Inputs signature
-    const dataToSign = bet.getDataToSign();
-    const auxData = { inputs: auxInputs, outputs: auxOutputs, version: constants.NANO_CONTRACTS_VERSION, tokens: [], weight: 1 };
-    const newData = transactionOld.signTx(auxData, dataToSign, pin);
+  isOracleScriptMyAddress = () => {
+    const parsedScript = this.props.wallet.parseOracleScript(this.props.selectedNC.nc_data.oracle);
 
-    for (let idx = 0; idx < newData.inputs.length; idx++) {
-      inputsObj[idx].setData(newData.inputs[idx].data);
+    // If script couldn't be parsed, not my address
+    if (parsedScript === null) {
+      return false;
     }
 
-    bet.prepareToSend();
+    // If script is not P2PKH and not P2SH, not my address
+    if (!(parsedScript instanceof P2PKH || parsedScript instanceof P2SH)) {
+      return false;
+    }
 
-    return new SendTransaction({ transaction: bet });
+    return this.props.wallet.isAddressMine(parsedScript.address.base58);
   }
 
   /**
@@ -155,33 +153,98 @@ class NanoContractExecuteMethod extends React.Component {
   render() {
     const method = this.props.match.params.method;
 
-    const renderForm = () => {
+    const renderBet = () => {
       // TODO render input differently if token is an NFT
-      if (method === 'make_a_bet') {
-        return (
-          <div>
-            <div className="row">
-              <div className="form-group col-6">
-                <label>{t`Amount to bet`}</label>
-                <InputNumber key="amount-to-bet" ref={this.valueRef} placeholder={helpers.prettyValue(0)} className="form-control col-2" />
-              </div>
-            </div>
-            <div className="row">
-              <div className="form-group col-6">
-                <label>{t`Bet result`}</label>
-                <input required ref="result" type="text" className="form-control" />
-              </div>
-            </div>
-            <div className="row">
-              <div className="form-group col-6">
-                <label>{t`Address`}</label>
-                <input required ref="address" type="text" placeholder={t`Address to withdraw in case of success`} className="form-control" />
-              </div>
+      return (
+        <div>
+          <div className="row">
+            <div className="form-group col-6">
+              <label>{t`Amount to bet`}</label>
+              <InputNumber key="amount-to-bet" ref={this.valueRef} placeholder={helpersUtils.prettyValue(0)} className="form-control col-2" />
             </div>
           </div>
-        );
+          <div className="row">
+            <div className="form-group col-6">
+              <label>{t`Bet result`}</label>
+              <input required ref="result" type="text" className="form-control" />
+            </div>
+          </div>
+          <div className="row">
+            <div className="form-group col-6">
+              <label>{t`Address`}</label>
+              <input required ref="address" type="text" placeholder={t`Address to withdraw in case of success`} className="form-control" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const renderOracleSignatureMyAddress = () => {
+      return (
+        <div className="form-group col-6">
+          <label>{t`Oracle signature`}</label>
+          <p>{t`The oracle script is an address of this wallet, the result will be signed automatically.`}</p>
+        </div>
+      );
+    }
+
+    const renderOracleCustomScript = () => {
+      return (
+        <div className="form-group col-6">
+          <label>{t`Oracle signed input`}</label>
+          <input required ref="oracleSignedInput" type="text" placeholder={t`The signed input result to check with the oracle script`} className="form-control" />
+        </div>
+      );
+    }
+
+    const renderSetResult = () => {
+      return (
+        <div>
+          <div className="row">
+            <div className="form-group col-6">
+              <label>{t`Final result`}</label>
+              <input required ref={this.resultRef} type="text" className="form-control" />
+            </div>
+          </div>
+          <div className="row">
+            {this.isOracleScriptMyAddress() ? renderOracleSignatureMyAddress() : renderOracleCustomScript()}
+          </div>
+        </div>
+      );
+    }
+
+    const renderWithdraw = () => {
+      // TODO render input differently if token is an NFT
+      // TODO show correct available amount to withdraw
+      return (
+        <div>
+          <div className="row">
+            <div className="form-group col-12">
+              <label>{t`Amount available to withdraw: `}100.00</label>
+            </div>
+          </div>
+          <div className="row">
+            <div className="form-group col-6">
+              <label>{t`Amount to withdraw`}</label>
+              <InputNumber key="amount-to-bet" ref={this.valueRef} placeholder={helpersUtils.prettyValue(0)} className="form-control col-2" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const renderForm = () => {
+      if (method === 'make_a_bet') {
+        return renderBet();
       }
-      // TODO add other methods
+
+      if (method === 'set-result') {
+        return renderSetResult();
+      }
+
+      if (method === 'withdraw') {
+        return renderWithdraw();
+      }
     }
 
     const prettyMethod = (method) => {
