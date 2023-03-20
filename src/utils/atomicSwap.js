@@ -338,5 +338,5 @@ export const updatePersistentStorage = (proposalList) => {
         };
     }
 
-    walletUtil.setListenedProposalList(simplifiedStorage);
+    walletUtil.setListenedProposals(simplifiedStorage);
 }

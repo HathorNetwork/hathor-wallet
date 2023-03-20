@@ -116,7 +116,7 @@ export default function ProposalList (props) {
 
         // Ensuring the local storage is populated on first load
         if (Object.keys(startingProposalList).length < 1) {
-            const localStorage = walletUtil.getListenedProposalList();
+            const localStorage = walletUtil.getListenedProposals();
             startingProposalList = { ...localStorage };
         }
 

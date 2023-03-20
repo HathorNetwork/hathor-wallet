@@ -738,7 +738,7 @@ const wallet = {
    * Returns a string map containing the identifiers for proposals currently being watched.
    * @returns {Record<string,{ id:string, password:string }>}
    */
-  getListenedProposalList() {
+  getListenedProposals() {
     const proposalMap = storage.getItem(storageKeys.atomicProposals);
     return proposalMap || {};
   },
@@ -747,7 +747,7 @@ const wallet = {
    * Stores a string map containing the identifiers for proposals currently being watched.
    * @param {Record<string,{ id:string, password:string }>} proposalList
    */
-  setListenedProposalList(proposalList) {
+  setListenedProposals(proposalList) {
     storage.setItem(storageKeys.atomicProposals, proposalList);
   },
 }
