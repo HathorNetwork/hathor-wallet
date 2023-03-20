@@ -129,7 +129,7 @@ export default function EditSwap(props) {
                             title={t`This input is signed`}></i>}
                     </td>
                     <td className="text-right">
-                        {helpers.renderValue(input.value)}
+                        {helpers.renderValue(input.value, false)}
                     </td>
                     <td className="text-right">
                         {input.index}
@@ -148,7 +148,7 @@ export default function EditSwap(props) {
             return outputs.map((output,index) => {
                 return <tr key={`${output.address}-${index}`}>
                     <td>{output.address}</td>
-                    <td className="text-right">{helpers.renderValue(output.value)}</td>
+                    <td className="text-right">{helpers.renderValue(output.value, false)}</td>
                     <td className="text-center">
                         {output.isMine && output.isChange && <i
                             className="fa fa-check ml-1"

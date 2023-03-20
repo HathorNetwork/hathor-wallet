@@ -21,7 +21,7 @@ export function BalanceComponent ({ partialTx, wallet, balance }) {
     const renderRows = () => {
         const renderOne = (amount, symbol) => {
             if (!amount || !symbol) return '';
-            return <span>{helpers.renderValue(amount)} <b>{symbol}</b></span>
+            return <span>{helpers.renderValue(amount, false)} <b>{symbol}</b></span>
         }
 
         if (sendingBalances.length === 0 && receivingBalances.length === 0) {

@@ -63,7 +63,7 @@ function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHa
         }
 
         const newAmount = validUtxo.amount;
-        setAmount(helpers.renderValue(newAmount));
+        setAmount(helpers.renderValue(newAmount, false));
         setIsInvalid(false);
         setErrMessage('');
         utxoChanged(validUtxo);

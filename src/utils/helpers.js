@@ -76,7 +76,7 @@ const helpers = {
    * Render value to integer or decimal
    *
    * @param {number} amount Amount to render
-   * @param {boolean} [isInteger=false] If it's an integer or decimal
+   * @param {boolean} isInteger If it's an integer or decimal
    *
    * @return {string} rendered value
    * @memberof Helpers
