@@ -405,14 +405,6 @@ export function* listenForFeatureFlags(featureFlags) {
 
       if (oldUseWalletService && oldUseWalletService !== newUseWalletService) {
         yield put(reloadWalletRequested());
-        return;
-      }
-
-      const newShowAtomicSwap = yield take(channel);
-      const oldShowAtomicSwap = yield select((state) => state.useAtomicSwap);
-
-      if (oldShowAtomicSwap && oldShowAtomicSwap !== newShowAtomicSwap) {
-        yield put(reloadWalletRequested());
       }
     }
   } finally {
