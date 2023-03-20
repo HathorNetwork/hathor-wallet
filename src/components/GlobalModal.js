@@ -127,15 +127,13 @@ export const GlobalModal = ({ children }) => {
   const manageDomLifecycle = (domSelector) => {
     const domElement = $(domSelector);
 
-    // First, show the modal
-    domElement.modal('show');
-
-    domElement.on('shown.bs.modal', (e) => {
-      // When it is properly shown, configure its teardown
-      domElement.on('hidden.bs.modal', (e) => {
-        hideModal(domSelector);
-      });
+    // Configure its teardown
+    domElement.on('hidden.bs.modal', (e) => {
+      hideModal(domSelector);
     });
+
+    // Once properly configured, show the modal
+    domElement.modal('show');
   }
 
   const renderComponent = () => {
