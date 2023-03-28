@@ -14,7 +14,7 @@ import { t } from "ttag";
  * @param {HathorWallet} wallet
  * @param {DisplayBalance[]} balance
  */
-export function BalanceComponent ({ partialTx, wallet, balance }) {
+export function ProposalBalanceTable ({ partialTx, wallet, balance }) {
     const sendingBalances = balance.filter(b => b.sending > 0);
     const receivingBalances = balance.filter(b => b.receiving > 0);
 

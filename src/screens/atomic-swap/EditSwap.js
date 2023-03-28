@@ -19,7 +19,7 @@ import {
     deserializePartialTx,
     enrichTxData
 } from "../../utils/atomicSwap";
-import { BalanceComponent } from "../../components/atomic-swap/BalanceComponent";
+import { ProposalBalanceTable } from "../../components/atomic-swap/ProposalBalanceTable";
 import helpers from "../../utils/helpers";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 import { PartialTxProposal, PartialTx } from "@hathor/wallet-lib";
@@ -506,7 +506,7 @@ export default function EditSwap(props) {
         {renderCopiableHeader()}
 
         <h4 className="col-3 text-center">{t`Summary`}</h4>
-        <BalanceComponent partialTx={partialTx} wallet={wallet} balance={txBalances} />
+        <ProposalBalanceTable partialTx={partialTx} wallet={wallet} balance={txBalances} />
 
         <hr/>
 
