@@ -101,9 +101,13 @@ const initialState = {
   // RouterHistory object
   routerHistory: null,
 
-  // Should we allow using the atomic swap feature?
+  /**
+   * Indicates if the Atomic Swap feature is available for use
+   * @type {boolean}
+   */
   useAtomicSwap: false,
   /**
+   * A map of proposals being listened to and/or manipulated by this wallet
    * @type {Record<string,ReduxProposalData>}
    */
   proposals: {},
