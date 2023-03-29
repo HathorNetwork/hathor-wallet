@@ -60,8 +60,10 @@ export class ModalSendTx extends React.Component {
       }
     });
 
-    // Start the promise and ignore its results
-    this.processTxWithPin(this.props.pin);
+    // After the component is completely ready, start the processing
+    $('#sendTxModal').on('shown.bs.modal', (e) => {
+      this.processTxWithPin(this.props.pin);
+    })
   }
 
   componentWillUnmount = () => {
