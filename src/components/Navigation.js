@@ -12,6 +12,14 @@ import logo from '../assets/images/hathor-white-logo.png';
 import Version from './Version';
 import ServerStatus from './ServerStatus';
 import helpers from '../utils/helpers';
+import { connect } from "react-redux";
+
+
+const mapStateToProps = (state) => {
+  return {
+    useAtomicSwap: state.useAtomicSwap,
+  };
+};
 
 /**
  * Component that shows a navigation bar with the menu options
@@ -56,6 +64,9 @@ class Navigation extends React.Component {
               <li className="nav-item">
                 <NavLink to="/nft/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`NFTs`}</NavLink>
               </li>
+              {this.props.useAtomicSwap && <li className="nav-item">
+                <NavLink to="/wallet/atomic_swap/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Atomic Swap`}</NavLink>
+              </li>}
               <li className="nav-item">
                 <a className="nav-link" href="true" onClick={this.goToExplorer}>{t`Public Explorer`}</a>
               </li>
@@ -71,4 +82,4 @@ class Navigation extends React.Component {
   }
 };
 
-export default Navigation;
+export default connect(mapStateToProps)(Navigation);

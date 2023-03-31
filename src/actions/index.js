@@ -21,6 +21,16 @@ export const types = {
   TOKEN_FETCH_HISTORY_REQUESTED: 'TOKEN_FETCH_HISTORY_REQUESTED',
   TOKEN_FETCH_HISTORY_SUCCESS: 'TOKEN_FETCH_HISTORY_SUCCESS',
   TOKEN_FETCH_HISTORY_FAILED: 'TOKEN_FETCH_HISTORY_FAILED',
+  SET_ENABLE_ATOMIC_SWAP: 'SET_ENABLE_ATOMIC_SWAP',
+  PROPOSAL_FETCH_REQUESTED: 'PROPOSAL_FETCH_REQUESTED',
+  PROPOSAL_FETCH_SUCCESS: 'PROPOSAL_FETCH_SUCCESS',
+  PROPOSAL_FETCH_FAILED: 'PROPOSAL_FETCH_FAILED',
+  PROPOSAL_TOKEN_FETCH_REQUESTED: 'PROPOSAL_TOKEN_FETCH_REQUESTED',
+  PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
+  PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
+  PROPOSAL_GENERATED: 'PROPOSAL_GENERATED',
+  PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
+  PROPOSAL_IMPORTED: 'PROPOSAL_IMPORTED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
   ON_START_WALLET_LOCK: 'ON_START_WALLET_LOCK',
   RELOAD_WALLET_REQUESTED: 'RELOAD_WALLET_REQUESTED',
@@ -260,6 +270,101 @@ export const tokenFetchBalanceSuccess = (tokenId, data) => ({
 export const tokenFetchBalanceFailed = (tokenId) => ({
   type: types.TOKEN_FETCH_BALANCE_FAILED,
   tokenId,
+});
+
+/**
+ * Flag indicating if we are using the atomic swap feature
+ */
+export const setEnableAtomicSwap = (useAtomicSwap) => ({ type: types.SET_ENABLE_ATOMIC_SWAP, payload: useAtomicSwap });
+
+/**
+ * @param {string} proposalId The proposalId to request data
+ * @param {string} password The proposal's password to decode its data
+ * @param {boolean} [force=false] Should we ignore the stored data?
+ */
+export const proposalFetchRequested = (proposalId, password, force) => ({
+  type: types.PROPOSAL_FETCH_REQUESTED,
+  proposalId,
+  password,
+  force,
+});
+
+/**
+ * @param {string} proposalId The proposalId to store data
+ * @param {unknown} data The downloaded proposal data
+ */
+export const proposalFetchSuccess = (proposalId, data) => ({
+  type: types.PROPOSAL_FETCH_SUCCESS,
+  proposalId,
+  data,
+});
+
+/**
+ * @param {string} proposalId The proposalId of the fetch request
+ * @param {string} errorMessage The error found on proposal fetching
+ */
+export const proposalFetchFailed = (proposalId, errorMessage) => ({
+  type: types.PROPOSAL_FETCH_FAILED,
+  proposalId,
+  errorMessage,
+});
+
+/**
+ * @param {string} tokenUid The token identifier to fetch
+ */
+export const proposalTokenFetchRequested = (tokenUid) => ({
+  type: types.PROPOSAL_TOKEN_FETCH_REQUESTED,
+  tokenUid
+});
+
+/**
+ * @param {string} tokenUid The token identifier fetched
+ * @param {unknown} data The downloaded token data
+ */
+export const proposalTokenFetchSuccess = (tokenUid, data) => ({
+  type: types.PROPOSAL_TOKEN_FETCH_SUCCESS,
+  tokenUid,
+  data,
+});
+
+/**
+ * @param {string} tokenUid The token identifier fetched
+ * @param {string} errorMessage The error found on token fetching
+ */
+export const proposalTokenFetchFailed = (tokenUid, errorMessage) => ({
+  type: types.PROPOSAL_TOKEN_FETCH_FAILED,
+  tokenUid,
+  errorMessage,
+});
+
+/**
+ * @param {string} proposalId
+ * @param {string} password
+ * @param {ProposalData} data The generated proposal object
+ */
+export const proposalGenerated = (proposalId, password, data) => ({
+  type: types.PROPOSAL_GENERATED,
+  proposalId,
+  password,
+  data,
+});
+
+/**
+ * @param {string} proposalId
+ */
+export const proposalRemoved = (proposalId) => ({
+  type: types.PROPOSAL_REMOVED,
+  proposalId,
+});
+
+/**
+ * @param {string} proposalId
+ * @param {string} password
+ */
+export const importProposal = (proposalId, password) => ({
+  type: types.PROPOSAL_IMPORTED,
+  proposalId,
+  password,
 });
 
 export const tokenInvalidateBalance = (tokenId) => ({

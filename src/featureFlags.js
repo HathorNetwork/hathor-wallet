@@ -5,6 +5,7 @@ import {
   UNLEASH_CLIENT_KEY,
   UNLEASH_POLLING_INTERVAL,
   WALLET_SERVICE_FEATURE_TOGGLE,
+  ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
 } from './constants';
 import helpers from './utils/helpers';
 
@@ -12,6 +13,7 @@ const IGNORE_WALLET_SERVICE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 
 export const Events = {
   WALLET_SERVICE_ENABLED: 'wallet-service-enabled',
+  ATOMIC_SWAP_ENABLED: 'atomic-swap-enabled',
 };
 
 export class FeatureFlags extends events.EventEmitter {
@@ -21,7 +23,9 @@ export class FeatureFlags extends events.EventEmitter {
     this.userId = userId;
     this.network = network;
     this.walletServiceFlag = WALLET_SERVICE_FEATURE_TOGGLE;
+    this.atomicSwapFlag = ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE;
     this.walletServiceEnabled = null;
+    this.atomicSwapEnabled = null;
     this.client = new UnleashClient({
       url: UNLEASH_URL,
       clientKey: UNLEASH_CLIENT_KEY,
@@ -32,6 +36,7 @@ export class FeatureFlags extends events.EventEmitter {
     this.client.on('update', () => {
       // Get current flag
       const walletServiceEnabled = this.client.isEnabled(this.walletServiceFlag);
+      const atomicSwapEnabled = this.client.isEnabled(this.atomicSwapFlag);
 
       // We should only emit an update if we already had a value on the instance
       // and if the value has changed
@@ -40,6 +45,13 @@ export class FeatureFlags extends events.EventEmitter {
       )) {
         this.walletServiceEnabled = walletServiceEnabled;
         this.emit(Events.WALLET_SERVICE_ENABLED, walletServiceEnabled);
+      }
+
+      if (this.atomicSwapEnabled !== null && (
+        this.atomicSwapEnabled !== atomicSwapEnabled
+      )) {
+        this.atomicSwapEnabled = atomicSwapEnabled;
+        this.emit(Events.ATOMIC_SWAP_ENABLED, atomicSwapEnabled);
       }
     });
   }
@@ -98,5 +110,35 @@ export class FeatureFlags extends events.EventEmitter {
    */
   static async clearIgnoreWalletServiceFlag() {
     await localStorage.removeItem(IGNORE_WALLET_SERVICE_FLAG);
+  }
+
+  /**
+   * Uses the Hathor Unleash Server and Proxy to determine if the
+   * wallet should have the Atomic Swap feature
+   *
+   * @return {boolean} The result from the unleash feature flag
+   */
+  async isAtomicSwapEnabled() {
+    try {
+      await this.client.updateContext({
+        userId: this.userId,
+        properties: {
+          network: this.network,
+          platform: helpers.getCurrentOS(),
+        },
+      });
+
+      // Start polling for feature flag updates
+      await this.client.start();
+
+      // start() method will have already called the fetchToggles, so the flag should be enabled
+      this.atomicSwapEnabled = this.client.isEnabled(this.atomicSwapFlag);
+
+      return this.atomicSwapEnabled;
+    } catch (e) {
+      // If unleash is unavailable, this is the fallback result
+      // XXX: After the Atomic Swap feature is released, this should be changed to `true`
+      return false;
+    }
   }
 }
