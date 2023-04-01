@@ -45,7 +45,7 @@ class SentryPermission extends React.Component {
     if (this.state.savedPermission === null) {
       this.props.history.push('/wallet_type/');
     } else {
-      this.props.history.push('/settings/');
+      this.props.history.goBack();
     }
   }
 
