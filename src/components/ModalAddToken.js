@@ -87,7 +87,7 @@ class ModalAddToken extends React.Component {
       const tokensBalance = this.props.tokensBalance;
 
       const tokenUid = tokenData.uid;
-      const tokenBalance = tokensBalance[tokenUid];
+      const tokenBalance = tokensBalance[tokenUid]?.data;
       const tokenHasZeroBalance = !tokenBalance
         || (tokenBalance.available + tokenBalance.locked) === 0;
 

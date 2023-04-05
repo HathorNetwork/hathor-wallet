@@ -2,7 +2,7 @@ import React from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { act, render, screen } from '@testing-library/react';
 import $ from 'jquery'
-import hathorLib from '@hathor/wallet-lib';
+import hathorLib, { SendTransaction } from '@hathor/wallet-lib';
 import { ModalSendTx } from '../../components/ModalSendTx';
 import { SendTxHandler } from '../../components/SendTxHandler';
 import userEvent from '@testing-library/user-event';
@@ -76,12 +76,14 @@ describe('tx handling', () => {
       return <mock-child-component/>
     })
 
-    const mockPrepareSendTransaction = () => ({
-      on: () => jest.fn(), // Necessary for the event listeners
-      run: async () => {
+    const mockPrepareSendTransaction = () => {
+      const sendTransactionObj = new SendTransaction();
+      sendTransactionObj.on = jest.fn();
+      sendTransactionObj.run = jest.fn().mockImplementation(async () => {
         return ({ mockedTransaction: true });
-      }
-    });
+      })
+      return sendTransactionObj;
+    };
     const mockOnSuccess = jest.fn();
     const mockOnError = jest.fn();
 
@@ -100,6 +102,7 @@ describe('tx handling', () => {
     });
 
     // Waiting until the transaction has been "processed"
+    $(MODAL_ID).trigger('shown.bs.modal');
     await helpers.delay(0);
 
     // Simulating click ok button (by hiding the modal) and validating the onSuccess call
@@ -115,12 +118,14 @@ describe('tx handling', () => {
       return <mock-child-component/>
     })
 
-    const mockPrepareSendTransaction = () => ({
-      on: () => jest.fn(), // Necessary for the event listeners
-      run: async () => {
+    const mockPrepareSendTransaction = () => {
+      const sendTransactionObj = new SendTransaction();
+      sendTransactionObj.on = jest.fn();
+      sendTransactionObj.run = jest.fn().mockImplementation(async () => {
         throw new Error('SendTransaction Error')
-      }
-    });
+      })
+      return sendTransactionObj;
+    };
     const mockOnSuccess = jest.fn();
     const mockOnError = jest.fn();
 
@@ -139,6 +144,7 @@ describe('tx handling', () => {
     });
 
     // Waiting until the transaction has been "processed"
+    $(MODAL_ID).trigger('shown.bs.modal');
     await helpers.delay(0);
 
     // Simulating click ok button (by hiding the modal) and validating the onSuccess call
