@@ -191,7 +191,10 @@ class Server extends React.Component {
       if (this.props.useWalletService) {
         this.props.wallet.changeWsServer(currentWsServer);
       }
-      this.setState({ loading: false });
+      this.setState({
+        loading: false,
+        errorMessage: e.message,
+      });
     }
   }
 
@@ -227,8 +230,11 @@ class Server extends React.Component {
     const promise = wallet.changeServer(this.props.wallet, pin, this.props.history);
     promise.then(() => {
       this.props.history.push('/wallet/');
-    }, () => {
-      this.setState({ loading: false });
+    }, (err) => {
+      this.setState({
+        loading: false,
+        errorMessage: err.message,
+      });
     });
   }
 

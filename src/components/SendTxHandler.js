@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
  *
  * @memberof Components
  */
-class SendTxHandler extends React.Component {
+export class SendTxHandler extends React.Component {
   // Loading message to be shown while server does not return a response
   powMessage = t`Resolving proof of work of your transaction.`
 

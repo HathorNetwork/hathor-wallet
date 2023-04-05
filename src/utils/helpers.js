@@ -5,11 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import path from 'path';
+import hathorLib from '@hathor/wallet-lib';
+import { get } from 'lodash';
 import store from '../store/index';
 import { networkUpdate } from '../actions/index';
-import hathorLib from '@hathor/wallet-lib';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
-import path from 'path';
 
 let shell = null;
 if (window.require) {
@@ -200,6 +201,59 @@ const helpers = {
       is_voided: Boolean(tx.voided),
       version: tx.version,
     };
+  },
+
+  /**
+   * Returns the current OS
+   *
+   * @returns {string} 'macos', 'windows', 'linux' or 'other'
+   */
+  getCurrentOS() {
+    if (!window) {
+      return 'other';
+    }
+
+    /**
+     * Possible values for clientInformation['platform'] are:
+     * "Win32" - indicates the browser is running on a 32-bit version of Windows.
+     * "Win64" - indicates the browser is running on a 64-bit version of Windows.
+     * "MacIntel" - indicates the browser is running on an Intel-based Mac.
+     * "MacPPC" - indicates the browser is running on a PowerPC-based Mac.
+     * "Linux i686" - indicates the browser is running on a 32-bit version of Linux.
+     * "Linux x86_64" - indicates the browser is running on a 64-bit version of Linux.
+     * "Android" - indicates the browser is running on an Android device.
+     * "iPhone" - indicates the browser is running on an iPhone.
+     * "iPad" - indicates the browser is running on an iPad.
+     * "iPod" - indicates the browser is running on an iPod.
+     *
+     * Since the wallet-desktop only runs in desktops, we can return 'other' for any other
+     * platform that is not windows, mac or linux
+     */
+    const platform = get(window, 'clientInformation.platform', 'other').toLowerCase();
+
+    if (platform.includes('win')) {
+      return 'windows';
+    } else if (platform.includes('mac')) {
+      return 'macos';
+    } else if (platform.includes('linux')) {
+      return 'linux';
+    }
+
+    return 'other';
+  },
+
+  /**
+   * Generates a promise that resolves only after a specified time
+   * @param {number} [ms=1000] Time in milliseconds
+   * @return {Promise<unknown>}
+   */
+  async delay(ms = 1000) {
+    return new Promise((resolve) => {
+      setTimeout(
+        () => resolve(),
+        ms
+      )
+    })
   }
 }
 

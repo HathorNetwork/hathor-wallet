@@ -56,6 +56,7 @@ if (window.require) {
  * hideZeroBalanceTokens: string,
  * sentry: string,
  * alwaysShowTokens: string,
+ * atomicProposals: string,
  * }}
  * @readonly
  */
@@ -67,6 +68,7 @@ const storageKeys = {
   notification: 'wallet:notification',
   hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
   alwaysShowTokens: 'wallet:always_show_tokens',
+  atomicProposals: 'wallet:atomic_swap_proposals',
 }
 
 /**
@@ -366,14 +368,14 @@ const wallet = {
       store.dispatch(startWalletRequested({
         passphrase: '',
         pin,
-        password: '', 
+        password: '',
         routerHistory,
         fromXpriv: true,
       }));
     } else {
       store.dispatch(startWalletRequested({
         passphrase: '',
-        password: '', 
+        password: '',
         routerHistory,
         fromXpriv: false,
         xpub: wallet.xpub,
@@ -730,6 +732,23 @@ const wallet = {
    */
   decimalToInteger(value) {
     return Math.round(value*(10**hathorConstants.DECIMAL_PLACES));
+  },
+
+  /**
+   * Returns a string map containing the identifiers for proposals currently being watched.
+   * @returns {Record<string,{ id:string, password:string }>}
+   */
+  getListenedProposals() {
+    const proposalMap = storage.getItem(storageKeys.atomicProposals);
+    return proposalMap || {};
+  },
+
+  /**
+   * Stores a string map containing the identifiers for proposals currently being watched.
+   * @param {Record<string,{ id:string, password:string }>} proposalList
+   */
+  setListenedProposals(proposalList) {
+    storage.setItem(storageKeys.atomicProposals, proposalList);
   },
 }
 

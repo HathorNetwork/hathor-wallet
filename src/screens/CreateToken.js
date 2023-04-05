@@ -100,11 +100,16 @@ class CreateToken extends React.Component {
     }
 
     this.setState({ errorMessage: '' });
-    this.context.showModal(MODAL_TYPES.SEND_TX, {
-      prepareSendTransaction: this.prepareSendTransaction,
-      onSendSuccess: this.onTokenCreateSuccess,
-      title: 'Creating token',
-    });
+    this.context.showModal(MODAL_TYPES.PIN, {
+      onSuccess: ({pin}) => {
+        this.context.showModal(MODAL_TYPES.SEND_TX, {
+          pin,
+          prepareSendTransaction: this.prepareSendTransaction,
+          onSendSuccess: this.onTokenCreateSuccess,
+          title: t`Creating token`,
+        });
+      }
+    })
   }
 
   /**
