@@ -186,13 +186,15 @@ class Server extends React.Component {
         this.executeServerChange();
       }
     } catch (e) {
-      this.state.errorMessage = e.message;
       // Go back to the previous server
       this.props.wallet.changeServer(currentServer);
       if (this.props.useWalletService) {
         this.props.wallet.changeWsServer(currentWsServer);
       }
-      this.setState({ loading: false });
+      this.setState({
+        loading: false,
+        errorMessage: e.message,
+      });
     }
   }
 
@@ -229,8 +231,10 @@ class Server extends React.Component {
     promise.then(() => {
       this.props.history.push('/wallet/');
     }, (err) => {
-      this.state.errorMessage = err.message;
-      this.setState({ loading: false });
+      this.setState({
+        loading: false,
+        errorMessage: err.message,
+      });
     });
   }
 
