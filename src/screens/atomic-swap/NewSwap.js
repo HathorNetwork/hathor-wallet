@@ -9,16 +9,24 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from 'react-router-dom';
 import { t } from "ttag";
 import Loading from "../../components/Loading";
-import { generateEmptyProposalFromPassword, updatePersistentStorage } from "../../utils/atomicSwap";
+import {
+    generateReduxObjFromProposal,
+    generateEmptyProposal,
+    PROPOSAL_CREATION_STATUS,
+    updatePersistentStorage, PROPOSAL_DOWNLOAD_STATUS
+} from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
-import { proposalGenerated } from "../../actions";
+import { proposalCreateRequested } from "../../actions";
 
 export default function NewSwap (props) {
-    const [proposalId, setProposalId] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const allProposals = useSelector(state => state.proposals);
+    const newProposal = useSelector(state => state.newProposal);
     const wallet = useSelector(state => state.wallet);
+    const [partialTx, setPartialTx] = useState('');
+
+    // Global interactions
+    const allProposals = useSelector(state => state.proposals);
     const history = useHistory();
     const dispatch = useDispatch();
 
@@ -30,23 +38,46 @@ export default function NewSwap (props) {
 
     const createClickHandler = () => {
         if (password.length < 3) {
-            setErrorMessage('Please insert a password more than 3 characters long');
+            setErrorMessage(t`Please insert a password more than 3 characters long`);
             return;
         }
 
         setIsLoading(true);
-        const { data, id } = generateEmptyProposalFromPassword(password, wallet);
-        setProposalId(id);
-        dispatch(proposalGenerated(id, password, data))
+        const newPartialTx = generateEmptyProposal(wallet);
+        setPartialTx(newPartialTx)
+        dispatch(proposalCreateRequested(newPartialTx, password));
     }
 
+    /**
+     * Listening to the new proposal's status
+     */
     useEffect(() => {
-        // If this proposal exists, navigate to it immediately
-        if (allProposals[proposalId]) {
-            updatePersistentStorage(allProposals);
-            navigateToProposal(proposalId);
+        const creationStatus = newProposal?.status;
+
+        // Error handling
+        if (creationStatus === PROPOSAL_CREATION_STATUS.FAILED) {
+            setErrorMessage(newProposal.errorMessage || t`An unknown error happened.`)
+            return;
         }
-    })
+
+        // While the proposal is not successfully created, just stay in this screen
+        if (creationStatus !== PROPOSAL_CREATION_STATUS.SUCCESS) {
+            return;
+        }
+
+        // If the proposal was successfully created, calculate its helper values and navigate to it
+        const proposalId = newProposal.proposalId;
+        const reduxObj = generateReduxObjFromProposal(
+          proposalId,
+          password,
+          partialTx,
+          wallet,
+        );
+        reduxObj.status = PROPOSAL_DOWNLOAD_STATUS.READY; // We already have all data, no need to fetch again.
+        allProposals[proposalId] = reduxObj;
+        updatePersistentStorage(allProposals);
+        navigateToProposal(proposalId);
+    }, [newProposal])
 
     return <div className="content-wrapper flex align-items-center">
         <BackButton {...props} />

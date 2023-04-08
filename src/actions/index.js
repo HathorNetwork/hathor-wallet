@@ -29,6 +29,9 @@ export const types = {
   PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
   PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
   PROPOSAL_GENERATED: 'PROPOSAL_GENERATED',
+  PROPOSAL_CREATE_REQUESTED: 'PROPOSAL_CREATE_REQUESTED',
+  PROPOSAL_CREATE_SUCCESS: 'PROPOSAL_CREATE_SUCCESS',
+  PROPOSAL_CREATE_FAILED: 'PROPOSAL_CREATE_FAILED',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
   PROPOSAL_IMPORTED: 'PROPOSAL_IMPORTED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
@@ -338,15 +341,29 @@ export const proposalTokenFetchFailed = (tokenUid, errorMessage) => ({
 });
 
 /**
- * @param {string} proposalId
+ * @param {string} partialTx
  * @param {string} password
- * @param {ProposalData} data The generated proposal object
  */
-export const proposalGenerated = (proposalId, password, data) => ({
-  type: types.PROPOSAL_GENERATED,
-  proposalId,
+export const proposalCreateRequested = (partialTx, password) => ({
+  type: types.PROPOSAL_CREATE_REQUESTED,
   password,
-  data,
+  partialTx,
+});
+
+/**
+ * @param {string} proposalId
+ */
+export const proposalCreateSuccess = (proposalId) => ({
+  type: types.PROPOSAL_CREATE_SUCCESS,
+  proposalId,
+});
+
+/**
+ * @param {string} errorMessage
+ */
+export const proposalCreateFailed = (errorMessage) => ({
+  type: types.PROPOSAL_CREATE_FAILED,
+  errorMessage,
 });
 
 /**

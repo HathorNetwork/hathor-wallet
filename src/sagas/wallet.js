@@ -7,6 +7,7 @@ import {
   tokens as tokensUtils,
   constants as hathorLibConstants,
   config,
+  storage,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -62,6 +63,7 @@ import { specificTypeAndPayload, errorHandler } from './helpers';
 import { fetchTokenData } from './tokens';
 import walletHelpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
+import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 
 export const WALLET_STATUS = {
   READY: 'ready',
@@ -237,6 +239,9 @@ export function* startWallet(action) {
       return;
     }
   }
+
+  // Set urls for the Atomic Swap Service. If we have it on storage, use it, otherwise use defaults
+  initializeSwapServiceBaseUrlForWallet(network.name)
 
   // Wallet start called, we need to show the loading addresses screen
   routerHistory.replace('/loading_addresses');

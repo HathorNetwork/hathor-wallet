@@ -5,15 +5,22 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { all, call, fork, put, select, take, } from 'redux-saga/effects';
+import { all, call, fork, put, select, take, takeEvery, } from 'redux-saga/effects';
 import { channel } from "redux-saga";
-import { proposalFetchFailed, proposalFetchSuccess, types } from "../actions";
+import {
+    proposalCreateFailed,
+    proposalCreateSuccess,
+    proposalFetchFailed,
+    proposalFetchSuccess,
+    types
+} from "../actions";
 import { specificTypeAndPayload } from "./helpers";
 import { get } from 'lodash';
 import {
     PROPOSAL_DOWNLOAD_STATUS,
 } from "../utils/atomicSwap";
 import { t } from "ttag";
+import { swapService } from '@hathor/wallet-lib'
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 
@@ -87,10 +94,32 @@ function* fetchProposalData(action) {
     }
 }
 
+/**
+ * Makes the request to the backend to create a proposal and returns its results via saga events
+ * @param {string} action.partialTx
+ * @param {string} action.password
+ */
+function* createProposalOnBackend(action) {
+    const { password, partialTx } = action;
+
+    try {
+        const { success, id } = yield swapService.create(partialTx, password);
+        if (!success) {
+            yield put(proposalCreateFailed(t`An error occurred while creating this proposal.`))
+            return;
+        }
+        // Inform the NewSwap screen about the new proposal identifier
+        yield put(proposalCreateSuccess(id));
+    } catch (e) {
+        yield put(proposalCreateFailed(e.message));
+    }
+}
+
 
 
 export function* saga() {
     yield all([
         fork(fetchProposalDataQueue),
+        takeEvery(types.PROPOSAL_CREATE_REQUESTED, createProposalOnBackend)
     ]);
 }
