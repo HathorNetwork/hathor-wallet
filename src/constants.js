@@ -255,10 +255,16 @@ export const DEFAULT_WALLET_SERVICE_WS_SERVERS = [
  */
 export const UNLEASH_URL = 'https://unleash-proxy.b7e6a7f52ee9fefaf0c53e300cfcb014.hathor.network/proxy';
 export const UNLEASH_CLIENT_KEY = 'wKNhpEXKa39aTRgIjcNsO4Im618bRGTq';
-export const UNLEASH_POLLING_INTERVAL = 120; // seconds
+export const UNLEASH_POLLING_INTERVAL = 3000; // seconds
+
 
 /**
  * The feature toggle configured in Unleash
  */
 export const WALLET_SERVICE_FEATURE_TOGGLE = 'wallet-service-desktop.rollout';
 export const ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE = 'atomic-swap-service-desktop.rollout';
+
+export const FEATURE_TOGGLE_DEFAULTS = {
+  [WALLET_SERVICE_FEATURE_TOGGLE]: false,
+  [ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE]: false,
+};

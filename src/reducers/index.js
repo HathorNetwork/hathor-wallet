@@ -11,8 +11,9 @@ import { types } from '../actions';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
-import { PROPOSAL_DOWNLOAD_STATUS } from "../utils/atomicSwap";
+import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
 
 /**
  * @typedef TokenHistory
@@ -125,6 +126,11 @@ const initialState = {
       name: HATHOR_TOKEN_CONFIG.name,
       status: TOKEN_DOWNLOAD_STATUS.READY
     }
+  },
+  unleashClient: null,
+  featureTogglesInitialized: false,
+  featureToggles: {
+    ...FEATURE_TOGGLE_DEFAULTS,
   },
 };
 
@@ -250,6 +256,12 @@ const rootReducer = (state = initialState, action) => {
       return onWalletBestBlockUpdate(state, action);
     case types.STORE_ROUTER_HISTORY:
       return onStoreRouterHistory(state, action);
+    case types.SET_UNLEASH_CLIENT:
+      return onSetUnleashClient(state, action);
+    case types.SET_FEATURE_TOGGLES:
+      return onSetFeatureToggles(state, action);
+    case types.FEATURE_TOGGLE_INITIALIZED:
+      return onFeatureToggleInitialized(state);
     default:
       return state;
   }
@@ -961,5 +973,27 @@ const onSetServerInfo = (state, action) => ({
     version: action.payload.version,
   },
 });
+
+const onFeatureToggleInitialized = (state) => ({
+  ...state,
+  featureTogglesInitialized: true,
+});
+
+/**
+ * @param {Object} action.payload The key->value object with feature toggles
+ */
+const onSetFeatureToggles = (state, { payload }) => ({
+  ...state,
+  featureToggles: payload,
+});
+
+/**
+ * @param {Object} action.payload The unleash client to store
+ */
+const onSetUnleashClient = (state, { payload }) => ({
+  ...state,
+  unleashClient: payload,
+});
+
 
 export default rootReducer;
