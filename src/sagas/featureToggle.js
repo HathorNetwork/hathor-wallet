@@ -25,6 +25,7 @@ import {
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { config } from '@hathor/wallet-lib';
+import helpers from '../utils/helpers';
 
 import {
   setUnleashClient,
@@ -40,63 +41,6 @@ import {
 
 const CONNECT_TIMEOUT = 10000;
 const MAX_RETRIES = 5;
-
-/**
- * Generates a uniqueId and stores it on localStorage to be persisted
- * between reloads
- *
- * @returns {string} The generated unique identifier
- *
- * @memberof Helpers
- * @inner
- */
-function getUniqueId() {
-  const currentUniqueId = localStorage.getItem('app:uniqueId');
-
-  if (currentUniqueId) {
-    return currentUniqueId;
-  }
-
-  const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2);
-
-  localStorage.setItem('app:uniqueId', uniqueId);
-
-  return uniqueId;
-}
-
-export function getCurrentOS() {
-  if (!window) {
-    return 'other';
-  }
-
-  /**
-   * Possible values for clientInformation['platform'] are:
-   * "Win32" - indicates the browser is running on a 32-bit version of Windows.
-   * "Win64" - indicates the browser is running on a 64-bit version of Windows.
-   * "MacIntel" - indicates the browser is running on an Intel-based Mac.
-   * "MacPPC" - indicates the browser is running on a PowerPC-based Mac.
-   * "Linux i686" - indicates the browser is running on a 32-bit version of Linux.
-   * "Linux x86_64" - indicates the browser is running on a 64-bit version of Linux.
-   * "Android" - indicates the browser is running on an Android device.
-   * "iPhone" - indicates the browser is running on an iPhone.
-   * "iPad" - indicates the browser is running on an iPad.
-   * "iPod" - indicates the browser is running on an iPod.
-   *
-   * Since the wallet-desktop only runs in desktops, we can return 'other' for any other
-   * platform that is not windows, mac or linux
-   */
-  const platform = get(window, 'clientInformation.platform', 'other').toLowerCase();
-
-  if (platform.includes('win')) {
-    return 'windows';
-  } else if (platform.includes('mac')) {
-    return 'macos';
-  } else if (platform.includes('linux')) {
-    return 'linux';
-  }
-
-  return 'other';
-}
 
 export function* handleInitFailed(currentRetry) {
   if (currentRetry >= MAX_RETRIES) {
@@ -144,8 +88,8 @@ export function* monitorFeatureFlags(currentRetry = 0) {
     appName: 'wallet-desktop',
   });
 
-  const userId = getUniqueId();
-  const platform = getCurrentOS();
+  const userId = helpers.getUniqueId();
+  const platform = helpers.getCurrentOS();
   const network = config.getNetwork().name;
 
   const options = {
