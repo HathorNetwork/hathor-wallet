@@ -57,7 +57,9 @@ import {
   tokenInvalidateHistory,
   sharedAddressUpdate,
   walletRefreshSharedAddress,
-  setEnableAtomicSwap, proposalListUpdated,
+  setEnableAtomicSwap,
+  proposalListUpdated,
+  proposalFetchRequested,
 } from '../actions';
 import { specificTypeAndPayload, errorHandler } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -241,11 +243,18 @@ export function* startWallet(action) {
     }
   }
 
-  // Set urls for the Atomic Swap Service. If we have it on storage, use it, otherwise use defaults
-  initializeSwapServiceBaseUrlForWallet(network.name)
-  // Initialize listened proposals list
-  const listenedProposals = walletUtil.getListenedProposals();
-  yield put(proposalListUpdated(listenedProposals));
+  if (enableAtomicSwap) {
+    // Set urls for the Atomic Swap Service. If we have it on storage, use it, otherwise use defaults
+    initializeSwapServiceBaseUrlForWallet(network.name)
+    // Initialize listened proposals list
+    const listenedProposals = walletUtil.getListenedProposals();
+    yield put(proposalListUpdated(listenedProposals));
+
+    // Fetch all proposals from service backend
+    for (const [pId, p] of Object.entries(listenedProposals)) {
+      yield put(proposalFetchRequested(pId, p.password));
+    }
+  }
 
   // Wallet start called, we need to show the loading addresses screen
   routerHistory.replace('/loading_addresses');
