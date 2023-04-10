@@ -28,6 +28,7 @@ import {
   WALLET_SERVICE_MAINNET_BASE_WS_URL,
   WALLET_SERVICE_MAINNET_BASE_URL,
   WALLET_SERVICE_FEATURE_TOGGLE,
+  ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
 } from '../constants';
 import {
   types,
@@ -85,6 +86,12 @@ export function* isWalletServiceEnabled() {
   return walletServiceEnabled;
 }
 
+export function* isAtomicSwapEnabled() {
+  const atomicSwapEnabled = yield call(checkForFeatureFlag, ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE);
+
+  return atomicSwapEnabled;
+}
+
 export function* startWallet(action) {
   const {
     words,
@@ -115,7 +122,7 @@ export function* startWallet(action) {
 
   // For now, the wallet service does not support hardware wallet, so default to the old facade
   const useWalletService = hardwareWallet ? false : yield call(isWalletServiceEnabled);
-  const enableAtomicSwap = false; // yield call(() => featureFlags.isAtomicSwapEnabled());
+  const enableAtomicSwap = yield call(isAtomicSwapEnabled);
 
   yield put(setUseWalletService(useWalletService));
   yield put(setEnableAtomicSwap(enableAtomicSwap));
