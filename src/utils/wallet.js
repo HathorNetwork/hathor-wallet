@@ -10,25 +10,22 @@ import {
   DEBUG_LOCAL_DATA_KEYS,
   WALLET_HISTORY_COUNT,
   METADATA_CONCURRENT_DOWNLOAD,
+  IGNORE_WS_TOGGLE_FLAG,
 } from '../constants';
-import { FeatureFlags } from '../featureFlags';
 import store from '../store/index';
 import {
   loadingAddresses,
   startWalletRequested,
   historyUpdate,
-  sharedAddressUpdate,
   reloadData,
   cleanData,
   updateTokenHistory,
   tokenMetadataUpdated,
-  partiallyUpdateHistoryAndBalance,
   resetSelectedTokenIfNeeded,
 } from '../actions/index';
 import {
   constants as hathorConstants,
   errors as hathorErrors,
-  HathorWallet,
   wallet as oldWalletUtil,
   walletUtils,
   storage,
@@ -458,7 +455,7 @@ const wallet = {
    * @inner
    */
   async resetWalletData() {
-    await FeatureFlags.clearIgnoreWalletServiceFlag();
+    localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG)
 
     this.cleanWalletRedux();
     oldWalletUtil.resetWalletData();

@@ -257,6 +257,10 @@ export const UNLEASH_URL = 'https://unleash-proxy.b7e6a7f52ee9fefaf0c53e300cfcb0
 export const UNLEASH_CLIENT_KEY = 'wKNhpEXKa39aTRgIjcNsO4Im618bRGTq';
 export const UNLEASH_POLLING_INTERVAL = 12 * 1000; // 12s
 
+/**
+ * Flag name stored in localStorage to ignore the FeatureToggle for wallet service
+ */
+export const IGNORE_WS_TOGGLE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 
 /**
  * The feature toggle configured in Unleash

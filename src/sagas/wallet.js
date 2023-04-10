@@ -29,6 +29,7 @@ import {
   WALLET_SERVICE_MAINNET_BASE_URL,
   WALLET_SERVICE_FEATURE_TOGGLE,
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
+  IGNORE_WS_TOGGLE_FLAG,
 } from '../constants';
 import {
   types,
@@ -68,8 +69,6 @@ export const WALLET_STATUS = {
   FAILED: 'failed',
   LOADING: 'loading',
 };
-
-export const IGNORE_WS_TOGGLE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 
 export function* isWalletServiceEnabled() {
   const shouldIgnoreFlag = localStorage.getItem(IGNORE_WS_TOGGLE_FLAG);
@@ -233,8 +232,7 @@ export function* startWallet(action) {
       // the service is 'error' or if the start wallet request failed.
       // We should fallback to the old facade by storing the flag to ignore
       // the feature flag
-      // yield call(featureFlags.ignoreWalletServiceFlag.bind(featureFlags));
-
+      localStorage.setItem(IGNORE_WS_TOGGLE_FLAG, true)
       // Yield the same action so it will now load on the old facade
       yield put(action);
 
