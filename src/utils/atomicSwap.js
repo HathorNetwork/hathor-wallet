@@ -384,6 +384,8 @@ export const generateReduxObjFromProposal = (proposalId, password, partialTx, wa
  * @param {string} network Network name for fetching the default base server url
  */
 export function initializeSwapServiceBaseUrlForWallet(network) {
+    // XXX: This storage item is currently unchangeable via the wallet UX, and is available
+    //      only for debugging purposes on networks other than mainnet and testnet
     const configUrl = storage.getItem('wallet:atomic_swap_service:base_server')
     // Configures Atomic Swap Service url. Prefers explicit config input, then network-based
     if (configUrl) {

@@ -228,12 +228,16 @@ const rootReducer = (state = initialState, action) => {
       return onTokenFetchHistoryFailed(state, action);
     case types.SET_ENABLE_ATOMIC_SWAP:
       return onSetUseAtomicSwap(state, action);
+    case types.PROPOSAL_LIST_UPDATED:
+      return onProposalListUpdated(state, action);
     case types.PROPOSAL_FETCH_REQUESTED:
       return onProposalFetchRequested(state, action);
     case types.PROPOSAL_FETCH_SUCCESS:
       return onProposalFetchSuccess(state, action);
     case types.PROPOSAL_FETCH_FAILED:
       return onProposalFetchFailed(state, action);
+    case types.PROPOSAL_UPDATED:
+      return onProposalUpdate(state, action);
     case types.PROPOSAL_TOKEN_FETCH_REQUESTED:
       return onProposalTokenFetchRequested(state, action);
     case types.PROPOSAL_TOKEN_FETCH_SUCCESS:
@@ -691,6 +695,17 @@ export const onSetUseAtomicSwap = (state, action) => {
 };
 
 /**
+ * @param {Record<string,{id:string,password:string}>} action.listenedProposalsMap
+*                                                        A map of listened proposals
+ */
+export const onProposalListUpdated = (state, action) => {
+  return {
+    ...state,
+    proposals: action.listenedProposalsMap
+  }
+}
+
+/**
  * @param {String} action.proposalId The proposal id to fetch from the backend
  */
 export const onProposalFetchRequested = (state, action) => {
@@ -753,6 +768,28 @@ export const onProposalFetchFailed = (state, action) => {
         status: PROPOSAL_DOWNLOAD_STATUS.FAILED,
         errorMessage: errorMessage,
         updatedAt: new Date().getTime(),
+      },
+    },
+  };
+};
+
+/**
+ * @param {String} action.proposalId - The proposalId to mark as success
+ * @param {Object} action.data - The proposal history information to store on redux
+ */
+export const onProposalUpdate = (state, action) => {
+  const { proposalId, data } = action;
+
+  const oldState = get(state.proposals, proposalId, { id: proposalId })
+
+  return {
+    ...state,
+    proposals: {
+      ...state.proposals,
+      [proposalId]: {
+        ...oldState,
+        updatedAt: new Date().getTime(),
+        data,
       },
     },
   };

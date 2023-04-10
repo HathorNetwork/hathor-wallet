@@ -10,9 +10,14 @@ import { t } from "ttag";
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from 'react-router-dom';
+import { isNumber } from 'lodash';
 import Loading from "../../components/Loading";
-import { proposalFetchRequested, proposalRemoved } from "../../actions";
-import { PROPOSAL_DOWNLOAD_STATUS, updatePersistentStorage } from "../../utils/atomicSwap";
+import { proposalFetchRequested, proposalRemoved, proposalUpdated } from "../../actions";
+import {
+    generateReduxObjFromProposal,
+    PROPOSAL_DOWNLOAD_STATUS,
+    updatePersistentStorage
+} from "../../utils/atomicSwap";
 import walletUtil from "../../utils/wallet";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 
@@ -20,6 +25,7 @@ export default function ProposalList (props) {
     const history = useHistory();
     const dispatch = useDispatch();
     const modalContext = useContext(GlobalModalContext);
+    const wallet = useSelector(state => state.wallet);
 
     /** @type {Record<string, ReduxProposalData>} */
     const proposals = useSelector(state => state.proposals)
@@ -63,7 +69,9 @@ export default function ProposalList (props) {
         for (const [proposalId, proposal] of Object.entries(proposals)) {
             const pId = proposalId;
             const password = proposal.password;
-            const pAmountTokens = proposal.data?.amountTokens; // Get this from proposal
+            const pAmountTokens = proposal.data
+              ? proposal.data.amountTokens || '0'
+              : ''
             const pStatus = proposal.data?.signatureStatus;
             const isLoading = proposal.status === PROPOSAL_DOWNLOAD_STATUS.LOADING || proposal.status === PROPOSAL_DOWNLOAD_STATUS.INVALIDATED;
             const isLoaded = proposal.status === PROPOSAL_DOWNLOAD_STATUS.READY;
@@ -124,6 +132,24 @@ export default function ProposalList (props) {
         Object.entries(startingProposalList)
             .forEach(([pId, p]) => dispatch(proposalFetchRequested(pId, p.password)));
     }, []);
+
+    // Populating metadata TODO: This logic will be moved to wallet initialization
+    useEffect(() => {
+        Object.entries(proposals)
+          .forEach(([pId, p]) => {
+              if (!p.data || (isNumber(p.data.amountTokens) && p.data.signatureStatus)) {
+                  return; // Ignore proposals that have no fetched data or are enriched already
+              }
+
+              const reduxObj = generateReduxObjFromProposal(
+                pId,
+                p.data.password,
+                p.data.partialTx,
+                wallet,
+              );
+              dispatch(proposalUpdated(pId, reduxObj.data));
+          });
+    }, [proposals])
 
     return (
         <div className="content-wrapper flex align-items-center">

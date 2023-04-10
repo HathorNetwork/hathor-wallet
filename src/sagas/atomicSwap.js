@@ -83,8 +83,8 @@ function* fetchProposalData(action) {
             return;
         }
 
-        // TODO: Implement the actual communication with the backend
-        throw new Error(`Proposal fetching not implemented.`)
+        const responseData = yield swapService.get(proposalId, password);
+        yield put(proposalFetchSuccess(proposalId, responseData));
 
         // yield put(proposalFetchFailed(proposalId, "Proposal not found"));
         // yield put(proposalFetchFailed(proposalId, "Incorrect password"));

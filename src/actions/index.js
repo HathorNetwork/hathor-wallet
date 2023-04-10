@@ -22,9 +22,11 @@ export const types = {
   TOKEN_FETCH_HISTORY_SUCCESS: 'TOKEN_FETCH_HISTORY_SUCCESS',
   TOKEN_FETCH_HISTORY_FAILED: 'TOKEN_FETCH_HISTORY_FAILED',
   SET_ENABLE_ATOMIC_SWAP: 'SET_ENABLE_ATOMIC_SWAP',
+  PROPOSAL_LIST_UPDATED: 'PROPOSAL_LIST_UPDATED',
   PROPOSAL_FETCH_REQUESTED: 'PROPOSAL_FETCH_REQUESTED',
   PROPOSAL_FETCH_SUCCESS: 'PROPOSAL_FETCH_SUCCESS',
   PROPOSAL_FETCH_FAILED: 'PROPOSAL_FETCH_FAILED',
+  PROPOSAL_UPDATED: 'PROPOSAL_UPDATED',
   PROPOSAL_TOKEN_FETCH_REQUESTED: 'PROPOSAL_TOKEN_FETCH_REQUESTED',
   PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
   PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
@@ -281,6 +283,15 @@ export const tokenFetchBalanceFailed = (tokenId) => ({
 export const setEnableAtomicSwap = (useAtomicSwap) => ({ type: types.SET_ENABLE_ATOMIC_SWAP, payload: useAtomicSwap });
 
 /**
+ * @param {Record<string,{id:string,password:string}>} listenedProposalsMap
+ *                                                        A map of listened proposals
+ */
+export const proposalListUpdated = (listenedProposalsMap) => ({
+  type: types.PROPOSAL_LIST_UPDATED,
+  listenedProposalsMap
+});
+
+/**
  * @param {string} proposalId The proposalId to request data
  * @param {string} password The proposal's password to decode its data
  * @param {boolean} [force=false] Should we ignore the stored data?
@@ -310,6 +321,16 @@ export const proposalFetchFailed = (proposalId, errorMessage) => ({
   type: types.PROPOSAL_FETCH_FAILED,
   proposalId,
   errorMessage,
+});
+
+/**
+ * @param {string} proposalId The proposalId to store data
+ * @param {unknown} data The updated proposal data
+ */
+export const proposalUpdated = (proposalId, data) => ({
+  type: types.PROPOSAL_UPDATED,
+  proposalId,
+  data,
 });
 
 /**

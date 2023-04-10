@@ -10,8 +10,12 @@ import Loading from "../../components/Loading";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { importProposal, proposalFetchRequested } from "../../actions";
-import { PROPOSAL_DOWNLOAD_STATUS } from "../../utils/atomicSwap";
+import { importProposal, proposalFetchRequested, proposalUpdated } from "../../actions";
+import {
+    generateReduxObjFromProposal,
+    PROPOSAL_DOWNLOAD_STATUS,
+    updatePersistentStorage
+} from "../../utils/atomicSwap";
 
 export default function ImportExisting(props) {
     // Internal state
@@ -19,6 +23,7 @@ export default function ImportExisting(props) {
     const [proposalId, setProposalId] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const wallet = useSelector(state => state.wallet);
 
     // Global interactions
     const allProposals = useSelector(state => state.proposals);
@@ -61,9 +66,18 @@ export default function ImportExisting(props) {
             return;
         }
 
-        if (existingProposal) {
-            navigateToProposal(proposalId);
-        }
+        // The proposal was successfully imported: updating persistent storage
+        updatePersistentStorage(allProposals);
+
+        // Calculate its helper values and navigate to it
+        const reduxObj = generateReduxObjFromProposal(
+          proposalId,
+          password,
+          existingProposal.data.partialTx,
+          wallet,
+        );
+        dispatch(proposalUpdated(proposalId, reduxObj.data));
+        navigateToProposal(proposalId);
     })
 
     return <div className="content-wrapper flex align-items-center">
