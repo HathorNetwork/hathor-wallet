@@ -311,7 +311,7 @@ function* fetchProposalTokenData(action) {
     yield put(proposalTokenFetchSuccess(tokenUid, updatedTokenDetails.tokenInfo));
   } catch (e){
     console.error(`Error downloading metadata of proposal token`, tokenUid, e.message);
-    yield put(proposalTokenFetchFailed(tokenUid, t`An error ocurred while fetching this token`));
+    yield put(proposalTokenFetchFailed(tokenUid, t`An error occurred while fetching this token`));
   }
 }
 
