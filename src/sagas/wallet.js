@@ -49,7 +49,6 @@ import {
   walletStateError,
   walletStateReady,
   storeRouterHistory,
-  reloadWalletRequested,
   reloadingWallet,
   tokenInvalidateHistory,
   sharedAddressUpdate,
