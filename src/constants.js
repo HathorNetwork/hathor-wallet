@@ -255,7 +255,7 @@ export const DEFAULT_WALLET_SERVICE_WS_SERVERS = [
  */
 export const UNLEASH_URL = 'https://unleash-proxy.b7e6a7f52ee9fefaf0c53e300cfcb014.hathor.network/proxy';
 export const UNLEASH_CLIENT_KEY = 'wKNhpEXKa39aTRgIjcNsO4Im618bRGTq';
-export const UNLEASH_POLLING_INTERVAL = 3000; // seconds
+export const UNLEASH_POLLING_INTERVAL = 12 * 1000; // 12s
 
 
 /**
