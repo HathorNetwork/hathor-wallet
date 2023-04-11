@@ -162,7 +162,7 @@ export function* setupUnleashListeners(unleashClient) {
 
     unleashClient.on(UnleashEvents.ERROR, (err) => emitter({
       type: 'FEATURE_TOGGLE_ERROR',
-      payload: err,
+      data: err,
     }));
 
     return () => {

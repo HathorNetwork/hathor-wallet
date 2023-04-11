@@ -55,6 +55,7 @@ import {
   sharedAddressUpdate,
   walletRefreshSharedAddress,
   setEnableAtomicSwap,
+  walletResetSuccess,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -622,11 +623,23 @@ export function* refreshSharedAddress() {
   }));
 }
 
+export function* onWalletReset() {
+  const routerHistory = yield select((state) => state.routerHistory);
+
+  localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
+  oldWalletUtil.resetWalletData();
+
+  yield put(walletResetSuccess());
+
+  routerHistory.push('/welcome');
+}
+
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
     takeLatest('WALLET_RELOADING', walletReloading),
+    takeLatest('WALLET_RESET', onWalletReset),
     takeEvery('WALLET_NEW_TX', handleTx),
     takeEvery('WALLET_UPDATE_TX', handleTx),
     takeEvery('WALLET_BEST_BLOCK_UPDATE', bestBlockUpdate),

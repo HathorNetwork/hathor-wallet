@@ -262,6 +262,8 @@ const rootReducer = (state = initialState, action) => {
       return onSetFeatureToggles(state, action);
     case types.FEATURE_TOGGLE_INITIALIZED:
       return onFeatureToggleInitialized(state);
+    case types.WALLET_RESET_SUCCESS:
+      return onWalletResetSuccess(state);
     default:
       return state;
   }
@@ -993,6 +995,12 @@ const onSetFeatureToggles = (state, { payload }) => ({
 const onSetUnleashClient = (state, { payload }) => ({
   ...state,
   unleashClient: payload,
+});
+
+const onWalletResetSuccess = (state) => ({
+  ...state,
+  // Keep the unleashClient as it should continue running
+  unleashClient: state.unleashClient,
 });
 
 
