@@ -9,6 +9,9 @@ import {
 import { types } from '../actions';
 import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
 
+/**
+ * Waits until feature toggle saga finishes loading
+ */
 export function* waitForFeatureToggleInitialization() {
   const featureTogglesInitialized = yield select((state) => state.featureTogglesInitialized);
 
@@ -19,6 +22,12 @@ export function* waitForFeatureToggleInitialization() {
   }
 }
 
+/**
+ * This generator will wait until the feature toggle saga finishes loading and
+ * checks if a given flag is active
+ *
+ * @param {String} flag - The flag to check
+ */
 export function* checkForFeatureFlag(flag) {
   yield call(waitForFeatureToggleInitialization);
 
