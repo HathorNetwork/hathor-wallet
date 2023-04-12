@@ -107,8 +107,10 @@ function* fetchProposalData(action) {
         const backendErrorData = e.response?.data || {};
         switch (backendErrorData.code) {
             case ATOMIC_SWAP_SERVICE_ERRORS.ProposalNotFound:
+                errorMessage = t`Proposal not found.`;
+                break;
             case ATOMIC_SWAP_SERVICE_ERRORS.IncorrectPassword:
-                errorMessage = t`${backendErrorData.errorMessage}`;
+                errorMessage = t`Incorrect password.`;
                 break;
             default:
                 errorMessage = t`An error occurred while fetching this proposal.`;
@@ -134,7 +136,7 @@ function* createProposalOnBackend(action) {
         // Inform the NewSwap screen about the new proposal identifier
         yield put(proposalCreateSuccess(id));
     } catch (e) {
-        yield put(proposalCreateFailed(t`${e.message}`));
+        yield put(proposalCreateFailed(e.message));
     }
 }
 

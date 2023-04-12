@@ -56,7 +56,7 @@ export default function NewSwap (props) {
 
         // Error handling
         if (creationStatus === PROPOSAL_CREATION_STATUS.FAILED) {
-            setErrorMessage(t`${newProposal.errorMessage}` || t`An unknown error happened.`)
+            setErrorMessage(newProposal.errorMessage)
             setIsLoading(false);
             return;
         }
