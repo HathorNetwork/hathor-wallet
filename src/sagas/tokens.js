@@ -21,7 +21,9 @@ import {
   tokenFetchBalanceFailed,
   tokenFetchHistoryRequested,
   tokenFetchHistorySuccess,
-  tokenFetchHistoryFailed, proposalTokenFetchSuccess, proposalTokenFetchFailed,
+  tokenFetchHistoryFailed,
+  proposalTokenFetchSuccess,
+  proposalTokenFetchFailed,
 } from '../actions';
 import { t } from "ttag";
 
@@ -282,6 +284,48 @@ export function* monitorSelectedToken() {
 }
 
 /**
+ * This saga will create a channel to queue PROPOSAL_TOKEN_FETCH_REQUESTED actions and
+ * consumers that will run in parallel consuming those actions.
+ *
+ * More information about channels can be read on https://redux-saga.js.org/docs/api/#takechannel
+ */
+function* fetchProposalTokenDataQueue() {
+  const fetchTokenMetadataChannel = yield call(channel);
+
+  // Fork CONCURRENT_FETCH_REQUESTS threads to download token balances
+  for (let i = 0; i < METADATA_CONCURRENT_DOWNLOAD; i += 1) {
+    yield fork(fetchProposalTokenDataConsumer, fetchTokenMetadataChannel);
+  }
+
+  while (true) {
+    const action = yield take(types.PROPOSAL_TOKEN_FETCH_REQUESTED);
+    yield put(fetchTokenMetadataChannel, action);
+  }
+}
+
+/**
+ * This saga will consume the fetchTokenBalanceChannel for PROPOSAL_TOKEN_FETCH_REQUESTED actions
+ * and wait until the PROPOSAL_TOKEN_FETCH_SUCCESS action is dispatched with the specific proposalId
+ */
+function* fetchProposalTokenDataConsumer(fetchTokenMetadataChannel) {
+  while (true) {
+    const action = yield take(fetchTokenMetadataChannel);
+
+    yield fork(fetchProposalTokenData, action);
+
+    // Wait until the success action is dispatched before consuming another action
+    yield take(
+      specificTypeAndPayload([
+        types.PROPOSAL_TOKEN_FETCH_SUCCESS,
+        types.PROPOSAL_TOKEN_FETCH_FAILED,
+      ], {
+        tokenId: action.proposalId,
+      }),
+    );
+  }
+}
+
+/**
  *
  * @param {string} action.tokenUid Token identifier to fetch data from
  * @returns {Generator<*, void, *>}
@@ -320,8 +364,8 @@ export function* saga() {
     fork(fetchTokenMetadataQueue),
     fork(fetchTokenBalanceQueue),
     fork(monitorSelectedToken),
+    fork(fetchProposalTokenDataQueue),
     takeEvery(types.TOKEN_FETCH_HISTORY_REQUESTED, fetchTokenHistory),
     takeEvery('new_tokens', routeTokenChange),
-    takeEvery(types.PROPOSAL_TOKEN_FETCH_REQUESTED, fetchProposalTokenData)
   ]);
 }
