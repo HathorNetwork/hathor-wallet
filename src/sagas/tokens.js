@@ -290,21 +290,21 @@ export function* monitorSelectedToken() {
  * More information about channels can be read on https://redux-saga.js.org/docs/api/#takechannel
  */
 function* fetchProposalTokenDataQueue() {
-  const fetchTokenMetadataChannel = yield call(channel);
+  const fetchProposalTokenDataChannel = yield call(channel);
 
   // Fork CONCURRENT_FETCH_REQUESTS threads to download token balances
   for (let i = 0; i < METADATA_CONCURRENT_DOWNLOAD; i += 1) {
-    yield fork(fetchProposalTokenDataConsumer, fetchTokenMetadataChannel);
+    yield fork(fetchProposalTokenDataConsumer, fetchProposalTokenDataChannel);
   }
 
   while (true) {
     const action = yield take(types.PROPOSAL_TOKEN_FETCH_REQUESTED);
-    yield put(fetchTokenMetadataChannel, action);
+    yield put(fetchProposalTokenDataChannel, action);
   }
 }
 
 /**
- * This saga will consume the fetchTokenBalanceChannel for PROPOSAL_TOKEN_FETCH_REQUESTED actions
+ * This saga will consume the fetchProposalTokenDataChannel for PROPOSAL_TOKEN_FETCH_REQUESTED actions
  * and wait until the PROPOSAL_TOKEN_FETCH_SUCCESS action is dispatched with the specific proposalId
  */
 function* fetchProposalTokenDataConsumer(fetchTokenMetadataChannel) {
