@@ -18,6 +18,7 @@ import {
 import { specificTypeAndPayload } from "./helpers";
 import { get } from 'lodash';
 import {
+    ATOMIC_SWAP_SERVICE_ERRORS,
     generateReduxObjFromProposal,
     PROPOSAL_DOWNLOAD_STATUS,
 } from "../utils/atomicSwap";
@@ -101,12 +102,18 @@ function* fetchProposalData(action) {
         // Adding the newly generated metadata to the proposal
         const enrichedData = { ...responseData, ...newData.data };
         yield put(proposalUpdated(proposalId, enrichedData));
-
-        // yield put(proposalFetchFailed(proposalId, "Proposal not found"));
-        // yield put(proposalFetchFailed(proposalId, "Incorrect password"));
-        // yield put(proposalFetchSuccess(proposalId, apiResponseData));
     } catch (e) {
-        yield put(proposalFetchFailed(proposalId, t`An error occurred while fetching this proposal.`));
+        let errorMessage;
+        const backendErrorData = e.response?.data || {};
+        switch (backendErrorData.code) {
+            case ATOMIC_SWAP_SERVICE_ERRORS.ProposalNotFound:
+            case ATOMIC_SWAP_SERVICE_ERRORS.IncorrectPassword:
+                errorMessage = t`${backendErrorData.errorMessage}`;
+                break;
+            default:
+                errorMessage = t`An error occurred while fetching this proposal.`;
+        }
+        yield put(proposalFetchFailed(proposalId, errorMessage));
     }
 }
 

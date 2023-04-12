@@ -64,6 +64,15 @@ export const PROPOSAL_SIGNATURE_STATUS = {
     SENT: 'Sent',
 }
 
+export const ATOMIC_SWAP_SERVICE_ERRORS = {
+    ProposalNotFound: 'PROPOSAL_NOT_FOUND',
+    DuplicateProposalId: 'DUPLICATE_PROPOSAL_ID',
+    InvalidPassword: 'INVALID_PASSWORD',
+    IncorrectPassword: 'INCORRECT_PASSWORD',
+    VersionConflict: 'VERSION_CONFLICT',
+    UnknownError: 'UNKNOWN_ERROR',
+}
+
 /**
  * Generates an empty proposal for the current wallet
  * @param {HathorWallet} wallet Current wallet in use
