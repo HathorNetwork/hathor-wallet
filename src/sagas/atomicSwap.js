@@ -12,11 +12,13 @@ import {
     proposalCreateSuccess,
     proposalFetchFailed,
     proposalFetchSuccess,
+    proposalUpdated,
     types
 } from "../actions";
 import { specificTypeAndPayload } from "./helpers";
 import { get } from 'lodash';
 import {
+    generateReduxObjFromProposal,
     PROPOSAL_DOWNLOAD_STATUS,
 } from "../utils/atomicSwap";
 import { t } from "ttag";
@@ -83,8 +85,22 @@ function* fetchProposalData(action) {
             return;
         }
 
+        // Fetch data from the backend
         const responseData = yield swapService.get(proposalId, password);
         yield put(proposalFetchSuccess(proposalId, responseData));
+
+        // On success, build the proposal object locally and enrich it
+        const wallet = yield select((state) => state.wallet);
+        const newData = generateReduxObjFromProposal(
+          proposalId,
+          password,
+          responseData.partialTx,
+          wallet,
+        );
+
+        // Adding the newly generated metadata to the proposal
+        const enrichedData = { ...responseData, ...newData.data };
+        yield put(proposalUpdated(proposalId, enrichedData));
 
         // yield put(proposalFetchFailed(proposalId, "Proposal not found"));
         // yield put(proposalFetchFailed(proposalId, "Incorrect password"));

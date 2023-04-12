@@ -68,15 +68,6 @@ export default function ImportExisting(props) {
 
         // The proposal was successfully imported: updating persistent storage
         updatePersistentStorage(allProposals);
-
-        // Calculate its helper values and navigate to it
-        const reduxObj = generateReduxObjFromProposal(
-          proposalId,
-          password,
-          existingProposal.data.partialTx,
-          wallet,
-        );
-        dispatch(proposalUpdated(proposalId, reduxObj.data));
         navigateToProposal(proposalId);
     })
 
