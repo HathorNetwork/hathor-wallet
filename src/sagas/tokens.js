@@ -292,7 +292,7 @@ export function* monitorSelectedToken() {
 function* fetchProposalTokenDataQueue() {
   const fetchProposalTokenDataChannel = yield call(channel);
 
-  // Fork CONCURRENT_FETCH_REQUESTS threads to download token balances
+  // Fork CONCURRENT_FETCH_REQUESTS threads to download token metadata
   for (let i = 0; i < CONCURRENT_FETCH_REQUESTS; i += 1) {
     yield fork(fetchProposalTokenDataConsumer, fetchProposalTokenDataChannel);
   }
