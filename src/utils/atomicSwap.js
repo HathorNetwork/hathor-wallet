@@ -74,7 +74,7 @@ export const ATOMIC_SWAP_SERVICE_ERRORS = {
 }
 
 /**
- * Generates an empty proposal for the current wallet
+ * Generates the serialized string of an empty proposal for the current wallet
  * @param {HathorWallet} wallet Current wallet in use
  * @return {string}
  */

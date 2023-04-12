@@ -134,7 +134,7 @@ function* createProposalOnBackend(action) {
         // Inform the NewSwap screen about the new proposal identifier
         yield put(proposalCreateSuccess(id));
     } catch (e) {
-        yield put(proposalCreateFailed(e.message));
+        yield put(proposalCreateFailed(t`${e.message}`));
     }
 }
 
