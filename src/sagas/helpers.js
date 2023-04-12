@@ -27,6 +27,7 @@ export function* waitForFeatureToggleInitialization() {
  * checks if a given flag is active
  *
  * @param {String} flag - The flag to check
+ * @return {Boolean} Whether the flag is on of off
  */
 export function* checkForFeatureFlag(flag) {
   yield call(waitForFeatureToggleInitialization);
