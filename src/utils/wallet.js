@@ -449,19 +449,6 @@ const wallet = {
   },
 
   /*
-   * Clean all data from everything
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  async resetWalletData() {
-    localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG)
-
-    this.cleanWalletRedux();
-    oldWalletUtil.resetWalletData();
-  },
-
-  /*
    * Reload data in the localStorage
    *
    * @memberof Wallet
