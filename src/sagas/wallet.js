@@ -56,6 +56,7 @@ import {
   walletRefreshSharedAddress,
   setEnableAtomicSwap,
   walletResetSuccess,
+  reloadWalletRequested,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -204,6 +205,9 @@ export function* startWallet(action) {
 
   // Setup listeners before starting the wallet so we don't lose messages
   yield fork(setupWalletListeners, wallet);
+
+  // Thread to listen for feature flags from Unleash
+  yield fork(featureToggleUpdateListener);
 
   // Create a channel to listen for the ready state and
   // wait until the wallet is ready
@@ -632,6 +636,29 @@ export function* onWalletReset() {
   yield put(walletResetSuccess());
 
   routerHistory.push('/welcome');
+}
+
+export function* onWalletServiceDisabled() {
+  console.debug('We are currently in the wallet-service and the feature-flag is disabled, reloading.');
+  yield put(reloadWalletRequested());
+}
+
+/**
+ * This saga will wait for feature toggle updates and react when a toggle state
+ * transition is done
+ */
+export function* featureToggleUpdateListener() {
+  while (true) {
+    yield take('FEATURE_TOGGLE_UPDATED');
+
+    const oldWalletServiceToggle = yield select(({ useWalletService }) => useWalletService);
+    const newWalletServiceToggle = yield call(isWalletServiceEnabled);
+
+    // WalletService is currently ON and the featureToggle is now OFF
+    if (!newWalletServiceToggle && oldWalletServiceToggle) {
+      yield call(onWalletServiceDisabled);
+    }
+  }
 }
 
 export function* saga() {
