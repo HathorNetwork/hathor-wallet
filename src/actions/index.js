@@ -284,7 +284,7 @@ export const setEnableAtomicSwap = (useAtomicSwap) => ({ type: types.SET_ENABLE_
 
 /**
  * @param {Record<string,{id:string,password:string}>} listenedProposalsMap
- *                                                        A map of listened proposals
+ *                                                     A map of listened proposals
  */
 export const proposalListUpdated = (listenedProposalsMap) => ({
   type: types.PROPOSAL_LIST_UPDATED,

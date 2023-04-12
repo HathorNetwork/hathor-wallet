@@ -696,7 +696,7 @@ export const onSetUseAtomicSwap = (state, action) => {
 
 /**
  * @param {Record<string,{id:string,password:string}>} action.listenedProposalsMap
-*                                                        A map of listened proposals
+*                                                      A map of listened proposals
  */
 export const onProposalListUpdated = (state, action) => {
   return {
