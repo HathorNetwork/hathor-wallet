@@ -13,6 +13,11 @@ const url = require('url');
 const path = require('path');
 const constants = require('./constants');
 const { instance: Ledger } = require('./ledger');
+// DevTools Extensions
+const electronDevtoolsInstaller = require('electron-devtools-installer');
+const REDUX_DEVTOOLS = electronDevtoolsInstaller.REDUX_DEVTOOLS;
+const REACT_DEVELOPER_TOOLS = electronDevtoolsInstaller.REACT_DEVELOPER_TOOLS;
+const installExtension = electronDevtoolsInstaller.default;
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
@@ -165,6 +170,14 @@ function createWindow () {
   });
 
   addLedgerListeners(mainWindow);
+
+  // Install debuger extensions
+  installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS])
+    .then((name) => console.log(`Added Extension:  ${name}`))
+    .catch((err) => console.log("An error occurred: ", err))
+    .finally(() => {
+        mainWindow.webContents.openDevTools();
+    });
 }
 
 if (process.platform === 'darwin') {
