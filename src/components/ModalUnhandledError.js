@@ -9,6 +9,14 @@ import React from 'react';
 import { t } from 'ttag';
 import wallet from '../utils/wallet';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { walletReset } from '../actions';
+import { connect } from 'react-redux';
+
+const mapDispatchToProps = dispatch => {
+  return {
+    walletReset: () => dispatch(walletReset()),
+  };
+};
 
 /**
  * Component that shows a modal when an unhandled error happens  
@@ -29,7 +37,7 @@ class ModalUnhandledError extends React.Component {
    */
   handleConfirm = (e) => {
     e.preventDefault();
-    wallet.resetWalletData();
+    this.props.walletReset();
     this.props.history.push('/welcome/');
   }
 
@@ -98,4 +106,4 @@ class ModalUnhandledError extends React.Component {
   }
 }
 
-export default ModalUnhandledError;
+export default connect(null, mapDispatchToProps)(ModalUnhandledError);

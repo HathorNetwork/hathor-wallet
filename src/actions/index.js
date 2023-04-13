@@ -40,10 +40,15 @@ export const types = {
   WALLET_STATE_READY: 'WALLET_STATE_READY',
   WALLET_STATE_ERROR: 'WALLET_STATE_ERROR',
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
+  WALLET_RESET: 'WALLET_RESET',
+  WALLET_RESET_SUCCESS: 'WALLET_RESET_SUCCESS',
   WALLET_REFRESH_SHARED_ADDRESS: 'WALLET_REFRESH_SHARED_ADDRESS',
   SET_SERVER_INFO: 'SET_SERVER_INFO',
   STORE_ROUTER_HISTORY: 'STORE_ROUTER_HISTORY',
   WALLET_RELOADING: 'WALLET_RELOADING',
+  FEATURE_TOGGLE_INITIALIZED: 'FEATURE_TOGGLE_INITIALIZED',
+  SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
+  SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
 };
 
 /**
@@ -429,3 +434,31 @@ export const setServerInfo = ({ version, network }) => (
   { type: types.SET_SERVER_INFO, payload: { version, network } }
 );
 
+export const featureToggleInitialized = () => ({
+  type: types.FEATURE_TOGGLE_INITIALIZED,
+});
+
+/**
+ * toggles {Object} Key value object where the key is the feature toggle name and the value
+ * indicates whether it is on (true) or off (false)
+ */
+export const setFeatureToggles = (toggles) => ({
+  type: types.SET_FEATURE_TOGGLES,
+  payload: toggles,
+});
+
+/**
+ * unleashClient {UnleashClient} The unleash client to store
+ */
+export const setUnleashClient = (unleashClient) => ({
+  type: types.SET_UNLEASH_CLIENT,
+  payload: unleashClient,
+});
+
+export const walletResetSuccess = () => ({
+  type: types.WALLET_RESET_SUCCESS,
+});
+
+export const walletReset = () => ({
+  type: types.WALLET_RESET,
+});

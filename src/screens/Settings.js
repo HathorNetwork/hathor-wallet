@@ -20,11 +20,18 @@ import version from '../utils/version';
 import { connect } from "react-redux";
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../constants';
+import { walletReset } from '../actions';
 
 const mapStateToProps = (state) => {
   return {
     useWalletService: state.useWalletService,
     registeredTokens: state.tokens,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    walletReset: () => dispatch(walletReset()),
   };
 };
 
@@ -79,7 +86,7 @@ class Settings extends React.Component {
    */
   handleReset = () => {
     this.context.hideModal();
-    wallet.resetWalletData();
+    this.props.walletReset();
     this.props.history.push('/welcome/');
   }
 
@@ -366,4 +373,4 @@ class Settings extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(Settings);
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);
