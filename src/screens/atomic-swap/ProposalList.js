@@ -23,7 +23,6 @@ export default function ProposalList (props) {
     const history = useHistory();
     const dispatch = useDispatch();
     const modalContext = useContext(GlobalModalContext);
-    const wallet = useSelector(state => state.wallet);
 
     /** @type {Record<string, ReduxProposalData>} */
     const proposals = useSelector(state => state.proposals)

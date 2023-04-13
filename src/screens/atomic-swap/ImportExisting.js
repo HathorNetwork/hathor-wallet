@@ -10,9 +10,8 @@ import Loading from "../../components/Loading";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { importProposal, proposalFetchRequested, proposalUpdated } from "../../actions";
+import { importProposal, proposalFetchRequested } from "../../actions";
 import {
-    generateReduxObjFromProposal,
     PROPOSAL_DOWNLOAD_STATUS,
     updatePersistentStorage
 } from "../../utils/atomicSwap";
@@ -23,7 +22,6 @@ export default function ImportExisting(props) {
     const [proposalId, setProposalId] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const wallet = useSelector(state => state.wallet);
 
     // Global interactions
     const allProposals = useSelector(state => state.proposals);
