@@ -21,7 +21,9 @@ import {
   tokenFetchBalanceFailed,
   tokenFetchHistoryRequested,
   tokenFetchHistorySuccess,
-  tokenFetchHistoryFailed, proposalTokenFetchSuccess, proposalTokenFetchFailed,
+  tokenFetchHistoryFailed,
+  proposalTokenFetchSuccess,
+  proposalTokenFetchFailed,
 } from '../actions';
 import { t } from "ttag";
 
@@ -282,6 +284,51 @@ export function* monitorSelectedToken() {
 }
 
 /**
+ * This saga will create a channel to queue PROPOSAL_TOKEN_FETCH_REQUESTED actions and
+ * consumers that will run in parallel consuming those actions.
+ *
+ * This will mainly be used in the context of the Atomic Swap, retrieving names and symbols for all the tokens
+ * present in the listened proposals for this wallet.
+ *
+ * More information about channels can be read on https://redux-saga.js.org/docs/api/#takechannel
+ */
+function* fetchProposalTokenDataQueue() {
+  const fetchProposalTokenDataChannel = yield call(channel);
+
+  // Fork CONCURRENT_FETCH_REQUESTS threads to download token data ( name and symbol )
+  for (let i = 0; i < CONCURRENT_FETCH_REQUESTS; i += 1) {
+    yield fork(fetchProposalTokenDataConsumer, fetchProposalTokenDataChannel);
+  }
+
+  while (true) {
+    const action = yield take(types.PROPOSAL_TOKEN_FETCH_REQUESTED);
+    yield put(fetchProposalTokenDataChannel, action);
+  }
+}
+
+/**
+ * This saga will consume the fetchProposalTokenDataChannel for PROPOSAL_TOKEN_FETCH_REQUESTED actions
+ * and wait until the PROPOSAL_TOKEN_FETCH_SUCCESS action is dispatched with the specific proposalId
+ */
+function* fetchProposalTokenDataConsumer(fetchProposalTokenDataChannel) {
+  while (true) {
+    const action = yield take(fetchProposalTokenDataChannel);
+
+    yield fork(fetchProposalTokenData, action);
+
+    // Wait until the success action is dispatched before consuming another action
+    yield take(
+      specificTypeAndPayload([
+        types.PROPOSAL_TOKEN_FETCH_SUCCESS,
+        types.PROPOSAL_TOKEN_FETCH_FAILED,
+      ], {
+        tokenId: action.proposalId,
+      }),
+    );
+  }
+}
+
+/**
  *
  * @param {string} action.tokenUid Token identifier to fetch data from
  * @returns {Generator<*, void, *>}
@@ -306,12 +353,12 @@ function* fetchProposalTokenData(action) {
 
     const wallet = yield select((state) => state.wallet);
 
-    // Fetching from the fullnode
+    // Fetching name and symbol data from the fullnode
     const updatedTokenDetails = yield wallet.getTokenDetails(tokenUid);
     yield put(proposalTokenFetchSuccess(tokenUid, updatedTokenDetails.tokenInfo));
   } catch (e){
-    console.error(`Error downloading metadata of proposal token`, tokenUid, e.message);
-    yield put(proposalTokenFetchFailed(tokenUid, t`An error ocurred while fetching this token`));
+    console.error(`Error downloading proposal token data`, tokenUid, e.message);
+    yield put(proposalTokenFetchFailed(tokenUid, t`An error occurred while fetching this token data`));
   }
 }
 
@@ -320,8 +367,8 @@ export function* saga() {
     fork(fetchTokenMetadataQueue),
     fork(fetchTokenBalanceQueue),
     fork(monitorSelectedToken),
+    fork(fetchProposalTokenDataQueue),
     takeEvery(types.TOKEN_FETCH_HISTORY_REQUESTED, fetchTokenHistory),
     takeEvery('new_tokens', routeTokenChange),
-    takeEvery(types.PROPOSAL_TOKEN_FETCH_REQUESTED, fetchProposalTokenData)
   ]);
 }
