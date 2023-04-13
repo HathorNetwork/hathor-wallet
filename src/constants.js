@@ -81,6 +81,7 @@ export const SENTRY_DSN = process.env.SENTRY_DSN || 'https://69c067d1587c465cac8
  * Server options for the user to choose which one to connect
  */
 export const DEFAULT_SERVERS = [
+  'https://node1.testnet.hathor.network/v1a/',
   'https://node1.mainnet.hathor.network/v1a/',
   'https://node2.mainnet.hathor.network/v1a/',
 ];
@@ -234,8 +235,10 @@ export const LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION = '1.1.0'
 /**
  * Wallet service URLs
  */
-export const WALLET_SERVICE_MAINNET_BASE_URL = 'https://wallet-service.hathor.network/';
-export const WALLET_SERVICE_MAINNET_BASE_WS_URL = 'wss://ws.wallet-service.hathor.network/';
+// export const WALLET_SERVICE_MAINNET_BASE_URL = 'https://wallet-service.hathor.network/';
+// export const WALLET_SERVICE_MAINNET_BASE_WS_URL = 'wss://ws.wallet-service.hathor.network/';
+export const WALLET_SERVICE_MAINNET_BASE_URL = 'https://dev.wallet-service.testnet.hathor.network/';
+export const WALLET_SERVICE_MAINNET_BASE_WS_URL = 'wss://ws.dev.wallet-service.testnet.hathor.network/';
 
 /**
  * Default Wallet Service servers

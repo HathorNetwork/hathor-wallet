@@ -37,10 +37,7 @@ if (process.platform === 'darwin') {
 const appName = 'Hathor Wallet';
 const walletVersion = '0.25.1';
 
-const debugMode = (
-  process.argv.indexOf('--unsafe-mode') >= 0 &&
-  process.argv.indexOf('--debug') >= 0
-);
+const debugMode = true;
 
 // Creates the context menu on mouse right-click for allowing copy/paste and other configurable actions
 contextMenu({
