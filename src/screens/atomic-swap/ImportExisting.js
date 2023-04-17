@@ -58,13 +58,14 @@ export default function ImportExisting(props) {
             return;
         }
 
+        // Error handling
         if (existingProposal.status === PROPOSAL_DOWNLOAD_STATUS.FAILED) {
             setErrorMessage(existingProposal.errorMessage);
             setIsLoading(false);
             return;
         }
 
-        // The proposal was successfully imported: updating persistent storage
+        // The proposal was successfully imported: updating persistent storage and navigating to it
         updatePersistentStorage(allProposals);
         navigateToProposal(proposalId);
     })

@@ -33,6 +33,7 @@ export const types = {
   PROPOSAL_CREATE_REQUESTED: 'PROPOSAL_CREATE_REQUESTED',
   PROPOSAL_CREATE_SUCCESS: 'PROPOSAL_CREATE_SUCCESS',
   PROPOSAL_CREATE_FAILED: 'PROPOSAL_CREATE_FAILED',
+  PROPOSAL_CREATE_CLEANUP: 'PROPOSAL_CREATE_CLEANUP',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
   PROPOSAL_IMPORTED: 'PROPOSAL_IMPORTED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
@@ -384,6 +385,15 @@ export const proposalCreateSuccess = (proposalId) => ({
 export const proposalCreateFailed = (errorMessage) => ({
   type: types.PROPOSAL_CREATE_FAILED,
   errorMessage,
+});
+
+/**
+ * Cleans the `newProposal` state object and adds the full redux object to the listened proposals map
+ * @param {ReduxProposalData} proposalReduxObj
+ */
+export const proposalCreateCleanup = (proposalReduxObj) => ({
+  type: types.PROPOSAL_CREATE_CLEANUP,
+  proposalReduxObj,
 });
 
 /**

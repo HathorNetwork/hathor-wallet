@@ -250,6 +250,8 @@ const rootReducer = (state = initialState, action) => {
       return onProposalCreateSuccess(state, action);
     case types.PROPOSAL_CREATE_FAILED:
       return onProposalCreateFailed(state, action);
+    case types.PROPOSAL_CREATE_CLEANUP:
+      return onProposalCreateCleanup(state, action);
     case types.PROPOSAL_REMOVED:
       return onProposalRemoved(state, action);
     case types.PROPOSAL_IMPORTED:
@@ -932,6 +934,23 @@ export const onProposalCreateFailed = (state, action) => {
       ...state.newProposal,
       errorMessage,
       status: PROPOSAL_CREATION_STATUS.FAILED,
+    }
+  }
+}
+
+/**
+ * @param {ReduxProposalData} action.proposalReduxObj The full redux object for this proposal
+ */
+export const onProposalCreateCleanup = (state, action) => {
+  const { proposalReduxObj } = action;
+  const proposalId = proposalReduxObj.id;
+
+  return {
+    ...state,
+    newProposal: {}, // Temporary object is cleaned up
+    proposals: {
+      ...state.proposals,
+      [proposalId]: proposalReduxObj // New proposal complete calculated data
     }
   }
 }

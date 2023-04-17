@@ -16,7 +16,7 @@ import {
     updatePersistentStorage, PROPOSAL_DOWNLOAD_STATUS
 } from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
-import { proposalCreateRequested } from "../../actions";
+import { proposalCreateCleanup, proposalCreateRequested } from "../../actions";
 
 export default function NewSwap (props) {
     const [password, setPassword] = useState('');
@@ -24,6 +24,7 @@ export default function NewSwap (props) {
     const newProposal = useSelector(state => state.newProposal);
     const wallet = useSelector(state => state.wallet);
     const [partialTx, setPartialTx] = useState('');
+    const [newProposalId, setNewProposalId] = useState('');
 
     // Global interactions
     const allProposals = useSelector(state => state.proposals);
@@ -75,10 +76,31 @@ export default function NewSwap (props) {
           wallet,
         );
         reduxObj.status = PROPOSAL_DOWNLOAD_STATUS.READY; // We already have all data, no need to fetch again.
-        allProposals[proposalId] = reduxObj;
-        updatePersistentStorage(allProposals);
-        navigateToProposal(proposalId);
+
+        // Adding the new redux object to the listened proposals map
+        dispatch(proposalCreateCleanup(reduxObj));
+        setNewProposalId(proposalId);
     }, [newProposal])
+
+    /**
+     * Listening to the proposals map when the cleanup was requested
+     */
+    useEffect(() => {
+        // Discard this effect if the cleanup was not yet requested, and the proposals map is not being updated
+        if (!newProposalId) {
+            return;
+        }
+
+        // Verify if the new proposal is already on the listened proposals map
+        const proposalReduxObj = allProposals[newProposalId];
+        if (!proposalReduxObj) {
+            return;
+        }
+
+        // Update the persistent storage and navigate to the proposal
+        updatePersistentStorage(allProposals);
+        navigateToProposal(newProposalId);
+    }, [allProposals]);
 
     return <div className="content-wrapper flex align-items-center">
         <BackButton {...props} />
