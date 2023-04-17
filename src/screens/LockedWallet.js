@@ -8,14 +8,12 @@
 import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
-import ModalResetAllData from '../components/ModalResetAllData';
-import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { resolveLockWalletPromise, startWalletRequested } from '../actions';
+import { resolveLockWalletPromise, startWalletRequested, walletReset } from '../actions';
 import colors from '../index.scss';
 
 
@@ -29,6 +27,7 @@ const mapDispatchToProps = dispatch => {
   return {
     resolveLockWalletPromise: pin => dispatch(resolveLockWalletPromise(pin)),
     startWallet: (payload) => dispatch(startWalletRequested(payload)),
+    walletReset: () => dispatch(walletReset()),
   };
 };
 
@@ -122,8 +121,7 @@ class LockedWallet extends React.Component {
    */
   handleReset = () => {
     this.context.hideModal();
-
-    wallet.resetWalletData();
+    this.props.walletReset();
     this.props.history.push('/welcome/');
   }
 

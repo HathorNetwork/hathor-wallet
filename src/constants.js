@@ -20,7 +20,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.25.1';
+export const VERSION = '0.26.0';
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible
@@ -255,10 +255,20 @@ export const DEFAULT_WALLET_SERVICE_WS_SERVERS = [
  */
 export const UNLEASH_URL = 'https://unleash-proxy.b7e6a7f52ee9fefaf0c53e300cfcb014.hathor.network/proxy';
 export const UNLEASH_CLIENT_KEY = 'wKNhpEXKa39aTRgIjcNsO4Im618bRGTq';
-export const UNLEASH_POLLING_INTERVAL = 120; // seconds
+export const UNLEASH_POLLING_INTERVAL = 12 * 1000; // 12s
+
+/**
+ * Flag name stored in localStorage to ignore the FeatureToggle for wallet service
+ */
+export const IGNORE_WS_TOGGLE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 
 /**
  * The feature toggle configured in Unleash
  */
 export const WALLET_SERVICE_FEATURE_TOGGLE = 'wallet-service-desktop.rollout';
 export const ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE = 'atomic-swap-service-desktop.rollout';
+
+export const FEATURE_TOGGLE_DEFAULTS = {
+  [WALLET_SERVICE_FEATURE_TOGGLE]: false,
+  [ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE]: false,
+};

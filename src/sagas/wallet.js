@@ -28,11 +28,10 @@ import STORE from '../storageInstance';
 import {
   WALLET_SERVICE_MAINNET_BASE_WS_URL,
   WALLET_SERVICE_MAINNET_BASE_URL,
+  WALLET_SERVICE_FEATURE_TOGGLE,
+  ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
+  IGNORE_WS_TOGGLE_FLAG,
 } from '../constants';
-import {
-  FeatureFlags,
-  Events as FeatureFlagEvents,
-} from '../featureFlags';
 import {
   types,
   isOnlineUpdate,
@@ -52,7 +51,6 @@ import {
   walletStateError,
   walletStateReady,
   storeRouterHistory,
-  reloadWalletRequested,
   reloadingWallet,
   tokenInvalidateHistory,
   sharedAddressUpdate,
@@ -60,10 +58,15 @@ import {
   setEnableAtomicSwap,
   proposalListUpdated,
   proposalFetchRequested,
+  walletResetSuccess,
+  reloadWalletRequested,
 } from '../actions';
-import { specificTypeAndPayload, errorHandler } from './helpers';
+import {
+  specificTypeAndPayload,
+  errorHandler,
+  checkForFeatureFlag,
+} from './helpers';
 import { fetchTokenData } from './tokens';
-import walletHelpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 import walletUtil from "../utils/wallet";
@@ -73,6 +76,26 @@ export const WALLET_STATUS = {
   FAILED: 'failed',
   LOADING: 'loading',
 };
+
+export function* isWalletServiceEnabled() {
+  const shouldIgnoreFlag = localStorage.getItem(IGNORE_WS_TOGGLE_FLAG);
+
+  // If we should ignore flag, it shouldn't matter what the featureToggle is, wallet service
+  // is definitely disabled.
+  if (shouldIgnoreFlag) {
+    return false;
+  }
+
+  const walletServiceEnabled = yield call(checkForFeatureFlag, WALLET_SERVICE_FEATURE_TOGGLE);
+
+  return walletServiceEnabled;
+}
+
+export function* isAtomicSwapEnabled() {
+  const atomicSwapEnabled = yield call(checkForFeatureFlag, ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE);
+
+  return atomicSwapEnabled;
+}
 
 export function* startWallet(action) {
   const {
@@ -100,13 +123,11 @@ export function* startWallet(action) {
   // We are offline, the connection object is yet to be created
   yield put(isOnlineUpdate({ isOnline: false }));
 
-  const uniqueDeviceId = walletHelpers.getUniqueId();
-  const featureFlags = new FeatureFlags(uniqueDeviceId, network.name);
   const hardwareWallet = oldWalletUtil.isHardwareWallet();
 
   // For now, the wallet service does not support hardware wallet, so default to the old facade
-  const useWalletService = hardwareWallet ? false : yield call(() => featureFlags.shouldUseWalletService());
-  const enableAtomicSwap = yield call(() => featureFlags.isAtomicSwapEnabled());
+  const useWalletService = hardwareWallet ? false : yield call(isWalletServiceEnabled);
+  const enableAtomicSwap = yield call(isAtomicSwapEnabled);
 
   yield put(setUseWalletService(useWalletService));
   yield put(setEnableAtomicSwap(enableAtomicSwap));
@@ -188,22 +209,14 @@ export function* startWallet(action) {
   yield put(setWallet(wallet));
 
   // Setup listeners before starting the wallet so we don't lose messages
-  const walletListenerThread = yield fork(setupWalletListeners, wallet);
+  yield fork(setupWalletListeners, wallet);
+
+  // Thread to listen for feature flags from Unleash
+  yield fork(featureToggleUpdateListener);
 
   // Create a channel to listen for the ready state and
   // wait until the wallet is ready
-  const walletReadyThread = yield fork(listenForWalletReady, wallet);
-
-  // Thread to listen for feature flags from Unleash
-  const featureFlagsThread = yield fork(listenForFeatureFlags, featureFlags);
-
-  // Keep track of the forked threads so we can cancel them later. We are currently
-  // using this to start the startWallet saga again during a reload
-  const threads = [
-    walletListenerThread,
-    walletReadyThread,
-    featureFlagsThread
-  ];
+  yield fork(listenForWalletReady, wallet);
 
   try {
     const serverInfo = yield call(wallet.start.bind(wallet), {
@@ -229,11 +242,7 @@ export function* startWallet(action) {
       // the service is 'error' or if the start wallet request failed.
       // We should fallback to the old facade by storing the flag to ignore
       // the feature flag
-      yield call(featureFlags.ignoreWalletServiceFlag.bind(featureFlags));
-
-      // Cleanup all listeners
-      yield cancel(threads);
-
+      localStorage.setItem(IGNORE_WS_TOGGLE_FLAG, true)
       // Yield the same action so it will now load on the old facade
       yield put(action);
 
@@ -268,7 +277,6 @@ export function* startWallet(action) {
 
     if (error) {
       yield put(startWalletFailed());
-      yield cancel(threads);
       return;
     }
   }
@@ -279,7 +287,6 @@ export function* startWallet(action) {
     yield put(loadWalletSuccess(allTokens));
   } catch(e) {
     yield put(startWalletFailed());
-    yield cancel(threads);
     return;
   }
 
@@ -298,9 +305,6 @@ export function* startWallet(action) {
     start: take(types.START_WALLET_REQUESTED),
     reload: take(types.RELOAD_WALLET_REQUESTED),
   });
-
-  // We need to cancel threads on both reload and start
-  yield cancel(threads);
 
   if (reload) {
     // Yield the same action again to reload the wallet
@@ -396,41 +400,6 @@ export function* fetchTokensMetadata(tokens) {
   }
 
   yield put(tokenMetadataUpdated(tokenMetadatas, errors));
-}
-
-// This will create a channel to listen for featureFlag updates
-export function* listenForFeatureFlags(featureFlags) {
-  const channel = eventChannel((emitter) => {
-    const listener = (state) => emitter(state);
-    featureFlags.on(FeatureFlagEvents.WALLET_SERVICE_ENABLED, (state) => {
-      emitter(state);
-    });
-    featureFlags.on(FeatureFlagEvents.ATOMIC_SWAP_ENABLED, (state) => {
-      emitter(state);
-    });
-
-    // Cleanup when the channel is closed
-    return () => {
-      featureFlags.removeListener(FeatureFlagEvents.WALLET_SERVICE_ENABLED, listener);
-      featureFlags.removeListener(FeatureFlagEvents.ATOMIC_SWAP_ENABLED, listener);
-    };
-  });
-
-  try {
-    while (true) {
-      const newUseWalletService = yield take(channel);
-      const oldUseWalletService = yield select((state) => state.useWalletService);
-
-      if (oldUseWalletService && oldUseWalletService !== newUseWalletService) {
-        yield put(reloadWalletRequested());
-      }
-    }
-  } finally {
-    if (yield cancelled()) {
-      // When we close the channel, it will remove the event listener
-      channel.close();
-    }
-  }
 }
 
 // This will create a channel from an EventEmitter to wait until the wallet is loaded,
@@ -676,11 +645,46 @@ export function* refreshSharedAddress() {
   }));
 }
 
+export function* onWalletReset() {
+  const routerHistory = yield select((state) => state.routerHistory);
+
+  localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
+  oldWalletUtil.resetWalletData();
+
+  yield put(walletResetSuccess());
+
+  routerHistory.push('/welcome');
+}
+
+export function* onWalletServiceDisabled() {
+  console.debug('We are currently in the wallet-service and the feature-flag is disabled, reloading.');
+  yield put(reloadWalletRequested());
+}
+
+/**
+ * This saga will wait for feature toggle updates and react when a toggle state
+ * transition is done
+ */
+export function* featureToggleUpdateListener() {
+  while (true) {
+    yield take('FEATURE_TOGGLE_UPDATED');
+
+    const oldWalletServiceToggle = yield select(({ useWalletService }) => useWalletService);
+    const newWalletServiceToggle = yield call(isWalletServiceEnabled);
+
+    // WalletService is currently ON and the featureToggle is now OFF
+    if (!newWalletServiceToggle && oldWalletServiceToggle) {
+      yield call(onWalletServiceDisabled);
+    }
+  }
+}
+
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
     takeLatest('WALLET_RELOADING', walletReloading),
+    takeLatest('WALLET_RESET', onWalletReset),
     takeEvery('WALLET_NEW_TX', handleTx),
     takeEvery('WALLET_UPDATE_TX', handleTx),
     takeEvery('WALLET_BEST_BLOCK_UPDATE', bestBlockUpdate),

@@ -1,5 +1,41 @@
 import { get } from 'lodash';
-import { put, call, race, take } from 'redux-saga/effects';
+import {
+  put,
+  call,
+  race,
+  take,
+  select,
+} from 'redux-saga/effects';
+import { types } from '../actions';
+import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
+
+/**
+ * Waits until feature toggle saga finishes loading
+ */
+export function* waitForFeatureToggleInitialization() {
+  const featureTogglesInitialized = yield select((state) => state.featureTogglesInitialized);
+
+  if (!featureTogglesInitialized) {
+    // Wait until featureToggle saga completed initialization, which includes
+    // downloading the current toggle status for this client.
+    yield take(types.FEATURE_TOGGLE_INITIALIZED);
+  }
+}
+
+/**
+ * This generator will wait until the feature toggle saga finishes loading and
+ * checks if a given flag is active
+ *
+ * @param {String} flag - The flag to check
+ * @return {Boolean} Whether the flag is on of off
+ */
+export function* checkForFeatureFlag(flag) {
+  yield call(waitForFeatureToggleInitialization);
+
+  const featureToggles = yield select((state) => state.featureToggles);
+
+  return get(featureToggles, flag, FEATURE_TOGGLE_DEFAULTS[flag] || false);
+}
 
 /**
  * Helper method to be used on take saga effect, will wait until an action

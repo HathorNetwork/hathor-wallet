@@ -10,10 +10,8 @@ import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
 import wallet from '../utils/wallet';
 import Version from '../components/Version';
-import $ from 'jquery';
-import ModalBackupWords from '../components/ModalBackupWords';
 import HathorAlert from '../components/HathorAlert';
-import { updateWords } from '../actions/index';
+import { updateWords, walletReset } from '../actions/index';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
@@ -22,6 +20,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 const mapDispatchToProps = dispatch => {
   return {
     updateWords: (data) => dispatch(updateWords(data)),
+    walletReset: () => dispatch(walletReset()),
   };
 };
 
@@ -81,7 +80,7 @@ class WalletVersionError extends React.Component {
    */
   handleReset = () => {
     this.context.hideModal();
-    wallet.resetWalletData();
+    this.props.walletReset();
     this.props.history.push('/welcome/');
   }
 
