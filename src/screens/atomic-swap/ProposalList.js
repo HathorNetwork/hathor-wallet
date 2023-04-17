@@ -10,7 +10,6 @@ import { t } from "ttag";
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from 'react-router-dom';
-import Loading from "../../components/Loading";
 import { proposalFetchRequested, proposalRemoved } from "../../actions";
 import {
     PROPOSAL_DOWNLOAD_STATUS,
@@ -67,7 +66,7 @@ export default function ProposalList (props) {
             const pId = proposalId;
             const password = proposal.password;
             const pAmountTokens = proposal.data
-              ? `${proposal.data.amountTokens} || '0'
+              ? `${proposal.data.amountTokens}` || '0'
               : ''
             const pStatus = proposal.data?.signatureStatus;
             const isLoading = proposal.status === PROPOSAL_DOWNLOAD_STATUS.LOADING || proposal.status === PROPOSAL_DOWNLOAD_STATUS.INVALIDATED;
@@ -104,9 +103,7 @@ export default function ProposalList (props) {
                 { isLoaded && <td className="text-center">{pAmountTokens}</td> }
                 { isLoaded && <td className="text-center">{pStatus}</td> }
                 <td className="text-center">
-                    <i
-                        className="fa fa-remove pointer ml-1"
-                        title={t`Remove`}
+                    <i className="fa fa-remove pointer ml-1" title={t`Remove`}
                         onClick={e => removeProposalClickHandler(e, pId)}></i>
                 </td>
             </tr>)
