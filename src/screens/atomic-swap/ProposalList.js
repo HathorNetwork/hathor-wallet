@@ -67,7 +67,7 @@ export default function ProposalList (props) {
             const pId = proposalId;
             const password = proposal.password;
             const pAmountTokens = proposal.data
-              ? proposal.data.amountTokens || '0'
+              ? `${proposal.data.amountTokens} || '0'
               : ''
             const pStatus = proposal.data?.signatureStatus;
             const isLoading = proposal.status === PROPOSAL_DOWNLOAD_STATUS.LOADING || proposal.status === PROPOSAL_DOWNLOAD_STATUS.INVALIDATED;
