@@ -10,6 +10,7 @@ import { t } from "ttag";
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from 'react-router-dom';
+import Loading from "../../components/Loading";
 import { proposalFetchRequested, proposalRemoved } from "../../actions";
 import {
     PROPOSAL_DOWNLOAD_STATUS,
