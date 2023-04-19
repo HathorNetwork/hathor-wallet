@@ -140,14 +140,14 @@ export function calculateExhibitionData(partialTx, cachedTokens, wallet) {
                 tokenUid,
                 symbol: '',
                 name: '',
-                status: PROPOSAL_DOWNLOAD_STATUS.LOADING
+                status: PROPOSAL_DOWNLOAD_STATUS.LOADING,
             };
         }
 
         return cachedTokens[tokenUid];
     }
 
-    const txProposal = new PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.getNetworkObject());
+    const txProposal = PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.getNetworkObject());
     const balance = txProposal.calculateBalance(wallet);
 
     // Calculating the difference between them both
