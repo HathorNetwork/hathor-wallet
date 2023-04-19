@@ -21,7 +21,7 @@ import { importProposal, proposalCreateCleanup, proposalCreateRequested, proposa
 /**
  * This screen will interact with two asynchronous processes when generating a new Swap Proposal:
  * - One for generating the proposal identifier: a process done exclusively on the backend
- * - One for storing the
+ * - Other for storing the newly generated proposal on the "listened proposals" state map
  */
 export default function NewSwap (props) {
     const [password, setPassword] = useState('');

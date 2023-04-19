@@ -393,7 +393,7 @@ export const proposalCreateFailed = (errorMessage) => ({
 });
 
 /**
- * Cleans the `newProposal` state object and adds the full redux object to the listened proposals map
+ * Cleans the `newProposal` state object
  */
 export const proposalCreateCleanup = () => ({
   type: types.PROPOSAL_CREATE_CLEANUP,
