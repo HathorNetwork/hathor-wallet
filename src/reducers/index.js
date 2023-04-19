@@ -881,29 +881,6 @@ export const onProposalTokenFetchFailed = (state, action) => {
 };
 
 /**
- * @param {String} action.proposalId - The new proposalId to store
- * @param {String} action.password - The proposal password
- * @param {Object} action.data - The proposal history information to store on redux
- */
-export const onNewProposalGeneration = (state, action) => {
-  const { proposalId, password, data } = action;
-
-  return {
-    ...state,
-    proposals: {
-      ...state.proposals,
-      [proposalId]: {
-        id: proposalId,
-        password,
-        status: PROPOSAL_DOWNLOAD_STATUS.READY,
-        updatedAt: new Date().getTime(),
-        data
-      },
-    },
-  };
-};
-
-/**
  * @param {string} action.password
  * @param {string} action.partialTx
  */
@@ -953,19 +930,12 @@ export const onProposalCreateFailed = (state, action) => {
 }
 
 /**
- * @param {ReduxProposalData} action.proposalReduxObj The full redux object for this proposal
+ * Cleans up the temporary `newProposal` state object
  */
 export const onProposalCreateCleanup = (state, action) => {
-  const { proposalReduxObj } = action;
-  const proposalId = proposalReduxObj.id;
-
   return {
     ...state,
     newProposal: {}, // Temporary object is cleaned up
-    proposals: {
-      ...state.proposals,
-      [proposalId]: proposalReduxObj // New proposal complete calculated data
-    }
   }
 }
 

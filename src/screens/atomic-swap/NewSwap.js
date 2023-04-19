@@ -16,14 +16,18 @@ import {
     updatePersistentStorage, PROPOSAL_DOWNLOAD_STATUS
 } from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
-import { proposalCreateCleanup, proposalCreateRequested } from "../../actions";
+import { importProposal, proposalCreateCleanup, proposalCreateRequested, proposalFetchRequested } from "../../actions";
 
+/**
+ * This screen will interact with two asynchronous processes when generating a new Swap Proposal:
+ * - One for generating the proposal identifier: a process done exclusively on the backend
+ * - One for storing the
+ */
 export default function NewSwap (props) {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const newProposal = useSelector(state => state.newProposal);
     const wallet = useSelector(state => state.wallet);
-    const [partialTx, setPartialTx] = useState('');
     const [newProposalId, setNewProposalId] = useState('');
 
     // Global interactions
@@ -45,12 +49,12 @@ export default function NewSwap (props) {
 
         setIsLoading(true);
         const newPartialTx = generateEmptyProposal(wallet);
-        setPartialTx(newPartialTx)
         dispatch(proposalCreateRequested(newPartialTx, password));
     }
 
     /**
-     * Listening to the new proposal's status
+     * First asynchronous interaction: generating the unique proposal identifier
+     * Listening to the temporary `newProposal` state object status
      */
     useEffect(() => {
         const creationStatus = newProposal?.status;
@@ -67,37 +71,46 @@ export default function NewSwap (props) {
             return;
         }
 
-        // If the proposal was successfully created, calculate its helper values and request temporary data cleanup
+        // The proposal was successfully created
         const proposalId = newProposal.proposalId;
-        const reduxObj = generateReduxObjFromProposal(
-          proposalId,
-          password,
-          partialTx,
-          wallet,
-        );
-        reduxObj.status = PROPOSAL_DOWNLOAD_STATUS.READY; // We already have all data, no need to fetch again.
-
-        // Adding the new redux object to the listened proposals map
-        dispatch(proposalCreateCleanup(reduxObj));
         setNewProposalId(proposalId);
+
+
+        // Import its fully calculated data from the service backend and request temporary data cleanup
+        dispatch(importProposal(proposalId, password));
+        dispatch(proposalFetchRequested(proposalId, password, true));
+        dispatch(proposalCreateCleanup());
     }, [newProposal])
 
     /**
-     * Listening to the proposals map when the cleanup was requested
+     * Second asynchronous interaction: waiting for the successful fetch from the service backend
+     * Listening to the `proposals` state object
      */
     useEffect(() => {
-        // Discard this effect if the cleanup was not yet requested, and the proposals map is not being updated
+        // Discard this effect if the import was not yet requested
         if (!newProposalId) {
             return;
         }
 
-        // Verify if the new proposal is already on the listened proposals map
+        // Make sure the new proposal is ready on the listened proposals map
         const proposalReduxObj = allProposals[newProposalId];
         if (!proposalReduxObj) {
             return;
         }
 
-        // Update the persistent storage and navigate to the proposal
+        // Error handling
+        if (proposalReduxObj.status === PROPOSAL_DOWNLOAD_STATUS.FAILED) {
+            setErrorMessage(proposalReduxObj.errorMessage);
+            setIsLoading(false);
+            return;
+        }
+
+        // If the proposal was not loaded, keep waiting
+        if (proposalReduxObj.status !== PROPOSAL_DOWNLOAD_STATUS.READY) {
+            return;
+        }
+
+        // Update the persistent storage with the newly imported proposal and navigate to it
         updatePersistentStorage(allProposals);
         navigateToProposal(newProposalId);
     }, [allProposals]);
