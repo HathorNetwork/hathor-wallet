@@ -67,7 +67,7 @@ export default function NewSwap (props) {
             return;
         }
 
-        // If the proposal was successfully created, calculate its helper values and navigate to it
+        // If the proposal was successfully created, calculate its helper values and request temporary data cleanup
         const proposalId = newProposal.proposalId;
         const reduxObj = generateReduxObjFromProposal(
           proposalId,
