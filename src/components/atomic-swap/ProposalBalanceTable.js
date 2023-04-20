@@ -18,7 +18,7 @@ export function ProposalBalanceTable ({ partialTx, wallet, balance }) {
     const receivingBalances = balance.filter(b => b.receiving > 0);
     // If the wallet participates in the proposal with a token with zero balance, it is displayed as "sending"
     const sendingBalances = balance.filter(b => {
-        return b.sending > 0 || b.sending === -0;
+        return b.sending >= 0;
     });
 
     const renderRows = () => {
