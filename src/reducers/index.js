@@ -778,7 +778,6 @@ export const onProposalFetchFailed = (state, action) => {
 /**
  * @param {String} action.proposalId - The proposalId to mark as success
  * @param {Object} action.data - The proposal history information to store on redux
- * @param {Object} action.isNew - A flag indicating this proposal is a newly created one
  */
 export const onProposalUpdate = (state, action) => {
   const { proposalId, data } = action;

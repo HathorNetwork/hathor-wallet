@@ -81,7 +81,7 @@ export function* dispatchAndWait(action, successAction, failureAction) {
 
   return yield race({
     success: take(successAction),
-    failure: take(failureAction),
+    falure: take(failureAction),
   });
 }
 
