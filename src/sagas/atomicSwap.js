@@ -10,14 +10,13 @@ import { channel } from "redux-saga";
 import {
     importProposal,
     proposalCreateFailed,
-    proposalCreateSuccess,
     proposalFetchFailed,
     proposalFetchRequested,
     proposalFetchSuccess,
     proposalUpdated,
     types
 } from "../actions";
-import { dispatchAndWait, specificTypeAndPayload } from "./helpers";
+import { specificTypeAndPayload } from "./helpers";
 import { get } from 'lodash';
 import {
     ATOMIC_SWAP_SERVICE_ERRORS,
@@ -132,36 +131,16 @@ function* createProposalOnBackend(action) {
     try {
         // Request an identifier from the service backend
         const { success, id } = yield swapService.create(partialTx, password);
-        if (!success) {
-            yield put(proposalCreateFailed(t`An error occurred while creating this proposal.`))
-            return;
-        }
-
-        // Request a full import of the generated object on the backend
-        yield(put(importProposal(id, password, { isNew: true })));
-
-        // Wait for its success or failure
-        const fetchProposalResponse = yield call(
-          dispatchAndWait,
-          proposalFetchRequested(id, password),
-          specificTypeAndPayload(
-            [ types.PROPOSAL_FETCH_SUCCESS ],
-            { proposalId: id })
-          ,
-          specificTypeAndPayload(
-            [ types.PROPOSAL_FETCH_FAILED ],
-            { proposalId: id })
-          ,
-        );
 
         // Error handling
-        if (fetchProposalResponse.failure) {
-            console.error(fetchProposalResponse.failure);
-            throw new Error(t`Error while loading proposal ${id}`)
+        if (!success) {
+            throw new Error(t`An error occurred while creating this proposal.`);
         }
 
-        // Inform the NewSwap screen about the new proposal identifier, properly imported already
-        yield put(proposalCreateSuccess(id));
+        // On creation success, request a full import of the generated object on the backend
+        // All error handling and processing will now be done by these sagas, not here
+        yield(put(importProposal(id, password, { isNew: true })));
+        yield(put(proposalFetchRequested(id, password)));
     } catch (e) {
         yield put(proposalCreateFailed(e.message));
     }

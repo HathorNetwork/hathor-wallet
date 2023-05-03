@@ -11,7 +11,7 @@ import { types } from '../actions';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
-import { PROPOSAL_CREATION_STATUS, PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
+import { FAILED_PROPOSAL_ID, PROPOSAL_CREATION_STATUS, PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
 import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
 
@@ -240,8 +240,6 @@ const rootReducer = (state = initialState, action) => {
       return onProposalTokenFetchFailed(state, action);
     case types.PROPOSAL_CREATE_REQUESTED:
       return onProposalCreateRequested(state, action);
-    case types.PROPOSAL_CREATE_SUCCESS:
-      return onProposalCreateSuccess(state, action);
     case types.PROPOSAL_CREATE_FAILED:
       return onProposalCreateFailed(state, action);
     case types.PROPOSAL_CREATE_CLEANUP:
@@ -887,22 +885,8 @@ export const onProposalCreateRequested = (state, action) => {
 }
 
 /**
- * @param {string} action.proposalId
- */
-export const onProposalCreateSuccess = (state, action) => {
-  const { proposalId } = action;
-
-  return {
-    ...state,
-    newProposal: {
-      ...state.newProposal,
-      proposalId,
-      status: PROPOSAL_CREATION_STATUS.SUCCESS,
-    }
-  }
-}
-
-/**
+ * This reducer creates a mock proposal with a known, constant failed proposal ID and injects the
+ * error data inside it.
  * @param {string} action.errorMessage
  */
 export const onProposalCreateFailed = (state, action) => {
@@ -910,10 +894,16 @@ export const onProposalCreateFailed = (state, action) => {
 
   return {
     ...state,
-    newProposal: {
-      ...state.newProposal,
-      errorMessage,
-      status: PROPOSAL_CREATION_STATUS.FAILED,
+    proposals: {
+      ...state.proposals,
+      [FAILED_PROPOSAL_ID]: {
+        id: FAILED_PROPOSAL_ID,
+        password: '',
+        status: PROPOSAL_DOWNLOAD_STATUS.FAILED,
+        errorMessage: errorMessage,
+        updatedAt: new Date().getTime(),
+        isNew: true,
+      }
     }
   }
 }

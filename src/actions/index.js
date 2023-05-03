@@ -31,7 +31,6 @@ export const types = {
   PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
   PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
   PROPOSAL_CREATE_REQUESTED: 'PROPOSAL_CREATE_REQUESTED',
-  PROPOSAL_CREATE_SUCCESS: 'PROPOSAL_CREATE_SUCCESS',
   PROPOSAL_CREATE_FAILED: 'PROPOSAL_CREATE_FAILED',
   PROPOSAL_CREATE_CLEANUP: 'PROPOSAL_CREATE_CLEANUP',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
@@ -374,14 +373,6 @@ export const proposalCreateRequested = (partialTx, password) => ({
   type: types.PROPOSAL_CREATE_REQUESTED,
   password,
   partialTx,
-});
-
-/**
- * @param {string} proposalId
- */
-export const proposalCreateSuccess = (proposalId) => ({
-  type: types.PROPOSAL_CREATE_SUCCESS,
-  proposalId,
 });
 
 /**

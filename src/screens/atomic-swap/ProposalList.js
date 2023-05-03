@@ -13,6 +13,7 @@ import { useHistory } from 'react-router-dom';
 import Loading from "../../components/Loading";
 import { proposalFetchRequested, proposalRemoved } from "../../actions";
 import {
+    FAILED_PROPOSAL_ID,
     PROPOSAL_DOWNLOAD_STATUS,
     updatePersistentStorage
 } from "../../utils/atomicSwap";
@@ -125,7 +126,15 @@ export default function ProposalList (props) {
 
         // Make sure all proposals are loaded
         Object.entries(startingProposalList)
-            .forEach(([pId, p]) => dispatch(proposalFetchRequested(pId, p.password)));
+            .forEach(([pId, p]) => {
+                // Cleaning up any previously failed proposal creation data
+                if (pId === FAILED_PROPOSAL_ID) {
+                    dispatch(proposalRemoved(FAILED_PROPOSAL_ID));
+                    return;
+                }
+
+                dispatch(proposalFetchRequested(pId, p.password));
+            });
     }, []);
 
     return (

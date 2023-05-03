@@ -75,6 +75,12 @@ export const ATOMIC_SWAP_SERVICE_ERRORS = {
 }
 
 /**
+ * A default value for identifying a failed proposal identifier
+ * @type {string}
+ */
+export const FAILED_PROPOSAL_ID = 'failed-proposal-id';
+
+/**
  * Generates the serialized string of an empty proposal for the current wallet
  * @param {HathorWallet} wallet Current wallet in use
  * @return {string}
