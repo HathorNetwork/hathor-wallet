@@ -31,6 +31,7 @@ const { wallet: oldWallet, config: hathorLibConfig } = hathorLib;
  * @property {string} [errorMessage] Error message, present when status is failed
  * @property {string} [oldStatus] Saga-related information, from PROPOSAL_DOWNLOAD_STATUS
  * @property {number} [updatedAt] Saga-related last update timestamp
+ * @property {boolean} [isNew] Saga-related indicator that this proposal was recently created
  * @property {ProposalData} [data] Full decrypted proposal data
  * @property {BackendProposalData} [rawData] Raw data received from the backend
  */

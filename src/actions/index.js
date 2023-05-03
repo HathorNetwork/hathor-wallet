@@ -393,10 +393,12 @@ export const proposalCreateFailed = (errorMessage) => ({
 });
 
 /**
- * Cleans the `newProposal` state object
+ * Cleans up the newly created proposal's temporary data
+ * @param {string} proposalId
  */
-export const proposalCreateCleanup = () => ({
+export const proposalCreateCleanup = (proposalId) => ({
   type: types.PROPOSAL_CREATE_CLEANUP,
+  proposalId,
 });
 
 /**
@@ -410,11 +412,14 @@ export const proposalRemoved = (proposalId) => ({
 /**
  * @param {string} proposalId
  * @param {string} password
+ * @param [options]
+ * @param {boolean} [options.isNew]
  */
-export const importProposal = (proposalId, password) => ({
+export const importProposal = (proposalId, password, options) => ({
   type: types.PROPOSAL_IMPORTED,
   proposalId,
   password,
+  options,
 });
 
 export const tokenInvalidateBalance = (tokenId) => ({

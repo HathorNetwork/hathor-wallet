@@ -10,13 +10,11 @@ import { useHistory } from 'react-router-dom';
 import { t } from "ttag";
 import Loading from "../../components/Loading";
 import {
-    generateReduxObjFromProposal,
     generateEmptyProposal,
-    PROPOSAL_CREATION_STATUS,
     updatePersistentStorage, PROPOSAL_DOWNLOAD_STATUS
 } from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
-import { importProposal, proposalCreateCleanup, proposalCreateRequested, proposalFetchRequested } from "../../actions";
+import { proposalCreateCleanup, proposalCreateRequested } from "../../actions";
 
 /**
  * This screen will interact with two asynchronous processes when generating a new Swap Proposal:
@@ -26,9 +24,7 @@ import { importProposal, proposalCreateCleanup, proposalCreateRequested, proposa
 export default function NewSwap (props) {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const newProposal = useSelector(state => state.newProposal);
     const wallet = useSelector(state => state.wallet);
-    const [newProposalId, setNewProposalId] = useState('');
 
     // Global interactions
     const allProposals = useSelector(state => state.proposals);
@@ -53,65 +49,47 @@ export default function NewSwap (props) {
     }
 
     /**
-     * First asynchronous interaction: generating the unique proposal identifier
-     * Listening to the temporary `newProposal` state object status
+     * Waiting for the successful creation and data fetch from the service backend
+     * Listening to the `proposals` state object
      */
     useEffect(() => {
-        const creationStatus = newProposal?.status;
+        // Discard this effect if the creation was not yet requested from the backend
+        if (!isLoading) {
+            return;
+        }
 
-        // Error handling
-        if (creationStatus === PROPOSAL_CREATION_STATUS.FAILED) {
-            setErrorMessage(newProposal.errorMessage)
+        // Find which proposal is the one recently created
+        let newProposalId;
+        for (const [proposalId, proposal] of Object.entries(allProposals)) {
+            if (proposal.isNew) {
+                newProposalId = proposalId;
+                break;
+            }
+        }
+
+        // XXX: This should never happen.
+        if (!newProposalId) {
+            setErrorMessage(t`Could not generate the proposal. Please try again later.`)
             setIsLoading(false);
             return;
         }
 
-        // While the proposal is not successfully created, just stay in this screen
-        if (creationStatus !== PROPOSAL_CREATION_STATUS.SUCCESS) {
-            return;
-        }
-
-        // The proposal was successfully created
-        const proposalId = newProposal.proposalId;
-        setNewProposalId(proposalId);
-
-
-        // Import its fully calculated data from the service backend and request temporary data cleanup
-        dispatch(importProposal(proposalId, password));
-        dispatch(proposalFetchRequested(proposalId, password, true));
-        dispatch(proposalCreateCleanup());
-    }, [newProposal])
-
-    /**
-     * Second asynchronous interaction: waiting for the successful fetch from the service backend
-     * Listening to the `proposals` state object
-     */
-    useEffect(() => {
-        // Discard this effect if the import was not yet requested
-        if (!newProposalId) {
-            return;
-        }
-
-        // Make sure the new proposal is ready on the listened proposals map
-        const proposalReduxObj = allProposals[newProposalId];
-        if (!proposalReduxObj) {
-            return;
-        }
-
         // Error handling
+        const proposalReduxObj = allProposals[newProposalId];
         if (proposalReduxObj.status === PROPOSAL_DOWNLOAD_STATUS.FAILED) {
             setErrorMessage(proposalReduxObj.errorMessage);
             setIsLoading(false);
             return;
         }
 
-        // If the proposal was not loaded, keep waiting
+        // If the proposal was not completely loaded, keep waiting
         if (proposalReduxObj.status !== PROPOSAL_DOWNLOAD_STATUS.READY) {
             return;
         }
 
         // Update the persistent storage with the newly imported proposal and navigate to it
         updatePersistentStorage(allProposals);
+        dispatch(proposalCreateCleanup(newProposalId));
         navigateToProposal(newProposalId);
     }, [allProposals]);
 
