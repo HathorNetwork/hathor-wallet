@@ -6,14 +6,13 @@
  */
 
 import hathorLib from '@hathor/wallet-lib';
-import { VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
-import { FAILED_PROPOSAL_ID, PROPOSAL_CREATION_STATUS, PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
+import { PROPOSAL_CREATION_STATUS, PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
-import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
 
 /**
  * @typedef TokenHistory
@@ -240,10 +239,6 @@ const rootReducer = (state = initialState, action) => {
       return onProposalTokenFetchFailed(state, action);
     case types.PROPOSAL_CREATE_REQUESTED:
       return onProposalCreateRequested(state, action);
-    case types.PROPOSAL_CREATE_FAILED:
-      return onProposalCreateFailed(state, action);
-    case types.PROPOSAL_CREATE_CLEANUP:
-      return onProposalCreateCleanup(state, action);
     case types.PROPOSAL_REMOVED:
       return onProposalRemoved(state, action);
     case types.PROPOSAL_IMPORTED:
@@ -884,71 +879,20 @@ export const onProposalCreateRequested = (state, action) => {
 }
 
 /**
- * This reducer creates a mock proposal with a known, constant failed proposal ID and injects the
- * error data inside it.
- * @param {string} action.errorMessage
+ * @param {String} action.proposalId - The new proposalId to store
+ * @param {String} action.password - The proposal's password
  */
-export const onProposalCreateFailed = (state, action) => {
-  const { errorMessage } = action;
-
-  return {
-    ...state,
-    proposals: {
-      ...state.proposals,
-      [FAILED_PROPOSAL_ID]: {
-        id: FAILED_PROPOSAL_ID,
-        password: '',
-        status: PROPOSAL_DOWNLOAD_STATUS.FAILED,
-        errorMessage: errorMessage,
-        updatedAt: new Date().getTime(),
-        isNew: true,
-      }
-    }
-  }
-}
-
-/**
- * Cleans up the newly created proposal's temporary data
- * @param {String} action.proposalId - The proposalId to clean
- */
-export const onProposalCreateCleanup = (state, action) => {
-  const { proposalId } = action;
-
+export const onProposalImported = (state, action) => {
+  const { proposalId, password } = action;
   return {
     ...state,
     proposals: {
       ...state.proposals,
       [proposalId]: {
-        ...state.proposals[proposalId],
-        isNew: false,
+        id: proposalId,
+        password,
+        status: PROPOSAL_DOWNLOAD_STATUS.INVALIDATED
       }
-    }
-  }
-}
-
-/**
- * @param {String} action.proposalId - The new proposalId to store
- * @param {String} action.password - The proposal's password
- * @param {String} [action.options.isNew] - Signals if the proposal was newly created
- */
-export const onProposalImported = (state, action) => {
-  const { proposalId, password } = action;
-  const proposalObj = {
-    id: proposalId,
-    password,
-    status: PROPOSAL_DOWNLOAD_STATUS.INVALIDATED
-  };
-
-  // Omit the `isNew` property if it's not true
-  if (action.options?.isNew) {
-    proposalObj.isNew = true;
-  }
-
-  return {
-    ...state,
-    proposals: {
-      ...state.proposals,
-      [proposalId]: proposalObj
     },
   };
 };

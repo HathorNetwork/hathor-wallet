@@ -6,15 +6,13 @@
  */
 import BackButton from "../../components/BackButton";
 import React, { useEffect, useState } from "react";
-import { useHistory } from 'react-router-dom';
 import { t } from "ttag";
 import Loading from "../../components/Loading";
 import {
     generateEmptyProposal,
-    updatePersistentStorage, PROPOSAL_DOWNLOAD_STATUS
 } from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
-import { proposalCreateCleanup, proposalCreateRequested } from "../../actions";
+import { proposalCreateRequested } from "../../actions";
 
 /**
  * This screen will interact with two asynchronous processes when generating a new Swap Proposal:
@@ -27,15 +25,10 @@ export default function NewSwap (props) {
     const wallet = useSelector(state => state.wallet);
 
     // Global interactions
-    const allProposals = useSelector(state => state.proposals);
-    const history = useHistory();
+    const lastFailedRequest = useSelector(state => state.lastFailedRequest);
     const dispatch = useDispatch();
 
     const [errorMessage, setErrorMessage] = useState('');
-
-    const navigateToProposal = (pId) => {
-        history.replace(`/wallet/atomic_swap/proposal/${pId}`);
-    }
 
     const createClickHandler = () => {
         if (password.length < 3) {
@@ -48,50 +41,13 @@ export default function NewSwap (props) {
         dispatch(proposalCreateRequested(newPartialTx, password));
     }
 
-    /**
-     * Waiting for the successful creation and data fetch from the service backend
-     * Listening to the `proposals` state object
-     */
     useEffect(() => {
-        // Discard this effect if the creation was not yet requested from the backend
-        if (!isLoading) {
-            return;
-        }
-
-        // Find which proposal is the one recently created
-        let newProposalId;
-        for (const [proposalId, proposal] of Object.entries(allProposals)) {
-            if (proposal.isNew) {
-                newProposalId = proposalId;
-                break;
-            }
-        }
-
-        // XXX: This should never happen.
-        if (!newProposalId) {
-            setErrorMessage(t`Could not generate the proposal. Please try again later.`)
+        // Shows the error message if it happens
+        if (lastFailedRequest && lastFailedRequest.message) {
+            setErrorMessage(lastFailedRequest.message);
             setIsLoading(false);
-            return;
         }
-
-        // Error handling
-        const proposalReduxObj = allProposals[newProposalId];
-        if (proposalReduxObj.status === PROPOSAL_DOWNLOAD_STATUS.FAILED) {
-            setErrorMessage(proposalReduxObj.errorMessage);
-            setIsLoading(false);
-            return;
-        }
-
-        // If the proposal was not completely loaded, keep waiting
-        if (proposalReduxObj.status !== PROPOSAL_DOWNLOAD_STATUS.READY) {
-            return;
-        }
-
-        // Update the persistent storage with the newly imported proposal and navigate to it
-        updatePersistentStorage(allProposals);
-        dispatch(proposalCreateCleanup(newProposalId));
-        navigateToProposal(newProposalId);
-    }, [allProposals]);
+    }, [lastFailedRequest]);
 
     return <div className="content-wrapper flex align-items-center">
         <BackButton {...props} />

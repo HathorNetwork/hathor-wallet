@@ -31,7 +31,6 @@ const { wallet: oldWallet, config: hathorLibConfig } = hathorLib;
  * @property {string} [errorMessage] Error message, present when status is failed
  * @property {string} [oldStatus] Saga-related information, from PROPOSAL_DOWNLOAD_STATUS
  * @property {number} [updatedAt] Saga-related last update timestamp
- * @property {boolean} [isNew] Saga-related indicator that this proposal was recently created
  * @property {ProposalData} [data] Full decrypted proposal data
  * @property {BackendProposalData} [rawData] Raw data received from the backend
  */
@@ -73,12 +72,6 @@ export const ATOMIC_SWAP_SERVICE_ERRORS = {
     VersionConflict: 'VERSION_CONFLICT',
     UnknownError: 'UNKNOWN_ERROR',
 }
-
-/**
- * A default value for identifying a failed proposal identifier
- * @type {string}
- */
-export const FAILED_PROPOSAL_ID = 'failed-proposal-id';
 
 /**
  * Generates the serialized string of an empty proposal for the current wallet

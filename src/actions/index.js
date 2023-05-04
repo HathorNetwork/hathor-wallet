@@ -31,8 +31,6 @@ export const types = {
   PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
   PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
   PROPOSAL_CREATE_REQUESTED: 'PROPOSAL_CREATE_REQUESTED',
-  PROPOSAL_CREATE_FAILED: 'PROPOSAL_CREATE_FAILED',
-  PROPOSAL_CREATE_CLEANUP: 'PROPOSAL_CREATE_CLEANUP',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
   PROPOSAL_IMPORTED: 'PROPOSAL_IMPORTED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
@@ -376,23 +374,6 @@ export const proposalCreateRequested = (partialTx, password) => ({
 });
 
 /**
- * @param {string} errorMessage
- */
-export const proposalCreateFailed = (errorMessage) => ({
-  type: types.PROPOSAL_CREATE_FAILED,
-  errorMessage,
-});
-
-/**
- * Cleans up the newly created proposal's temporary data
- * @param {string} proposalId
- */
-export const proposalCreateCleanup = (proposalId) => ({
-  type: types.PROPOSAL_CREATE_CLEANUP,
-  proposalId,
-});
-
-/**
  * @param {string} proposalId
  */
 export const proposalRemoved = (proposalId) => ({
@@ -403,14 +384,11 @@ export const proposalRemoved = (proposalId) => ({
 /**
  * @param {string} proposalId
  * @param {string} password
- * @param [options]
- * @param {boolean} [options.isNew]
  */
-export const importProposal = (proposalId, password, options) => ({
+export const importProposal = (proposalId, password) => ({
   type: types.PROPOSAL_IMPORTED,
   proposalId,
   password,
-  options,
 });
 
 export const tokenInvalidateBalance = (tokenId) => ({

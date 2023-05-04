@@ -9,14 +9,14 @@ import { all, call, fork, put, select, take, takeEvery, } from 'redux-saga/effec
 import { channel } from "redux-saga";
 import {
     importProposal,
-    proposalCreateFailed,
+    lastFailedRequest,
     proposalFetchFailed,
     proposalFetchRequested,
     proposalFetchSuccess,
     proposalUpdated,
     types
 } from "../actions";
-import { specificTypeAndPayload } from "./helpers";
+import { dispatchAndWait, specificTypeAndPayload } from "./helpers";
 import { get } from 'lodash';
 import {
     ATOMIC_SWAP_SERVICE_ERRORS,
@@ -129,20 +129,49 @@ function* createProposalOnBackend(action) {
     const { password, partialTx } = action;
 
     try {
+        // Cleaning up the error handling redux object
+        yield put(lastFailedRequest(undefined))
+
         // Request an identifier from the service backend
-        const { success, id } = yield swapService.create(partialTx, password);
+        const { success, id: proposalId } = yield swapService.create(partialTx, password);
 
         // Error handling
         if (!success) {
-            throw new Error(t`An error occurred while creating this proposal.`);
+            yield put(lastFailedRequest({
+                message: t`An error occurred while creating this proposal.`
+            }))
+            return;
         }
 
-        // On creation success, request a full import of the generated object on the backend
-        // All error handling and processing will now be done by these sagas, not here
-        yield(put(importProposal(id, password, { isNew: true })));
-        yield(put(proposalFetchRequested(id, password)));
+        // Generate a minimal redux object to allow for the fetch request
+        yield(put(importProposal(proposalId, password)));
+
+        // Fetch the full proposal data from the backend
+        const fetchProposalResponse = yield call(
+          dispatchAndWait,
+          proposalFetchRequested(proposalId, password),
+          specificTypeAndPayload(
+            [ types.PROPOSAL_FETCH_SUCCESS ],
+            { proposalId: proposalId })
+          ,
+          specificTypeAndPayload(
+            [ types.PROPOSAL_FETCH_FAILED ],
+            { proposalId: proposalId })
+          ,
+        );
+
+        // Error handling
+        if (fetchProposalResponse.falure) {
+            console.error('failure:', fetchProposalResponse.falure);
+            yield put(lastFailedRequest({ message: fetchProposalResponse.falure.errorMessage }))
+            return;
+        }
+
+        // Navigating to the Edit Swap screen with this proposal
+        const routerHistory = yield select((state) => state.routerHistory);
+        routerHistory.replace(`/wallet/atomic_swap/proposal/${proposalId}`);
     } catch (e) {
-        yield put(proposalCreateFailed(e.message));
+        yield put(lastFailedRequest({ message: e.message }));
     }
 }
 
