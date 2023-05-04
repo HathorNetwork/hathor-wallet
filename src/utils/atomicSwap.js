@@ -51,12 +51,6 @@ export const PROPOSAL_DOWNLOAD_STATUS = {
     INVALIDATED: 'invalidated',
 };
 
-export const PROPOSAL_CREATION_STATUS = {
-    REQUESTED: 'requested',
-    FAILED: 'failed',
-    SUCCESS: 'success',
-}
-
 export const PROPOSAL_SIGNATURE_STATUS = {
     OPEN: 'Open',
     PARTIALLY_SIGNED: 'Partially Signed',

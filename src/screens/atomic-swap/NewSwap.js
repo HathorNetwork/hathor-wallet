@@ -14,11 +14,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { proposalCreateRequested } from "../../actions";
 
-/**
- * This screen will interact with two asynchronous processes when generating a new Swap Proposal:
- * - One for generating the proposal identifier: a process done exclusively on the backend
- * - Other for storing the newly generated proposal on the "listened proposals" state map
- */
 export default function NewSwap (props) {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);

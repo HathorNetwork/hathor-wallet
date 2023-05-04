@@ -11,7 +11,7 @@ import { types } from '../actions';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
-import { PROPOSAL_CREATION_STATUS, PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
+import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
 
 /**
@@ -237,8 +237,6 @@ const rootReducer = (state = initialState, action) => {
       return onProposalTokenFetchSuccess(state, action);
     case types.PROPOSAL_TOKEN_FETCH_FAILED:
       return onProposalTokenFetchFailed(state, action);
-    case types.PROPOSAL_CREATE_REQUESTED:
-      return onProposalCreateRequested(state, action);
     case types.PROPOSAL_REMOVED:
       return onProposalRemoved(state, action);
     case types.PROPOSAL_IMPORTED:
@@ -860,23 +858,6 @@ export const onProposalTokenFetchFailed = (state, action) => {
     },
   };
 };
-
-/**
- * @param {string} action.password
- * @param {string} action.partialTx
- */
-export const onProposalCreateRequested = (state, action) => {
-  const { password, partialTx } = action;
-
-  return {
-    ...state,
-    newProposal: {
-      partialTx,
-      password,
-      status: PROPOSAL_CREATION_STATUS.REQUESTED,
-    }
-  }
-}
 
 /**
  * @param {String} action.proposalId - The new proposalId to store
