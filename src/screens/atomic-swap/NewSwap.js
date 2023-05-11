@@ -31,6 +31,7 @@ export default function NewSwap (props) {
             return;
         }
 
+        setErrorMessage('');
         setIsLoading(true);
         const newPartialTx = generateEmptyProposal(wallet);
         dispatch(proposalCreateRequested(newPartialTx, password));
