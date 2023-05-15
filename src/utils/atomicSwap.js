@@ -385,6 +385,7 @@ export const generateReduxObjFromProposal = (proposalId, password, partialTx, wa
 /**
  * Returns the Atomic Swap Service base URL,
  * @param {string} network Network name for fetching the default base server url
+ * @returns {void}
  */
 export function initializeSwapServiceBaseUrlForWallet(network) {
     // XXX: This storage item is currently unchangeable via the wallet UI, and is available
