@@ -143,29 +143,27 @@ function* createProposalOnBackend(action) {
             return;
         }
 
-        // Generate a minimal redux object to allow for the fetch request
+        // Generate a minimal redux object on the application state
         yield(put(importProposal(proposalId, password)));
 
-        // Fetch the full proposal data from the backend
-        const fetchProposalResponse = yield call(
-          dispatchAndWait,
-          proposalFetchRequested(proposalId, password),
-          specificTypeAndPayload(
-            [ types.PROPOSAL_FETCH_SUCCESS ],
-            { proposalId: proposalId })
-          ,
-          specificTypeAndPayload(
-            [ types.PROPOSAL_FETCH_FAILED ],
-            { proposalId: proposalId })
-          ,
+        // Enrich the PartialTx with exhibition metadata
+        const wallet = yield select((state) => state.wallet);
+        const newProposalReduxObj = generateReduxObjFromProposal(
+          proposalId,
+          password,
+          partialTx,
+          wallet,
         );
 
-        // Error handling
-        if (fetchProposalResponse.falure) {
-            console.error('failure:', fetchProposalResponse.falure);
-            yield put(lastFailedRequest({ message: fetchProposalResponse.falure.errorMessage }))
-            return;
-        }
+        // Fill the remaining proposal data
+        const newProposalDataObj = {
+            version: 0,
+            timestamp: new Date(),
+            ...newProposalReduxObj.data,
+        };
+
+        // Insert generated data into state as a fetch saga results
+        yield put(proposalFetchSuccess(proposalId, newProposalDataObj));
 
         // Navigating to the Edit Swap screen with this proposal
         const routerHistory = yield select((state) => state.routerHistory);
