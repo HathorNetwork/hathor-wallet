@@ -11,16 +11,16 @@ import {
     importProposal,
     lastFailedRequest,
     proposalFetchFailed,
-    proposalFetchRequested,
     proposalFetchSuccess,
     proposalUpdated,
     types
 } from "../actions";
-import { dispatchAndWait, specificTypeAndPayload } from "./helpers";
+import { specificTypeAndPayload } from "./helpers";
 import { get } from 'lodash';
 import {
     ATOMIC_SWAP_SERVICE_ERRORS,
     generateReduxObjFromProposal,
+    updatePersistentStorage,
     PROPOSAL_DOWNLOAD_STATUS,
 } from "../utils/atomicSwap";
 import { t } from "ttag";
@@ -164,6 +164,10 @@ function* createProposalOnBackend(action) {
 
         // Insert generated data into state as a fetch saga results
         yield put(proposalFetchSuccess(proposalId, newProposalDataObj));
+
+        // Update the persistent storage with the new addition
+        const allProposals = yield select((state) => state.proposals);
+        updatePersistentStorage(allProposals);
 
         // Navigating to the Edit Swap screen with this proposal
         const routerHistory = yield select((state) => state.routerHistory);
