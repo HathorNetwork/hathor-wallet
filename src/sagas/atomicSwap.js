@@ -153,17 +153,11 @@ function* createProposalOnBackend(action) {
           password,
           partialTx,
           wallet,
+          { newProposal: true }
         );
 
-        // Fill the remaining proposal data
-        const newProposalDataObj = {
-            version: 0,
-            timestamp: new Date(),
-            ...newProposalReduxObj.data,
-        };
-
         // Insert generated data into state as a fetch saga results
-        yield put(proposalFetchSuccess(proposalId, newProposalDataObj));
+        yield put(proposalFetchSuccess(proposalId, newProposalReduxObj.data));
 
         // Update the persistent storage with the new addition
         const allProposals = yield select((state) => state.proposals);

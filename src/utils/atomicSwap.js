@@ -341,10 +341,12 @@ export const updatePersistentStorage = (proposalList) => {
  * @param {string} password
  * @param {string} partialTx
  * @param {HathorWallet} wallet
- * @param {string} [signatures]
+ * @param [options]
+ * @param {boolean} [options.signatures] Optional signatures data for the proposal
+ * @param {boolean} [options.newProposal=false] Requests new proposal properties to be added
  * @return {ReduxProposalData}
  */
-export const generateReduxObjFromProposal = (proposalId, password, partialTx, wallet, signatures) => {
+export const generateReduxObjFromProposal = (proposalId, password, partialTx, wallet, options = {}) => {
     /** @type ReduxProposalData */
     const rObj = {
         id: proposalId,
@@ -367,8 +369,8 @@ export const generateReduxObjFromProposal = (proposalId, password, partialTx, wa
     // Calculating signature status
     let sigStatus;
     const amountInputs = txProposal.partialTx.getTx().inputs.length;
-    const amountSigs = signatures
-      ? signatures.split('|').length - 2 // Removing the prefix and txHex, sigs remain
+    const amountSigs = options.signatures
+      ? options.signatures.split('|').length - 2 // Removing the prefix and txHex, sigs remain
       : 0;
     if (amountSigs < 1) {
         sigStatus = PROPOSAL_SIGNATURE_STATUS.OPEN;
@@ -378,6 +380,12 @@ export const generateReduxObjFromProposal = (proposalId, password, partialTx, wa
         sigStatus = PROPOSAL_SIGNATURE_STATUS.SIGNED;
     }
     rObj.data.signatureStatus = sigStatus;
+
+    // Adding new proposal data, if requested
+    if (options.newProposal) {
+        rObj.data.version = 0;
+        rObj.data.timestamp = rObj.updatedAt;
+    }
 
     return rObj;
 }
