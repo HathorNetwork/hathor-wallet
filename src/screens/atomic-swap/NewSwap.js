@@ -6,47 +6,44 @@
  */
 import BackButton from "../../components/BackButton";
 import React, { useEffect, useState } from "react";
-import { useHistory } from 'react-router-dom';
 import { t } from "ttag";
 import Loading from "../../components/Loading";
-import { generateEmptyProposalFromPassword, updatePersistentStorage } from "../../utils/atomicSwap";
+import {
+    generateEmptyProposal,
+} from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
-import { proposalGenerated } from "../../actions";
+import { proposalCreateRequested } from "../../actions";
 
 export default function NewSwap (props) {
-    const [proposalId, setProposalId] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const allProposals = useSelector(state => state.proposals);
     const wallet = useSelector(state => state.wallet);
-    const history = useHistory();
+
+    // Global interactions
+    const lastFailedRequest = useSelector(state => state.lastFailedRequest);
     const dispatch = useDispatch();
 
     const [errorMessage, setErrorMessage] = useState('');
 
-    const navigateToProposal = (pId) => {
-        history.replace(`/wallet/atomic_swap/proposal/${pId}`);
-    }
-
     const createClickHandler = () => {
         if (password.length < 3) {
-            setErrorMessage('Please insert a password more than 3 characters long');
+            setErrorMessage(t`Please insert a password more than 3 characters long`);
             return;
         }
 
+        setErrorMessage('');
         setIsLoading(true);
-        const { data, id } = generateEmptyProposalFromPassword(password, wallet);
-        setProposalId(id);
-        dispatch(proposalGenerated(id, password, data))
+        const newPartialTx = generateEmptyProposal(wallet);
+        dispatch(proposalCreateRequested(newPartialTx, password));
     }
 
     useEffect(() => {
-        // If this proposal exists, navigate to it immediately
-        if (allProposals[proposalId]) {
-            updatePersistentStorage(allProposals);
-            navigateToProposal(proposalId);
+        // Shows the error message if it happens
+        if (lastFailedRequest && lastFailedRequest.message) {
+            setErrorMessage(lastFailedRequest.message);
+            setIsLoading(false);
         }
-    })
+    }, [lastFailedRequest]);
 
     return <div className="content-wrapper flex align-items-center">
         <BackButton {...props} />

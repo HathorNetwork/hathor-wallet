@@ -12,7 +12,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from 'react-router-dom';
 import Loading from "../../components/Loading";
 import { proposalFetchRequested, proposalRemoved } from "../../actions";
-import { PROPOSAL_DOWNLOAD_STATUS, updatePersistentStorage } from "../../utils/atomicSwap";
+import {
+    PROPOSAL_DOWNLOAD_STATUS,
+    updatePersistentStorage
+} from "../../utils/atomicSwap";
 import walletUtil from "../../utils/wallet";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 
@@ -63,7 +66,9 @@ export default function ProposalList (props) {
         for (const [proposalId, proposal] of Object.entries(proposals)) {
             const pId = proposalId;
             const password = proposal.password;
-            const pAmountTokens = proposal.data?.amountTokens; // Get this from proposal
+            const pAmountTokens = proposal.data
+              ? proposal.data.amountTokens || 0
+              : undefined;
             const pStatus = proposal.data?.signatureStatus;
             const isLoading = proposal.status === PROPOSAL_DOWNLOAD_STATUS.LOADING || proposal.status === PROPOSAL_DOWNLOAD_STATUS.INVALIDATED;
             const isLoaded = proposal.status === PROPOSAL_DOWNLOAD_STATUS.READY;
@@ -99,9 +104,7 @@ export default function ProposalList (props) {
                 { isLoaded && <td className="text-center">{pAmountTokens}</td> }
                 { isLoaded && <td className="text-center">{pStatus}</td> }
                 <td className="text-center">
-                    <i
-                        className="fa fa-remove pointer ml-1"
-                        title={t`Remove`}
+                    <i className="fa fa-remove pointer ml-1" title={t`Remove`}
                         onClick={e => removeProposalClickHandler(e, pId)}></i>
                 </td>
             </tr>)

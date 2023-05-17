@@ -6,14 +6,13 @@
  */
 
 import hathorLib from '@hathor/wallet-lib';
-import { VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
-import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
 
 /**
  * @typedef TokenHistory
@@ -222,20 +221,22 @@ const rootReducer = (state = initialState, action) => {
       return onTokenFetchHistoryFailed(state, action);
     case types.SET_ENABLE_ATOMIC_SWAP:
       return onSetUseAtomicSwap(state, action);
+    case types.PROPOSAL_LIST_UPDATED:
+      return onProposalListUpdated(state, action);
     case types.PROPOSAL_FETCH_REQUESTED:
       return onProposalFetchRequested(state, action);
     case types.PROPOSAL_FETCH_SUCCESS:
       return onProposalFetchSuccess(state, action);
     case types.PROPOSAL_FETCH_FAILED:
       return onProposalFetchFailed(state, action);
+    case types.PROPOSAL_UPDATED:
+      return onProposalUpdate(state, action);
     case types.PROPOSAL_TOKEN_FETCH_REQUESTED:
       return onProposalTokenFetchRequested(state, action);
     case types.PROPOSAL_TOKEN_FETCH_SUCCESS:
       return onProposalTokenFetchSuccess(state, action);
     case types.PROPOSAL_TOKEN_FETCH_FAILED:
       return onProposalTokenFetchFailed(state, action);
-    case types.PROPOSAL_GENERATED:
-      return onNewProposalGeneration(state, action);
     case types.PROPOSAL_REMOVED:
       return onProposalRemoved(state, action);
     case types.PROPOSAL_IMPORTED:
@@ -689,6 +690,17 @@ export const onSetUseAtomicSwap = (state, action) => {
 };
 
 /**
+ * @param {Record<string,{id:string,password:string}>} action.listenedProposalsMap
+*                                                      A map of listened proposals
+ */
+export const onProposalListUpdated = (state, action) => {
+  return {
+    ...state,
+    proposals: action.listenedProposalsMap
+  }
+}
+
+/**
  * @param {String} action.proposalId The proposal id to fetch from the backend
  */
 export const onProposalFetchRequested = (state, action) => {
@@ -751,6 +763,28 @@ export const onProposalFetchFailed = (state, action) => {
         status: PROPOSAL_DOWNLOAD_STATUS.FAILED,
         errorMessage: errorMessage,
         updatedAt: new Date().getTime(),
+      },
+    },
+  };
+};
+
+/**
+ * @param {String} action.proposalId - The proposalId to mark as success
+ * @param {Object} action.data - The proposal history information to store on redux
+ */
+export const onProposalUpdate = (state, action) => {
+  const { proposalId, data } = action;
+
+  const oldState = get(state.proposals, proposalId, { id: proposalId })
+
+  return {
+    ...state,
+    proposals: {
+      ...state.proposals,
+      [proposalId]: {
+        ...oldState,
+        updatedAt: new Date().getTime(),
+        data,
       },
     },
   };
@@ -827,33 +861,10 @@ export const onProposalTokenFetchFailed = (state, action) => {
 
 /**
  * @param {String} action.proposalId - The new proposalId to store
- * @param {String} action.password - The proposal password
- * @param {Object} action.data - The proposal history information to store on redux
- */
-export const onNewProposalGeneration = (state, action) => {
-  const { proposalId, password, data } = action;
-
-  return {
-    ...state,
-    proposals: {
-      ...state.proposals,
-      [proposalId]: {
-        id: proposalId,
-        password,
-        status: PROPOSAL_DOWNLOAD_STATUS.READY,
-        updatedAt: new Date().getTime(),
-        data
-      },
-    },
-  };
-};
-
-/**
- * @param {String} action.proposalId - The new proposalId to store
+ * @param {String} action.password - The proposal's password
  */
 export const onProposalImported = (state, action) => {
   const { proposalId, password } = action;
-
   return {
     ...state,
     proposals: {

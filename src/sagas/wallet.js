@@ -7,6 +7,7 @@ import {
   tokens as tokensUtils,
   constants as hathorLibConstants,
   config,
+  storage,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -55,6 +56,8 @@ import {
   sharedAddressUpdate,
   walletRefreshSharedAddress,
   setEnableAtomicSwap,
+  proposalListUpdated,
+  proposalFetchRequested,
   walletResetSuccess,
   reloadWalletRequested,
 } from '../actions';
@@ -65,6 +68,8 @@ import {
 } from './helpers';
 import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
+import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
+import walletUtil from "../utils/wallet";
 
 export const WALLET_STATUS = {
   READY: 'ready',
@@ -244,6 +249,19 @@ export function* startWallet(action) {
       // takeLatest will stop running the generator if a new START_WALLET_REQUESTED
       // action is dispatched, but returning so the code is clearer
       return;
+    }
+  }
+
+  if (enableAtomicSwap) {
+    // Set urls for the Atomic Swap Service. If we have it on storage, use it, otherwise use defaults
+    initializeSwapServiceBaseUrlForWallet(network.name)
+    // Initialize listened proposals list
+    const listenedProposals = walletUtil.getListenedProposals();
+    yield put(proposalListUpdated(listenedProposals));
+
+    // Fetch all proposals from service backend
+    for (const [pId, p] of Object.entries(listenedProposals)) {
+      yield put(proposalFetchRequested(pId, p.password));
     }
   }
 
