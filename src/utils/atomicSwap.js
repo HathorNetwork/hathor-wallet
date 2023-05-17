@@ -342,7 +342,7 @@ export const updatePersistentStorage = (proposalList) => {
  * @param {string} partialTx
  * @param {HathorWallet} wallet
  * @param [options]
- * @param {boolean} [options.signatures] Optional signatures data for the proposal
+ * @param {string} [options.signatures] Optional signatures data for the proposal
  * @param {boolean} [options.newProposal=false] Requests new proposal properties to be added
  * @return {ReduxProposalData}
  */
