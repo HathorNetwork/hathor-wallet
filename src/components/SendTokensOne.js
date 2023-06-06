@@ -19,6 +19,7 @@ import OutputsWrapper from '../components/OutputsWrapper';
 import InputsWrapper from '../components/InputsWrapper';
 import Loading from '../components/Loading';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import LOCAL_STORE from '../storage';
 
 
 const mapStateToProps = (state) => {
@@ -194,7 +195,7 @@ class SendTokensOne extends React.Component {
     }
 
     const renderSelectToken = () => {
-      const enableSelect = !hathorLib.wallet.isHardwareWallet() || version.isLedgerCustomTokenAllowed();
+      const enableSelect = !LOCAL_STORE.isHardwareWallet() || version.isLedgerCustomTokenAllowed();
       return (
         <select className="ml-3" value={this.state.selected.uid} onChange={this.changeSelect}
           title={enableSelect ? t`Select token` : t`This feature is disabled for the current Ledger app version`}

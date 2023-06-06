@@ -99,7 +99,7 @@ class RequestErrorModal extends React.Component {
     } else {
       let config = this.props.lastFailedRequest;
       let axios = createRequestInstance(config.resolve);
-      hathorLib.helpers.fixAxiosConfig(axios, config);
+      hathorLib.helpersUtils.fixAxiosConfig(axios, config);
       axios(config).then((response) => {
         config.resolve(response.data);
       });
@@ -161,7 +161,7 @@ class RequestErrorModal extends React.Component {
   }
 
   render() {
-    const serverURL = hathorLib.helpers.getServerURL();
+    const serverURL = hathorLib.config.getServerURL();
     return (
       <div className="modal fade" id="requestErrorModal" tabIndex="-1" role="dialog" aria-labelledby="requestErrorModal" aria-hidden="true">
         <div className="modal-dialog" role="document">

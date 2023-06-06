@@ -9,7 +9,7 @@ import store from '../store/index';
 import { newTokens, removeTokenMetadata } from '../actions/index';
 import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
-
+import LOCAL_STORE from '../storage';
 
 /**
  * Methods to create and handle tokens
@@ -18,6 +18,33 @@ import hathorLib from '@hathor/wallet-lib';
  */
 
 const tokens = {
+  /**
+   * Get registered tokens from the wallet instance.
+   * @param {HathorWallet} wallet
+   * @param {boolean} excludeHTR If we should exclude the HTR token.
+   * @returns {Promise<ITokenData[]>}
+   */
+  async getRegisteredTokens(wallet, excludeHTR = false) {
+    const htrUid = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+    const tokens = [];
+
+    // redux-saga generator magic does not work well with the "for await..of" syntax
+    // The asyncGenerator is not recognized as an iterable and it throws an exception
+    // So we must iterate manually, awaiting each "next" call
+    const iterator = wallet.storage.getRegisteredTokens();
+    let next = await iterator.next();
+    while (!next.done) {
+      const token = next.value;
+      if ((!excludeHTR) || token.uid !== htrUid) {
+        tokens.push({ uid: token.uid, name: token.name, symbol: token.symbol });
+      }
+      // eslint-disable-next-line no-await-in-loop
+      next = await iterator.next();
+    }
+
+    return tokens;
+  },
+
   /**
    * Add a new token to the localStorage and redux
    *
@@ -28,30 +55,13 @@ const tokens = {
    * @memberof Tokens
    * @inner
    */
-  addToken(uid, name, symbol) {
-    const tokens = hathorLib.tokens.addToken(uid, name, symbol);
-    store.dispatch(newTokens({tokens, uid: uid}));
+  async addToken(uid, name, symbol) {
     const reduxState = store.getState();
     const reduxWallet = reduxState.wallet;
+    await reduxWallet.storage.registerToken({ uid, name, symbol });
+    const tokens = await this.getRegisteredTokens(reduxWallet);
+    store.dispatch(newTokens({tokens, uid: uid}));
     wallet.fetchTokensMetadata([uid], reduxWallet.conn.network);
-  },
-
-  /**
-   * Edit token name and symbol. Save in localStorage and redux
-   *
-   * @param {string} uid Token uid to be edited
-   * @param {string} name New token name
-   * @param {string} synbol New token symbol
-   *
-   * @return {Object} edited token
-   *
-   * @memberof Tokens
-   * @inner
-   */
-  editToken(uid, name, symbol) {
-    const tokens = hathorLib.tokens.editToken(uid, name, symbol);
-    store.dispatch(newTokens({tokens, uid}));
-    return {uid, name, symbol};
   },
 
   /**
@@ -64,46 +74,29 @@ const tokens = {
    * @memberof Tokens
    * @inner
    */
-  unregisterToken(uid) {
-    const promise = new Promise((resolve, reject) => {
-      const libPromise = hathorLib.tokens.unregisterToken(uid);
-      libPromise.then((tokens) => {
-        store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
-        store.dispatch(removeTokenMetadata(uid));
-        resolve();
-      }, (e) => {
-        reject(e);
-      });
-    });
-    return promise;
-  },
-
-  /**
-   * Save new tokens array and selected token after a new one
-   *
-   * @param {string} uid Token uid added
-   *
-   * @memberof Tokens
-   * @inner
-   */
-  saveTokenRedux(uid) {
-    const storageTokens = hathorLib.storage.getItem('wallet:tokens');
-    store.dispatch(newTokens({tokens: storageTokens, uid: uid}));
+  async unregisterToken(uid) {
+    const reduxState = store.getState();
+    const reduxWallet = reduxState.wallet;
+    await reduxWallet.storage.unregisterToken(uid);
+    const tokens = await this.getRegisteredTokens(reduxWallet);
+    store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
+    store.dispatch(removeTokenMetadata(uid));
   },
 
   /**
    * Returns the deposit amount in 'pretty' format
    *
    * @param {number} mintAmount Amount of tokens to mint
+   * @param {number} depositPercent deposit percentage for creating tokens
    *
    * @memberof Tokens
    * @inner
    */
-  getDepositAmount(mintAmount) {
+  getDepositAmount(mintAmount, depositPercent) {
     if (mintAmount) {
       const amountValue = wallet.decimalToInteger(mintAmount);
-      const deposit = hathorLib.tokens.getDepositAmount(amountValue);
-      return hathorLib.helpers.prettyValue(deposit);
+      const deposit = hathorLib.tokensUtils.getDepositAmount(amountValue, depositPercent);
+      return hathorLib.numberUtils.prettyValue(deposit);
     } else {
       return 0;
     }
@@ -129,9 +122,7 @@ const tokens = {
    * @inner
    */
   getTokenSignatures() {
-    const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
-    if (!tokenSignatures) return {};
-    return tokenSignatures;
+    return LOCAL_STORE.getTokenSignatures();
   },
 
   /**
@@ -162,7 +153,7 @@ const tokens = {
   addTokenSignature(uid, signature) {
     const tokenSignatures = this.getTokenSignatures();
     tokenSignatures[uid] = signature;
-    hathorLib.storage.setItem('wallet:token:signatures', tokenSignatures);
+    LOCAL_STORE.setTokenSignatures(tokenSignatures);
   },
 
   /**
@@ -173,7 +164,7 @@ const tokens = {
    * @inner
    */
   resetTokenSignatures() {
-    hathorLib.storage.setItem('wallet:token:signatures', {});
+    LOCAL_STORE.resetTokenSignatures();
   },
 
   /**
@@ -188,7 +179,7 @@ const tokens = {
   removeTokenSignature(uid) {
     const tokenSignatures = this.getTokenSignatures();
     delete tokenSignatures[uid];
-    hathorLib.storage.setItem('wallet:token:signatures', tokenSignatures);
+    LOCAL_STORE.setTokenSignatures(tokenSignatures);
   },
 }
 

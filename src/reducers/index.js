@@ -13,6 +13,7 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import LOCAL_STORE from '../storage';
 
 /**
  * @typedef TokenHistory
@@ -315,13 +316,13 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
  */
 const isAllAuthority = (tx) => {
   for (let txin of tx.inputs) {
-    if (!hathorLib.wallet.isAuthorityOutput(txin)) {
+    if (!hathorLib.transactionUtils.isAuthorityOutput(txin)) {
       return false;
     }
   }
 
   for (let txout of tx.outputs) {
-    if (!hathorLib.wallet.isAuthorityOutput(txout)) {
+    if (!hathorLib.transactionUtils.isAuthorityOutput(txout)) {
       return false;
     }
   }
@@ -334,10 +335,9 @@ const isAllAuthority = (tx) => {
  */
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
-  hathorLib.storage.setItem('wallet:version', VERSION);
-  const { tokens } = action.payload;
+  LOCAL_STORE.setWalletVersion(VERSION);
+  const { tokens, currentAddress } = action.payload;
   const allTokens = new Set(tokens);
-  const currentAddress = state.wallet.getCurrentAddress();
 
   return {
     ...state,

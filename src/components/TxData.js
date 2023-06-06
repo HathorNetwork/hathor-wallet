@@ -64,6 +64,7 @@ class TxData extends React.Component {
     children: false,
     unregisteredLoading: false,
     tokens: [],
+    balance: {},
     tokenClicked: null,
     walletAddressesMap: {},
     graphvizFundsRequestLoading: false,
@@ -76,6 +77,7 @@ class TxData extends React.Component {
   tokensFound = [];
 
   componentDidMount = () => {
+    this.calculateBalance();
     this.calculateTokens();
     this.fetchWalletAddressesMap();
     this.queryVerificationData();
@@ -201,7 +203,7 @@ class TxData extends React.Component {
     const tokens = [];
 
     for (const output of this.props.transaction.outputs) {
-      const tokenData = this.checkToken(hathorLib.wallet.getTokenIndex(output.decoded.token_data));
+      const tokenData = this.checkToken(hathorLib.tokensUtils.getTokenIndexFromData(output.decoded.token_data));
 
       if (tokenData) {
         tokens.push(tokenData);
@@ -209,7 +211,7 @@ class TxData extends React.Component {
     }
 
     for (const input of this.props.transaction.inputs) {
-      const tokenData = this.checkToken(hathorLib.wallet.getTokenIndex(input.decoded.token_data));
+      const tokenData = this.checkToken(hathorLib.tokensUtils.getTokenIndexFromData(input.decoded.token_data));
 
       if (tokenData) {
         tokens.push(tokenData);
@@ -243,6 +245,18 @@ class TxData extends React.Component {
     return configToAdd;
   }
 
+  calculateBalance = async () => {
+    const fullBalance = await hathorLib.transactionUtils.getTxBalance(this.props.transaction, this.props.wallet.storage);
+    const balance = {};
+    for (const token of Object.keys(fullBalance)) {
+      const tokenBalance = fullBalance[token];
+      // The UI balance does not distinguish between locked and unlocked balance
+      // Also, it does not care for authority balance, so we skip it
+      balance[token] = tokenBalance.tokens.locked + tokenBalance.tokens.unlocked;
+    }
+    this.setState({ balance });
+  }
+
   /**
    * Show/hide raw transaction in hexadecimal
    *
@@ -270,7 +284,7 @@ class TxData extends React.Component {
   }
 
   /**
-   * Method called on copy to clipboard success  
+   * Method called on copy to clipboard success
    * Show alert success message
    *
    * @param {string} text Text copied to clipboard
@@ -403,7 +417,7 @@ class TxData extends React.Component {
 
   render() {
     const renderBlockOrTransaction = () => {
-      if (hathorLib.helpers.isBlock(this.props.transaction)) {
+      if (hathorLib.transactionUtils.isBlock(this.props.transaction)) {
         return 'block';
       } else {
         return 'transaction';
@@ -416,7 +430,7 @@ class TxData extends React.Component {
       return inputs.map((input, idx) => {
         return (
           <div key={`${input.tx_id}${input.index}`}>
-            <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpers.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && this.isAddressMine(input.decoded.address) && renderAddressBadge()}
+            <Link to={`/transaction/${input.tx_id}`}>{hathorLib.helpersUtils.getShortHash(input.tx_id)}</Link> ({input.index}) {input.decoded && this.isAddressMine(input.decoded.address) && renderAddressBadge()}
             {renderOutput(input, 0, false)}
           </div>
         );
@@ -424,10 +438,10 @@ class TxData extends React.Component {
     }
 
     const outputValue = (output) => {
-      if (hathorLib.wallet.isAuthorityOutput(output)) {
-        if (hathorLib.wallet.isMintOutput(output)) {
+      if (hathorLib.transactionUtils.isAuthorityOutput(output)) {
+        if (hathorLib.transactionUtils.isMint(output)) {
           return t`Mint authority`;
-        } else if (hathorLib.wallet.isMeltOutput(output)) {
+        } else if (hathorLib.transactionUtils.isMelt(output)) {
           return t`Melt authority`;
         } else {
           // Should never come here
@@ -435,7 +449,7 @@ class TxData extends React.Component {
         }
       } else {
         // if it's an NFT token we should show integer value
-        const uid = this.getUIDFromTokenData(hathorLib.wallet.getTokenIndex(output.token_data));
+        const uid = this.getUIDFromTokenData(hathorLib.tokensUtils.getTokenIndexFromData(output.token_data));
         return helpers.renderValue(output.value, isNFT(uid));
       }
     }
@@ -445,7 +459,7 @@ class TxData extends React.Component {
     }
 
     const renderOutputToken = (output) => {
-      const tokenOutput = this.getOutputToken(hathorLib.wallet.getTokenIndex(output.decoded.token_data));
+      const tokenOutput = this.getOutputToken(hathorLib.tokensUtils.getTokenIndexFromData(output.decoded.token_data));
       return (
         <strong>{tokenOutput.symbol} {this.isTokenUnknown(tokenOutput.uid) && renderUnregisteredIcon()}</strong>
       );
@@ -541,14 +555,14 @@ class TxData extends React.Component {
     }
 
     const renderDivList = (hashes) => {
-      return hashes.map((h) => <div key={h}><Link to={`/transaction/${h}`}>{hathorLib.helpers.getShortHash(h)}</Link></div>)
+      return hashes.map((h) => <div key={h}><Link to={`/transaction/${h}`}>{hathorLib.helpersUtils.getShortHash(h)}</Link></div>)
     }
 
     const renderTwins = () => {
       if (!this.props.meta.twins.length) {
         return;
       } else {
-        return <div>This transaction has twin {hathorLib.helpers.plural(this.props.meta.twins.length, 'transaction', 'transactions')}: {renderListWithLinks(this.props.meta.twins, true)}</div>
+        return <div>This transaction has twin {helpers.plural(this.props.meta.twins.length, 'transaction', 'transactions')}: {renderListWithLinks(this.props.meta.twins, true)}</div>
       }
     }
 
@@ -669,7 +683,7 @@ class TxData extends React.Component {
       }
 
       if (this.props.confirmationData) {
-        let acc = hathorLib.helpers.roundFloat(this.props.confirmationData.accumulated_weight);
+        let acc = hathorLib.helpersUtils.roundFloat(this.props.confirmationData.accumulated_weight);
         if (this.props.confirmationData.accumulated_bigger) {
           return t`Over ${acc}`;
         } else {
@@ -683,7 +697,7 @@ class TxData extends React.Component {
     const renderScore = () => {
       return (
         <div>
-          <label>{`Score:`}</label> {hathorLib.helpers.roundFloat(this.props.meta.score)}
+          <label>{`Score:`}</label> {hathorLib.helpersUtils.roundFloat(this.props.meta.score)}
         </div>
       );
     }
@@ -736,7 +750,7 @@ class TxData extends React.Component {
 
     const renderFirstBlock = () => {
       return (
-         <Link to={`/transaction/${this.props.meta.first_block}`}> {hathorLib.helpers.getShortHash(this.props.meta.first_block)}</Link>
+         <Link to={`/transaction/${this.props.meta.first_block}`}> {hathorLib.helpersUtils.getShortHash(this.props.meta.first_block)}</Link>
       );
     }
 
@@ -770,13 +784,12 @@ class TxData extends React.Component {
     }
 
     const renderBalance = () => {
-      const balance = hathorLib.wallet.getTxBalance(this.props.transaction);
-      if (Object.keys(balance).length === 0) return null;
+      if (Object.keys(this.state.balance).length === 0) return null;
 
       // If all balances are 0, we return null
       let only0 = true;
-      for (const key in balance) {
-        if (balance[key] !== 0) {
+      for (const key in this.state.balance) {
+        if (this.state.balance[key] !== 0) {
           only0 = false;
           break;
         }
@@ -787,7 +800,7 @@ class TxData extends React.Component {
       return (
         <div className="d-flex flex-column common-div bordered-wrapper mt-3">
           <div><label>{t`Balance:`}</label></div>
-          {renderBalanceData(balance)}
+          {renderBalanceData(this.state.balance)}
         </div>
       );
     }
@@ -826,7 +839,7 @@ class TxData extends React.Component {
         }
 
         if (this.props.confirmationData) {
-          return `${hathorLib.helpers.roundFloat(this.props.confirmationData.confirmation_level * 100)}%`;
+          return `${hathorLib.helpersUtils.roundFloat(this.props.confirmationData.confirmation_level * 100)}%`;
         }
 
         return t`Retrieving confirmation level data...`;
@@ -853,21 +866,21 @@ class TxData extends React.Component {
       return (
         <div className="tx-data-wrapper">
           {this.props.showConflicts ? renderConflicts() : ''}
-          <div><label>{hathorLib.helpers.isBlock(this.props.transaction) ? t`Block` : t`Transaction`} ID:</label> {this.props.transaction.hash}</div>
+          <div><label>{hathorLib.transactionUtils.isBlock(this.props.transaction) ? t`Block` : t`Transaction`} ID:</label> {this.props.transaction.hash}</div>
           {renderBalance()}
           <div className="d-flex flex-row align-items-start mt-3 mb-3">
             <div className="d-flex flex-column align-items-start common-div bordered-wrapper mr-3">
-              <div><label>{t`Type:`}</label> {hathorLib.helpers.getTxType(this.props.transaction)} {isNFTCreation() && '(NFT)'}</div>
+              <div><label>{t`Type:`}</label> {hathorLib.transactionUtils.getTxType(this.props.transaction)} {isNFTCreation() && '(NFT)'}</div>
               <div><label>{t`Time:`}</label> {hathorLib.dateFormatter.parseTimestamp(this.props.transaction.timestamp)}</div>
               <div><label>{t`Nonce:`}</label> {this.props.transaction.nonce}</div>
-              <div><label>{t`Weight:`}</label> {hathorLib.helpers.roundFloat(this.props.transaction.weight)}</div>
-              {!hathorLib.helpers.isBlock(this.props.transaction) && renderFirstBlockDiv()}
+              <div><label>{t`Weight:`}</label> {hathorLib.helpersUtils.roundFloat(this.props.transaction.weight)}</div>
+              {!hathorLib.transactionUtils.isBlock(this.props.transaction) && renderFirstBlockDiv()}
             </div>
             <div className="d-flex flex-column align-items-center important-div bordered-wrapper">
-              {hathorLib.helpers.isBlock(this.props.transaction) && renderHeight()}
-              {hathorLib.helpers.isBlock(this.props.transaction) && renderScore()}
-              {!hathorLib.helpers.isBlock(this.props.transaction) && renderAccWeightDiv()}
-              {!hathorLib.helpers.isBlock(this.props.transaction) && renderConfirmationLevel()}
+              {hathorLib.transactionUtils.isBlock(this.props.transaction) && renderHeight()}
+              {hathorLib.transactionUtils.isBlock(this.props.transaction) && renderScore()}
+              {!hathorLib.transactionUtils.isBlock(this.props.transaction) && renderAccWeightDiv()}
+              {!hathorLib.transactionUtils.isBlock(this.props.transaction) && renderConfirmationLevel()}
             </div>
           </div>
           <div className="d-flex flex-row align-items-start mb-3">

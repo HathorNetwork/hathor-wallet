@@ -10,8 +10,7 @@ import { t } from "ttag";
 import InputNumber from "../InputNumber";
 import hathorLib, { Address } from "@hathor/wallet-lib";
 import { useSelector } from "react-redux";
-import walletUtil from '../../utils/wallet';
-const { decimalToInteger } = walletUtil;
+import { decimalToInteger } from '../../utils/wallet';
 
 export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manageDomLifecycle, onClose }) {
     /** @type HathorWallet */
@@ -36,9 +35,9 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
 
     /**
      * Validates form fields and return true if all are valid
-     * @returns {boolean}
+     * @returns {Promise<boolean>}
      */
-    const validateForm = () => {
+    const validateForm = async () => {
         const addressObj = new Address(address);
         if (!addressObj.isValid()) {
             setErrMessage(t`Invalid address.`)
@@ -50,7 +49,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
             return false;
         }
 
-        if (!wallet.isAddressMine(address)) {
+        if (!await wallet.isAddressMine(address)) {
             setErrMessage(t`Address does not belong to this wallet`);
             return false;
         }
@@ -116,8 +115,8 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
                                 <InputNumber key="value"
                                              name="amount"
                                              ref={amountRef}
-                                             defaultValue={hathorLib.helpers.prettyValue(amount)}
-                                             placeholder={hathorLib.helpers.prettyValue(0)}
+                                             defaultValue={hathorLib.numberUtils.prettyValue(amount)}
+                                             placeholder={hathorLib.numberUtils.prettyValue(0)}
                                              onValueChange={value => setAmount(value)}
                                              className="form-control output-value col-3"/>
                             </div>

@@ -5,12 +5,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import hathorLib, { PartialTx, PartialTxInputData, PartialTxProposal, storage } from "@hathor/wallet-lib";
-import { HATHOR_TOKEN_CONFIG, TOKEN_MELT_MASK, TOKEN_MINT_MASK } from "@hathor/wallet-lib/lib/constants";
+import { v4 } from 'uuid'
+import {
+  transactionUtils,
+  PartialTx,
+  PartialTxInputData,
+  PartialTxProposal,
+  tokensUtils,
+  config as hathorLibConfig,
+} from "@hathor/wallet-lib";
+import { TOKEN_MINT_MASK, TOKEN_MELT_MASK, HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
 import { get } from 'lodash';
 import walletUtil from "./wallet";
 
-const { wallet: oldWallet, config: hathorLibConfig } = hathorLib;
 /**
  * @typedef ProposalData
  * @property {string} id Proposal identifier
@@ -86,12 +93,12 @@ export function generateEmptyProposal(wallet) {
  * @param {HathorWallet} wallet
  * @param {string} [strSignatures] Optional signatures string
  */
-export function enrichTxData(partialTx, wallet, strSignatures) {
+export async function enrichTxData(partialTx, wallet, strSignatures) {
     const signaturesObj = strSignatures && calculateSignaturesObject(partialTx, strSignatures);
 
     for (const inputIndex in partialTx.inputs) {
         const input = partialTx.inputs[inputIndex];
-        if (wallet.isAddressMine(input.address)) {
+        if (await wallet.isAddressMine(input.address)) {
             input.isMine = true;
             input.indexOnTx = +inputIndex;
         }
@@ -103,7 +110,7 @@ export function enrichTxData(partialTx, wallet, strSignatures) {
         const output = partialTx.outputs[outputIndex];
         output.parseScript(wallet.getNetworkObject());
         output.address = get(output,'decodedScript.address.base58','Unknown Address');
-        if (wallet.isAddressMine(output.address)) {
+        if (await wallet.isAddressMine(output.address)) {
             output.isMine = true;
             output.indexOnTx = +outputIndex;
         }
@@ -140,8 +147,8 @@ export function calculateExhibitionData(partialTx, cachedTokens, wallet) {
         return cachedTokens[tokenUid];
     }
 
-    const txProposal = PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.getNetworkObject());
-    const balance = txProposal.calculateBalance(wallet);
+    const txProposal = PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.storage);
+    const balance = await txProposal.calculateBalance();
 
     // Calculating the difference between them both
     const balanceArr = [];
@@ -224,10 +231,10 @@ export function canISign(partialTx, currentSignatures) {
     return false;
 }
 
-export function deserializePartialTx(strPartialTx, wallet) {
+export async function deserializePartialTx(strPartialTx, wallet) {
     const networkObject = wallet.getNetworkObject();
     const partialTx = PartialTx.deserialize(strPartialTx, networkObject);
-    enrichTxData(partialTx, wallet);
+    await enrichTxData(partialTx, wallet);
 
     return partialTx;
 }
@@ -273,48 +280,48 @@ export const assembleProposal = (partialTx, signatures, network) => {
  * @see https://github.com/HathorNetwork/hathor-wallet-headless/blob/fd1fb5d9757871bdf367e0496cfa85be8175e09d/src/controllers/wallet/atomic-swap/tx-proposal.controller.js#L56-L97
  * @returns {null | ProposalCustomUtxo}
  */
-export const translateTxToProposalUtxo = (txId, index, wallet) => {
-    const txData = wallet.getTx(txId);
-    if (!txData) {
-        // utxo not in history
-        return null;
-    }
-    const txout = txData.outputs[index];
-    if (!oldWallet.canUseUnspentTx(txout, txData.height)) {
-        // Cannot use this utxo
-        return null;
-    }
+export const translateTxToProposalUtxo = async (txId, index, wallet) => {
+  const utxo = { txId, index };
+  if (!await transactionUtils.canUseUtxo(utxo, wallet.storage)) {
+    // Cannot use this utxo
+    return null;
+  }
 
-    const addressIndex = wallet.getAddressIndex(txout.decoded.address);
-    const addressPath = addressIndex ? wallet.getAddressPathForIndex(addressIndex) : '';
-    let authorities = 0;
-    if (oldWallet.isMintOutput(txout)) {
-        authorities += TOKEN_MINT_MASK;
-    }
-    if (oldWallet.isMeltOutput(txout)) {
-        authorities += TOKEN_MELT_MASK;
-    }
+  const tx = await wallet.getTx(txId);
+  const txout = tx.outputs[index];
+  // We use the storage getAddressInfo because the wallet.getAddressInfo
+  // has some unnecessary calculations
+  const addressInfo = await wallet.storage.getAddressInfo(txout.decoded.address);
+  const addressIndex = addressInfo.bip32AddressIndex;
 
-    let tokenId = txout.token;
-    if (!tokenId) {
-        const tokenIndex = oldWallet.getTokenIndex(txout.token_data) - 1;
-        tokenId = txout.token_data === 0
-            ? HATHOR_TOKEN_CONFIG.uid
-            : txData.tx.tokens[tokenIndex].uid;
-    }
+  const addressPath = addressIndex ? await wallet.getAddressPathForIndex(addressIndex) : '';
+  let authorities = 0;
+  if (transactionUtils.isMint(txout)) {
+    authorities += TOKEN_MINT_MASK;
+  }
+  if (transactionUtils.isMelt(txout)) {
+    authorities += TOKEN_MELT_MASK;
+  }
 
-    return {
-        txId: txId,
-        index: index,
-        value: txout.value,
-        address: txout.decoded.address,
-        timelock: txout.decoded.timelock,
-        tokenId,
-        authorities,
-        addressPath,
-        heightlock: null,
-        locked: false,
-    };
+  let tokenId = txout.token;
+  if (!tokenId) {
+    // This should never happen since the fullnode always sends the token uid.
+    const tokenIndex = tokensUtils.getTokenIndexFromData(txout.token_data);
+    tokenId = [HATHOR_TOKEN_CONFIG.uid, ...tx.tokens][tokenIndex];
+  }
+
+  return {
+    txId: txId,
+    index: index,
+    value: txout.value,
+    address: txout.decoded.address,
+    timelock: txout.decoded.timelock,
+    tokenId,
+    authorities,
+    addressPath,
+    heightlock: null,
+    locked: false,
+  };
 }
 
 /**

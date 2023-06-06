@@ -43,11 +43,11 @@ class ModalUnregisteredTokenInfo extends React.Component {
   }
 
   /**
-   * Method called when user clicks the button to register the token  
+   * Method called when user clicks the button to register the token
    *
    * @param {Object} e Event emitted when user clicks the button
    */
-  register = (e) => {
+  register = async (e) => {
     if (!this.props.token) return;
 
     e.preventDefault();
@@ -55,20 +55,20 @@ class ModalUnregisteredTokenInfo extends React.Component {
     const isValid = this.form.current.checkValidity();
     this.setState({ formValidated: true, errorMessage: '' });
     if (isValid) {
-      const configurationString = hathorLib.tokens.getConfigurationString(
+      const configurationString = hathorLib.tokensUtils.getConfigurationString(
         this.props.token.uid,
         this.props.token.name,
         this.props.token.symbol,
       );
 
-      const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(configurationString, null);
-      promise.then((tokenData) => {
-        tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
+      try {
+        const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(configurationString, this.props.wallet.storage);
+        await tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
         $('#unregisteredTokenInfoModal').modal('hide');
         this.props.tokenRegistered(this.props.token);
-      }, (e) => {
-        this.setState({ errorMessage: e.message });
-      });
+      } catch (err) {
+        this.setState({ errorMessage: err.message });
+      }
     }
   }
 

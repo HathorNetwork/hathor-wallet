@@ -8,13 +8,20 @@
 import React from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
-import hathorLib from '@hathor/wallet-lib';
 import { CONFIRM_RESET_MESSAGE } from '../constants';
+import { connect } from 'react-redux';
 import SpanFmt from './SpanFmt';
+import LOCAL_STORE from '../storage';
 
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+  };
+};
 
 /**
- * Component that shows a modal to ask form confirmation data to reset the wallet  
+ * Component that shows a modal to ask form confirmation data to reset the wallet
  * Asks for the password and for the user to write a sentence saying that really wants to reset
  *
  * @memberof Components
@@ -37,12 +44,12 @@ class ModalResetAllData extends React.Component {
   }
 
   /**
-   * Method to be called when user clicks the button to confirm  
+   * Method to be called when user clicks the button to confirm
    * Validates the form and then calls a method from props to indicate success
    *
    * @param {Object} e Event emitted when button is clicked
    */
-  handleConfirm = (e) => {
+  handleConfirm = async (e) => {
     e.preventDefault();
 
     // Form is invalid
@@ -68,7 +75,7 @@ class ModalResetAllData extends React.Component {
     }
 
     // Password was informed and it is incorrect
-    const correctPassword = hathorLib.wallet.isPasswordCorrect(password)
+    const correctPassword = await this.props.wallet.checkPassword(password);
     if (password && !correctPassword) {
       this.setState({errorMessage: t`Invalid password`})
       return
@@ -111,7 +118,7 @@ class ModalResetAllData extends React.Component {
   render() {
     const getFirstMessage = () => {
       let firstMessage = t`If you reset your wallet, all data will be deleted, and you will lose access to your tokens. To recover access to your tokens, you will need to import your words again.`;
-      if (!hathorLib.wallet.isBackupDone()) {
+      if (!LOCAL_STORE.isBackupDone()) {
         firstMessage = t`${firstMessage} You still haven't done the backup of your words.`;
       }
       return firstMessage;
@@ -167,4 +174,4 @@ class ModalResetAllData extends React.Component {
   }
 }
 
-export default ModalResetAllData;
+export default connect(mapStateToProps)(ModalResetAllData);

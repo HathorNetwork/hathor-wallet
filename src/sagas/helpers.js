@@ -8,6 +8,7 @@ import {
 } from 'redux-saga/effects';
 import { types } from '../actions';
 import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
+import tokensUtils from '../utils/tokens';
 
 /**
  * Waits until feature toggle saga finishes loading
@@ -101,4 +102,15 @@ export function errorHandler(saga, failureAction) {
       yield put(failureAction);
     }
   };
+}
+
+/**
+ * Get registered tokens from the wallet instance.
+ * @param {HathorWallet} wallet
+ * @param {boolean} excludeHTR If we should exclude the HTR token.
+ * @returns {string[]}
+ */
+export async function getRegisteredTokens(wallet, excludeHTR = false) {
+  const tokenConfigArr = await tokensUtils.getRegisteredTokens(wallet, excludeHTR);
+  return tokenConfigArr.map(token => token.uid);
 }

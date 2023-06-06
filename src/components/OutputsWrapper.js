@@ -9,9 +9,17 @@ import React from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import _ from 'lodash';
+import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import InputNumber from './InputNumber';
+import LOCAL_STORE from '../storage';
 
+
+const mapStateToProps = (state) => {
+  return {
+    wallet: state.wallet,
+  };
+};
 
 /**
  * Component that wraps the outputs of a token in the Send Tokens screen
@@ -49,7 +57,7 @@ class OutputsWrapper extends React.Component {
       if (this.props.isNFT) {
         return <InputNumber key="nft-value" ref={this.value} className={classNames} placeholder="0" precision={0} />;
       } else {
-        return <InputNumber key="value" ref={this.value} placeholder={hathorLib.helpers.prettyValue(0)} className={classNames} />;
+        return <InputNumber key="value" ref={this.value} placeholder={hathorLib.numberUtils.prettyValue(0)} className={classNames} />;
       }
     }
 
@@ -60,19 +68,19 @@ class OutputsWrapper extends React.Component {
         <div className="form-check mr-2 d-flex flex-column justify-content-center">
           <input className="form-check-input mt-0 has-timelock" type="checkbox"
             ref={this.timelockCheckbox} onChange={this.handleCheckboxTimelockChange} id={this.uniqueID}
-            title={hathorLib.wallet.isHardwareWallet() ? t`This feature is disabled for hardware wallet` : t`Timelock`}
-            disabled={hathorLib.wallet.isHardwareWallet() ? true : null}/>
+            title={LOCAL_STORE.isHardwareWallet() ? t`This feature is disabled for hardware wallet` : t`Timelock`}
+            disabled={LOCAL_STORE.isHardwareWallet() ? true : null}/>
           <label className="form-check-label" htmlFor={this.uniqueID}>
             {t`Time lock`}
           </label>
         </div>
         <input type="datetime-local" placeholder={t`Date and time in GMT`} step="1"
           className="form-control output-timelock col-3" style={{display: 'none'}} ref={this.timelock}
-          disabled={hathorLib.wallet.isHardwareWallet() ? true : null}/>
+          disabled={LOCAL_STORE.isHardwareWallet() ? true : null}/>
         {this.props.index === 0 ? <button type="button" className="btn btn-hathor" onClick={this.props.addOutput}>+</button> : null}
       </div>
     );
   }
 }
 
-export default OutputsWrapper;
+export default connect(mapStateToProps)(OutputsWrapper);

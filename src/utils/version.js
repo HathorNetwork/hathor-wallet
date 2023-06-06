@@ -10,6 +10,7 @@ import { isVersionAllowedUpdate } from '../actions/index';
 import { FIRST_WALLET_COMPATIBLE_VERSION, LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION } from '../constants';
 import helpers from './helpers';
 import hathorLib from '@hathor/wallet-lib';
+import LOCAL_STORE from '../storage';
 
 /**
  * Methods to validate version
@@ -35,7 +36,7 @@ const version = {
      * is allowed by checking it against the MIN_API_VERSION constant from the library.
      */
     store.dispatch(isVersionAllowedUpdate({
-      allowed: hathorLib.helpers.isVersionAllowed(
+      allowed: hathorLib.helpersUtils.isVersionAllowed(
         data.version,
         hathorLib.constants.MIN_API_VERSION
       ),
@@ -64,8 +65,8 @@ const version = {
    * @inner
    */
   checkWalletVersion() {
-    const version = hathorLib.storage.getItem('wallet:version');
-    if (version !== null && hathorLib.helpers.isVersionAllowed(version, FIRST_WALLET_COMPATIBLE_VERSION)) {
+    const version = LOCAL_STORE.getWalletVersion();
+    if (version !== null && hathorLib.helpersUtils.isVersionAllowed(version, FIRST_WALLET_COMPATIBLE_VERSION)) {
       return true;
     } else {
       return false;
@@ -79,7 +80,7 @@ const version = {
    * @inner
    */
   isLedgerCustomTokenAllowed() {
-    const version = hathorLib.storage.getItem('ledger:version');
+    const version = LOCAL_STORE.getWalletVersion();
     if (version !== null) return helpers.cmpVersionString(version, LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION) >= 0;
     return false;
   }

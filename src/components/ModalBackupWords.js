@@ -24,12 +24,15 @@ const mapDispatchToProps = dispatch => {
 
 
 const mapStateToProps = (state) => {
-  return { words: state.words };
+  return {
+    words: state.words,
+    wallet: state.wallet,
+  };
 };
 
 
 /**
- * Component that shows a modal to do backup of words  
+ * Component that shows a modal to do backup of words
  * If user is already inside the wallet asks for the user password
  *
  * @memberof Components
@@ -97,19 +100,24 @@ class ModalBackupWords extends React.Component {
    *
    * @param {Object} e Event emitted when button is clicked
    */
-  handlePassword = (e) => {
+  handlePassword = async (e) => {
     e.preventDefault();
     if (this.refs.formPassword.checkValidity() === false) {
       this.setState({ passwordFormValidated: true });
     } else {
       this.setState({ passwordFormValidated: false });
       const password = this.refs.password.value;
-      if (hathorLib.wallet.isPasswordCorrect(password)) {
-        const words = hathorLib.wallet.getWalletWords(password);
+      try {
+        const accessData = await this.props.wallet.storage.getAccessData();
+        const words = hathorLib.cryptoUtils.decryptData(accessData.words, password);
         this.props.updateWords(words);
         this.setState({ passwordSuccess: true, errorMessage: '' });
-      } else {
-        this.setState({ errorMessage: t`Invalid password` });
+      } catch (err) {
+        if (err.errorCode && err.errorCode === hathorLib.ErrorMessages.DECRYPTION_ERROR) {
+          // If the password is invalid it will throw a DecryptionError
+          this.setState({ errorMessage: t`Invalid password` });
+        }
+        throw err;
       }
     }
   };

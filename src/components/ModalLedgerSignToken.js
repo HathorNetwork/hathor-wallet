@@ -119,10 +119,10 @@ function ModalLedgerSignToken({token, modalId, cb, onClose}) {
     } else {
       switch (arg.error.status) {
         // user deny
-        case 0x6985: 
+        case 0x6985:
           setError('user_deny');
           break;
-        case 0xb00a: 
+        case 0xb00a:
           setError('invalid_token');
           break;
         default:
@@ -229,19 +229,19 @@ function ModalLedgerSignToken({token, modalId, cb, onClose}) {
   const renderErrorMessage = () => {
     let error = '';
     switch (errorMessage) {
-      case 'signature_fail': 
+      case 'signature_fail':
         error = t`Signature failed on Ledger`;
         break;
-      case 'user_deny': 
+      case 'user_deny':
         error = t`User denied token on Ledger`;
         break;
       case 'invalid_token':
         error = t`Ledger denied token`;
         break;
-      case 'invalid_symbol': 
+      case 'invalid_symbol':
         error = t`Invalid token symbol`;
         break;
-      case 'invalid_name': 
+      case 'invalid_name':
         error = t`Invalid token name`;
         break;
     }

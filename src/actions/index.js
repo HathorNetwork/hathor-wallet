@@ -152,8 +152,9 @@ export const resetWallet = () => ({ type: "reset_wallet" });
 
 /**
  * tokens {Array} array of token uids the the wallet has
+ * currentAddress {Object} The current unused address
  */
-export const loadWalletSuccess = (tokens) => ({ type: "load_wallet_success", payload: { tokens } });
+export const loadWalletSuccess = (tokens, currentAddress) => ({ type: "load_wallet_success", payload: { tokens, currentAddress } });
 
 /**
  * tx {Object} the new transaction

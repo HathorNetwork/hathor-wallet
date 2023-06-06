@@ -14,8 +14,7 @@ import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import { get } from 'lodash';
 import Loading from "../Loading";
 import helpers from "../../utils/helpers";
-import walletUtil from '../../utils/wallet';
-const { decimalToInteger } = walletUtil;
+import { decimalToInteger } from '../../utils/wallet';
 
 function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHandler, setErrMessage }) {
     const [txId, setTxId] = useState(utxo.tx_id || '');
@@ -30,7 +29,7 @@ function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHa
         utxoChanged({ txId, index: outputIndex, amount: 0, tokenId: '' });
     }
 
-    const localDataChanged = () => {
+    const localDataChanged = async () => {
         // Data was removed completely
         if (txId.length === 0 && outputIndex.length === 0) {
             setAmount('');
@@ -47,14 +46,14 @@ function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHa
         }
 
         // If no address can be found, this tx does not exist or is invalid for this wallet
-        const tx = wallet.getTx(txId);
+        const tx = await wallet.getTx(txId);
         const utxo = tx?.outputs[outputIndex];
         const filterAddress = utxo?.decoded.address;
         if (!filterAddress) {
             raiseInvalidInputError();
         }
         const options = { token: token.uid, filter_address: filterAddress };
-        const { utxos: validUtxos } = wallet.getUtxos(options);
+        const { utxos: validUtxos } = await wallet.getUtxos(options);
 
         const validUtxo = validUtxos.find(u => u.tx_id === txId && u.index === +outputIndex);
         if (!validUtxo) {
@@ -173,9 +172,9 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
 
     /**
      * Validates form fields and return true if all are valid
-     * @returns {boolean}
+     * @returns {Promise<boolean>}
      */
-    const validateForm = () => {
+    const validateForm = async () => {
         // An error message is already being exhibited for manual utxo selection.
         if (utxoError) {
             return false;
@@ -189,7 +188,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
                 return false;
             }
 
-            if (!wallet.isAddressMine(changeAddress)) {
+            if (!await wallet.isAddressMine(changeAddress)) {
                 setErrMessage(t`Change address does not belong to this wallet`);
                 return false;
             }
@@ -226,7 +225,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         e.preventDefault();
 
         // Don't submit an invalid form
-        if (!validateForm()) {
+        if (!await validateForm()) {
             return;
         }
 
@@ -325,8 +324,8 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
                                 <InputNumber key="value"
                                              name="amount"
                                              ref={amountRef}
-                                             defaultValue={hathorLib.helpers.prettyValue(amount)}
-                                             placeholder={hathorLib.helpers.prettyValue(0)}
+                                             defaultValue={hathorLib.numberUtils.prettyValue(amount)}
+                                             placeholder={hathorLib.numberUtils.prettyValue(0)}
                                              onValueChange={value => setAmount(value)}
                                              className="form-control output-value col-3"/>
                             </div>

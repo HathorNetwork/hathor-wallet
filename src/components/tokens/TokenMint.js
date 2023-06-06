@@ -166,7 +166,7 @@ class TokenMint extends React.Component {
            required
            className="form-control"
            onValueChange={this.onAmountChange}
-           placeholder={hathorLib.helpers.prettyValue(0)}
+           placeholder={hathorLib.numberUtils.prettyValue(0)}
           />
         );
       }
@@ -206,12 +206,14 @@ class TokenMint extends React.Component {
       }
     }
 
+    const depositPercent = this.props.wallet.storage.getTokenDepositPercentage();
+
     return (
       <TokenAction
        renderForm={renderForm}
        title={t`Mint tokens`}
-       subtitle={`A deposit of ${hathorLib.tokens.getDepositPercentage() * 100}% in HTR of the mint amount is required`}
-       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit())} HTR (${hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)`}
+       subtitle={`A deposit of ${depositPercent * 100}% in HTR of the mint amount is required`}
+       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent)} HTR (${hathorLib.numberUtils.prettyValue(this.props.htrBalance)} HTR available)`}
        buttonName={t`Go`}
        validateForm={this.mint}
        getSuccessMessage={this.getSuccessMessage}
