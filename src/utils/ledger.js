@@ -119,11 +119,12 @@ if (IPC_RENDERER) {
      * @param {Object} data Transaction data
      * @param {number} changeIndex Index of the change output. -1 in case there is no change
      * @param {number} changeKeyIndex Index of address of the change output
+     * @param {Network} network The network of the configured wallet, so we generate the data correctly
      *
      * @memberof Ledger
      * @inner
      */
-    sendTx(data, changeInfo, useOldProtocol) {
+    sendTx(data, changeInfo, useOldProtocol, network) {
       // XXX: if custom tokens not allowed, use old protocol for first change output
       // first assemble data to be sent
       const arr = [];
@@ -158,7 +159,7 @@ if (IPC_RENDERER) {
         });
       }
       const initialData = Buffer.concat(arr);
-      const tx = hathorLib.transactionUtils.createTransactionFromData(data, LOCAL_STORE.getNetwork());
+      const tx = hathorLib.transactionUtils.createTransactionFromData(data, network);
       const dataBytes = tx.getDataToSign();
       const dataToSend = Buffer.concat([initialData, dataBytes]);
 
@@ -169,16 +170,17 @@ if (IPC_RENDERER) {
      * Get tx signatures from ledger
      *
      * @param {Object} data Transaction data
+     * @param {HathorWallet} wallet Wallet to get address indexes
      *
      * @memberof Ledger
      * @inner
      */
-    getSignatures(data, keys) {
+    async getSignatures(data, wallet) {
       // send key indexes as 4-byte integers
       const arr = [];
       for (const input of data.inputs) {
-        const index = keys[input.address].index;
-        arr.push(index);
+        const addressIndex = await wallet.getAddressIndex(input.address);
+        arr.push(addressIndex);
       }
       IPC_RENDERER.send("ledger:getSignatures", arr);
     },

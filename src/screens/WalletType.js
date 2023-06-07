@@ -16,8 +16,8 @@ import InitialImages from '../components/InitialImages';
 import HathorAlert from '../components/HathorAlert';
 import { str2jsx } from '../utils/i18n';
 import { connect } from "react-redux";
-import hathorLib from '@hathor/wallet-lib';
 import { updateLedgerClosed } from '../actions/index';
+import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {
   return {
@@ -51,7 +51,7 @@ class WalletType extends React.Component {
    * Go to software wallet warning screen
    */
   goToSoftwareWallet = () => {
-    hathorLib.wallet.setWalletType('software');
+    LOCAL_STORE.setHardwareWallet(false);
     this.props.history.push('/software_warning/');
   }
 

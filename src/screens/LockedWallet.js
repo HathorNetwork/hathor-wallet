@@ -10,7 +10,6 @@ import { t } from 'ttag';
 import { connect } from "react-redux";
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
-import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { resolveLockWalletPromise, startWalletRequested, walletReset } from '../actions';
@@ -20,6 +19,7 @@ import colors from '../index.scss';
 const mapStateToProps = (state) => {
   return {
     lockWalletPromise: state.lockWalletPromise,
+    wallet: state.wallet,
   };
 };
 
@@ -58,12 +58,12 @@ class LockedWallet extends React.Component {
   }
 
   /**
-   * When user clicks on the unlock button  
+   * When user clicks on the unlock button
    * Checks if form is valid and if PIN is correct, then unlocks the wallet loading the data and redirecting
    *
    * @param {Object} e Event of when the button is clicked
    */
-  unlockClicked = (e) => {
+  unlockClicked = async (e) => {
     e.preventDefault();
 
     if (this.state.loading) {
@@ -74,7 +74,7 @@ class LockedWallet extends React.Component {
     if (isValid) {
       const pin = this.refs.pin.value;
       this.refs.unlockForm.classList.remove('was-validated')
-      if (!hathorLib.wallet.isPinCorrect(pin)) {
+      if (!await this.props.wallet.checkPin(pin)) {
         this.setState({ errorMessage: t`Invalid PIN` });
         return;
       }

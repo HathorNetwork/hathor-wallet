@@ -11,9 +11,13 @@ import { t } from 'ttag'
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import BackButton from '../components/BackButton';
-import hathorLib from '@hathor/wallet-lib';
+import { connect } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
+
+const mapStateToProps = (state) => {
+  return { wallet: state.wallet };
+};
 
 /**
  * Screen used to choose a passphrase for your wallet
@@ -34,15 +38,17 @@ class ChoosePassphrase extends React.Component {
    */
   handlePassphrase = () => {
     this.context.hideModal();
-    wallet.addPassphrase(this.refs.passphrase.value, this.refs.pin.value, this.refs.password.value, this.props.history);
-    this.props.history.push('/wallet/');
+    wallet.addPassphrase(this.props.wallet, this.refs.passphrase.value, this.refs.pin.value, this.refs.password.value, this.props.history)
+      .then(() => {
+        this.props.history.push('/wallet/');
+      });
   }
 
   /**
    * Method called when user clicks in the button to change the passphrase, then a modal opens to confirm the action
    * Validates if all form requirements are okay
    */
-  addClicked = () => {
+  addClicked = async () => {
     const isValid = this.refs.passphraseForm.checkValidity();
     if (isValid) {
       this.refs.passphraseForm.classList.remove('was-validated')
@@ -57,12 +63,12 @@ class ChoosePassphrase extends React.Component {
         return;
       }
 
-      if (!hathorLib.wallet.isPasswordCorrect(this.refs.password.value)) {
+      if (!await this.props.wallet.checkPassword(this.refs.password.value)) {
         this.setState({ errorMessage: t`Invalid password` });
         return;
       }
 
-      if (!hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
+      if (!await this.props.wallet.checkPin(this.refs.pin.value)) {
         this.setState({ errorMessage: t`Invalid PIN` });
         return;
       }
@@ -84,7 +90,7 @@ class ChoosePassphrase extends React.Component {
   }
 
   /**
-   * Method called when user clicks in the button to continue and that he understand the risks of it.  
+   * Method called when user clicks in the button to continue and that he understand the risks of it.
    * Validates if checkbox is checked and shows the form to set the passphrase
    */
   continueClicked = () => {
@@ -165,4 +171,4 @@ class ChoosePassphrase extends React.Component {
   }
 }
 
-export default ChoosePassphrase;
+export default connect(mapStateToProps)(ChoosePassphrase);

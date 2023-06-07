@@ -59,11 +59,9 @@ export default function EditSwap(props) {
      * The proposal editing will happen entirely on a local state, without interfering on the global
      * state. Only when explicitly saving will this persistence happen.
      */
-    const [partialTx, setPartialTx] = useState(deserializePartialTx(proposal.data.partialTx, wallet, proposal.data.signatures));
-    const [txBalances, setTxBalances] = useState(calculateExhibitionData(partialTx, tokensCache, wallet));
-    const [signaturesObj, setSignaturesObj] = useState(proposal.data.signatures && proposal.data.signatures.length
-        ? calculateSignaturesObject(partialTx, proposal.data.signatures)
-        : null);
+    const [partialTx, setPartialTx] = useState(new PartialTx(wallet.getNetworkObject()));
+    const [txBalances, setTxBalances] = useState([]);
+    const [signaturesObj, setSignaturesObj] = useState(null);
     const [hasAtLeastOneSig, setHasAtLeastOneSig] = useState(false);
     const dispatch = useDispatch();
 
@@ -246,19 +244,18 @@ export default function EditSwap(props) {
      * @param {number} amount
      * @param {Utxo[]} utxos
      */
-    const sendOperationHandler = ({ selectedToken, changeAddress, amount, utxos }) => {
-        const network = wallet.getNetworkObject();
-        const txProposal = PartialTxProposal.fromPartialTx(partialTx.serialize(), network);
+    const sendOperationHandler = async ({ selectedToken, changeAddress, amount, utxos }) => {
+        const txProposal = PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.storage);
 
         // Tokens added here will not be marked as selected, only when saved/updated
-        txProposal.addSend(wallet, selectedToken.uid, amount, {
+        await txProposal.addSend(selectedToken.uid, amount, {
             utxos,
             changeAddress: changeAddress,
             markAsSelected: false
         });
 
 
-        enrichTxData(txProposal.partialTx, wallet);
+        await enrichTxData(txProposal.partialTx, wallet);
         setPartialTx(txProposal.partialTx);
         setSignaturesObj(null);
         setHasTxChange(true);
@@ -272,11 +269,10 @@ export default function EditSwap(props) {
      * @param {string} address
      * @param {number} amount
      */
-    const receiveOperationHandler = ({ selectedToken, address, amount }) => {
-        const network = wallet.getNetworkObject();
-        const txProposal = PartialTxProposal.fromPartialTx(partialTx.serialize(), network);
-        txProposal.addReceive(wallet, selectedToken.uid, amount, { address });
-        enrichTxData(txProposal.partialTx, wallet);
+    const receiveOperationHandler = async ({ selectedToken, address, amount }) => {
+        const txProposal = PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.storage);
+        await txProposal.addReceive(selectedToken.uid, amount, { address });
+        await enrichTxData(txProposal.partialTx, wallet);
         setPartialTx(txProposal.partialTx);
         setSignaturesObj(null);
         setHasTxChange(true);
@@ -349,7 +345,7 @@ export default function EditSwap(props) {
     const signOperationHandler = async ({ pin }) => {
         const newProposal = PartialTxProposal.fromPartialTx(
             partialTx.serialize(),
-            wallet.getNetworkObject()
+            wallet.storage
         );
         await newProposal.signData(pin);
         const mySignatures = newProposal.signatures.serialize();
@@ -365,7 +361,7 @@ export default function EditSwap(props) {
         setHasSigChange(true);
 
         // Updating the signed inputs on the partialTx metadata
-        enrichTxData(newProposal.partialTx, wallet, newSignaturesObj.serialize());
+        await enrichTxData(newProposal.partialTx, wallet, newSignaturesObj.serialize());
         setPartialTx(newProposal.partialTx);
     }
 
@@ -375,7 +371,7 @@ export default function EditSwap(props) {
         });
     }
 
-    const handleSaveClick = () => {
+    const handleSaveClick = async () => {
         // Save to local redux
         if (hasTxChange) {
             // Update the selection mark on all old inputs
@@ -385,14 +381,14 @@ export default function EditSwap(props) {
 
                 if (!updatedInput) {
                     // This input was removed: unmark it
-                    wallet.markUtxoSelected(old.hash, old.index, false);
+                    await wallet.markUtxoSelected(old.hash, old.index, false);
                 }
             })
 
             // Mark all the current inputs as selected
             partialTx.inputs.forEach(i => {
                 if (i.isMine) {
-                    wallet.markUtxoSelected(i.hash, i.index, true);
+                    await wallet.markUtxoSelected(i.hash, i.index, true);
                 }
             })
 
@@ -425,10 +421,11 @@ export default function EditSwap(props) {
         modalContext.showModal(MODAL_TYPES.CONFIRM, {
             title: 'Remove all my inputs and outputs',
             body: confirmationMessage,
-            handleYes: () => {
+            handleYes: async () => {
                 // Unlocking the utxo for this wallet session
-                const inputsToRemove = partialTx.inputs.filter((input) => input.isMine);
-                inputsToRemove.forEach(i => wallet.markUtxoSelected(i.hash, i.index, false));
+                for (const inputToRemove of partialTx.inputs.filter((input) => input.isMine)) {
+                  await wallet.markUtxoSelected(inputToRemove.hash, inputToRemove.index, false)
+                }
 
                 // Removing the inputs from the local state
                 partialTx.inputs = partialTx.inputs.filter(input => {
@@ -443,7 +440,7 @@ export default function EditSwap(props) {
                 // Generate a new partialTx and store it
                 const newPartialTx = PartialTx.deserialize(partialTx.serialize(), wallet.getNetworkObject());
                 setTxBalances(calculateExhibitionData(newPartialTx, tokensCache, wallet));
-                enrichTxData(newPartialTx, wallet);
+                await enrichTxData(newPartialTx, wallet);
                 setPartialTx(newPartialTx);
                 setSignaturesObj(null);
                 setHasSigChange(true);
@@ -457,6 +454,16 @@ export default function EditSwap(props) {
     //-------------------------------------------------------
     // Effects
     //-------------------------------------------------------
+
+    useEffect(() => {
+      deserializePartialTx(proposal.data.partialTx, wallet).then(enrichedPartialTx => {
+        setPartialTx(enrichedPartialTx);
+        setTxBalances(calculateExhibitionData(enrichedPartialTx, tokensCache, wallet));
+        setSignaturesObj(proposal.data.signatures && proposal.data.signatures.length
+          ? calculateSignaturesObject(enrichedPartialTx, proposal.data.signatures)
+          : null);
+      });
+    }, []);
 
     // Re-fetching all the tokens involved in every proposal change and calculating ability to sign
     useEffect(() => {
@@ -487,7 +494,7 @@ export default function EditSwap(props) {
             const fullProposalObj = assembleProposal(
                 partialTx.serialize(),
                 signaturesObj.serialize(),
-                wallet.getNetworkObject()
+                wallet.storage
             );
             setShowSendTxButton(fullProposalObj.isComplete());
         }

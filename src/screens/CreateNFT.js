@@ -129,7 +129,7 @@ class CreateNFT extends React.Component {
     // Get the address to send the created tokens
     let address = '';
     if (this.autoselectAddressRef.current.checked) {
-      address = this.props.wallet.getCurrentAddress({ markAsUsed: true }).address;
+      address = (await this.props.wallet.getCurrentAddress({ markAsUsed: true })).address;
     } else {
       address = this.addressRef.current.value;
     }
@@ -163,7 +163,7 @@ class CreateNFT extends React.Component {
         });
       }
 
-      return new hathorLib.SendTransaction({ transaction, pin, network: this.props.wallet.getNetworkObject() });
+      return new hathorLib.SendTransaction({ transaction, pin, storage: this.props.wallet.storage });
     } catch (e) {
       this.setState({ errorMessage: e.message });
     }
@@ -202,7 +202,7 @@ class CreateNFT extends React.Component {
    * @param {Object} token Object with {uid, name, symbol}
    */
   showAlert = (token) => {
-    this.setState({ name: token.name, configurationString: hathorLib.tokens.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
+    this.setState({ name: token.name, configurationString: hathorLib.tokensUtils.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
       this.context.showModal(MODAL_TYPES.ALERT, {
         title: t`NFT ${this.state.name} created`,
         handleButton: this.alertButtonClick,
@@ -269,12 +269,14 @@ class CreateNFT extends React.Component {
   }
 
   render = () => {
-    // This htrDeposit variable will be used only in the explanation text
-    // so this must be 0.01 (the text will show 0.01%) because the amount to create for NFTs is an integer.
+    // The htrDeposit will show on the explanation text as 0.01% since NFTs use unit values
     // Then to create 100 units, the deposit is 0.01 HTR, to create 1,000 units the deposit is 0.1 HTR
-    const htrDeposit = hathorLib.tokens.getDepositPercentage();
-    const depositAmount = hathorLib.tokens.getDepositAmount(this.state.amount);
-    const nftFee = hathorLib.helpers.prettyValue(tokens.getNFTFee());
+    // This is in the place of 0.01 HTR to create 1.00 of a custom token.
+    // The actual math for the UI value would be htrDeposit * 100 / (10^(2-DECIMAL_PLACES))
+    // Since NFT have 0 for DECIMAL_PLACES we get htrDeposit * 100/100 which is htrDeposit
+    const htrDeposit = this.props.wallet.storage.getTokenDepositPercentage();
+    const depositAmount = hathorLib.tokensUtils.getDepositAmount(this.state.amount, htrDeposit);
+    const nftFee = hathorLib.numberUtils.prettyValue(tokens.getNFTFee());
 
     return (
       <div className="content-wrapper">
@@ -356,10 +358,10 @@ class CreateNFT extends React.Component {
             </div>
           </div>
           <hr className="mb-5 mt-5"/>
-          <p><strong>HTR available:</strong> {hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR</p>
-          <p><strong>Deposit:</strong> {hathorLib.helpers.prettyValue(depositAmount)} HTR</p>
+          <p><strong>HTR available:</strong> {hathorLib.numberUtils.prettyValue(this.props.htrBalance)} HTR</p>
+          <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount)} HTR</p>
           <p><strong>Fee:</strong> {nftFee} HTR</p>
-          <p><strong>Total:</strong> {hathorLib.helpers.prettyValue(tokens.getNFTFee() + depositAmount)} HTR</p>
+          <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokens.getNFTFee() + depositAmount)} HTR</p>
           <button type="button" className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>

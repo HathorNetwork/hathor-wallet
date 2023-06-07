@@ -12,6 +12,7 @@ import { VERSION } from "./constants";
 export const WALLET_VERSION_KEY = 'localstorage:version';
 // This key holds the storage version to indicate the migration strategy
 export const STORE_VERSION_KEY = 'localstorage:storeversion';
+export const LEDGER_APP_VERSION_KEY = 'localstorage:ledger:version';
 // This marks the wallet as being manually locked
 export const LOCKED_KEY = 'localstorage:lock';
 // This key marks the wallet as being correctly closed
@@ -340,6 +341,14 @@ export class LocalStorageStore {
 
   isBackupDone() {
     return !!this.getItem(IS_BACKUP_DONE_KEY)
+  }
+
+  saveLedgerAppVersion(version) {
+    this.setItem(LEDGER_APP_VERSION_KEY, version);
+  }
+
+  getLedgerAppVersion() {
+    return this.getItem(LEDGER_APP_VERSION_KEY);
   }
 }
 

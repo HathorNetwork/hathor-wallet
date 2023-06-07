@@ -11,10 +11,9 @@ import HathorPaginate from '../components/HathorPaginate';
 import HathorAlert from '../components/HathorAlert';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
+import wallet from '../utils/wallet';
 import path from 'path';
 import { connect } from "react-redux";
-
-import hathorLib from '@hathor/wallet-lib';
 
 const mapStateToProps = (state) => {
   return {
@@ -104,7 +103,7 @@ class AddressList extends React.Component {
   search = () => {
     const text = this.refs.txSearch.value;
     if (text) {
-      if (hathorLib.transaction.isAddressValid(text)) {
+      if (wallet.validateAddress(text)) {
         for (const addr of this.state.addresses) {
           if (addr.address === text) {
             this.setState({ filtered: true, filteredAddresses: [addr], totalPages: 1, page: 1 });

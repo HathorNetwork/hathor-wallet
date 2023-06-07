@@ -95,7 +95,7 @@ class TransactionDetail extends React.Component {
     try {
       const data = await this.props.wallet.getFullTxById(this.props.match.params.id);
 
-      if (!hathorLib.helpers.isBlock(data.tx)) {
+      if (!hathorLib.transactionUtils.isBlock(data.tx)) {
         this.getConfirmationData();
       }
 

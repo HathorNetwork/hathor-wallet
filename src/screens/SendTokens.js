@@ -20,6 +20,7 @@ import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT } from '../constants';
 import ReactLoading from 'react-loading';
 import colors from '../index.scss';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {
   return {
@@ -216,8 +217,10 @@ class SendTokens extends React.Component {
    * Execute ledger get signatures
    */
   getSignatures = () => {
-    const keys = hathorLib.wallet.getWalletData().keys;
-    ledger.getSignatures(Object.assign({}, this.data), keys);
+    ledger.getSignatures(
+      Object.assign({}, this.data),
+      this.props.wallet.storage,
+    );
   }
 
   /**
@@ -252,7 +255,7 @@ class SendTokens extends React.Component {
    */
   beforeSendLedger = () => {
     // remove HTR if present
-    const txTokens = this.state.txTokens.filter(t => !hathorLib.tokens.isHathorToken(t.uid));
+    const txTokens = this.state.txTokens.filter(t => !hathorLib.tokensUtils.isHathorToken(t.uid));
 
     if (txTokens.length === 0) {
       // no custom tokens, just send
@@ -290,40 +293,37 @@ class SendTokens extends React.Component {
    * Method executed to send transaction on ledger
    * It opens the ledger modal to wait for user action on the device
    */
-  executeSendLedger = () => {
+  executeSendLedger = async () => {
     // Wallet Service currently does not support Ledger, so we default to the regular SendTransaction
     this.sendTransaction = new hathorLib.SendTransaction({
       outputs: this.data.outputs,
       inputs: this.data.inputs,
-      network: this.props.wallet.getNetworkObject(),
+      storage: this.props.wallet.storage,
     });
 
     try {
       // Errors may happen in this step ( ex.: insufficient amount of tokens )
-      this.data = this.sendTransaction.prepareTxData();
+      this.data = await this.sendTransaction.prepareTxData();
     }
     catch (e) {
       this.setState({ errorMessage: e.message, ledgerStep: 0 })
       return;
     }
 
-    // Complete data with default values
-    hathorLib.transaction.completeTx(this.data);
-
     const changeInfo = [];
-    const keys = hathorLib.wallet.getWalletData().keys;
-    this.data.outputs.forEach((output, outputIndex) => {
+    for (const output of this.data.outputs.entries()) {
       if (output.isChange) {
         changeInfo.push({
           outputIndex,
-          keyIndex: keys[output.address].index,
+          keyIndex: await this.props.wallet.getAddressIndex(output.address),
         });
       }
-    });
+    }
 
     const useOldProtocol = !version.isLedgerCustomTokenAllowed();
 
-    ledger.sendTx(this.data, changeInfo, useOldProtocol);
+    const network = this.props.wallet.getNetworkObject();
+    ledger.sendTx(this.data, changeInfo, useOldProtocol, network);
     this.context.showModal(MODAL_TYPES.ALERT, {
       title: t`Validate outputs on Ledger`,
       body: this.renderAlertBody(),
@@ -343,7 +343,7 @@ class SendTokens extends React.Component {
     this.setState({ errorMessage: '' });
     try {
       this.data = data;
-      if (hathorLib.wallet.isSoftwareWallet()) {
+      if (!LOCAL_STORE.isHardwareWallet()) {
         this.context.showModal(MODAL_TYPES.PIN, {
           onSuccess: ({pin}) => {
             this.context.showModal(MODAL_TYPES.SEND_TX, {

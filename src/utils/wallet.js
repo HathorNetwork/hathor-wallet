@@ -95,6 +95,23 @@ const storageKeys = {
  */
 const wallet = {
   /**
+   * Validates an address
+   *
+   * @param {string} address Address in base58
+   *
+   * @return {boolean} boolean indicating if address is valid
+   */
+  validateAddress(address) {
+    try {
+      const addressObj = new hathorLib.Address(address, { network: networkObj });
+      addressObj.validateAddress();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  /**
    * Validate if can generate the wallet with those parameters and then, call to generate it
    *
    * @param {string} words Words to generate the HD Wallet seed,

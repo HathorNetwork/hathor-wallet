@@ -10,12 +10,12 @@ import { t } from 'ttag'
 
 import SpanFmt from '../components/SpanFmt';
 import logo from '../assets/images/hathor-logo.png';
-import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
 import InitialImages from '../components/InitialImages';
 import { LEDGER_ENABLED, TERMS_OF_SERVICE_URL, PRIVACY_POLICY_URL } from '../constants';
 import { str2jsx } from '../utils/i18n';
 import helpers from '../utils/helpers';
+import LOCAL_STORE from '../storage';
 
 
 /**
@@ -36,13 +36,13 @@ class Welcome extends React.Component {
     const isValid = this.refs.agreeForm.checkValidity();
     this.setState({ formValidated: !isValid });
     if (isValid) {
-      hathorLib.wallet.markWalletAsStarted();
+      LOCAL_STORE.markWalletAsStarted();
       // For the mainnet sentry will be disabled by default and the user can change this on Settings
       wallet.disallowSentry();
       if (LEDGER_ENABLED) {
         this.props.history.push('/wallet_type/');
       } else {
-        hathorLib.wallet.setWalletType('software');
+        LOCAL_STORE.setHardwareWallet(false);
         this.props.history.push('/signin/');
       }
     }
