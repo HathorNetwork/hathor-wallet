@@ -132,7 +132,7 @@ export function* dispatchLedgerTokenSignatureVerification(wallet) {
 
   const registeredTokens = yield tokensUtils.getRegisteredTokens(wallet, true);
   const tokensToVerify = registeredTokens
-      .filter(t => tokenSignatures[t.uid] != undefined)
+      .filter(t => !!tokenSignatures[t.uid])
       .map(t => {
         const signature = tokenSignatures[t.uid];
         return { ...t, signature };

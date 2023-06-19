@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import SpanFmt from '../components/SpanFmt';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
@@ -206,7 +205,7 @@ class Server extends React.Component {
    * we successfully validated that the user has written 'testnet' on the input
    * so we can execute the change
    */
-  confirmTestnetServer = () => {
+  confirmTestnetServer = async () => {
     await this.props.wallet.changeServer(this.state.selectedServer);
     if (this.props.useWalletService) {
       await this.props.wallet.changeWsServer(this.state.selectedWsServer);

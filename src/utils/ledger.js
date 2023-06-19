@@ -7,7 +7,6 @@
 
 import { IPC_RENDERER, LEDGER_TOKEN_VERSION } from '../constants';
 import hathorLib from '@hathor/wallet-lib';
-import LOCAL_STORE from '../storage';
 
 /**
  * Error thrown when we get an error from Ledger

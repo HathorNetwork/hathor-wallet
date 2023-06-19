@@ -10,7 +10,6 @@ import { t } from 'ttag'
 
 import logo from '../assets/images/hathor-logo.png';
 import wallet from '../utils/wallet';
-import { HATHOR_WEBSITE_URL } from '../constants';
 import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
 import HathorAlert from '../components/HathorAlert';

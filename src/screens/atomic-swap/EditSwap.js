@@ -260,7 +260,7 @@ export default function EditSwap(props) {
         setSignaturesObj(null);
         setHasTxChange(true);
         setHasSigChange(true);
-        setTxBalances(calculateExhibitionData(txProposal.partialTx, tokensCache, wallet));
+        setTxBalances(await calculateExhibitionData(txProposal.partialTx, tokensCache, wallet));
     }
 
     /**
@@ -277,7 +277,7 @@ export default function EditSwap(props) {
         setSignaturesObj(null);
         setHasTxChange(true);
         setHasSigChange(true);
-        setTxBalances(calculateExhibitionData(txProposal.partialTx, tokensCache, wallet));
+        setTxBalances(await calculateExhibitionData(txProposal.partialTx, tokensCache, wallet));
     }
 
     const handleSendClick = () => {
@@ -376,21 +376,21 @@ export default function EditSwap(props) {
         if (hasTxChange) {
             // Update the selection mark on all old inputs
             const oldPartialTx = deserializePartialTx(proposal.data.partialTx, wallet);
-            oldPartialTx.inputs.forEach(old => {
-                const updatedInput = partialTx.inputs.find(updated => updated.hash === old.hash);
+            for (const old of oldPartialTx.inputs) {
+              const updatedInput = partialTx.inputs.find(updated => updated.hash === old.hash);
 
-                if (!updatedInput) {
-                    // This input was removed: unmark it
-                    await wallet.markUtxoSelected(old.hash, old.index, false);
-                }
-            })
+              if (!updatedInput) {
+                  // This input was removed: unmark it
+                  await wallet.markUtxoSelected(old.hash, old.index, false);
+              }
+             }
 
             // Mark all the current inputs as selected
-            partialTx.inputs.forEach(i => {
+            for (const i of partialTx.inputs) {
                 if (i.isMine) {
                     await wallet.markUtxoSelected(i.hash, i.index, true);
                 }
-            })
+            }
 
             // Update the global redux state
             proposal.data.partialTx = partialTx.serialize();
@@ -439,7 +439,7 @@ export default function EditSwap(props) {
 
                 // Generate a new partialTx and store it
                 const newPartialTx = PartialTx.deserialize(partialTx.serialize(), wallet.getNetworkObject());
-                setTxBalances(calculateExhibitionData(newPartialTx, tokensCache, wallet));
+                setTxBalances(await calculateExhibitionData(newPartialTx, tokensCache, wallet));
                 await enrichTxData(newPartialTx, wallet);
                 setPartialTx(newPartialTx);
                 setSignaturesObj(null);
@@ -456,13 +456,19 @@ export default function EditSwap(props) {
     //-------------------------------------------------------
 
     useEffect(() => {
-      deserializePartialTx(proposal.data.partialTx, wallet).then(enrichedPartialTx => {
+      // We define the async method and call it so we do not use an async method on useEffect
+      // The effect return should be the cleanup method, but any async will return
+      // a promise and a Promise<void> would be interpreted as a cleanup funcion, which would
+      // break when trying to be called.
+      async function internalEffect() {
+        const enrichedPartialTx = await deserializePartialTx(proposal.data.partialTx, wallet);
         setPartialTx(enrichedPartialTx);
-        setTxBalances(calculateExhibitionData(enrichedPartialTx, tokensCache, wallet));
+        setTxBalances(await calculateExhibitionData(enrichedPartialTx, tokensCache, wallet));
         setSignaturesObj(proposal.data.signatures && proposal.data.signatures.length
           ? calculateSignaturesObject(enrichedPartialTx, proposal.data.signatures)
           : null);
-      });
+      };
+      internalEffect();
     }, []);
 
     // Re-fetching all the tokens involved in every proposal change and calculating ability to sign
@@ -502,7 +508,10 @@ export default function EditSwap(props) {
 
     // Enriching local exhibition data with updated token symbol and name
     useEffect(() => {
-        setTxBalances(calculateExhibitionData(partialTx, tokensCache, wallet));
+      async function internalEffect() {
+        setTxBalances(await calculateExhibitionData(partialTx, tokensCache, wallet));
+      }
+      internalEffect();
     }, [tokensCache])
 
     // Main screen render

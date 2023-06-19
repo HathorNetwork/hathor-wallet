@@ -22,11 +22,13 @@ import {
   resetSelectedTokenIfNeeded,
 } from '../actions/index';
 import {
+  Address,
   constants as hathorConstants,
   errors as hathorErrors,
   walletUtils,
   metadataApi,
   storageUtils,
+  Network,
 } from '@hathor/wallet-lib';
 import { chunk, get } from 'lodash';
 import helpers from '../utils/helpers';
@@ -102,8 +104,10 @@ const wallet = {
    * @return {boolean} boolean indicating if address is valid
    */
   validateAddress(address) {
+    const networkName = LOCAL_STORE.getNetwork() || 'mainnet';
+    const networkObj = new Network(networkName);
     try {
-      const addressObj = new hathorLib.Address(address, { network: networkObj });
+      const addressObj = new Address(address, { network: networkObj });
       addressObj.validateAddress();
       return true;
     } catch (e) {
@@ -476,7 +480,7 @@ const wallet = {
 
     // Load history from new server
     await storageUtils.reloadStorage(wallet.storage, wallet.conn);
-    await afterLoadAddressHistory(wallet);
+    await this.afterLoadAddressHistory(wallet);
   },
 
   /**
@@ -719,7 +723,7 @@ const wallet = {
    * @returns {Record<string,{ id:string, password:string }>}
    */
   getListenedProposals() {
-    const proposalMap = storage.getItem(storageKeys.atomicProposals);
+    const proposalMap = LOCAL_STORE.getItem(storageKeys.atomicProposals);
     return proposalMap || {};
   },
 
@@ -728,7 +732,7 @@ const wallet = {
    * @param {Record<string,{ id:string, password:string }>} proposalList
    */
   setListenedProposals(proposalList) {
-    storage.setItem(storageKeys.atomicProposals, proposalList);
+    LOCAL_STORE.setItem(storageKeys.atomicProposals, proposalList);
   },
 }
 

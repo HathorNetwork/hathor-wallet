@@ -130,9 +130,9 @@ export async function enrichTxData(partialTx, wallet, strSignatures) {
  * @param {PartialTx} partialTx
  * @param {Record<string, {symbol: string, name: string, tokenUid: string}>} cachedTokens
  * @param {HathorWallet} wallet
- * @returns {DisplayBalance[]}
+ * @returns {Promise<DisplayBalance[]>}
  */
-export function calculateExhibitionData(partialTx, cachedTokens, wallet) {
+export async function calculateExhibitionData(partialTx, cachedTokens, wallet) {
     const getTokenOrCreate = (tokenUid) => {
         const cachedToken = cachedTokens[tokenUid];
         if (!cachedToken) {

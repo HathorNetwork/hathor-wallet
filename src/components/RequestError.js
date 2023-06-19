@@ -161,7 +161,7 @@ class RequestErrorModal extends React.Component {
   }
 
   render() {
-    const serverURL = hathorLib.config.getServerURL();
+    const serverURL = hathorLib.config.getServerUrl();
     return (
       <div className="modal fade" id="requestErrorModal" tabIndex="-1" role="dialog" aria-labelledby="requestErrorModal" aria-hidden="true">
         <div className="modal-dialog" role="document">

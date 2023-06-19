@@ -311,7 +311,7 @@ class SendTokens extends React.Component {
     }
 
     const changeInfo = [];
-    for (const output of this.data.outputs.entries()) {
+    for (const [outputIndex, output] of this.data.outputs.entries()) {
       if (output.isChange) {
         changeInfo.push({
           outputIndex,

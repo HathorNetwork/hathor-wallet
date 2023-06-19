@@ -75,7 +75,7 @@ function* fetchProposalDataConsumer(fetchProposalDataChannel) {
  * @param {string} [action.force=false]
  */
 function* fetchProposalData(action) {
-    const { proposalId, password, force } = action;
+    const { proposalId, force } = action;
 
     try {
         const proposalData = yield select((state) => get(state.proposals, proposalId));

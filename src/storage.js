@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { LevelDBStore, Storage, walletUtils } from "@hathor/wallet-lib";
+import CryptoJS from 'crypto-js';
+import { LevelDBStore, Storage, walletUtils, config, network } from "@hathor/wallet-lib";
 import { VERSION } from "./constants";
 
 
@@ -107,7 +108,7 @@ export class LocalStorageStore {
       {
         pin,
         password,
-        networkName: network,
+        networkName: config.getNetwork().name,
       }
     );
     const walletId = walletUtils.getWalletIdFromXPub(accessData.xpubkey);
@@ -271,7 +272,7 @@ export class LocalStorageStore {
   }
 
   isLocked() {
-    return this.getItem(LOCKED_KEY) || false;
+    return this.getItem(LOCKED_KEY) || true;
   }
 
   close() {
@@ -304,7 +305,7 @@ export class LocalStorageStore {
 
   setNetwork(networkName) {
     this.setItem(NETWORK_KEY, networkName);
-    hathorLib.network.setNetwork(network);
+    network.setNetwork(networkName);
   }
 
   getNetwork() {
