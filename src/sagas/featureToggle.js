@@ -150,8 +150,6 @@ export function* monitorFeatureFlags(currentRetry = 0) {
 
 export function* setupUnleashListeners(unleashClient) {
   const channel = eventChannel((emitter) => {
-    const listener = (state) => emitter(state);
-
     unleashClient.on(UnleashEvents.UPDATE, () => emitter({
       type: 'FEATURE_TOGGLE_UPDATE',
     }));
@@ -166,9 +164,7 @@ export function* setupUnleashListeners(unleashClient) {
     }));
 
     return () => {
-      unleashClient.removeListener(UnleashEvents.UPDATE, listener);
-      unleashClient.removeListener(UnleashEvents.READY, listener);
-      unleashClient.removeListener(UnleashEvents.ERROR, listener);
+      // XXX: This should be a cleanup but removeListener does not exist
     };
   });
 

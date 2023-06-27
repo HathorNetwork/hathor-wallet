@@ -645,7 +645,9 @@ export function* onWalletReset() {
 
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
   LOCAL_STORE.resetStorage();
-  yield wallet.storage.cleanStorage(true, true);
+  if (wallet) {
+    yield wallet.storage.cleanStorage(true, true);
+  }
 
   yield put(walletResetSuccess());
 
