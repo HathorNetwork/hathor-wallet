@@ -17,7 +17,7 @@ Sentry.init({
 
 process.once('loaded', () => {
   // Set closed in localStorage, so user does not open in the wallet page
-  localStorage.setItem('wallet:closed', true);
+  localStorage.setItem('localstorage:closed', true);
 
   // Sending to main process the information about systray message
   const systrayMessageChecked = JSON.parse(localStorage.getItem('wallet:systray_message_checked')) === true;
