@@ -66,11 +66,11 @@ const version = {
    */
   checkWalletVersion() {
     const version = LOCAL_STORE.getWalletVersion();
-    if (version !== null && hathorLib.helpersUtils.isVersionAllowed(version, FIRST_WALLET_COMPATIBLE_VERSION)) {
+    if (version === null) {
+      // We do not have a version to check yet, so we will let this check pass.
       return true;
-    } else {
-      return false;
     }
+    return hathorLib.helpersUtils.isVersionAllowed(version, FIRST_WALLET_COMPATIBLE_VERSION);
   },
 
   /**

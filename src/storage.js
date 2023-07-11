@@ -6,7 +6,7 @@
  */
 
 import CryptoJS from 'crypto-js';
-import { LevelDBStore, Storage, walletUtils, config, network } from "@hathor/wallet-lib";
+import { LevelDBStore, Storage, walletUtils, config, network, cryptoUtils } from "@hathor/wallet-lib";
 import { VERSION } from "./constants";
 
 
@@ -261,6 +261,23 @@ export class LocalStorageStore {
     }
     // We have finished the migration so we can set the storage version to the most recent one.
     this.updateStorageVersion();
+  }
+
+  async checkPin(pinCode) {
+    const accessData = await this.getAvailableAccessData();
+    let mainEncryptedData = accessData.mainKey;
+    if (!mainEncryptedData.data) {
+      // Old storage
+      mainEncryptedData = {
+        data: accessData.mainKey,
+        hash: accessData.hash,
+        salt: accessData.salt,
+        iterations: accessData.hashIterations,
+        pbkdf2Hasher: accessData.pbkdf2Hasher,
+      };
+    }
+
+    return cryptoUtils.checkPassword(mainEncryptedData, pinCode);
   }
 
   lock() {

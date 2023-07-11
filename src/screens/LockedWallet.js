@@ -14,12 +14,12 @@ import ReactLoading from 'react-loading';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { resolveLockWalletPromise, startWalletRequested, walletReset } from '../actions';
 import colors from '../index.scss';
+import LOCAL_STORE from '../storage';
 
 
 const mapStateToProps = (state) => {
   return {
     lockWalletPromise: state.lockWalletPromise,
-    wallet: state.wallet,
   };
 };
 
@@ -74,7 +74,7 @@ class LockedWallet extends React.Component {
     if (isValid) {
       const pin = this.refs.pin.value;
       this.refs.unlockForm.classList.remove('was-validated')
-      if (!await this.props.wallet.checkPin(pin)) {
+      if (!await LOCAL_STORE.checkPin(pin)) {
         this.setState({ errorMessage: t`Invalid PIN` });
         return;
       }
