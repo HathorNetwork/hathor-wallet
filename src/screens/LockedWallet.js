@@ -97,7 +97,6 @@ class LockedWallet extends React.Component {
       this.props.startWallet({
         pin,
         routerHistory: this.props.history,
-        fromXpriv: true,
       });
     } else {
       this.refs.unlockForm.classList.add('was-validated')

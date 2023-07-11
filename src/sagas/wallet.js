@@ -6,6 +6,7 @@ import {
   config,
   transactionUtils,
   errors as hathorErrors,
+  cryptoUtils,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -105,6 +106,7 @@ export function* startWallet(action) {
     xpub,
     hardware,
   } = action.payload;
+  let xpriv = null;
 
   yield put(loadingAddresses(true));
   yield put(storeRouterHistory(routerHistory));
@@ -163,9 +165,15 @@ export function* startWallet(action) {
       }
     }
 
+    if (!(words && xpub)) {
+      const accessData = yield storage.getAccessData();
+      xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
+    }
+
     const walletConfig = {
       seed: words,
       xpub,
+      xpriv,
       requestPassword: async () => new Promise((resolve) => {
         /**
          * Lock screen will call `resolve` with the pin screen after validation
@@ -189,8 +197,14 @@ export function* startWallet(action) {
       dispatch(reloadingWallet());
     };
 
+    if (!(words && xpub)) {
+      const accessData = yield storage.getAccessData();
+      xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
+    }
+
     const walletConfig = {
       seed: words,
+      xpriv,
       xpub,
       passphrase,
       connection,
