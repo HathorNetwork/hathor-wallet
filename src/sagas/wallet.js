@@ -165,7 +165,7 @@ export function* startWallet(action) {
       }
     }
 
-    if (!(words && xpub)) {
+    if (!(words || xpub)) {
       const accessData = yield storage.getAccessData();
       xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
     }
@@ -197,7 +197,7 @@ export function* startWallet(action) {
       dispatch(reloadingWallet());
     };
 
-    if (!(words && xpub)) {
+    if (!(words || xpub)) {
       const accessData = yield storage.getAccessData();
       xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
     }
@@ -304,6 +304,8 @@ export function* startWallet(action) {
     yield put(startWalletFailed());
     return;
   }
+
+  LOCAL_STORE.unlock();
 
   routerHistory.replace('/wallet/');
 

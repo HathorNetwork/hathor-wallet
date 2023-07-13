@@ -502,7 +502,7 @@ const wallet = {
    * @inner
    */
   allowSentry() {
-    localStorage.setItem(storageKeys.sentry, true);
+    LOCAL_STORE.setItem(storageKeys.sentry, true);
     this.updateSentryState();
   },
 
@@ -513,7 +513,7 @@ const wallet = {
    * @inner
    */
   disallowSentry() {
-    localStorage.setItem(storageKeys.sentry, false);
+    LOCAL_STORE.setItem(storageKeys.sentry, false);
     this.updateSentryState();
   },
 
@@ -526,7 +526,7 @@ const wallet = {
    * @inner
    */
   getSentryPermission() {
-    return localStorage.getItem(storageKeys.sentry);
+    return LOCAL_STORE.getItem(storageKeys.sentry);
   },
 
   /**
@@ -604,7 +604,7 @@ const wallet = {
    * @inner
    */
   isNotificationOn() {
-    return localStorage.getItem(storageKeys.notification) !== false;
+    return LOCAL_STORE.getItem(storageKeys.notification) !== false;
   },
 
   /**
@@ -614,7 +614,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOn() {
-    localStorage.setItem(storageKeys.notification, true);
+    LOCAL_STORE.setItem(storageKeys.notification, true);
   },
 
   /**
@@ -624,7 +624,7 @@ const wallet = {
    * @inner
    */
   turnNotificationOff() {
-    localStorage.setItem(storageKeys.notification, false);
+    LOCAL_STORE.setItem(storageKeys.notification, false);
   },
 
   /**
@@ -636,7 +636,7 @@ const wallet = {
    * @inner
    */
   areZeroBalanceTokensHidden() {
-    return localStorage.getItem(storageKeys.hideZeroBalanceTokens) === true;
+    return LOCAL_STORE.getItem(storageKeys.hideZeroBalanceTokens) === true;
   },
 
   /**
@@ -646,7 +646,7 @@ const wallet = {
    * @inner
    */
   hideZeroBalanceTokens() {
-    localStorage.setItem(storageKeys.hideZeroBalanceTokens, true);
+    LOCAL_STORE.setItem(storageKeys.hideZeroBalanceTokens, true);
     // If the token selected has been hidden, then we must select HTR
     store.dispatch(resetSelectedTokenIfNeeded());
   },
@@ -658,7 +658,7 @@ const wallet = {
    * @inner
    */
   showZeroBalanceTokens() {
-    localStorage.setItem(storageKeys.hideZeroBalanceTokens, false);
+    LOCAL_STORE.setItem(storageKeys.hideZeroBalanceTokens, false);
   },
 
   /**
@@ -668,13 +668,13 @@ const wallet = {
    * @param {boolean} newValue If true, the token will always be shown
    */
   setTokenAlwaysShow(tokenUid, newValue) {
-    const alwaysShowMap = localStorage.getItem(storageKeys.alwaysShowTokens) || {};
+    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};
     if (!newValue) {
       delete alwaysShowMap[tokenUid];
     } else {
       alwaysShowMap[tokenUid] = true;
     }
-    localStorage.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
+    LOCAL_STORE.setItem(storageKeys.alwaysShowTokens, alwaysShowMap);
   },
 
   /**
@@ -683,7 +683,7 @@ const wallet = {
    * @returns {boolean}
    */
   isTokenAlwaysShow(tokenUid) {
-    const alwaysShowMap = localStorage.getItem(storageKeys.alwaysShowTokens) || {};
+    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};
     return alwaysShowMap[tokenUid] || false;
   },
 
@@ -696,7 +696,7 @@ const wallet = {
    * @returns {string[]}
    */
   listTokensAlwaysShow() {
-    const alwaysShowMap = localStorage.getItem(storageKeys.alwaysShowTokens) || {};;
+    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};;
     return Object.keys(alwaysShowMap);
   },
 

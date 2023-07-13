@@ -79,6 +79,8 @@ class LockedWallet extends React.Component {
         return;
       }
 
+      await LOCAL_STORE.handleDataMigration(pin);
+
       // LockedWallet screen was called for a result, so we should resolve the promise with the PIN after
       // it is validated.
       if (this.props.lockWalletPromise) {
@@ -92,8 +94,6 @@ class LockedWallet extends React.Component {
         loading: true,
       });
 
-      // Start the wallet from an xpriv that's already encrypted in localStorage.
-      // Because of that we don't need to send the seed neither the password.
       this.props.startWallet({
         pin,
         routerHistory: this.props.history,

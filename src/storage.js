@@ -6,7 +6,7 @@
  */
 
 import CryptoJS from 'crypto-js';
-import { LevelDBStore, Storage, walletUtils, config, network, cryptoUtils } from "@hathor/wallet-lib";
+import { LevelDBStore, Storage, walletUtils, config, network, cryptoUtils, WalletType } from "@hathor/wallet-lib";
 import { VERSION } from "./constants";
 
 
@@ -116,6 +116,7 @@ export class LocalStorageStore {
     const storage = this.getStorage();
     await storage.saveAccessData(accessData);
     this._storage = storage;
+    this.updateStorageVersion();
     return storage;
   }
 
@@ -241,13 +242,21 @@ export class LocalStorageStore {
    * @param {String} pin Unlock PIN written by the user
    * @async
    */
-  async handleDataMigration(password, pin) {
+  async handleDataMigration(pin) {
     const storageVersion = this.getStorageVersion();
-    const oldWords = this.getOldWalletWords(password);
-    if (storageVersion === null && oldWords !== null) {
+    if (storageVersion === null) {
       // We are migrating from an version of wallet-lib prior to 1.0.0
       // This will generate the encrypted keys and other metadata
-      const storage = await this.initStorage(oldWords, password, pin);
+      const accessData = this.migrateAccessData(pin);
+      // Prepare the storage with the migrated access data
+      this._storage = null;
+      this.setHardwareWallet(false);
+      const walletId = walletUtils.getWalletIdFromXPub(accessData.xpubkey);
+      this.setWalletId(walletId);
+      const storage = this.getStorage();
+      await storage.saveAccessData(accessData);
+      this._storage = storage;
+
       await this.handleMigrationOldRegisteredTokens(storage);
       const isBackupDone = this.getItem('wallet:backup');
       if (isBackupDone) {
@@ -261,6 +270,44 @@ export class LocalStorageStore {
     }
     // We have finished the migration so we can set the storage version to the most recent one.
     this.updateStorageVersion();
+  }
+
+  migrateAccessData(pin) {
+    const oldAccessData = this.getItem('wallet:accessData');
+    let acctPathKey;
+    let authKey;
+    if (oldAccessData.acctPathMainKey) {
+      const decryptedAcctKey = CryptoJS.AES.decrypt(oldAccessData.acctPathMainKey, pin);
+      const acctKeyStr = decryptedAcctKey.toString(CryptoJS.enc.Utf8);
+      acctPathKey = cryptoUtils.encryptData(acctKeyStr, pin);
+    }
+    if (oldAccessData.authKey) {
+      const decryptedAuthKey = CryptoJS.AES.decrypt(oldAccessData.authKey, pin);
+      const authKeyStr = decryptedAuthKey.toString(CryptoJS.enc.Utf8);
+      authKey = cryptoUtils.encryptData(authKeyStr, pin);
+    }
+
+    return {
+      walletType: WalletType.P2PKH,
+      walletFlags: 0,
+      xpubkey: oldAccessData.xpubkey,
+      acctPathKey,
+      authKey,
+      words: {
+        data: oldAccessData.words,
+        hash: oldAccessData.hashPasswd,
+        salt: oldAccessData.saltPasswd,
+        iterations: oldAccessData.hashIterations,
+        pbkdf2Hasher: oldAccessData.pbkdf2Hasher,
+      },
+      mainKey: {
+        data: oldAccessData.mainKey,
+        hash: oldAccessData.hash,
+        salt: oldAccessData.salt,
+        iterations: oldAccessData.hashIterations,
+        pbkdf2Hasher: oldAccessData.pbkdf2Hasher,
+      },
+    };
   }
 
   async checkPin(pinCode) {
@@ -289,7 +336,7 @@ export class LocalStorageStore {
   }
 
   isLocked() {
-    return this.getItem(LOCKED_KEY) || true;
+    return this.getItem(LOCKED_KEY) ?? true;
   }
 
   close() {

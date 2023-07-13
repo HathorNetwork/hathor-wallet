@@ -76,6 +76,8 @@ class Root extends React.Component {
 
   componentDidMount() {
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
+    // Start the wallet as locked
+    LOCAL_STORE.lock();
 
     if (IPC_RENDERER) {
       // Event called when user quits hathor app
