@@ -10,14 +10,6 @@ The wallet is developed using Javascript with [React](https://reactjs.org/). We 
 
 You can download the newest version of the wallet for each specific platform from the [Releases page](https://github.com/HathorNetwork/hathor-wallet/releases).
 
-### Warning Message for Windows:
-
-We are finishing the process of acquiring the certificates for Windows. While we don't get it you may see a warning message when opening the wallet.
-
-![Warning Windows](https://drive.google.com/thumbnail?id=1B5kLAXUMj4wmrRfmVtiQyoNe6Q7r8s_h&sz=w500-h375)
-
-This screen will show a warning, so you need to click on 'More info'. Another screen will appear, then just click the button 'Run anyway' to start the wallet.
-
 ## Screenshots
 
 The basic view of the wallet.  Note that different types of tokens are made possible in the Hathor Network.  On the left hand side we see both a HTR tab and a MTK tab, for the Hathor token, and a different, ERC-20 like, token.   
