@@ -165,6 +165,12 @@ Run `msgmerge pt-br/texts.po texts.pot -o pt-br/texts.po` to merge a pot file wi
 
 Finally, run `make i18n` to compile all po files to json files. You can use `make check_po` to check for problems in translations.
 
+## Release
+
+There is a release guide in [RELEASE.md](/RELEASE.md).
+
+We ship GPG signatures for all release packages. Check our guide in [RELEASING.md#signature-verification](/RELEASING.md#signature-verification) to learn how to verify them.
+
 ## License
 
 Code released under [the MIT license](https://github.com/HathorNetwork/hathor-wallet/blob/dev/LICENSE).
