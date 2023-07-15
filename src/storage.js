@@ -327,6 +327,26 @@ export class LocalStorageStore {
     return cryptoUtils.checkPassword(mainEncryptedData, pinCode);
   }
 
+  /**
+   * Persist server URLs on the localStorage.
+   * @param {string} serverURL Fullnode api url
+   * @param {string} wsServerURL websocket server url for wallet-service
+   */
+  setServers(serverURL, wsServerURL) {
+    this.setItem(SERVER_KEY, serverURL);
+    if (wsServerURL) {
+      this.setItem(WS_SERVER_KEY, serverURL);
+    }
+  }
+
+  getServer() {
+    return this.getItem(SERVER_KEY);
+  }
+
+  getWsServer() {
+    return this.getItem(WS_SERVER_KEY);
+  }
+
   lock() {
     this.setItem(LOCKED_KEY, true);
   }

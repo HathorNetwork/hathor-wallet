@@ -188,6 +188,9 @@ export function* startWallet(action) {
     wallet = new HathorWalletServiceWallet(walletConfig);
     connection = wallet.conn;
   } else {
+    // Set the server and network as saved on localStorage
+    config.setServerUrl(LOCAL_STORE.getServer());
+
     connection = new Connection({
       network: network.name,
       servers: [config.getServerUrl()],

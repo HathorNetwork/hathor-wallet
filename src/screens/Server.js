@@ -155,6 +155,11 @@ class Server extends React.Component {
       await this.props.wallet.changeWsServer(newWsServer);
     }
 
+    LOCAL_STORE.setServers(
+      newBaseServer,
+      this.props.useWalletService ? newWsServer : null,
+    );
+
     try {
       const versionData = await this.props.wallet.getVersionData();
 
@@ -177,6 +182,10 @@ class Server extends React.Component {
         if (this.props.useWalletService) {
          await this.props.wallet.changeWsServer(currentWsServer);
         }
+        LOCAL_STORE.setServers(
+          currentServer,
+          this.props.useWalletService ? currentWsServer : null,
+        );
         this.context.showModal(MODAL_TYPES.CONFIRM_TESTNET, {
           success: this.confirmTestnetServer,
         });
@@ -193,6 +202,10 @@ class Server extends React.Component {
       if (this.props.useWalletService) {
         await this.props.wallet.changeWsServer(currentWsServer);
       }
+      LOCAL_STORE.setServers(
+        currentServer,
+        this.props.useWalletService ? currentWsServer : null,
+      );
       this.setState({
         loading: false,
         errorMessage: e.message,
@@ -210,6 +223,10 @@ class Server extends React.Component {
     if (this.props.useWalletService) {
       await this.props.wallet.changeWsServer(this.state.selectedWsServer);
     }
+    LOCAL_STORE.setServers(
+      this.state.selectedServer,
+      this.props.useWalletService ? this.state.selectedWsServer : null,
+    );
 
     // Set network on config singleton so the load wallet will get it properly
     hathorLib.config.setNetwork(this.state.selectedNetwork);
