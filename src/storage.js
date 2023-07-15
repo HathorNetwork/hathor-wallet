@@ -24,6 +24,8 @@ export const NETWORK_KEY = 'localstorage:network';
 export const IS_HARDWARE_KEY = 'localstorage:ishardware';
 export const TOKEN_SIGNATURES_KEY = 'localstorage:token:signatures';
 export const IS_BACKUP_DONE_KEY = 'localstorage:backup';
+export const SERVER_KEY = 'localstorage:server';
+export const WS_SERVER_KEY = 'localstorage:wsserver';
 
 export const storageKeys = [
   WALLET_VERSION_KEY,
@@ -34,7 +36,9 @@ export const storageKeys = [
   NETWORK_KEY,
   IS_HARDWARE_KEY,
   TOKEN_SIGNATURES_KEY,
-  IS_BACKUP_DONE_KEY
+  IS_BACKUP_DONE_KEY,
+  SERVER_KEY,
+  WS_SERVER_KEY,
 ];
 
 export class LocalStorageStore {
