@@ -35,6 +35,8 @@ class OutputsWrapper extends React.Component {
     this.timelock = React.createRef();
     this.timelockCheckbox = React.createRef();
     this.uniqueID = _.uniqueId()
+
+    props.setRef(this);
   }
 
   /**

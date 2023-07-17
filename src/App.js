@@ -170,9 +170,6 @@ const returnLoadedWalletComponent = (Component, props, _) => {
 
   // Check version
   if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
-    // We already handle all js errors in general and open an error modal to the user
-    // so there is no need to catch the promise error below
-    version.checkApiVersion(reduxState.wallet);
     return <Redirect to={{
       pathname: '/loading_addresses/',
       state: {path: props.match.url},
@@ -272,6 +269,14 @@ const StartedRoute = ({component: Component, ...rest}) => (
  * Return a div grouping the Navigation and the Component
  */
 const returnDefaultComponent = (Component, props) => {
+  const reduxState = store.getState();
+
+  if (reduxState.isVersionAllowed === undefined) {
+    // We already handle all js errors in general and open an error modal to the user
+    // so there is no need to catch the promise error below
+    version.checkApiVersion(reduxState.wallet);
+  }
+
   if (version.checkWalletVersion()) {
     if (
       props.location.pathname === '/locked/' &&

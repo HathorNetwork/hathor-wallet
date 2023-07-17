@@ -379,7 +379,7 @@ class SendTokens extends React.Component {
       });
     }
 
-    return new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, pin, network: this.props.wallet.getNetworkObject() });
+    return new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, pin, storage: this.props.wallet.storage });
   }
 
   /**
@@ -415,7 +415,7 @@ class SendTokens extends React.Component {
    * Create a new child reference with this new token
    */
   addAnotherToken = () => {
-    if (hathorLib.wallet.isHardwareWallet()) {
+    if (LOCAL_STORE.isHardwareWallet()) {
       if (!version.isLedgerCustomTokenAllowed()) {
         // Custom token not allowed for this Ledger version
         this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
@@ -427,7 +427,7 @@ class SendTokens extends React.Component {
         })
         return;
       }
-      if (this.state.txTokens.filter(t => !hathorLib.tokens.isHathorToken(t.uid)).length === LEDGER_TX_CUSTOM_TOKEN_LIMIT) {
+      if (this.state.txTokens.filter(t => !hathorLib.tokensUtils.isHathorToken(t.uid)).length === LEDGER_TX_CUSTOM_TOKEN_LIMIT) {
         // limit is 10 custom tokens per tx
         const modalBody = <p>{t`Ledger has a limit of ${LEDGER_TX_CUSTOM_TOKEN_LIMIT} different tokens per transaction.`}</p>
         this.context.showModal(MODAL_TYPES.ALERT, {

@@ -29,6 +29,9 @@ const version = {
    * @inner
    */
   async checkApiVersion(wallet) {
+    if (!wallet) {
+      return;
+    }
     const data = await wallet.getVersionData();
 
     /**

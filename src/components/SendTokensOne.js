@@ -174,7 +174,7 @@ class SendTokensOne extends React.Component {
   render = () => {
     const renderOutputs = () => {
       return this.outputs.map((output, index) =>
-        <OutputsWrapper key={index} index={index} ref={output} addOutput={this.addOutput} isNFT={this.isNFT()} />
+        <OutputsWrapper key={index} index={index} setRef={(node) => { output.current = node; }} addOutput={this.addOutput} isNFT={this.isNFT()} />
       );
     }
 
