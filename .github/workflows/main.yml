@@ -6,10 +6,10 @@ on:
     - dev
     tags:
     - v*
-  pull_request:
-    branches:
-    - dev
-    - master
+  # pull_request:
+  #   branches:
+  #   - dev
+  #   - master
 jobs:
   test:
     runs-on: 'ubuntu-latest'

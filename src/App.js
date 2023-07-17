@@ -160,7 +160,7 @@ class Root extends React.Component {
  */
 const returnLoadedWalletComponent = (Component, props, _) => {
   // If was closed and is loaded we need to redirect to locked screen
-  if (LOCAL_STORE.wasClosed()) {
+  if (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) {
     return <Redirect to={{ pathname: '/locked/' }} />;
   }
 
@@ -170,6 +170,9 @@ const returnLoadedWalletComponent = (Component, props, _) => {
 
   // Check version
   if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
+    // We already handle all js errors in general and open an error modal to the user
+    // so there is no need to catch the promise error below
+    version.checkApiVersion(reduxState.wallet);
     return <Redirect to={{
       pathname: '/loading_addresses/',
       state: {path: props.match.url},

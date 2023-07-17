@@ -2,7 +2,6 @@ import React from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { act, render, screen } from '@testing-library/react';
 import $ from 'jquery'
-import hathorLib from '@hathor/wallet-lib';
 import { ModalPin } from '../../components/ModalPin';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -61,11 +60,13 @@ describe('pin validation', () => {
     const validationPattern = '[0-9]{6}';
     const failingPin = 'abc123';
     const passingPin = '123321'
+    const wallet = { checkPin: () => Promise.resolve(false) };
     act(() => {
       render(
         <ModalPin
           onSuccess={jest.fn()}
           onClose={jest.fn()}
+          wallet={wallet}
         />,
         container
       )
@@ -73,9 +74,6 @@ describe('pin validation', () => {
 
     expect(new RegExp(validationPattern).test(failingPin)).toStrictEqual(false);
     expect(new RegExp(validationPattern).test(passingPin)).toStrictEqual(true);
-
-    const pinMock = jest.spyOn(hathorLib.wallet, 'isPinCorrect')
-      .mockImplementation(() => false);
 
     // Gets the input element, types the pin and clicks "Go"
     /** @type HTMLElement */
@@ -96,16 +94,16 @@ describe('pin validation', () => {
     // Validating form
     expect(pinInput.validity.patternMismatch).toStrictEqual(false);
     expect(pinInput.checkValidity()).toStrictEqual(true);
-
-    pinMock.mockRestore();
   });
 
   it('displays error on incorrect pin', async () => {
+    const wallet = { checkPin: () => Promise.resolve(false) };
     act(() => {
       render(
         <ModalPin
           onSuccess={jest.fn()}
           onClose={jest.fn()}
+          wallet={wallet}
         />,
         container
       )
@@ -118,10 +116,7 @@ describe('pin validation', () => {
     await userEvent.type(pinInput, '123321');
 
     // Clicks "Go"
-    const pinMock = jest.spyOn(hathorLib.wallet, 'isPinCorrect')
-      .mockImplementation(() => false);
     await userEvent.click(goButton);
-    pinMock.mockRestore();
 
     // Validates error message
     const element = screen.getByText('Invalid PIN');
@@ -132,12 +127,14 @@ describe('pin validation', () => {
     const successCallback = jest.fn();
     const closeCallback = jest.fn();
     const pinText = '123321';
+    const wallet = { checkPin: () => Promise.resolve(true) };
 
     act(() => {
       render(
         <ModalPin
           onSuccess={successCallback}
           onClose={closeCallback}
+          wallet={wallet}
         />,
         container
       )
@@ -150,10 +147,7 @@ describe('pin validation', () => {
     await userEvent.type(pinInput, pinText);
 
     // Clicks "Go"
-    const pinMock = jest.spyOn(hathorLib.wallet, 'isPinCorrect')
-      .mockImplementation(() => true);
     await userEvent.click(goButton);
-    pinMock.mockRestore();
 
     // Confirms there is no error message
     const element = screen.queryByText('Invalid PIN');
