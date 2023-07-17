@@ -268,7 +268,7 @@ export function* startWallet(action) {
     // Set urls for the Atomic Swap Service. If we have it on storage, use it, otherwise use defaults
     initializeSwapServiceBaseUrlForWallet(network.name)
     // Initialize listened proposals list
-    const listenedProposals = walletUtil.getListenedProposals();
+    const listenedProposals = walletUtils.getListenedProposals();
     yield put(proposalListUpdated(listenedProposals));
 
     // Fetch all proposals from service backend
