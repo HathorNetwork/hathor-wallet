@@ -405,7 +405,7 @@ export const generateReduxObjFromProposal = (proposalId, password, partialTx, wa
 export function initializeSwapServiceBaseUrlForWallet(network) {
     // XXX: This storage item is currently unchangeable via the wallet UI, and is available
     //      only for debugging purposes on networks other than mainnet and testnet
-    const configUrl = storage.getItem('wallet:atomic_swap_service:base_server')
+    const configUrl = localStorage.getItem('wallet:atomic_swap_service:base_server')
     // Configures Atomic Swap Service url. Prefers explicit config input, then network-based
     if (configUrl) {
         hathorLibConfig.setSwapServiceBaseUrl(configUrl);
