@@ -21,10 +21,10 @@ const tokens = {
   /**
    * Get registered tokens from the wallet instance.
    * @param {HathorWallet} wallet
-   * @param {boolean} excludeHTR If we should exclude the HTR token.
+   * @param {boolean} excludeDefaultToken If we should exclude the default token.
    * @returns {Promise<ITokenData[]>}
    */
-  async getRegisteredTokens(wallet, excludeHTR = false) {
+  async getRegisteredTokens(wallet, excludeDefaultToken = false) {
     const htrUid = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
     const tokens = [];
 
@@ -35,7 +35,7 @@ const tokens = {
     let next = await iterator.next();
     while (!next.done) {
       const token = next.value;
-      if ((!excludeHTR) || token.uid !== htrUid) {
+      if ((!excludeDefaultToken) || token.uid !== htrUid) {
         tokens.push({ uid: token.uid, name: token.name, symbol: token.symbol });
       }
       // eslint-disable-next-line no-await-in-loop

@@ -63,7 +63,7 @@ import {
   specificTypeAndPayload,
   errorHandler,
   checkForFeatureFlag,
-  getRegisteredTokens,
+  getRegisteredTokensUids,
   dispatchLedgerTokenSignatureVerification,
 } from './helpers';
 import { fetchTokenData } from './tokens';
@@ -231,10 +231,12 @@ export function* startWallet(action) {
   yield fork(listenForWalletReady, wallet);
 
   try {
-    const serverInfo = yield call(wallet.start.bind(wallet), {
+    console.log('[*] Start wallet.');
+    const serverInfo = yield call([wallet, wallet.start], {
       pinCode: pin,
       password,
     });
+    console.log('[+] Start wallet.', serverInfo);
 
     let version;
     let networkName = network.name;
@@ -300,7 +302,7 @@ export function* startWallet(action) {
 
   try {
     const { allTokens } = yield call(loadTokens);
-    const currentAddress = yield call(wallet.getCurrentAddress.bind(wallet));
+    const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
     // Store all tokens on redux
     yield put(loadWalletSuccess(allTokens, currentAddress));
   } catch(e) {
@@ -343,8 +345,8 @@ export function* loadTokens() {
   const wallet = yield select((state) => state.wallet);
 
   // Fetch all tokens, including the ones that are not registered yet
-  const allTokens = yield call(wallet.getTokens.bind(wallet));
-  const registeredTokens = yield getRegisteredTokens(wallet, true);
+  const allTokens = yield call([wallet, wallet.getTokens]);
+  const registeredTokens = yield getRegisteredTokensUids(wallet, true);
 
   // We don't need to wait for the metadatas response, so we can just
   // spawn a new "thread" to handle it.
@@ -496,7 +498,8 @@ export function* handleTx(action) {
   // Since we have already received the transaction at this point, the wallet
   // instance will already have updated its current address, we should just
   // fetch it and update the redux-store
-  const newAddress = yield wallet.getCurrentAddress();
+  const newAddress = yield call([wallet, wallet.getCurrentAddress]);
+
   yield put(sharedAddressUpdate({
     lastSharedAddress: newAddress.address,
     lastSharedIndex: newAddress.index,
@@ -627,7 +630,7 @@ export function* walletReloading() {
     // If we are on the wallet-service, we also need to refresh the
     // facade instance internal addresses
     if (useWalletService) {
-      yield call(wallet.getNewAddresses.bind(wallet));
+      yield call([wallet, wallet.getNewAddresses]);
     }
 
     // dispatch the refreshSharedAddress so our redux store is potentially
@@ -635,7 +638,7 @@ export function* walletReloading() {
     // time
     yield put(walletRefreshSharedAddress());
 
-    const currentAddress = yield call(wallet.getCurrentAddress.bind(wallet));
+    const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
 
     // Load success, we can send the user back to the wallet screen
     yield put(loadWalletSuccess(allTokens, currentAddress));
@@ -650,7 +653,7 @@ export function* walletReloading() {
 export function* refreshSharedAddress() {
   const wallet = yield select((state) => state.wallet);
 
-  const { address, index } = yield wallet.getCurrentAddress();
+  const { address, index } = yield call([wallet, wallet.getCurrentAddress]);
 
   yield put(sharedAddressUpdate({
     lastSharedAddress: address,
@@ -665,12 +668,14 @@ export function* onWalletReset() {
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
   LOCAL_STORE.resetStorage();
   if (wallet) {
-    yield wallet.storage.cleanStorage(true, true);
+    yield call([wallet.storage, wallet.storage.cleanStorage], true, true);
   }
 
   yield put(walletResetSuccess());
 
-  routerHistory.push('/welcome');
+  if (routerHistory) {
+    routerHistory.push('/welcome');
+  }
 }
 
 export function* onWalletServiceDisabled() {

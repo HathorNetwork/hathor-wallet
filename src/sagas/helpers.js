@@ -110,11 +110,11 @@ export function errorHandler(saga, failureAction) {
 /**
  * Get registered tokens from the wallet instance.
  * @param {HathorWallet} wallet
- * @param {boolean} excludeHTR If we should exclude the HTR token.
+ * @param {boolean} excludeDefaultToken If we should exclude the default token.
  * @returns {string[]}
  */
-export async function getRegisteredTokens(wallet, excludeHTR = false) {
-  const tokenConfigArr = await tokensUtils.getRegisteredTokens(wallet, excludeHTR);
+export async function getRegisteredTokensUids(wallet, excludeDefaultToken = false) {
+  const tokenConfigArr = await tokensUtils.getRegisteredTokens(wallet, excludeDefaultToken);
   return tokenConfigArr.map(token => token.uid);
 }
 

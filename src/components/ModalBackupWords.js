@@ -113,7 +113,7 @@ class ModalBackupWords extends React.Component {
         this.props.updateWords(words);
         this.setState({ passwordSuccess: true, errorMessage: '' });
       } catch (err) {
-        if (err.errorCode && err.errorCode === hathorLib.ErrorMessages.DECRYPTION_ERROR) {
+        if (err && err.errorCode === hathorLib.ErrorMessages.DECRYPTION_ERROR) {
           // If the password is invalid it will throw a DecryptionError
           this.setState({ errorMessage: t`Invalid password` });
         }
