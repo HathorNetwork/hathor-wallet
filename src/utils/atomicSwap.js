@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { v4 } from 'uuid'
 import {
   transactionUtils,
   PartialTx,
@@ -367,7 +366,7 @@ export const generateReduxObjFromProposal = (proposalId, password, partialTx, wa
         updatedAt: new Date().valueOf(),
     };
     // Building the object to retrieve data from
-    const txProposal = new PartialTxProposal.fromPartialTx(partialTx, wallet.getNetworkObject());
+    const txProposal = PartialTxProposal.fromPartialTx(partialTx, wallet.storage);
 
     // Calculating the amount of tokens
     const balance = txProposal.calculateBalance(wallet);

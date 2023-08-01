@@ -2,23 +2,33 @@ import { calculateExhibitionData, PROPOSAL_DOWNLOAD_STATUS } from "../../utils/a
 import { PartialTxProposal } from "@hathor/wallet-lib";
 
 const customTokenUid = '00003b47ce1a6774cfc132169122c38c15fbc4a7f43487cf1041ff4826c1842e';
+
+const mockNetwork = {
+  name: "privatenet",
+};
+const mockStorage = {
+  config: {
+    getNetwork: () => mockNetwork,
+  },
+  isAddressMine: async (address) => {
+    return address.startsWith('mine-');
+  },
+}
+
 /**
  * Mocked wallet to help with the tests
  * @type {HathorWallet}
  */
 const wallet = {
-  getNetworkObject: () => ({ name: 'privatenet' }),
-  isAddressMine: (address) => {
+  getNetworkObject: () => mockNetwork,
+  isAddressMine: async (address) => {
     return address.startsWith('mine-');
   },
-};
-
-const mockNetwork = {
-  name: "privatenet",
+  storage: mockStorage,
 };
 
 function createNewProposal() {
-  const np = new PartialTxProposal(mockNetwork);
+  const np = new PartialTxProposal(mockStorage);
 
   // Mock another wallet sending 200 HTR and receiving 1 of a custom token
   np.partialTx.inputs = [
@@ -64,14 +74,14 @@ describe('calculateExhibitionData', () => {
   const deserializeSpy = jest.spyOn(PartialTxProposal, 'fromPartialTx');
   const fakePartialTx = { serialize: () => 'fakeSerializedPartialTx' };
 
-  it('should return an empty array when there is no interaction with the wallet', () => {
+  it('should return an empty array when there is no interaction with the wallet', async () => {
     deserializeSpy.mockImplementationOnce(() => createNewProposal())
     const cachedTokens = {};
-    const results = calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
+    const results = await calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
     expect(results).toStrictEqual([]);
   })
 
-  it('should return the correct balance for a single receive', () => {
+  it('should return the correct balance for a single receive', async () => {
     // Mock receiving 200 HTR
     deserializeSpy.mockImplementationOnce(() => {
       const np = createNewProposal();
@@ -90,7 +100,7 @@ describe('calculateExhibitionData', () => {
       return np;
     })
     const cachedTokens = {};
-    const results = calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
+    const results = await calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
     expect(results).toStrictEqual([
       expect.objectContaining({
         tokenUid: '00',
@@ -99,7 +109,7 @@ describe('calculateExhibitionData', () => {
     ]);
   })
 
-  it('should return the correct balance for a single send', () => {
+  it('should return the correct balance for a single send', async () => {
     // Mock sending 1 custom token
     deserializeSpy.mockImplementationOnce(() => {
       const np = createNewProposal();
@@ -116,7 +126,7 @@ describe('calculateExhibitionData', () => {
       return np;
     })
     const cachedTokens = {};
-    const results = calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
+    const results = await calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
     expect(results).toStrictEqual([
       expect.objectContaining({
         tokenUid: customTokenUid,
@@ -125,7 +135,7 @@ describe('calculateExhibitionData', () => {
     ]);
   })
 
-  it('should return the correct balance for sending and receiving multiple tokens', () => {
+  it('should return the correct balance for sending and receiving multiple tokens', async () => {
     // Mock sending 1 custom token
     deserializeSpy.mockImplementationOnce(() => {
       const np = createNewProposal();
@@ -154,7 +164,7 @@ describe('calculateExhibitionData', () => {
       return np;
     })
     const cachedTokens = {};
-    const results = calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
+    const results = await calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
     expect(results).toStrictEqual(expect.arrayContaining([
       expect.objectContaining({
         tokenUid: customTokenUid,
@@ -167,7 +177,7 @@ describe('calculateExhibitionData', () => {
     ]));
   })
 
-  it('should return the correct balance for sending and receiving zero tokens', () => {
+  it('should return the correct balance for sending and receiving zero tokens', async () => {
     // Mock sending 1 custom token
     deserializeSpy.mockImplementationOnce(() => {
       const np = createNewProposal();
@@ -196,7 +206,7 @@ describe('calculateExhibitionData', () => {
       return np;
     })
     const cachedTokens = {};
-    const results = calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
+    const results = await calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
     expect(results).toStrictEqual([
       expect.objectContaining({
         tokenUid: '00',
@@ -204,7 +214,7 @@ describe('calculateExhibitionData', () => {
     ]);
   })
 
-  it('should return the correct balance for all conditions above simultaneously', () => {
+  it('should return the correct balance for all conditions above simultaneously', async () => {
     deserializeSpy.mockImplementationOnce(() => {
       const np = createNewProposal();
       // Token '00' has zero balance
@@ -284,7 +294,7 @@ describe('calculateExhibitionData', () => {
       return np;
     })
     const cachedTokens = {};
-    const results = calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
+    const results = await calculateExhibitionData(fakePartialTx, cachedTokens, wallet);
     expect(results).toStrictEqual([
       expect.objectContaining({
         tokenUid: '00',

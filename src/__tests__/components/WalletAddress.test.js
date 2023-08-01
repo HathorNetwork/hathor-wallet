@@ -25,7 +25,7 @@ afterEach(() => {
   container = null;
 });
 
-describe.skip('rendering tests', () => {
+describe('rendering tests', () => {
   it('renders without crashing', () => {
     render(
       <WalletAddress
