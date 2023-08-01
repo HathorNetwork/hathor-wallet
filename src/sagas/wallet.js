@@ -570,6 +570,14 @@ export function* setupWalletListeners(wallet) {
   }
 }
 
+/**
+ * Update the redux state with the data from the history sync partial data.
+ *
+ * @param {Object} data
+ * @param {Object} data.payload payload from the wallet event
+ * @param {number} data.payload.historyLength Number of transactions found in the entire history.
+ * @param {number} data.payload.addressesFound Number of addresses loaded by the wallet.
+ */
 export function* loadPartialUpdate({ payload }) {
   const transactions = payload.historyLength;
   const addresses = payload.addressesFound;
