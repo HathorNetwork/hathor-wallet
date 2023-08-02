@@ -197,7 +197,7 @@ export class LocalStorageStore {
    * @returns {Promise<boolean>} Whether we have a loaded wallet on the storage.
    */
   async isLoaded() {
-    const { accessData } = await this.getAvailableAccessData();
+    const accessData = await this.getAvailableAccessData();
     return !!accessData;
   }
 

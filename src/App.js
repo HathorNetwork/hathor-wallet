@@ -223,7 +223,7 @@ const returnStartedRoute = (Component, props, rest) => {
 
   // The wallet is already loaded
   const routeRequiresWalletToBeLoaded = rest.loaded;
-  if (LOCAL_STORE.isLoaded()) {
+  if (LOCAL_STORE.getWalletId()) {
     // Wallet is locked, go to locked screen
     if (LOCAL_STORE.isLocked()) {
       return <Redirect to={{pathname: '/locked/'}}/>;
