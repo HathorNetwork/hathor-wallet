@@ -34,7 +34,7 @@ import WalletVersionError from './screens/WalletVersionError';
 import LoadWalletFailed from './screens/LoadWalletFailed';
 import version from './utils/version';
 import tokens from './utils/tokens';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import RequestErrorModal from './components/RequestError';
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
@@ -44,10 +44,10 @@ import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
 import { updateLedgerClosed } from './actions/index';
 import {WALLET_STATUS} from './sagas/wallet';
-import ProposalList from "./screens/atomic-swap/ProposalList";
-import EditSwap from "./screens/atomic-swap/EditSwap";
-import NewSwap from "./screens/atomic-swap/NewSwap";
-import ImportExisting from "./screens/atomic-swap/ImportExisting";
+import ProposalList from './screens/atomic-swap/ProposalList';
+import EditSwap from './screens/atomic-swap/EditSwap';
+import NewSwap from './screens/atomic-swap/NewSwap';
+import ImportExisting from './screens/atomic-swap/ImportExisting';
 import LOCAL_STORE from './storage';
 
 const mapStateToProps = (state) => {
@@ -81,7 +81,7 @@ class Root extends React.Component {
 
     if (IPC_RENDERER) {
       // Event called when user quits hathor app
-      IPC_RENDERER.on("ledger:closed", async () => {
+      IPC_RENDERER.on('ledger:closed', async () => {
         const storage = LOCAL_STORE.getStorage();
         if (
           storage &&
@@ -110,8 +110,8 @@ class Root extends React.Component {
 
   componentWillUnmount() {
     if (IPC_RENDERER) {
-      IPC_RENDERER.removeAllListeners("ledger:closed");
-      IPC_RENDERER.removeAllListeners("ledger:manyTokenSignatureValid");
+      IPC_RENDERER.removeAllListeners('ledger:closed');
+      IPC_RENDERER.removeAllListeners('ledger:manyTokenSignatureValid');
     }
   }
 
@@ -158,7 +158,7 @@ class Root extends React.Component {
 /*
  * Validate if version is allowed for the loaded wallet
  */
-const returnLoadedWalletComponent = (Component, props, _) => {
+const returnLoadedWalletComponent = (Component, props) => {
   // If was closed and is loaded we need to redirect to locked screen
   if (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) {
     return <Redirect to={{ pathname: '/locked/' }} />;
@@ -231,7 +231,7 @@ const returnStartedRoute = (Component, props, rest) => {
 
     // Route requires the wallet to be loaded, render it
     if (routeRequiresWalletToBeLoaded) {
-      return returnLoadedWalletComponent(Component, props, rest);
+      return returnLoadedWalletComponent(Component, props);
     }
 
     // Route does not require wallet to be loaded. Redirect to wallet "home" screen
@@ -292,7 +292,7 @@ const returnDefaultComponent = (Component, props) => {
       return <Redirect to={{ pathname: '/wallet_type/' }} />;
     } else {
       return (
-        <div className="component-div h-100">
+        <div className='component-div h-100'>
           <Navigation {...props}/>
           <Component {...props} />
           <RequestErrorModal {...props} />
