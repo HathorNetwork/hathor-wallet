@@ -30,7 +30,7 @@ const mapStateToProps = (state, props) => {
     history = get(state.tokensHistory, `${props.selectedToken}`, defaultTokenHistory);
   }
 
-  return { 
+  return {
     tokenHistory: history,
     wallet: state.wallet,
     tokenMetadata: state.tokenMetadata,
@@ -171,7 +171,7 @@ class TokenHistory extends React.Component {
   }
 
   /**
-   * Method called on copy to clipboard success  
+   * Method called on copy to clipboard success
    * Show alert success message
    *
    * @param {string} text Text copied to clipboard
@@ -295,7 +295,7 @@ class TokenHistory extends React.Component {
           <tr key={`${tx.tx_id}`} className={trClass}>
             <td>{hathorLib.dateFormatter.parseTimestamp(tx.timestamp)}</td>
             <td>
-              <Link className={tx.is_voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>{hathorLib.helpers.getShortHash(tx.tx_id)}</Link>
+              <Link className={tx.is_voided ? 'voided' : ''} to={`/transaction/${tx.tx_id}`}>{hathorLib.helpersUtils.getShortHash(tx.tx_id)}</Link>
               <CopyToClipboard text={tx.tx_id} onCopy={this.copied}>
                 <i className="fa fa-clone pointer ml-1" title="Copy to clipboard"></i>
               </CopyToClipboard>

@@ -2,10 +2,8 @@ import React from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { act, render, screen } from '@testing-library/react';
 import $ from 'jquery'
-import hathorLib, { SendTransaction } from '@hathor/wallet-lib';
+import { SendTransaction } from '@hathor/wallet-lib';
 import { ModalSendTx } from '../../components/ModalSendTx';
-import { SendTxHandler } from '../../components/SendTxHandler';
-import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import helpers from '../../utils/helpers';
 

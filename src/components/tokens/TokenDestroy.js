@@ -8,6 +8,7 @@
 import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
+import helpers from '../../utils/helpers';
 import TokenAction from './TokenAction';
 import SpanFmt from '../SpanFmt';
 import { connect } from "react-redux";
@@ -59,7 +60,7 @@ class TokenDestroy extends React.Component {
       });
     }
 
-    return new hathorLib.SendTransaction({ transaction, pin, network: this.props.wallet.getNetworkObject() });
+    return new hathorLib.SendTransaction({ transaction, pin, storage: this.props.wallet.storage });
   }
 
   /**
@@ -80,7 +81,7 @@ class TokenDestroy extends React.Component {
     if (this.state.destroyQuantity > this.props.authoritiesLength) {
       const authoritiesLength = this.props.authoritiesLength;
       const type = this.props.action === 'destroy-mint' ? t`mint` : t`melt`;
-      const plural = hathorLib.helpers.plural(this.props.authoritiesLength, 'output', 'outputs');
+      const plural = helpers.plural(this.props.authoritiesLength, 'output', 'outputs');
       return t`You only have ${authoritiesLength} ${type} ${plural} to destroy.`;
     }
   }
@@ -89,7 +90,7 @@ class TokenDestroy extends React.Component {
     const getDestroyBody = () => {
       const quantity = parseInt(this.state.destroyQuantity, 10);
       const type = this.props.action === 'destroy-mint' ? t`mint` : t`melt`;
-      const plural = hathorLib.helpers.plural(quantity, 'output', 'outputs');
+      const plural = helpers.plural(quantity, 'output', 'outputs');
 
       return (
         <p><SpanFmt>{t`Are you sure you want to destroy **${quantity} ${type}** authority ${plural}?`}</SpanFmt></p>

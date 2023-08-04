@@ -10,12 +10,12 @@ import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectToken } from '../actions/index';
 import { get } from 'lodash';
-import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
 import Loading from '../components/Loading';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { useHistory, useLocation } from 'react-router-dom';
+import LOCAL_STORE from '../storage';
 
 // Routes that should display the TokenBar
 const ROUTE_WHITELIST = [
@@ -75,7 +75,7 @@ export default function TokenBar () {
    * Called when user clicks to lock wallet, then redirects to locked screen
    */
   const lockWallet = () => {
-    hathorLib.wallet.lock();
+    LOCAL_STORE.lock();
     history.push('/locked/');
   };
 
@@ -175,9 +175,9 @@ export default function TokenBar () {
 
   const renderUnknownTokens = () => {
     return (
-      <div title={`${unknownTokens} unknown ${hathorLib.helpers.plural(unknownTokens, 'token', 'tokens')}`} className={`d-flex align-items-center icon-wrapper ${opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={unknownClicked}>
+      <div title={`${unknownTokens} unknown ${helpers.plural(unknownTokens, 'token', 'tokens')}`} className={`d-flex align-items-center icon-wrapper ${opened ? 'justify-content-start' : 'justify-content-center'}`} onClick={unknownClicked}>
         <div className="unknown-symbol d-flex flex-row align-items-center justify-content-center">{unknownTokens}</div>
-        {opened && <span className='ellipsis'>Unknown {hathorLib.helpers.plural(unknownTokens, 'token', 'tokens')}</span>}
+        {opened && <span className='ellipsis'>Unknown {helpers.plural(unknownTokens, 'token', 'tokens')}</span>}
       </div>
     );
   };

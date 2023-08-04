@@ -19,6 +19,7 @@ import TokenDestroy from '../components/tokens/TokenDestroy';
 import Loading from '../components/Loading';
 import helpers from '../utils/helpers';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {
   const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
@@ -28,7 +29,6 @@ const mapStateToProps = (state) => {
     htrBalance,
     tokensHistory: state.tokensHistory,
     tokensBalance: state.tokensBalance,
-    wallet: state.wallet,
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
   };
@@ -111,7 +111,7 @@ class TokenAdministrative extends React.Component {
   }
 
   render() {
-    if (hathorLib.wallet.isHardwareWallet()) {
+    if (LOCAL_STORE.isHardwareWallet()) {
       return (
         <div className="content-wrapper flex align-items-start">
           <p>{t`This feature is not currently supported for a hardware wallet.`}</p>
@@ -177,12 +177,12 @@ class TokenAdministrative extends React.Component {
         <div className="d-flex align-items-center mt-3">
           <div className="token-manage-wrapper d-flex flex-column align-items-center mr-4">
             <p><strong>{t`Mint authority management`}</strong></p>
-            <p>You are the owner of {this.props.mintCount} mint {hathorLib.helpers.plural(this.props.mintCount, 'output', 'outputs')}</p>
+            <p>You are the owner of {this.props.mintCount} mint {helpers.plural(this.props.mintCount, 'output', 'outputs')}</p>
             {this.props.mintCount > 0 && renderMintLinks()}
           </div>
           <div className="token-manage-wrapper d-flex flex-column align-items-center">
             <p><strong>{t`Melt authority management`}</strong></p>
-            <p>You are the owner of {this.props.meltCount} melt {hathorLib.helpers.plural(this.props.meltCount, 'output', 'outputs')}</p>
+            <p>You are the owner of {this.props.meltCount} melt {helpers.plural(this.props.meltCount, 'output', 'outputs')}</p>
             {this.props.meltCount > 0 && renderMeltLinks()}
           </div>
         </div>

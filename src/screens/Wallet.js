@@ -31,6 +31,7 @@ import {
   tokenFetchHistoryRequested,
   tokenFetchBalanceRequested,
 } from '../actions/index';
+import LOCAL_STORE from '../storage';
 
 
 const mapDispatchToProps = dispatch => {
@@ -91,7 +92,7 @@ class Wallet extends React.Component {
 
   componentDidMount = async () => {
     this.setState({
-      backupDone: hathorLib.wallet.isBackupDone()
+      backupDone: LOCAL_STORE.isBackupDone()
     });
 
     this.initializeWalletScreen();
@@ -209,7 +210,7 @@ class Wallet extends React.Component {
    */
   backupSuccess = () => {
     this.context.hideModal();
-    hathorLib.wallet.markBackupAsDone();
+    LOCAL_STORE.markBackupDone();
 
     this.props.updateWords(null);
     this.setState({ backupDone: true, successMessage: t`Backup completed!` }, () => {
@@ -236,7 +237,7 @@ class Wallet extends React.Component {
   signClicked = () => {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
 
-    if (hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed()) {
+    if (LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed()) {
       this.context.showModal(MODAL_TYPES.LEDGER_SIGN_TOKEN, {
         token,
         modalId: 'signTokenDataModal',
@@ -392,7 +393,7 @@ class Wallet extends React.Component {
     }
 
     const renderTokenData = (token) => {
-      if (hathorLib.tokens.isHathorToken(this.props.selectedToken)) {
+      if (hathorLib.tokensUtils.isHathorToken(this.props.selectedToken)) {
         return renderWallet();
       } else {
         return (
@@ -448,7 +449,7 @@ class Wallet extends React.Component {
 
     const renderSignTokenIcon = () => {
       // Don't show if it's HTR
-      if (hathorLib.tokens.isHathorToken(this.props.selectedToken)) return null;
+      if (hathorLib.tokensUtils.isHathorToken(this.props.selectedToken)) return null;
 
       const signature = tokens.getTokenSignature(this.props.selectedToken);
       // Show only if we don't have a signature on storage
@@ -496,8 +497,8 @@ class Wallet extends React.Component {
             <div className='token-wrapper d-flex flex-row align-items-center mb-3'>
               <p className='token-name mb-0'>
                 <strong>{token ? token.name : ''}</strong>
-                {!hathorLib.tokens.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>}
-                {hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && renderSignTokenIcon()}
+                {!hathorLib.tokensUtils.isHathorToken(this.props.selectedToken) && <i className="fa fa-trash pointer ml-3" title={t`Unregister token`} onClick={this.unregisterClicked}></i>}
+                {LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && renderSignTokenIcon()}
               </p>
             </div>
             {renderTokenData(token)}

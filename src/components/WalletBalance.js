@@ -8,13 +8,12 @@
 import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
-import hathorLib from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
 import { get } from 'lodash';
 
 
 const mapStateToProps = (state) => {
-  return { 
+  return {
     selectedToken: state.selectedToken,
     tokens: state.tokens,
     tokensBalance: state.tokensBalance,

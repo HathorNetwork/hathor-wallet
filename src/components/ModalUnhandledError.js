@@ -19,7 +19,7 @@ const mapDispatchToProps = dispatch => {
 };
 
 /**
- * Component that shows a modal when an unhandled error happens  
+ * Component that shows a modal when an unhandled error happens
  * Shows a message to the user with a button for him to copy the error or reset the wallet
  *
  * @memberof Components

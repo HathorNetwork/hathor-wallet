@@ -11,7 +11,6 @@ import { t } from 'ttag'
 import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
 import ChoosePassword from '../components/ChoosePassword';
-import ModalBackupWords from '../components/ModalBackupWords';
 import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
 import { updatePassword, updatePin, updateWords } from '../actions/index';
@@ -19,7 +18,7 @@ import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import $ from 'jquery';
+import LOCAL_STORE from '../storage';
 
 
 const mapDispatchToProps = dispatch => {
@@ -67,14 +66,14 @@ class NewWallet extends React.Component {
   }
 
   componentDidMount = () => {
-    hathorLib.wallet.markBackupAsNotDone();
+    LOCAL_STORE.markBackupAsNotDone();
   }
 
   create = () => {
     let isValid = this.refs.confirmForm.checkValidity();
     if (isValid) {
       this.refs.confirmForm.classList.remove('was-validated')
-      const words = hathorLib.wallet.generateWalletWords(hathorLib.constants.HD_WALLET_ENTROPY);
+      const words = hathorLib.walletUtils.generateWalletWords(hathorLib.constants.HD_WALLET_ENTROPY);
       this.props.updateWords(words);
       this.setState({ step2: true });
     } else {
@@ -127,7 +126,7 @@ class NewWallet extends React.Component {
    */
   validationSuccess = () => {
     this.context.hideModal();
-    hathorLib.wallet.markBackupAsDone();
+    LOCAL_STORE.markBackupDone();
     this.alertSuccessRef.current.show(3000);
     this.setState({ askPassword: true });
   }

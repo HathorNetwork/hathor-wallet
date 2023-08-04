@@ -81,7 +81,7 @@ class CreateToken extends React.Component {
       // Validating maximum amount
       const tokensValue = wallet.decimalToInteger(this.state.amount)
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-        const max_output_value_str = hathorLib.helpers.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
+        const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
         this.setState({ errorMessage: t`Maximum value to mint token is ${max_output_value_str}` });
         return false;
       }
@@ -123,7 +123,7 @@ class CreateToken extends React.Component {
     // Get the address to send the created tokens
     let address = '';
     if (this.refs.autoselectAddress.checked) {
-      address = this.props.wallet.getCurrentAddress({ markAsUsed: true }).address;
+      address = (await this.props.wallet.getCurrentAddress({ markAsUsed: true })).address;
     } else {
       address = this.refs.address.value;
     }
@@ -148,7 +148,7 @@ class CreateToken extends React.Component {
       return new hathorLib.SendTransaction({
         transaction,
         pin,
-        network: this.props.wallet.getNetworkObject(),
+        storage: this.props.wallet.storage,
       });
     } catch (e) {
       this.setState({ errorMessage: e.message });
@@ -160,7 +160,7 @@ class CreateToken extends React.Component {
    *
    * @param {Object} tx Create token transaction data
    */
-  onTokenCreateSuccess = (tx) => {
+  onTokenCreateSuccess = async (tx) => {
     const name = this.refs.shortName.value;
     const symbol = this.refs.symbol.value;
     const token = {
@@ -170,7 +170,7 @@ class CreateToken extends React.Component {
     };
 
     // Update redux with added token
-    tokens.addToken(token.uid, name, symbol);
+    await tokens.addToken(token.uid, name, symbol);
 
     // Must update the shared address, in case we have used one for the change
     this.props.walletRefreshSharedAddress();
@@ -184,7 +184,7 @@ class CreateToken extends React.Component {
    * @param {Object} token Object with {uid, name, symbol}
    */
   showAlert = (token) => {
-    this.setState({ name: token.name, configurationString: hathorLib.tokens.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
+    this.setState({ name: token.name, configurationString: hathorLib.tokensUtils.getConfigurationString(token.uid, token.name, token.symbol) }, () => {
       this.context.showModal(MODAL_TYPES.ALERT, {
         title: t`Token ${this.state.name} created`,
         body: this.getAlertBody(),
@@ -259,7 +259,8 @@ class CreateToken extends React.Component {
   }
 
   render = () => {
-    const htrDeposit = hathorLib.tokens.getDepositPercentage() * 100;
+    const depositPercent = this.props.wallet.storage.getTokenDepositPercentage();
+    const htrDeposit = depositPercent * 100;
 
     return (
       <div className="content-wrapper">
@@ -296,7 +297,7 @@ class CreateToken extends React.Component {
                required
                className="form-control"
                onValueChange={this.onAmountChange}
-               placeholder={hathorLib.helpers.prettyValue(0)}
+               placeholder={hathorLib.numberUtils.prettyValue(0)}
               />
             </div>
             <div className="form-group d-flex flex-row align-items-center address-checkbox">
@@ -312,7 +313,7 @@ class CreateToken extends React.Component {
               <input ref="address" type="text" placeholder={t`Address`} className="form-control" />
             </div>
           </div>
-          <p>Deposit: {tokens.getDepositAmount(this.state.amount)} HTR ({hathorLib.helpers.prettyValue(this.props.htrBalance)} HTR available)</p>
+          <p>Deposit: {tokens.getDepositAmount(this.state.amount, depositPercent)} HTR ({hathorLib.numberUtils.prettyValue(this.props.htrBalance)} HTR available)</p>
           <button type="button" className="mt-3 btn btn-hathor" onClick={this.onClickCreate}>Create</button>
         </form>
         <p className="text-danger mt-3">{this.state.errorMessage}</p>

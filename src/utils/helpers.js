@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import store from '../store/index';
 import { networkUpdate } from '../actions/index';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
+import LOCAL_STORE from '../storage';
 
 let shell = null;
 if (window.require) {
@@ -50,8 +51,8 @@ const helpers = {
   updateNetwork(network) {
     // Update network in redux
     store.dispatch(networkUpdate({network}));
-    hathorLib.storage.setItem('wallet:network', network);
     hathorLib.network.setNetwork(network);
+    LOCAL_STORE.setNetwork(network);
   },
 
   /**
@@ -64,7 +65,7 @@ const helpers = {
    * @inner
    */
   getExplorerURL() {
-    const currentNetwork = hathorLib.storage.getItem('wallet:network') || 'mainnet';
+    const currentNetwork = LOCAL_STORE.getNetwork() || 'mainnet';
     if (currentNetwork === 'mainnet') {
       return EXPLORER_BASE_URL;
     } else {
@@ -84,9 +85,9 @@ const helpers = {
    */
   renderValue(amount, isInteger) {
     if (isInteger) {
-      return hathorLib.helpersUtils.prettyIntegerValue(amount);
+      return hathorLib.numberUtils.prettyIntegerValue(amount);
     } else {
-      return hathorLib.helpersUtils.prettyValue(amount);
+      return hathorLib.numberUtils.prettyValue(amount);
     }
   },
 
@@ -254,6 +255,17 @@ const helpers = {
         ms
       )
     })
+  },
+
+  /**
+   * Return either the single or plural form depending on the quantity.
+   * @param {number} qty Quantity to access
+   * @param {string} singleWord word in single format
+   * @param {string} pluralWord word in plural format
+   * @returns {string}
+   */
+  plural(qty, singleWord, pluralWord) {
+    return qty === 1 ? singleWord : pluralWord;
   }
 }
 

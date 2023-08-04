@@ -52,14 +52,14 @@ export const serializeTokenInfo = (token, hasSignature) => {
   const arr = [];
 
   // 0: token version = 1 (always)
-  arr.push(hathorLib.helpersUtils.intToBytes(LEDGER_TOKEN_VERSION, 1));
+  arr.push(hathorLib.bufferUtils.intToBytes(LEDGER_TOKEN_VERSION, 1));
   // 1: uid bytes (length is fixed 32 bytes)
   arr.push(uidBytes);
   // 2, 3: symbol length + bytes
-  arr.push(hathorLib.helpersUtils.intToBytes(symbolBytes.length, 1));
+  arr.push(hathorLib.bufferUtils.intToBytes(symbolBytes.length, 1));
   arr.push(symbolBytes);
   // 4, 5: name length + bytes
-  arr.push(hathorLib.helpersUtils.intToBytes(nameBytes.length, 1));
+  arr.push(hathorLib.bufferUtils.intToBytes(nameBytes.length, 1));
   arr.push(nameBytes);
 
   if (hasSignature) {
@@ -118,11 +118,12 @@ if (IPC_RENDERER) {
      * @param {Object} data Transaction data
      * @param {number} changeIndex Index of the change output. -1 in case there is no change
      * @param {number} changeKeyIndex Index of address of the change output
+     * @param {Network} network The network of the configured wallet, so we generate the data correctly
      *
      * @memberof Ledger
      * @inner
      */
-    sendTx(data, changeInfo, useOldProtocol) {
+    sendTx(data, changeInfo, useOldProtocol, network) {
       // XXX: if custom tokens not allowed, use old protocol for first change output
       // first assemble data to be sent
       const arr = [];
@@ -133,14 +134,14 @@ if (IPC_RENDERER) {
           const change = changeInfo[0];
           const changeBuffer = formatPathData(change.keyIndex)
           // encode the bit indicating existence of change and change path length on first byte
-          arr.push(hathorLib.transaction.intToBytes(0x80 | changeBuffer[0], 1))
+          arr.push(hathorLib.bufferUtils.intToBytes(0x80 | changeBuffer[0], 1))
           // change output index on the second
-          arr.push(hathorLib.transaction.intToBytes(change.outputIndex, 1))
+          arr.push(hathorLib.bufferUtils.intToBytes(change.outputIndex, 1))
           // Change key path of the address
           arr.push(changeBuffer.slice(1));
         } else {
           // no change output
-          arr.push(hathorLib.transaction.intToBytes(0, 1));
+          arr.push(hathorLib.bufferUtils.intToBytes(0, 1));
         }
       } else {
         // Protocol v1
@@ -150,14 +151,15 @@ if (IPC_RENDERER) {
         //    - 1 byte for output index
         //    - bip32 path (can be up to 21 bytes)
         arr.push(Buffer.from([0x01]));
-        arr.push(hathorLib.transaction.intToBytes(changeInfo.length, 1));
+        arr.push(hathorLib.bufferUtils.intToBytes(changeInfo.length, 1));
         changeInfo.forEach(change => {
-          arr.push(hathorLib.transaction.intToBytes(change.outputIndex, 1));
+          arr.push(hathorLib.bufferUtils.intToBytes(change.outputIndex, 1));
           arr.push(formatPathData(change.keyIndex));
         });
       }
       const initialData = Buffer.concat(arr);
-      const dataBytes = hathorLib.transaction.dataToSign(data);
+      const tx = hathorLib.transactionUtils.createTransactionFromData(data, network);
+      const dataBytes = tx.getDataToSign();
       const dataToSend = Buffer.concat([initialData, dataBytes]);
 
       IPC_RENDERER.send("ledger:sendTx", dataToSend);
@@ -167,16 +169,17 @@ if (IPC_RENDERER) {
      * Get tx signatures from ledger
      *
      * @param {Object} data Transaction data
+     * @param {HathorWallet} wallet Wallet to get address indexes
      *
      * @memberof Ledger
      * @inner
      */
-    getSignatures(data, keys) {
+    async getSignatures(data, wallet) {
       // send key indexes as 4-byte integers
       const arr = [];
       for (const input of data.inputs) {
-        const index = keys[input.address].index;
-        arr.push(index);
+        const addressIndex = await wallet.getAddressIndex(input.address);
+        arr.push(addressIndex);
       }
       IPC_RENDERER.send("ledger:getSignatures", arr);
     },

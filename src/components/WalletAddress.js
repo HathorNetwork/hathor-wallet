@@ -10,11 +10,11 @@ import { t } from 'ttag';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
 import { connect } from "react-redux";
-import hathorLib from '@hathor/wallet-lib';
 import ledger from '../utils/ledger';
 import { IPC_RENDERER } from '../constants';
 import { sharedAddressUpdate } from '../actions/index';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
+import LOCAL_STORE from '../storage';
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -86,7 +86,7 @@ export class WalletAddress extends React.Component {
   openAddressModal = (e) => {
     e.preventDefault();
 
-    if (hathorLib.wallet.isHardwareWallet()) {
+    if (LOCAL_STORE.isHardwareWallet()) {
       this.context.showModal(MODAL_TYPES.ALERT, {
         title: t`Validate address on Ledger`,
         id: 'ledgerAlert',
@@ -151,14 +151,14 @@ export class WalletAddress extends React.Component {
           {showAddressString()}
           <div className="d-flex flex-row align-items-center">
             <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">{t`Generate new address`} <i className="fa fa-refresh ml-1" title={t`Get new address`}></i></a>
-            {hathorLib.wallet.isSoftwareWallet() &&   // hide the QR code for hardware wallet
+            {(!LOCAL_STORE.isHardwareWallet()) &&   // hide the QR code for hardware wallet
               <div>
                 <span className="ml-3 mr-3">|</span>
                 <a href="true" onClick={(e) => this.showQRCode(e)}>{t`QR Code`} <i className="fa fa-qrcode ml-1" title={t`Get qrcode`}></i></a>
               </div>
             }
           </div>
-          {hathorLib.wallet.isSoftwareWallet() &&   // hide all addresses for hardware wallet
+          {(!LOCAL_STORE.isHardwareWallet()) &&   // hide all addresses for hardware wallet
             <a href="true" onClick={this.seeAllAddresses} className="mt-3 ">{t`See all addresses`}</a>
           }
         </div>
@@ -166,7 +166,7 @@ export class WalletAddress extends React.Component {
     }
 
     const showAddressString = () => {
-      if (hathorLib.wallet.isSoftwareWallet()) {
+      if (!LOCAL_STORE.isHardwareWallet()) {
         return (
           <span ref="address" className="mt-1 mb-2">
             {this.props.lastSharedAddress}

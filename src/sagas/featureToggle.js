@@ -101,6 +101,7 @@ export function* monitorFeatureFlags(currentRetry = 0) {
   };
 
   try {
+    console.log('starting unleash with', options);
     yield call(() => unleashClient.updateContext(options));
     yield put(setUnleashClient(unleashClient));
 
@@ -135,6 +136,7 @@ export function* monitorFeatureFlags(currentRetry = 0) {
       yield call(() => unleashClient.stop());
     }
   } catch (e) {
+    console.error(e);
     console.error('Error initializing unleash');
     unleashClient.stop();
 
@@ -150,25 +152,27 @@ export function* monitorFeatureFlags(currentRetry = 0) {
 
 export function* setupUnleashListeners(unleashClient) {
   const channel = eventChannel((emitter) => {
-    const listener = (state) => emitter(state);
 
-    unleashClient.on(UnleashEvents.UPDATE, () => emitter({
+    const l1 = () => emitter({
       type: 'FEATURE_TOGGLE_UPDATE',
-    }));
+    });
+    unleashClient.on(UnleashEvents.UPDATE, l1);
 
-    unleashClient.on(UnleashEvents.READY, () => emitter({
+    const l2 = () => emitter({
       type: 'FEATURE_TOGGLE_READY',
-    }));
+    });
+    unleashClient.on(UnleashEvents.READY, l2);
 
-    unleashClient.on(UnleashEvents.ERROR, (err) => emitter({
+    const l3 = (err) => emitter({
       type: 'FEATURE_TOGGLE_ERROR',
       data: err,
-    }));
+    });
+    unleashClient.on(UnleashEvents.ERROR, l3);
 
     return () => {
-      unleashClient.removeListener(UnleashEvents.UPDATE, listener);
-      unleashClient.removeListener(UnleashEvents.READY, listener);
-      unleashClient.removeListener(UnleashEvents.ERROR, listener);
+      unleashClient.off(UnleashEvents.UPDATE, l1);
+      unleashClient.off(UnleashEvents.READY, l2);
+      unleashClient.off(UnleashEvents.ERROR, l3);
     };
   });
 

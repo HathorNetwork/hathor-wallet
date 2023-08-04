@@ -147,7 +147,7 @@ export default function TokenGeneralInfo ({
   };
 
   const renderConfigString = () => {
-    const configurationString = hathorLib.tokens.getConfigurationString(token.uid, token.name, token.symbol);
+    const configurationString = hathorLib.tokensUtils.getConfigurationString(token.uid, token.name, token.symbol);
 
     const getShortConfigurationString = () => {
       const configArr = configurationString.split(':');

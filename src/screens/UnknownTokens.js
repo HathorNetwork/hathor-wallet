@@ -9,7 +9,6 @@ import React from 'react';
 import { t } from 'ttag';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-import hathorLib from '@hathor/wallet-lib';
 import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
@@ -154,7 +153,7 @@ class UnknownTokens extends React.Component {
    */
   massiveImportSuccess = (count) => {
     this.context.hideModal();
-    const message = `${count} ${hathorLib.helpers.plural(count, 'token was', 'tokens were')} added!`;
+    const message = `${count} ${helpers.plural(count, 'token was', 'tokens were')} added!`;
     this.setState({ successMessage: message }, () => {
       this.alertSuccessRef.current.show(3000);
     });
@@ -251,7 +250,7 @@ class UnknownTokens extends React.Component {
     const renderTokens = () => {
       if (unknownTokens.length === 0) {
         return <p>{t`You don't have any unknown tokens`}</p>;
-      } 
+      }
 
       return unknownTokens.map((token, index) => {
         const isNFT = helpers.isTokenNFT(token.uid, this.props.tokenMetadata);

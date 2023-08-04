@@ -8,6 +8,10 @@ import {
 } from 'redux-saga/effects';
 import { types } from '../actions';
 import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
+import tokensUtils from '../utils/tokens';
+import version from '../utils/tokens';
+import ledger from '../utils/ledger';
+import LOCAL_STORE from '../storage';
 
 /**
  * Waits until feature toggle saga finishes loading
@@ -101,4 +105,40 @@ export function errorHandler(saga, failureAction) {
       yield put(failureAction);
     }
   };
+}
+
+/**
+ * Get registered tokens from the wallet instance.
+ * @param {HathorWallet} wallet
+ * @param {boolean} excludeDefaultToken If we should exclude the default token.
+ * @returns {string[]}
+ */
+export async function getRegisteredTokensUids(wallet, excludeDefaultToken = false) {
+  const tokenConfigArr = await tokensUtils.getRegisteredTokens(wallet, excludeDefaultToken);
+  return tokenConfigArr.map(token => token.uid);
+}
+
+export function* dispatchLedgerTokenSignatureVerification(wallet) {
+  const isHardware = yield wallet.storage.isHardwareWallet();
+  if (!isHardware) {
+    // We are not connected to a hardware wallet, we can just ignore this.
+    return;
+  }
+  const tokenSignatures = LOCAL_STORE.getTokenSignatures();
+  if (!tokenSignatures) {
+    // We do not have any signatures to check, we can just ignore this.
+    return;
+  }
+
+  const registeredTokens = yield tokensUtils.getRegisteredTokens(wallet, true);
+  const tokensToVerify = registeredTokens
+      .filter(t => !!tokenSignatures[t.uid])
+      .map(t => {
+        const signature = tokenSignatures[t.uid];
+        return { ...t, signature };
+      });
+
+  if (version.isLedgerCustomTokenAllowed() && tokensToVerify.length !== 0) {
+    ledger.verifyManyTokenSignatures(tokensToVerify);
+  }
 }
