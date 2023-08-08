@@ -12,7 +12,12 @@ import tokens from '../utils/tokens';
 import SpanFmt from './SpanFmt';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import hathorLib from '@hathor/wallet-lib';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+
+const mapStateToProps = (state) => {
+  return { storage: state.wallet.storage };
+};
 
 /**
  * Component that shows a modal with information about an unregistered token
@@ -62,7 +67,7 @@ class ModalUnregisteredTokenInfo extends React.Component {
       );
 
       try {
-        const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(configurationString, this.props.wallet.storage);
+        const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(configurationString, this.props.storage);
         await tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
         $('#unregisteredTokenInfoModal').modal('hide');
         this.props.tokenRegistered(this.props.token);
@@ -153,4 +158,4 @@ ModalUnregisteredTokenInfo.propTypes = {
   totalSupply: PropTypes.number,
 };
 
-export default ModalUnregisteredTokenInfo;
+export default connect(mapStateToProps)(ModalUnregisteredTokenInfo);

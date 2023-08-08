@@ -132,6 +132,8 @@ const initialState = {
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
+
+  receivedTxs: new Set(),
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -266,6 +268,8 @@ const rootReducer = (state = initialState, action) => {
       return onFeatureToggleInitialized(state);
     case types.WALLET_RESET_SUCCESS:
       return onWalletResetSuccess(state);
+    case types.MARK_TX_RECEIVED:
+      return onMarkTxReceived(state, action);
     default:
       return state;
   }
@@ -336,7 +340,7 @@ const isAllAuthority = (tx) => {
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
   LOCAL_STORE.setWalletVersion(VERSION);
-  const { tokens, currentAddress } = action.payload;
+  const { tokens, registeredTokens, currentAddress } = action.payload;
   const allTokens = new Set(tokens);
 
   return {
@@ -345,6 +349,7 @@ const onLoadWalletSuccess = (state, action) => {
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
     allTokens,
+    tokens: registeredTokens,
   };
 };
 
@@ -1014,5 +1019,11 @@ const onWalletResetSuccess = (state) => ({
   unleashClient: state.unleashClient,
 });
 
+export const onMarkTxReceived = (state, action) => {
+  const txId = action.payload;
+  state.receivedTxs.add(txId);
+
+  return state;
+};
 
 export default rootReducer;

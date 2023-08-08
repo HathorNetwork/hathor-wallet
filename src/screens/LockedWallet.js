@@ -80,6 +80,7 @@ class LockedWallet extends React.Component {
       }
 
       await LOCAL_STORE.handleDataMigration(pin);
+      LOCAL_STORE.open();
 
       // LockedWallet screen was called for a result, so we should resolve the promise with the PIN after
       // it is validated.

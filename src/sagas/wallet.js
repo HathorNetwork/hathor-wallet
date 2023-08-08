@@ -58,16 +58,17 @@ import {
   proposalFetchRequested,
   walletResetSuccess,
   reloadWalletRequested,
+  markTxReceived,
 } from '../actions';
 import {
   specificTypeAndPayload,
   errorHandler,
   checkForFeatureFlag,
-  getRegisteredTokensUids,
   dispatchLedgerTokenSignatureVerification,
 } from './helpers';
 import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
+import tokensUtils from '../utils/tokens';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 
 export const WALLET_STATUS = {
@@ -295,7 +296,7 @@ export function* startWallet(action) {
     }
   }
 
-  yield call([wallet.storage, wallet.storage.registerToken(hathorLibConstants.HATHOR_TOKEN_CONFIG)]);
+  yield call([wallet.storage, wallet.storage.registerToken], hathorLibConstants.HATHOR_TOKEN_CONFIG);
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
@@ -303,10 +304,10 @@ export function* startWallet(action) {
   }
 
   try {
-    const { allTokens } = yield call(loadTokens);
+    const { allTokens, registeredTokens } = yield call(loadTokens);
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
     // Store all tokens on redux
-    yield put(loadWalletSuccess(allTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
   } catch(e) {
     yield put(startWalletFailed());
     return;
@@ -348,13 +349,13 @@ export function* loadTokens() {
 
   // Fetch all tokens, including the ones that are not registered yet
   const allTokens = yield call([wallet, wallet.getTokens]);
-  const registeredTokens = yield getRegisteredTokensUids(wallet, false);
+  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet);
 
   // We don't need to wait for the metadatas response, so we can just
   // spawn a new "thread" to handle it.
   //
   // `spawn` is similar to `fork`, but it creates a `detached` fork
-  yield spawn(fetchTokensMetadata, registeredTokens);
+  yield spawn(fetchTokensMetadata, registeredTokens.map(token => token.uid));
 
   // Dispatch actions to asynchronously load the balances of each token the wallet has
   // ever interacted with. The `put` effect will just dispatch and continue, loading
@@ -458,10 +459,20 @@ export function* handleTx(action) {
   const tx = action.payload;
   const wallet = yield select((state) => state.wallet);
   const routerHistory = yield select((state) => state.routerHistory);
+  const receivedTxs = yield select((state) => state.receivedTxs);
 
   if (!wallet.isReady()) {
     return;
   }
+
+  if (receivedTxs.has(tx.tx_id)) {
+    // This transaction is being processed for a second time.
+    // This may happen due to an event being received twice.
+    // We will skip to avoid multiple notifications and UI changes.
+    return;
+  }
+
+  yield put(markTxReceived(tx.tx_id));
 
   // find tokens affected by the transaction
   const affectedTokens = new Set();
@@ -626,7 +637,7 @@ export function* walletReloading() {
   try {
     // Store all tokens on redux as we might have lost tokens during the disconnected
     // period.
-    const { allTokens } = yield call(loadTokens);
+    const { allTokens, registeredTokens } = yield call(loadTokens);
 
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
@@ -651,7 +662,7 @@ export function* walletReloading() {
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
 
     // Load success, we can send the user back to the wallet screen
-    yield put(loadWalletSuccess(allTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
     routerHistory.replace('/wallet/');
     yield put(loadingAddresses(false));
   } catch (e) {

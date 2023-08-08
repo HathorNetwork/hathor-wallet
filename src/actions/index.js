@@ -51,6 +51,7 @@ export const types = {
   FEATURE_TOGGLE_INITIALIZED: 'FEATURE_TOGGLE_INITIALIZED',
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
   SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
+  MARK_TX_RECEIVED: 'MARK_TX_RECEIVED',
 };
 
 /**
@@ -154,7 +155,7 @@ export const resetWallet = () => ({ type: 'reset_wallet' });
  * tokens {Array} array of token uids the the wallet has
  * currentAddress {Object} The current unused address
  */
-export const loadWalletSuccess = (tokens, currentAddress) => ({ type: 'load_wallet_success', payload: { tokens, currentAddress } });
+export const loadWalletSuccess = (tokens, registeredTokens, currentAddress) => ({ type: 'load_wallet_success', payload: { tokens, registeredTokens, currentAddress } });
 
 /**
  * tx {Object} the new transaction
@@ -481,4 +482,9 @@ export const walletResetSuccess = () => ({
 
 export const walletReset = () => ({
   type: types.WALLET_RESET,
+});
+
+export const markTxReceived = (txId) => ({
+  type: types.MARK_TX_RECEIVED,
+  payload: txId,
 });
