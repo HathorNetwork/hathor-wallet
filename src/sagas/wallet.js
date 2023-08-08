@@ -295,6 +295,8 @@ export function* startWallet(action) {
     }
   }
 
+  yield call([wallet.storage, wallet.storage.registerToken(hathorLibConstants.HATHOR_TOKEN_CONFIG)]);
+
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
     yield fork(dispatchLedgerTokenSignatureVerification, wallet);
@@ -346,7 +348,7 @@ export function* loadTokens() {
 
   // Fetch all tokens, including the ones that are not registered yet
   const allTokens = yield call([wallet, wallet.getTokens]);
-  const registeredTokens = yield getRegisteredTokensUids(wallet, true);
+  const registeredTokens = yield getRegisteredTokensUids(wallet, false);
 
   // We don't need to wait for the metadatas response, so we can just
   // spawn a new "thread" to handle it.
