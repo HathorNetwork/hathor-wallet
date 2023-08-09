@@ -160,13 +160,14 @@ class Root extends React.Component {
  * Validate if version is allowed for the loaded wallet
  */
 const returnLoadedWalletComponent = (Component, props) => {
+  // For server screen we don't need to check version
+  const isServerScreen = props.match.path === '/server';
+
   // If was closed and is loaded we need to redirect to locked screen
-  if (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) {
+  if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked())) {
     return <Redirect to={{ pathname: '/locked/' }} />;
   }
 
-  // For server screen we don't need to check version
-  const isServerScreen = props.match.path === '/server';
   const reduxState = store.getState();
 
   // Check version
@@ -228,13 +229,14 @@ const returnStartedRoute = (Component, props, rest) => {
   // The wallet is already loaded
   const routeRequiresWalletToBeLoaded = rest.loaded;
   if (LOCAL_STORE.getWalletId()) {
+    const isServerScreen = props.match.path === '/server';
     // Wallet is locked, go to locked screen
-    if (LOCAL_STORE.isLocked()) {
+    if (LOCAL_STORE.isLocked() && !isServerScreen) {
       return <Redirect to={{pathname: '/locked/'}}/>;
     }
 
     // Route requires the wallet to be loaded, render it
-    if (routeRequiresWalletToBeLoaded) {
+    if (routeRequiresWalletToBeLoaded || isServerScreen) {
       return returnLoadedWalletComponent(Component, props);
     }
 
