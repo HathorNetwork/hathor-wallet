@@ -34,6 +34,7 @@ import WalletVersionError from './screens/WalletVersionError';
 import LoadWalletFailed from './screens/LoadWalletFailed';
 import version from './utils/version';
 import tokens from './utils/tokens';
+import storageUtils from './utils/storage';
 import { connect } from 'react-redux';
 import RequestErrorModal from './components/RequestError';
 import store from './store/index';
@@ -215,6 +216,9 @@ const returnStartedRoute = (Component, props, rest) => {
       return <Redirect to={{pathname: pathname.slice(3)}} />;
     }
   }
+
+  // Detect a previous instalation and migrate before continuing
+  storageUtils.migratePreviousLocalStorage();
 
   // The wallet was not yet started, go to Welcome
   if (!LOCAL_STORE.wasStarted()) {
