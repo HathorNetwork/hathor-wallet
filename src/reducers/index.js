@@ -133,6 +133,11 @@ const initialState = {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
 
+  /**
+   * A set of tx ids received during this session.
+   * This will be used to prevent sending a notification for the same tx twice.
+   * @type {Set<string>}
+   */
   receivedTxs: new Set(),
 };
 

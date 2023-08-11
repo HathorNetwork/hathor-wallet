@@ -8,47 +8,56 @@
 import LOCAL_STORE, { STARTED_KEY, LOCKED_KEY, CLOSED_KEY, IS_BACKUP_DONE_KEY, IS_HARDWARE_KEY } from '../storage';
 
 const storageUtils = {
+  /**
+   * Migrate the localStorage from a previous version to the current version.
+   *
+   * The current state should not be affected if we run this method more than
+   * once. Like a user closing and opening the wallet again before inputing his
+   * pin.
+   */
   migratePreviousLocalStorage() {
-    const accessData = LOCAL_STORE.getItem('wallet:accessData');
-
-    if (!accessData) {
-      return;
+    const oldStorageKeys = {
+      OLD_STARTED_KEY: 'wallet:started',
+      OLD_LOCKED_KEY: 'wallet:locked',
+      OLD_CLOSED_KEY: 'wallet:closed',
+      OLD_BACKUP_KEY: 'wallet:backup',
+      OLD_TYPE_KEY: 'wallet:type',
     }
 
-    if (LOCAL_STORE.getItem('wallet:started')) {
+    if (LOCAL_STORE.getItem(oldStorageKeys.OLD_STARTED_KEY)) {
       LOCAL_STORE.setItem(
         STARTED_KEY,
-        LOCAL_STORE.getItem('wallet:started'),
+        LOCAL_STORE.getItem(oldStorageKeys.OLD_STARTED_KEY),
       );
-      LOCAL_STORE.removeItem('wallet:started');
+      LOCAL_STORE.removeItem(oldStorageKeys.OLD_STARTED_KEY);
     }
-    if (LOCAL_STORE.getItem('wallet:locked')) {
+    if (LOCAL_STORE.getItem(oldStorageKeys.OLD_LOCKED_KEY)) {
       LOCAL_STORE.setItem(
         LOCKED_KEY,
-        LOCAL_STORE.getItem('wallet:locked'),
+        LOCAL_STORE.getItem(oldStorageKeys.OLD_LOCKED_KEY),
       );
-      LOCAL_STORE.removeItem('wallet:locked');
+      LOCAL_STORE.removeItem(oldStorageKeys.OLD_LOCKED_KEY);
     }
-    if (LOCAL_STORE.getItem('wallet:closed')) {
+    if (LOCAL_STORE.getItem(oldStorageKeys.OLD_CLOSED_KEY)) {
       LOCAL_STORE.setItem(
         CLOSED_KEY,
-        LOCAL_STORE.getItem('wallet:closed'),
+        LOCAL_STORE.getItem(oldStorageKeys.OLD_CLOSED_KEY),
       );
-      LOCAL_STORE.removeItem('wallet:closed');
+      LOCAL_STORE.removeItem(oldStorageKeys.OLD_CLOSED_KEY);
     }
-    if (LOCAL_STORE.getItem('wallet:backup')) {
+    if (LOCAL_STORE.getItem(oldStorageKeys.OLD_BACKUP_KEY)) {
       LOCAL_STORE.setItem(
         IS_BACKUP_DONE_KEY,
-        LOCAL_STORE.getItem('wallet:backup'),
+        LOCAL_STORE.getItem(oldStorageKeys.OLD_BACKUP_KEY),
       );
-      LOCAL_STORE.removeItem('wallet:backup');
+      LOCAL_STORE.removeItem(oldStorageKeys.OLD_BACKUP_KEY);
     }
-    if (LOCAL_STORE.getItem('wallet:type')) {
+    if (LOCAL_STORE.getItem(oldStorageKeys.OLD_TYPE_KEY)) {
       LOCAL_STORE.setItem(
         IS_HARDWARE_KEY,
-        LOCAL_STORE.getItem('wallet:type') === 'hardware',
+        LOCAL_STORE.getItem(oldStorageKeys.OLD_TYPE_KEY) === 'hardware',
       );
-      LOCAL_STORE.removeItem('wallet:type');
+      LOCAL_STORE.removeItem(oldStorageKeys.OLD_TYPE_KEY);
     }
   }
 };
