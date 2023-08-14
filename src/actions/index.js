@@ -484,6 +484,11 @@ export const walletReset = () => ({
   type: types.WALLET_RESET,
 });
 
+/**
+ * Action to mark the txId as received by the wallet in this session.
+ * @param {string} txId id of the tx to mark as received.
+ * @returns {Object} action to mark tx as received.
+ */
 export const markTxReceived = (txId) => ({
   type: types.MARK_TX_RECEIVED,
   payload: txId,
