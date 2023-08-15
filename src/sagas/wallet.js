@@ -465,16 +465,8 @@ export function* handleTx(action) {
     return;
   }
 
-  if (receivedTxs.has(tx.tx_id)) {
-    // This transaction is being processed for a second time.
-    // This may happen due to an event being received twice.
-    // We will skip to avoid multiple notifications and UI changes.
-    return;
-  }
-
-  yield put(markTxReceived(tx.tx_id));
-
-  // find tokens affected by the transaction
+  // reload token history of affected tokens
+  // We always reload the history and balance
   const affectedTokens = new Set();
 
   for (const output of tx.outputs) {
@@ -486,26 +478,6 @@ export function* handleTx(action) {
   }
   const stateTokens = yield select((state) => state.tokens);
   const registeredTokens = stateTokens.map((token) => token.uid);
-
-  let message = '';
-  if (transactionUtils.isBlock(tx)) {
-    message = 'You\'ve found a new block! Click to open it.';
-  } else {
-    message = 'You\'ve received a new transaction! Click to open it.'
-  }
-
-  const notification = walletUtils.sendNotification(message);
-
-  // Set the notification click, in case we have sent one
-  if (notification !== undefined) {
-    notification.onclick = () => {
-      if (!routerHistory) {
-        return;
-      }
-
-      routerHistory.push(`/transaction/${tx.tx_id}/`);
-    }
-  }
 
   // We should refresh the available addresses.
   // Since we have already received the transaction at this point, the wallet
@@ -527,6 +499,34 @@ export function* handleTx(action) {
     yield put(tokenFetchBalanceRequested(tokenUid, true));
     yield put(tokenFetchHistoryRequested(tokenUid, true));
   }
+
+  if (!receivedTxs.has(tx.tx_id)) {
+    // We only show a notification on the first time we see a transaction
+    let message = '';
+    if (transactionUtils.isBlock(tx)) {
+      message = 'You\'ve found a new block! Click to open it.';
+    } else {
+      message = 'You\'ve received a new transaction! Click to open it.'
+    }
+
+    const notification = walletUtils.sendNotification(message);
+
+    // Set the notification click, in case we have sent one
+    if (notification !== undefined) {
+      notification.onclick = () => {
+        if (!routerHistory) {
+          return;
+        }
+
+        routerHistory.push(`/transaction/${tx.tx_id}/`);
+      }
+    }
+  }
+
+  // Mark the tx as received by the wallet.
+  // This is meant to avoid sending the same notification twice
+  // receivedTxs is a set, so multiple calls to this event are ignored.
+  yield put(markTxReceived(tx.tx_id));
 }
 
 export function* setupWalletListeners(wallet) {

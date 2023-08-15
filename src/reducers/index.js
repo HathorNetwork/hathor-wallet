@@ -597,6 +597,7 @@ export const onTokenFetchBalanceRequested = (state, action) => {
  */
 export const onTokenFetchBalanceSuccess = (state, action) => {
   const { tokenId, data } = action;
+  const oldState = get(state.tokensBalance, tokenId, {});
 
   return {
     ...state,
@@ -606,6 +607,7 @@ export const onTokenFetchBalanceSuccess = (state, action) => {
         status: TOKEN_DOWNLOAD_STATUS.READY,
         updatedAt: new Date().getTime(),
         data,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -616,6 +618,7 @@ export const onTokenFetchBalanceSuccess = (state, action) => {
  */
 export const onTokenFetchBalanceFailed = (state, action) => {
   const { tokenId } = action;
+  const oldState = get(state.tokensBalance, tokenId, {});
 
   return {
     ...state,
@@ -623,6 +626,7 @@ export const onTokenFetchBalanceFailed = (state, action) => {
       ...state.tokensBalance,
       [tokenId]: {
         status: TOKEN_DOWNLOAD_STATUS.FAILED,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -634,6 +638,7 @@ export const onTokenFetchBalanceFailed = (state, action) => {
  */
 export const onTokenFetchHistorySuccess = (state, action) => {
   const { tokenId, data } = action;
+  const oldState = get(state.tokensHistory, tokenId, {});
 
   return {
     ...state,
@@ -643,6 +648,7 @@ export const onTokenFetchHistorySuccess = (state, action) => {
         status: TOKEN_DOWNLOAD_STATUS.READY,
         updatedAt: new Date().getTime(),
         data,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -653,6 +659,7 @@ export const onTokenFetchHistorySuccess = (state, action) => {
  */
 export const onTokenFetchHistoryFailed = (state, action) => {
   const { tokenId } = action;
+  const oldState = get(state.tokensHistory, tokenId, {});
 
   return {
     ...state,
@@ -661,6 +668,7 @@ export const onTokenFetchHistoryFailed = (state, action) => {
       [tokenId]: {
         status: TOKEN_DOWNLOAD_STATUS.FAILED,
         data: [],
+        oldStatus: oldState.status,
       },
     },
   };
