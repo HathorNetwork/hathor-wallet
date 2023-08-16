@@ -308,7 +308,7 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
     balance: tokenTxBalance,
     is_voided: tx.is_voided,
     version: tx.version,
-    isAllAuthority: isAllAuthority(tx),
+    // isAllAuthority: isAllAuthority(tx),
   }
 };
 
