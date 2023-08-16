@@ -533,7 +533,6 @@ export function* handleNewTx(action) {
 export function* handleUpdateTx(action) {
   const tx = action.payload;
   const wallet = yield select((state) => state.wallet);
-  const allTokensHistory = yield select((state) => state.tokensHistory);
 
   if (!wallet.isReady()) {
     return;
@@ -544,6 +543,7 @@ export function* handleUpdateTx(action) {
   const affectedTokens = yield call(handleTx, wallet, tx);
   const stateTokens = yield select((state) => state.tokens);
   const registeredTokens = stateTokens.map((token) => token.uid);
+  const txbalance = yield call([wallet, wallet.getTxBalance], tx);
 
   // We should download the **balance** and **history** for every token involved
   // in the transaction
@@ -551,22 +551,10 @@ export function* handleUpdateTx(action) {
     if (registeredTokens.indexOf(tokenUid) === -1) {
       continue;
     }
+
     // Always reload balance
     yield put(tokenFetchBalanceRequested(tokenUid, true));
-
-    const tokenHistory = allTokensHistory[tokenUid];
-    if (!tokenHistory) {
-      continue;
-    }
-
-    const txbalance = yield call([wallet, wallet.getTxBalance], tx);
-
-    for (const histTx of tokenHistory.data) {
-      if (histTx.tx_id === tx.tx_id) {
-        // We are updating a tx on the redux
-        yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0));
-      }
-    }
+    yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0));
   }
 }
 
