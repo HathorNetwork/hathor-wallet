@@ -58,7 +58,8 @@ import {
   proposalFetchRequested,
   walletResetSuccess,
   reloadWalletRequested,
-  markTxReceived,
+  changeWalletState,
+  updateTxHistory,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -75,6 +76,7 @@ export const WALLET_STATUS = {
   READY: 'ready',
   FAILED: 'failed',
   LOADING: 'loading',
+  SYNCING: 'syncing',
 };
 
 export function* isWalletServiceEnabled() {
@@ -455,18 +457,7 @@ export function* listenForWalletReady(wallet) {
   }
 }
 
-export function* handleTx(action) {
-  const tx = action.payload;
-  const wallet = yield select((state) => state.wallet);
-  const routerHistory = yield select((state) => state.routerHistory);
-  const receivedTxs = yield select((state) => state.receivedTxs);
-
-  if (!wallet.isReady()) {
-    return;
-  }
-
-  // reload token history of affected tokens
-  // We always reload the history and balance
+export function* handleTx(wallet, tx) {
   const affectedTokens = new Set();
 
   for (const output of tx.outputs) {
@@ -476,8 +467,6 @@ export function* handleTx(action) {
   for (const input of tx.inputs) {
     affectedTokens.add(input.token);
   }
-  const stateTokens = yield select((state) => state.tokens);
-  const registeredTokens = stateTokens.map((token) => token.uid);
 
   // We should refresh the available addresses.
   // Since we have already received the transaction at this point, the wallet
@@ -489,6 +478,25 @@ export function* handleTx(action) {
     lastSharedAddress: newAddress.address,
     lastSharedIndex: newAddress.index,
   }));
+
+  return affectedTokens;
+}
+
+export function* handleNewTx(action) {
+  const tx = action.payload;
+  const wallet = yield select((state) => state.wallet);
+  const routerHistory = yield select((state) => state.routerHistory);
+
+  if (!wallet.isReady()) {
+    return;
+  }
+
+  // reload token history of affected tokens
+  // We always reload the history and balance
+  const affectedTokens = yield call(handleTx, wallet, tx);
+  const stateTokens = yield select((state) => state.tokens);
+  const registeredTokens = stateTokens.map((token) => token.uid);
+
   // We should download the **balance** and **history** for every token involved
   // in the transaction
   for (const tokenUid of affectedTokens) {
@@ -500,33 +508,66 @@ export function* handleTx(action) {
     yield put(tokenFetchHistoryRequested(tokenUid, true));
   }
 
-  if (!receivedTxs.has(tx.tx_id)) {
-    // We only show a notification on the first time we see a transaction
-    let message = '';
-    if (transactionUtils.isBlock(tx)) {
-      message = 'You\'ve found a new block! Click to open it.';
-    } else {
-      message = 'You\'ve received a new transaction! Click to open it.'
+  // We only show a notification on the first time we see a transaction
+  let message = '';
+  if (transactionUtils.isBlock(tx)) {
+    message = 'You\'ve found a new block! Click to open it.';
+  } else {
+    message = 'You\'ve received a new transaction! Click to open it.'
+  }
+
+  const notification = walletUtils.sendNotification(message);
+
+  // Set the notification click, in case we have sent one
+  if (notification !== undefined) {
+    notification.onclick = () => {
+      if (!routerHistory) {
+        return;
+      }
+
+      routerHistory.push(`/transaction/${tx.tx_id}/`);
+    }
+  }
+}
+
+export function* handleUpdateTx(action) {
+  const tx = action.payload;
+  const wallet = yield select((state) => state.wallet);
+  const allTokensHistory = yield select((state) => state.tokensHistory);
+
+  if (!wallet.isReady()) {
+    return;
+  }
+
+  // reload token history of affected tokens
+  // We always reload the history and balance
+  const affectedTokens = yield call(handleTx, wallet, tx);
+  const stateTokens = yield select((state) => state.tokens);
+  const registeredTokens = stateTokens.map((token) => token.uid);
+
+  // We should download the **balance** and **history** for every token involved
+  // in the transaction
+  for (const tokenUid of affectedTokens) {
+    if (registeredTokens.indexOf(tokenUid) === -1) {
+      continue;
+    }
+    // Always reload balance
+    yield put(tokenFetchBalanceRequested(tokenUid, true));
+
+    const tokenHistory = allTokensHistory[tokenUid];
+    if (!tokenHistory) {
+      continue;
     }
 
-    const notification = walletUtils.sendNotification(message);
+    const txbalance = yield call([wallet, wallet.getTxBalance], tx);
 
-    // Set the notification click, in case we have sent one
-    if (notification !== undefined) {
-      notification.onclick = () => {
-        if (!routerHistory) {
-          return;
-        }
-
-        routerHistory.push(`/transaction/${tx.tx_id}/`);
+    for (const histTx of tokenHistory.data) {
+      if (histTx.tx_id === tx.tx_id) {
+        // We are updating a tx on the redux
+        yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0));
       }
     }
   }
-
-  // Mark the tx as received by the wallet.
-  // This is meant to avoid sending the same notification twice
-  // receivedTxs is a set, so multiple calls to this event are ignored.
-  yield put(markTxReceived(tx.tx_id));
 }
 
 export function* setupWalletListeners(wallet) {
@@ -556,6 +597,8 @@ export function* setupWalletListeners(wallet) {
       data,
     }));
 
+    wallet.on('state', (data) => emitter(changeWalletState(data)));
+
     return () => {
       wallet.conn.removeListener('best-block-update', listener);
       wallet.conn.removeListener('wallet-load-partial-update', listener);
@@ -563,6 +606,7 @@ export function* setupWalletListeners(wallet) {
       wallet.removeListener('reload-data', listener);
       wallet.removeListener('update-tx', listener);
       wallet.removeListener('new-tx', listener);
+      wallet.removeListener('state', listener);
     };
   });
 
@@ -728,8 +772,8 @@ export function* saga() {
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
     takeLatest('WALLET_RELOADING', walletReloading),
     takeLatest('WALLET_RESET', onWalletReset),
-    takeEvery('WALLET_NEW_TX', handleTx),
-    takeEvery('WALLET_UPDATE_TX', handleTx),
+    takeEvery('WALLET_NEW_TX', handleNewTx),
+    takeEvery('WALLET_UPDATE_TX', handleUpdateTx),
     takeEvery('WALLET_BEST_BLOCK_UPDATE', bestBlockUpdate),
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
     takeEvery('WALLET_RELOAD_DATA', walletReloading),

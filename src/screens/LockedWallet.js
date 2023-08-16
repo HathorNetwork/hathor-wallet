@@ -80,6 +80,8 @@ class LockedWallet extends React.Component {
       }
 
       await LOCAL_STORE.handleDataMigration(pin);
+      // We block the wallet from being showed if it was locked or closed.
+      // So we need to mark it as opened for the UI to proceed.
       LOCAL_STORE.open();
 
       // LockedWallet screen was called for a result, so we should resolve the promise with the PIN after

@@ -80,6 +80,7 @@ const initialState = {
   // Height of the best chain of the network arrived from ws data
   height: 0,
   wallet: null,
+  walletState: null,
   // Metadata of tokens
   tokenMetadata: {},
   // Token list of uids that had errors when loading metadata
@@ -132,13 +133,6 @@ const initialState = {
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
-
-  /**
-   * A set of tx ids received during this session.
-   * This will be used to prevent sending a notification for the same tx twice.
-   * @type {Set<string>}
-   */
-  receivedTxs: new Set(),
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -273,8 +267,10 @@ const rootReducer = (state = initialState, action) => {
       return onFeatureToggleInitialized(state);
     case types.WALLET_RESET_SUCCESS:
       return onWalletResetSuccess(state);
-    case types.MARK_TX_RECEIVED:
-      return onMarkTxReceived(state, action);
+    case types.UPDATE_TX_HISTORY:
+      return onUpdateTxHistory(state, action);
+    case types.WALLET_CHANGE_STATE:
+      return onWalletStateChanged(state, action);
     default:
       return state;
   }
@@ -1032,11 +1028,42 @@ const onWalletResetSuccess = (state) => ({
   unleashClient: state.unleashClient,
 });
 
-export const onMarkTxReceived = (state, action) => {
-  const txId = action.payload;
-  state.receivedTxs.add(txId);
+export const onUpdateTxHistory = (state, action) => {
+  const { tx, tokenId, balance } = action.payload;
+  const tokenHistory = state.tokensHistory[tokenId];
 
-  return state;
+  if (!tokenHistory) {
+    return state;
+  }
+
+  for (const [index, histTx] of tokenHistory.data.entries()) {
+    if (histTx.tx_id === tx.tx_id) {
+      tokenHistory.data[index] = {
+        tx_id: tx.tx_id,
+        timestamp: tx.timestamp,
+        tokenUid: tokenId,
+        is_voided: Boolean(tx.is_voided),
+        version: tx.version,
+        balance,
+      };
+      break;
+    }
+  }
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      [tokenId]: {
+        ...tokenHistory,
+      }
+    },
+  };
 };
+
+export const onWalletStateChanged = (state, { payload }) => ({
+  ...state,
+  walletState: payload,
+});
 
 export default rootReducer;

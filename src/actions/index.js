@@ -42,6 +42,7 @@ export const types = {
   WALLET_STATE_READY: 'WALLET_STATE_READY',
   WALLET_STATE_ERROR: 'WALLET_STATE_ERROR',
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
+  WALLET_CHANGE_STATE: 'WALLET_CHANGE_STATE',
   WALLET_RESET: 'WALLET_RESET',
   WALLET_RESET_SUCCESS: 'WALLET_RESET_SUCCESS',
   WALLET_REFRESH_SHARED_ADDRESS: 'WALLET_REFRESH_SHARED_ADDRESS',
@@ -51,7 +52,7 @@ export const types = {
   FEATURE_TOGGLE_INITIALIZED: 'FEATURE_TOGGLE_INITIALIZED',
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
   SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
-  MARK_TX_RECEIVED: 'MARK_TX_RECEIVED',
+  UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
 };
 
 /**
@@ -485,11 +486,23 @@ export const walletReset = () => ({
 });
 
 /**
- * Action to mark the txId as received by the wallet in this session.
- * @param {string} txId id of the tx to mark as received.
+ * Action to update the token history with this tx.
+ * @param {Object} tx New transaction to update in the token history.
+ * @param {string} tokenId token to update the history.
+ * @param {number} balance transaction balance of the token on the wallet.
  * @returns {Object} action to mark tx as received.
  */
-export const markTxReceived = (txId) => ({
-  type: types.MARK_TX_RECEIVED,
-  payload: txId,
+export const updateTxHistory = (tx, tokenId, balance) => ({
+  type: types.UPDATE_TX_HISTORY,
+  payload: { tx, tokenId, balance },
+});
+
+/**
+ * Action to set the wallet state and allow the UI to react to a state change.
+ * @param {number} newState state from the enum included on HathorWallet
+ * @returns {Object}
+ */
+export const changeWalletState = (newState) => ({
+  type: types.WALLET_CHANGE_STATE,
+  payload: newState,
 });

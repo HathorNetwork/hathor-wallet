@@ -50,6 +50,7 @@ const mapStateToProps = (state) => {
     tokenMetadata: state.tokenMetadata || {},
     tokens: state.tokens,
     wallet: state.wallet,
+    walletState: state.walletState,
     useWalletService: state.useWalletService,
   };
 };
@@ -338,12 +339,10 @@ class Wallet extends React.Component {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
     const tokenHistory = get(this.props.tokensHistory, this.props.selectedToken, {
       status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      oldStatus: undefined,
       data: [],
     });
     const tokenBalance = get(this.props.tokensBalance, this.props.selectedToken, {
       status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      oldStatus: undefined,
       data: {
         available: 0,
         locked: 0,
@@ -462,12 +461,11 @@ class Wallet extends React.Component {
     const renderUnlockedWallet = () => {
       let template;
       /**
-       * If an oldStatus of either balance or history should be undefined this
-       * means that this is the first time we are loading it, so it should show
-       * the loading message.
+       * We only show the loading message if we are syncing the entire history
+       * This will happen on the first history load and if we lose connection
+       * to the fullnode.
        */
-      if (tokenHistory.oldStatus === undefined
-          || tokenBalance.oldStatus === undefined) {
+      if (this.props.walletState === hathorLib.HathorWallet.SYNCING) {
         template = (
           <div className='token-wrapper d-flex flex-column align-items-center justify-content-center mb-3'>
             <ReactLoading
