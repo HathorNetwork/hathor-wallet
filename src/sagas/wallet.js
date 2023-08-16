@@ -539,14 +539,12 @@ export function* handleUpdateTx(action) {
   }
 
   // reload token history of affected tokens
-  // We always reload the history and balance
+  // We always reload balance but only reload the tx being updated on history.
   const affectedTokens = yield call(handleTx, wallet, tx);
   const stateTokens = yield select((state) => state.tokens);
   const registeredTokens = stateTokens.map((token) => token.uid);
   const txbalance = yield call([wallet, wallet.getTxBalance], tx);
 
-  // We should download the **balance** and **history** for every token involved
-  // in the transaction
   for (const tokenUid of affectedTokens) {
     if (registeredTokens.indexOf(tokenUid) === -1) {
       continue;

@@ -1038,14 +1038,7 @@ export const onUpdateTxHistory = (state, action) => {
 
   for (const [index, histTx] of tokenHistory.data.entries()) {
     if (histTx.tx_id === tx.tx_id) {
-      tokenHistory.data[index] = {
-        tx_id: tx.tx_id,
-        timestamp: tx.timestamp,
-        tokenUid: tokenId,
-        is_voided: Boolean(tx.is_voided),
-        version: tx.version,
-        balance,
-      };
+      tokenHistory.data[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
       break;
     }
   }

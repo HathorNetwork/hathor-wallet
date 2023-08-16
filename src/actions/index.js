@@ -490,7 +490,7 @@ export const walletReset = () => ({
  * @param {Object} tx New transaction to update in the token history.
  * @param {string} tokenId token to update the history.
  * @param {number} balance transaction balance of the token on the wallet.
- * @returns {Object} action to mark tx as received.
+ * @returns {Object} action to update the history of the token with the tx.
  */
 export const updateTxHistory = (tx, tokenId, balance) => ({
   type: types.UPDATE_TX_HISTORY,
