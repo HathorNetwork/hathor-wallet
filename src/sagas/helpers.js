@@ -107,17 +107,6 @@ export function errorHandler(saga, failureAction) {
   };
 }
 
-/**
- * Get registered tokens from the wallet instance.
- * @param {HathorWallet} wallet
- * @param {boolean} excludeDefaultToken If we should exclude the default token.
- * @returns {string[]}
- */
-export async function getRegisteredTokensUids(wallet, excludeDefaultToken = false) {
-  const tokenConfigArr = await tokensUtils.getRegisteredTokens(wallet, excludeDefaultToken);
-  return tokenConfigArr.map(token => token.uid);
-}
-
 export function* dispatchLedgerTokenSignatureVerification(wallet) {
   const isHardware = yield wallet.storage.isHardwareWallet();
   if (!isHardware) {

@@ -42,6 +42,7 @@ export const types = {
   WALLET_STATE_READY: 'WALLET_STATE_READY',
   WALLET_STATE_ERROR: 'WALLET_STATE_ERROR',
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
+  WALLET_CHANGE_STATE: 'WALLET_CHANGE_STATE',
   WALLET_RESET: 'WALLET_RESET',
   WALLET_RESET_SUCCESS: 'WALLET_RESET_SUCCESS',
   WALLET_REFRESH_SHARED_ADDRESS: 'WALLET_REFRESH_SHARED_ADDRESS',
@@ -51,6 +52,7 @@ export const types = {
   FEATURE_TOGGLE_INITIALIZED: 'FEATURE_TOGGLE_INITIALIZED',
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
   SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
+  UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
 };
 
 /**
@@ -154,7 +156,7 @@ export const resetWallet = () => ({ type: 'reset_wallet' });
  * tokens {Array} array of token uids the the wallet has
  * currentAddress {Object} The current unused address
  */
-export const loadWalletSuccess = (tokens, currentAddress) => ({ type: 'load_wallet_success', payload: { tokens, currentAddress } });
+export const loadWalletSuccess = (tokens, registeredTokens, currentAddress) => ({ type: 'load_wallet_success', payload: { tokens, registeredTokens, currentAddress } });
 
 /**
  * tx {Object} the new transaction
@@ -481,4 +483,26 @@ export const walletResetSuccess = () => ({
 
 export const walletReset = () => ({
   type: types.WALLET_RESET,
+});
+
+/**
+ * Action to update the token history with this tx.
+ * @param {Object} tx New transaction to update in the token history.
+ * @param {string} tokenId token to update the history.
+ * @param {number} balance transaction balance of the token on the wallet.
+ * @returns {Object} action to update the history of the token with the tx.
+ */
+export const updateTxHistory = (tx, tokenId, balance) => ({
+  type: types.UPDATE_TX_HISTORY,
+  payload: { tx, tokenId, balance },
+});
+
+/**
+ * Action to set the wallet state and allow the UI to react to a state change.
+ * @param {number} newState state from the enum included on HathorWallet
+ * @returns {Object}
+ */
+export const changeWalletState = (newState) => ({
+  type: types.WALLET_CHANGE_STATE,
+  payload: newState,
 });

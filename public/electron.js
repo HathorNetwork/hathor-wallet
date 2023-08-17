@@ -35,7 +35,7 @@ if (process.platform === 'darwin') {
 }
 
 const appName = 'Hathor Wallet';
-const walletVersion = '0.26.0';
+const walletVersion = '0.27.0-rc1';
 
 const debugMode = (
   process.argv.indexOf('--unsafe-mode') >= 0 &&

@@ -80,6 +80,7 @@ const initialState = {
   // Height of the best chain of the network arrived from ws data
   height: 0,
   wallet: null,
+  walletState: null,
   // Metadata of tokens
   tokenMetadata: {},
   // Token list of uids that had errors when loading metadata
@@ -266,6 +267,10 @@ const rootReducer = (state = initialState, action) => {
       return onFeatureToggleInitialized(state);
     case types.WALLET_RESET_SUCCESS:
       return onWalletResetSuccess(state);
+    case types.UPDATE_TX_HISTORY:
+      return onUpdateTxHistory(state, action);
+    case types.WALLET_CHANGE_STATE:
+      return onWalletStateChanged(state, action);
     default:
       return state;
   }
@@ -303,7 +308,7 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
     balance: tokenTxBalance,
     is_voided: tx.is_voided,
     version: tx.version,
-    isAllAuthority: isAllAuthority(tx),
+    // isAllAuthority: isAllAuthority(tx),
   }
 };
 
@@ -336,7 +341,7 @@ const isAllAuthority = (tx) => {
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
   LOCAL_STORE.setWalletVersion(VERSION);
-  const { tokens, currentAddress } = action.payload;
+  const { tokens, registeredTokens, currentAddress } = action.payload;
   const allTokens = new Set(tokens);
 
   return {
@@ -345,6 +350,7 @@ const onLoadWalletSuccess = (state, action) => {
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
     allTokens,
+    tokens: registeredTokens,
   };
 };
 
@@ -587,6 +593,7 @@ export const onTokenFetchBalanceRequested = (state, action) => {
  */
 export const onTokenFetchBalanceSuccess = (state, action) => {
   const { tokenId, data } = action;
+  const oldState = get(state.tokensBalance, tokenId, {});
 
   return {
     ...state,
@@ -596,6 +603,7 @@ export const onTokenFetchBalanceSuccess = (state, action) => {
         status: TOKEN_DOWNLOAD_STATUS.READY,
         updatedAt: new Date().getTime(),
         data,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -606,6 +614,7 @@ export const onTokenFetchBalanceSuccess = (state, action) => {
  */
 export const onTokenFetchBalanceFailed = (state, action) => {
   const { tokenId } = action;
+  const oldState = get(state.tokensBalance, tokenId, {});
 
   return {
     ...state,
@@ -613,6 +622,7 @@ export const onTokenFetchBalanceFailed = (state, action) => {
       ...state.tokensBalance,
       [tokenId]: {
         status: TOKEN_DOWNLOAD_STATUS.FAILED,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -624,6 +634,7 @@ export const onTokenFetchBalanceFailed = (state, action) => {
  */
 export const onTokenFetchHistorySuccess = (state, action) => {
   const { tokenId, data } = action;
+  const oldState = get(state.tokensHistory, tokenId, {});
 
   return {
     ...state,
@@ -633,6 +644,7 @@ export const onTokenFetchHistorySuccess = (state, action) => {
         status: TOKEN_DOWNLOAD_STATUS.READY,
         updatedAt: new Date().getTime(),
         data,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -643,6 +655,7 @@ export const onTokenFetchHistorySuccess = (state, action) => {
  */
 export const onTokenFetchHistoryFailed = (state, action) => {
   const { tokenId } = action;
+  const oldState = get(state.tokensHistory, tokenId, {});
 
   return {
     ...state,
@@ -651,6 +664,7 @@ export const onTokenFetchHistoryFailed = (state, action) => {
       [tokenId]: {
         status: TOKEN_DOWNLOAD_STATUS.FAILED,
         data: [],
+        oldStatus: oldState.status,
       },
     },
   };
@@ -1014,5 +1028,35 @@ const onWalletResetSuccess = (state) => ({
   unleashClient: state.unleashClient,
 });
 
+export const onUpdateTxHistory = (state, action) => {
+  const { tx, tokenId, balance } = action.payload;
+  const tokenHistory = state.tokensHistory[tokenId];
+
+  if (!tokenHistory) {
+    return state;
+  }
+
+  for (const [index, histTx] of tokenHistory.data.entries()) {
+    if (histTx.tx_id === tx.tx_id) {
+      tokenHistory.data[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
+      break;
+    }
+  }
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      [tokenId]: {
+        ...tokenHistory,
+      }
+    },
+  };
+};
+
+export const onWalletStateChanged = (state, { payload }) => ({
+  ...state,
+  walletState: payload,
+});
 
 export default rootReducer;

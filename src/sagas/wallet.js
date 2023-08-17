@@ -58,22 +58,25 @@ import {
   proposalFetchRequested,
   walletResetSuccess,
   reloadWalletRequested,
+  changeWalletState,
+  updateTxHistory,
 } from '../actions';
 import {
   specificTypeAndPayload,
   errorHandler,
   checkForFeatureFlag,
-  getRegisteredTokensUids,
   dispatchLedgerTokenSignatureVerification,
 } from './helpers';
 import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
+import tokensUtils from '../utils/tokens';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 
 export const WALLET_STATUS = {
   READY: 'ready',
   FAILED: 'failed',
   LOADING: 'loading',
+  SYNCING: 'syncing',
 };
 
 export function* isWalletServiceEnabled() {
@@ -295,16 +298,18 @@ export function* startWallet(action) {
     }
   }
 
+  yield call([wallet.storage, wallet.storage.registerToken], hathorLibConstants.HATHOR_TOKEN_CONFIG);
+
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
     yield fork(dispatchLedgerTokenSignatureVerification, wallet);
   }
 
   try {
-    const { allTokens } = yield call(loadTokens);
+    const { allTokens, registeredTokens } = yield call(loadTokens);
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
     // Store all tokens on redux
-    yield put(loadWalletSuccess(allTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
   } catch(e) {
     yield put(startWalletFailed());
     return;
@@ -346,13 +351,13 @@ export function* loadTokens() {
 
   // Fetch all tokens, including the ones that are not registered yet
   const allTokens = yield call([wallet, wallet.getTokens]);
-  const registeredTokens = yield getRegisteredTokensUids(wallet, true);
+  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet);
 
   // We don't need to wait for the metadatas response, so we can just
   // spawn a new "thread" to handle it.
   //
   // `spawn` is similar to `fork`, but it creates a `detached` fork
-  yield spawn(fetchTokensMetadata, registeredTokens);
+  yield spawn(fetchTokensMetadata, registeredTokens.map(token => token.uid));
 
   // Dispatch actions to asynchronously load the balances of each token the wallet has
   // ever interacted with. The `put` effect will just dispatch and continue, loading
@@ -452,16 +457,7 @@ export function* listenForWalletReady(wallet) {
   }
 }
 
-export function* handleTx(action) {
-  const tx = action.payload;
-  const wallet = yield select((state) => state.wallet);
-  const routerHistory = yield select((state) => state.routerHistory);
-
-  if (!wallet.isReady()) {
-    return;
-  }
-
-  // find tokens affected by the transaction
+export function* handleTx(wallet, tx) {
   const affectedTokens = new Set();
 
   for (const output of tx.outputs) {
@@ -471,9 +467,48 @@ export function* handleTx(action) {
   for (const input of tx.inputs) {
     affectedTokens.add(input.token);
   }
+
+  // We should refresh the available addresses.
+  // Since we have already received the transaction at this point, the wallet
+  // instance will already have updated its current address, we should just
+  // fetch it and update the redux-store
+  const newAddress = yield call([wallet, wallet.getCurrentAddress]);
+
+  yield put(sharedAddressUpdate({
+    lastSharedAddress: newAddress.address,
+    lastSharedIndex: newAddress.index,
+  }));
+
+  return affectedTokens;
+}
+
+export function* handleNewTx(action) {
+  const tx = action.payload;
+  const wallet = yield select((state) => state.wallet);
+  const routerHistory = yield select((state) => state.routerHistory);
+
+  if (!wallet.isReady()) {
+    return;
+  }
+
+  // reload token history of affected tokens
+  // We always reload the history and balance
+  const affectedTokens = yield call(handleTx, wallet, tx);
   const stateTokens = yield select((state) => state.tokens);
   const registeredTokens = stateTokens.map((token) => token.uid);
 
+  // We should download the **balance** and **history** for every token involved
+  // in the transaction
+  for (const tokenUid of affectedTokens) {
+    if (registeredTokens.indexOf(tokenUid) === -1) {
+      continue;
+    }
+
+    yield put(tokenFetchBalanceRequested(tokenUid, true));
+    yield put(tokenFetchHistoryRequested(tokenUid, true));
+  }
+
+  // We only show a notification on the first time we see a transaction
   let message = '';
   if (transactionUtils.isBlock(tx)) {
     message = 'You\'ve found a new block! Click to open it.';
@@ -493,26 +528,31 @@ export function* handleTx(action) {
       routerHistory.push(`/transaction/${tx.tx_id}/`);
     }
   }
+}
 
-  // We should refresh the available addresses.
-  // Since we have already received the transaction at this point, the wallet
-  // instance will already have updated its current address, we should just
-  // fetch it and update the redux-store
-  const newAddress = yield call([wallet, wallet.getCurrentAddress]);
+export function* handleUpdateTx(action) {
+  const tx = action.payload;
+  const wallet = yield select((state) => state.wallet);
 
-  yield put(sharedAddressUpdate({
-    lastSharedAddress: newAddress.address,
-    lastSharedIndex: newAddress.index,
-  }));
-  // We should download the **balance** and **history** for every token involved
-  // in the transaction
+  if (!wallet.isReady()) {
+    return;
+  }
+
+  // reload token history of affected tokens
+  // We always reload balance but only reload the tx being updated on history.
+  const affectedTokens = yield call(handleTx, wallet, tx);
+  const stateTokens = yield select((state) => state.tokens);
+  const registeredTokens = stateTokens.map((token) => token.uid);
+  const txbalance = yield call([wallet, wallet.getTxBalance], tx);
+
   for (const tokenUid of affectedTokens) {
     if (registeredTokens.indexOf(tokenUid) === -1) {
       continue;
     }
 
+    // Always reload balance
     yield put(tokenFetchBalanceRequested(tokenUid, true));
-    yield put(tokenFetchHistoryRequested(tokenUid, true));
+    yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0));
   }
 }
 
@@ -543,6 +583,8 @@ export function* setupWalletListeners(wallet) {
       data,
     }));
 
+    wallet.on('state', (data) => emitter(changeWalletState(data)));
+
     return () => {
       wallet.conn.removeListener('best-block-update', listener);
       wallet.conn.removeListener('wallet-load-partial-update', listener);
@@ -550,6 +592,7 @@ export function* setupWalletListeners(wallet) {
       wallet.removeListener('reload-data', listener);
       wallet.removeListener('update-tx', listener);
       wallet.removeListener('new-tx', listener);
+      wallet.removeListener('state', listener);
     };
   });
 
@@ -624,7 +667,7 @@ export function* walletReloading() {
   try {
     // Store all tokens on redux as we might have lost tokens during the disconnected
     // period.
-    const { allTokens } = yield call(loadTokens);
+    const { allTokens, registeredTokens } = yield call(loadTokens);
 
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
@@ -649,7 +692,7 @@ export function* walletReloading() {
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
 
     // Load success, we can send the user back to the wallet screen
-    yield put(loadWalletSuccess(allTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
     routerHistory.replace('/wallet/');
     yield put(loadingAddresses(false));
   } catch (e) {
@@ -715,8 +758,8 @@ export function* saga() {
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
     takeLatest('WALLET_RELOADING', walletReloading),
     takeLatest('WALLET_RESET', onWalletReset),
-    takeEvery('WALLET_NEW_TX', handleTx),
-    takeEvery('WALLET_UPDATE_TX', handleTx),
+    takeEvery('WALLET_NEW_TX', handleNewTx),
+    takeEvery('WALLET_UPDATE_TX', handleUpdateTx),
     takeEvery('WALLET_BEST_BLOCK_UPDATE', bestBlockUpdate),
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
     takeEvery('WALLET_RELOAD_DATA', walletReloading),

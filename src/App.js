@@ -34,6 +34,7 @@ import WalletVersionError from './screens/WalletVersionError';
 import LoadWalletFailed from './screens/LoadWalletFailed';
 import version from './utils/version';
 import tokens from './utils/tokens';
+import storageUtils from './utils/storage';
 import { connect } from 'react-redux';
 import RequestErrorModal from './components/RequestError';
 import store from './store/index';
@@ -159,13 +160,16 @@ class Root extends React.Component {
  * Validate if version is allowed for the loaded wallet
  */
 const returnLoadedWalletComponent = (Component, props) => {
+  // For server screen we don't need to check version
+  // We also allow the server screen to be reached from the locked screen
+  // In the case of an unresponsive fullnode, which would block the wallet start
+  const isServerScreen = props.match.path === '/server';
+
   // If was closed and is loaded we need to redirect to locked screen
-  if (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) {
+  if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked())) {
     return <Redirect to={{ pathname: '/locked/' }} />;
   }
 
-  // For server screen we don't need to check version
-  const isServerScreen = props.match.path === '/server';
   const reduxState = store.getState();
 
   // Check version
@@ -216,6 +220,9 @@ const returnStartedRoute = (Component, props, rest) => {
     }
   }
 
+  // Detect a previous instalation and migrate before continuing
+  storageUtils.migratePreviousLocalStorage();
+
   // The wallet was not yet started, go to Welcome
   if (!LOCAL_STORE.wasStarted()) {
     return <Redirect to={{pathname: '/welcome/'}}/>;
@@ -224,13 +231,17 @@ const returnStartedRoute = (Component, props, rest) => {
   // The wallet is already loaded
   const routeRequiresWalletToBeLoaded = rest.loaded;
   if (LOCAL_STORE.getWalletId()) {
+    // The server screen is a special case since we allow the user to change the
+    // connected server in case of unresponsiveness, this should be allowed from
+    // the locked screen since the wallet would not be able to be started otherwise
+    const isServerScreen = props.match.path === '/server';
     // Wallet is locked, go to locked screen
-    if (LOCAL_STORE.isLocked()) {
+    if (LOCAL_STORE.isLocked() && !isServerScreen) {
       return <Redirect to={{pathname: '/locked/'}}/>;
     }
 
     // Route requires the wallet to be loaded, render it
-    if (routeRequiresWalletToBeLoaded) {
+    if (routeRequiresWalletToBeLoaded || isServerScreen) {
       return returnLoadedWalletComponent(Component, props);
     }
 

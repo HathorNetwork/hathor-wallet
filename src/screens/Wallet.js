@@ -50,6 +50,7 @@ const mapStateToProps = (state) => {
     tokenMetadata: state.tokenMetadata || {},
     tokens: state.tokens,
     wallet: state.wallet,
+    walletState: state.walletState,
     useWalletService: state.useWalletService,
   };
 };
@@ -459,8 +460,12 @@ class Wallet extends React.Component {
 
     const renderUnlockedWallet = () => {
       let template;
-      if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING
-          || tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
+      /**
+       * We only show the loading message if we are syncing the entire history
+       * This will happen on the first history load and if we lose connection
+       * to the fullnode.
+       */
+      if (this.props.walletState === hathorLib.HathorWallet.SYNCING) {
         template = (
           <div className='token-wrapper d-flex flex-column align-items-center justify-content-center mb-3'>
             <ReactLoading
