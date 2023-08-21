@@ -187,12 +187,62 @@ const helpers = {
   },
 
   /**
-   * Map token history object to the expected object in the wallet redux data
-   *
-   * tx {Object} history data element
-   * tokenUid {String} token uid
+   * @typedef {Object} ReduxTxHistory
+   * @property {string} tx_id
+   * @property {number} timestamp
+   * @property {string} tokenUid
+   * @property {number} balance
+   * @property {boolean} is_voided
+   * @property {number} version
+   * @property {boolean} isAllAuthority
    */
-  mapTokenHistory(tx, tokenUid) {
+
+  /**
+   * @typedef {Object} LibTxHistory
+   * @property {string} txId
+   * @property {number} balance
+   * @property {number} timestamp
+   * @property {boolean} voided
+   * @property {number} version
+   */
+
+  /**
+   * Check if the tx has only inputs and outputs that are authorities
+   *
+   * @param {Object} tx Transaction data
+   *
+   * @return {boolean} If the tx has only authority
+   */
+  isAllAuthority(tx) {
+    for (let txin of tx.inputs) {
+      if (!hathorLib.transactionUtils.isAuthorityOutput(txin)) {
+        return false;
+      }
+    }
+
+    for (let txout of tx.outputs) {
+      if (!hathorLib.transactionUtils.isAuthorityOutput(txout)) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  /**
+   * Map tx history object to the expected object in the wallet redux data
+   *
+   * @param {HathorWallet} wallet - Wallet instance
+   * @param {LibTxHistory} tx - tx received via getTxHistory
+   * @param {string} tokenUid - token uid
+   * @returns {Promise<ReduxTxHistory>}
+   */
+  async mapTxHistoryToRedux(wallet, tx, tokenUid) {
+    // tx comes from getTxHistory and does not have token_data
+    // We need the actual history tx to access if it is an authority tx
+    const histTx = await wallet.getTx(tx.txId);
+    const isAllAuthority = this.isAllAuthority(histTx);
+
     return {
       tx_id: tx.txId,
       timestamp: tx.timestamp,
@@ -201,7 +251,24 @@ const helpers = {
       // in wallet service this comes as 0/1 and in the full node comes with true/false
       is_voided: Boolean(tx.voided),
       version: tx.version,
+      isAllAuthority,
     };
+  },
+
+  /**
+   * Map token history to a list of the expected format in the wallet redux
+   *
+   * @param {HathorWallet} wallet - Wallet instance
+   * @param {LibTxHistory[]} history - history of txs received via getTxHistory
+   * @param {string} tokenUid - token uid
+   * @returns {Promise<ReduxTxHistory[]>}
+   */
+  async mapTokenHistory(wallet, history, tokenUid) {
+    const mappedHistory = [];
+    for (const tx of history) {
+      mappedHistory.push(await this.mapTxHistoryToRedux(wallet, tx, tokenUid));
+    }
+    return mappedHistory;
   },
 
   /**

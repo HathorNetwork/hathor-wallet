@@ -13,6 +13,7 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import helpersUtils from '../utils/helpers';
 import LOCAL_STORE from '../storage';
 
 /**
@@ -308,32 +309,10 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
     balance: tokenTxBalance,
     is_voided: tx.is_voided,
     version: tx.version,
-    // isAllAuthority: isAllAuthority(tx),
+    isAllAuthority: helpersUtils.isAllAuthority(tx),
   }
 };
 
-/**
- * Check if the tx has only inputs and outputs that are authorities
- *
- * @param {Object} tx Transaction data
- *
- * @return {boolean} If the tx has only authority
- */
-const isAllAuthority = (tx) => {
-  for (let txin of tx.inputs) {
-    if (!hathorLib.transactionUtils.isAuthorityOutput(txin)) {
-      return false;
-    }
-  }
-
-  for (let txout of tx.outputs) {
-    if (!hathorLib.transactionUtils.isAuthorityOutput(txout)) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 /**
  * Got wallet history. Update wallet data on redux
