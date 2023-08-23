@@ -157,7 +157,7 @@ const wallet = {
    */
   async fetchMoreHistory(wallet, token, history) {
     const newHistory = await wallet.getTxHistory({ token_id: token, skip: history.length, count: WALLET_HISTORY_COUNT });
-    const newHistoryObjects = newHistory.map((element) => helpers.mapTokenHistory(element, token));
+    const newHistoryObjects = await helpers.mapTokenHistory(wallet, newHistory, token);
 
     if (newHistoryObjects.length) {
       store.dispatch(updateTokenHistory(token, newHistoryObjects));
