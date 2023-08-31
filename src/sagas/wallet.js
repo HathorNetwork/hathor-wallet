@@ -151,6 +151,8 @@ export function* startWallet(action) {
   if (useWalletService) {
     // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
     try {
+      // getWsServer can return null if not previously set
+      config.setWalletServiceBaseUrl(LOCAL_STORE.getWsServer());
       config.getWalletServiceBaseUrl();
     } catch(err) {
       if (err instanceof hathorErrors.GetWalletServiceUrlError) {
