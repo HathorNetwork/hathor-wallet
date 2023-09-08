@@ -427,7 +427,7 @@ const wallet = {
    * @inner
    */
   async addPassphrase(wallet, passphrase, pin, password, routerHistory) {
-    const words = await wallet.storage.getWalletWords(password);
+    const words = await LOCAL_STORE.getWalletWords(password);
 
     // Clean wallet data, persisted data and redux
     await this.cleanWallet(wallet);
