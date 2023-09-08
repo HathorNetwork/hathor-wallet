@@ -94,6 +94,25 @@ class TransactionDetail extends React.Component {
 
     try {
       const data = await this.props.wallet.getFullTxById(this.props.match.params.id);
+      for (const output of data.tx.outputs) {
+        if (!output.token) {
+          if (output.token_data === 0) {
+            output.token = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+          } else {
+            output.token = data.tx.tokens[(output.token_data & hathorLib.constants.TOKEN_INDEX_MASK) -1].uid;
+          }
+        }
+      }
+
+      for (const input of data.tx.inputs) {
+        if (!input.token) {
+          if (input.token_data === 0) {
+            input.token = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+          } else {
+            input.token = data.tx.tokens[(input.token_data & hathorLib.constants.TOKEN_INDEX_MASK) -1].uid;
+          }
+        }
+      }
 
       if (!hathorLib.transactionUtils.isBlock(data.tx)) {
         this.getConfirmationData();
