@@ -154,7 +154,7 @@ class Server extends React.Component {
 
     // We only have a different websocket server on the wallet-service facade, so update the config singleton
     if (this.props.useWalletService) {
-      this.props.wallet.storage.config.setWalletServiceBaseWsUrl(newWsServer);
+      await this.props.wallet.changeWsServer(newWsServer);
     }
 
     LOCAL_STORE.setServers(
@@ -182,7 +182,7 @@ class Server extends React.Component {
         // If the user decides to continue with this change, we will update again
         this.props.wallet.changeServer(currentServer);
         if (this.props.useWalletService) {
-         this.props.wallet.storage.config.setWalletServiceBaseWsUrl(currentWsServer);
+          await this.props.wallet.changeWsServer(currentWsServer);
         }
         LOCAL_STORE.setServers(
           currentServer,
@@ -203,7 +203,7 @@ class Server extends React.Component {
       // Go back to the previous server
       this.props.wallet.changeServer(currentServer);
       if (this.props.useWalletService) {
-        this.props.wallet.storage.config.setWalletServiceBaseWsUrl(currentWsServer);
+        await this.props.wallet.changeWsServer(currentWsServer);
       }
       LOCAL_STORE.setServers(
         currentServer,
@@ -225,7 +225,7 @@ class Server extends React.Component {
   confirmTestnetServer = () => {
     this.props.wallet.changeServer(this.state.selectedServer);
     if (this.props.useWalletService) {
-      this.props.wallet.storage.config.setWalletServiceBaseWsUrl(this.state.selectedWsServer);
+      await this.props.wallet.changeWsServer(this.state.selectedWsServer);
     }
     LOCAL_STORE.setServers(
       this.state.selectedServer,
