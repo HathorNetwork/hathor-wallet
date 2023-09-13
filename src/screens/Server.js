@@ -147,6 +147,8 @@ class Server extends React.Component {
       hathorLib.config.getWalletServiceBaseWsUrl() :
       '';
 
+    const currentNetwork = this.props.wallet.getNetwork();
+
     // Update new server in storage and in the config singleton
     this.props.wallet.changeServer(newBaseServer);
 
@@ -207,6 +209,7 @@ class Server extends React.Component {
         currentServer,
         this.props.useWalletService ? currentWsServer : null,
       );
+      helpers.updateNetwork(currentNetwork);
       this.setState({
         loading: false,
         errorMessage: e.message,

@@ -97,7 +97,6 @@ class LoadWallet extends React.Component {
     // Clean pin and password from redux
     this.props.updatePassword(null);
     this.props.updatePin(null);
-    this.props.history.push('/wallet/');
   }
 
   /**

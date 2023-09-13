@@ -268,6 +268,11 @@ export function* startWallet(action) {
       // takeLatest will stop running the generator if a new START_WALLET_REQUESTED
       // action is dispatched, but returning so the code is clearer
       return;
+    } else {
+      console.error(e);
+      // Return to locked screen when the wallet fails to start
+      LOCAL_STORE.lock();
+      routerHistory.push('/locked/');
     }
   }
 
