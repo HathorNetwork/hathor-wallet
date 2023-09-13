@@ -222,7 +222,7 @@ class Server extends React.Component {
    * we successfully validated that the user has written 'testnet' on the input
    * so we can execute the change
    */
-  confirmTestnetServer = () => {
+  confirmTestnetServer = async () => {
     this.props.wallet.changeServer(this.state.selectedServer);
     if (this.props.useWalletService) {
       await this.props.wallet.changeWsServer(this.state.selectedWsServer);
