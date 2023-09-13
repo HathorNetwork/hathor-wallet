@@ -272,7 +272,8 @@ export function* startWallet(action) {
       console.error(e);
       // Return to locked screen when the wallet fails to start
       LOCAL_STORE.lock();
-      routerHistory.push('/locked/');
+      routerHistory.push('/');
+      return
     }
   }
 
