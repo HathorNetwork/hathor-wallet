@@ -151,6 +151,8 @@ export function* startWallet(action) {
   if (useWalletService) {
     // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
     try {
+      // getWsServer can return null if not previously set
+      config.setWalletServiceBaseUrl(LOCAL_STORE.getWsServer());
       config.getWalletServiceBaseUrl();
     } catch(err) {
       if (err instanceof hathorErrors.GetWalletServiceUrlError) {
@@ -246,7 +248,7 @@ export function* startWallet(action) {
 
     if (serverInfo) {
       version = serverInfo.version;
-      networkName = serverInfo.network;
+      networkName = serverInfo.network && serverInfo.network.split('-')[0];
     }
 
     yield put(setServerInfo({
@@ -266,6 +268,12 @@ export function* startWallet(action) {
       // takeLatest will stop running the generator if a new START_WALLET_REQUESTED
       // action is dispatched, but returning so the code is clearer
       return;
+    } else {
+      console.error(e);
+      // Return to locked screen when the wallet fails to start
+      LOCAL_STORE.lock();
+      routerHistory.push('/');
+      return
     }
   }
 

@@ -226,6 +226,16 @@ export class LocalStorageStore {
     return decryptedWords.toString(CryptoJS.enc.Utf8);
   }
 
+  async getWalletWords(password) {
+    const storage = this.getStorage();
+    if (!storage) {
+      throw new Error('Cannot get words from uninitialized wallet');
+    }
+
+    const data = await storage.getAccessData();
+    return cryptoUtils.decryptData(data.words, password);
+  }
+
   /**
    * Migrate registered tokens from the old storage into the new storage
    * The old storage holds an array of token data and the new storage expects

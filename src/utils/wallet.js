@@ -353,8 +353,14 @@ const wallet = {
    * @param {string} pin The pin entered by the user
    * @param {any} routerHistory
    */
-  async changeServer(wallet, pin, routerHistory) {
-    await wallet.stop({ cleanStorage: false });
+  async changeServer(wallet, pin, routerHistory, networkChanged) {
+    // We only clean the storage if the network has changed
+    await wallet.stop({ cleanStorage: true, cleanAddresses: true });
+
+    if (networkChanged) {
+      // need to clean the storage, including registered tokens.
+      await wallet.storage.cleanStorage(true, true, true);
+    }
 
     const isHardwareWallet = await wallet.isHardwareWallet();
 
@@ -421,7 +427,7 @@ const wallet = {
    * @inner
    */
   async addPassphrase(wallet, passphrase, pin, password, routerHistory) {
-    const words = await wallet.storage.getWalletWords(password);
+    const words = await LOCAL_STORE.getWalletWords(password);
 
     // Clean wallet data, persisted data and redux
     await this.cleanWallet(wallet);

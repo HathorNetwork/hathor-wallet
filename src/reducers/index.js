@@ -972,13 +972,15 @@ export const onStoreRouterHistory = (state, action) => {
   };
 };
 
-const onSetServerInfo = (state, action) => ({
-  ...state,
-  serverInfo: {
-    network: action.payload.network,
-    version: action.payload.version,
-  },
-});
+const onSetServerInfo = (state, action) => {
+  return {
+    ...state,
+    serverInfo: {
+      network: action.payload.network,
+      version: action.payload.version,
+    },
+  }
+};
 
 const onFeatureToggleInitialized = (state) => ({
   ...state,

@@ -147,8 +147,10 @@ class Server extends React.Component {
       hathorLib.config.getWalletServiceBaseWsUrl() :
       '';
 
+    const currentNetwork = this.props.wallet.getNetwork();
+
     // Update new server in storage and in the config singleton
-    await this.props.wallet.changeServer(newBaseServer);
+    this.props.wallet.changeServer(newBaseServer);
 
     // We only have a different websocket server on the wallet-service facade, so update the config singleton
     if (this.props.useWalletService) {
@@ -178,9 +180,9 @@ class Server extends React.Component {
 
         // Go back to the previous server
         // If the user decides to continue with this change, we will update again
-        await this.props.wallet.changeServer(currentServer);
+        this.props.wallet.changeServer(currentServer);
         if (this.props.useWalletService) {
-         await this.props.wallet.changeWsServer(currentWsServer);
+          await this.props.wallet.changeWsServer(currentWsServer);
         }
         LOCAL_STORE.setServers(
           currentServer,
@@ -192,13 +194,14 @@ class Server extends React.Component {
         this.setState({ loading: false });
       } else {
         // We are on mainnet, so set the network on the singleton and storage
+        const networkChanged = LOCAL_STORE.getNetwork() !== 'mainnet';
         hathorLib.config.setNetwork('mainnet');
         helpers.updateNetwork('mainnet');
-        this.executeServerChange();
+        this.executeServerChange(networkChanged);
       }
     } catch (e) {
       // Go back to the previous server
-      await this.props.wallet.changeServer(currentServer);
+      this.props.wallet.changeServer(currentServer);
       if (this.props.useWalletService) {
         await this.props.wallet.changeWsServer(currentWsServer);
       }
@@ -206,6 +209,7 @@ class Server extends React.Component {
         currentServer,
         this.props.useWalletService ? currentWsServer : null,
       );
+      helpers.updateNetwork(currentNetwork);
       this.setState({
         loading: false,
         errorMessage: e.message,
@@ -219,7 +223,7 @@ class Server extends React.Component {
    * so we can execute the change
    */
   confirmTestnetServer = async () => {
-    await this.props.wallet.changeServer(this.state.selectedServer);
+    this.props.wallet.changeServer(this.state.selectedServer);
     if (this.props.useWalletService) {
       await this.props.wallet.changeWsServer(this.state.selectedWsServer);
     }
@@ -227,6 +231,8 @@ class Server extends React.Component {
       this.state.selectedServer,
       this.props.useWalletService ? this.state.selectedWsServer : null,
     );
+
+    const networkChanged = !LOCAL_STORE.getNetwork().startsWith('testnet');
 
     // Set network on config singleton so the load wallet will get it properly
     hathorLib.config.setNetwork(this.state.selectedNetwork);
@@ -236,18 +242,18 @@ class Server extends React.Component {
     this.setState({
       loading: true,
     });
-    this.executeServerChange();
+    this.executeServerChange(networkChanged);
   }
 
   /**
    * Execute server change checking server API and, in case of success
    * reloads data and redirects to wallet screen
    */
-  executeServerChange = async () => {
+  executeServerChange = async (networkChanged) => {
     // We don't have PIN on hardware wallet
     const pin = LOCAL_STORE.isHardwareWallet() ? null : this.refs.pin.value;
     try {
-      await wallet.changeServer(this.props.wallet, pin, this.props.history);
+      await wallet.changeServer(this.props.wallet, pin, this.props.history, networkChanged);
       this.props.history.push('/wallet/');
     } catch (err) {
       this.setState({
