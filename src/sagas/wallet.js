@@ -248,7 +248,7 @@ export function* startWallet(action) {
 
     if (serverInfo) {
       version = serverInfo.version;
-      networkName = serverInfo.network;
+      networkName = serverInfo.network && serverInfo.network.split('-')[0];
     }
 
     yield put(setServerInfo({
