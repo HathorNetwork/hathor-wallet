@@ -69,9 +69,9 @@ export class WalletAddress extends React.Component {
    *
    * @param {Object} e Event emitted by the link clicked
    */
-  generateNewAddress = (e) => {
+  generateNewAddress = async (e) => {
     e.preventDefault();
-    const address = this.props.wallet.getNextAddress();
+    const address = await this.props.wallet.getNextAddress();
 
     if (address.address === this.props.lastSharedAddress) {
       this.alertErrorRef.current.show(3000);
