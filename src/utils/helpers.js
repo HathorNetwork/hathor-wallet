@@ -41,6 +41,20 @@ const helpers = {
   },
 
   /**
+   * Load the network from localstorage into hathorlib and redux.
+   * If not configured, get the default from hathorlib.
+   */
+  loadNetworkState() {
+    let network = LOCAL_STORE.getNetwork();
+    if (!network) {
+      network = hathorLib.config.getNetwork().name;
+    }
+
+    // Update the network in redux and lib
+    this.updateNetwork(network);
+  },
+
+  /**
    * Update network variables in redux, storage and lib
    *
    * @params {String} network Network name

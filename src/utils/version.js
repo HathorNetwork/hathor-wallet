@@ -19,6 +19,32 @@ import LOCAL_STORE from '../storage';
  */
 
 const version = {
+
+  /**
+   * Get version data from HathorLib
+   * @returns {Promise} Promise that resolves after getting the version
+   * @memberof Version
+   */
+  async getVersionData() {
+    const versionData = await new Promise(resolve => {
+      hathorLib.versionApi.getVersion(resolve);
+    });
+
+    return {
+      timestamp: Date.now(),
+      version: versionData.version,
+      network: versionData.network,
+      minWeight: versionData.min_weight,
+      minTxWeight: versionData.min_tx_weight,
+      minTxWeightCoefficient: versionData.min_tx_weight_coefficient,
+      minTxWeightK: versionData.min_tx_weight_k,
+      tokenDepositPercentage: versionData.token_deposit_percentage,
+      rewardSpendMinBlocks: versionData.reward_spend_min_blocks,
+      maxNumberInputs: versionData.max_number_inputs,
+      maxNumberOutputs: versionData.max_number_outputs,
+    };
+  },
+
   /**
    * Checks if the API version of the server the wallet is connected is valid for this wallet version
    *
@@ -28,11 +54,8 @@ const version = {
    * @memberof Version
    * @inner
    */
-  async checkApiVersion(wallet) {
-    if (!wallet) {
-      return;
-    }
-    const data = await wallet.getVersionData();
+  async checkApiVersion() {
+    const data = await this.getVersionData();
 
     /**
      * Checks if the version downloaded from the backend (fullnode or wallet-service, depending on the facade)

@@ -33,6 +33,7 @@ import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
 import LoadWalletFailed from './screens/LoadWalletFailed';
 import version from './utils/version';
+import helpers from './utils/helpers';
 import tokens from './utils/tokens';
 import storageUtils from './utils/storage';
 import { connect } from 'react-redux';
@@ -176,7 +177,7 @@ const returnLoadedWalletComponent = (Component, props) => {
   if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
     // We already handle all js errors in general and open an error modal to the user
     // so there is no need to catch the promise error below
-    version.checkApiVersion(reduxState.wallet);
+    version.checkApiVersion();
     return <Redirect to={{
       pathname: '/loading_addresses/',
       state: {path: props.match.url},
@@ -286,9 +287,12 @@ const returnDefaultComponent = (Component, props) => {
   const reduxState = store.getState();
 
   if (reduxState.isVersionAllowed === undefined) {
+
+    helpers.loadNetworkState();
+
     // We already handle all js errors in general and open an error modal to the user
     // so there is no need to catch the promise error below
-    version.checkApiVersion(reduxState.wallet);
+    version.checkApiVersion();
   }
 
   if (version.checkWalletVersion()) {
