@@ -20,6 +20,7 @@ export function* waitForFeatureToggleInitialization() {
   const featureTogglesInitialized = yield select((state) => state.featureTogglesInitialized);
 
   if (!featureTogglesInitialized) {
+    console.log('Feature toggle is not initialized, will wait indefinetely until it is.');
     // Wait until featureToggle saga completed initialization, which includes
     // downloading the current toggle status for this client.
     yield take(types.FEATURE_TOGGLE_INITIALIZED);

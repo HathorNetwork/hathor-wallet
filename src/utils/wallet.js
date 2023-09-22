@@ -131,6 +131,7 @@ const wallet = {
     try {
       walletUtils.wordsValid(words);
     } catch(e) {
+      console.error(e);
       if (e instanceof hathorErrors.InvalidWords) {
         return null;
       } else {
@@ -431,6 +432,7 @@ const wallet = {
 
     // Clean wallet data, persisted data and redux
     await this.cleanWallet(wallet);
+    helpers.loadStorageState();
     this.generateWallet(words, passphrase, pin, password, routerHistory);
   },
 
@@ -446,16 +448,20 @@ const wallet = {
   async cleanWallet(wallet) {
     await wallet.storage.cleanStorage(true, true);
     LOCAL_STORE.cleanWallet();
-    this.cleanWalletRedux();
+    this.cleanWalletRedux(wallet);
   },
 
-  /*
+  /**
    * Clean data from redux
    *
+   * @param {HathorWallet|undefined} wallet The wallet instance
    * @memberof Wallet
    * @inner
    */
-  cleanWalletRedux() {
+  cleanWalletRedux(wallet) {
+    if (wallet) {
+      wallet.stop();
+    }
     store.dispatch(cleanData());
   },
 

@@ -372,14 +372,13 @@ const onUpdateLoadedData = (state, action) => ({
 });
 
 const onCleanData = (state) => {
-  if (state.wallet) {
-    state.wallet.stop();
-  }
-
   return Object.assign({}, initialState, {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
     ledgerWasClosed: state.ledgerWasClosed,
+    // Keep the unleashClient as it should continue running
+    unleashClient: state.unleashClient,
+    featureTogglesInitialized: state.featureTogglesInitialized,
   });
 };
 
