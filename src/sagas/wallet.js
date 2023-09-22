@@ -120,7 +120,7 @@ export function* startWallet(action) {
     if (hardware) {
       yield LOCAL_STORE.initHWStorage(xpub);
     } else {
-      yield LOCAL_STORE.initStorage(words, password, pin);
+      yield LOCAL_STORE.initStorage(words, password, pin, passphrase);
     }
   }
 

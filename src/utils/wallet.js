@@ -431,7 +431,7 @@ const wallet = {
 
     // Clean wallet data, persisted data and redux
     await this.cleanWallet(wallet);
-    return this.generateWallet(words, passphrase, pin, password, routerHistory);
+    this.generateWallet(words, passphrase, pin, password, routerHistory);
   },
 
   /*
