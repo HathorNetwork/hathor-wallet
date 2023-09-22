@@ -257,10 +257,6 @@ const returnStartedRoute = (Component, props, rest) => {
     return <Redirect to={{pathname: '/wallet/'}}/>;
   }
 
-  // Check if we are currently addind the passphrase
-  // This should hold until we finish loading the wallet
-  // ...
-
   // Wallet is not loaded, but it is still loading addresses. Go to the loading screen
   const reduxState = store.getState();
   if (reduxState.loadingAddresses) {

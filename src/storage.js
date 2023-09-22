@@ -89,9 +89,6 @@ export class LocalStorageStore {
   cleanWallet() {
     this.removeItem('wallet:id');
     this.removeItem(IS_HARDWARE_KEY);
-    // this.removeItem(STARTED_KEY);
-    // this.removeItem(LOCKED_KEY);
-    this.lock();
     this.removeItem(CLOSED_KEY);
     delete this._storage;
     this._storage = null;
