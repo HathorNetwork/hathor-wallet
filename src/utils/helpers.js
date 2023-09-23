@@ -55,7 +55,7 @@ const helpers = {
 
     let server = LOCAL_STORE.getServer();
     if (!server) {
-      server = hathorLib.config.getServer();
+      server = hathorLib.config.getServerUrl();
     }
     hathorLib.config.setServerUrl(server);
 
