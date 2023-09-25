@@ -18,15 +18,18 @@ jobs:
         node-version: [14.x]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        # https://github.com/actions/checkout/releases/tag/v4.0.0
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
       - name: Setup nodejs
-        uses: actions/setup-node@v2
+        # https://github.com/actions/setup-node/releases/tag/v3.8.1
+        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d
         with:
           node-version: ${{ matrix.node-version }}
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
-        uses: cypress-io/github-action@v5
+        # https://github.com/cypress-io/github-action/releases/tag/v6.5.0
+        uses: cypress-io/github-action@59810ebfa5a5ac6fcfdcfdf036d1cd4d083a88f2
         with:
           start: npm start
           wait-on: 'http://localhost:3000'
