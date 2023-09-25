@@ -41,6 +41,37 @@ const helpers = {
   },
 
   /**
+   * Load the network and server url from localstorage into hathorlib and redux.
+   * If not configured, get the default from hathorlib.
+   */
+  loadStorageState() {
+    let network = LOCAL_STORE.getNetwork();
+    if (!network) {
+      network = hathorLib.config.getNetwork().name;
+    }
+
+    // Update the network in redux and lib
+    this.updateNetwork(network);
+
+    let server = LOCAL_STORE.getServer();
+    if (!server) {
+      server = hathorLib.config.getServerUrl();
+    }
+    hathorLib.config.setServerUrl(server);
+
+    let wsServer = LOCAL_STORE.getWsServer();
+    if (wsServer) {
+      hathorLib.config.setWalletServiceBaseWsUrl(wsServer);
+      const storage = LOCAL_STORE.getStorage();
+      if (storage) {
+        // This is a promise but we should not await it since this method has to be sync
+        // There is no issue not awaiting this since we already have this configured on the config
+        storage.store.setItem('wallet:wallet_service:ws_server', wsServer);
+      }
+    }
+  },
+
+  /**
    * Update network variables in redux, storage and lib
    *
    * @params {String} network Network name

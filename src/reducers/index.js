@@ -372,14 +372,13 @@ const onUpdateLoadedData = (state, action) => ({
 });
 
 const onCleanData = (state) => {
-  if (state.wallet) {
-    state.wallet.stop();
-  }
-
   return Object.assign({}, initialState, {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
     ledgerWasClosed: state.ledgerWasClosed,
+    // Keep the unleashClient as it should continue running
+    unleashClient: state.unleashClient,
+    featureTogglesInitialized: state.featureTogglesInitialized,
   });
 };
 
@@ -449,6 +448,15 @@ const removeTokenMetadata = (state, action) => {
   const newMeta = Object.assign({}, state.tokenMetadata);
   if (uid in newMeta) {
     delete newMeta[uid];
+  }
+
+  // If the token has zero balance we should remove the balance data
+  const newBalance = Object.assign({}, state.tokensBalance);
+  if (uid in newBalance && (!!newBalance[uid].data)) {
+    const balance = newBalance[uid].data;
+    if ((balance.unlocked + balance.locked) === 0) {
+      delete newBalance[uid];
+    }
   }
 
   return {

@@ -89,8 +89,6 @@ export class LocalStorageStore {
   cleanWallet() {
     this.removeItem('wallet:id');
     this.removeItem(IS_HARDWARE_KEY);
-    this.removeItem(STARTED_KEY);
-    this.removeItem(LOCKED_KEY);
     this.removeItem(CLOSED_KEY);
     delete this._storage;
     this._storage = null;
@@ -104,13 +102,14 @@ export class LocalStorageStore {
     }
   }
 
-  async initStorage(seed, password, pin) {
+  async initStorage(seed, password, pin, passphrase='') {
     this._storage = null;
     this.setHardwareWallet(false);
     const accessData = walletUtils.generateAccessDataFromSeed(
       seed,
       {
         pin,
+        passphrase,
         password,
         networkName: config.getNetwork().name,
       }

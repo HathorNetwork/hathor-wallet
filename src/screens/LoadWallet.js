@@ -91,6 +91,7 @@ class LoadWallet extends React.Component {
   pinSuccess = () => {
     // Getting redux variables before cleaning all data
     const { pin, password } = this.props;
+    LOCAL_STORE.unlock();
     // First we clean what can still be there of a last wallet
     wallet.generateWallet(this.state.words, '', pin, password, this.props.history);
     LOCAL_STORE.markBackupDone();
