@@ -82,6 +82,10 @@ export class LocalStorageStore {
     return this.getItem('wallet:id');
   }
 
+  isLoadedSync() {
+    return (!!this.getWalletId()) || (!!this.getItem('wallet:accessData'))
+  }
+
   setWalletId(walletId) {
     this.setItem('wallet:id', walletId);
   }
@@ -244,6 +248,9 @@ export class LocalStorageStore {
    */
   async handleMigrationOldRegisteredTokens(storage) {
     const oldTokens = this.getItem('wallet:tokens');
+    if (!oldTokens) {
+      return;
+    }
     for (const token of oldTokens) {
       await storage.registerToken(token);
     }
@@ -277,9 +284,13 @@ export class LocalStorageStore {
       }
 
       // The access data is saved on the new storage, we can delete the old data.
-      // This will only delete keys with the wallet prefix, so we don't delete
-      // the biometry keys and new data.
-      await this.clearItems(true);
+      // This will only delete keys with the wallet prefix
+      for (const key of Object.keys(localStorage)) {
+        if (key === 'wallet:id') continue;
+        if (key.startsWith('wallet:')) {
+          localStorage.removeItem(key);
+        }
+      }
     }
     // We have finished the migration so we can set the storage version to the most recent one.
     this.updateStorageVersion();
