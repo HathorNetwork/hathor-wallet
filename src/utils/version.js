@@ -83,7 +83,7 @@ const version = {
    * @inner
    */
   isLedgerCustomTokenAllowed() {
-    const version = LOCAL_STORE.getWalletVersion();
+    const version = LOCAL_STORE.getLedgerAppVersion();
     if (version !== null) return helpers.cmpVersionString(version, LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION) >= 0;
     return false;
   }
