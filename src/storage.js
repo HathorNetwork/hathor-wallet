@@ -82,6 +82,15 @@ export class LocalStorageStore {
     return this.getItem('wallet:id');
   }
 
+  /**
+   * Check if the wallet is loaded, it does not check the access data in storage since it requires
+   * an async call, so we only check the wallet id.
+   * We also check the 'wallet:accessData' key used on old versions of the lib so we can start the
+   * wallet and finish the migration process, this key is deleted during the migration process so
+   * this check will not be needed after all wallets have migrated.
+   *
+   * @return {boolean} Whether the wallet is loaded
+   */
   isLoadedSync() {
     return (!!this.getWalletId()) || (!!this.getItem('wallet:accessData'))
   }
