@@ -238,7 +238,7 @@ const returnStartedRoute = (Component, props, rest) => {
 
   // The wallet is already loaded
   const routeRequiresWalletToBeLoaded = rest.loaded;
-  if (LOCAL_STORE.getWalletId()) {
+  if (LOCAL_STORE.isLoadedSync()) {
     // The server screen is a special case since we allow the user to change the
     // connected server in case of unresponsiveness, this should be allowed from
     // the locked screen since the wallet would not be able to be started otherwise

@@ -82,6 +82,19 @@ export class LocalStorageStore {
     return this.getItem('wallet:id');
   }
 
+  /**
+   * Check if the wallet is loaded, it does not check the access data in storage since it requires
+   * an async call, so we only check the wallet id.
+   * We also check the 'wallet:accessData' key used on old versions of the lib so we can start the
+   * wallet and finish the migration process, this key is deleted during the migration process so
+   * this check will not be needed after all wallets have migrated.
+   *
+   * @return {boolean} Whether the wallet is loaded
+   */
+  isLoadedSync() {
+    return (!!this.getWalletId()) || (!!this.getItem('wallet:accessData'))
+  }
+
   setWalletId(walletId) {
     this.setItem('wallet:id', walletId);
   }
@@ -244,6 +257,9 @@ export class LocalStorageStore {
    */
   async handleMigrationOldRegisteredTokens(storage) {
     const oldTokens = this.getItem('wallet:tokens');
+    if (!oldTokens) {
+      return;
+    }
     for (const token of oldTokens) {
       await storage.registerToken(token);
     }
@@ -277,9 +293,13 @@ export class LocalStorageStore {
       }
 
       // The access data is saved on the new storage, we can delete the old data.
-      // This will only delete keys with the wallet prefix, so we don't delete
-      // the biometry keys and new data.
-      await this.clearItems(true);
+      // This will only delete keys with the wallet prefix
+      for (const key of Object.keys(localStorage)) {
+        if (key === 'wallet:id') continue;
+        if (key.startsWith('wallet:')) {
+          localStorage.removeItem(key);
+        }
+      }
     }
     // We have finished the migration so we can set the storage version to the most recent one.
     this.updateStorageVersion();

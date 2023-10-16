@@ -9,7 +9,7 @@ import {
 import { types } from '../actions';
 import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
 import tokensUtils from '../utils/tokens';
-import version from '../utils/tokens';
+import version from '../utils/version';
 import ledger from '../utils/ledger';
 import LOCAL_STORE from '../storage';
 
