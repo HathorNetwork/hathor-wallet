@@ -81,6 +81,12 @@ class Root extends React.Component {
     // Start the wallet as locked
     LOCAL_STORE.lock();
 
+    // Ensure we have the network set even before the first ever load.
+    const localNetwork = LOCAL_STORE.getNetwork();
+    if (!localNetwork) {
+      LOCAL_STORE.setNetwork('mainnet');
+    }
+
     if (IPC_RENDERER) {
       // Event called when user quits hathor app
       IPC_RENDERER.on('ledger:closed', async () => {

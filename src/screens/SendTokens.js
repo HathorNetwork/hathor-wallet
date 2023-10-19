@@ -219,7 +219,7 @@ class SendTokens extends React.Component {
   getSignatures = () => {
     ledger.getSignatures(
       Object.assign({}, this.data),
-      this.props.wallet.storage,
+      this.props.wallet,
     );
   }
 
