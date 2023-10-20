@@ -114,12 +114,11 @@ export function* startWallet(action) {
   yield put(loadingAddresses(true));
   yield put(storeRouterHistory(routerHistory));
 
-  const walletId = yield LOCAL_STORE.getWalletId();
-  if (!walletId) {
-    // The wallet has not been initialized yet
-    if (hardware) {
-      yield LOCAL_STORE.initHWStorage(xpub);
-    } else {
+  if (hardware) {
+    yield LOCAL_STORE.initHWStorage(xpub);
+  } else {
+    const walletId = yield LOCAL_STORE.getWalletId();
+    if (!walletId) {
       yield LOCAL_STORE.initStorage(words, password, pin, passphrase);
     }
   }

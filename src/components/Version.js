@@ -8,7 +8,7 @@
 import React from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
-import { VERSION, LEDGER_ENABLED } from '../constants';
+import { VERSION } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import SoftwareWalletWarningMessage from './SoftwareWalletWarningMessage';
 import LOCAL_STORE from '../storage';
@@ -25,16 +25,14 @@ class Version extends React.Component {
    * If it's software wallet show modal warning
    */
   walletTypeClicked = () => {
-    if (LEDGER_ENABLED) {
-      if (!LOCAL_STORE.isHardwareWallet()) {
-        $('#softwareWalletWarningModal').modal('show');
-        this.context.showModal(MODAL_TYPES.ALERT, {
-          body: <SoftwareWalletWarningMessage />,
-          buttonName: 'Ok',
-          id: 'softwareWalletWarningModal',
-          title: 'Software wallet warning',
-        });
-      }
+    if (!LOCAL_STORE.isHardwareWallet()) {
+      $('#softwareWalletWarningModal').modal('show');
+      this.context.showModal(MODAL_TYPES.ALERT, {
+        body: <SoftwareWalletWarningMessage />,
+        buttonName: 'Ok',
+        id: 'softwareWalletWarningModal',
+        title: 'Software wallet warning',
+      });
     }
   }
 
