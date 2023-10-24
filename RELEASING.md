@@ -12,7 +12,11 @@ Create a git tag and a new release on GitHub.
 
 # Publishing the new App
 
-In case this is a Hathor release, make sure you also read our internal guide in https://github.com/HathorNetwork/ops-tools/blob/master/docs/release-guides/hathor-wallet.md
+In case this is a Hathor release, make sure you also read our [internal guide](https://github.com/HathorNetwork/ops-tools/tree/master/docs/release-guides).
+
+1. Make sure you have the following environment variables set: `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD` ( [see docs](https://www.electron.build/configuration/mac) ).
+1. Replace the `build.mac.notarize.teamId` property on the `package.json` file with the correct value.
+
 
 1. Run the `release.sh` script, which will clean the environment and build the app for all platforms. The files go to the `dist` folder after the script finishes running. You should get 4 of them: `.AppImage`, `.deb`, `.dmg` and `.exe`.
 
@@ -143,3 +147,10 @@ To do so, you have to open a PR that:
 
 1. Add the generated `.gpg` file to the [./gpg-keys](./gpg-keys) folder.
 1. Add the key fingerprint to the list in [Our public keys](#our-public-keys). The fingerprint can be obtained with `gpg --list-secret-keys`. See the examples in the list to make sure you are adding it in the right format.
+
+# Testing the Apple notarization
+In order to test the correct notarization of the app, you can run the following command:
+```shell
+spctl -a -vvv -t execute PATH_TO_APP_FILE.app
+```
+You should get an `accepted` repsonse, along with the source and origin of the app.

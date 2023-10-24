@@ -88,9 +88,8 @@
     "@testing-library/user-event": "13.5.0",
     "cypress": "11.2.0",
     "electron": "13.6.9",
-    "electron-builder": "23.0.3",
+    "electron-builder": "24.6.4",
     "electron-devtools-installer": "2.2.4",
-    "electron-notarize": "0.1.1",
     "eslint-plugin-cypress": "2.12.1",
     "jsdoc": "3.6.10",
     "nodemon": "2.0.16",
@@ -101,7 +100,6 @@
   "build": {
     "appId": "network.hathor.macos.wallet",
     "compression": "maximum",
-    "afterSign": "scripts/notarize.js",
     "win": {
       "icon": "build/icon.png",
       "target": "nsis",
@@ -110,6 +108,7 @@
     },
     "mac": {
       "provisioningProfile": "keys/mac_production.provisionprofile",
+      "notarize": { "teamId": "TEAM-ID-HERE" },
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
