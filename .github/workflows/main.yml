@@ -18,9 +18,11 @@ jobs:
       matrix:
         node-version: [14.x]
     steps:
-    - uses: actions/checkout@v2
+      # https://github.com/actions/checkout/releases/tag/v4.0.0
+    - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+      # https://github.com/actions/setup-node/releases/tag/v3.8.1
+      uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
@@ -38,7 +40,8 @@ jobs:
     - name: Unit tests
       run: npm run test -- --coverage
     - name: Upload coverage
-      uses: codecov/codecov-action@v3
+      # https://github.com/codecov/codecov-action/releases/tag/v3.1.4
+      uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d
     - name: Start
       run: npm start & npx wait-on http://localhost:3000
       env:
