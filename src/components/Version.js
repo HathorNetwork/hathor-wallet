@@ -26,7 +26,6 @@ class Version extends React.Component {
    */
   walletTypeClicked = () => {
     if (!LOCAL_STORE.isHardwareWallet()) {
-      $('#softwareWalletWarningModal').modal('show');
       this.context.showModal(MODAL_TYPES.ALERT, {
         body: <SoftwareWalletWarningMessage />,
         buttonName: 'Ok',
