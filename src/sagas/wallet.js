@@ -114,12 +114,13 @@ export function* startWallet(action) {
   yield put(loadingAddresses(true));
   yield put(storeRouterHistory(routerHistory));
 
-  const walletId = yield LOCAL_STORE.getWalletId();
-  if (!walletId) {
-    // The wallet has not been initialized yet
-    if (hardware) {
-      yield LOCAL_STORE.initHWStorage(xpub);
-    } else {
+  if (hardware) {
+    // We need to ensure that the hardware wallet storage is always generated here since we may be
+    // starting the wallet with a second device and so we cannot trust the xpub saved on storage.
+    yield LOCAL_STORE.initHWStorage(xpub);
+  } else {
+    const walletId = yield LOCAL_STORE.getWalletId();
+    if (!walletId) {
       yield LOCAL_STORE.initStorage(words, password, pin, passphrase);
     }
   }

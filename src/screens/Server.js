@@ -232,7 +232,7 @@ class Server extends React.Component {
       this.props.useWalletService ? this.state.selectedWsServer : null,
     );
 
-    const networkChanged = !LOCAL_STORE.getNetwork().startsWith('testnet');
+    const networkChanged = !LOCAL_STORE.getNetwork()?.startsWith('testnet');
 
     // Set network on config singleton so the load wallet will get it properly
     hathorLib.config.setNetwork(this.state.selectedNetwork);

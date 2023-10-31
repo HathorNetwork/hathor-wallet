@@ -41,7 +41,7 @@ import RequestErrorModal from './components/RequestError';
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import { IPC_RENDERER, LEDGER_ENABLED } from './constants';
+import { IPC_RENDERER } from './constants';
 import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
 import { updateLedgerClosed } from './actions/index';
@@ -80,6 +80,12 @@ class Root extends React.Component {
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
     // Start the wallet as locked
     LOCAL_STORE.lock();
+
+    // Ensure we have the network set even before the first ever load.
+    const localNetwork = LOCAL_STORE.getNetwork();
+    if (!localNetwork) {
+      LOCAL_STORE.setNetwork('mainnet');
+    }
 
     if (IPC_RENDERER) {
       // Event called when user quits hathor app
@@ -266,13 +272,11 @@ const returnStartedRoute = (Component, props, rest) => {
     }}/>;
   }
 
-  // Wallet is not loaded nor loading, but it's started. Go to the first screen after "welcome"
   if (routeRequiresWalletToBeLoaded) {
-    return LEDGER_ENABLED
-        ? <Redirect to={{pathname: '/wallet_type/'}}/>
-        : <Redirect to={{pathname: '/signin/'}}/>;
+    // Wallet is not loaded or loading, but it is started
+    // Since it requires the wallet to be loaded, redirect to the wallet_type screen
+    return <Redirect to={{pathname: '/wallet_type/'}}/>;
   }
-
   // Wallet is not loaded nor loading, and the route does not require it.
   // Do not redirect anywhere, just render the component.
   return <Component {...props} />;
@@ -308,9 +312,7 @@ const returnDefaultComponent = (Component, props) => {
       LOCAL_STORE.isHardwareWallet()
     ) {
       // This will redirect the page to Wallet Type screen
-      LOCAL_STORE.resetStorage();
-      // XXX: We are skipping destroying the storage this may help
-      // recover the storage if the same wallet is started later
+      LOCAL_STORE.cleanWallet();
       return <Redirect to={{ pathname: '/wallet_type/' }} />;
     } else {
       return (

@@ -148,6 +148,7 @@ export class LocalStorageStore {
     const storage = this.getStorage();
     await storage.saveAccessData(accessData);
     this._storage = storage;
+    this.updateStorageVersion();
     return storage;
   }
 

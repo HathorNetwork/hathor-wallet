@@ -190,14 +190,14 @@ class SendTokens extends React.Component {
   /**
    * Add signature to each input and execute send transaction
    */
-  onLedgerSuccess = (signatures) => {
+  onLedgerSuccess = async (signatures) => {
     try {
       // Prepare data and submit job to tx mining API
       const arr = [];
       for (let i=0;i<signatures.length;i++) {
         arr.push(Buffer.from(signatures[i]));
       }
-      this.sendTransaction.prepareTxFrom(arr);
+      await this.sendTransaction.prepareTxFrom(arr);
       this.setState({
         ledgerStep: 1,
       }, () => {
@@ -219,7 +219,7 @@ class SendTokens extends React.Component {
   getSignatures = () => {
     ledger.getSignatures(
       Object.assign({}, this.data),
-      this.props.wallet.storage,
+      this.props.wallet,
     );
   }
 
