@@ -315,7 +315,7 @@ class Settings extends React.Component {
   render() {
     const serverURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
     const wsServerURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
-    const ledgerCustomTokens = (!LOCAL_STORE.isHardwareWallet()) && version.isLedgerCustomTokenAllowed();
+    const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
     const uniqueIdentifier = helpers.getUniqueId();
 
     return (
