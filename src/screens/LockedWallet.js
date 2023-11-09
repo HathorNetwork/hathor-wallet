@@ -8,15 +8,13 @@
 import React from 'react';
 import { t } from 'ttag';
 import { connect } from "react-redux";
-import ModalResetAllData from '../components/ModalResetAllData';
-import $ from 'jquery';
 import wallet from '../utils/wallet';
 import RequestErrorModal from '../components/RequestError';
-import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { resolveLockWalletPromise, startWalletRequested } from '../actions';
+import { resolveLockWalletPromise, startWalletRequested, walletReset } from '../actions';
 import colors from '../index.scss';
+import LOCAL_STORE from '../storage';
 
 
 const mapStateToProps = (state) => {
@@ -29,6 +27,7 @@ const mapDispatchToProps = dispatch => {
   return {
     resolveLockWalletPromise: pin => dispatch(resolveLockWalletPromise(pin)),
     startWallet: (payload) => dispatch(startWalletRequested(payload)),
+    walletReset: () => dispatch(walletReset()),
   };
 };
 
@@ -59,12 +58,12 @@ class LockedWallet extends React.Component {
   }
 
   /**
-   * When user clicks on the unlock button  
+   * When user clicks on the unlock button
    * Checks if form is valid and if PIN is correct, then unlocks the wallet loading the data and redirecting
    *
    * @param {Object} e Event of when the button is clicked
    */
-  unlockClicked = (e) => {
+  unlockClicked = async (e) => {
     e.preventDefault();
 
     if (this.state.loading) {
@@ -75,10 +74,15 @@ class LockedWallet extends React.Component {
     if (isValid) {
       const pin = this.refs.pin.value;
       this.refs.unlockForm.classList.remove('was-validated')
-      if (!hathorLib.wallet.isPinCorrect(pin)) {
+      if (!await LOCAL_STORE.checkPin(pin)) {
         this.setState({ errorMessage: t`Invalid PIN` });
         return;
       }
+
+      await LOCAL_STORE.handleDataMigration(pin);
+      // We block the wallet from being showed if it was locked or closed.
+      // So we need to mark it as opened for the UI to proceed.
+      LOCAL_STORE.open();
 
       // LockedWallet screen was called for a result, so we should resolve the promise with the PIN after
       // it is validated.
@@ -93,12 +97,9 @@ class LockedWallet extends React.Component {
         loading: true,
       });
 
-      // Start the wallet from an xpriv that's already encrypted in localStorage.
-      // Because of that we don't need to send the seed neither the password.
       this.props.startWallet({
         pin,
         routerHistory: this.props.history,
-        fromXpriv: true,
       });
     } else {
       this.refs.unlockForm.classList.add('was-validated')
@@ -122,8 +123,7 @@ class LockedWallet extends React.Component {
    */
   handleReset = () => {
     this.context.hideModal();
-
-    wallet.resetWalletData();
+    this.props.walletReset();
     this.props.history.push('/welcome/');
   }
 

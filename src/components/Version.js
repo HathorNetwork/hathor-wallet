@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import hathorLib from '@hathor/wallet-lib';
 import $ from 'jquery';
-import { VERSION, LEDGER_ENABLED } from '../constants';
+import { VERSION } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import SoftwareWalletWarningMessage from './SoftwareWalletWarningMessage';
+import LOCAL_STORE from '../storage';
 
 
 /**
@@ -25,24 +25,21 @@ class Version extends React.Component {
    * If it's software wallet show modal warning
    */
   walletTypeClicked = () => {
-    if (LEDGER_ENABLED) {
-      if (hathorLib.wallet.isSoftwareWallet()) {
-        $('#softwareWalletWarningModal').modal('show');
-        this.context.showModal(MODAL_TYPES.ALERT, {
-          body: <SoftwareWalletWarningMessage />,
-          buttonName: 'Ok',
-          id: 'softwareWalletWarningModal',
-          title: 'Software wallet warning',
-        });
-      }
+    if (!LOCAL_STORE.isHardwareWallet()) {
+      this.context.showModal(MODAL_TYPES.ALERT, {
+        body: <SoftwareWalletWarningMessage />,
+        buttonName: 'Ok',
+        id: 'softwareWalletWarningModal',
+        title: 'Software wallet warning',
+      });
     }
   }
 
   render() {
     return (
       <div className='d-flex flex-column version-wrapper align-items-center'>
-        <span className={hathorLib.wallet.isSoftwareWallet() ? 'software' : 'hardware'} onClick={this.walletTypeClicked}>
-          {hathorLib.wallet.isSoftwareWallet() ? t`Software Wallet` : t`Hardware Wallet`}
+        <span className={LOCAL_STORE.isHardwareWallet() ? 'hardware' : 'software'} onClick={this.walletTypeClicked}>
+          {LOCAL_STORE.isHardwareWallet() ? t`Hardware Wallet` : t`Software Wallet`}
         </span>
         <span>{VERSION}</span>
       </div>

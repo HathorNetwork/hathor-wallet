@@ -12,7 +12,12 @@ import tokens from '../utils/tokens';
 import SpanFmt from './SpanFmt';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import hathorLib from '@hathor/wallet-lib';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+
+const mapStateToProps = (state) => {
+  return { storage: state.wallet.storage };
+};
 
 /**
  * Component that shows a modal with information about an unregistered token
@@ -43,11 +48,11 @@ class ModalUnregisteredTokenInfo extends React.Component {
   }
 
   /**
-   * Method called when user clicks the button to register the token  
+   * Method called when user clicks the button to register the token
    *
    * @param {Object} e Event emitted when user clicks the button
    */
-  register = (e) => {
+  register = async (e) => {
     if (!this.props.token) return;
 
     e.preventDefault();
@@ -55,20 +60,20 @@ class ModalUnregisteredTokenInfo extends React.Component {
     const isValid = this.form.current.checkValidity();
     this.setState({ formValidated: true, errorMessage: '' });
     if (isValid) {
-      const configurationString = hathorLib.tokens.getConfigurationString(
+      const configurationString = hathorLib.tokensUtils.getConfigurationString(
         this.props.token.uid,
         this.props.token.name,
         this.props.token.symbol,
       );
 
-      const promise = hathorLib.tokens.validateTokenToAddByConfigurationString(configurationString, null);
-      promise.then((tokenData) => {
-        tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
+      try {
+        const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(configurationString, this.props.storage);
+        await tokens.addToken(tokenData.uid, tokenData.name, tokenData.symbol);
         $('#unregisteredTokenInfoModal').modal('hide');
         this.props.tokenRegistered(this.props.token);
-      }, (e) => {
-        this.setState({ errorMessage: e.message });
-      });
+      } catch (err) {
+        this.setState({ errorMessage: err.message });
+      }
     }
   }
 
@@ -153,4 +158,4 @@ ModalUnregisteredTokenInfo.propTypes = {
   totalSupply: PropTypes.number,
 };
 
-export default ModalUnregisteredTokenInfo;
+export default connect(mapStateToProps)(ModalUnregisteredTokenInfo);

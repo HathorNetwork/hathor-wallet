@@ -1,43 +1,21 @@
 import React from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { render, act, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { WalletAddress } from '../../components/WalletAddress';
 import * as _ from 'lodash';
-import hathorLib from '@hathor/wallet-lib'
 
 const sampleAddress = 'WPhehTyNHTPz954CskfuSgLEfuKXbXeK3f';
 
-class ModalAddressQRCodeMock extends React.Component {
-  render() { return <div/> }
-}
 jest.mock('../../components/ModalAddressQRCode', () => () => {
   const MockName = "modal-address-qrcode-mock";
   return <MockName />;
 });
-
-// Mocking the underlying hathor wallet to better manage the tests
-let oldWallet;
 
 let container = null;
 beforeEach(() => {
   // setup a DOM element as a render target
   container = document.createElement("div");
   document.body.appendChild(container);
-
-  // Replace the oldWallet object with a mock focused on validating wallet type
-  oldWallet = hathorLib.wallet;
-  hathorLib.wallet = (() => {
-    let walletType = 'software';
-
-    return {
-      /** @param {'software'|'hardware'} type */
-      setMockType: (type) => walletType = type,
-
-      isHardwareWallet: () => walletType === 'hardware',
-      isSoftwareWallet: () => walletType === 'software',
-    }
-  })()
 });
 
 afterEach(() => {
@@ -45,9 +23,6 @@ afterEach(() => {
   unmountComponentAtNode(container);
   container.remove();
   container = null;
-
-  // Revert mocked oldWallet
-  hathorLib.wallet = oldWallet;
 });
 
 describe('rendering tests', () => {
@@ -62,6 +37,7 @@ describe('rendering tests', () => {
   });
 
   it('renders the correct address on a software wallet', () => {
+    window.localStorage.setItem('localstorage:ishardware', 'false');
     render(
       <WalletAddress
         goToAllAddresses={jest.fn()}
@@ -81,7 +57,7 @@ describe('rendering tests', () => {
   });
 
   it('renders the correct address on a hardware wallet', () => {
-    hathorLib.wallet.setMockType("hardware")
+    window.localStorage.setItem('localstorage:ishardware', 'true');
 
     render(
       <WalletAddress
@@ -102,6 +78,7 @@ describe('rendering tests', () => {
   });
 
   it('renders the "see all addresses" option on a software wallet', () => {
+    window.localStorage.setItem('localstorage:ishardware', 'false');
     render(
       <WalletAddress
         goToAllAddresses={jest.fn()}
@@ -116,7 +93,7 @@ describe('rendering tests', () => {
   });
 
   it('does not render the "see all addresses" option on a hardware wallet', () => {
-    hathorLib.wallet.setMockType('hardware')
+    window.localStorage.setItem('localstorage:ishardware', 'true');
 
     render(
       <WalletAddress

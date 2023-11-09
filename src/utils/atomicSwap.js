@@ -5,13 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { v4 } from 'uuid'
-import hathorLib, { PartialTx, PartialTxInputData, PartialTxProposal } from "@hathor/wallet-lib";
-import { DECIMAL_PLACES, TOKEN_MINT_MASK, TOKEN_MELT_MASK, HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import {
+  transactionUtils,
+  PartialTx,
+  PartialTxInputData,
+  PartialTxProposal,
+  tokensUtils,
+  config as hathorLibConfig,
+} from "@hathor/wallet-lib";
+import { TOKEN_MINT_MASK, TOKEN_MELT_MASK, HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
 import { get } from 'lodash';
 import walletUtil from "./wallet";
 
-const { wallet: oldWallet } = hathorLib;
 /**
  * @typedef ProposalData
  * @property {string} id Proposal identifier
@@ -59,29 +64,23 @@ export const PROPOSAL_SIGNATURE_STATUS = {
     SENT: 'Sent',
 }
 
-/**
- * Generates an empty proposal for storing on redux
- * @param {string} password
- * @param {HathorWallet} wallet Current wallet in use
- * @return {{id:string, password:string, data:ProposalData}}
- */
-export function generateEmptyProposalFromPassword(password, wallet) {
-    const partialTx = new PartialTx(wallet.getNetworkObject());
-    const pId = v4();
+export const ATOMIC_SWAP_SERVICE_ERRORS = {
+    ProposalNotFound: 'PROPOSAL_NOT_FOUND',
+    DuplicateProposalId: 'DUPLICATE_PROPOSAL_ID',
+    InvalidPassword: 'INVALID_PASSWORD',
+    IncorrectPassword: 'INCORRECT_PASSWORD',
+    VersionConflict: 'VERSION_CONFLICT',
+    UnknownError: 'UNKNOWN_ERROR',
+}
 
-    return {
-        id: pId,
-        password,
-        data: {
-            id: pId,
-            partialTx: partialTx.serialize(),
-            signatures: null,
-            amountTokens: 0,
-            signatureStatus: PROPOSAL_SIGNATURE_STATUS.OPEN,
-            timestamp: undefined,
-            history: []
-        },
-    };
+/**
+ * Generates the serialized string of an empty proposal for the current wallet
+ * @param {HathorWallet} wallet Current wallet in use
+ * @return {string}
+ */
+export function generateEmptyProposal(wallet) {
+    const partialTx = new PartialTx(wallet.getNetworkObject());
+    return partialTx.serialize();
 }
 
 /**
@@ -93,12 +92,12 @@ export function generateEmptyProposalFromPassword(password, wallet) {
  * @param {HathorWallet} wallet
  * @param {string} [strSignatures] Optional signatures string
  */
-export function enrichTxData(partialTx, wallet, strSignatures) {
+export async function enrichTxData(partialTx, wallet, strSignatures) {
     const signaturesObj = strSignatures && calculateSignaturesObject(partialTx, strSignatures);
 
     for (const inputIndex in partialTx.inputs) {
         const input = partialTx.inputs[inputIndex];
-        if (wallet.isAddressMine(input.address)) {
+        if (await wallet.isAddressMine(input.address)) {
             input.isMine = true;
             input.indexOnTx = +inputIndex;
         }
@@ -110,7 +109,7 @@ export function enrichTxData(partialTx, wallet, strSignatures) {
         const output = partialTx.outputs[outputIndex];
         output.parseScript(wallet.getNetworkObject());
         output.address = get(output,'decodedScript.address.base58','Unknown Address');
-        if (wallet.isAddressMine(output.address)) {
+        if (await wallet.isAddressMine(output.address)) {
             output.isMine = true;
             output.indexOnTx = +outputIndex;
         }
@@ -130,9 +129,9 @@ export function enrichTxData(partialTx, wallet, strSignatures) {
  * @param {PartialTx} partialTx
  * @param {Record<string, {symbol: string, name: string, tokenUid: string}>} cachedTokens
  * @param {HathorWallet} wallet
- * @returns {DisplayBalance[]}
+ * @returns {Promise<DisplayBalance[]>}
  */
-export function calculateExhibitionData(partialTx, cachedTokens, wallet) {
+export async function calculateExhibitionData(partialTx, cachedTokens, wallet) {
     const getTokenOrCreate = (tokenUid) => {
         const cachedToken = cachedTokens[tokenUid];
         if (!cachedToken) {
@@ -140,15 +139,15 @@ export function calculateExhibitionData(partialTx, cachedTokens, wallet) {
                 tokenUid,
                 symbol: '',
                 name: '',
-                status: PROPOSAL_DOWNLOAD_STATUS.LOADING
+                status: PROPOSAL_DOWNLOAD_STATUS.LOADING,
             };
         }
 
         return cachedTokens[tokenUid];
     }
 
-    const txProposal = new PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.getNetworkObject());
-    const balance = txProposal.calculateBalance(wallet);
+    const txProposal = PartialTxProposal.fromPartialTx(partialTx.serialize(), wallet.storage);
+    const balance = await txProposal.calculateBalance();
 
     // Calculating the difference between them both
     const balanceArr = [];
@@ -231,10 +230,10 @@ export function canISign(partialTx, currentSignatures) {
     return false;
 }
 
-export function deserializePartialTx(strPartialTx, wallet) {
+export async function deserializePartialTx(strPartialTx, wallet) {
     const networkObject = wallet.getNetworkObject();
     const partialTx = PartialTx.deserialize(strPartialTx, networkObject);
-    enrichTxData(partialTx, wallet);
+    await enrichTxData(partialTx, wallet);
 
     return partialTx;
 }
@@ -243,11 +242,11 @@ export function deserializePartialTx(strPartialTx, wallet) {
  * Assemble a transaction from the serialized partial tx and signatures
  * @param {string} partialTx The serialized partial tx
  * @param {string} signatures The serialized signatures
- * @param {Network} network The network object
+ * @param {IStorage} storage The storage object
  * @see https://github.com/HathorNetwork/hathor-wallet-headless/blob/fd1fb5d9757871bdf367e0496cfa85be8175e09d/src/services/atomic-swap.service.js
  */
-export const assembleProposal = (partialTx, signatures, network) => {
-    const proposal = PartialTxProposal.fromPartialTx(partialTx, network);
+export const assembleProposal = (partialTx, signatures, storage) => {
+    const proposal = PartialTxProposal.fromPartialTx(partialTx, storage);
 
     const tx = proposal.partialTx.getTx();
     const inputData = new PartialTxInputData(tx.getDataToSign().toString('hex'), tx.inputs.length);
@@ -280,48 +279,48 @@ export const assembleProposal = (partialTx, signatures, network) => {
  * @see https://github.com/HathorNetwork/hathor-wallet-headless/blob/fd1fb5d9757871bdf367e0496cfa85be8175e09d/src/controllers/wallet/atomic-swap/tx-proposal.controller.js#L56-L97
  * @returns {null | ProposalCustomUtxo}
  */
-export const translateTxToProposalUtxo = (txId, index, wallet) => {
-    const txData = wallet.getTx(txId);
-    if (!txData) {
-        // utxo not in history
-        return null;
-    }
-    const txout = txData.outputs[index];
-    if (!oldWallet.canUseUnspentTx(txout, txData.height)) {
-        // Cannot use this utxo
-        return null;
-    }
+export const translateTxToProposalUtxo = async (txId, index, wallet) => {
+  const utxo = { txId, index };
+  if (!await transactionUtils.canUseUtxo(utxo, wallet.storage)) {
+    // Cannot use this utxo
+    return null;
+  }
 
-    const addressIndex = wallet.getAddressIndex(txout.decoded.address);
-    const addressPath = addressIndex ? wallet.getAddressPathForIndex(addressIndex) : '';
-    let authorities = 0;
-    if (oldWallet.isMintOutput(txout)) {
-        authorities += TOKEN_MINT_MASK;
-    }
-    if (oldWallet.isMeltOutput(txout)) {
-        authorities += TOKEN_MELT_MASK;
-    }
+  const tx = await wallet.getTx(txId);
+  const txout = tx.outputs[index];
+  // We use the storage getAddressInfo because the wallet.getAddressInfo
+  // has some unnecessary calculations
+  const addressInfo = await wallet.storage.getAddressInfo(txout.decoded.address);
+  const addressIndex = addressInfo.bip32AddressIndex;
 
-    let tokenId = txout.token;
-    if (!tokenId) {
-        const tokenIndex = oldWallet.getTokenIndex(txout.token_data) - 1;
-        tokenId = txout.token_data === 0
-            ? HATHOR_TOKEN_CONFIG.uid
-            : txData.tx.tokens[tokenIndex].uid;
-    }
+  const addressPath = addressIndex ? await wallet.getAddressPathForIndex(addressIndex) : '';
+  let authorities = 0;
+  if (transactionUtils.isMint(txout)) {
+    authorities += TOKEN_MINT_MASK;
+  }
+  if (transactionUtils.isMelt(txout)) {
+    authorities += TOKEN_MELT_MASK;
+  }
 
-    return {
-        txId: txId,
-        index: index,
-        value: txout.value,
-        address: txout.decoded.address,
-        timelock: txout.decoded.timelock,
-        tokenId,
-        authorities,
-        addressPath,
-        heightlock: null,
-        locked: false,
-    };
+  let tokenId = txout.token;
+  if (!tokenId) {
+    // This should never happen since the fullnode always sends the token uid.
+    const tokenIndex = tokensUtils.getTokenIndexFromData(txout.token_data);
+    tokenId = [HATHOR_TOKEN_CONFIG.uid, ...tx.tokens][tokenIndex];
+  }
+
+  return {
+    txId: txId,
+    index: index,
+    value: txout.value,
+    address: txout.decoded.address,
+    timelock: txout.decoded.timelock,
+    tokenId,
+    authorities,
+    addressPath,
+    heightlock: null,
+    locked: false,
+  };
 }
 
 /**
@@ -339,4 +338,79 @@ export const updatePersistentStorage = (proposalList) => {
     }
 
     walletUtil.setListenedProposals(simplifiedStorage);
+}
+
+/**
+ * Calculates the object that will be stored in Redux, containing all the helper values for a more
+ * enriched exhibition on the Atomic Swap screens
+ * @param {string} proposalId
+ * @param {string} password
+ * @param {string} partialTx
+ * @param {HathorWallet} wallet
+ * @param [options]
+ * @param {string} [options.signatures] Optional signatures data for the proposal
+ * @param {boolean} [options.newProposal=false] Requests new proposal properties to be added
+ * @return {ReduxProposalData}
+ */
+export const generateReduxObjFromProposal = (proposalId, password, partialTx, wallet, options = {}) => {
+    /** @type ReduxProposalData */
+    const rObj = {
+        id: proposalId,
+        password: password,
+        status: PROPOSAL_DOWNLOAD_STATUS.INVALIDATED, // We do not know the current state from the calculations
+        data: { // Only the minimum information. Any other data already retrieved should be added afterward
+            id: proposalId,
+            partialTx,
+            history: [],
+        },
+        updatedAt: new Date().valueOf(),
+    };
+    // Building the object to retrieve data from
+    const txProposal = PartialTxProposal.fromPartialTx(partialTx, wallet.storage);
+
+    // Calculating the amount of tokens
+    const balance = txProposal.calculateBalance(wallet);
+    rObj.data.amountTokens = Object.keys(balance).length;
+
+    // Calculating signature status
+    let sigStatus;
+    const amountInputs = txProposal.partialTx.getTx().inputs.length;
+    const amountSigs = options.signatures
+      ? options.signatures.split('|').length - 2 // Removing the prefix and txHex, sigs remain
+      : 0;
+    if (amountSigs < 1) {
+        sigStatus = PROPOSAL_SIGNATURE_STATUS.OPEN;
+    } else if (amountSigs < amountInputs) {
+        sigStatus = PROPOSAL_SIGNATURE_STATUS.PARTIALLY_SIGNED;
+    } else {
+        sigStatus = PROPOSAL_SIGNATURE_STATUS.SIGNED;
+    }
+    rObj.data.signatureStatus = sigStatus;
+
+    // Adding new proposal data, if requested
+    if (options.newProposal) {
+        rObj.data.version = 0;
+        rObj.data.timestamp = rObj.updatedAt;
+    }
+
+    return rObj;
+}
+
+/**
+ * Returns the Atomic Swap Service base URL,
+ * @param {string} network Network name for fetching the default base server url
+ * @returns {void}
+ */
+export function initializeSwapServiceBaseUrlForWallet(network) {
+    // XXX: This storage item is currently unchangeable via the wallet UI, and is available
+    //      only for debugging purposes on networks other than mainnet and testnet
+    const configUrl = localStorage.getItem('wallet:atomic_swap_service:base_server')
+    // Configures Atomic Swap Service url. Prefers explicit config input, then network-based
+    if (configUrl) {
+        hathorLibConfig.setSwapServiceBaseUrl(configUrl);
+    } else {
+        hathorLibConfig.setSwapServiceBaseUrl(
+          hathorLibConfig.getSwapServiceBaseUrl(network)
+        );
+    }
 }

@@ -1,12 +1,12 @@
 import {
-  helpers,
   Connection,
   HathorWallet,
   HathorWalletServiceWallet,
-  wallet as oldWalletUtil,
-  tokens as tokensUtils,
   constants as hathorLibConstants,
   config,
+  transactionUtils,
+  errors as hathorErrors,
+  cryptoUtils,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -23,22 +23,20 @@ import {
   spawn,
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
-import STORE from '../storageInstance';
+import LOCAL_STORE from '../storage';
 import {
   WALLET_SERVICE_MAINNET_BASE_WS_URL,
   WALLET_SERVICE_MAINNET_BASE_URL,
+  WALLET_SERVICE_FEATURE_TOGGLE,
+  ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
+  IGNORE_WS_TOGGLE_FLAG,
 } from '../constants';
-import {
-  FeatureFlags,
-  Events as FeatureFlagEvents,
-} from '../featureFlags';
 import {
   types,
   isOnlineUpdate,
   loadingAddresses,
   lockWalletForResult,
   loadWalletSuccess,
-  reloadData,
   metadataLoaded,
   tokenMetadataUpdated,
   setUseWalletService,
@@ -51,23 +49,55 @@ import {
   walletStateError,
   walletStateReady,
   storeRouterHistory,
-  reloadWalletRequested,
   reloadingWallet,
   tokenInvalidateHistory,
   sharedAddressUpdate,
   walletRefreshSharedAddress,
   setEnableAtomicSwap,
+  proposalListUpdated,
+  proposalFetchRequested,
+  walletResetSuccess,
+  reloadWalletRequested,
+  changeWalletState,
+  updateTxHistory,
 } from '../actions';
-import { specificTypeAndPayload, errorHandler } from './helpers';
+import {
+  specificTypeAndPayload,
+  errorHandler,
+  checkForFeatureFlag,
+  dispatchLedgerTokenSignatureVerification,
+} from './helpers';
 import { fetchTokenData } from './tokens';
-import walletHelpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
+import tokensUtils from '../utils/tokens';
+import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 
 export const WALLET_STATUS = {
   READY: 'ready',
   FAILED: 'failed',
   LOADING: 'loading',
+  SYNCING: 'syncing',
 };
+
+export function* isWalletServiceEnabled() {
+  const shouldIgnoreFlag = localStorage.getItem(IGNORE_WS_TOGGLE_FLAG);
+
+  // If we should ignore flag, it shouldn't matter what the featureToggle is, wallet service
+  // is definitely disabled.
+  if (shouldIgnoreFlag) {
+    return false;
+  }
+
+  const walletServiceEnabled = yield call(checkForFeatureFlag, WALLET_SERVICE_FEATURE_TOGGLE);
+
+  return walletServiceEnabled;
+}
+
+export function* isAtomicSwapEnabled() {
+  const atomicSwapEnabled = yield call(checkForFeatureFlag, ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE);
+
+  return atomicSwapEnabled;
+}
 
 export function* startWallet(action) {
   const {
@@ -76,32 +106,34 @@ export function* startWallet(action) {
     pin,
     password,
     routerHistory,
-    fromXpriv,
     xpub,
+    hardware,
   } = action.payload;
+  let xpriv = null;
 
   yield put(loadingAddresses(true));
   yield put(storeRouterHistory(routerHistory));
 
-  // When we start a wallet from the locked screen, we need to unlock it in the storage
-  oldWalletUtil.unlock();
+  if (hardware) {
+    // We need to ensure that the hardware wallet storage is always generated here since we may be
+    // starting the wallet with a second device and so we cannot trust the xpub saved on storage.
+    yield LOCAL_STORE.initHWStorage(xpub);
+  } else {
+    const walletId = yield LOCAL_STORE.getWalletId();
+    if (!walletId) {
+      yield LOCAL_STORE.initStorage(words, password, pin, passphrase);
+    }
+  }
 
   const network = config.getNetwork();
-  const registeredTokens = tokensUtils.getTokens();
-
-  // Before cleaning loaded data we must save in redux what we have of tokens in localStorage
-  yield put(reloadData({ tokens: registeredTokens }));
+  const storage = LOCAL_STORE.getStorage();
 
   // We are offline, the connection object is yet to be created
   yield put(isOnlineUpdate({ isOnline: false }));
 
-  const uniqueDeviceId = walletHelpers.getUniqueId();
-  const featureFlags = new FeatureFlags(uniqueDeviceId, network.name);
-  const hardwareWallet = oldWalletUtil.isHardwareWallet();
-
   // For now, the wallet service does not support hardware wallet, so default to the old facade
-  const useWalletService = hardwareWallet ? false : yield call(() => featureFlags.shouldUseWalletService());
-  const enableAtomicSwap = yield call(() => featureFlags.isAtomicSwapEnabled());
+  const useWalletService = hardware ? false : yield call(isWalletServiceEnabled);
+  const enableAtomicSwap = yield call(isAtomicSwapEnabled);
 
   yield put(setUseWalletService(useWalletService));
   yield put(setEnableAtomicSwap(enableAtomicSwap));
@@ -114,30 +146,40 @@ export function* startWallet(action) {
 
   // If we've lost redux data, we could not properly stop the wallet object
   // then we don't know if we've cleaned up the wallet data in the storage
-  // If it's fromXpriv, then we can't clean access data because we need that
-  oldWalletUtil.cleanLoadedData({ cleanAccessData: !fromXpriv });
+  yield storage.cleanStorage(true, true);
 
   let wallet, connection;
   if (useWalletService) {
-    let xpriv = null;
-
-    if (fromXpriv) {
-      xpriv = oldWalletUtil.getAcctPathXprivKey(pin);
+    // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
+    try {
+      // getWsServer can return null if not previously set
+      config.setWalletServiceBaseUrl(LOCAL_STORE.getWsServer());
+      config.getWalletServiceBaseUrl();
+    } catch(err) {
+      if (err instanceof hathorErrors.GetWalletServiceUrlError) {
+        // Throwing this error means there is not a base url set
+        // So we update with the default url
+        config.setWalletServiceBaseUrl(WALLET_SERVICE_MAINNET_BASE_URL);
+      }
     }
 
-    const {
-      walletServiceBaseUrl,
-      walletServiceWsUrl,
-    } = HathorWalletServiceWallet.getServerUrlsFromStorage();
+    try {
+      config.getWalletServiceBaseWsUrl();
+    } catch(err) {
+      if (err instanceof hathorErrors.GetWalletServiceWsUrlError) {
+        config.setWalletServiceBaseWsUrl(WALLET_SERVICE_MAINNET_BASE_WS_URL);
+      }
+    }
 
-    // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
-    config.setWalletServiceBaseUrl(walletServiceBaseUrl || WALLET_SERVICE_MAINNET_BASE_URL);
-    config.setWalletServiceBaseWsUrl(walletServiceWsUrl || WALLET_SERVICE_MAINNET_BASE_WS_URL);
+    if (!(words || xpub)) {
+      const accessData = yield storage.getAccessData();
+      xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
+    }
 
     const walletConfig = {
       seed: words,
-      xpriv,
       xpub,
+      xpriv,
       requestPassword: async () => new Promise((resolve) => {
         /**
          * Lock screen will call `resolve` with the pin screen after validation
@@ -146,35 +188,37 @@ export function* startWallet(action) {
         dispatch(lockWalletForResult(resolve));
       }),
       passphrase,
-      network,
+      storage,
     };
 
     wallet = new HathorWalletServiceWallet(walletConfig);
     connection = wallet.conn;
   } else {
-    let xpriv = null;
-
-    if (fromXpriv) {
-      xpriv = oldWalletUtil.getXprivKey(pin);
-    }
+    // Set the server and network as saved on localStorage
+    config.setServerUrl(LOCAL_STORE.getServer());
 
     connection = new Connection({
       network: network.name,
-      servers: [helpers.getServerURL()],
+      servers: [config.getServerUrl()],
     });
 
     const beforeReloadCallback = () => {
       dispatch(reloadingWallet());
     };
 
+    if (!(words || xpub)) {
+      const accessData = yield storage.getAccessData();
+      xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
+    }
+
     const walletConfig = {
       seed: words,
       xpriv,
       xpub,
-      store: STORE,
       passphrase,
       connection,
       beforeReloadCallback,
+      storage,
     };
 
     wallet = new HathorWallet(walletConfig);
@@ -183,35 +227,29 @@ export function* startWallet(action) {
   yield put(setWallet(wallet));
 
   // Setup listeners before starting the wallet so we don't lose messages
-  const walletListenerThread = yield fork(setupWalletListeners, wallet);
+  yield fork(setupWalletListeners, wallet);
+
+  // Thread to listen for feature flags from Unleash
+  yield fork(featureToggleUpdateListener);
 
   // Create a channel to listen for the ready state and
   // wait until the wallet is ready
-  const walletReadyThread = yield fork(listenForWalletReady, wallet);
-
-  // Thread to listen for feature flags from Unleash
-  const featureFlagsThread = yield fork(listenForFeatureFlags, featureFlags);
-
-  // Keep track of the forked threads so we can cancel them later. We are currently
-  // using this to start the startWallet saga again during a reload
-  const threads = [
-    walletListenerThread,
-    walletReadyThread,
-    featureFlagsThread
-  ];
+  yield fork(listenForWalletReady, wallet);
 
   try {
-    const serverInfo = yield call(wallet.start.bind(wallet), {
+    console.log('[*] Start wallet.');
+    const serverInfo = yield call([wallet, wallet.start], {
       pinCode: pin,
       password,
     });
+    console.log('[+] Start wallet.', serverInfo);
 
     let version;
     let networkName = network.name;
 
     if (serverInfo) {
       version = serverInfo.version;
-      networkName = serverInfo.network;
+      networkName = serverInfo.network && serverInfo.network.split('-')[0];
     }
 
     yield put(setServerInfo({
@@ -224,17 +262,32 @@ export function* startWallet(action) {
       // the service is 'error' or if the start wallet request failed.
       // We should fallback to the old facade by storing the flag to ignore
       // the feature flag
-      yield call(featureFlags.ignoreWalletServiceFlag.bind(featureFlags));
-
-      // Cleanup all listeners
-      yield cancel(threads);
-
+      localStorage.setItem(IGNORE_WS_TOGGLE_FLAG, true)
       // Yield the same action so it will now load on the old facade
       yield put(action);
 
       // takeLatest will stop running the generator if a new START_WALLET_REQUESTED
       // action is dispatched, but returning so the code is clearer
       return;
+    } else {
+      console.error(e);
+      // Return to locked screen when the wallet fails to start
+      LOCAL_STORE.lock();
+      routerHistory.push('/');
+      return
+    }
+  }
+
+  if (enableAtomicSwap) {
+    // Set urls for the Atomic Swap Service. If we have it on storage, use it, otherwise use defaults
+    initializeSwapServiceBaseUrlForWallet(network.name)
+    // Initialize listened proposals list
+    const listenedProposals = walletUtils.getListenedProposals();
+    yield put(proposalListUpdated(listenedProposals));
+
+    // Fetch all proposals from service backend
+    for (const [pId, p] of Object.entries(listenedProposals)) {
+      yield put(proposalFetchRequested(pId, p.password));
     }
   }
 
@@ -250,20 +303,28 @@ export function* startWallet(action) {
 
     if (error) {
       yield put(startWalletFailed());
-      yield cancel(threads);
       return;
     }
   }
 
+  yield call([wallet.storage, wallet.storage.registerToken], hathorLibConstants.HATHOR_TOKEN_CONFIG);
+
+  if (hardware) {
+    // This will verify all ledger trusted tokens to check their validity
+    yield fork(dispatchLedgerTokenSignatureVerification, wallet);
+  }
+
   try {
-    const { allTokens } = yield call(loadTokens);
+    const { allTokens, registeredTokens } = yield call(loadTokens);
+    const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
     // Store all tokens on redux
-    yield put(loadWalletSuccess(allTokens));
+    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
   } catch(e) {
     yield put(startWalletFailed());
-    yield cancel(threads);
     return;
   }
+
+  LOCAL_STORE.unlock();
 
   routerHistory.replace('/wallet/');
 
@@ -280,9 +341,6 @@ export function* startWallet(action) {
     start: take(types.START_WALLET_REQUESTED),
     reload: take(types.RELOAD_WALLET_REQUESTED),
   });
-
-  // We need to cancel threads on both reload and start
-  yield cancel(threads);
 
   if (reload) {
     // Yield the same action again to reload the wallet
@@ -301,23 +359,14 @@ export function* loadTokens() {
   const wallet = yield select((state) => state.wallet);
 
   // Fetch all tokens, including the ones that are not registered yet
-  const allTokens = yield call(wallet.getTokens.bind(wallet));
-  const registeredTokens = tokensUtils
-    .getTokens()
-    .reduce((acc, token) => {
-      // remove htr since we will always download the HTR token
-      if (token.uid === htrUid) {
-        return acc;
-      }
-
-      return [...acc, token.uid];
-    }, []);
+  const allTokens = yield call([wallet, wallet.getTokens]);
+  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet);
 
   // We don't need to wait for the metadatas response, so we can just
   // spawn a new "thread" to handle it.
   //
   // `spawn` is similar to `fork`, but it creates a `detached` fork
-  yield spawn(fetchTokensMetadata, registeredTokens);
+  yield spawn(fetchTokensMetadata, registeredTokens.map(token => token.uid));
 
   // Dispatch actions to asynchronously load the balances of each token the wallet has
   // ever interacted with. The `put` effect will just dispatch and continue, loading
@@ -380,41 +429,6 @@ export function* fetchTokensMetadata(tokens) {
   yield put(tokenMetadataUpdated(tokenMetadatas, errors));
 }
 
-// This will create a channel to listen for featureFlag updates
-export function* listenForFeatureFlags(featureFlags) {
-  const channel = eventChannel((emitter) => {
-    const listener = (state) => emitter(state);
-    featureFlags.on(FeatureFlagEvents.WALLET_SERVICE_ENABLED, (state) => {
-      emitter(state);
-    });
-    featureFlags.on(FeatureFlagEvents.ATOMIC_SWAP_ENABLED, (state) => {
-      emitter(state);
-    });
-
-    // Cleanup when the channel is closed
-    return () => {
-      featureFlags.removeListener(FeatureFlagEvents.WALLET_SERVICE_ENABLED, listener);
-      featureFlags.removeListener(FeatureFlagEvents.ATOMIC_SWAP_ENABLED, listener);
-    };
-  });
-
-  try {
-    while (true) {
-      const newUseWalletService = yield take(channel);
-      const oldUseWalletService = yield select((state) => state.useWalletService);
-
-      if (oldUseWalletService && oldUseWalletService !== newUseWalletService) {
-        yield put(reloadWalletRequested());
-      }
-    }
-  } finally {
-    if (yield cancelled()) {
-      // When we close the channel, it will remove the event listener
-      channel.close();
-    }
-  }
-}
-
 // This will create a channel from an EventEmitter to wait until the wallet is loaded,
 // dispatching actions
 export function* listenForWalletReady(wallet) {
@@ -452,16 +466,7 @@ export function* listenForWalletReady(wallet) {
   }
 }
 
-export function* handleTx(action) {
-  const tx = action.payload;
-  const wallet = yield select((state) => state.wallet);
-  const routerHistory = yield select((state) => state.routerHistory);
-
-  if (!wallet.isReady()) {
-    return;
-  }
-
-  // find tokens affected by the transaction
+export function* handleTx(wallet, tx) {
   const affectedTokens = new Set();
 
   for (const output of tx.outputs) {
@@ -471,11 +476,50 @@ export function* handleTx(action) {
   for (const input of tx.inputs) {
     affectedTokens.add(input.token);
   }
+
+  // We should refresh the available addresses.
+  // Since we have already received the transaction at this point, the wallet
+  // instance will already have updated its current address, we should just
+  // fetch it and update the redux-store
+  const newAddress = yield call([wallet, wallet.getCurrentAddress]);
+
+  yield put(sharedAddressUpdate({
+    lastSharedAddress: newAddress.address,
+    lastSharedIndex: newAddress.index,
+  }));
+
+  return affectedTokens;
+}
+
+export function* handleNewTx(action) {
+  const tx = action.payload;
+  const wallet = yield select((state) => state.wallet);
+  const routerHistory = yield select((state) => state.routerHistory);
+
+  if (!wallet.isReady()) {
+    return;
+  }
+
+  // reload token history of affected tokens
+  // We always reload the history and balance
+  const affectedTokens = yield call(handleTx, wallet, tx);
   const stateTokens = yield select((state) => state.tokens);
   const registeredTokens = stateTokens.map((token) => token.uid);
 
+  // We should download the **balance** and **history** for every token involved
+  // in the transaction
+  for (const tokenUid of affectedTokens) {
+    if (registeredTokens.indexOf(tokenUid) === -1) {
+      continue;
+    }
+
+    yield put(tokenFetchBalanceRequested(tokenUid, true));
+    yield put(tokenFetchHistoryRequested(tokenUid, true));
+  }
+
+  // We only show a notification on the first time we see a transaction
   let message = '';
-  if (helpers.isBlock(tx)) {
+  if (transactionUtils.isBlock(tx)) {
     message = 'You\'ve found a new block! Click to open it.';
   } else {
     message = 'You\'ve received a new transaction! Click to open it.'
@@ -493,25 +537,31 @@ export function* handleTx(action) {
       routerHistory.push(`/transaction/${tx.tx_id}/`);
     }
   }
+}
 
-  // We should refresh the available addresses.
-  // Since we have already received the transaction at this point, the wallet
-  // instance will already have updated its current address, we should just
-  // fetch it and update the redux-store
-  const newAddress = wallet.getCurrentAddress();
-  yield put(sharedAddressUpdate({
-    lastSharedAddress: newAddress.address,
-    lastSharedIndex: newAddress.index,
-  }));
-  // We should download the **balance** and **history** for every token involved
-  // in the transaction
+export function* handleUpdateTx(action) {
+  const tx = action.payload;
+  const wallet = yield select((state) => state.wallet);
+
+  if (!wallet.isReady()) {
+    return;
+  }
+
+  // reload token history of affected tokens
+  // We always reload balance but only reload the tx being updated on history.
+  const affectedTokens = yield call(handleTx, wallet, tx);
+  const stateTokens = yield select((state) => state.tokens);
+  const registeredTokens = stateTokens.map((token) => token.uid);
+  const txbalance = yield call([wallet, wallet.getTxBalance], tx);
+
   for (const tokenUid of affectedTokens) {
     if (registeredTokens.indexOf(tokenUid) === -1) {
       continue;
     }
 
+    // Always reload balance
     yield put(tokenFetchBalanceRequested(tokenUid, true));
-    yield put(tokenFetchHistoryRequested(tokenUid, true));
+    yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0));
   }
 }
 
@@ -542,6 +592,8 @@ export function* setupWalletListeners(wallet) {
       data,
     }));
 
+    wallet.on('state', (data) => emitter(changeWalletState(data)));
+
     return () => {
       wallet.conn.removeListener('best-block-update', listener);
       wallet.conn.removeListener('wallet-load-partial-update', listener);
@@ -549,6 +601,7 @@ export function* setupWalletListeners(wallet) {
       wallet.removeListener('reload-data', listener);
       wallet.removeListener('update-tx', listener);
       wallet.removeListener('new-tx', listener);
+      wallet.removeListener('state', listener);
     };
   });
 
@@ -569,8 +622,16 @@ export function* setupWalletListeners(wallet) {
   }
 }
 
+/**
+ * Update the redux state with the data from the history sync partial data.
+ *
+ * @param {Object} data
+ * @param {Object} data.payload payload from the wallet event
+ * @param {number} data.payload.historyLength Number of transactions found in the entire history.
+ * @param {number} data.payload.addressesFound Number of addresses loaded by the wallet.
+ */
 export function* loadPartialUpdate({ payload }) {
-  const transactions = Object.keys(payload.historyTransactions).length;
+  const transactions = payload.historyLength;
   const addresses = payload.addressesFound;
   yield put(updateLoadedData({ transactions, addresses }));
 }
@@ -615,7 +676,7 @@ export function* walletReloading() {
   try {
     // Store all tokens on redux as we might have lost tokens during the disconnected
     // period.
-    const { allTokens } = yield call(loadTokens);
+    const { allTokens, registeredTokens } = yield call(loadTokens);
 
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
@@ -629,7 +690,7 @@ export function* walletReloading() {
     // If we are on the wallet-service, we also need to refresh the
     // facade instance internal addresses
     if (useWalletService) {
-      yield call(wallet.getNewAddresses.bind(wallet));
+      yield call([wallet, wallet.getNewAddresses]);
     }
 
     // dispatch the refreshSharedAddress so our redux store is potentially
@@ -637,8 +698,10 @@ export function* walletReloading() {
     // time
     yield put(walletRefreshSharedAddress());
 
+    const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
+
     // Load success, we can send the user back to the wallet screen
-    yield put(loadWalletSuccess(allTokens));
+    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
     routerHistory.replace('/wallet/');
     yield put(loadingAddresses(false));
   } catch (e) {
@@ -650,7 +713,7 @@ export function* walletReloading() {
 export function* refreshSharedAddress() {
   const wallet = yield select((state) => state.wallet);
 
-  const { address, index } = wallet.getCurrentAddress();
+  const { address, index } = yield call([wallet, wallet.getCurrentAddress]);
 
   yield put(sharedAddressUpdate({
     lastSharedAddress: address,
@@ -658,13 +721,54 @@ export function* refreshSharedAddress() {
   }));
 }
 
+export function* onWalletReset() {
+  const routerHistory = yield select((state) => state.routerHistory);
+  const wallet = yield select((state) => state.wallet);
+
+  localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
+  LOCAL_STORE.resetStorage();
+  if (wallet) {
+    yield call([wallet.storage, wallet.storage.cleanStorage], true, true);
+  }
+
+  yield put(walletResetSuccess());
+
+  if (routerHistory) {
+    routerHistory.push('/welcome');
+  }
+}
+
+export function* onWalletServiceDisabled() {
+  console.debug('We are currently in the wallet-service and the feature-flag is disabled, reloading.');
+  yield put(reloadWalletRequested());
+}
+
+/**
+ * This saga will wait for feature toggle updates and react when a toggle state
+ * transition is done
+ */
+export function* featureToggleUpdateListener() {
+  while (true) {
+    yield take('FEATURE_TOGGLE_UPDATED');
+
+    const oldWalletServiceToggle = yield select(({ useWalletService }) => useWalletService);
+    const newWalletServiceToggle = yield call(isWalletServiceEnabled);
+
+    // WalletService is currently ON and the featureToggle is now OFF
+    if (!newWalletServiceToggle && oldWalletServiceToggle) {
+      yield call(onWalletServiceDisabled);
+    }
+  }
+}
+
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
     takeLatest('WALLET_CONN_STATE_UPDATE', onWalletConnStateUpdate),
     takeLatest('WALLET_RELOADING', walletReloading),
-    takeEvery('WALLET_NEW_TX', handleTx),
-    takeEvery('WALLET_UPDATE_TX', handleTx),
+    takeLatest('WALLET_RESET', onWalletReset),
+    takeEvery('WALLET_NEW_TX', handleNewTx),
+    takeEvery('WALLET_UPDATE_TX', handleUpdateTx),
     takeEvery('WALLET_BEST_BLOCK_UPDATE', bestBlockUpdate),
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
     takeEvery('WALLET_RELOAD_DATA', walletReloading),

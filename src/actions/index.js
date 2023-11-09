@@ -22,13 +22,15 @@ export const types = {
   TOKEN_FETCH_HISTORY_SUCCESS: 'TOKEN_FETCH_HISTORY_SUCCESS',
   TOKEN_FETCH_HISTORY_FAILED: 'TOKEN_FETCH_HISTORY_FAILED',
   SET_ENABLE_ATOMIC_SWAP: 'SET_ENABLE_ATOMIC_SWAP',
+  PROPOSAL_LIST_UPDATED: 'PROPOSAL_LIST_UPDATED',
   PROPOSAL_FETCH_REQUESTED: 'PROPOSAL_FETCH_REQUESTED',
   PROPOSAL_FETCH_SUCCESS: 'PROPOSAL_FETCH_SUCCESS',
   PROPOSAL_FETCH_FAILED: 'PROPOSAL_FETCH_FAILED',
+  PROPOSAL_UPDATED: 'PROPOSAL_UPDATED',
   PROPOSAL_TOKEN_FETCH_REQUESTED: 'PROPOSAL_TOKEN_FETCH_REQUESTED',
   PROPOSAL_TOKEN_FETCH_SUCCESS: 'PROPOSAL_TOKEN_FETCH_SUCCESS',
   PROPOSAL_TOKEN_FETCH_FAILED: 'PROPOSAL_TOKEN_FETCH_FAILED',
-  PROPOSAL_GENERATED: 'PROPOSAL_GENERATED',
+  PROPOSAL_CREATE_REQUESTED: 'PROPOSAL_CREATE_REQUESTED',
   PROPOSAL_REMOVED: 'PROPOSAL_REMOVED',
   PROPOSAL_IMPORTED: 'PROPOSAL_IMPORTED',
   TOKEN_INVALIDATE_HISTORY: 'TOKEN_INVALIDATE_HISTORY',
@@ -40,173 +42,181 @@ export const types = {
   WALLET_STATE_READY: 'WALLET_STATE_READY',
   WALLET_STATE_ERROR: 'WALLET_STATE_ERROR',
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
+  WALLET_CHANGE_STATE: 'WALLET_CHANGE_STATE',
+  WALLET_RESET: 'WALLET_RESET',
+  WALLET_RESET_SUCCESS: 'WALLET_RESET_SUCCESS',
   WALLET_REFRESH_SHARED_ADDRESS: 'WALLET_REFRESH_SHARED_ADDRESS',
   SET_SERVER_INFO: 'SET_SERVER_INFO',
   STORE_ROUTER_HISTORY: 'STORE_ROUTER_HISTORY',
   WALLET_RELOADING: 'WALLET_RELOADING',
+  FEATURE_TOGGLE_INITIALIZED: 'FEATURE_TOGGLE_INITIALIZED',
+  SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
+  SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
+  UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
 };
 
 /**
  * Update transaction history
  */
-export const historyUpdate = (data) => ({ type: "history_update", payload: data });
+export const historyUpdate = (data) => ({ type: 'history_update', payload: data });
 
 /**
  * Reload data from localStorage to Redux
  */
-export const reloadData = data => ({ type: "reload_data", payload: data });
+export const reloadData = data => ({ type: 'reload_data', payload: data });
 
 /**
  * Clean redux data and set as initialState
  */
-export const cleanData = () => ({ type: "clean_data" });
+export const cleanData = () => ({ type: 'clean_data' });
 
 /**
  * Update address that must be shared with user
  */
-export const sharedAddressUpdate = data => ({ type: "shared_address", payload: data });
+export const sharedAddressUpdate = data => ({ type: 'shared_address', payload: data });
 
 /**
  * Set if API version is allowed
  */
-export const isVersionAllowedUpdate = data => ({ type: "is_version_allowed_update", payload: data });
+export const isVersionAllowedUpdate = data => ({ type: 'is_version_allowed_update', payload: data });
 
 /**
  * Set if websocket is connected
  */
-export const isOnlineUpdate = data => ({ type: "is_online_update", payload: data });
+export const isOnlineUpdate = data => ({ type: 'is_online_update', payload: data });
 
 /**
  * Update the network that you are connected
  */
-export const networkUpdate = data => ({ type: "network_update", payload: data });
+export const networkUpdate = data => ({ type: 'network_update', payload: data });
 
 /**
  * Save last request that failed
  */
-export const lastFailedRequest = data => ({ type: "last_failed_request", payload: data });
+export const lastFailedRequest = data => ({ type: 'last_failed_request', payload: data });
 
 /**
  * Save written password in Redux (it's always cleaned after the use)
  */
-export const updatePassword = data => ({ type: "update_password", payload: data });
+export const updatePassword = data => ({ type: 'update_password', payload: data });
 
 /**
  * Save written pin in Redux (it's always cleaned after the use)
  */
-export const updatePin = data => ({ type: "update_pin", payload: data });
+export const updatePin = data => ({ type: 'update_pin', payload: data });
 
 /**
  * Save words in Redux (it's always cleaned after the use)
  */
-export const updateWords = data => ({ type: "update_words", payload: data });
+export const updateWords = data => ({ type: 'update_words', payload: data });
 
 /**
  * Update token that is selected in the wallet
  */
-export const selectToken = data => ({ type: "select_token", payload: data });
+export const selectToken = data => ({ type: 'select_token', payload: data });
 
 /**
  * Update selected token and all known tokens in the wallet
  */
-export const newTokens = data => ({ type: "new_tokens", payload: data });
+export const newTokens = data => ({ type: 'new_tokens', payload: data });
 
 /**
  * Set if addresses are being loaded
  */
-export const loadingAddresses = data => ({ type: "loading_addresses_update", payload: data });
+export const loadingAddresses = data => ({ type: 'loading_addresses_update', payload: data });
 
 /**
  * Set quantity of addresses and transactions already loaded
  */
-export const updateLoadedData = data => ({ type: "update_loaded_data", payload: data });
+export const updateLoadedData = data => ({ type: 'update_loaded_data', payload: data });
 
 /**
  * Update status code of the last request that failed
  */
-export const updateRequestErrorStatusCode = data => ({ type: "update_request_error_status_code", payload: data });
+export const updateRequestErrorStatusCode = data => ({ type: 'update_request_error_status_code', payload: data });
 
 /**
  * Set height
  * height {number} new network height
  * htrUpdatedBalance {Object} balance of HTR
  */
-export const updateHeight = (height, htrUpdatedBalance) => ({ type: "update_height", payload: { height, htrUpdatedBalance } });
+export const updateHeight = (height, htrUpdatedBalance) => ({ type: 'update_height', payload: { height, htrUpdatedBalance } });
 
 /**
  * wallet {HathorWallet} wallet object
  */
-export const setWallet = (wallet) => ({ type: "set_wallet", payload: wallet });
+export const setWallet = (wallet) => ({ type: 'set_wallet', payload: wallet });
 
 /**
  * Stop and clean wallet redux state
  */
-export const resetWallet = () => ({ type: "reset_wallet" });
+export const resetWallet = () => ({ type: 'reset_wallet' });
 
 /**
  * tokens {Array} array of token uids the the wallet has
+ * currentAddress {Object} The current unused address
  */
-export const loadWalletSuccess = (tokens) => ({ type: "load_wallet_success", payload: { tokens } });
+export const loadWalletSuccess = (tokens, registeredTokens, currentAddress) => ({ type: 'load_wallet_success', payload: { tokens, registeredTokens, currentAddress } });
 
 /**
  * tx {Object} the new transaction
  * updatedBalanceMap {Object} balance updated of each token in this tx
  * balances {Object} balance of each token in this tx for this wallet including authorities
  */
-export const updateTx = (tx, updatedBalanceMap, balances) => ({ type: "update_tx", payload: { tx, updatedBalanceMap, balances } });
+export const updateTx = (tx, updatedBalanceMap, balances) => ({ type: 'update_tx', payload: { tx, updatedBalanceMap, balances } });
 
 /**
  * token {String} token of the updated history
  * newHistory {Array} array with the new fetched history
  */
-export const updateTokenHistory = (token, newHistory) => ({ type: "update_token_history", payload: { token, newHistory } });
+export const updateTokenHistory = (token, newHistory) => ({ type: 'update_token_history', payload: { token, newHistory } });
 
 /**
  * data {Object} object with token metadata
  */
-export const tokenMetadataUpdated = (data, errors) => ({ type: "token_metadata_updated", payload: { data, errors } });
+export const tokenMetadataUpdated = (data, errors) => ({ type: 'token_metadata_updated', payload: { data, errors } });
 
 /**
  * Set if metadata was already loaded from the lib
  */
-export const metadataLoaded = data => ({ type: "metadata_loaded", payload: data });
+export const metadataLoaded = data => ({ type: 'metadata_loaded', payload: data });
 
 /**
  * Remove token metadata after unregister token
  */
-export const removeTokenMetadata = data => ({ type: "remove_token_metadata", payload: data });
+export const removeTokenMetadata = data => ({ type: 'remove_token_metadata', payload: data });
 
 /**
  * Partially update history and balance
  */
-export const partiallyUpdateHistoryAndBalance = (data) => ({ type: "partially_update_history_and_balance", payload: data });
+export const partiallyUpdateHistoryAndBalance = (data) => ({ type: 'partially_update_history_and_balance', payload: data });
 
 /**
  * Flag indicating if we are using the wallet service facade
  */
-export const setUseWalletService = (useWalletService) => ({ type: "set_use_wallet_service", payload: useWalletService });
+export const setUseWalletService = (useWalletService) => ({ type: 'set_use_wallet_service', payload: useWalletService });
 
 /**
  * Action to display the locked wallet screen and resolve the passed promise after the user typed his PIN
  */
-export const lockWalletForResult = (promise) => ({ type: "lock_wallet_for_result", payload: promise });
+export const lockWalletForResult = (promise) => ({ type: 'lock_wallet_for_result', payload: promise });
 
 /**
  * This will resolve the promise and reset the lockWalletPromise state
  */
-export const resolveLockWalletPromise = (pin) => ({ type: "resolve_lock_wallet_promise", payload: pin });
+export const resolveLockWalletPromise = (pin) => ({ type: 'resolve_lock_wallet_promise', payload: pin });
 
 /**
  * This will reset the selected token if the one selected has been hidden because of zero balance
  */
-export const resetSelectedTokenIfNeeded = () => ({ type: "reset_selected_token_if_needed" });
+export const resetSelectedTokenIfNeeded = () => ({ type: 'reset_selected_token_if_needed' });
 
 /**
  * This will be used when the Ledger app closes and after the user is notified.
  *
  * @param {boolean} data If the Ledger device has disconnected.
  */
-export const updateLedgerClosed = data => ({ type: "set_ledger_was_closed", payload: data });
+export const updateLedgerClosed = data => ({ type: 'set_ledger_was_closed', payload: data });
 
 /**
  * tokenId: The tokenId to request history from
@@ -278,6 +288,15 @@ export const tokenFetchBalanceFailed = (tokenId) => ({
 export const setEnableAtomicSwap = (useAtomicSwap) => ({ type: types.SET_ENABLE_ATOMIC_SWAP, payload: useAtomicSwap });
 
 /**
+ * @param {Record<string,{id:string,password:string}>} listenedProposalsMap
+ *                                                     A map of listened proposals
+ */
+export const proposalListUpdated = (listenedProposalsMap) => ({
+  type: types.PROPOSAL_LIST_UPDATED,
+  listenedProposalsMap
+});
+
+/**
  * @param {string} proposalId The proposalId to request data
  * @param {string} password The proposal's password to decode its data
  * @param {boolean} [force=false] Should we ignore the stored data?
@@ -310,6 +329,16 @@ export const proposalFetchFailed = (proposalId, errorMessage) => ({
 });
 
 /**
+ * @param {string} proposalId The proposalId to store data
+ * @param {unknown} data The updated proposal data
+ */
+export const proposalUpdated = (proposalId, data) => ({
+  type: types.PROPOSAL_UPDATED,
+  proposalId,
+  data,
+});
+
+/**
  * @param {string} tokenUid The token identifier to fetch
  */
 export const proposalTokenFetchRequested = (tokenUid) => ({
@@ -338,15 +367,13 @@ export const proposalTokenFetchFailed = (tokenUid, errorMessage) => ({
 });
 
 /**
- * @param {string} proposalId
+ * @param {string} partialTx
  * @param {string} password
- * @param {ProposalData} data The generated proposal object
  */
-export const proposalGenerated = (proposalId, password, data) => ({
-  type: types.PROPOSAL_GENERATED,
-  proposalId,
+export const proposalCreateRequested = (partialTx, password) => ({
+  type: types.PROPOSAL_CREATE_REQUESTED,
   password,
-  data,
+  partialTx,
 });
 
 /**
@@ -429,3 +456,53 @@ export const setServerInfo = ({ version, network }) => (
   { type: types.SET_SERVER_INFO, payload: { version, network } }
 );
 
+export const featureToggleInitialized = () => ({
+  type: types.FEATURE_TOGGLE_INITIALIZED,
+});
+
+/**
+ * toggles {Object} Key value object where the key is the feature toggle name and the value
+ * indicates whether it is on (true) or off (false)
+ */
+export const setFeatureToggles = (toggles) => ({
+  type: types.SET_FEATURE_TOGGLES,
+  payload: toggles,
+});
+
+/**
+ * unleashClient {UnleashClient} The unleash client to store
+ */
+export const setUnleashClient = (unleashClient) => ({
+  type: types.SET_UNLEASH_CLIENT,
+  payload: unleashClient,
+});
+
+export const walletResetSuccess = () => ({
+  type: types.WALLET_RESET_SUCCESS,
+});
+
+export const walletReset = () => ({
+  type: types.WALLET_RESET,
+});
+
+/**
+ * Action to update the token history with this tx.
+ * @param {Object} tx New transaction to update in the token history.
+ * @param {string} tokenId token to update the history.
+ * @param {number} balance transaction balance of the token on the wallet.
+ * @returns {Object} action to update the history of the token with the tx.
+ */
+export const updateTxHistory = (tx, tokenId, balance) => ({
+  type: types.UPDATE_TX_HISTORY,
+  payload: { tx, tokenId, balance },
+});
+
+/**
+ * Action to set the wallet state and allow the UI to react to a state change.
+ * @param {number} newState state from the enum included on HathorWallet
+ * @returns {Object}
+ */
+export const changeWalletState = (newState) => ({
+  type: types.WALLET_CHANGE_STATE,
+  payload: newState,
+});

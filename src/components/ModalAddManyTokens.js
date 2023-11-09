@@ -10,9 +10,14 @@ import { t } from 'ttag';
 import { get } from 'lodash';
 import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
+import { connect } from 'react-redux';
 import tokens from '../utils/tokens';
 import wallet from "../utils/wallet";
 
+
+const mapStateToProps = (state) => {
+  return { storage: state.wallet.storage };
+};
 
 /**
  * Component that shows a modal to add many unknown tokens to the wallet (bulk import)
@@ -100,7 +105,7 @@ class ModalAddManyTokens extends React.Component {
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
         // Getting all validation promises
-        validations.push(hathorLib.tokens.validateTokenToAddByConfigurationString(config));
+        validations.push(hathorLib.tokensUtils.validateTokenToAddByConfigurationString(config, this.props.storage));
       }
     }
 
@@ -157,7 +162,7 @@ class ModalAddManyTokens extends React.Component {
 
       // Adding the tokens to the wallet and returning with the success callback
       for (const config of tokensToAdd) {
-        tokens.addToken(config.uid, config.name, config.symbol);
+        await tokens.addToken(config.uid, config.name, config.symbol);
         wallet.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
       }
 
@@ -235,4 +240,4 @@ class ModalAddManyTokens extends React.Component {
   }
 }
 
-export default ModalAddManyTokens;
+export default connect(mapStateToProps)(ModalAddManyTokens);

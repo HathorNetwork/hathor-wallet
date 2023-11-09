@@ -11,7 +11,10 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { importProposal, proposalFetchRequested } from "../../actions";
-import { PROPOSAL_DOWNLOAD_STATUS } from "../../utils/atomicSwap";
+import {
+    PROPOSAL_DOWNLOAD_STATUS,
+    updatePersistentStorage
+} from "../../utils/atomicSwap";
 
 export default function ImportExisting(props) {
     // Internal state
@@ -55,15 +58,16 @@ export default function ImportExisting(props) {
             return;
         }
 
+        // Error handling
         if (existingProposal.status === PROPOSAL_DOWNLOAD_STATUS.FAILED) {
             setErrorMessage(existingProposal.errorMessage);
             setIsLoading(false);
             return;
         }
 
-        if (existingProposal) {
-            navigateToProposal(proposalId);
-        }
+        // The proposal was successfully imported: updating persistent storage and navigating to it
+        updatePersistentStorage(allProposals);
+        navigateToProposal(proposalId);
     })
 
     return <div className="content-wrapper flex align-items-center">

@@ -6,13 +6,15 @@
  */
 
 import hathorLib from '@hathor/wallet-lib';
-import { VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
-import { PROPOSAL_DOWNLOAD_STATUS } from "../utils/atomicSwap";
+import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import helpersUtils from '../utils/helpers';
+import LOCAL_STORE from '../storage';
 
 /**
  * @typedef TokenHistory
@@ -79,6 +81,7 @@ const initialState = {
   // Height of the best chain of the network arrived from ws data
   height: 0,
   wallet: null,
+  walletState: null,
   // Metadata of tokens
   tokenMetadata: {},
   // Token list of uids that had errors when loading metadata
@@ -125,6 +128,11 @@ const initialState = {
       name: HATHOR_TOKEN_CONFIG.name,
       status: TOKEN_DOWNLOAD_STATUS.READY
     }
+  },
+  unleashClient: null,
+  featureTogglesInitialized: false,
+  featureToggles: {
+    ...FEATURE_TOGGLE_DEFAULTS,
   },
 };
 
@@ -216,20 +224,22 @@ const rootReducer = (state = initialState, action) => {
       return onTokenFetchHistoryFailed(state, action);
     case types.SET_ENABLE_ATOMIC_SWAP:
       return onSetUseAtomicSwap(state, action);
+    case types.PROPOSAL_LIST_UPDATED:
+      return onProposalListUpdated(state, action);
     case types.PROPOSAL_FETCH_REQUESTED:
       return onProposalFetchRequested(state, action);
     case types.PROPOSAL_FETCH_SUCCESS:
       return onProposalFetchSuccess(state, action);
     case types.PROPOSAL_FETCH_FAILED:
       return onProposalFetchFailed(state, action);
+    case types.PROPOSAL_UPDATED:
+      return onProposalUpdate(state, action);
     case types.PROPOSAL_TOKEN_FETCH_REQUESTED:
       return onProposalTokenFetchRequested(state, action);
     case types.PROPOSAL_TOKEN_FETCH_SUCCESS:
       return onProposalTokenFetchSuccess(state, action);
     case types.PROPOSAL_TOKEN_FETCH_FAILED:
       return onProposalTokenFetchFailed(state, action);
-    case types.PROPOSAL_GENERATED:
-      return onNewProposalGeneration(state, action);
     case types.PROPOSAL_REMOVED:
       return onProposalRemoved(state, action);
     case types.PROPOSAL_IMPORTED:
@@ -250,6 +260,18 @@ const rootReducer = (state = initialState, action) => {
       return onWalletBestBlockUpdate(state, action);
     case types.STORE_ROUTER_HISTORY:
       return onStoreRouterHistory(state, action);
+    case types.SET_UNLEASH_CLIENT:
+      return onSetUnleashClient(state, action);
+    case types.SET_FEATURE_TOGGLES:
+      return onSetFeatureToggles(state, action);
+    case types.FEATURE_TOGGLE_INITIALIZED:
+      return onFeatureToggleInitialized(state);
+    case types.WALLET_RESET_SUCCESS:
+      return onWalletResetSuccess(state);
+    case types.UPDATE_TX_HISTORY:
+      return onUpdateTxHistory(state, action);
+    case types.WALLET_CHANGE_STATE:
+      return onWalletStateChanged(state, action);
     default:
       return state;
   }
@@ -287,42 +309,19 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
     balance: tokenTxBalance,
     is_voided: tx.is_voided,
     version: tx.version,
-    isAllAuthority: isAllAuthority(tx),
+    isAllAuthority: helpersUtils.isAllAuthority(tx),
   }
 };
 
-/**
- * Check if the tx has only inputs and outputs that are authorities
- *
- * @param {Object} tx Transaction data
- *
- * @return {boolean} If the tx has only authority
- */
-const isAllAuthority = (tx) => {
-  for (let txin of tx.inputs) {
-    if (!hathorLib.wallet.isAuthorityOutput(txin)) {
-      return false;
-    }
-  }
-
-  for (let txout of tx.outputs) {
-    if (!hathorLib.wallet.isAuthorityOutput(txout)) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 /**
  * Got wallet history. Update wallet data on redux
  */
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
-  hathorLib.storage.setItem('wallet:version', VERSION);
-  const { tokens } = action.payload;
+  LOCAL_STORE.setWalletVersion(VERSION);
+  const { tokens, registeredTokens, currentAddress } = action.payload;
   const allTokens = new Set(tokens);
-  const currentAddress = state.wallet.getCurrentAddress();
 
   return {
     ...state,
@@ -330,6 +329,7 @@ const onLoadWalletSuccess = (state, action) => {
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
     allTokens,
+    tokens: registeredTokens,
   };
 };
 
@@ -372,14 +372,13 @@ const onUpdateLoadedData = (state, action) => ({
 });
 
 const onCleanData = (state) => {
-  if (state.wallet) {
-    state.wallet.stop();
-  }
-
   return Object.assign({}, initialState, {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
     ledgerWasClosed: state.ledgerWasClosed,
+    // Keep the unleashClient as it should continue running
+    unleashClient: state.unleashClient,
+    featureTogglesInitialized: state.featureTogglesInitialized,
   });
 };
 
@@ -449,6 +448,15 @@ const removeTokenMetadata = (state, action) => {
   const newMeta = Object.assign({}, state.tokenMetadata);
   if (uid in newMeta) {
     delete newMeta[uid];
+  }
+
+  // If the token has zero balance we should remove the balance data
+  const newBalance = Object.assign({}, state.tokensBalance);
+  if (uid in newBalance && (!!newBalance[uid].data)) {
+    const balance = newBalance[uid].data;
+    if ((balance.unlocked + balance.locked) === 0) {
+      delete newBalance[uid];
+    }
   }
 
   return {
@@ -572,6 +580,7 @@ export const onTokenFetchBalanceRequested = (state, action) => {
  */
 export const onTokenFetchBalanceSuccess = (state, action) => {
   const { tokenId, data } = action;
+  const oldState = get(state.tokensBalance, tokenId, {});
 
   return {
     ...state,
@@ -581,6 +590,7 @@ export const onTokenFetchBalanceSuccess = (state, action) => {
         status: TOKEN_DOWNLOAD_STATUS.READY,
         updatedAt: new Date().getTime(),
         data,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -591,6 +601,7 @@ export const onTokenFetchBalanceSuccess = (state, action) => {
  */
 export const onTokenFetchBalanceFailed = (state, action) => {
   const { tokenId } = action;
+  const oldState = get(state.tokensBalance, tokenId, {});
 
   return {
     ...state,
@@ -598,6 +609,7 @@ export const onTokenFetchBalanceFailed = (state, action) => {
       ...state.tokensBalance,
       [tokenId]: {
         status: TOKEN_DOWNLOAD_STATUS.FAILED,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -609,6 +621,7 @@ export const onTokenFetchBalanceFailed = (state, action) => {
  */
 export const onTokenFetchHistorySuccess = (state, action) => {
   const { tokenId, data } = action;
+  const oldState = get(state.tokensHistory, tokenId, {});
 
   return {
     ...state,
@@ -618,6 +631,7 @@ export const onTokenFetchHistorySuccess = (state, action) => {
         status: TOKEN_DOWNLOAD_STATUS.READY,
         updatedAt: new Date().getTime(),
         data,
+        oldStatus: oldState.status,
       },
     },
   };
@@ -628,6 +642,7 @@ export const onTokenFetchHistorySuccess = (state, action) => {
  */
 export const onTokenFetchHistoryFailed = (state, action) => {
   const { tokenId } = action;
+  const oldState = get(state.tokensHistory, tokenId, {});
 
   return {
     ...state,
@@ -636,6 +651,7 @@ export const onTokenFetchHistoryFailed = (state, action) => {
       [tokenId]: {
         status: TOKEN_DOWNLOAD_STATUS.FAILED,
         data: [],
+        oldStatus: oldState.status,
       },
     },
   };
@@ -673,6 +689,17 @@ export const onSetUseAtomicSwap = (state, action) => {
     useAtomicSwap,
   };
 };
+
+/**
+ * @param {Record<string,{id:string,password:string}>} action.listenedProposalsMap
+*                                                      A map of listened proposals
+ */
+export const onProposalListUpdated = (state, action) => {
+  return {
+    ...state,
+    proposals: action.listenedProposalsMap
+  }
+}
 
 /**
  * @param {String} action.proposalId The proposal id to fetch from the backend
@@ -737,6 +764,28 @@ export const onProposalFetchFailed = (state, action) => {
         status: PROPOSAL_DOWNLOAD_STATUS.FAILED,
         errorMessage: errorMessage,
         updatedAt: new Date().getTime(),
+      },
+    },
+  };
+};
+
+/**
+ * @param {String} action.proposalId - The proposalId to mark as success
+ * @param {Object} action.data - The proposal history information to store on redux
+ */
+export const onProposalUpdate = (state, action) => {
+  const { proposalId, data } = action;
+
+  const oldState = get(state.proposals, proposalId, { id: proposalId })
+
+  return {
+    ...state,
+    proposals: {
+      ...state.proposals,
+      [proposalId]: {
+        ...oldState,
+        updatedAt: new Date().getTime(),
+        data,
       },
     },
   };
@@ -813,33 +862,10 @@ export const onProposalTokenFetchFailed = (state, action) => {
 
 /**
  * @param {String} action.proposalId - The new proposalId to store
- * @param {String} action.password - The proposal password
- * @param {Object} action.data - The proposal history information to store on redux
- */
-export const onNewProposalGeneration = (state, action) => {
-  const { proposalId, password, data } = action;
-
-  return {
-    ...state,
-    proposals: {
-      ...state.proposals,
-      [proposalId]: {
-        id: proposalId,
-        password,
-        status: PROPOSAL_DOWNLOAD_STATUS.READY,
-        updatedAt: new Date().getTime(),
-        data
-      },
-    },
-  };
-};
-
-/**
- * @param {String} action.proposalId - The new proposalId to store
+ * @param {String} action.password - The proposal's password
  */
 export const onProposalImported = (state, action) => {
   const { proposalId, password } = action;
-
   return {
     ...state,
     proposals: {
@@ -954,12 +980,72 @@ export const onStoreRouterHistory = (state, action) => {
   };
 };
 
-const onSetServerInfo = (state, action) => ({
+const onSetServerInfo = (state, action) => {
+  return {
+    ...state,
+    serverInfo: {
+      network: action.payload.network,
+      version: action.payload.version,
+    },
+  }
+};
+
+const onFeatureToggleInitialized = (state) => ({
   ...state,
-  serverInfo: {
-    network: action.payload.network,
-    version: action.payload.version,
-  },
+  featureTogglesInitialized: true,
+});
+
+/**
+ * @param {Object} action.payload The key->value object with feature toggles
+ */
+const onSetFeatureToggles = (state, { payload }) => ({
+  ...state,
+  featureToggles: payload,
+});
+
+/**
+ * @param {Object} action.payload The unleash client to store
+ */
+const onSetUnleashClient = (state, { payload }) => ({
+  ...state,
+  unleashClient: payload,
+});
+
+const onWalletResetSuccess = (state) => ({
+  ...state,
+  // Keep the unleashClient as it should continue running
+  unleashClient: state.unleashClient,
+});
+
+export const onUpdateTxHistory = (state, action) => {
+  const { tx, tokenId, balance } = action.payload;
+  const tokenHistory = state.tokensHistory[tokenId];
+
+  if (!tokenHistory) {
+    return state;
+  }
+
+  for (const [index, histTx] of tokenHistory.data.entries()) {
+    if (histTx.tx_id === tx.tx_id) {
+      tokenHistory.data[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
+      break;
+    }
+  }
+
+  return {
+    ...state,
+    tokensHistory: {
+      ...state.tokensHistory,
+      [tokenId]: {
+        ...tokenHistory,
+      }
+    },
+  };
+};
+
+export const onWalletStateChanged = (state, { payload }) => ({
+  ...state,
+  walletState: payload,
 });
 
 export default rootReducer;

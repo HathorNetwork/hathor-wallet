@@ -13,8 +13,8 @@ import HathorAlert from '../components/HathorAlert';
 import BackButton from '../components/BackButton';
 import { NFT_ENABLED } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
+import LOCAL_STORE from '../storage';
 
 /**
  * Maps redux state to instance props
@@ -63,7 +63,7 @@ class CustomTokens extends React.Component {
    * Triggered when user clicks to do the create a new token, then redirects to the screen
    */
   createTokenClicked = () => {
-    if (hathorLib.wallet.isHardwareWallet()) {
+    if (LOCAL_STORE.isHardwareWallet()) {
       this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED);
     } else {
       this.props.history.push('/create_token/');
@@ -74,7 +74,7 @@ class CustomTokens extends React.Component {
    * Triggered when user clicks on the Create NFT button
    */
   createNFTClicked = () => {
-    if (hathorLib.wallet.isHardwareWallet()) {
+    if (LOCAL_STORE.isHardwareWallet()) {
       this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED);
     } else {
       this.props.history.push('/create_nft/');

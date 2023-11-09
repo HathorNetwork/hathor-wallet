@@ -8,26 +8,24 @@
 import React from 'react';
 import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
-import wallet from '../utils/wallet';
 import Version from '../components/Version';
-import $ from 'jquery';
-import ModalBackupWords from '../components/ModalBackupWords';
 import HathorAlert from '../components/HathorAlert';
-import { updateWords } from '../actions/index';
+import { updateWords, walletReset } from '../actions/index';
 import { connect } from "react-redux";
-import hathorLib from '@hathor/wallet-lib';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import LOCAL_STORE from '../storage';
 
 
 const mapDispatchToProps = dispatch => {
   return {
     updateWords: (data) => dispatch(updateWords(data)),
+    walletReset: () => dispatch(walletReset()),
   };
 };
 
 
 /**
- * Screen used when the previous wallet version installed is not compatible with the new version  
+ * Screen used when the previous wallet version installed is not compatible with the new version
  * So user can reset the wallet, or install the previous version again
  *
  * @memberof Screens
@@ -59,7 +57,7 @@ class WalletVersionError extends React.Component {
    */
   backupSuccess = () => {
     this.context.hideModal();
-    hathorLib.wallet.markBackupAsDone();
+    LOCAL_STORE.markBackupDone();
     this.props.updateWords(null);
     this.alertSuccessRef.current.show(3000);
   }
@@ -81,7 +79,7 @@ class WalletVersionError extends React.Component {
    */
   handleReset = () => {
     this.context.hideModal();
-    wallet.resetWalletData();
+    this.props.walletReset();
     this.props.history.push('/welcome/');
   }
 

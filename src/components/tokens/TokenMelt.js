@@ -74,7 +74,7 @@ class TokenMelt extends React.Component {
       });
     }
 
-    return new hathorLib.SendTransaction({ transaction, pin, network: this.props.wallet.getNetworkObject() });
+    return new hathorLib.SendTransaction({ transaction, pin, storage: this.props.wallet.storage });
   }
 
   /**
@@ -134,7 +134,7 @@ class TokenMelt extends React.Component {
           <InputNumber
            required
            ref={this.amount}
-           placeholder={hathorLib.helpers.prettyValue(0)}
+           placeholder={hathorLib.numberUtils.prettyValue(0)}
            className="form-control"
            onValueChange={this.onAmountChange}
           />

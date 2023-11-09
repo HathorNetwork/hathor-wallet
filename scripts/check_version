@@ -3,11 +3,13 @@
 SRC_VERSION=`grep "const VERSION " ./src/constants.js | cut -d"'" -f2`
 ELECTRON_VERSION=`grep "const walletVersion " ./public/electron.js | cut -d "'" -f2`
 PACKAGE_VERSION=`grep '"version":' ./package.json | cut -d '"' -f4`
+PACKAGE_LOCK_VERSION=`node -p "require('./package-lock.json').version"`
 
 # For debugging:
 # echo x${SRC_VERSION}x
 # echo x${ELECTRON_VERSION}x
 # echo x${PACKAGE_VERSION}x
+# echo x${PACKAGE_LOCK_VERSION}x
 
 EXITCODE=0
 
@@ -18,6 +20,11 @@ fi
 
 if [[ x${PACKAGE_VERSION}x != x${ELECTRON_VERSION}x ]]; then
 	echo Version different in package.json and public/electron.js
+	EXITCODE=-1
+fi
+
+if [[ x${PACKAGE_VERSION}x != x${PACKAGE_LOCK_VERSION}x ]]; then
+	echo Version different in package.json and package-lock.json
 	EXITCODE=-1
 fi
 

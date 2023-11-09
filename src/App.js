@@ -33,28 +33,24 @@ import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
 import LoadWalletFailed from './screens/LoadWalletFailed';
 import version from './utils/version';
-import wallet from './utils/wallet';
+import helpers from './utils/helpers';
 import tokens from './utils/tokens';
-import { connect } from "react-redux";
+import storageUtils from './utils/storage';
+import { connect } from 'react-redux';
 import RequestErrorModal from './components/RequestError';
 import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
-import { IPC_RENDERER, LEDGER_ENABLED } from './constants';
-import STORE from './storageInstance';
-import ModalAlert from './components/ModalAlert';
-import SoftwareWalletWarningMessage from './components/SoftwareWalletWarningMessage';
+import { IPC_RENDERER } from './constants';
 import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
 import { updateLedgerClosed } from './actions/index';
 import {WALLET_STATUS} from './sagas/wallet';
-import ProposalList from "./screens/atomic-swap/ProposalList";
-import EditSwap from "./screens/atomic-swap/EditSwap";
-import NewSwap from "./screens/atomic-swap/NewSwap";
-import ImportExisting from "./screens/atomic-swap/ImportExisting";
-
-
-hathorLib.storage.setStore(STORE);
+import ProposalList from './screens/atomic-swap/ProposalList';
+import EditSwap from './screens/atomic-swap/EditSwap';
+import NewSwap from './screens/atomic-swap/NewSwap';
+import ImportExisting from './screens/atomic-swap/ImportExisting';
+import LOCAL_STORE from './storage';
 
 const mapStateToProps = (state) => {
   return {
@@ -75,24 +71,41 @@ class Root extends React.Component {
   componentDidUpdate(prevProps) {
     // When Ledger device loses connection or the app is closed
     if (this.props.ledgerClosed && !prevProps.ledgerClosed) {
-      hathorLib.wallet.lock();
+      LOCAL_STORE.lock();
       this.props.history.push('/wallet_type/');
     }
   }
 
   componentDidMount() {
     hathorLib.axios.registerNewCreateRequestInstance(createRequestInstance);
+    // Start the wallet as locked
+    LOCAL_STORE.lock();
+
+    // Ensure we have the network set even before the first ever load.
+    const localNetwork = LOCAL_STORE.getNetwork();
+    if (!localNetwork) {
+      LOCAL_STORE.setNetwork('mainnet');
+    }
 
     if (IPC_RENDERER) {
       // Event called when user quits hathor app
-      IPC_RENDERER.on("ledger:closed", () => {
-        if (hathorLib.wallet.loaded() && hathorLib.wallet.isHardwareWallet()) {
+      IPC_RENDERER.on('ledger:closed', async () => {
+        const storage = LOCAL_STORE.getStorage();
+        if (
+          storage &&
+          await LOCAL_STORE.isLoaded() &&
+          await storage.isHardwareWallet()
+        ) {
           this.props.updateLedgerClosed(true);
         }
       });
 
-      IPC_RENDERER.on('ledger:manyTokenSignatureValid', (event, arg) => {
-        if (hathorLib.wallet.isHardwareWallet()) {
+      IPC_RENDERER.on('ledger:manyTokenSignatureValid', async (_, arg) => {
+        const storage = LOCAL_STORE.getStorage();
+        if (
+          storage &&
+          await storage.isHardwareWallet()
+        ) {
           // remove all invalid signatures
           // arg.data is a list of uids with invalid signatures
           arg.data.forEach(uid => {
@@ -105,8 +118,8 @@ class Root extends React.Component {
 
   componentWillUnmount() {
     if (IPC_RENDERER) {
-      IPC_RENDERER.removeAllListeners("ledger:closed");
-      IPC_RENDERER.removeAllListeners("ledger:manyTokenSignatureValid");
+      IPC_RENDERER.removeAllListeners('ledger:closed');
+      IPC_RENDERER.removeAllListeners('ledger:manyTokenSignatureValid');
     }
   }
 
@@ -153,18 +166,27 @@ class Root extends React.Component {
 /*
  * Validate if version is allowed for the loaded wallet
  */
-const returnLoadedWalletComponent = (Component, props, rest) => {
+const returnLoadedWalletComponent = (Component, props) => {
+  // For server screen we don't need to check version
+  // We also allow the server screen to be reached from the locked screen
+  // In the case of an unresponsive fullnode, which would block the wallet start
+  const isServerScreen = props.match.path === '/server';
+
   // If was closed and is loaded we need to redirect to locked screen
-  if (hathorLib.wallet.wasClosed()) {
+  if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked())) {
     return <Redirect to={{ pathname: '/locked/' }} />;
   }
 
-  // For server screen we don't need to check version
-  const isServerScreen = props.match.path === '/server';
+  if (isServerScreen) {
+    // We allow server screen to be shown from locked screen to allow the user to
+    // change the server before from a locked wallet.
+    return returnDefaultComponent(Component, props);
+  }
+
   const reduxState = store.getState();
 
   // Check version
-  if (reduxState.isVersionAllowed === undefined && !isServerScreen) {
+  if (reduxState.isVersionAllowed === undefined) {
     // We already handle all js errors in general and open an error modal to the user
     // so there is no need to catch the promise error below
     version.checkApiVersion(reduxState.wallet);
@@ -173,19 +195,20 @@ const returnLoadedWalletComponent = (Component, props, rest) => {
       state: {path: props.match.url},
       waitVersionCheck: true
     }} />;
-  } else if (reduxState.isVersionAllowed === false && !isServerScreen) {
-    return <VersionError {...props} />;
-  } else {
-    if (reduxState.loadingAddresses && !isServerScreen) {
-      // If wallet is still loading addresses we redirect to the loading screen
-      return <Redirect to={{
-        pathname: '/loading_addresses/',
-        state: {path: props.match.url}
-      }} />;
-    } else {
-      return returnDefaultComponent(Component, props);
-    }
   }
+  if (reduxState.isVersionAllowed === false) {
+    return <VersionError {...props} />;
+  }
+
+  // The version has been checked and allowed
+  if (reduxState.loadingAddresses) {
+    // If wallet is still loading addresses we redirect to the loading screen
+    return <Redirect to={{
+      pathname: '/loading_addresses/',
+      state: {path: props.match.url}
+    }} />;
+  }
+  return returnDefaultComponent(Component, props);
 }
 
 /**
@@ -211,22 +234,29 @@ const returnStartedRoute = (Component, props, rest) => {
     }
   }
 
+  // Detect a previous instalation and migrate before continuing
+  storageUtils.migratePreviousLocalStorage();
+
   // The wallet was not yet started, go to Welcome
-  if (!hathorLib.wallet.started()) {
+  if (!LOCAL_STORE.wasStarted()) {
     return <Redirect to={{pathname: '/welcome/'}}/>;
   }
 
   // The wallet is already loaded
   const routeRequiresWalletToBeLoaded = rest.loaded;
-  if (hathorLib.wallet.loaded()) {
+  if (LOCAL_STORE.isLoadedSync()) {
+    // The server screen is a special case since we allow the user to change the
+    // connected server in case of unresponsiveness, this should be allowed from
+    // the locked screen since the wallet would not be able to be started otherwise
+    const isServerScreen = props.match.path === '/server';
     // Wallet is locked, go to locked screen
-    if (hathorLib.wallet.isLocked()) {
+    if (LOCAL_STORE.isLocked() && !isServerScreen) {
       return <Redirect to={{pathname: '/locked/'}}/>;
     }
 
     // Route requires the wallet to be loaded, render it
-    if (routeRequiresWalletToBeLoaded) {
-      return returnLoadedWalletComponent(Component, props, rest);
+    if (routeRequiresWalletToBeLoaded || isServerScreen) {
+      return returnLoadedWalletComponent(Component, props);
     }
 
     // Route does not require wallet to be loaded. Redirect to wallet "home" screen
@@ -242,13 +272,11 @@ const returnStartedRoute = (Component, props, rest) => {
     }}/>;
   }
 
-  // Wallet is not loaded nor loading, but it's started. Go to the first screen after "welcome"
   if (routeRequiresWalletToBeLoaded) {
-    return LEDGER_ENABLED
-        ? <Redirect to={{pathname: '/wallet_type/'}}/>
-        : <Redirect to={{pathname: '/signin/'}}/>;
+    // Wallet is not loaded or loading, but it is started
+    // Since it requires the wallet to be loaded, redirect to the wallet_type screen
+    return <Redirect to={{pathname: '/wallet_type/'}}/>;
   }
-
   // Wallet is not loaded nor loading, and the route does not require it.
   // Do not redirect anywhere, just render the component.
   return <Component {...props} />;
@@ -267,15 +295,28 @@ const StartedRoute = ({component: Component, ...rest}) => (
  * Return a div grouping the Navigation and the Component
  */
 const returnDefaultComponent = (Component, props) => {
+  const reduxState = store.getState();
+
+  if (reduxState.isVersionAllowed === undefined) {
+
+    helpers.loadStorageState();
+
+    // We already handle all js errors in general and open an error modal to the user
+    // so there is no need to catch the promise error below
+    version.checkApiVersion(reduxState.wallet);
+  }
+
   if (version.checkWalletVersion()) {
-    if (props.location.pathname === '/locked/' && hathorLib.wallet.isHardwareWallet()) {
+    if (
+      props.location.pathname === '/locked/' &&
+      LOCAL_STORE.isHardwareWallet()
+    ) {
       // This will redirect the page to Wallet Type screen
-      wallet.cleanWallet();
-      hathorLib.wallet.unlock();
+      LOCAL_STORE.cleanWallet();
       return <Redirect to={{ pathname: '/wallet_type/' }} />;
     } else {
       return (
-        <div className="component-div h-100">
+        <div className='component-div h-100'>
           <Navigation {...props}/>
           <Component {...props} />
           <RequestErrorModal {...props} />

@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import store from '../store/index';
 import { networkUpdate } from '../actions/index';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
+import LOCAL_STORE from '../storage';
 
 let shell = null;
 if (window.require) {
@@ -40,6 +41,37 @@ const helpers = {
   },
 
   /**
+   * Load the network and server url from localstorage into hathorlib and redux.
+   * If not configured, get the default from hathorlib.
+   */
+  loadStorageState() {
+    let network = LOCAL_STORE.getNetwork();
+    if (!network) {
+      network = hathorLib.config.getNetwork().name;
+    }
+
+    // Update the network in redux and lib
+    this.updateNetwork(network);
+
+    let server = LOCAL_STORE.getServer();
+    if (!server) {
+      server = hathorLib.config.getServerUrl();
+    }
+    hathorLib.config.setServerUrl(server);
+
+    let wsServer = LOCAL_STORE.getWsServer();
+    if (wsServer) {
+      hathorLib.config.setWalletServiceBaseWsUrl(wsServer);
+      const storage = LOCAL_STORE.getStorage();
+      if (storage) {
+        // This is a promise but we should not await it since this method has to be sync
+        // There is no issue not awaiting this since we already have this configured on the config
+        storage.store.setItem('wallet:wallet_service:ws_server', wsServer);
+      }
+    }
+  },
+
+  /**
    * Update network variables in redux, storage and lib
    *
    * @params {String} network Network name
@@ -50,8 +82,8 @@ const helpers = {
   updateNetwork(network) {
     // Update network in redux
     store.dispatch(networkUpdate({network}));
-    hathorLib.storage.setItem('wallet:network', network);
     hathorLib.network.setNetwork(network);
+    LOCAL_STORE.setNetwork(network);
   },
 
   /**
@@ -64,7 +96,7 @@ const helpers = {
    * @inner
    */
   getExplorerURL() {
-    const currentNetwork = hathorLib.storage.getItem('wallet:network') || 'mainnet';
+    const currentNetwork = LOCAL_STORE.getNetwork() || 'mainnet';
     if (currentNetwork === 'mainnet') {
       return EXPLORER_BASE_URL;
     } else {
@@ -84,9 +116,9 @@ const helpers = {
    */
   renderValue(amount, isInteger) {
     if (isInteger) {
-      return hathorLib.helpersUtils.prettyIntegerValue(amount);
+      return hathorLib.numberUtils.prettyIntegerValue(amount);
     } else {
-      return hathorLib.helpersUtils.prettyValue(amount);
+      return hathorLib.numberUtils.prettyValue(amount);
     }
   },
 
@@ -186,12 +218,62 @@ const helpers = {
   },
 
   /**
-   * Map token history object to the expected object in the wallet redux data
-   *
-   * tx {Object} history data element
-   * tokenUid {String} token uid
+   * @typedef {Object} ReduxTxHistory
+   * @property {string} tx_id
+   * @property {number} timestamp
+   * @property {string} tokenUid
+   * @property {number} balance
+   * @property {boolean} is_voided
+   * @property {number} version
+   * @property {boolean} isAllAuthority
    */
-  mapTokenHistory(tx, tokenUid) {
+
+  /**
+   * @typedef {Object} LibTxHistory
+   * @property {string} txId
+   * @property {number} balance
+   * @property {number} timestamp
+   * @property {boolean} voided
+   * @property {number} version
+   */
+
+  /**
+   * Check if the tx has only inputs and outputs that are authorities
+   *
+   * @param {Object} tx Transaction data
+   *
+   * @return {boolean} If the tx has only authority
+   */
+  isAllAuthority(tx) {
+    for (let txin of tx.inputs) {
+      if (!hathorLib.transactionUtils.isAuthorityOutput(txin)) {
+        return false;
+      }
+    }
+
+    for (let txout of tx.outputs) {
+      if (!hathorLib.transactionUtils.isAuthorityOutput(txout)) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  /**
+   * Map tx history object to the expected object in the wallet redux data
+   *
+   * @param {HathorWallet} wallet - Wallet instance
+   * @param {LibTxHistory} tx - tx received via getTxHistory
+   * @param {string} tokenUid - token uid
+   * @returns {Promise<ReduxTxHistory>}
+   */
+  async mapTxHistoryToRedux(wallet, tx, tokenUid) {
+    // tx comes from getTxHistory and does not have token_data
+    // We need the actual history tx to access if it is an authority tx
+    const histTx = await wallet.getTx(tx.txId);
+    const isAllAuthority = this.isAllAuthority(histTx);
+
     return {
       tx_id: tx.txId,
       timestamp: tx.timestamp,
@@ -200,7 +282,24 @@ const helpers = {
       // in wallet service this comes as 0/1 and in the full node comes with true/false
       is_voided: Boolean(tx.voided),
       version: tx.version,
+      isAllAuthority,
     };
+  },
+
+  /**
+   * Map token history to a list of the expected format in the wallet redux
+   *
+   * @param {HathorWallet} wallet - Wallet instance
+   * @param {LibTxHistory[]} history - history of txs received via getTxHistory
+   * @param {string} tokenUid - token uid
+   * @returns {Promise<ReduxTxHistory[]>}
+   */
+  async mapTokenHistory(wallet, history, tokenUid) {
+    const mappedHistory = [];
+    for (const tx of history) {
+      mappedHistory.push(await this.mapTxHistoryToRedux(wallet, tx, tokenUid));
+    }
+    return mappedHistory;
   },
 
   /**
@@ -254,6 +353,17 @@ const helpers = {
         ms
       )
     })
+  },
+
+  /**
+   * Return either the single or plural form depending on the quantity.
+   * @param {number} qty Quantity to access
+   * @param {string} singleWord word in single format
+   * @param {string} pluralWord word in plural format
+   * @returns {string}
+   */
+  plural(qty, singleWord, pluralWord) {
+    return qty === 1 ? singleWord : pluralWord;
   }
 }
 

@@ -10,14 +10,13 @@ import { t } from 'ttag'
 import { connect } from 'react-redux';
 
 import logo from '../assets/images/hathor-logo.png';
-import wallet from '../utils/wallet';
 import ledger from '../utils/ledger';
-import version from '../utils/version';
 import helpers from '../utils/helpers';
 import { LEDGER_GUIDE_URL, IPC_RENDERER, LEDGER_MIN_VERSION, LEDGER_MAX_VERSION } from '../constants';
 import { startWalletRequested } from '../actions';
 import InitialImages from '../components/InitialImages';
 import hathorLib from '@hathor/wallet-lib';
+import LOCAL_STORE from '../storage';
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -75,7 +74,7 @@ class StartHardwareWallet extends React.Component {
     if (arg.success) {
       // compare ledger version with our min version
       const version = Buffer.from(arg.data).slice(3, 6).join('.');
-      hathorLib.storage.setItem('ledger:version', version);
+      LOCAL_STORE.saveLedgerAppVersion(version);
       if (
         helpers.cmpVersionString(version, LEDGER_MIN_VERSION) < 0 ||
         helpers.cmpVersionString(version, LEDGER_MAX_VERSION) >= 0
@@ -114,42 +113,22 @@ class StartHardwareWallet extends React.Component {
     if (arg.success) {
       const data = Buffer.from(arg.data);
       const uncompressedPubkey = data.slice(0, 65);
-      const compressedPubkey = hathorLib.wallet.toPubkeyCompressed(uncompressedPubkey);
+      const compressedPubkey = hathorLib.walletUtils.toPubkeyCompressed(uncompressedPubkey);
       const chainCode = data.slice(65, 97);
       const fingerprint = data.slice(97, 101);
-      const xpub = hathorLib.wallet.xpubFromData(compressedPubkey, chainCode, fingerprint);
+      const xpub = hathorLib.walletUtils.xpubFromData(compressedPubkey, chainCode, fingerprint);
 
-      hathorLib.wallet.setWalletType('hardware');
+      LOCAL_STORE.setHardwareWallet(true);
       this.props.startWallet({
         words: null,
         passphrase: '',
         pin: null,
         password: '',
         routerHistory: this.props.history,
-        fromXpriv: false,
         xpub,
+        hardware: true,
       });
-      hathorLib.wallet.markBackupAsDone();
-
-      const tokenSignatures = hathorLib.storage.getItem('wallet:token:signatures');
-      if (tokenSignatures) {
-        const dataToken = hathorLib.tokens.getTokens();
-        const tokensToVerify = dataToken
-          .filter(t => tokenSignatures[t.uid] != undefined)
-          .map(t => {
-            const signature = tokenSignatures[t.uid];
-            return {
-              uid: t.uid,
-              name: t.name,
-              symbol: t.symbol,
-              signature: signature,
-            };
-          });
-
-        if (hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed() && tokensToVerify.length !== 0) {
-          ledger.verifyManyTokenSignatures(tokensToVerify);
-        }
-      }
+      LOCAL_STORE.markBackupDone();
 
       this.props.history.push('/wallet/');
     } else {

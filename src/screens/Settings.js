@@ -20,11 +20,19 @@ import version from '../utils/version';
 import { connect } from "react-redux";
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../constants';
+import { walletReset } from '../actions';
+import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {
   return {
     useWalletService: state.useWalletService,
     registeredTokens: state.tokens,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    walletReset: () => dispatch(walletReset()),
   };
 };
 
@@ -79,7 +87,7 @@ class Settings extends React.Component {
    */
   handleReset = () => {
     this.context.hideModal();
-    wallet.resetWalletData();
+    this.props.walletReset();
     this.props.history.push('/welcome/');
   }
 
@@ -96,7 +104,7 @@ class Settings extends React.Component {
    * When user clicks Add Passphrase button we redirect to Passphrase screen
    */
   addPassphrase = () => {
-    if (hathorLib.wallet.isHardwareWallet()) {
+    if (LOCAL_STORE.isHardwareWallet()) {
       this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
         title: t`Complete action on your hardware wallet`,
         children: (
@@ -125,7 +133,7 @@ class Settings extends React.Component {
     const configurationStrings = this.props.registeredTokens.filter((token) => {
       return token.uid !== hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
     }).map((token) => {
-      return hathorLib.tokens.getConfigurationString(token.uid, token.name, token.symbol);
+      return hathorLib.tokensUtils.getConfigurationString(token.uid, token.name, token.symbol);
     });
 
     // The text will be all the configuration strings, one for each line
@@ -307,7 +315,7 @@ class Settings extends React.Component {
   render() {
     const serverURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
     const wsServerURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
-    const ledgerCustomTokens = hathorLib.wallet.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
+    const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
     const uniqueIdentifier = helpers.getUniqueId();
 
     return (
@@ -366,4 +374,4 @@ class Settings extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(Settings);
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

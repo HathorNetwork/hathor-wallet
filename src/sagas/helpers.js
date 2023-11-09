@@ -1,5 +1,46 @@
 import { get } from 'lodash';
-import { put, call, race, take } from 'redux-saga/effects';
+import {
+  put,
+  call,
+  race,
+  take,
+  select,
+} from 'redux-saga/effects';
+import { types } from '../actions';
+import { FEATURE_TOGGLE_DEFAULTS } from '../constants';
+import tokensUtils from '../utils/tokens';
+import version from '../utils/version';
+import ledger from '../utils/ledger';
+import LOCAL_STORE from '../storage';
+
+/**
+ * Waits until feature toggle saga finishes loading
+ */
+export function* waitForFeatureToggleInitialization() {
+  const featureTogglesInitialized = yield select((state) => state.featureTogglesInitialized);
+
+  if (!featureTogglesInitialized) {
+    console.log('Feature toggle is not initialized, will wait indefinetely until it is.');
+    // Wait until featureToggle saga completed initialization, which includes
+    // downloading the current toggle status for this client.
+    yield take(types.FEATURE_TOGGLE_INITIALIZED);
+  }
+}
+
+/**
+ * This generator will wait until the feature toggle saga finishes loading and
+ * checks if a given flag is active
+ *
+ * @param {String} flag - The flag to check
+ * @return {Boolean} Whether the flag is on of off
+ */
+export function* checkForFeatureFlag(flag) {
+  yield call(waitForFeatureToggleInitialization);
+
+  const featureToggles = yield select((state) => state.featureToggles);
+
+  return get(featureToggles, flag, FEATURE_TOGGLE_DEFAULTS[flag] || false);
+}
 
 /**
  * Helper method to be used on take saga effect, will wait until an action
@@ -65,4 +106,29 @@ export function errorHandler(saga, failureAction) {
       yield put(failureAction);
     }
   };
+}
+
+export function* dispatchLedgerTokenSignatureVerification(wallet) {
+  const isHardware = yield wallet.storage.isHardwareWallet();
+  if (!isHardware) {
+    // We are not connected to a hardware wallet, we can just ignore this.
+    return;
+  }
+  const tokenSignatures = LOCAL_STORE.getTokenSignatures();
+  if (!tokenSignatures) {
+    // We do not have any signatures to check, we can just ignore this.
+    return;
+  }
+
+  const registeredTokens = yield tokensUtils.getRegisteredTokens(wallet, true);
+  const tokensToVerify = registeredTokens
+      .filter(t => !!tokenSignatures[t.uid])
+      .map(t => {
+        const signature = tokenSignatures[t.uid];
+        return { ...t, signature };
+      });
+
+  if (version.isLedgerCustomTokenAllowed() && tokensToVerify.length !== 0) {
+    ledger.verifyManyTokenSignatures(tokensToVerify);
+  }
 }

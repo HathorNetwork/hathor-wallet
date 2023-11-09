@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import SpanFmt from '../components/SpanFmt';
 import $ from 'jquery';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
@@ -21,6 +20,7 @@ import {
 import colors from '../index.scss';
 import { connect } from "react-redux";
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
+import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {
   return {
@@ -73,7 +73,7 @@ class Server extends React.Component {
   }
 
   /**
-   * Called after user click the button to change the server  
+   * Called after user click the button to change the server
    * Check if form is valid and then reload that from new server
    */
   serverSelected = async () => {
@@ -125,9 +125,11 @@ class Server extends React.Component {
     }
 
     // we don't ask for the pin on the hardware wallet
-    if (hathorLib.wallet.isSoftwareWallet() && !hathorLib.wallet.isPinCorrect(this.refs.pin.value)) {
-      this.setState({ errorMessage: t`Invalid PIN` });
-      return;
+    if (!LOCAL_STORE.isHardwareWallet()) {
+      if (!await this.props.wallet.checkPin(this.refs.pin.value)) {
+        this.setState({ errorMessage: t`Invalid PIN` });
+        return;
+      }
     }
 
     this.setState({
@@ -138,20 +140,27 @@ class Server extends React.Component {
     });
 
     const currentServer = this.props.useWalletService ?
-      hathorLib.config.getWalletServiceBaseUrl() : 
+      hathorLib.config.getWalletServiceBaseUrl() :
       hathorLib.config.getServerUrl();
 
     const currentWsServer = this.props.useWalletService ?
       hathorLib.config.getWalletServiceBaseWsUrl() :
       '';
 
+    const currentNetwork = this.props.wallet.getNetwork();
+
     // Update new server in storage and in the config singleton
     this.props.wallet.changeServer(newBaseServer);
 
     // We only have a different websocket server on the wallet-service facade, so update the config singleton
     if (this.props.useWalletService) {
-      this.props.wallet.changeWsServer(newWsServer);
+      await this.props.wallet.changeWsServer(newWsServer);
     }
+
+    LOCAL_STORE.setServers(
+      newBaseServer,
+      this.props.useWalletService ? newWsServer : null,
+    );
 
     try {
       const versionData = await this.props.wallet.getVersionData();
@@ -173,24 +182,34 @@ class Server extends React.Component {
         // If the user decides to continue with this change, we will update again
         this.props.wallet.changeServer(currentServer);
         if (this.props.useWalletService) {
-          this.props.wallet.changeWsServer(currentWsServer);
+          await this.props.wallet.changeWsServer(currentWsServer);
         }
+        LOCAL_STORE.setServers(
+          currentServer,
+          this.props.useWalletService ? currentWsServer : null,
+        );
         this.context.showModal(MODAL_TYPES.CONFIRM_TESTNET, {
           success: this.confirmTestnetServer,
         });
         this.setState({ loading: false });
       } else {
         // We are on mainnet, so set the network on the singleton and storage
+        const networkChanged = LOCAL_STORE.getNetwork() !== 'mainnet';
         hathorLib.config.setNetwork('mainnet');
         helpers.updateNetwork('mainnet');
-        this.executeServerChange();
+        this.executeServerChange(networkChanged);
       }
     } catch (e) {
       // Go back to the previous server
       this.props.wallet.changeServer(currentServer);
       if (this.props.useWalletService) {
-        this.props.wallet.changeWsServer(currentWsServer);
+        await this.props.wallet.changeWsServer(currentWsServer);
       }
+      LOCAL_STORE.setServers(
+        currentServer,
+        this.props.useWalletService ? currentWsServer : null,
+      );
+      helpers.updateNetwork(currentNetwork);
       this.setState({
         loading: false,
         errorMessage: e.message,
@@ -203,11 +222,17 @@ class Server extends React.Component {
    * we successfully validated that the user has written 'testnet' on the input
    * so we can execute the change
    */
-  confirmTestnetServer = () => {
+  confirmTestnetServer = async () => {
     this.props.wallet.changeServer(this.state.selectedServer);
     if (this.props.useWalletService) {
-      this.props.wallet.changeWsServer(this.state.selectedWsServer);
+      await this.props.wallet.changeWsServer(this.state.selectedWsServer);
     }
+    LOCAL_STORE.setServers(
+      this.state.selectedServer,
+      this.props.useWalletService ? this.state.selectedWsServer : null,
+    );
+
+    const networkChanged = !LOCAL_STORE.getNetwork()?.startsWith('testnet');
 
     // Set network on config singleton so the load wallet will get it properly
     hathorLib.config.setNetwork(this.state.selectedNetwork);
@@ -217,25 +242,25 @@ class Server extends React.Component {
     this.setState({
       loading: true,
     });
-    this.executeServerChange();
+    this.executeServerChange(networkChanged);
   }
 
   /**
    * Execute server change checking server API and, in case of success
    * reloads data and redirects to wallet screen
    */
-  executeServerChange = () => {
+  executeServerChange = async (networkChanged) => {
     // We don't have PIN on hardware wallet
-    const pin = hathorLib.wallet.isSoftwareWallet() ? this.refs.pin.value : null;
-    const promise = wallet.changeServer(this.props.wallet, pin, this.props.history);
-    promise.then(() => {
+    const pin = LOCAL_STORE.isHardwareWallet() ? null : this.refs.pin.value;
+    try {
+      await wallet.changeServer(this.props.wallet, pin, this.props.history, networkChanged);
       this.props.history.push('/wallet/');
-    }, (err) => {
+    } catch (err) {
       this.setState({
         loading: false,
         errorMessage: err.message,
       });
-    });
+    }
   }
 
   /**
@@ -363,7 +388,7 @@ class Server extends React.Component {
               )
             }
           </div>
-          {hathorLib.wallet.isSoftwareWallet() && <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />}
+          {(!LOCAL_STORE.isHardwareWallet()) && <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />}
         </form>
         <div className="d-flex flex-row align-items-center mt-3">
           <button onClick={this.serverSelected} type="button" className="btn btn-hathor mr-3">{t`Connect to server`}</button>

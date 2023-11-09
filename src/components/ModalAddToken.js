@@ -10,8 +10,13 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
+import { connect } from 'react-redux';
 import wallet from "../utils/wallet";
 
+
+const mapStateToProps = (state) => {
+  return { storage: state.wallet.storage };
+};
 
 /**
  * Component that shows a modal to add one specific unknown token to the wallet
@@ -83,7 +88,7 @@ class ModalAddToken extends React.Component {
     }
 
     try {
-      const tokenData = await hathorLib.tokens.validateTokenToAddByConfigurationString(this.refs.config.value, null);
+      const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(this.refs.config.value, this.props.storage);
       const tokensBalance = this.props.tokensBalance;
 
       const tokenUid = tokenData.uid;
@@ -190,4 +195,4 @@ class ModalAddToken extends React.Component {
   }
 }
 
-export default ModalAddToken;
+export default connect(mapStateToProps)(ModalAddToken);
