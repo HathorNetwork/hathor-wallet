@@ -87,7 +87,7 @@
     "@testing-library/react": "12.1.5",
     "@testing-library/user-event": "13.5.0",
     "cypress": "11.2.0",
-    "electron": "13.6.9",
+    "electron": "22.3.25",
     "electron-builder": "23.0.3",
     "electron-devtools-installer": "2.2.4",
     "electron-notarize": "0.1.1",
