@@ -69,7 +69,9 @@ describe('tx handling', () => {
 
   it('invokes onSendSuccess callback correctly', async () => {
     const mockChildComponent = jest.fn();
-    jest.mock('../../components/SendTxHandler', (props) => {
+    // Using doMock instead of mock due to a bug in jest.
+    // @see https://github.com/facebook/create-react-app/issues/9896#issuecomment-885029868
+    jest.doMock('../../components/SendTxHandler', (props) => {
       mockChildComponent(props);
       return <mock-child-component/>
     })
@@ -111,7 +113,9 @@ describe('tx handling', () => {
 
   it('invokes onSendError callback on failure', async () => {
     const mockChildComponent = jest.fn();
-    jest.mock('../../components/SendTxHandler', (props) => {
+    // Using doMock instead of mock due to a bug in jest.
+    // @see https://github.com/facebook/create-react-app/issues/9896#issuecomment-885029868
+    jest.doMock('../../components/SendTxHandler', (props) => {
       mockChildComponent(props);
       return <mock-child-component/>
     })
