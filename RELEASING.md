@@ -115,11 +115,31 @@ WARNING: Make sure there are no recent commits altering the existing keys in [./
 These are the fingerprints of the keys we currently have in the repository:
 
 ```
+pub   rsa2048/0xF56CD59E8DE497EA 2023-10-18 [SC]
+      Key fingerprint = 3362 8D59 9847 F19F AF04  1636 F56C D59E 8DE4 97EA
+uid                              Marcelo Salhab Brogliato <msbrogli@hathor.network>
 ```
 
 # Adding your GPG key to the repository
 
-If you want to sign the releases, you should add your GPG key to the repository. To do so, you should open a PR that:
+If you want to sign the releases, you must add your GPG key to the repository.
 
-1. Adds your public key to the [./gpg-keys](./gpg-keys) folder.
-1. Adds your fingerprint to the list in [Our public keys](#our-public-keys).
+The first step is to export your pubkey. Here follows the commands to get this done:
+
+```sh
+# List all keys in your keyring that you have a private key for
+gpg --list-secret-keys
+
+# Export one key to a file
+gpg --output <filename>.pgp --armor --export <key-id>
+
+# Show the exported key
+gpg --show-keys <filename>.gpg
+```
+
+Then, you must add your `.gpg` file to the repository.
+
+To do so, you have to open a PR that:
+
+1. Add the generated `.gpg` file to the [./gpg-keys](./gpg-keys) folder.
+1. Add the key fingerprint to the list in [Our public keys](#our-public-keys). The fingerprint can be obtained with `gpg --list-secret-keys`. See the examples in the list to make sure you are adding it in the right format.
