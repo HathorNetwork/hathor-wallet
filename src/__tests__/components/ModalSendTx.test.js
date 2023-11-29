@@ -9,6 +9,9 @@ import helpers from '../../utils/helpers';
 
 let container = null;
 
+// Mock the `featureToggle.js` file with an empty object, since this is out of the scope of this test
+jest.mock('../../sagas/featureToggle.js', () => ({ saga: () => {} }));
+
 // This allows the calls to Bootstrap's $('#modalId').modal('show') to work.
 $.fn.modal = jest.fn();
 const MODAL_ID = '#sendTxModal';
