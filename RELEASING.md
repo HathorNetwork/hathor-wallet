@@ -16,6 +16,11 @@ In case this is a Hathor release, make sure you also read our [internal guide](h
 
 1. Make sure you have the following environment variables set: `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD` ( [see docs](https://www.electron.build/configuration/mac) ).
 1. Replace the `build.mac.notarize.teamId` property on the `package.json` file with the correct value.
+1. Due to a bug on the notarization process, some versions of `npm` are not able to execute it successfully. The following configurations, that were used on [our last successful build](https://github.com/HathorNetwork/internal-issues/issues/200#issuecomment-1830765685), should work correctly:
+  <br/>- Python 3.11.6
+  <br/>- NodeJS 16.20.1
+  <br/>- npm 8.15.0
+    
 
 
 1. Run the `release.sh` script, which will clean the environment and build the app for all platforms. The files go to the `dist` folder after the script finishes running. You should get 4 of them: `.AppImage`, `.deb`, `.dmg` and `.exe`.
@@ -153,4 +158,4 @@ In order to test the correct notarization of the app, you can run the following 
 ```shell
 spctl -a -vvv -t execute PATH_TO_APP_FILE.app
 ```
-You should get an `accepted` repsonse, along with the source and origin of the app.
+You should get an `accepted` response, along with the source and origin of the app.
