@@ -120,6 +120,12 @@ pub   rsa2048/0xF56CD59E8DE497EA 2023-10-18 [SC]
 uid                              Marcelo Salhab Brogliato <msbrogli@hathor.network>
 ```
 
+```
+pub  rsa2048/0x534A8B3634D0E661 2023-10-17 [SC]
+      Key fingerprint = 81F7 37E3 4466 B63F DE44  871F 534A 8B36 34D0 E661
+uid                   [ultimate] Pedro Ferreira <pedro@hathor.network>
+```
+
 # Adding your GPG key to the repository
 
 If you want to sign the releases, you must add your GPG key to the repository.
