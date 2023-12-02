@@ -39,7 +39,7 @@ const walletVersion = '0.27.0';
 
 const debugMode = (
   process.argv.indexOf('--unsafe-mode') >= 0 &&
-  process.argv.indexOf('--debug') >= 0
+  process.argv.indexOf('--hathor-debug') >= 0
 );
 
 // Creates the context menu on mouse right-click for allowing copy/paste and other configurable actions
@@ -143,7 +143,7 @@ function createWindow () {
     defaultId: 2,
     icon: path.join(__dirname, 'icon.png'),
     title: 'Attention',
-    message: 'Your Hathor Wallet has not been closed. It is only hidden, and you can access it through your systray.',    
+    message: 'Your Hathor Wallet has not been closed. It is only hidden, and you can access it through your systray.',
     checkboxLabel: 'Do not show this message again.',
     checkboxChecked: msgCheck
   };
@@ -218,8 +218,8 @@ const systrayMenuItemShow = {
 const getMenu = (firstItem) => {
   return Menu.buildFromTemplate([
     firstItem,
-    { 
-      label: 'Exit', 
+    {
+      label: 'Exit',
       type: 'normal',
       click() {
         app.exit()
