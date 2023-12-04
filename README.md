@@ -52,11 +52,16 @@ It will start running in the browser in http://localhost:3000
 
 Run the electron besides the react app. Open a new instance of the terminal and run the following command:
 
-```
+```sh
 npm run electron-dev
 ```
 
 If you get some error like this `error while loading shared libraries: libxshmfence.so.1: cannot open shared object file: No such file or directory` refer to the [throubleshooting](#troubleshooting) section.
+
+To use the Chrome Dev Tools associated with Electron for debugging purposes, the unsafe mode may be enabled through CLI arguments:
+```sh
+npm run electron-dev -- --unsafe-mode --hathor-debug
+```
 
 ### To Build
 
