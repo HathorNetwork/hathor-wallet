@@ -9,6 +9,9 @@ import helpers from '../../utils/helpers';
 
 let container = null;
 
+// Mock the `featureToggle.js` file with an empty object, since this is out of the scope of this test
+jest.mock('../../sagas/featureToggle.js', () => ({ saga: () => {} }));
+
 // This allows the calls to Bootstrap's $('#modalId').modal('show') to work.
 $.fn.modal = jest.fn();
 const MODAL_ID = '#sendTxModal';
@@ -69,7 +72,9 @@ describe('tx handling', () => {
 
   it('invokes onSendSuccess callback correctly', async () => {
     const mockChildComponent = jest.fn();
-    jest.mock('../../components/SendTxHandler', (props) => {
+    // Using doMock instead of mock due to a bug in jest.
+    // @see https://github.com/facebook/create-react-app/issues/9896#issuecomment-885029868
+    jest.doMock('../../components/SendTxHandler', (props) => {
       mockChildComponent(props);
       return <mock-child-component/>
     })
@@ -111,7 +116,9 @@ describe('tx handling', () => {
 
   it('invokes onSendError callback on failure', async () => {
     const mockChildComponent = jest.fn();
-    jest.mock('../../components/SendTxHandler', (props) => {
+    // Using doMock instead of mock due to a bug in jest.
+    // @see https://github.com/facebook/create-react-app/issues/9896#issuecomment-885029868
+    jest.doMock('../../components/SendTxHandler', (props) => {
       mockChildComponent(props);
       return <mock-child-component/>
     })
