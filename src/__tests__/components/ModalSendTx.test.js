@@ -44,7 +44,7 @@ describe('rendering tests', () => {
     )
   })
 
-  it('renders the title prop correctly', () => {
+  it('renders the title prop correctly', async () => {
     render(
       <ModalSendTx
         pin={'123321'}
@@ -57,7 +57,9 @@ describe('rendering tests', () => {
     )
 
     // Force creating the event, since the whole `modal` bootstrap class is mocked
-    $('#modalPin').trigger('shown.bs.modal');
+    await act(async () => {
+      $('#modalPin').trigger('shown.bs.modal');
+    });
     const element = screen.getByText('Mock Title');
     expect(element instanceof HTMLElement).toStrictEqual(true);
   })
@@ -105,8 +107,10 @@ describe('tx handling', () => {
     });
 
     // Waiting until the transaction has been "processed"
-    $(MODAL_ID).trigger('shown.bs.modal');
-    await helpers.delay(0);
+    await act(async () => {
+      $(MODAL_ID).trigger('shown.bs.modal');
+      await helpers.delay(0);
+    });
 
     // Simulating click ok button (by hiding the modal) and validating the onSuccess call
     $(MODAL_ID).trigger('hidden.bs.modal');
@@ -149,8 +153,10 @@ describe('tx handling', () => {
     });
 
     // Waiting until the transaction has been "processed"
-    $(MODAL_ID).trigger('shown.bs.modal');
-    await helpers.delay(0);
+    await act(async () => {
+      $(MODAL_ID).trigger('shown.bs.modal');
+      await helpers.delay(0);
+    });
 
     // Simulating click ok button (by hiding the modal) and validating the onSuccess call
     $(MODAL_ID).trigger('hidden.bs.modal');
