@@ -61,16 +61,14 @@ describe('pin validation', () => {
     const failingPin = 'abc123';
     const passingPin = '123321'
     const wallet = { checkPin: () => Promise.resolve(false) };
-    act(() => {
-      render(
-        <ModalPin
-          onSuccess={jest.fn()}
-          onClose={jest.fn()}
-          wallet={wallet}
-        />,
-        container
-      )
-    });
+    render(
+      <ModalPin
+        onSuccess={jest.fn()}
+        onClose={jest.fn()}
+        wallet={wallet}
+      />,
+      container
+    )
 
     expect(new RegExp(validationPattern).test(failingPin)).toStrictEqual(false);
     expect(new RegExp(validationPattern).test(passingPin)).toStrictEqual(true);
@@ -79,17 +77,21 @@ describe('pin validation', () => {
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
     const goButton = screen.getByText('Go');
-    await userEvent.type(pinInput, failingPin);
-    await userEvent.click(goButton);
+    await act(async () => {
+      await userEvent.type(pinInput, failingPin);
+      await userEvent.click(goButton);
+    });
 
     // Validating form
     expect(pinInput.validity.patternMismatch).toStrictEqual(true);
     expect(pinInput.checkValidity()).toStrictEqual(false);
 
     // Clears input, types again
-    await userEvent.clear(pinInput);
-    await userEvent.type(pinInput, passingPin);
-    await userEvent.click(goButton);
+    await act(async () => {
+      await userEvent.clear(pinInput);
+      await userEvent.type(pinInput, passingPin);
+      await userEvent.click(goButton);
+    });
 
     // Validating form
     expect(pinInput.validity.patternMismatch).toStrictEqual(false);
@@ -98,25 +100,25 @@ describe('pin validation', () => {
 
   it('displays error on incorrect pin', async () => {
     const wallet = { checkPin: () => Promise.resolve(false) };
-    act(() => {
-      render(
-        <ModalPin
-          onSuccess={jest.fn()}
-          onClose={jest.fn()}
-          wallet={wallet}
-        />,
-        container
-      )
-    });
+    render(
+      <ModalPin
+        onSuccess={jest.fn()}
+        onClose={jest.fn()}
+        wallet={wallet}
+      />,
+      container
+    );
 
-    // Gets the input element, types the pin
+    // Gets the input element
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
     const goButton = screen.getByText('Go');
-    await userEvent.type(pinInput, '123321');
 
-    // Clicks "Go"
-    await userEvent.click(goButton);
+    // Types on input and clicks "Go"
+    await act(async () => {
+      await userEvent.type(pinInput, '123321');
+      await userEvent.click(goButton);
+    });
 
     // Validates error message
     const element = screen.getByText('Invalid PIN');
@@ -129,25 +131,25 @@ describe('pin validation', () => {
     const pinText = '123321';
     const wallet = { checkPin: () => Promise.resolve(true) };
 
-    act(() => {
-      render(
-        <ModalPin
-          onSuccess={successCallback}
-          onClose={closeCallback}
-          wallet={wallet}
-        />,
-        container
-      )
-    });
+    render(
+      <ModalPin
+        onSuccess={successCallback}
+        onClose={closeCallback}
+        wallet={wallet}
+      />,
+      container
+    );
 
     // Gets the input element, types the pin
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
     const goButton = screen.getByText('Go');
-    await userEvent.type(pinInput, pinText);
 
     // Clicks "Go"
-    await userEvent.click(goButton);
+    await act(async () => {
+      await userEvent.type(pinInput, pinText);
+      await userEvent.click(goButton);
+    });
 
     // Confirms there is no error message
     const element = screen.queryByText('Invalid PIN');
@@ -178,21 +180,21 @@ describe('pin validation', () => {
       receivedEvents.push(e.target.value);
     });
 
-    act(() => {
-      render(
-        <ModalPin
-          onSuccess={successCallback}
-          onClose={closeCallback}
-          handleChangePin={changePinCallback}
-        />,
-        container
-      )
-    });
+    render(
+      <ModalPin
+        onSuccess={successCallback}
+        onClose={closeCallback}
+        handleChangePin={changePinCallback}
+      />,
+      container
+    );
 
     // Gets the input element, types the pin
     /** @type HTMLElement */
     const pinInput = screen.getByTestId('pin-input');
-    await userEvent.type(pinInput, pinText);
+    await act(async () => {
+      await userEvent.type(pinInput, pinText);
+    });
 
     // Validates the handleChange callback results
     expect(changePinCallback).toHaveBeenCalledTimes(6);
