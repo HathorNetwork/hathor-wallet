@@ -122,6 +122,21 @@ class HybridStore extends MemoryStore {
     return tokenUid in registeredTokens;
   }
 
+  /**
+   * Clean the storage.
+   * @param {boolean} cleanHistory if we should clean the transaction history.
+   * @param {boolean} cleanAddresses if we should clean the addresses.
+   * @param {boolean} cleanTokens if we should clean the registered tokens.
+   * @async
+   * @returns {Promise<void>}
+   */
+  async cleanStorage(cleanHistory = false, cleanAddresses = false, cleanTokens = false) {
+    await super.cleanStorage(cleanHistory, cleanAddresses, cleanTokens);
+    if (cleanTokens) {
+      STORE.removeItem(REGISTERED_TOKENS_KEY);
+    }
+  }
+
 }
 
 
