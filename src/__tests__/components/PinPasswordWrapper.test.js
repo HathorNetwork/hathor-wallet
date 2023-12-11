@@ -3,7 +3,6 @@ import { unmountComponentAtNode } from 'react-dom';
 import { render, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PinPasswordWrapper from '../../components/PinPasswordWrapper';
-import * as _ from 'lodash';
 
 let container = null;
 beforeEach(() => {
@@ -206,20 +205,18 @@ it('validates password confirmation on button click', async () => {
 
   const successHandler = jest.fn();
   // Render the element
-  act(() => {
-    render(
-      <PinPasswordWrapper
-        message={(<div/>)}
-        success={successHandler}
-        back={jest.fn()}
-        handleChange={jest.fn()}
-        field={`Password`}
-        button={`Next`}
-        pattern={'[0-9]+'} // Only numbers are allowed
-      />,
-      container
-    )
-  });
+  render(
+    <PinPasswordWrapper
+      message={(<div/>)}
+      success={successHandler}
+      back={jest.fn()}
+      handleChange={jest.fn()}
+      field={`Password`}
+      button={`Next`}
+      pattern={'[0-9]+'} // Only numbers are allowed
+    />,
+    container
+  )
 
   // Get the elements
   const nextButton = screen.getByText('Next');
@@ -227,22 +224,28 @@ it('validates password confirmation on button click', async () => {
   const confirmPassInput = screen.getByPlaceholderText(/^Confirm/);
 
   // Fill password field with invalid data and click
-  await userEvent.type(passInput, 'abc');
-  await userEvent.click(nextButton);
+  await act(async () => {
+    await userEvent.type(passInput, 'abc');
+    await userEvent.click(nextButton);
+  });
   expect(passInput.parentElement.classList).toContain('was-validated');
   expect(successHandler).not.toHaveBeenCalled();
 
   // Fill confirmation field with invalid data and click
-  await userEvent.clear(passInput);
-  await userEvent.type(passInput, '123');
-  await userEvent.type(confirmPassInput, 'abc');
+  await act(async () => {
+    await userEvent.clear(passInput);
+    await userEvent.type(passInput, '123');
+    await userEvent.type(confirmPassInput, 'abc');
+  });
   expect(passInput.parentElement.classList).toContain('was-validated');
   expect(successHandler).not.toHaveBeenCalled();
 
   // Fill both with valid data, but not matching
-  await userEvent.clear(confirmPassInput);
-  await userEvent.type(confirmPassInput, '321');
-  await userEvent.click(nextButton);
+  await act(async () => {
+    await userEvent.clear(confirmPassInput);
+    await userEvent.type(confirmPassInput, '321');
+    await userEvent.click(nextButton);
+  });
   expect(passInput.parentElement.classList).not.toContain('was-validated');
   expect(screen.getByText('Both fields must be equal')).toBeInstanceOf(HTMLElement);
   expect(successHandler).not.toHaveBeenCalled();
