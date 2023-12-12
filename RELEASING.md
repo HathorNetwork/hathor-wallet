@@ -12,7 +12,16 @@ Create a git tag and a new release on GitHub.
 
 # Publishing the new App
 
-In case this is a Hathor release, make sure you also read our internal guide in https://github.com/HathorNetwork/ops-tools/blob/master/docs/release-guides/hathor-wallet.md
+In case this is a Hathor release, make sure you also read our [internal guide](https://github.com/HathorNetwork/ops-tools/tree/master/docs/release-guides).
+
+1. Make sure you have the following environment variables set: `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD` ( [see docs](https://www.electron.build/configuration/mac) ).
+1. Replace the `build.mac.notarize.teamId` property on the `package.json` file with the correct value.
+1. Due to a bug on the notarization process, some versions of `npm` are not able to execute it successfully. The following configurations, that were used on [our last successful build](https://github.com/HathorNetwork/internal-issues/issues/200#issuecomment-1830765685), should work correctly:
+  <br/>- Python 3.11.6
+  <br/>- NodeJS 16.20.1
+  <br/>- npm 8.15.0
+    
+
 
 1. Run the `release.sh` script, which will clean the environment and build the app for all platforms. The files go to the `dist` folder after the script finishes running. You should get 4 of them: `.AppImage`, `.deb`, `.dmg` and `.exe`.
 
@@ -115,11 +124,44 @@ WARNING: Make sure there are no recent commits altering the existing keys in [./
 These are the fingerprints of the keys we currently have in the repository:
 
 ```
+pub   rsa2048/0xF56CD59E8DE497EA 2023-10-18 [SC]
+      Key fingerprint = 3362 8D59 9847 F19F AF04  1636 F56C D59E 8DE4 97EA
+uid                              Marcelo Salhab Brogliato <msbrogli@hathor.network>
+```
+
+```
+pub  rsa2048/0x534A8B3634D0E661 2023-10-17 [SC]
+      Key fingerprint = 81F7 37E3 4466 B63F DE44  871F 534A 8B36 34D0 E661
+uid                   [ultimate] Pedro Ferreira <pedro@hathor.network>
 ```
 
 # Adding your GPG key to the repository
 
-If you want to sign the releases, you should add your GPG key to the repository. To do so, you should open a PR that:
+If you want to sign the releases, you must add your GPG key to the repository.
 
-1. Adds your public key to the [./gpg-keys](./gpg-keys) folder.
-1. Adds your fingerprint to the list in [Our public keys](#our-public-keys).
+The first step is to export your pubkey. Here follows the commands to get this done:
+
+```sh
+# List all keys in your keyring that you have a private key for
+gpg --list-secret-keys
+
+# Export one key to a file
+gpg --output <filename>.pgp --armor --export <key-id>
+
+# Show the exported key
+gpg --show-keys <filename>.gpg
+```
+
+Then, you must add your `.gpg` file to the repository.
+
+To do so, you have to open a PR that:
+
+1. Add the generated `.gpg` file to the [./gpg-keys](./gpg-keys) folder.
+1. Add the key fingerprint to the list in [Our public keys](#our-public-keys). The fingerprint can be obtained with `gpg --list-secret-keys`. See the examples in the list to make sure you are adding it in the right format.
+
+# Testing the Apple notarization
+In order to test the correct notarization of the app, you can run the following command:
+```shell
+spctl -a -vvv -t execute PATH_TO_APP_FILE.app
+```
+You should get an `accepted` response, along with the source and origin of the app.

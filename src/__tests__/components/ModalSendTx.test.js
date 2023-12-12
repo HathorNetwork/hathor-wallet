@@ -9,6 +9,9 @@ import helpers from '../../utils/helpers';
 
 let container = null;
 
+// Mock the `featureToggle.js` file with an empty object, since this is out of the scope of this test
+jest.mock('../../sagas/featureToggle.js', () => ({ saga: () => {} }));
+
 // This allows the calls to Bootstrap's $('#modalId').modal('show') to work.
 $.fn.modal = jest.fn();
 const MODAL_ID = '#sendTxModal';
@@ -41,7 +44,7 @@ describe('rendering tests', () => {
     )
   })
 
-  it('renders the title prop correctly', () => {
+  it('renders the title prop correctly', async () => {
     render(
       <ModalSendTx
         pin={'123321'}
@@ -54,7 +57,9 @@ describe('rendering tests', () => {
     )
 
     // Force creating the event, since the whole `modal` bootstrap class is mocked
-    $('#modalPin').trigger('shown.bs.modal');
+    await act(async () => {
+      $('#modalPin').trigger('shown.bs.modal');
+    });
     const element = screen.getByText('Mock Title');
     expect(element instanceof HTMLElement).toStrictEqual(true);
   })
@@ -69,7 +74,9 @@ describe('tx handling', () => {
 
   it('invokes onSendSuccess callback correctly', async () => {
     const mockChildComponent = jest.fn();
-    jest.mock('../../components/SendTxHandler', (props) => {
+    // Using doMock instead of mock due to a bug in jest.
+    // @see https://github.com/facebook/create-react-app/issues/9896#issuecomment-885029868
+    jest.doMock('../../components/SendTxHandler', (props) => {
       mockChildComponent(props);
       return <mock-child-component/>
     })
@@ -100,8 +107,10 @@ describe('tx handling', () => {
     });
 
     // Waiting until the transaction has been "processed"
-    $(MODAL_ID).trigger('shown.bs.modal');
-    await helpers.delay(0);
+    await act(async () => {
+      $(MODAL_ID).trigger('shown.bs.modal');
+      await helpers.delay(0);
+    });
 
     // Simulating click ok button (by hiding the modal) and validating the onSuccess call
     $(MODAL_ID).trigger('hidden.bs.modal');
@@ -111,7 +120,9 @@ describe('tx handling', () => {
 
   it('invokes onSendError callback on failure', async () => {
     const mockChildComponent = jest.fn();
-    jest.mock('../../components/SendTxHandler', (props) => {
+    // Using doMock instead of mock due to a bug in jest.
+    // @see https://github.com/facebook/create-react-app/issues/9896#issuecomment-885029868
+    jest.doMock('../../components/SendTxHandler', (props) => {
       mockChildComponent(props);
       return <mock-child-component/>
     })
@@ -142,8 +153,10 @@ describe('tx handling', () => {
     });
 
     // Waiting until the transaction has been "processed"
-    $(MODAL_ID).trigger('shown.bs.modal');
-    await helpers.delay(0);
+    await act(async () => {
+      $(MODAL_ID).trigger('shown.bs.modal');
+      await helpers.delay(0);
+    });
 
     // Simulating click ok button (by hiding the modal) and validating the onSuccess call
     $(MODAL_ID).trigger('hidden.bs.modal');
