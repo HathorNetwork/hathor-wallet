@@ -122,7 +122,7 @@ function createWindow () {
     template.push({
       label: 'Debug',
       submenu: [
-        { label: `Open DevTools`, click: function() { mainWindow.webContents.openDevTools(); }}
+        { label: `Open DevTools`, accelerator: 'CmdOrCtrl+B', click: function() { mainWindow.webContents.openDevTools(); }}
       ]
     });
   };

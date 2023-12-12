@@ -6,9 +6,8 @@
  */
 
 import CryptoJS from 'crypto-js';
-import { LevelDBStore, Storage, walletUtils, config, network, cryptoUtils, WalletType } from "@hathor/wallet-lib";
+import { MemoryStore, Storage, walletUtils, config, network, cryptoUtils, WalletType } from "@hathor/wallet-lib";
 import { VERSION } from "./constants";
-
 
 export const WALLET_VERSION_KEY = 'localstorage:version';
 // This key holds the storage version to indicate the migration strategy
@@ -27,6 +26,9 @@ export const IS_BACKUP_DONE_KEY = 'localstorage:backup';
 export const SERVER_KEY = 'localstorage:server';
 export const WS_SERVER_KEY = 'localstorage:wsserver';
 
+export const ACCESS_DATA_KEY = 'localstorage:accessdata';
+export const REGISTERED_TOKENS_KEY = 'localstorage:registeredTokens';
+
 export const storageKeys = [
   WALLET_VERSION_KEY,
   STORE_VERSION_KEY,
@@ -39,7 +41,104 @@ export const storageKeys = [
   IS_BACKUP_DONE_KEY,
   SERVER_KEY,
   WS_SERVER_KEY,
+  // Wallet keys
+  ACCESS_DATA_KEY,
+  REGISTERED_TOKENS_KEY,
 ];
+
+class HybridStore extends MemoryStore {
+  /**
+   * Save access data on our localStorage.
+   * @param {IWalletAccessData} data Access data to save
+   * @async
+   * @returns {Promise<void>}
+   */
+  async saveAccessData(data) {
+    await super.saveAccessData(data);
+    STORE.setItem(ACCESS_DATA_KEY, data);
+  }
+
+  /**
+   * Fetch wallet access data on storage if present.
+   * @async
+   * @returns {Promise<IWalletAccessData | null>} A promise with the wallet access data.
+   */
+  async getAccessData() {
+    return STORE.getItem(ACCESS_DATA_KEY);
+  }
+
+  /**
+   * Iterate on registered tokens.
+   *
+   * @async
+   * @returns {AsyncGenerator<ITokenData & Partial<ITokenMetadata>>}
+   */
+  async* registeredTokenIter() {
+    const registeredTokens = STORE.getItem(REGISTERED_TOKENS_KEY) || {};
+    for (const tokenConfig of Object.values(registeredTokens)) {
+      const tokenMeta = this.tokensMetadata.get(tokenConfig.uid);
+      yield { ...tokenConfig, ...tokenMeta };
+    }
+  }
+
+  /**
+   * Register a token.
+   *
+   * @param token Token config to register
+   * @async
+   * @returns {Promise<void>}
+   */
+  async registerToken(token) {
+    await super.registerToken(token);
+    const registeredTokens = STORE.getItem(REGISTERED_TOKENS_KEY) || {};
+    registeredTokens[token.uid] = token;
+    STORE.setItem(REGISTERED_TOKENS_KEY, registeredTokens);
+  }
+
+  /**
+   * Unregister a token.
+   *
+   * @param {string} tokenUid Token id
+   * @async
+   * @returns {Promise<void>}
+   */
+  async unregisterToken(tokenUid) {
+    await super.unregisterToken(tokenUid);
+    const registeredTokens = STORE.getItem(REGISTERED_TOKENS_KEY) || {};
+    if (tokenUid in registeredTokens) {
+      delete registeredTokens[tokenUid];
+    }
+    STORE.setItem(REGISTERED_TOKENS_KEY, registeredTokens);
+  }
+
+  /**
+   * Return if a token uid is registered or not.
+   *
+   * @param {string} tokenUid - Token id
+   * @returns {Promise<boolean>}
+   */
+  async isTokenRegistered(tokenUid) {
+    const registeredTokens = STORE.getItem(REGISTERED_TOKENS_KEY) || {};
+    return tokenUid in registeredTokens;
+  }
+
+  /**
+   * Clean the storage.
+   * @param {boolean} cleanHistory if we should clean the transaction history.
+   * @param {boolean} cleanAddresses if we should clean the addresses.
+   * @param {boolean} cleanTokens if we should clean the registered tokens.
+   * @async
+   * @returns {Promise<void>}
+   */
+  async cleanStorage(cleanHistory = false, cleanAddresses = false, cleanTokens = false) {
+    await super.cleanStorage(cleanHistory, cleanAddresses, cleanTokens);
+    if (cleanTokens) {
+      STORE.removeItem(REGISTERED_TOKENS_KEY);
+    }
+  }
+
+}
+
 
 export class LocalStorageStore {
   _storage = null;
@@ -163,7 +262,7 @@ export class LocalStorageStore {
         return null;
       }
 
-      const store = new LevelDBStore(walletId);
+      const store = new HybridStore();
       this._storage = new Storage(store);
     }
     return this._storage;
@@ -471,4 +570,6 @@ export class LocalStorageStore {
   }
 }
 
-export default new LocalStorageStore();
+const STORE = new LocalStorageStore();
+
+export default STORE;
