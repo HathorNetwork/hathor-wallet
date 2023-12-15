@@ -51,7 +51,7 @@
     "redux-saga": "1.2.1",
     "redux-thunk": "2.4.1",
     "ttag": "1.7.24",
-    "unleash-proxy-client": "1.11.0",
+    "unleash-proxy-client": "3.2.0",
     "viz.js": "2.1.2"
   },
   "main": "public/electron.js",
