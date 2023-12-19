@@ -119,8 +119,7 @@ export function* startWallet(action) {
     // starting the wallet with a second device and so we cannot trust the xpub saved on storage.
     yield LOCAL_STORE.initHWStorage(xpub);
   } else {
-    const walletId = yield LOCAL_STORE.getWalletId();
-    if (!walletId) {
+    if (!LOCAL_STORE.isLoadedSync(true)) {
       yield LOCAL_STORE.initStorage(words, password, pin, passphrase);
     }
   }
