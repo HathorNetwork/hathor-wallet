@@ -28,7 +28,7 @@ root.render(
     <GlobalModal>
       <Router>
         <TokenBar />
-        <Route path="/" component={ErrorWrapper} />
+        <ErrorWrapper />
       </Router>
     </GlobalModal>
   </Provider>
