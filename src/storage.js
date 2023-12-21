@@ -224,6 +224,7 @@ export class LocalStorageStore {
         networkName: config.getNetwork().name,
       }
     );
+    STORE.setItem(ACCESS_DATA_KEY, accessData);
     const storage = this.getStorage();
     await storage.saveAccessData(accessData);
     this._storage = storage;
@@ -238,6 +239,7 @@ export class LocalStorageStore {
       xpub,
       { hardware: true }
     );
+    STORE.setItem(ACCESS_DATA_KEY, accessData);
     const storage = this.getStorage();
     await storage.saveAccessData(accessData);
     this._storage = storage;
