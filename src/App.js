@@ -319,7 +319,7 @@ const returnDefaultComponent = (Component, props) => {
         <div className='component-div h-100'>
           <Navigation {...props}/>
           <Component {...props} />
-          <RequestErrorModal {...props} />
+          <RequestErrorModal />
         </div>
       );
     }
