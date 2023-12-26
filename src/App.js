@@ -157,7 +157,7 @@ class Root extends React.Component {
         <Route exact path="/loading_addresses" children={<LoadingAddresses />} />
         <Route exact path="/permission" component={SentryPermission} />
         <StartedRoute exact path="" component={Wallet} loaded={true} />
-        <Route path="" component={Page404} />
+        <Route path="" children={<Page404 />} />
       </Switch>
     )
   }
