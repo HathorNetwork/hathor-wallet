@@ -7,7 +7,7 @@
 
 import './i18nInit';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import ErrorWrapper from './ErrorWrapper';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { GlobalModal } from './components/GlobalModal';
@@ -21,14 +21,15 @@ import './index.css';
 import store from "./store/index";
 import { Provider } from "react-redux";
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
   <Provider store={store}>
     <GlobalModal>
       <Router>
         <TokenBar />
-        <Route path="/" component={ErrorWrapper} />
+        <ErrorWrapper />
       </Router>
     </GlobalModal>
-  </Provider>,
-  document.getElementById('root')
+  </Provider>
 );

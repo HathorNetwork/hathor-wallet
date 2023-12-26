@@ -177,10 +177,6 @@ export class LocalStorageStore {
     localStorage.clear();
   }
 
-  getWalletId() {
-    return this.getItem('wallet:id');
-  }
-
   /**
    * Check if the wallet is loaded, it does not check the access data in storage since it requires
    * an async call, so we only check the wallet id.
@@ -188,27 +184,29 @@ export class LocalStorageStore {
    * wallet and finish the migration process, this key is deleted during the migration process so
    * this check will not be needed after all wallets have migrated.
    *
+   * @param {boolean} [strict=false] If true, will not check the backwards compatibility key
    * @return {boolean} Whether the wallet is loaded
    */
-  isLoadedSync() {
-    return (!!this.getWalletId()) || (!!this.getItem('wallet:accessData'))
-  }
-
-  setWalletId(walletId) {
-    this.setItem('wallet:id', walletId);
+  isLoadedSync(strict = false) {
+    const isLoaded = !!this.getItem(ACCESS_DATA_KEY);
+    if (strict) {
+      return isLoaded;
+    } else {
+      // In non strict mode we also check the 'wallet:accessData' key for backward compatibility
+      // Backwards compatibility is used to show the locked screen when upgrading from a previous version.
+      return isLoaded || !!this.getItem('wallet:accessData');
+    }
   }
 
   cleanWallet() {
-    this.removeItem('wallet:id');
     this.removeItem(IS_HARDWARE_KEY);
     this.removeItem(CLOSED_KEY);
+    this.removeItem(ACCESS_DATA_KEY);
     delete this._storage;
     this._storage = null;
   }
 
   resetStorage() {
-    this.removeItem('wallet:id');
-
     for (const key of storageKeys) {
       this.removeItem(key);
     }
@@ -226,8 +224,7 @@ export class LocalStorageStore {
         networkName: config.getNetwork().name,
       }
     );
-    const walletId = walletUtils.getWalletIdFromXPub(accessData.xpubkey);
-    this.setWalletId(walletId);
+    STORE.setItem(ACCESS_DATA_KEY, accessData);
     const storage = this.getStorage();
     await storage.saveAccessData(accessData);
     this._storage = storage;
@@ -242,8 +239,7 @@ export class LocalStorageStore {
       xpub,
       { hardware: true }
     );
-    const walletId = walletUtils.getWalletIdFromXPub(accessData.xpubkey);
-    this.setWalletId(walletId);
+    STORE.setItem(ACCESS_DATA_KEY, accessData);
     const storage = this.getStorage();
     await storage.saveAccessData(accessData);
     this._storage = storage;
@@ -257,8 +253,8 @@ export class LocalStorageStore {
    */
   getStorage() {
     if (!this._storage) {
-      const walletId = this.getWalletId();
-      if (!walletId) {
+      // Check if we have a wallet to load
+      if(!this.isLoadedSync(true)) {
         return null;
       }
 
@@ -380,8 +376,6 @@ export class LocalStorageStore {
       // Prepare the storage with the migrated access data
       this._storage = null;
       this.setHardwareWallet(false);
-      const walletId = walletUtils.getWalletIdFromXPub(accessData.xpubkey);
-      this.setWalletId(walletId);
       const storage = this.getStorage();
       await storage.saveAccessData(accessData);
       this._storage = storage;
@@ -395,7 +389,6 @@ export class LocalStorageStore {
       // The access data is saved on the new storage, we can delete the old data.
       // This will only delete keys with the wallet prefix
       for (const key of Object.keys(localStorage)) {
-        if (key === 'wallet:id') continue;
         if (key.startsWith('wallet:')) {
           localStorage.removeItem(key);
         }

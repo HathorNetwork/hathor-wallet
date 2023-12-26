@@ -95,6 +95,7 @@ class LoadWallet extends React.Component {
     // First we clean what can still be there of a last wallet
     wallet.generateWallet(this.state.words, '', pin, password, this.props.history);
     LOCAL_STORE.markBackupDone();
+    LOCAL_STORE.open(); // Mark this wallet as open, so that it does not appear locked after loading
     // Clean pin and password from redux
     this.props.updatePassword(null);
     this.props.updatePin(null);
