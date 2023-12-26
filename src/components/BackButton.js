@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { useHistory } from "react-router-dom";
 
 
 /**
@@ -14,26 +15,25 @@ import { t } from 'ttag';
  *
  * @memberof Components
  */
-class BackButton extends React.Component {
+function BackButton() {
+  const history = useHistory();
 
   /**
    * Called when link is clicked and goes back one page
    *
    * @param {Object} e Event emitted when link is clicked
    */
-  goBack = (e) => {
+  const goBack = (e) => {
     e.preventDefault();
-    this.props.history.goBack();
+    history.goBack();
   }
 
-  render = () => {
-    return (
-      <div className="d-flex flex-row align-items-center back-div mb-3">
-        <i className="fa fa-long-arrow-left mr-2" />
-        <a href="true" onClick={(e) => this.goBack(e)}>{t`Back`}</a>
-      </div>
-    )
-  }
+  return (
+    <div className="d-flex flex-row align-items-center back-div mb-3">
+      <i className="fa fa-long-arrow-left mr-2" />
+      <a href="true" onClick={(e) => goBack(e)}>{t`Back`}</a>
+    </div>
+  )
 }
 
 export default BackButton;

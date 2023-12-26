@@ -120,7 +120,7 @@ class NFTList extends React.Component {
 
     return (
       <div className="content-wrapper">
-        <BackButton {...this.props} />
+        <BackButton />
         <div className="d-flex flex-column mb-3">
           <h3 className="mt-4">NFT List</h3>
           <p className="mt-5">{t`This list will have all the registered NFTs that you have balance and that have a digital asset being shown in our explorer.`}</p>
