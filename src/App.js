@@ -153,7 +153,7 @@ class Root extends React.Component {
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <StartedRoute exact path="/hardware_wallet" component={StartHardwareWallet} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
-        <Route exact path="/welcome" component={Welcome} />
+        <Route exact path="/welcome" children={<Welcome />} />
         <Route exact path="/loading_addresses" component={LoadingAddresses} />
         <Route exact path="/permission" component={SentryPermission} />
         <StartedRoute exact path="" component={Wallet} loaded={true} />
