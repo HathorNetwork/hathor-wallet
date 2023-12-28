@@ -30,10 +30,6 @@ function RequestErrorModal() {
   const history = useHistory();
   const lastFailedRequest = useSelector(state => state.lastFailedRequest);
   const requestErrorStatusCode = useSelector(state => state.requestErrorStatusCode);
-  /**
-   * @type {boolean} True if user selected to retry the request
-   */
-  const [retry, setRetry] = useState(false);
 
   const advancedDataRef = useRef();
   const showAdvancedLinkRef = useRef();
@@ -48,11 +44,11 @@ function RequestErrorModal() {
   }
 
   /**
-   * User clicked to retry request, then update the state, hide the modal and when hidden will try again
+   * User clicked to retry request: hide the modal and try again
    */
   const handleRetryRequest = () => {
-    setRetry(true);
     $(MODAL_DOM_ID).modal('hide');
+    modalHiddenRetry();
   }
 
   /**
@@ -88,7 +84,6 @@ function RequestErrorModal() {
         config.resolve(response.data);
       });
     }
-    setRetry(false);
   }
 
   /**
@@ -143,20 +138,6 @@ function RequestErrorModal() {
     $(hideAdvancedLinkRef.current).hide();
     $(showAdvancedLinkRef.current).show();
   }
-
-  // DOM lifecycle management
-  useEffect(() => {
-    $(MODAL_DOM_ID).on('hidden.bs.modal', () => {
-      if (retry) {
-        // If modal is closing and user selected retry should get last request from Redux and try again
-        modalHiddenRetry();
-      }
-    });
-    return () => {
-      // When unmounting this modal, we should hide it before
-      $(MODAL_DOM_ID).modal('hide');
-    };
-  }, []);
 
   const serverURL = hathorLib.config.getServerUrl();
 
