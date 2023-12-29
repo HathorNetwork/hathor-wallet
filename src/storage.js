@@ -373,6 +373,7 @@ export class LocalStorageStore {
       // We are migrating from an version of wallet-lib prior to 1.0.0
       // This will generate the encrypted keys and other metadata
       const accessData = this.migrateAccessData(pin);
+      STORE.setItem(ACCESS_DATA_KEY, accessData);
       // Prepare the storage with the migrated access data
       this._storage = null;
       this.setHardwareWallet(false);

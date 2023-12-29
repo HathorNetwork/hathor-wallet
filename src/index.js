@@ -9,7 +9,7 @@ import './i18nInit';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import ErrorWrapper from './ErrorWrapper';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { GlobalModal } from './components/GlobalModal';
 import TokenBar from './components/TokenBar';
 
