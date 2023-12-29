@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactLoading from 'react-loading';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { t } from 'ttag';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
@@ -15,85 +15,60 @@ import hathorLib from '@hathor/wallet-lib';
 import colors from '../index.scss';
 import helpers from '../utils/helpers';
 import path from 'path';
-
-const mapStateToProps = (state) => ({
-  wallet: state.wallet,
-});
+import { useHistory, useParams } from 'react-router-dom';
 
 /**
  * Shows the detail of a transaction or block
  *
  * @memberof Screens
  */
-class TransactionDetail extends React.Component {
-  constructor(props) {
-    super(props);
+function TransactionDetail() {
+  const wallet = useSelector((state) => state.wallet);
+  const history = useHistory();
+  const { id: txId } = useParams();
 
-    /**
-     * transaction {Object} Loaded transaction
-     * loaded {boolean} If had success loading transaction from the server
-     * success {boolean} If a transaction was returned from the server or an error ocurred
-     * meta {Object} Metadata of loaded transaction received from the server
-     * spentOutputs {Object} Spent outputs of loaded transaction received from the server
-     * confirmationData {Object} Confirmation data of loaded transaction received from the server
-     */
-    this.state = {
-      transaction: null,
-      meta: null,
-      spentOutputs: null,
-      loaded: false,
-      success: null,
-      confirmationData: null,
-      confirmationDataError: false,
-      isTxNotFound: false,
-    }
-  }
-
-  componentDidMount() {
-    this.getTx();
-  }
+  /* transaction {Object} Loaded transaction */
+  const [transaction, setTransaction] = useState(null);
+  /* meta {Object} Metadata of loaded transaction received from the server */
+  const [meta, setMeta] = useState(null);
+  /* spentOutputs {Object} Spent outputs of loaded transaction received from the server */
+  const [spentOutputs, setSpentOutputs] = useState(null);
+  /* loaded {boolean} If had success loading transaction from the server */
+  const [loaded, setLoaded] = useState(false);
+  /* confirmationData {Object} Confirmation data of loaded transaction received from the server */
+  const [confirmationData, setConfirmationData] = useState(null);
+  const [confirmationDataError, setConfirmationDataError] = useState(false);
+  const [isTxNotFound, setIsTxNotFound] = useState(false);
 
   /**
    * Get accumulated weight and confirmation level of the transaction
    */
-  getConfirmationData = async () => {
-    this.setState({
-      confirmationData: null,
-      confirmationDataError: false,
-    });
+  const getConfirmationData = async () => {
+    setConfirmationData(null);
+    setConfirmationDataError(false);
 
     try {
-      const data = await this.props.wallet.getTxConfirmationData(this.props.match.params.id);
-      this.setState({
-        confirmationData: data,
-        confirmationDataError: false,
-      });
+      const data = await wallet.getTxConfirmationData(txId);
+      setConfirmationData(data);
+      setConfirmationDataError(false);
     } catch(e) {
-      // Error in request
-      console.log(e);
-
-      this.setState({
-        confirmationData: null,
-        confirmationDataError: true,
-      });
+      setConfirmationData(null);
+      setConfirmationDataError(true);
     }
   }
 
   /**
    * Get transaction in the server when mounting the page
    */
-  async getTx() {
-    this.setState({
-      loaded: false,
-      transaction: null,
-      meta: null,
-      spentOutputs: null,
-      success: null,
-      isTxNotFound: false,
-    });
+  const getTx = async () => {
+    setLoaded(false);
+    setTransaction(null);
+    setMeta(null);
+    setSpentOutputs(null);
+    setIsTxNotFound(false);
 
     try {
-      const data = await this.props.wallet.getFullTxById(this.props.match.params.id);
+      const data = await wallet.getFullTxById(txId);
       for (const output of data.tx.outputs) {
         if (!output.token) {
           if (output.token_data === 0) {
@@ -115,114 +90,104 @@ class TransactionDetail extends React.Component {
       }
 
       if (!hathorLib.transactionUtils.isBlock(data.tx)) {
-        this.getConfirmationData();
+        await getConfirmationData();
       }
 
-      this.setState({
-        transaction: data.tx,
-        meta: data.meta,
-        spentOutputs: data.spent_outputs,
-        loaded: true,
-        success: true,
-        isTxNotFound: false,
-      });
+      setTransaction(data.tx);
+      setMeta(data.meta);
+      setSpentOutputs(data.spent_outputs);
+      setLoaded(true);
+      setIsTxNotFound(false);
     } catch(e) {
-      let isTxNotFound = false;
+      let txNotFoundOnWallet = false;
       // Error in request
       if (e instanceof hathorLib.errors.TxNotFoundError) {
-        isTxNotFound = true;
+        txNotFoundOnWallet = true;
       }
 
-      this.setState({
-        loaded: true,
-        success: false,
-        transaction: null,
-        isTxNotFound,
-      });
+      setLoaded(true);
+      setTransaction(null)
+      setIsTxNotFound(txNotFoundOnWallet);
     }
   }
 
   /**
-   * When transaction changed in the page we need to load the new one and the new confirmation data
+   * Fetch tx data whenever the id is updated
    */
-  componentDidUpdate(prevProps) {
-    if (this.props.match.params.id !== prevProps.match.params.id) {
-      this.getTx();
-    }
-  }
+  useEffect(() => {
+    getTx();
+  }, [txId]);
 
   /**
    * Method called when user clicked on 'See on explorer' link
    *
    * @param {Object} e Event for the click
    */
-  goToExplorer = (e) => {
+  const goToExplorer = (e) => {
     e.preventDefault();
-    const url = path.join(helpers.getExplorerURL(), `transaction/${this.state.transaction.hash}`);
+    const url = path.join(helpers.getExplorerURL(), `transaction/${transaction.hash}`);
     helpers.openExternalURL(url);
   }
 
-  render() {
-    const renderTx = () => {
-      return (
-        <div>
-          {renderLinks()}
-          {this.state.transaction ? (
-            <TxData
-              key={this.state.transaction.hash}
-              transaction={this.state.transaction}
-              confirmationData={this.state.confirmationData}
-              confirmationDataError={this.state.confirmationDataError}
-              confirmationDataRetry={this.getConfirmationData}
-              spentOutputs={this.state.spentOutputs}
-              meta={this.state.meta}
-              showRaw={true}
-              showConflicts={true}
-              showGraphs={true}
-              history={this.props.history} />
-          ) : (
-            <p className="text-danger">
-              {this.state.isTxNotFound ? (
-                <>{t`Transaction with hash ${this.props.match.params.id} not found`}.</>
-              ) : (
-                <>
-                  {t`Error retrieving transaction ${this.props.match.params.id}`}.&nbsp;
-                  <a href="true" onClick={(e) => {
-                    e.preventDefault();
-                    this.getTx();
-                  }}>{t`Try again`}</a>
-                </>
-              )}
-            </p>
-          )}
-        </div>
-      );
-    }
-
-    const renderLinks = () => {
-      return (
-        <div className="d-flex flex-row justify-content-between">
-          <BackButton />
-          {this.state.transaction && renderExplorerLink()}
-        </div>
-      );
-    }
-
-    const renderExplorerLink = () => {
-      return (
-        <div className="d-flex flex-row align-items-center mb-3 back-div">
-          <a href="true" onClick={this.goToExplorer}>{t`See on explorer`}</a>
-          <i className="fa fa-long-arrow-right ml-2" />
-        </div>
-      );
-    }
-
+  const renderTx = () => {
     return (
-      <div className="flex align-items-center content-wrapper">
-        {!this.state.loaded ? <ReactLoading type='spin' color={colors.purpleHathor} delay={500} /> : renderTx()}
+      <div>
+        {renderLinks()}
+        {transaction ? (
+          <TxData
+            key={transaction.hash}
+            transaction={transaction}
+            confirmationData={confirmationData}
+            confirmationDataError={confirmationDataError}
+            confirmationDataRetry={getConfirmationData}
+            spentOutputs={spentOutputs}
+            meta={meta}
+            showRaw={true}
+            showConflicts={true}
+            showGraphs={true}
+            history={history} />
+        ) : (
+          <p className="text-danger">
+            {isTxNotFound ? (
+              <>{t`Transaction with hash ${txId} not found`}.</>
+            ) : (
+              <>
+                {t`Error retrieving transaction ${txId}`}.&nbsp;
+                <a href="true" onClick={(e) => {
+                  e.preventDefault();
+                  getTx();
+                }}>{t`Try again`}</a>
+              </>
+            )}
+          </p>
+        )}
       </div>
     );
   }
+
+  const renderExplorerLink = () => {
+    return (
+      <div className="d-flex flex-row align-items-center mb-3 back-div">
+        <a href="true" onClick={goToExplorer}>{t`See on explorer`}</a>
+        <i className="fa fa-long-arrow-right ml-2" />
+      </div>
+    );
+  }
+
+  const renderLinks = () => {
+    return (
+      <div className="d-flex flex-row justify-content-between">
+        <BackButton />
+        {transaction && renderExplorerLink()}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex align-items-center content-wrapper">
+      {!loaded ? <ReactLoading type='spin' color={colors.purpleHathor} delay={500} /> : renderTx()}
+    </div>
+  );
 }
 
-export default connect(mapStateToProps)(TransactionDetail);
+export default TransactionDetail;
