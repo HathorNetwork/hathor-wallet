@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { t } from 'ttag'
 
 import wallet from '../utils/wallet';
@@ -13,24 +13,11 @@ import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import logo from '../assets/images/hathor-logo.png';
 import { updatePassword, updatePin } from '../actions/index';
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from 'react-router-dom';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import LOCAL_STORE from '../storage';
-
-
-const mapStateToProps = (state) => {
-  return { password: state.password, pin: state.pin };
-};
-
-
-const mapDispatchToProps = dispatch => {
-  return {
-    updatePassword: data => dispatch(updatePassword(data)),
-    updatePin: data => dispatch(updatePin(data)),
-  };
-};
-
 
 /**
  * Screen used to load a wallet that already exists
@@ -41,78 +28,76 @@ const mapDispatchToProps = dispatch => {
  *
  * @memberof Screens
  */
-class LoadWallet extends React.Component {
-  constructor(props) {
-    super(props);
-
-    /**
-     * errorMessage {string} Message to be shown in case of error in modal
-     * words {string} Text of words input
-     * askPassword {boolean} If should show password component
-     * askPIN {boolean} If should show PIN component
-     * wordsCount {number} Number of words written on words input
-     */
-    this.state = {
-      errorMessage: '',
-      words: '',
-      askPassword: false,
-      askPIN: false,
-      wordsCount: 0,
-    }
-  }
+function LoadWallet() {
+  /** errorMessage {string} Message to be shown in case of error in modal */
+  const [errorMessage, setErrorMessage] = useState('');
+  /** words {string} Text of words input */
+  const [words, setWords] = useState('');
+  /** askPassword {boolean} If should show password component */
+  const [askPassword, setAskPassword] = useState(false);
+  /** askPIN {boolean} If should show PIN component */
+  const [askPIN, setAskPIN] = useState(false);
+  /** wordsCount {number} Number of words written on words input */
+  const [wordsCount, setWordsCount] = useState(0);
+  const wordsInputRef = useRef();
+  const dispatch = useDispatch();
+  const { pin, password } = useSelector((state) => ({ pin: state.pin, password: state.password }));
+  const history = useHistory();
 
   /**
    * Method called when user clicks the 'Import' button
    * Checks if words are valid and, if true, show component to choose password
    */
-  import = () => {
-    const words = this.refs.wordsInput.value.trim();
-    const ret = hathorLib.walletUtils.wordsValid(words);
-    if (ret.valid) {
+  const importClick = () => {
+    const words = wordsInputRef.current.value.trim();
+    try {
+      const ret = hathorLib.walletUtils.wordsValid(words);
+
       // Using ret.words because this method returns a string with all words
       // separated by a single space, after removing duplicate spaces and possible break lines
-      this.setState({ words: ret.words, errorMessage: '', askPassword: true, wordsCount: 0 });
-    } else {
-      this.setState({ errorMessage: ret.message });
+      setWords(ret.words);
+      setErrorMessage('');
+      setAskPassword(true);
+      setWordsCount(0);
+    } catch(e) {
+      setErrorMessage(e.message);
     }
   }
 
   /**
    * Method called when user selects the password with success, so show component to choose pin
    */
-  passwordSuccess = () => {
+  const passwordSuccess = () => {
     // This method is called after the ChoosePassword component has a valid password and succeeds
-    this.setState({ askPIN: true });
+    setAskPIN(true);
   }
 
   /**
    * This method is called after the ChoosePin component has a valid PIN and succeeds
    */
-  pinSuccess = () => {
-    // Getting redux variables before cleaning all data
-    const { pin, password } = this.props;
+  const pinSuccess = () => {
     LOCAL_STORE.unlock();
     // First we clean what can still be there of a last wallet
-    wallet.generateWallet(this.state.words, '', pin, password, this.props.history);
+    wallet.generateWallet(words, '', pin, password, history);
     LOCAL_STORE.markBackupDone();
     LOCAL_STORE.open(); // Mark this wallet as open, so that it does not appear locked after loading
     // Clean pin and password from redux
-    this.props.updatePassword(null);
-    this.props.updatePin(null);
+    dispatch(updatePassword(null));
+    dispatch(updatePin(null));
   }
 
   /**
    * User clicked to go back from PIN component to Choose password
    */
-  pinBack = () => {
-    this.setState({ askPIN: false });
+  const pinBack = () => {
+    setAskPIN(false);
   }
 
   /**
    * User clicked to go back from Choose password component to write words
    */
-  passwordBack = () => {
-    this.setState({ askPassword: false });
+  const passwordBack = () => {
+    setAskPassword(false);
   }
 
   /**
@@ -120,13 +105,13 @@ class LoadWallet extends React.Component {
    *
    * @param {Event} e Input change event
    */
-  onWordsChange = (e) => {
+  const onWordsChange = (e) => {
     const trimValue = e.target.value.trim(/\s+/);
     let wordsCount = 0;
     if (trimValue !== '') {
       wordsCount = trimValue.replace(/\s+/g, ' ').split(' ').length;
     }
-    this.setState({ wordsCount });
+    setWordsCount(wordsCount);
   }
 
   /**
@@ -138,46 +123,50 @@ class LoadWallet extends React.Component {
    *
    * @return {String} CSS class to add in <p> tag
    */
-  getWordsCountClassName = () => {
-    if (this.state.wordsCount > 24) {
+  const getWordsCountClassName = () => {
+    if (wordsCount > 24) {
       return 'text-danger';
-    } else if (this.state.wordsCount === 24) {
+    } else if (wordsCount === 24) {
       return 'text-success';
     } else {
       return '';
     }
   }
 
-  render() {
-    const renderLoad = () => {
-      return (
-        <div>
-          <p className="mt-4 mb-4">{t`Write the 24 words of your wallet (separated by space).`}</p>
-          <textarea className="form-control one-word-input mb-4" placeholder={t`Words separated by single space`} ref="wordsInput" rows={5} onChange={this.onWordsChange} />
-          <p className={`mb-4 ${this.getWordsCountClassName()}`}>{this.state.wordsCount}/24 words</p>
-          {this.state.errorMessage && <p className="mb-4 text-danger">{this.state.errorMessage}</p>}
-          <div className="d-flex justify-content-between flex-row w-100">
-            <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
-            <button onClick={this.import} type="button" className="btn btn-hathor">{t`Import data`}</button>
-          </div>
-        </div>
-      )
-    }
-
+  const renderLoad = () => {
     return (
-      <div className="outside-content-wrapper">
-        <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div className="d-flex align-items-center flex-column inside-div">
-            <img className="hathor-logo" src={logo} alt="" />
-            <div className="d-flex align-items-start flex-column">
-              {this.state.askPIN ? <ChoosePin back={this.pinBack} success={this.pinSuccess} /> : (this.state.askPassword ? <ChoosePassword back={this.passwordBack} success={this.passwordSuccess} /> : renderLoad())}
-            </div>
-          </div>
-          <InitialImages />
+      <div>
+        <p className="mt-4 mb-4">{t`Write the 24 words of your wallet (separated by space).`}</p>
+        <textarea className="form-control one-word-input mb-4" placeholder={t`Words separated by single space`} ref={wordsInputRef} rows={5} onChange={onWordsChange} />
+        <p className={`mb-4 ${getWordsCountClassName()}`}>{`${wordsCount}/24 words`}</p>
+        {errorMessage && <p className="mb-4 text-danger">{errorMessage}</p>}
+        <div className="d-flex justify-content-between flex-row w-100">
+          <button onClick={() => history.goBack()} type="button" className="btn btn-secondary">{t`Back`}</button>
+          <button onClick={importClick} type="button" className="btn btn-hathor">{t`Import data`}</button>
         </div>
       </div>
     )
   }
+
+  return (
+    <div className="outside-content-wrapper">
+      <div className="inside-white-wrapper col-sm-12 col-md-8">
+        <div className="d-flex align-items-center flex-column inside-div">
+          <img className="hathor-logo" src={logo} alt="" />
+          <div className="d-flex align-items-start flex-column">
+            {askPIN
+              ? <ChoosePin back={pinBack} success={pinSuccess} />
+              : (askPassword
+                ? <ChoosePassword back={passwordBack} success={passwordSuccess} />
+                : renderLoad()
+              )
+            }
+          </div>
+        </div>
+        <InitialImages />
+      </div>
+    </div>
+  )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoadWallet);
+export default LoadWallet;
