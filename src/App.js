@@ -324,7 +324,7 @@ const returnDefaultComponent = (Component, props) => {
       );
     }
   } else {
-    return <WalletVersionError {...props} />;
+    return <WalletVersionError />;
   }
 }
 
