@@ -5,29 +5,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
-import wallet from '../utils/wallet';
+import walletUtils from '../utils/wallet';
 import helpers from '../utils/helpers';
 import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
-import {
-  DEFAULT_SERVERS,
-  DEFAULT_WALLET_SERVICE_SERVERS,
-  DEFAULT_WALLET_SERVICE_WS_SERVERS,
-} from '../constants';
+import { DEFAULT_SERVERS, DEFAULT_WALLET_SERVICE_SERVERS, DEFAULT_WALLET_SERVICE_WS_SERVERS, } from '../constants';
 import colors from '../index.scss';
-import { connect } from "react-redux";
+import { useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
-
-const mapStateToProps = (state) => {
-  return {
-    wallet: state.wallet,
-    useWalletService: state.useWalletService,
-  };
-};
+import { useHistory } from 'react-router-dom';
 
 
 /**
@@ -35,185 +25,183 @@ const mapStateToProps = (state) => {
  *
  * @memberof Screens
  */
-class Server extends React.Component {
-  static contextType = GlobalModalContext;
+function Server() {
+  const context = useContext(GlobalModalContext);
+  const history = useHistory();
 
-  constructor(props) {
-    super(props);
+  /* newServer {boolean} If user selected checkbox that he wants to set a new server */
+  const [newServer, setNewServer] = useState(false);
+  /* errorMessage {string} Message to be shown in case of error in form */
+  const [errorMessage, setErrorMessage] = useState('');
+  /* serverChangeFlag {{shouldExecute: boolean, networkChanged: boolean}} Triggers the sever changed execution */
+  const [serverChangeFlag, setServerChangeFlag] = useState({ shouldExecute: false, networkChanged: false });
+  /* loading {boolean} If should show spinner while waiting for server response */
+  const [loading, setLoading] = useState(false);
+  /* selectedServer {string} Server that the user wants to connect */
+  const [selectedServer, setSelectedServer] = useState('');
+  /* selectedWsServer {string} Websocket Server that the user wants to connect (only used when on the wallet-service facade) */
+  const [selectedWsServer, setSelectedWsServer] = useState('');
+  /* isHardwareWallet {boolean} If the application is using a hardware wallet */
+  const [isHardwareWallet] = useState(LOCAL_STORE.isHardwareWallet());
 
-    /**
-     * errorMessage {string} Message to be shown in case of error in form
-     * loading {boolean} If should show spinner while waiting for server response
-     * newServer {boolean} If user selected checkbox that he wants to set a new server
-     * selectedValue {string} Server selected from the user
-     * selectedServer {string} Server that the user wants to connect
-     * selectedWsServer {string} Websocket Server that the user wants to connect (only used when on the wallet-service facade)
-     * selectedNetwork {string} Network that the user wants to connect
-     */
-    this.state = {
-      newServer: false,
-      errorMessage: '',
-      selectedValue: '',
-      loading: false,
-      selectedServer: '',
-      selectedWsServer: '',
-      selectedNetwork: null,
-    }
-  }
+  // Use selector to fetch wallet and useWalletService
+  const { wallet, useWalletService } = useSelector(state => ({
+    wallet: state.wallet,
+    useWalletService: state.useWalletService
+  }));
 
-  componentDidMount = () => {
+  // Declare refs
+  const newServerRef = useRef(null);
+  const newWsServerRef = useRef(null);
+  const pinRef = useRef(null);
+  const newServerWrapperRef = useRef(null);
+
+  useEffect(() => {
     $('#requestErrorModal').on('hidden.bs.modal', (e) => {
-      this.setState({
-        loading: false,
-      });
+      setLoading(false);
     });
-
-    $('#alertModal').on('hidden.bs.modal', (e) => {
-    });
-  }
+  }, []);
 
   /**
    * Called after user click the button to change the server
    * Check if form is valid and then reload that from new server
    */
-  serverSelected = async () => {
-    let errorMessage = '';
+  const serverSelected = async () => {
+    let newErrorMessage = '';
 
     let invalidServer = false;
-    if (this.state.newServer) {
-      if (this.refs.newServer.value === '') {
+    if (newServer) {
+      if (newServerRef.current.value === '') {
         invalidServer = true;
-        errorMessage = t`New server is not valid`
+        newErrorMessage = t`New server is not valid`
       }
 
-      if (this.props.useWalletService && this.refs.newWsServer.value === '') {
+      if (useWalletService && newWsServerRef.current.value === '') {
         invalidServer = true;
-        errorMessage = t`New real-time server is not valid`
+        newErrorMessage = t`New real-time server is not valid`
       }
     } else {
-      if (this.state.selectedServer === '') {
+      if (selectedServer === '') {
         invalidServer = true;
-        errorMessage = t`New server is not valid`
+        newErrorMessage = t`New server is not valid`
       }
-      if (this.props.useWalletService && this.state.selectedWsServer === '') {
+      if (useWalletService && selectedWsServer === '') {
         invalidServer = true;
-        errorMessage = t`New real-time server is not valid`
+        newErrorMessage = t`New real-time server is not valid`
       }
     }
 
-    this.setState({ errorMessage });
+    setErrorMessage(newErrorMessage);
 
     if (invalidServer) {
       return;
     }
 
-    const newBaseServerInputValue = this.refs.newServer.value;
+    const newBaseServerInputValue = newServerRef.current.value;
     let newWsServerInputValue = null;
 
-    if (this.props.useWalletService) {
-      newWsServerInputValue = this.refs.newWsServer.value;
+    if (useWalletService) {
+      newWsServerInputValue = newWsServerRef.current.value;
     }
 
     let newBaseServer = null;
     let newWsServer = null;
-    if (this.state.newServer) {
+    if (newServer) {
       newBaseServer = newBaseServerInputValue;
       newWsServer = newWsServerInputValue;
     } else {
-      newBaseServer = this.state.selectedServer;
-      newWsServer = this.state.selectedWsServer;
+      newBaseServer = selectedServer;
+      newWsServer = selectedWsServer;
     }
 
     // we don't ask for the pin on the hardware wallet
-    if (!LOCAL_STORE.isHardwareWallet()) {
-      if (!await this.props.wallet.checkPin(this.refs.pin.value)) {
-        this.setState({ errorMessage: t`Invalid PIN` });
+    if (!isHardwareWallet) {
+      if (!await wallet.checkPin(pinRef.current.value)) {
+        setErrorMessage(`Invalid PIN`);
         return;
       }
     }
 
-    this.setState({
-      loading: true,
-      errorMessage: '',
-      selectedServer: newBaseServer,
-      selectedWsServer: newWsServer,
-    });
+    setLoading(true);
+    setErrorMessage('');
+    setSelectedServer(newBaseServer);
+    setSelectedWsServer(newWsServer);
 
-    const currentServer = this.props.useWalletService ?
+    const currentServer = useWalletService ?
       hathorLib.config.getWalletServiceBaseUrl() :
       hathorLib.config.getServerUrl();
 
-    const currentWsServer = this.props.useWalletService ?
+    const currentWsServer = useWalletService ?
       hathorLib.config.getWalletServiceBaseWsUrl() :
       '';
 
-    const currentNetwork = this.props.wallet.getNetwork();
+    const currentNetwork = wallet.getNetwork();
 
     // Update new server in storage and in the config singleton
-    this.props.wallet.changeServer(newBaseServer);
+    wallet.changeServer(newBaseServer);
 
     // We only have a different websocket server on the wallet-service facade, so update the config singleton
-    if (this.props.useWalletService) {
-      await this.props.wallet.changeWsServer(newWsServer);
+    if (useWalletService) {
+      await wallet.changeWsServer(newWsServer);
     }
 
     LOCAL_STORE.setServers(
       newBaseServer,
-      this.props.useWalletService ? newWsServer : null,
+      useWalletService ? newWsServer : null,
     );
 
     try {
-      const versionData = await this.props.wallet.getVersionData();
+      const versionData = await wallet.getVersionData();
 
       if (versionData.network !== 'mainnet') {
         const network = versionData.network;
-        let selectedNetwork = network;
+        let newSelectedNetwork = network;
 
         // Network might be 'testnet-golf' or 'testnet-charlie'
         if (network.startsWith('testnet')) {
-          selectedNetwork = 'testnet';
+          newSelectedNetwork = 'testnet';
         }
-
-        this.setState({
-          selectedNetwork,
-        });
 
         // Go back to the previous server
         // If the user decides to continue with this change, we will update again
-        this.props.wallet.changeServer(currentServer);
-        if (this.props.useWalletService) {
-          await this.props.wallet.changeWsServer(currentWsServer);
+        wallet.changeServer(currentServer);
+        if (useWalletService) {
+          await wallet.changeWsServer(currentWsServer);
         }
         LOCAL_STORE.setServers(
           currentServer,
-          this.props.useWalletService ? currentWsServer : null,
+          useWalletService ? currentWsServer : null,
         );
-        this.context.showModal(MODAL_TYPES.CONFIRM_TESTNET, {
-          success: this.confirmTestnetServer,
+        context.showModal(MODAL_TYPES.CONFIRM_TESTNET, {
+          success: () => confirmTestnetServer(
+            {
+              selectedServer: newBaseServer,
+              selectedWsServer: newWsServer,
+              selectedNetwork: newSelectedNetwork,
+            },
+          ),
         });
-        this.setState({ loading: false });
+        setLoading(false);
       } else {
         // We are on mainnet, so set the network on the singleton and storage
         const networkChanged = LOCAL_STORE.getNetwork() !== 'mainnet';
         hathorLib.config.setNetwork('mainnet');
         helpers.updateNetwork('mainnet');
-        this.executeServerChange(networkChanged);
+        setServerChangeFlag({ shouldExecute: true, networkChanged });
       }
     } catch (e) {
       // Go back to the previous server
-      this.props.wallet.changeServer(currentServer);
-      if (this.props.useWalletService) {
-        await this.props.wallet.changeWsServer(currentWsServer);
+      wallet.changeServer(currentServer);
+      if (useWalletService) {
+        await wallet.changeWsServer(currentWsServer);
       }
       LOCAL_STORE.setServers(
         currentServer,
-        this.props.useWalletService ? currentWsServer : null,
+        useWalletService ? currentWsServer : null,
       );
       helpers.updateNetwork(currentNetwork);
-      this.setState({
-        loading: false,
-        errorMessage: e.message,
-      });
+      setLoading(false);
+      setErrorMessage(e.message);
     }
   }
 
@@ -221,60 +209,76 @@ class Server extends React.Component {
    * Method called when user confirms that wants to connect to a testnet server and
    * we successfully validated that the user has written 'testnet' on the input
    * so we can execute the change
+   * @param {Object} params
+   * @param {string} params.selectedServer - New server
+   * @param {string} [params.selectedWsServer] - New websocket server
+   * @param {string} params.selectedNetwork - New network
    */
-  confirmTestnetServer = async () => {
-    this.props.wallet.changeServer(this.state.selectedServer);
-    if (this.props.useWalletService) {
-      await this.props.wallet.changeWsServer(this.state.selectedWsServer);
+	const confirmTestnetServer = async ({ // Renaming parameters to avoid naming conflict with the Component scope
+																				selectedServer: _selectedServer,
+																				selectedWsServer: _selectedWsServer,
+																				selectedNetwork: _selectedNetwork,
+																			}) => {
+    wallet.changeServer(_selectedServer);
+    if (useWalletService) {
+      await wallet.changeWsServer(_selectedWsServer);
     }
     LOCAL_STORE.setServers(
-      this.state.selectedServer,
-      this.props.useWalletService ? this.state.selectedWsServer : null,
+      _selectedServer,
+      useWalletService ? _selectedWsServer : null,
     );
 
     const networkChanged = !LOCAL_STORE.getNetwork()?.startsWith('testnet');
 
     // Set network on config singleton so the load wallet will get it properly
-    hathorLib.config.setNetwork(this.state.selectedNetwork);
+    hathorLib.config.setNetwork(_selectedNetwork);
     // Store on localStorage
-    helpers.updateNetwork(this.state.selectedNetwork);
-    this.context.hideModal();
-    this.setState({
-      loading: true,
-    });
-    this.executeServerChange(networkChanged);
+    helpers.updateNetwork(_selectedNetwork);
+    context.hideModal();
+    setLoading(true);
+    setServerChangeFlag({ shouldExecute: true, networkChanged });
   }
 
-  /**
-   * Execute server change checking server API and, in case of success
-   * reloads data and redirects to wallet screen
-   */
-  executeServerChange = async (networkChanged) => {
-    // We don't have PIN on hardware wallet
-    const pin = LOCAL_STORE.isHardwareWallet() ? null : this.refs.pin.value;
-    try {
-      await wallet.changeServer(this.props.wallet, pin, this.props.history, networkChanged);
-      this.props.history.push('/wallet/');
-    } catch (err) {
-      this.setState({
-        loading: false,
-        errorMessage: err.message,
-      });
+	/**
+	 * Listens to the server change flag and executes the actual server change command.
+	 */
+  useEffect(() => {
+    /**
+     * Execute server change checking server API and, in case of success
+     * reloads data and redirects to wallet screen
+     */
+    const executeServerChange = async (networkChanged) => {
+      // We don't have PIN on hardware wallet
+      const pin = isHardwareWallet ? null : pinRef.current.value;
+      try {
+        await walletUtils.changeServer(wallet, pin, history, networkChanged);
+        history.push('/wallet/');
+      } catch (err) {
+        setLoading(false);
+        setErrorMessage(err.message);
+      }
+      // Reset flag
+      setServerChangeFlag({ shouldExecute: false, networkChanged: false });
     }
-  }
+
+    if (serverChangeFlag.shouldExecute) {
+			// React effects cannot be asynchronous, so we fire this promise and ignore its result
+      executeServerChange(serverChangeFlag.networkChanged);
+    }
+  }, [serverChangeFlag]);
 
   /**
    * Update state if user wants to choose a new server or one of the default options
    *
    * @param {Object} e Event of checkbox change
    */
-  handleCheckboxChange = (e) => {
+  const handleCheckboxChange = (e) => {
     const value = e.target.checked;
-    this.setState({ newServer: value });
+    setNewServer(value);
     if (value) {
-      $(this.refs.newServerWrapper).show(400);
+      $(newServerWrapperRef.current).show(400);
     } else {
-      $(this.refs.newServerWrapper).hide(400);
+      $(newServerWrapperRef.current).hide(400);
     }
   }
 
@@ -283,17 +287,15 @@ class Server extends React.Component {
    *
    * @param {Object} e Event of select change
    */
-  handleBaseURLSelectChange = (e) => {
+  const handleBaseURLSelectChange = (e) => {
     if (e.target.value === '') {
-      return this.setState({
-        selectedServer: '',
-      });
+      setSelectedServer('');
     }
 
-    if (this.props.useWalletService) {
-      this.setState({ selectedServer: DEFAULT_WALLET_SERVICE_SERVERS[e.target.value] });
+    if (useWalletService) {
+      setSelectedServer(DEFAULT_WALLET_SERVICE_SERVERS[e.target.value]);
     } else {
-      this.setState({ selectedServer: DEFAULT_SERVERS[e.target.value] });
+      setSelectedServer(DEFAULT_SERVERS[e.target.value]);
     }
   }
 
@@ -303,101 +305,98 @@ class Server extends React.Component {
    *
    * @param {Object} e Event of select change
    */
-  handleWsURLSelectChange = (e) => {
-    if (!this.props.useWalletService) {
+  const handleWsURLSelectChange = (e) => {
+    if (!useWalletService) {
       // should never happen
       return;
     }
 
     if (e.target.value === '') {
-      return this.setState({
-        selectedWsServer: '',
-      });
+      setSelectedWsServer('');
+      return;
     }
 
-    this.setState({ selectedWsServer: DEFAULT_WALLET_SERVICE_WS_SERVERS[e.target.value] });
+    setSelectedWsServer(DEFAULT_WALLET_SERVICE_WS_SERVERS[e.target.value]);
   }
 
-  render() {
-    const mapServerToOption = (servers) => servers.map((server, idx) => (
-      <option key={idx} value={idx}>{server}</option>
-    ));
+  const mapServerToOption = (servers) => servers.map((server, idx) => (
+    <option key={idx} value={idx}>{server}</option>
+  ));
 
-    const renderServerOptions = () => {
-      return this.props.useWalletService ?
-        mapServerToOption(DEFAULT_WALLET_SERVICE_SERVERS) :
-        mapServerToOption(DEFAULT_SERVERS);
-    };
+  const renderServerOptions = () => {
+    return useWalletService ?
+      mapServerToOption(DEFAULT_WALLET_SERVICE_SERVERS) :
+      mapServerToOption(DEFAULT_SERVERS);
+  };
 
-    const renderWsServerOptions = () => {
-      if (!this.props.useWalletService) {
-        // should never happen
-        return null;
-      }
+  const renderWsServerOptions = () => {
+    if (!useWalletService) {
+      // should never happen
+      return null;
+    }
 
-      return mapServerToOption(DEFAULT_WALLET_SERVICE_WS_SERVERS);
-    };
+    return mapServerToOption(DEFAULT_WALLET_SERVICE_WS_SERVERS);
+  };
 
-    return (
-      <div className="content-wrapper">
-        <p><strong>{t`Select one of the default servers to connect or choose a new one`}</strong></p>
-        <form onSubmit={e => { e.preventDefault(); }}>
-          <div className="row mt-3">
-            <div className="col-12">
-              { this.props.useWalletService && (
-                  <p className="input-label">{t`Base server`}:</p>
-                )
-              }
-              <select onChange={this.handleBaseURLSelectChange}>
-                <option value=""> -- </option>
-                {renderServerOptions()}
-              </select>
-            </div>
-          </div>
-          {
-            this.props.useWalletService && (
-              <div className="row mt-3">
-                <div className="col-12">
-                  <p className="input-label">{t`Real-time server`}:</p>
-                  <select onChange={this.handleWsURLSelectChange}>
-                    <option value=""> -- </option>
-                    {renderWsServerOptions()}
-                  </select>
-                </div>
-              </div>
-            )
-          }
-          <div className="form-check checkbox-wrapper mt-3">
-            <input className="form-check-input" type="checkbox" id="newServerCheckbox" onChange={this.handleCheckboxChange} />
-            <label className="form-check-label" htmlFor="newServerCheckbox">
-              {t`Select a new server`}
-            </label>
-          </div>
-          <div ref="newServerWrapper" className="mt-3" style={{display: 'none'}}>
-            { this.props.useWalletService && (
+  return (
+    <div className="content-wrapper">
+      <p><strong>{t`Select one of the default servers to connect or choose a new one`}</strong></p>
+      <form onSubmit={e => { e.preventDefault(); }}>
+        <div className="row mt-3">
+          <div className="col-12">
+            { useWalletService && (
                 <p className="input-label">{t`Base server`}:</p>
               )
             }
-            <input type="text" placeholder={t`New server`} ref="newServer" className="form-control col-4" />
-
-            { this.props.useWalletService && (
-                <>
-                  <p className="input-label">{t`Real-time server`}:</p>
-                  <input type="text" placeholder={t`New real-time server`} ref="newWsServer" className="form-control col-4" />
-                </>
-              )
-            }
+            <select onChange={handleBaseURLSelectChange}>
+              <option value=""> -- </option>
+              {renderServerOptions()}
+            </select>
           </div>
-          {(!LOCAL_STORE.isHardwareWallet()) && <input required ref="pin" type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />}
-        </form>
-        <div className="d-flex flex-row align-items-center mt-3">
-          <button onClick={this.serverSelected} type="button" className="btn btn-hathor mr-3">{t`Connect to server`}</button>
-          {this.state.loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
         </div>
-        <p className="text-danger mt-3">{this.state.errorMessage}</p>
+        {
+          useWalletService && (
+            <div className="row mt-3">
+              <div className="col-12">
+                <p className="input-label">{t`Real-time server`}:</p>
+                <select onChange={handleWsURLSelectChange}>
+                  <option value=""> -- </option>
+                  {renderWsServerOptions()}
+                </select>
+              </div>
+            </div>
+          )
+        }
+        <div className="form-check checkbox-wrapper mt-3">
+          <input className="form-check-input" type="checkbox" id="newServerCheckbox" onChange={handleCheckboxChange} />
+          <label className="form-check-label" htmlFor="newServerCheckbox">
+            {t`Select a new server`}
+          </label>
+        </div>
+        <div ref={newServerWrapperRef} className="mt-3" style={{display: 'none'}}>
+          { useWalletService && (
+              <p className="input-label">{t`Base server`}:</p>
+            )
+          }
+          <input type="text" placeholder={t`New server`} ref={newServerRef} className="form-control col-4" />
+
+          { useWalletService && (
+              <>
+                <p className="input-label">{t`Real-time server`}:</p>
+                <input type="text" placeholder={t`New real-time server`} ref={newWsServerRef} className="form-control col-4" />
+              </>
+            )
+          }
+        </div>
+        {(!isHardwareWallet) && <input required ref={pinRef} type="password" pattern='[0-9]{6}' inputMode='numeric' autoComplete="off" placeholder={t`PIN`} className="form-control col-4 mt-3" />}
+      </form>
+      <div className="d-flex flex-row align-items-center mt-3">
+        <button onClick={serverSelected} type="button" className="btn btn-hathor mr-3">{t`Connect to server`}</button>
+        {loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
       </div>
-    )
-  }
+      <p className="text-danger mt-3">{errorMessage}</p>
+    </div>
+  )
 }
 
-export default connect(mapStateToProps)(Server);
+export default Server;
