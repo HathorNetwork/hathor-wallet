@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
@@ -13,7 +13,7 @@ import SpanFmt from './SpanFmt';
 import { useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
 
 /**
  * DOM Identifier for the modal

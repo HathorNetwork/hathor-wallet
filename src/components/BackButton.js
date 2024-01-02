@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
 
 
 /**

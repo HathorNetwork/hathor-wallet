@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
 import { t } from 'ttag';
 import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
