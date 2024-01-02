@@ -153,11 +153,11 @@ class Root extends React.Component {
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <StartedRoute exact path="/hardware_wallet" component={StartHardwareWallet} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
-        <Route exact path="/welcome" component={Welcome} />
-        <Route exact path="/loading_addresses" component={LoadingAddresses} />
-        <Route exact path="/permission" component={SentryPermission} />
+        <Route exact path="/welcome" children={<Welcome />} />
+        <Route exact path="/loading_addresses" children={<LoadingAddresses />} />
+        <Route exact path="/permission" children={<SentryPermission />} />
         <StartedRoute exact path="" component={Wallet} loaded={true} />
-        <Route path="" component={Page404} />
+        <Route path="" children={<Page404 />} />
       </Switch>
     )
   }
@@ -319,7 +319,7 @@ const returnDefaultComponent = (Component, props) => {
         <div className='component-div h-100'>
           <Navigation {...props}/>
           <Component {...props} />
-          <RequestErrorModal {...props} />
+          <RequestErrorModal />
         </div>
       );
     }

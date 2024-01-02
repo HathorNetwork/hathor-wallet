@@ -154,7 +154,7 @@ class LockedWallet extends React.Component {
             </div>
           </div>
         </div>
-        <RequestErrorModal {...this.props} />
+        <RequestErrorModal />
       </div>
     )
   }

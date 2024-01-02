@@ -154,7 +154,7 @@ class ChoosePassphrase extends React.Component {
 
     return (
       <div className="content-wrapper flex align-items-center">
-        <BackButton {...this.props} />
+        <BackButton />
         <h3 className="mt-4 mb-5">{t`Set Passphrase`}</h3>
         <div className="d-flex align-items-start flex-column">
           <p>{t`Adding a passphrase is an advanced feature, and you should not use it unless you know what you are doing.`}</p>

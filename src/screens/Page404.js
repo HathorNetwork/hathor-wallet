@@ -16,11 +16,11 @@ import BackButton from '../components/BackButton';
  *
  * @memberof Screens
  */
-const Page404 = (props) => {
+const Page404 = () => {
   return (
     <div className="outside-content-wrapper">
       <div className="inside-white-wrapper col-sm-12 col-md-8">
-        <BackButton {...props} />
+        <BackButton />
         <div>
           <div className="d-flex align-items-center flex-column">
             <img className="hathor-logo" src={logo} alt="" />
