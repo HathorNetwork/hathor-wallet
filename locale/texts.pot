@@ -684,7 +684,7 @@ msgstr ""
 msgid "**Real-time server:** You are connected to ${ wsServerURL }"
 msgstr ""
 
-#: src/components/RequestError.js:181
+#: src/components/RequestError.js:162
 #: src/screens/Settings.js:334
 msgid "Change server"
 msgstr ""
@@ -1721,7 +1721,7 @@ msgstr ""
 msgid "Both fields must be equal"
 msgstr ""
 
-#: src/components/RequestError.js:99
+#: src/components/RequestError.js:94
 msgid ""
 "There was an error fetching your transactions from the server.\n"
 "This might be caused by some reasons: (i) the server may be fully loaded, "
@@ -1730,46 +1730,46 @@ msgid ""
 "We advise you to wait a few seconds and retry your request."
 msgstr ""
 
-#: src/components/RequestError.js:102
+#: src/components/RequestError.js:97
 msgid ""
 "Rate limit exceeded. Sorry about that. You should wait a few seconds and "
 "try again. What do you want to do?"
 msgstr ""
 
-#: src/components/RequestError.js:104
+#: src/components/RequestError.js:99
 msgid "Your request failed to reach the server. What do you want to do?"
 msgstr ""
 
-#: src/components/RequestError.js:116
+#: src/components/RequestError.js:111
 msgid "URL:"
 msgstr ""
 
-#: src/components/RequestError.js:117
+#: src/components/RequestError.js:112
 msgid "Method:"
 msgstr ""
 
-#: src/components/RequestError.js:118
+#: src/components/RequestError.js:113
 msgid "Response status code:"
 msgstr ""
 
-#: src/components/RequestError.js:168
+#: src/components/RequestError.js:149
 msgid "Request failed"
 msgstr ""
 
-#: src/components/RequestError.js:175
+#: src/components/RequestError.js:156
 #, javascript-format
 msgid "You are connected to **${ serverURL }**"
 msgstr ""
 
-#: src/components/RequestError.js:176
+#: src/components/RequestError.js:157
 msgid "Show advanced data"
 msgstr ""
 
-#: src/components/RequestError.js:177
+#: src/components/RequestError.js:158
 msgid "Hide advanced data"
 msgstr ""
 
-#: src/components/RequestError.js:182
+#: src/components/RequestError.js:163
 msgid "Retry request"
 msgstr ""
 
