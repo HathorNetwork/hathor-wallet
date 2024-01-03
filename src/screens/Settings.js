@@ -5,132 +5,112 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { t } from 'ttag';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import HathorAlert from '../components/HathorAlert';
 import SpanFmt from '../components/SpanFmt';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../constants';
 import { walletReset } from '../actions';
 import LOCAL_STORE from '../storage';
-
-const mapStateToProps = (state) => {
-  return {
-    useWalletService: state.useWalletService,
-    registeredTokens: state.tokens,
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    walletReset: () => dispatch(walletReset()),
-  };
-};
 
 /**
  * Settings screen
  *
  * @memberof Screens
  */
-class Settings extends React.Component {
-  static contextType = GlobalModalContext;
+function Settings() {
+  const context = useContext(GlobalModalContext);
+  const alertCopiedRef = useRef();
+  const dispatch = useDispatch();
+  const history = useHistory();
 
-  constructor(props) {
-    super(props);
+  /** isNotificationOne {boolean} state to update if notification is turned on or off */
+  const [isNotificationOn, setIsNotificationOn] = useState(null);
+  /** zeroBalanceTokensHidden {boolean} if zero balance tokens are hidden or not */
+  const [zeroBalanceTokensHidden, setZeroBalanceTokensHidden] = useState(null);
+  /** now {Date} state to store the date which is updated every second */
+  const [now, setNow] = useState(new Date());
+  /** showTimestamp {boolean} If should show timestamp or full date in date and time */
+  const [showTimestamp, setShowTimestamp] = useState(false);
 
-    this.alertCopiedRef = React.createRef();
-  }
+  const { useWalletService, registeredTokens } = useSelector(state => ({
+    useWalletService: state.useWalletService,
+    registeredTokens: state.tokens,
+  }))
 
-  /**
-   * confirmData {Object} data for the notification confirm modal (title, body and handleYes)
-   * isNotificationOne {boolean} state to update if notification is turned on or off
-   * now {Date} state to store the date which is updated every second
-   * showTimestamp {boolean} If should show timestamp or full date in date and time
-   */
-  state = {
-    confirmData: {},
-    isNotificationOn: null,
-    zeroBalanceTokensHidden: null,
-    now: new Date(),
-    showTimestamp: false,
-  }
+  useEffect(() => {
+    setIsNotificationOn(wallet.isNotificationOn());
+    setZeroBalanceTokensHidden(wallet.areZeroBalanceTokensHidden());
 
-  // Stores the setTimeout interval of the date update
-  dateSetTimeoutInterval = null
-
-  componentDidMount() {
-    this.setState({
-      isNotificationOn: wallet.isNotificationOn(),
-      zeroBalanceTokensHidden: wallet.areZeroBalanceTokensHidden()
-    });
-
-    this.dateSetTimeoutInterval = setInterval(() => {
-      this.setState({ now: new Date() });
+    // Updates the screen date and time
+    const dateInterval = setInterval(() => {
+      setNow(new Date());
     }, 1000);
-  }
 
-  componentWillUnmount() {
-    clearInterval(this.dateSetTimeoutInterval);
-  }
+    return () => {
+      clearInterval(dateInterval);
+    }
+  }, []);
 
   /**
    * Method called when user confirmed the reset, then we reset all data and redirect to Welcome screen
    */
-  handleReset = () => {
-    this.context.hideModal();
-    this.props.walletReset();
-    this.props.history.push('/welcome/');
+  const handleReset = () => {
+    context.hideModal();
+    dispatch(walletReset());
+    history.push('/welcome/');
   }
 
   /**
    * When user clicks Reset button we open a modal to confirm it
    */
-  resetClicked = () => {
-    this.context.showModal(MODAL_TYPES.RESET_ALL_DATA, {
-      success: this.handleReset,
+  const resetClicked = () => {
+    context.showModal(MODAL_TYPES.RESET_ALL_DATA, {
+      success: handleReset,
     });
   }
 
   /**
    * When user clicks Add Passphrase button we redirect to Passphrase screen
    */
-  addPassphrase = () => {
+  const addPassphrase = () => {
     if (LOCAL_STORE.isHardwareWallet()) {
-      this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
+      context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
         title: t`Complete action on your hardware wallet`,
         children: (
           <div>
             <p>{t`You can set your passphrase directly on your hardware wallet.`}</p>
             <p>
               {str2jsx(t`|fn:More info| about this on Ledger.`,
-                       {fn: (x, i) => <a key={i} onClick={this.openLedgerLink} href="true">{x}</a>})}
+                       {fn: (x, i) => <a key={i} onClick={openLedgerLink} href="true">{x}</a>})}
             </p>
           </div>
         )
       });
     } else {
-      this.props.history.push('/wallet/passphrase/');
+      history.push('/wallet/passphrase/');
     }
   }
 
   /**
    * When user clicks Export Registered Tokens button, then we save all config strings in a txt file
    */
-  exportTokens = () => {
+  const exportTokens = () => {
     // The file text will be the configuration strings of each registered token, one each line
     //
     // First we get all token configs from registered tokens array,
     // remove the HTR token with filter, then map to each configuration string
-    const configurationStrings = this.props.registeredTokens.filter((token) => {
+    const configurationStrings = registeredTokens.filter((token) => {
       return token.uid !== hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
     }).map((token) => {
       return hathorLib.tokensUtils.getConfigurationString(token.uid, token.name, token.symbol);
@@ -154,8 +134,8 @@ class Settings extends React.Component {
   /**
    * When user clicks Change Server button we redirect to Change Server screen
    */
-  changeServer = () => {
-    this.props.history.push('/server/');
+  const changeServer = () => {
+    history.push('/server/');
   }
 
   /**
@@ -164,34 +144,23 @@ class Settings extends React.Component {
    *
    * @param {Object} e Event emitted on link click
    */
-  toggleNotificationSettings = (e) => {
+  const toggleNotificationSettings = (e) => {
     e.preventDefault();
-    let newState = {};
+    let title, body;
+
     if (wallet.isNotificationOn()) {
-      newState = {
-        confirmData: {
-          title: t`Turn notifications off`,
-          body: t`Are you sure you don't want to receive wallet notifications?`,
-          handleYes: this.handleToggleNotificationSettings
-        }
-      };
+      title = t`Turn notifications off`;
+      body = t`Are you sure you don't want to receive wallet notifications?`;
     } else {
-      newState = {
-        confirmData: {
-          title: t`Turn notifications on`,
-          body: t`Are you sure you want to receive wallet notifications?`,
-          handleYes: this.handleToggleNotificationSettings
-        }
-      };
+      title = t`Turn notifications on`;
+      body = t`Are you sure you want to receive wallet notifications?`;
     }
 
-    this.setState(newState, () => {
-      this.context.showModal(MODAL_TYPES.CONFIRM, {
-        title: this.state.confirmData.title,
-        body: this.state.confirmData.body,
-        handleYes: this.state.confirmData.handleYes,
-      });
-    })
+    context.showModal(MODAL_TYPES.CONFIRM, {
+      title,
+      body,
+      handleYes: handleToggleNotificationSettings,
+    });
   }
 
   /**
@@ -200,41 +169,29 @@ class Settings extends React.Component {
    *
    * @param {Object} e Event emitted on link click
    */
-  toggleZeroBalanceTokens = (e) => {
+  const toggleZeroBalanceTokens = (e) => {
     e.preventDefault();
-    let newState = {};
+    let title, body;
 
     if (wallet.areZeroBalanceTokensHidden()) {
-      newState = {
-        confirmData: {
-          title: t`Show zero-balance tokens`,
-          body: t`Are you sure you want to show all tokens, including those with zero balance?`,
-          handleYes: this.handleToggleZeroBalanceTokens
-        },
-      };
+      title = t`Show zero-balance tokens`;
+      body = t`Are you sure you want to show all tokens, including those with zero balance?`;
     } else {
-      newState = {
-        confirmData: {
-          title: t`Hide zero-balance tokens`,
-          body: t`Are you sure you want to hide tokens with zero balance?`,
-          handleYes: this.handleToggleZeroBalanceTokens
-        },
-      };
+      title = t`Hide zero-balance tokens`;
+      body = t`Are you sure you want to hide tokens with zero balance?`;
     }
 
-    this.setState(newState, () => {
-      this.context.showModal(MODAL_TYPES.CONFIRM, {
-        title: this.state.confirmData.title,
-        body: this.state.confirmData.body,
-        handleYes: this.state.confirmData.handleYes,
-      });
+    context.showModal(MODAL_TYPES.CONFIRM, {
+      title,
+      body,
+      handleYes: handleToggleZeroBalanceTokens,
     });
   }
 
   /**
    * Activates or deactivates the option to hide zero-balance tokens from the UI.
    */
-  handleToggleZeroBalanceTokens = () => {
+  const handleToggleZeroBalanceTokens = () => {
     const areZeroBalanceTokensHidden = wallet.areZeroBalanceTokensHidden();
 
     if (areZeroBalanceTokensHidden) {
@@ -242,22 +199,22 @@ class Settings extends React.Component {
     } else {
       wallet.hideZeroBalanceTokens();
     }
-    this.setState({ zeroBalanceTokensHidden: !areZeroBalanceTokensHidden });
-    this.context.hideModal();
+    setZeroBalanceTokensHidden(!areZeroBalanceTokensHidden);
+    context.hideModal();
   }
 
   /**
    * Called after user confirms the notification toggle action
    * Toggle user notification settings, update screen state and close the confirm modal
    */
-  handleToggleNotificationSettings = () => {
+  const handleToggleNotificationSettings = () => {
     if (wallet.isNotificationOn()) {
       wallet.turnNotificationOff();
     } else {
       wallet.turnNotificationOn();
     }
-    this.setState({ isNotificationOn: wallet.isNotificationOn() });
-    this.context.hideModal();
+    setIsNotificationOn(wallet.isNotificationOn());
+    context.hideModal();
   }
 
   /**
@@ -265,7 +222,7 @@ class Settings extends React.Component {
    *
    * @param {Object} e Event for the click
    */
-  openLedgerLink = (e) => {
+  const openLedgerLink = (e) => {
     e.preventDefault();
     const url = 'https://support.ledger.com/hc/en-us/articles/115005214529-Advanced-passphrase-security';
     helpers.openExternalURL(url);
@@ -274,8 +231,8 @@ class Settings extends React.Component {
   /**
    * Called when user clicks to untrust all tokens, then opens the modal
    */
-  untrustClicked = () => {
-    this.context.showModal(MODAL_TYPES.RESET_TOKEN_SIGNATURES);
+  const untrustClicked = () => {
+    context.showModal(MODAL_TYPES.RESET_TOKEN_SIGNATURES);
   }
 
   /**
@@ -285,10 +242,10 @@ class Settings extends React.Component {
    * @param {string} text Text copied to clipboard
    * @param {*} result Null in case of error
    */
-  copied = (text, result) => {
+  const copyClicked = (text, result) => {
     if (result) {
       // If copied with success
-      this.alertCopiedRef.current.show(1000);
+      alertCopiedRef.current.show(1000);
     }
   }
 
@@ -297,7 +254,7 @@ class Settings extends React.Component {
    *
    * @param {Object} e Event for the click
    */
-  goToTermsOfService = (e) => {
+  const goToTermsOfService = (e) => {
     e.preventDefault();
     helpers.openExternalURL(TERMS_OF_SERVICE_URL);
   }
@@ -307,71 +264,69 @@ class Settings extends React.Component {
    *
    * @param {Object} e Event for the click
    */
-  goToPrivacyPolicy = (e) => {
+  const goToPrivacyPolicy = (e) => {
     e.preventDefault();
     helpers.openExternalURL(PRIVACY_POLICY_URL);
   }
 
-  render() {
-    const serverURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
-    const wsServerURL = this.props.useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
-    const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
-    const uniqueIdentifier = helpers.getUniqueId();
+  const serverURL = useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
+  const wsServerURL = useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
+  const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
+  const uniqueIdentifier = helpers.getUniqueId();
 
-    return (
-      <div className="content-wrapper settings">
-        <BackButton />
-        <div>
-          <p onDoubleClick={() => this.setState({ showTimestamp: !this.state.showTimestamp })}><strong>{t`Date and time:`}</strong> {this.state.showTimestamp ? hathorLib.dateFormatter.dateToTimestamp(this.state.now) : this.state.now.toString()}</p>
-        </div>
-        <div>
-          <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
-          {
-            this.props.useWalletService && (
-              <p><SpanFmt>{t`**Real-time server:** You are connected to ${wsServerURL}`}</SpanFmt></p>
-            )
-          }
-          <button className="btn btn-hathor" onClick={this.changeServer}>{t`Change server`}</button>
-        </div>
-        <hr />
-
-        <div>
-          <h4>{t`Advanced Settings`}</h4>
-          <div className="d-flex flex-column align-items-start mt-4">
-            <p><strong>{t`Allow notifications:`}</strong> {this.state.isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={this.toggleNotificationSettings}> {t`Change`} </a></p>
-            <p>
-              <strong>{t`Hide zero-balance tokens:`}</strong> {
-              this.state.zeroBalanceTokensHidden
-                ? <span>{t`Yes`}</span>
-                : <span>{t`No`}</span>
-              }
-              <a className="ml-3" href="true" onClick={this.toggleZeroBalanceTokens}> {t`Change`} </a>
-              <i className="fa fa-question-circle pointer ml-3"
-                 title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallet.`}>
-              </i>
-            </p>
-            <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
-            <CopyToClipboard text={uniqueIdentifier} onCopy={this.copied}>
-              <span>
-                <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
-              </span>
-            </CopyToClipboard>
-            <button className="btn btn-hathor" onClick={this.exportTokens}>{t`Export Registered Tokens`}</button>
-            <button className="btn btn-hathor mt-4" onClick={this.addPassphrase}>{t`Set a passphrase`}</button>
-            {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={this.untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
-            <button className="btn btn-hathor mt-4" onClick={this.resetClicked}>{t`Reset all data`}</button>
-          </div>
-        </div>
-        <hr />
-
-        <div className="pb-5">
-          <div><a href="true" onClick={this.goToTermsOfService}>Terms of Service</a></div>
-          <div><a href="true" onClick={this.goToPrivacyPolicy}>Privacy Policy</a></div>
-        </div>
-        <HathorAlert ref={this.alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
+  return (
+    <div className="content-wrapper settings">
+      <BackButton />
+      <div>
+        <p onDoubleClick={() => setShowTimestamp(!showTimestamp)}><strong>{t`Date and time:`}</strong> {showTimestamp ? hathorLib.dateFormatter.dateToTimestamp(now) : now.toString()}</p>
       </div>
-    );
-  }
+      <div>
+        <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
+        {
+          useWalletService && (
+            <p><SpanFmt>{t`**Real-time server:** You are connected to ${wsServerURL}`}</SpanFmt></p>
+          )
+        }
+        <button className="btn btn-hathor" onClick={changeServer}>{t`Change server`}</button>
+      </div>
+      <hr />
+
+      <div>
+        <h4>{t`Advanced Settings`}</h4>
+        <div className="d-flex flex-column align-items-start mt-4">
+          <p><strong>{t`Allow notifications:`}</strong> {isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={toggleNotificationSettings}> {t`Change`} </a></p>
+          <p>
+            <strong>{t`Hide zero-balance tokens:`}</strong> {
+            zeroBalanceTokensHidden
+              ? <span>{t`Yes`}</span>
+              : <span>{t`No`}</span>
+            }
+            <a className="ml-3" href="true" onClick={toggleZeroBalanceTokens}> {t`Change`} </a>
+            <i className="fa fa-question-circle pointer ml-3"
+               title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallet.`}>
+            </i>
+          </p>
+          <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
+          <CopyToClipboard text={uniqueIdentifier} onCopy={copyClicked}>
+            <span>
+              <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
+            </span>
+          </CopyToClipboard>
+          <button className="btn btn-hathor" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
+          <button className="btn btn-hathor mt-4" onClick={addPassphrase}>{t`Set a passphrase`}</button>
+          {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
+          <button className="btn btn-hathor mt-4" onClick={resetClicked}>{t`Reset all data`}</button>
+        </div>
+      </div>
+      <hr />
+
+      <div className="pb-5">
+        <div><a href="true" onClick={goToTermsOfService}>Terms of Service</a></div>
+        <div><a href="true" onClick={goToPrivacyPolicy}>Privacy Policy</a></div>
+      </div>
+      <HathorAlert ref={alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
+    </div>
+  );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Settings);
+export default Settings;
