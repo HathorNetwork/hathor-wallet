@@ -12,7 +12,7 @@ import logo from '../assets/images/hathor-white-logo.png';
 import Version from './Version';
 import ServerStatus from './ServerStatus';
 import helpers from '../utils/helpers';
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 
 /**
  * Component that shows a navigation bar with the menu options
