@@ -10,7 +10,7 @@ import { t } from 'ttag'
 
 import logo from '../assets/images/hathor-logo.png';
 import InitialImages from '../components/InitialImages';
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
 
 
 /**

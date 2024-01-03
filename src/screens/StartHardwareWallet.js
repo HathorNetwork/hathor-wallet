@@ -130,8 +130,8 @@ function StartHardwareWallet() {
       if (IPC_RENDERER) {
         console.log(`listeners removed`)
         // Remove listeners
-        IPC_RENDERER.removeAllListeners("ledger:version");
-        IPC_RENDERER.removeAllListeners("ledger:publicKeyData");
+        IPC_RENDERER.removeAllListeners('ledger:version');
+        IPC_RENDERER.removeAllListeners('ledger:publicKeyData');
       }
     }
   }, [])

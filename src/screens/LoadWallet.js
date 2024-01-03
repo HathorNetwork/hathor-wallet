@@ -13,7 +13,7 @@ import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import logo from '../assets/images/hathor-logo.png';
 import { updatePassword, updatePin } from '../actions/index';
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';

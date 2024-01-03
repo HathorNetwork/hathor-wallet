@@ -14,12 +14,12 @@ import SpanFmt from '../components/SpanFmt';
 import InitialImages from '../components/InitialImages';
 import HathorAlert from '../components/HathorAlert';
 import { str2jsx } from '../utils/i18n';
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 import { updateLedgerClosed } from '../actions/index';
 import LOCAL_STORE from '../storage';
-import { useHistory } from "react-router-dom";
-import { LEDGER_GUIDE_URL } from "../constants";
-import helpers from "../utils/helpers";
+import { useHistory } from 'react-router-dom';
+import { LEDGER_GUIDE_URL } from '../constants';
+import helpers from '../utils/helpers';
 
 /**
  * Screen used to select between hardware wallet or software wallet

@@ -14,7 +14,7 @@ import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
 import { updatePassword, updatePin, updateWords } from '../actions/index';
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
