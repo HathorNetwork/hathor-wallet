@@ -25,8 +25,8 @@
   "version": "0.27.1-rc2",
   "private": true,
   "dependencies": {
-    "@hathor/wallet-lib": "1.0.2",
-    "@ledgerhq/hw-transport-node-hid": "6.27.1",
+    "@hathor/wallet-lib": "1.0.4",
+    "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@sentry/electron": "3.0.7",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.6.1",
@@ -108,7 +108,9 @@
     },
     "mac": {
       "provisioningProfile": "keys/mac_production.provisionprofile",
-      "notarize": { "teamId": "TEAM-ID-HERE" },
+      "notarize": {
+        "teamId": "TEAM-ID-HERE"
+      },
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",

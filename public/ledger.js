@@ -108,10 +108,12 @@ class Ledger {
     this.subscriptor = Transport.listen({
       next: e => {
         if (e.type === 'add') {
+          console.log(`Device detected: ${e.deviceModel?.id}`);
           // We get this event when any app is opened on Ledger (Bitcoin, Ethereum, Hathor, etc). We have
           // the getVersion call next to make sure we're on the Hathor app.
           this.getVersion();
         } else if (e.type === 'remove') {
+          console.log(`Device removed: ${e.deviceModel?.id}`);
           // This is called in some situations
           // - Usb disconnected
           // - When user quits an app
@@ -134,7 +136,10 @@ class Ledger {
           }
         }
       },
-      error: error => {},
+      error: error => {
+        console.log('Error communicating with device');
+        console.log(error);
+      },
       complete: () => {}
     })
 
@@ -175,11 +180,21 @@ class Ledger {
 
     const { command, p1, p2, data, resolve, reject } = this.sendQueue.shift();
     this.getTransport()
-      .then(transport => transport.send(ledgerCLA, command, p1, p2, data))
-      .then((response) => { resolve(response) }, (error) => { reject(error) })
+      .then(transport => {
+        console.log(`Sending to ledger ${command} ${p1} ${p2}`);
+        return transport.send(ledgerCLA, command, p1, p2, data);
+      })
+      .then((response) => {
+        console.log(`Got response ${response.toString('hex')}`);
+        resolve(response);
+      }, (error) => {
+          console.log(error);
+          reject(error);
+        })
       .finally(() => {
-      // When done, check the queue again
-      this.checkSendQueue();
+        console.log('Finished sending command, will retry queue');
+        // When done, check the queue again
+        this.checkSendQueue();
     });
   }
 
@@ -190,7 +205,7 @@ class Ledger {
    * @return {Promise} Promise resolved when there's a response from Ledger
    */
   sendToQueue = (command, p1, p2, data) => {
-    console.log('sending to Ledger:', command, p1, p2);
+    console.log('sending to queue:', command, p1, p2);
     const promise = new Promise((resolve, reject) => {
       const element = {
         command,
@@ -240,7 +255,9 @@ class Ledger {
         this.transport.decorateAppAPIMethods(this, this.methods, "HTR");
         resolve(transport);
       }, (e) => {
-        reject(Ledger.parseLedgerError(e));
+          console.log('Error creating transport');
+          console.log(e);
+          reject(Ledger.parseLedgerError(e));
       });
     });
     return promiseMethod;
