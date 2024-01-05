@@ -7,11 +7,11 @@ msgstr ""
 msgid "I want to reset my wallet"
 msgstr ""
 
-#: src/screens/AddressList.js:154
+#: src/screens/AddressList.js:160
 msgid "Search address"
 msgstr ""
 
-#: src/screens/AddressList.js:178
+#: src/screens/AddressList.js:184
 msgid "Addresses"
 msgstr ""
 
@@ -20,105 +20,104 @@ msgstr ""
 #: src/components/atomic-swap/ModalAtomicReceive.js:106
 #: src/components/atomic-swap/ModalAtomicSend.js:333
 #: src/components/tokens/TokenMint.js:146
-#: src/screens/AddressList.js:185
+#: src/screens/AddressList.js:191
 #: src/screens/CreateNFT.js:339
 #: src/screens/CreateToken.js:313
 msgid "Address"
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicSend.js:84
-#: src/screens/AddressList.js:186
+#: src/screens/AddressList.js:192
 msgid "Index"
 msgstr ""
 
-#: src/screens/AddressList.js:187
+#: src/screens/AddressList.js:193
 msgid "Number of transactions"
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:56
+#: src/screens/ChoosePassphrase.js:60
 msgid "To set a blank passphrase mark the corresponding checkbox above."
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:62
+#: src/screens/ChoosePassphrase.js:66
 msgid "Passphrase and confirm passphrase must be equal"
 msgstr ""
 
 #: src/components/ModalBackupWords.js:118
 #: src/components/ModalResetAllData.js:81
-#: src/screens/ChoosePassphrase.js:67
+#: src/screens/ChoosePassphrase.js:71
 msgid "Invalid password"
 msgstr ""
 
 #: src/components/ModalPin.js:82
-#: src/screens/ChoosePassphrase.js:72
+#: src/screens/ChoosePassphrase.js:76
 #: src/screens/LockedWallet.js:78
-#: src/screens/Server.js:130
 msgid "Invalid PIN"
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:79
-#: src/screens/Settings.js:360
+#: src/screens/ChoosePassphrase.js:83
+#: src/screens/Settings.js:316
 #.  Everything is fine, so show confirm modal
 msgid "Set a passphrase"
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:83
+#: src/screens/ChoosePassphrase.js:87
 #.  Everything is fine, so show confirm modal
 msgid "Are you sure you want to change your whole wallet setting this passphrase?"
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:123
+#: src/screens/ChoosePassphrase.js:127
 msgid "I understand the risks of adding a passphrase."
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:140
+#: src/screens/ChoosePassphrase.js:147
 msgid "I want to set a blank passphrase."
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:144
+#: src/screens/ChoosePassphrase.js:151
 msgid "Please, enter your password and PIN to confirm the operation."
 msgstr ""
 
 #: src/components/ChoosePassword.js:51
-#: src/screens/ChoosePassphrase.js:147
+#: src/screens/ChoosePassphrase.js:154
 msgid "Password"
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:148
+#: src/screens/ChoosePassphrase.js:157
 #: src/screens/LockedWallet.js:137
 #: src/screens/Server.js:391
 msgid "PIN"
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:158
+#: src/screens/ChoosePassphrase.js:166
 msgid "Set Passphrase"
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:160
+#: src/screens/ChoosePassphrase.js:168
 msgid ""
 "Adding a passphrase is an advanced feature, and you should not use it "
 "unless you know what you are doing."
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:161
+#: src/screens/ChoosePassphrase.js:169
 msgid ""
 "It will change all your addresses, so it is like generating a completely "
 "new wallet."
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:162
+#: src/screens/ChoosePassphrase.js:170
 msgid ""
 "You should take note of your passphrase for future use. If you lose your "
 "passphrase, you will never have access to your tokens again."
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:166
+#: src/screens/ChoosePassphrase.js:174
 #: src/screens/SentryPermission.js:89
 #: src/screens/SoftwareWalletWarning.js:55
 msgid "Continue"
 msgstr ""
 
-#: src/screens/ChoosePassphrase.js:167
+#: src/screens/ChoosePassphrase.js:175
 msgid "Confirm"
 msgstr ""
 
@@ -394,7 +393,7 @@ msgstr ""
 
 #: src/components/ModalResetAllData.js:134
 #: src/screens/LockedWallet.js:141
-#: src/screens/Settings.js:362
+#: src/screens/Settings.js:318
 msgid "Reset all data"
 msgstr ""
 
@@ -587,13 +586,13 @@ msgstr ""
 msgid "I allow Hathor Wallet to report error information to Hathor team."
 msgstr ""
 
+#: src/screens/Server.js:76
 #: src/screens/Server.js:86
-#: src/screens/Server.js:96
 msgid "New server is not valid"
 msgstr ""
 
-#: src/screens/Server.js:91
-#: src/screens/Server.js:100
+#: src/screens/Server.js:81
+#: src/screens/Server.js:90
 msgid "New real-time server is not valid"
 msgstr ""
 
@@ -627,137 +626,137 @@ msgstr ""
 msgid "Connect to server"
 msgstr ""
 
-#: src/screens/Settings.js:109
+#: src/screens/Settings.js:89
 msgid "Complete action on your hardware wallet"
 msgstr ""
 
-#: src/screens/Settings.js:112
+#: src/screens/Settings.js:92
 msgid "You can set your passphrase directly on your hardware wallet."
 msgstr ""
 
-#: src/screens/Settings.js:114
+#: src/screens/Settings.js:94
 msgid "|fn:More info| about this on Ledger."
 msgstr ""
 
-#: src/screens/Settings.js:173
+#: src/screens/Settings.js:152
 msgid "Turn notifications off"
 msgstr ""
 
-#: src/screens/Settings.js:174
+#: src/screens/Settings.js:153
 msgid "Are you sure you don't want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:181
+#: src/screens/Settings.js:155
 msgid "Turn notifications on"
 msgstr ""
 
-#: src/screens/Settings.js:182
+#: src/screens/Settings.js:156
 msgid "Are you sure you want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:210
+#: src/screens/Settings.js:177
 msgid "Show zero-balance tokens"
 msgstr ""
 
-#: src/screens/Settings.js:211
+#: src/screens/Settings.js:178
 msgid "Are you sure you want to show all tokens, including those with zero balance?"
 msgstr ""
 
-#: src/screens/Settings.js:218
+#: src/screens/Settings.js:180
 msgid "Hide zero-balance tokens"
 msgstr ""
 
-#: src/screens/Settings.js:219
+#: src/screens/Settings.js:181
 msgid "Are you sure you want to hide tokens with zero balance?"
 msgstr ""
 
-#: src/screens/Settings.js:325
+#: src/screens/Settings.js:281
 msgid "Date and time:"
 msgstr ""
 
-#: src/screens/Settings.js:328
+#: src/screens/Settings.js:284
 #, javascript-format
 msgid "**Server:** You are connected to ${ serverURL }"
 msgstr ""
 
-#: src/screens/Settings.js:331
+#: src/screens/Settings.js:287
 msgid "**Real-time server:** You are connected to ${ wsServerURL }"
 msgstr ""
 
-#: src/components/RequestError.js:181
-#: src/screens/Settings.js:334
+#: src/components/RequestError.js:162
+#: src/screens/Settings.js:290
 msgid "Change server"
 msgstr ""
 
-#: src/screens/Settings.js:339
+#: src/screens/Settings.js:295
 msgid "Advanced Settings"
 msgstr ""
 
-#: src/screens/Settings.js:341
+#: src/screens/Settings.js:297
 msgid "Allow notifications:"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:170
 #: src/components/TokenGeneralInfo.js:138
-#: src/screens/Settings.js:341
-#: src/screens/Settings.js:345
-#: src/screens/Settings.js:353
+#: src/screens/Settings.js:297
+#: src/screens/Settings.js:301
+#: src/screens/Settings.js:309
 msgid "Yes"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:169
 #: src/components/TokenGeneralInfo.js:139
-#: src/screens/Settings.js:341
-#: src/screens/Settings.js:346
-#: src/screens/Settings.js:353
+#: src/screens/Settings.js:297
+#: src/screens/Settings.js:302
+#: src/screens/Settings.js:309
 msgid "No"
 msgstr ""
 
 #: src/components/TokenGeneralInfo.js:141
-#: src/screens/Settings.js:341
-#: src/screens/Settings.js:348
-#: src/screens/Settings.js:353
+#: src/screens/Settings.js:297
+#: src/screens/Settings.js:304
+#: src/screens/Settings.js:309
 msgid "Change"
 msgstr ""
 
-#: src/screens/Settings.js:343
+#: src/screens/Settings.js:299
 msgid "Hide zero-balance tokens:"
 msgstr ""
 
-#: src/screens/Settings.js:350
+#: src/screens/Settings.js:306
 msgid ""
 "When selected, any tokens with a balance of zero will not be displayed "
 "anywhere in the wallet."
 msgstr ""
 
-#: src/screens/Settings.js:353
+#: src/screens/Settings.js:309
 msgid "Automatically report bugs to Hathor:"
 msgstr ""
 
-#: src/screens/Settings.js:356
+#: src/screens/Settings.js:312
 msgid "Unique identifier"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:101
 #: src/components/TokenGeneralInfo.js:164
 #: src/components/WalletAddress.js:174
-#: src/screens/Settings.js:356
+#: src/screens/Settings.js:312
 #: src/screens/atomic-swap/EditSwap.js:90
 #: src/screens/atomic-swap/EditSwap.js:104
 msgid "Copy to clipboard"
 msgstr ""
 
-#: src/screens/Settings.js:359
+#: src/screens/Settings.js:315
 msgid "Export Registered Tokens"
 msgstr ""
 
-#: src/screens/Settings.js:361
+#: src/screens/Settings.js:317
 msgid "Untrust all tokens on Ledger"
 msgstr ""
 
 #: src/components/TxData.js:949
 #: src/components/WalletAddress.js:194
-#: src/screens/Settings.js:371
+#: src/screens/Settings.js:327
 #: src/screens/atomic-swap/EditSwap.js:589
 msgid "Copied to clipboard!"
 msgstr ""
@@ -785,7 +784,7 @@ msgstr ""
 
 #: src/components/ModalLedgerResetTokenSignatures.js:121
 #: src/screens/StartHardwareWallet.js:167
-#: src/screens/TransactionDetail.js:193
+#: src/screens/TransactionDetail.js:159
 #: src/screens/VersionError.js:56
 msgid "Try again"
 msgstr ""
@@ -810,17 +809,17 @@ msgstr ""
 msgid "Connecting to Ledger"
 msgstr ""
 
-#: src/screens/TransactionDetail.js:186
+#: src/screens/TransactionDetail.js:152
 #, javascript-format
-msgid "Transaction with hash ${ _this2.props.match.params.id } not found"
+msgid "Transaction with hash ${ txId } not found"
 msgstr ""
 
-#: src/screens/TransactionDetail.js:189
-msgid "Error retrieving transaction ${ _this2.props.match.params.id }"
+#: src/screens/TransactionDetail.js:155
+msgid "Error retrieving transaction ${ txId }"
 msgstr ""
 
 #: src/components/NFTListElement.js:112
-#: src/screens/TransactionDetail.js:214
+#: src/screens/TransactionDetail.js:171
 msgid "See on explorer"
 msgstr ""
 
@@ -1721,7 +1720,7 @@ msgstr ""
 msgid "Both fields must be equal"
 msgstr ""
 
-#: src/components/RequestError.js:99
+#: src/components/RequestError.js:94
 msgid ""
 "There was an error fetching your transactions from the server.\n"
 "This might be caused by some reasons: (i) the server may be fully loaded, "
@@ -1730,46 +1729,46 @@ msgid ""
 "We advise you to wait a few seconds and retry your request."
 msgstr ""
 
-#: src/components/RequestError.js:102
+#: src/components/RequestError.js:97
 msgid ""
 "Rate limit exceeded. Sorry about that. You should wait a few seconds and "
 "try again. What do you want to do?"
 msgstr ""
 
-#: src/components/RequestError.js:104
+#: src/components/RequestError.js:99
 msgid "Your request failed to reach the server. What do you want to do?"
 msgstr ""
 
-#: src/components/RequestError.js:116
+#: src/components/RequestError.js:111
 msgid "URL:"
 msgstr ""
 
-#: src/components/RequestError.js:117
+#: src/components/RequestError.js:112
 msgid "Method:"
 msgstr ""
 
-#: src/components/RequestError.js:118
+#: src/components/RequestError.js:113
 msgid "Response status code:"
 msgstr ""
 
-#: src/components/RequestError.js:168
+#: src/components/RequestError.js:149
 msgid "Request failed"
 msgstr ""
 
-#: src/components/RequestError.js:175
+#: src/components/RequestError.js:156
 #, javascript-format
 msgid "You are connected to **${ serverURL }**"
 msgstr ""
 
-#: src/components/RequestError.js:176
+#: src/components/RequestError.js:157
 msgid "Show advanced data"
 msgstr ""
 
-#: src/components/RequestError.js:177
+#: src/components/RequestError.js:158
 msgid "Hide advanced data"
 msgstr ""
 
-#: src/components/RequestError.js:182
+#: src/components/RequestError.js:163
 msgid "Retry request"
 msgstr ""
 
