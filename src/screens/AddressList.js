@@ -72,7 +72,7 @@ function AddressList() {
     }
 
     fetchAddresses();
-  }, [wallet]);
+  }, []);
 
   /**
    * Event received from pagination component after a page button in clicked
