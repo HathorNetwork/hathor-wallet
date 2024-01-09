@@ -57,9 +57,6 @@ if (window.require) {
  * @readonly
  */
 const storageKeys = {
-  address: 'wallet:address',
-  lastSharedIndex: 'wallet:lastSharedIndex',
-  data: 'wallet:data',
   sentry: 'wallet:sentry',
   notification: 'wallet:notification',
   hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
