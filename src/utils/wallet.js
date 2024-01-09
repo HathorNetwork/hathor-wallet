@@ -448,6 +448,7 @@ const wallet = {
   async cleanWallet(wallet) {
     await wallet.storage.cleanStorage(true, true);
     LOCAL_STORE.cleanWallet();
+    LOCAL_STORE.cleanAccessData();
     this.cleanWalletRedux(wallet);
   },
 

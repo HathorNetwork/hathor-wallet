@@ -173,7 +173,7 @@ const returnLoadedWalletComponent = (Component, props) => {
   const isServerScreen = props.match.path === '/server';
 
   // If was closed and is loaded we need to redirect to locked screen
-  if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked())) {
+  if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) && (!LOCAL_STORE.isHardwareWallet())) {
     return <Redirect to={{ pathname: '/locked/' }} />;
   }
 
@@ -250,7 +250,7 @@ const returnStartedRoute = (Component, props, rest) => {
     // the locked screen since the wallet would not be able to be started otherwise
     const isServerScreen = props.match.path === '/server';
     // Wallet is locked, go to locked screen
-    if (LOCAL_STORE.isLocked() && !isServerScreen) {
+    if (LOCAL_STORE.isLocked() && !isServerScreen && !LOCAL_STORE.isHardwareWallet()) {
       return <Redirect to={{pathname: '/locked/'}}/>;
     }
 
