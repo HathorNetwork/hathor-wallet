@@ -516,7 +516,7 @@ export default function EditSwap(props) {
 
     // Main screen render
     return <div className="content-wrapper flex align-items-center">
-        <BackButton {...props} />
+        <BackButton />
         <h3 className="mt-4 mb-3">{t`Editing Atomic Swap Proposal`}</h3>
 
         {renderCopiableHeader()}

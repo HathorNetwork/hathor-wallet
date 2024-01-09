@@ -541,7 +541,7 @@ class SendTokens extends React.Component {
 
     return (
       <div className="content-wrapper flex align-items-center">
-        <BackButton {...this.props} />
+        <BackButton />
         <h3 className="mt-4 mb-4">{t`Send Tokens`}</h3>
         {renderPage()}
       </div>

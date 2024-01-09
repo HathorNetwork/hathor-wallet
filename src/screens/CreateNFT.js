@@ -280,7 +280,7 @@ class CreateNFT extends React.Component {
 
     return (
       <div className="content-wrapper">
-        <BackButton {...this.props} />
+        <BackButton />
         <h3 className="mt-4">Create NFT</h3>
         <p className="mt-5">{t`Here you will create a new NFT. After the creation, you will be able to send the units of this NFT to other addresses.`}</p>
         <p>{t`NFTs share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>

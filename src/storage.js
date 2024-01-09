@@ -198,14 +198,26 @@ export class LocalStorageStore {
     }
   }
 
-  cleanWallet() {
-    this.removeItem(IS_HARDWARE_KEY);
-    this.removeItem(CLOSED_KEY);
+  /**
+   * Clean access data from persistent storage, making the wallet 'not loaded'
+   */
+  cleanAccessData() {
     this.removeItem(ACCESS_DATA_KEY);
     delete this._storage;
     this._storage = null;
   }
 
+  /**
+   * Clean wallet metadata
+   */
+  cleanWallet() {
+    this.removeItem(IS_HARDWARE_KEY);
+    this.removeItem(CLOSED_KEY);
+  }
+
+  /**
+   * Reset the storage, removing all managed keys from localStorage
+   */
   resetStorage() {
     for (const key of storageKeys) {
       this.removeItem(key);
@@ -224,7 +236,7 @@ export class LocalStorageStore {
         networkName: config.getNetwork().name,
       }
     );
-    STORE.setItem(ACCESS_DATA_KEY, accessData);
+    this.setItem(ACCESS_DATA_KEY, accessData);
     const storage = this.getStorage();
     await storage.saveAccessData(accessData);
     this._storage = storage;
@@ -239,7 +251,7 @@ export class LocalStorageStore {
       xpub,
       { hardware: true }
     );
-    STORE.setItem(ACCESS_DATA_KEY, accessData);
+    this.setItem(ACCESS_DATA_KEY, accessData);
     const storage = this.getStorage();
     await storage.saveAccessData(accessData);
     this._storage = storage;
@@ -373,7 +385,7 @@ export class LocalStorageStore {
       // We are migrating from an version of wallet-lib prior to 1.0.0
       // This will generate the encrypted keys and other metadata
       const accessData = this.migrateAccessData(pin);
-      STORE.setItem(ACCESS_DATA_KEY, accessData);
+      this.setItem(ACCESS_DATA_KEY, accessData);
       // Prepare the storage with the migrated access data
       this._storage = null;
       this.setHardwareWallet(false);
@@ -382,6 +394,7 @@ export class LocalStorageStore {
       this._storage = storage;
 
       await this.handleMigrationOldRegisteredTokens(storage);
+      // Migrate old backup flag
       const isBackupDone = this.getItem('wallet:backup');
       if (isBackupDone) {
         this.markBackupDone();

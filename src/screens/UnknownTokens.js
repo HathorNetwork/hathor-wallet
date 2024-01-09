@@ -289,7 +289,7 @@ class UnknownTokens extends React.Component {
 
     return (
       <div className="content-wrapper">
-        <BackButton {...this.props} />
+        <BackButton />
         <div className="d-flex flex-row align-items-center mb-4 mt-4">
           <h3 className="mr-4">{t`Unknown Tokens`}</h3>
           <button onClick={this.massiveImport} className="btn btn-hathor">{t`Register Tokens`}</button>

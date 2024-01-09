@@ -71,7 +71,7 @@ export default function ImportExisting(props) {
     })
 
     return <div className="content-wrapper flex align-items-center">
-        <BackButton {...props} />
+        <BackButton />
         <h3 className="mt-4 mb-3">{t`New Atomic Swap Proposal`}</h3>
 
         <form>
