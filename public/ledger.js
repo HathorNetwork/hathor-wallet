@@ -188,14 +188,14 @@ class Ledger {
         console.log(`Got response ${response.toString('hex')}`);
         resolve(response);
       }, (error) => {
-          console.log(error);
-          reject(error);
-        })
+        console.log(error);
+        reject(error);
+      })
       .finally(() => {
         console.log('Finished sending command, will retry queue');
         // When done, check the queue again
         this.checkSendQueue();
-    });
+      });
   }
 
   /**
@@ -255,9 +255,9 @@ class Ledger {
         this.transport.decorateAppAPIMethods(this, this.methods, "HTR");
         resolve(transport);
       }, (e) => {
-          console.log('Error creating transport');
-          console.log(e);
-          reject(Ledger.parseLedgerError(e));
+        console.log('Error creating transport');
+        console.log(e);
+        reject(Ledger.parseLedgerError(e));
       });
     });
     return promiseMethod;
