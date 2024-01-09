@@ -130,7 +130,7 @@ export default function ProposalList (props) {
 
     return (
         <div className="content-wrapper flex align-items-center">
-            <BackButton {...props} />
+            <BackButton />
             <h3 className="mt-4">{t`Manage Atomic Swap`}</h3>
             <div className="mt-4">
                 <button

@@ -19,6 +19,17 @@ process.once('loaded', () => {
   // Set closed in localStorage, so user does not open in the wallet page
   localStorage.setItem('localstorage:closed', 'true');
 
+  const accessDataRaw = localStorage.getItem('localstorage:accessdata');
+  if (accessDataRaw) {
+    // check if the access data is from a hardware wallet, if so we need to remove it
+    // This ensures that a previously closed hardware wallet will not be loaded again
+    // unless the device is connected
+    const accessData = JSON.parse(accessDataRaw);
+    if ((accessData?.walletFlags & 0x02) > 0) {
+      localStorage.removeItem('localstorage:accessdata');
+    }
+  }
+
   // Sending to main process the information about systray message
   const systrayMessageChecked = JSON.parse(localStorage.getItem('wallet:systray_message_checked')) === true;
   ipcRenderer.send('systray_message:check', systrayMessageChecked);

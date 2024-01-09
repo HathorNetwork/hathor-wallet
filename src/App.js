@@ -153,11 +153,11 @@ class Root extends React.Component {
         <StartedRoute exact path="/signin" component={Signin} loaded={false} />
         <StartedRoute exact path="/hardware_wallet" component={StartHardwareWallet} loaded={false} />
         <NavigationRoute exact path="/locked" component={LockedWallet} />
-        <Route exact path="/welcome" component={Welcome} />
-        <Route exact path="/loading_addresses" component={LoadingAddresses} />
-        <Route exact path="/permission" component={SentryPermission} />
+        <Route exact path="/welcome" children={<Welcome />} />
+        <Route exact path="/loading_addresses" children={<LoadingAddresses />} />
+        <Route exact path="/permission" children={<SentryPermission />} />
         <StartedRoute exact path="" component={Wallet} loaded={true} />
-        <Route path="" component={Page404} />
+        <Route path="" children={<Page404 />} />
       </Switch>
     )
   }
@@ -173,7 +173,7 @@ const returnLoadedWalletComponent = (Component, props) => {
   const isServerScreen = props.match.path === '/server';
 
   // If was closed and is loaded we need to redirect to locked screen
-  if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked())) {
+  if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) && (!LOCAL_STORE.isHardwareWallet())) {
     return <Redirect to={{ pathname: '/locked/' }} />;
   }
 
@@ -250,7 +250,7 @@ const returnStartedRoute = (Component, props, rest) => {
     // the locked screen since the wallet would not be able to be started otherwise
     const isServerScreen = props.match.path === '/server';
     // Wallet is locked, go to locked screen
-    if (LOCAL_STORE.isLocked() && !isServerScreen) {
+    if (LOCAL_STORE.isLocked() && !isServerScreen && !LOCAL_STORE.isHardwareWallet()) {
       return <Redirect to={{pathname: '/locked/'}}/>;
     }
 
@@ -319,7 +319,7 @@ const returnDefaultComponent = (Component, props) => {
         <div className='component-div h-100'>
           <Navigation {...props}/>
           <Component {...props} />
-          <RequestErrorModal {...props} />
+          <RequestErrorModal />
         </div>
       );
     }

@@ -119,6 +119,7 @@ class StartHardwareWallet extends React.Component {
       const xpub = hathorLib.walletUtils.xpubFromData(compressedPubkey, chainCode, fingerprint);
 
       LOCAL_STORE.setHardwareWallet(true);
+      LOCAL_STORE.markBackupDone();
       this.props.startWallet({
         words: null,
         passphrase: '',
@@ -128,9 +129,6 @@ class StartHardwareWallet extends React.Component {
         xpub,
         hardware: true,
       });
-      LOCAL_STORE.markBackupDone();
-
-      this.props.history.push('/wallet/');
     } else {
       // Error
       this.setState({ errorMessage: arg.error.message });

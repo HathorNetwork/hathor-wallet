@@ -528,7 +528,7 @@ class Wallet extends React.Component {
           * Or handle it in our code, saving the last accessed screen
           * XXX Is it worth it to do anything about it just to prevent this case?
           */}
-          <BackButton {...this.props} />
+          <BackButton />
           {renderUnlockedWallet()}
         </div>
         <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />

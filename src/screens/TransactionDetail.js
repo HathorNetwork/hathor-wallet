@@ -202,7 +202,7 @@ class TransactionDetail extends React.Component {
     const renderLinks = () => {
       return (
         <div className="d-flex flex-row justify-content-between">
-          <BackButton {...this.props} />
+          <BackButton />
           {this.state.transaction && renderExplorerLink()}
         </div>
       );

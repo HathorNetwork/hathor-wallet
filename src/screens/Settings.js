@@ -320,7 +320,7 @@ class Settings extends React.Component {
 
     return (
       <div className="content-wrapper settings">
-        <BackButton {...this.props} />
+        <BackButton />
         <div>
           <p onDoubleClick={() => this.setState({ showTimestamp: !this.state.showTimestamp })}><strong>{t`Date and time:`}</strong> {this.state.showTimestamp ? hathorLib.dateFormatter.dateToTimestamp(this.state.now) : this.state.now.toString()}</p>
         </div>

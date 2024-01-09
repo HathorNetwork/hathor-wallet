@@ -264,7 +264,7 @@ class CreateToken extends React.Component {
 
     return (
       <div className="content-wrapper">
-        <BackButton {...this.props} />
+        <BackButton />
         <h3 className="mt-4">Create Token</h3>
         <p className="mt-5">{t`Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.`}</p>
         <p>{t`Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>

@@ -84,7 +84,7 @@ class CustomTokens extends React.Component {
   render() {
     return (
       <div className="content-wrapper">
-        <BackButton {...this.props} />
+        <BackButton />
         <h3 className="mt-4">{t`Custom Tokens`}</h3>
         <p className="mt-5">{t`You can create your own digital token with customized specifications on Hathor Network with only a few clicks. They will fully work under the same technical assumptions of high scalability and decentralized consensus of our native HTR tokens. Custom tokens will always work independently of the price of the native HTR token, and they can serve multiple purposes.`}</p>
         <p><SpanFmt>{t`Every custom token has a unique **Configuration String** which must be shared with all other people that will use the custom token.`}</SpanFmt></p>
