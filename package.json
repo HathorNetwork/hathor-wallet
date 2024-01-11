@@ -23,6 +23,10 @@
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
   "version": "0.27.1-rc3",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "private": true,
   "dependencies": {
     "@hathor/wallet-lib": "1.0.4",
