@@ -19,6 +19,16 @@
       "clover"
     ]
   },
+  "overrides": [
+    {
+      "extends": [
+        "plugin:cypress/recommended"
+      ],
+      "files": [
+        "cypress/**/*.js"
+      ]
+    }
+  ],
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
@@ -130,15 +140,5 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ],
-  "overrides": [
-    {
-      "extends": [
-        "plugin:cypress/recommended"
-      ],
-      "files": [
-        "cypress/**/*.js"
-      ]
-    }
   ]
 }
