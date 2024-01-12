@@ -47,6 +47,7 @@ function Wallet() {
   const [successMessage, setSuccessMessage] = useState('');
   /* shouldShowAdministrativeTab {boolean} If we should display the Administrative Tools tab */
   const [shouldShowAdministrativeTab, setShouldShowAdministrativeTab] = useState(false); // TODO: Refactor this name
+  const [errorMessage, setErrorMessage] = useState(''); // TODO: Metadata token error are being suppressed as of now
   const [totalSupply, setTotalSupply] = useState(null);
   const [canMint, setCanMint] = useState(false);
   const [canMelt, setCanMelt] = useState(false);
