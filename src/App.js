@@ -317,14 +317,14 @@ const returnDefaultComponent = (Component, props) => {
     } else {
       return (
         <div className='component-div h-100'>
-          <Navigation {...props}/>
+          <Navigation />
           <Component {...props} />
           <RequestErrorModal />
         </div>
       );
     }
   } else {
-    return <WalletVersionError {...props} />;
+    return <WalletVersionError />;
   }
 }
 
@@ -332,9 +332,7 @@ const returnDefaultComponent = (Component, props) => {
  * Return a component with the navigation component
  */
 const NavigationRoute = ({ component: Component, ...rest }) => (
-  <Route {...rest} render={(props) => (
-      returnDefaultComponent(Component, props)
-  )} />
+  returnDefaultComponent(Component, rest)
 )
 
 export default connect(mapStateToProps, mapDispatchToProps)(Root);

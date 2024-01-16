@@ -199,20 +199,14 @@ export class LocalStorageStore {
   }
 
   /**
-   * Clean access data from persistent storage, making the wallet 'not loaded'
-   */
-  cleanAccessData() {
-    this.removeItem(ACCESS_DATA_KEY);
-    delete this._storage;
-    this._storage = null;
-  }
-
-  /**
    * Clean wallet metadata
    */
   cleanWallet() {
     this.removeItem(IS_HARDWARE_KEY);
     this.removeItem(CLOSED_KEY);
+    this.removeItem(ACCESS_DATA_KEY);
+    delete this._storage;
+    this._storage = null;
   }
 
   /**

@@ -22,7 +22,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.27.1-rc3",
+  "version": "0.27.1-rc4",
   "private": true,
   "dependencies": {
     "@hathor/wallet-lib": "1.0.4",
@@ -38,7 +38,7 @@
     "patch-package": "6.4.7",
     "popper.js": "1.16.1",
     "prop-types": "15.8.1",
-    "qrcode.react": "0.9.3",
+    "qrcode.react": "3.1.0",
     "react": "18.2.0",
     "react-copy-to-clipboard": "5.1.0",
     "react-dom": "18.2.0",
