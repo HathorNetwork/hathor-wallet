@@ -5,64 +5,40 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { t } from 'ttag'
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom'
 
 import logo from '../assets/images/hathor-logo.png';
 import ledger from '../utils/ledger';
 import helpers from '../utils/helpers';
-import { LEDGER_GUIDE_URL, IPC_RENDERER, LEDGER_MIN_VERSION, LEDGER_MAX_VERSION } from '../constants';
+import { IPC_RENDERER, LEDGER_MIN_VERSION, LEDGER_MAX_VERSION } from '../constants';
 import { startWalletRequested } from '../actions';
 import InitialImages from '../components/InitialImages';
 import hathorLib from '@hathor/wallet-lib';
 import LOCAL_STORE from '../storage';
 
-const mapDispatchToProps = dispatch => {
-  return {
-    startWallet: (payload) => dispatch(startWalletRequested(payload)),
-  };
-};
+// Ledger connection constants for the component
+const attemptLimit = 100;
+const attemptInterval = 3000;
 
 /**
  * Screen used to select between hardware wallet or software wallet
  *
  * @memberof Screens
  */
-class StartHardwareWallet extends React.Component {
+function StartHardwareWallet() {
+  const history = useHistory();
+  const dispatch = useDispatch();
+
   // Attempt parameters when trying to connect to ledger
-  // attemptNumber: current attempt
-  // attemptLimit: maximum number of attempts
-  // attemptInterval: wait interval between attempts
-  attemptNumber = 0
-  attemptLimit = 100
-  attemptInterval = 3000
+  const [attemptNumber, setAttemptNumber] = useState(0);
 
-  /**
-   * errorMessage {string} message to show in case of error connecting to ledger
-   * waitAction {boolean} after connecting to ledger we need to wait for user action
-   */
-  state = {
-    errorMessage: '',
-    waitAction: false,
-  }
-
-  componentDidMount() {
-    if (IPC_RENDERER) {
-      IPC_RENDERER.on("ledger:version", this.handleVersion);
-      IPC_RENDERER.on("ledger:publicKeyData", this.handlePublicKeyData);
-    }
-    this.attemptNumber = 1;
-    ledger.getVersion();
-  }
-
-  componentWillUnmount() {
-    if (IPC_RENDERER) {
-      // Remove listeners
-      IPC_RENDERER.removeAllListeners("ledger:version");
-      IPC_RENDERER.removeAllListeners("ledger:publicKeyData");
-    }
-  }
+  /** errorMessage {string} message to show in case of error connecting to ledger */
+  const [errorMessage, setErrorMessage] = useState('');
+  /** waitAction {boolean} after connecting to ledger we need to wait for user action */
+  const [waitAction, setWaitAction] = useState(false);
 
   /**
    * Handle the response of a get version call to Ledger.
@@ -70,7 +46,7 @@ class StartHardwareWallet extends React.Component {
    * @param {IpcRendererEvent} event May be used to reply to the event
    * @param {Object} arg Data returned from the get version call
    */
-  handleVersion = (event, arg) => {
+  const handleVersion = (event, arg) => {
     if (arg.success) {
       // compare ledger version with our min version
       const version = Buffer.from(arg.data).slice(3, 6).join('.');
@@ -80,28 +56,34 @@ class StartHardwareWallet extends React.Component {
         helpers.cmpVersionString(version, LEDGER_MAX_VERSION) >= 0
       ) {
         // unsupported version
-        this.setState({ errorMessage: t`Unsupported Ledger app version` });
+        setErrorMessage(t`Unsupported Ledger app version`);
         return;
       }
       // We wait 2 seconds to update the message on the screen
       // so the user don't see the screen updating fast
       setTimeout(() => {
-        this.setState({ waitAction: true, errorMessage: '' }, () => {
-          ledger.getPublicKeyData();
-        })
+        setWaitAction(true);
+        setErrorMessage('');
       }, 2000);
     } else {
-      if (this.attemptNumber < this.attemptLimit) {
+      if (attemptNumber < attemptLimit) {
         setTimeout(() => {
-          this.attemptNumber += 1;
+          setAttemptNumber(current => current + 1);
           ledger.getVersion();
-        }, this.attemptInterval);
+        }, attemptInterval);
       } else {
         // Error
-        this.setState({ errorMessage: arg.error.message });
+        setErrorMessage(arg.error.message);
       }
     }
   }
+
+  // Gets the public key data when the user progresses to the second step
+  useEffect(() => {
+    if (waitAction) {
+      ledger.getPublicKeyData();
+    }
+  }, [waitAction]);
 
   /**
    * Handle the response of a get public key data call to Ledger.
@@ -109,7 +91,7 @@ class StartHardwareWallet extends React.Component {
    * @param {IpcRendererEvent} event May be used to reply to the event
    * @param {Object} arg Data returned from the get public key data call
    */
-  handlePublicKeyData = (event, arg) => {
+  const handlePublicKeyData = (event, arg) => {
     if (arg.success) {
       const data = Buffer.from(arg.data);
       const uncompressedPubkey = data.slice(0, 65);
@@ -120,104 +102,110 @@ class StartHardwareWallet extends React.Component {
 
       LOCAL_STORE.setHardwareWallet(true);
       LOCAL_STORE.markBackupDone();
-      this.props.startWallet({
+			dispatch(startWalletRequested({
         words: null,
         passphrase: '',
         pin: null,
         password: '',
-        routerHistory: this.props.history,
+        routerHistory: history,
         xpub,
         hardware: true,
-      });
+      }));
     } else {
       // Error
-      this.setState({ errorMessage: arg.error.message });
+      setErrorMessage(arg.error.message);
     }
   }
+
+  // Ledger event listeners and lifecycle management
+  useEffect(() => {
+    if (IPC_RENDERER) {
+      IPC_RENDERER.on("ledger:version", handleVersion);
+      IPC_RENDERER.on("ledger:publicKeyData", handlePublicKeyData);
+    }
+    setAttemptNumber(1);
+    ledger.getVersion();
+
+    return () => {
+      if (IPC_RENDERER) {
+        console.log(`listeners removed`)
+        // Remove listeners
+        IPC_RENDERER.removeAllListeners('ledger:version');
+        IPC_RENDERER.removeAllListeners('ledger:publicKeyData');
+      }
+    }
+  }, [])
 
   /*
    * Try getting user approval on Ledger again
    */
-  tryAgain = () => {
+  const tryAgain = () => {
     // clear error
-    this.setState({ errorMessage: null, waitAction: false }, () => {
-      this.attemptNumber = 1;
-      ledger.getVersion();
-    });
+    setErrorMessage(null);
+    setWaitAction(false);
+    setAttemptNumber(1);
+    ledger.getVersion();
   }
 
-  /**
-   * Method called to open ledger guide
-   *
-   * @param {Object} e Event for the click
-   */
-  openLedgerGuide = (e) => {
-    e.preventDefault();
-    const url = new URL(LEDGER_GUIDE_URL);
-    helpers.openExternalURL(url.href);
-  }
-
-  render() {
-    const renderError = () => {
-      return (
-        <div className="d-flex align-items-center flex-column">
-          <p className="mt-4 mb-4 text-danger">{this.state.errorMessage}</p>
-          <button onClick={this.tryAgain} type="button" className="btn btn-hathor">{t`Try again`}</button>
-        </div>
-      )
-    }
-
-    const renderText = () => {
-      if (this.state.waitAction) {
-        return t`You need to authorize the operation on your Ledger.`;
-      } else {
-        return t`Please connect your Ledger device to the computer and open the Hathor app.`;
-      }
-    }
-
-    const renderTextTitle = () => {
-      if (this.state.waitAction) {
-        return t`Step 2/2`;
-      } else {
-        return t`Step 1/2`;
-      }
-    }
-
-    const renderHardware = () => {
-      return (
-        <div>
-          <p className="mt-5 mb-2 text-center"><strong>{t`Connecting to Ledger`}</strong></p>
-          <p className="mt-4 mb-2 text-center"><strong>{renderTextTitle()}</strong></p>
-          <p className="mt-4 mb-4">{renderText()}</p>
-          <div className="d-flex align-items-center flex-column w-100 mt-5">
-            <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
-          </div>
-        </div>
-      )
-    }
-
-    const renderBody = () => {
-      if (this.state.errorMessage) {
-        return renderError();
-      } else {
-        return renderHardware();
-      }
-    }
-
+  const renderError = () => {
     return (
-      <div className="outside-content-wrapper">
-        <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div className="inside-div">
-            <div className="d-flex align-items-center flex-column">
-              <img className="hathor-logo" src={logo} alt="" />
-              {renderBody()}
-            </div>
-          </div>
-          <InitialImages />
+      <div className="d-flex align-items-center flex-column">
+        <p className="mt-4 mb-4 text-danger">{errorMessage}</p>
+        <button onClick={tryAgain} type="button" className="btn btn-hathor">{t`Try again`}</button>
+      </div>
+    )
+  }
+
+  const renderText = () => {
+    if (waitAction) {
+      return t`You need to authorize the operation on your Ledger.`;
+    } else {
+      return t`Please connect your Ledger device to the computer and open the Hathor app.`;
+    }
+  }
+
+  const renderTextTitle = () => {
+    if (waitAction) {
+      return t`Step 2/2`;
+    } else {
+      return t`Step 1/2`;
+    }
+  }
+
+  const renderHardware = () => {
+    return (
+      <div>
+        <p className="mt-5 mb-2 text-center"><strong>{t`Connecting to Ledger`}</strong></p>
+        <p className="mt-4 mb-2 text-center"><strong>{renderTextTitle()}</strong></p>
+        <p className="mt-4 mb-4">{renderText()}</p>
+        <div className="d-flex align-items-center flex-column w-100 mt-5">
+          <button onClick={history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
         </div>
       </div>
     )
   }
+
+  const renderBody = () => {
+    if (errorMessage) {
+      return renderError();
+    } else {
+      return renderHardware();
+    }
+  }
+
+  return (
+    <div className="outside-content-wrapper">
+      <div className="inside-white-wrapper col-sm-12 col-md-8">
+        <div className="inside-div">
+          <div className="d-flex align-items-center flex-column">
+            <img className="hathor-logo" src={logo} alt="" />
+            {renderBody()}
+          </div>
+        </div>
+        <InitialImages />
+      </div>
+    </div>
+  )
 }
 
-export default connect(null, mapDispatchToProps)(StartHardwareWallet);
+export default StartHardwareWallet;

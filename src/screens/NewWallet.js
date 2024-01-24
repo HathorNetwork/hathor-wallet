@@ -5,34 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useRef, useState, useContext, useEffect } from 'react';
 import { t } from 'ttag'
-
+import { useHistory } from 'react-router-dom'
 import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
 import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
 import { updatePassword, updatePin, updateWords } from '../actions/index';
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
-
-
-const mapDispatchToProps = dispatch => {
-  return {
-    updatePassword: data => dispatch(updatePassword(data)),
-    updatePin: data => dispatch(updatePin(data)),
-    updateWords: data => dispatch(updateWords(data)),
-  };
-};
-
-
-const mapStateToProps = (state) => {
-  return { password: state.password, pin: state.pin, words: state.words };
-};
 
 
 /**
@@ -45,175 +31,169 @@ const mapStateToProps = (state) => {
  *
  * @memberof Screens
  */
-class NewWallet extends React.Component {
-  static contextType = GlobalModalContext;
+function NewWallet() {
+  const history = useHistory();
+  const context = useContext(GlobalModalContext);
+  const dispatch = useDispatch();
 
-  constructor(props) {
-    super(props);
+  const { password, pin, words } = useSelector(state => ({
+    password: state.password,
+    pin: state.pin,
+    words: state.words,
+  }));
 
-    /**
-     * step2 {boolean} If should show step2 component
-     * askPassword {boolean} If should show password component
-     * askPIN {boolean} If should show PIN component
-     */
-    this.state = {
-      step2: false,
-      askPassword: false,
-      askPIN: false,
-    };
+  const [step2, setStep2] = useState(false);
+  const [askPassword, setAskPassword] = useState(false);
+  const [askPIN, setAskPIN] = useState(false);
 
-    this.alertSuccessRef = React.createRef();
-  }
+  const alertSuccessRef = useRef();
+  const confirmFormRef = useRef();
 
-  componentDidMount = () => {
+  useEffect(() => {
     LOCAL_STORE.markBackupAsNotDone();
-  }
+  }, []);
 
-  create = () => {
-    let isValid = this.refs.confirmForm.checkValidity();
+  const create = () => {
+    const isValid = confirmFormRef.current.checkValidity();
     if (isValid) {
-      this.refs.confirmForm.classList.remove('was-validated')
+      confirmFormRef.current.classList.remove('was-validated')
       const words = hathorLib.walletUtils.generateWalletWords(hathorLib.constants.HD_WALLET_ENTROPY);
-      this.props.updateWords(words);
-      this.setState({ step2: true });
+      dispatch(updateWords(words));
+      setStep2(true);
     } else {
-      this.refs.confirmForm.classList.add('was-validated')
+      confirmFormRef.current.classList.add('was-validated')
     }
   }
 
   /**
    * User clicked to do backup later, so shows Choose password component
    */
-  backupLater = () => {
-    this.setState({ askPassword: true });
+  const backupLater = () => {
+    setAskPassword(true);
+  }
+
+  /**
+   * After user backed up the words with success we mark it as done and show the component to Choose Password
+   */
+  const validationSuccess = () => {
+    context.hideModal();
+    LOCAL_STORE.markBackupDone();
+    alertSuccessRef.current.show(3000);
+    setAskPassword(true);
   }
 
   /**
    * When user decides to do the backup now (opens backup modal)
    */
-  backupNow = () => {
-    this.context.showModal(MODAL_TYPES.BACKUP_WORDS, {
+  const backupNow = () => {
+    context.showModal(MODAL_TYPES.BACKUP_WORDS, {
       needPassword: false,
-      validationSuccess: this.validationSuccess,
+      validationSuccess,
     });
   }
 
   /**
    * User succeded on choosing a password, then show the Choose PIN component
    */
-  passwordSuccess = () => {
-    this.setState({ askPIN: true });
+  const passwordSuccess = () => {
+    setAskPIN(true);
   }
 
   /**
    * After choosing a new PIN with success, executes the wallet creation and redirect to the wallet
    */
-  pinSuccess = () => {
-    // Getting redux variables before cleaning all data
-    const { words, pin, password } = this.props;
+  const pinSuccess = () => {
     // Generate addresses and load data
-    wallet.generateWallet(words, '', pin, password, this.props.history);
+    wallet.generateWallet(words, '', pin, password, history);
     // Clean pin, password and words from redux
-    this.props.updatePassword(null);
-    this.props.updatePin(null);
-    this.props.updateWords(null);
+    dispatch(updatePassword(null));
+    dispatch(updatePin(null));
+    dispatch(updateWords(null));
     // Go to wallet
-    this.props.history.push('/wallet/');
-  }
-
-  /**
-   * After user backed up the words with success we mark it as done and show the component to Choose Password
-   */
-  validationSuccess = () => {
-    this.context.hideModal();
-    LOCAL_STORE.markBackupDone();
-    this.alertSuccessRef.current.show(3000);
-    this.setState({ askPassword: true });
+    history.push('/wallet/');
   }
 
   /**
    * Going back from Choose Password component to the Step2
    */
-  passwordBack = () => {
-    this.setState({ askPassword: false });
+  const passwordBack = () => {
+    setAskPassword(false);
   }
 
   /**
    * Going back from Choose PIN component to Choose Password
    */
-  pinBack = () => {
-    this.setState({ askPIN: false });
+  const pinBack = () => {
+    setAskPIN(false);
   }
 
   /**
    * Going back from Step2 component to initial New Wallet component
    */
-  step2Back = () => {
-    this.setState({ step2: false });
+  const step2Back = () => {
+    setStep2(false);
   }
 
-  render() {
-    const renderStep1 = () => {
-      return (
-        <div>
-          <p className="mt-4">{t`. A new wallet is generated by 24 words.`}</p>
-          <p>{t`. To have access to this wallet you must have all the words saved in the same order we will show to you.`}</p>
-          <p className="mb-4">{t`. If someone manages to discover your words they can steal your tokens, so we advise you to save your words physically and don't show them to anyone.`}</p>
-          <form ref="confirmForm" className="w-100 mb-4">
-            <div className="form-check">
-              <input required type="checkbox" className="form-check-input" id="confirmWallet" />
-              <label className="form-check-label" htmlFor="confirmWallet" >{t`Ok, I got it!`}</label>
-            </div>
-          </form>
-          <div className="d-flex justify-content-between flex-row w-100">
-            <button onClick={this.props.history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
-            <button onClick={this.create} type="button" className="btn btn-hathor">{t`Create my words`}</button>
-          </div>
-        </div>
-      )
-    }
-
-    const renderNewWalletStep2 = () => {
-      return (
-        <div className="d-flex align-items-start flex-column">
-          <p className="mt-4">{t`Your words have been created!`}</p>
-          <p className="mb-4">{t`You should save them in a non-digital media, such as a piece of paper. We advise you to do it now, but you can do it later.`}</p>
-          <div className="d-flex justify-content-between flex-row w-100">
-            <button onClick={this.step2Back} type="button" className="btn btn-secondary">{t`Back`}</button>
-            <button onClick={this.backupLater} type="button" className="btn btn-secondary">{t`Do it later`}</button>
-            <button onClick={this.backupNow} type="button" className="btn btn-hathor">{t`Backup now`}</button>
-          </div>
-        </div>
-      );
-    }
-
-    const renderMainData = () => {
-      if (this.state.askPIN) {
-        return <ChoosePin back={this.pinBack} success={this.pinSuccess} />;
-      } else if (this.state.askPassword) {
-        return <ChoosePassword back={this.passwordBack} success={this.passwordSuccess} />;
-      } else if (this.state.step2) {
-        return renderNewWalletStep2();
-      } else {
-        return renderStep1();
-      }
-    }
-
+  const renderStep1 = () => {
     return (
-      <div className="outside-content-wrapper">
-        <div className="inside-white-wrapper col-sm-12 col-md-8">
-          <div className="d-flex align-items-center flex-column inside-div">
-            <img className="hathor-logo" src={logo} alt="" />
-            <div className="d-flex align-items-start flex-column">
-              {renderMainData()}
-            </div>
+      <div>
+        <p className="mt-4">{t`. A new wallet is generated by 24 words.`}</p>
+        <p>{t`. To have access to this wallet you must have all the words saved in the same order we will show to you.`}</p>
+        <p className="mb-4">{t`. If someone manages to discover your words they can steal your tokens, so we advise you to save your words physically and don't show them to anyone.`}</p>
+        <form ref={confirmFormRef} className="w-100 mb-4">
+          <div className="form-check">
+            <input required type="checkbox" className="form-check-input" id="confirmWallet" />
+            <label className="form-check-label" htmlFor="confirmWallet" >{t`Ok, I got it!`}</label>
           </div>
-          <InitialImages />
+        </form>
+        <div className="d-flex justify-content-between flex-row w-100">
+          <button onClick={history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
+          <button onClick={create} type="button" className="btn btn-hathor">{t`Create my words`}</button>
         </div>
-        <HathorAlert ref={this.alertSuccessRef} text={t`Backup completed!`} type="success" />
       </div>
     )
   }
+
+  const renderNewWalletStep2 = () => {
+    return (
+      <div className="d-flex align-items-start flex-column">
+        <p className="mt-4">{t`Your words have been created!`}</p>
+        <p className="mb-4">{t`You should save them in a non-digital media, such as a piece of paper. We advise you to do it now, but you can do it later.`}</p>
+        <div className="d-flex justify-content-between flex-row w-100">
+          <button onClick={step2Back} type="button" className="btn btn-secondary">{t`Back`}</button>
+          <button onClick={backupLater} type="button" className="btn btn-secondary">{t`Do it later`}</button>
+          <button onClick={backupNow} type="button" className="btn btn-hathor">{t`Backup now`}</button>
+        </div>
+      </div>
+    );
+  }
+
+  const renderMainData = () => {
+    if (askPIN) {
+      return <ChoosePin back={pinBack} success={pinSuccess} />;
+    } else if (askPassword) {
+      return <ChoosePassword back={passwordBack} success={passwordSuccess} />;
+    } else if (step2) {
+      return renderNewWalletStep2();
+    } else {
+      return renderStep1();
+    }
+  }
+
+  return (
+    <div className="outside-content-wrapper">
+      <div className="inside-white-wrapper col-sm-12 col-md-8">
+        <div className="d-flex align-items-center flex-column inside-div">
+          <img className="hathor-logo" src={logo} alt="" />
+          <div className="d-flex align-items-start flex-column">
+            {renderMainData()}
+          </div>
+        </div>
+        <InitialImages />
+      </div>
+      <HathorAlert ref={alertSuccessRef} text={t`Backup completed!`} type="success" />
+    </div>
+  )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(NewWallet);
+export default NewWallet;
