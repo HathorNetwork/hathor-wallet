@@ -255,6 +255,7 @@ function Wallet() {
     })
   }
 
+  // TODO: Understand when this calculation should be done. Maybe when token data was updated?
   /*
    * We show the administrative tools tab only for the users that one day had an authority output, even if it was already spent
    *
@@ -280,31 +281,34 @@ function Wallet() {
     history.push('/addresses/');
   }
 
-  // Trigger a render when we sign a token
-  const retryDownload = (e, tokenId) => {
+  /**
+   * Retries the download of a single token's balance and history
+   * @param {object} e Event
+   * @param {string} tokenId
+   */
+  const retryDownloadClicked = (e, tokenId) => {
     e.preventDefault();
     const balanceStatus = get(
       tokensBalance,
-      `${selectedToken}.status`,
+      `${tokenId}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
     const historyStatus = get(
       tokensHistory,
-      `${selectedToken}.status`,
+      `${tokenId}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
 
-    // We should only retry the request that failed:
-
+    // We should only retry requests that have failed:
     if (historyStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
       dispatch(tokenFetchHistoryRequested(tokenId));
     }
-
     if (balanceStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
       dispatch(tokenFetchBalanceRequested(tokenId));
     }
   }
 
+  // Rendering process below
   const token = tokens.find((token) => token.uid === selectedToken);
   const tokenHistory = get(tokensHistory, selectedToken, {
     status: TOKEN_DOWNLOAD_STATUS.LOADING,
@@ -367,7 +371,6 @@ function Wallet() {
       return renderWallet();
     }
 
-    // TODO: Add "calculateShouldShowAdministrativeTab()" here?
     return (
       <div>
         <ul className="nav nav-tabs mb-4" id="tokenTab" role="tablist">
@@ -459,7 +462,7 @@ function Wallet() {
           <p style={{ marginTop: 16 }}>
             <strong>
               {t`Token load failed, please`}&nbsp;
-              <a onClick={(e) => retryDownload(e, token.uid)} href="true">
+              <a onClick={(e) => retryDownloadClicked(e, token.uid)} href="true">
                 {t`try again`}
               </a>
               ...
