@@ -46,7 +46,7 @@ function Wallet() {
   /** successMessage {string} Message to be shown on alert success */
   const [successMessage, setSuccessMessage] = useState('');
   /* shouldShowAdministrativeTab {boolean} If we should display the Administrative Tools tab */
-  const [shouldShowAdministrativeTab, setShouldShowAdministrativeTab] = useState(false); // TODO: Refactor this name
+  const [shouldShowAdministrativeTab, setShouldShowAdministrativeTab] = useState(false);
   const [errorMessage, setErrorMessage] = useState(''); // TODO: Metadata token error are being suppressed as of now
   const [totalSupply, setTotalSupply] = useState(null);
   const [canMint, setCanMint] = useState(false);
@@ -99,15 +99,17 @@ function Wallet() {
 
   // The tokens history has changed, check the last timestamp to define if we should fetch the token details again
   useEffect(() => {
-    const currentTokenHistory = get(tokensHistory, selectedToken, {
+    const selectedTokenHistory = get(tokensHistory, selectedToken, {
       status: TOKEN_DOWNLOAD_STATUS.LOADING,
       updatedAt: -1,
       data: [],
     });
 
-    if (tokenHistoryTimestamp !== currentTokenHistory.updatedAt) { // TODO: Test this logic
-      updateTokenInfo();
-      updateWalletInfo();
+    // Check if the selected token history has changed from the last fetch
+    if (tokenHistoryTimestamp !== selectedTokenHistory.updatedAt) {
+      setTokenHistoryTimestamp(selectedTokenHistory.updatedAt);
+      updateTokenInfo(selectedToken);
+      updateWalletInfo(selectedToken);
     }
   }, [tokensHistory]);
 
@@ -115,58 +117,57 @@ function Wallet() {
    * Resets the state data and triggers token information requests
    */
   async function initializeWalletScreen() {
-    calculateShouldShowAdministrativeTab(selectedToken); // TODO: Refactor to something more synchronous
-
+    // Reset the screen state
     setTotalSupply(null);
     setCanMint(false);
     setCanMelt(false);
     setTransactionsCount(null);
-    setShouldShowAdministrativeTab(false); // FIXME: Will override calculate above
+    setShouldShowAdministrativeTab(false);
 
     // No need to download token info and wallet info if the token is hathor
     if (selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
       return;
     }
 
-    await updateTokenInfo();
-    await updateWalletInfo();
+    // Fires the fetching of all token data for the correct exhibition on screen
+    calculateShouldShowAdministrativeTab(selectedToken);
+    updateTokenInfo(selectedToken);
+    updateWalletInfo(selectedToken);
   }
 
   /**
    * Update token state after didmount or props update
    */
-  const updateWalletInfo = async () => {
-    const tokenUid = selectedToken;
+  const updateWalletInfo = async (tokenUid) => {
     const mintUtxos = await wallet.getMintAuthority(tokenUid, { many: true });
     const meltUtxos = await wallet.getMeltAuthority(tokenUid, { many: true });
 
-    // The user might have changed token while we are downloading, we should ignore
-    if (selectedToken !== tokenUid) { // TODO: Probably needs a refactor
+    // If the user has changed the selectedToken while we were fetching the data, discard it
+    if (selectedToken !== tokenUid) {
       return;
     }
 
+    // Update the state with the new data
     const mintCount = mintUtxos.length;
     const meltCount = meltUtxos.length;
     setMintCount(mintCount);
     setMeltCount(meltCount);
   }
 
-  async function updateTokenInfo() {
-    const tokenUid = selectedToken;
-
+  async function updateTokenInfo(tokenUid) {
     // No need to fetch token info if the token is hathor
     if (tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
       return;
     }
     const tokenDetails = await wallet.getTokenDetails(tokenUid);
 
-    // The user might have changed token while we are downloading, we should ignore
-    if (selectedToken !== tokenUid) { // TODO: Probably needs a refactor
+    // If the user has changed the selectedToken while we were fetching the data, discard it
+    if (selectedToken !== tokenUid) {
       return;
     }
 
+    // Update the state with the new data
     const { totalSupply: newTotalSupply, totalTransactions, authorities } = tokenDetails;
-
     setTotalSupply(newTotalSupply);
     setCanMint(authorities.mint);
     setCanMelt(authorities.melt);
@@ -277,6 +278,9 @@ function Wallet() {
     return setShouldShowAdministrativeTab(false);
   }
 
+  /**
+   * @deprecated This should be replaced by usage of `useHistory` inside the child component
+   */
   const goToAllAddresses = () => {
     history.push('/addresses/');
   }
@@ -325,7 +329,8 @@ function Wallet() {
   const renderBackupAlert = () => {
     return (
       <div className="alert alert-warning backup-alert" role="alert">
-        {t`You haven't done the backup of your wallet yet. You should do it as soon as possible for your own safety.`} <a href="true" onClick={(e) => backupClicked(e)}>{t`Do it now`}</a>
+        { t`You haven't done the backup of your wallet yet. You should do it as soon as possible for your own safety.` }
+        <a href="true" onClick={ (e) => backupClicked(e) }>{ t`Do it now` }</a>
       </div>
     )
   }
@@ -355,15 +360,15 @@ function Wallet() {
   }
 
   const renderTabAdmin = () => {
-    if (shouldShowAdministrativeTab) {
-      return (
-          <li className="nav-item">
-            <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">{t`Administrative Tools`}</a>
-        </li>
-      );
-    } else {
+    if (!shouldShowAdministrativeTab) {
       return null;
     }
+
+    return (
+        <li className="nav-item">
+          <a className="nav-link" id="administrative-tab" data-toggle="tab" href="#administrative" role="tab" aria-controls="administrative" aria-selected="false">{t`Administrative Tools`}</a>
+      </li>
+    );
   }
 
   const renderTokenData = (token) => {
