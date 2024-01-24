@@ -185,60 +185,74 @@ function Wallet() {
       needPassword: true,
       validationSuccess: backupSuccess,
     });
-  }
 
-  /**
-   * Called when the backup of words was done with success, then close the modal and show alert success
-   */
-  const backupSuccess = () => {
-    context.hideModal();
-    LOCAL_STORE.markBackupDone();
+    /**
+     * Called when the backup of words was done with success, then close the modal and show alert success
+     */
+    function backupSuccess() {
+      context.hideModal();
+      LOCAL_STORE.markBackupDone();
 
-    dispatch(updateWords(null));
-    setBackupDone(true);
-    setSuccessMessage(t`Backup completed!`);
-    alertSuccessRef.current.show(3000);
+      dispatch(updateWords(null));
+      setBackupDone(true);
+      setSuccessMessage(t`Backup completed!`);
+      alertSuccessRef.current.show(3000);
+    }
   }
 
   /**
    * Called when user clicks to unregister the token, then opens the modal
    */
   const unregisterClicked = () => {
+    const tokenUid = selectedToken;
+    const token = tokens.find((token) => token.uid === tokenUid);
+    if (token === undefined) return;
+
     context.showModal(MODAL_TYPES.CONFIRM, {
       ref: unregisterModalRef,
       modalID: 'unregisterModal',
       title: t`Unregister token`,
-      body: getUnregisterBody(), // TODO: Probably can inline this
-      handleYes: unregisterConfirmed, // TODO: Check if the state data is correct there
+      body: getUnregisterBody(),
+      handleYes: unregisterConfirmed,
     });
+
+    function getUnregisterBody() {
+      return (
+        <div>
+          <p><SpanFmt>{t`Are you sure you want to unregister the token **${token.name} (${token.symbol})**?`}</SpanFmt></p>
+          <p>{t`You won't lose your tokens, you just won't see this token on the side bar anymore.`}</p>
+        </div>
+      )
+    }
+
+    /**
+     * When user confirms the unregistration of the token, hide the modal and execute it
+     */
+    async function unregisterConfirmed() {
+      try {
+        await tokensUtils.unregisterToken(tokenUid);
+        walletUtils.setTokenAlwaysShow(tokenUid, false); // Remove this token from "always show"
+        context.hideModal();
+      } catch (e) {
+        unregisterModalRef.current.updateErrorMessage(e.message);
+      }
+    }
   }
 
   /**
    * Called when user clicks to sign the token, then opens the modal
    */
   const signClicked = () => {
+    // Can only sign on a hardware wallet on a version with custom tokens allowed
+    if (!LOCAL_STORE.isHardwareWallet() || !version.isLedgerCustomTokenAllowed()) {
+      return;
+    }
+
     const token = tokens.find((token) => token.uid === selectedToken);
-
-    if (LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed()) {
-      context.showModal(MODAL_TYPES.LEDGER_SIGN_TOKEN, {
-        token,
-        modalId: 'signTokenDataModal',
-      })
-    }
-  }
-
-  /**
-   * When user confirms the unregistration of the token, hide the modal and execute it
-   */
-  const unregisterConfirmed = async () => {
-    const tokenUid = selectedToken;
-    try {
-      await tokensUtils.unregisterToken(tokenUid);
-      walletUtils.setTokenAlwaysShow(tokenUid, false); // Remove this token from "always show"
-      context.hideModal();
-    } catch (e) {
-      unregisterModalRef.current.updateErrorMessage(e.message);
-    }
+    context.showModal(MODAL_TYPES.LEDGER_SIGN_TOKEN, {
+      token,
+      modalId: 'signTokenDataModal',
+    })
   }
 
   /*
@@ -291,18 +305,6 @@ function Wallet() {
     }
   }
 
-  function getUnregisterBody() { // TODO: Probably will be inlined
-    const token = tokens.find((token) => token.uid === selectedToken);
-    if (token === undefined) return null;
-
-    return (
-      <div>
-        <p><SpanFmt>{t`Are you sure you want to unregister the token **${token.name} (${token.symbol})**?`}</SpanFmt></p>
-        <p>{t`You won't lose your tokens, you just won't see this token on the side bar anymore.`}</p>
-      </div>
-    )
-  }
-
   const token = tokens.find((token) => token.uid === selectedToken);
   const tokenHistory = get(tokensHistory, selectedToken, {
     status: TOKEN_DOWNLOAD_STATUS.LOADING,
@@ -316,9 +318,9 @@ function Wallet() {
     },
   });
 
-  const renderBackupAlert = () => { // TODO: Double check this ref
+  const renderBackupAlert = () => {
     return (
-      <div ref="backupAlert" className="alert alert-warning backup-alert" role="alert">
+      <div className="alert alert-warning backup-alert" role="alert">
         {t`You haven't done the backup of your wallet yet. You should do it as soon as possible for your own safety.`} <a href="true" onClick={(e) => backupClicked(e)}>{t`Do it now`}</a>
       </div>
     )
