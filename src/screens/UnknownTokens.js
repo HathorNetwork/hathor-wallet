@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { get } from 'lodash';
 import $ from 'jquery';
 import HathorAlert from '../components/HathorAlert';
@@ -18,65 +18,56 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import helpers from '../utils/helpers';
-import wallet from "../utils/wallet";
+import walletUtils from '../utils/wallet';
 import Loading from '../components/Loading';
-
-const mapStateToProps = (state) => {
-  return {
-    registeredTokens: state.tokens,
-    allTokens: state.allTokens,
-    tokensBalance: state.tokensBalance,
-    tokensHistory: state.tokensHistory,
-    tokenMetadata: state.tokenMetadata,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => ({
-  getBalance: (tokenId) => dispatch(tokenFetchBalanceRequested(tokenId)),
-  getHistory: (tokenId) => dispatch(tokenFetchHistoryRequested(tokenId)),
-});
-
 
 /**
  * List of unknown tokens with its transactions and possibility to add them
  *
  * @memberof Screens
  */
-class UnknownTokens extends React.Component {
-  static contextType = GlobalModalContext;
+function UnknownTokens() {
+  const dispatch = useDispatch();
 
-  constructor(props) {
-    super(props);
+  const { registeredTokens, allTokens, tokensBalance, tokensHistory, tokenMetadata } = useSelector(
+    (state) => ({
+      registeredTokens: state.tokens,
+      allTokens: state.allTokens,
+      tokensBalance: state.tokensBalance,
+      tokensHistory: state.tokensHistory,
+      tokenMetadata: state.tokenMetadata,
+    })
+  );
 
-    this.anchorHideRefs = [];
-    this.anchorOpenRefs = [];
-    this.historyRefs = [];
+  const modalContext = useContext(GlobalModalContext);
 
-    this.alertSuccessRef = React.createRef();
+  /** Holds references to the "Open" and "Hide" link elements, that are rendered dynamically */
+  const anchorHideRefs = useRef([]);
+  const anchorOpenRefs = useRef([]);
+  /** Holds references to the transaction history elements, that are rendered dynamically */
+  const historyRefs = useRef([]);
+  /** Holds reference to the success alert element */
+  const alertSuccessRef = useRef(null);
 
-    /**
-     * uidSelected {string} UID of the token the user clicked to add
-     * successMessage {string} Message to be shown in the alert in case of success
-     */
-    this.state = {
-      uidSelected: null,
-      successMessage: ''
-    };
-  }
+  /** successMessage {string} Message to be shown in the alert in case of success */
+  const [successMessage, setSuccessMessage] = useState('');
 
-  componentDidMount() {
-    const unknownTokens = wallet.fetchUnknownTokens(
-      this.props.allTokens,
-      this.props.registeredTokens,
-      this.props.tokensBalance,
-      wallet.areZeroBalanceTokensHidden(),
+  /**
+   * Pre-emptively fetches all unknown token balances from server at component mount
+   */
+  useEffect(() => {
+    const unknownTokens = walletUtils.fetchUnknownTokens(
+      allTokens,
+      registeredTokens,
+      tokensBalance,
+      walletUtils.areZeroBalanceTokensHidden(),
     );
 
     // Dispatch fetch token balance actions for each token in the list.
     for (const token of unknownTokens) {
-      this.props.getBalance(token.uid);
+      dispatch(tokenFetchBalanceRequested(token.uid))
     }
-  }
+  }, []);
 
   /**
    * Get all unknown tokens from the wallet
@@ -85,22 +76,25 @@ class UnknownTokens extends React.Component {
    * @param {boolean} [hideZeroBalance] If true, omits tokens with zero balance
    * @return {Array} Array with unknown tokens {uid, balance, history}
    */
-  getUnknownTokens = (hideZeroBalance) => {
-    this.historyRefs = [];
-    this.anchorOpenRefs = [];
-    this.anchorHideRefs = [];
+  const getUnknownTokens = (hideZeroBalance) => {
+    // Emptying element reference arrays
+    historyRefs.current.length = 0;
+    anchorOpenRefs.current.length = 0;
+    anchorHideRefs.current.length = 0;
 
-    const unknownTokens = wallet.fetchUnknownTokens(
-      this.props.allTokens,
-      this.props.registeredTokens,
-      this.props.tokensBalance,
+    const unknownTokens = walletUtils.fetchUnknownTokens(
+      allTokens,
+      registeredTokens,
+      tokensBalance,
       hideZeroBalance,
     );
 
+    // Creates an empty non-reusable reference slot for each unknown token.
+    // These will be filled at render time by the actual elements.
     for (const _token of unknownTokens) {
-      this.historyRefs.push(React.createRef());
-      this.anchorOpenRefs.push(React.createRef());
-      this.anchorHideRefs.push(React.createRef());
+      historyRefs.current.push(React.createRef());
+      anchorOpenRefs.current.push(React.createRef());
+      anchorHideRefs.current.push(React.createRef());
     }
 
     return unknownTokens;
@@ -113,14 +107,13 @@ class UnknownTokens extends React.Component {
    * @param {number} index Index of the unknown token user clicked
    * @param {string} tokenId of the unknown token user clicked
    */
-  openHistory = (e, index, tokenId) => {
+  const openHistory = (e, index, tokenId) => {
     e.preventDefault();
+    dispatch(tokenFetchHistoryRequested(tokenId))
 
-    this.props.getHistory(tokenId);
-
-    $(this.historyRefs[index].current).show(400);
-    $(this.anchorHideRefs[index].current).show(300);
-    $(this.anchorOpenRefs[index].current).hide(300);
+    $(historyRefs.current[index].current).show(400);
+    $(anchorHideRefs.current[index].current).show(300);
+    $(anchorOpenRefs.current[index].current).hide(300);
   }
 
   /**
@@ -129,20 +122,21 @@ class UnknownTokens extends React.Component {
    * @param {Object} e Event emitted by the click
    * @param {number} index Index of the unknown token user clicked
    */
-  hideHistory = (e, index) => {
+  const hideHistory = (e, index) => {
     e.preventDefault();
-    $(this.historyRefs[index].current).hide(400);
-    $(this.anchorHideRefs[index].current).hide(300);
-    $(this.anchorOpenRefs[index].current).show(300);
+
+    $(historyRefs.current[index].current).hide(400);
+    $(anchorHideRefs.current[index].current).hide(300);
+    $(anchorOpenRefs.current[index].current).show(300);
   }
 
   /**
    * Triggered when user clicks to do a bulk import
    */
-  massiveImport = () => {
-    this.context.showModal(MODAL_TYPES.ADD_MANY_TOKENS, {
-      success: this.massiveImportSuccess,
-      tokensBalance: this.props.tokensBalance,
+  const massiveImport = () => {
+    modalContext.showModal(MODAL_TYPES.ADD_MANY_TOKENS, {
+      success: massiveImportSuccess,
+      tokensBalance: tokensBalance,
     });
   }
 
@@ -151,156 +145,151 @@ class UnknownTokens extends React.Component {
    *
    * @param {number} count Quantity of tokens that were added
    */
-  massiveImportSuccess = (count) => {
-    this.context.hideModal();
+  const massiveImportSuccess = (count) => {
+    modalContext.hideModal();
     const message = `${count} ${helpers.plural(count, 'token was', 'tokens were')} added!`;
-    this.setState({ successMessage: message }, () => {
-      this.alertSuccessRef.current.show(3000);
-    });
+    setSuccessMessage(message);
+    alertSuccessRef.current.show(3000);
   }
 
-  retryDownload = (e, tokenId) => {
+  const retryDownload = (e, tokenId) => {
     e.preventDefault();
     const balanceStatus = get(
-      this.props.tokensBalance,
+      tokensBalance,
       `${tokenId}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
     const historyStatus = get(
-      this.props.tokensHistory,
+      tokensHistory,
       `${tokenId}.status`,
       TOKEN_DOWNLOAD_STATUS.LOADING,
     );
 
-    // We should only retry the request that failed:
-
+    // We should only retry the requests that failed:
     if (historyStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
-      this.props.getHistory(tokenId);
+      dispatch(tokenFetchHistoryRequested(tokenId));
     }
-
     if (balanceStatus === TOKEN_DOWNLOAD_STATUS.FAILED) {
-      this.props.getBalance(tokenId);
+      dispatch(tokenFetchBalanceRequested(tokenId))
     }
   }
 
-  render = () => {
-    const unknownTokens = this.getUnknownTokens(wallet.areZeroBalanceTokensHidden());
+  const unknownTokensToRender = getUnknownTokens(walletUtils.areZeroBalanceTokensHidden());
 
-    const renderLoadingMessage = (tokenBalance, tokenHistory) => {
-      if (tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
-        if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
-          return t`Loading token balance and history...`;
-        }
-
-        return t`Loading token balance...`;
-      }
-
+  const renderLoadingMessage = (tokenBalance, tokenHistory) => {
+    if (tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
       if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
-        return t`Loading token history...`;
-      }
-    };
-
-    const renderTokenBalance = (token, isNFT, tokenBalance, tokenHistory) => {
-      const loadingTemplate = () => (
-        <div className="d-flex flex-row align-items-center justify-content-start w-100" style={{ lineHeight: '10px' }}>
-          <Loading width={16} height={16} />
-          <span style={{marginLeft: 10}}><strong>{ renderLoadingMessage(tokenBalance, tokenHistory) }</strong></span>
-        </div>
-      );
-
-      const balanceTemplate = () => {
-        return (
-          <div className="d-flex flex-row align-items-center justify-content-start w-100">
-            <span><strong>{t`Total:`}</strong> {helpers.renderValue(tokenBalance.data.available + tokenBalance.data.locked, isNFT)}</span>
-            <span className="ml-2"><strong>{t`Available:`}</strong> {helpers.renderValue(tokenBalance.data.available, isNFT)}</span>
-            <span className="ml-2"><strong>{t`Locked:`}</strong> {helpers.renderValue(tokenBalance.data.locked, isNFT)}</span>
-          </div>
-        )
-      };
-
-      const retryTemplate = () => {
-        return (
-          <div className="d-flex flex-row align-items-center justify-content-start w-100">
-            {t`Download failed, please`}&nbsp;
-            <a onClick={(e) => this.retryDownload(e, token.uid)} href="true">
-              {t`try again`}
-            </a>
-          </div>
-        );
+        return t`Loading token balance and history...`;
       }
 
-      if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.FAILED
-          || tokenBalance.status === TOKEN_DOWNLOAD_STATUS.FAILED) {
-        return retryTemplate();
-      }
-
-      if (tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.READY
-          || tokenBalance.status !== TOKEN_DOWNLOAD_STATUS.READY) {
-        if (tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY
-            && tokenHistory.status === TOKEN_DOWNLOAD_STATUS.INVALIDATED) {
-          return balanceTemplate();
-        }
-
-        return loadingTemplate();
-      }
-
-      return balanceTemplate();
+      return t`Loading token balance...`;
     }
 
-    const renderTokens = () => {
-      if (unknownTokens.length === 0) {
-        return <p>{t`You don't have any unknown tokens`}</p>;
-      }
-
-      return unknownTokens.map((token, index) => {
-        const isNFT = helpers.isTokenNFT(token.uid, this.props.tokenMetadata);
-
-        // Note: We can't default to LOADING here otherwise we will never show the `Show History` button
-        const tokenBalance = get(this.props.tokensBalance, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.INVALIDATED });
-        const tokenHistory = get(this.props.tokensHistory, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.INVALIDATED });
-
-        return (
-          <div key={token.uid} className="unknown-token card">
-            <div className="header d-flex flex-row align-items-center justify-content-between">
-              <div className="d-flex flex-column align-items-center justify-content-center">
-                <p>{token.uid}</p>
-                { renderTokenBalance(token, isNFT, tokenBalance, tokenHistory) }
-              </div>
-              <div className="d-flex flex-row align-items-center">
-                <a onClick={(e) => this.openHistory(e, index, token.uid)} ref={this.anchorOpenRefs[index]} href="true">
-                  {(tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.LOADING
-                    && tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.FAILED) && t`Show history`}
-                </a>
-                <a onClick={(e) => this.hideHistory(e, index)} ref={this.anchorHideRefs[index]} href="true" style={{display: 'none'}}>
-                  {(tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.LOADING
-                    && tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.FAILED) &&  t`Hide history`}
-                </a>
-              </div>
-            </div>
-            <div className="body mt-3" ref={this.historyRefs[index]} style={{display: 'none'}}>
-              { tokenHistory.status === TOKEN_DOWNLOAD_STATUS.READY && (
-                <TokenHistory count={WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
-              )}
-            </div>
-          </div>
-        );
-      });
+    if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.LOADING) {
+      return t`Loading token history...`;
     }
+  };
 
-    return (
-      <div className="content-wrapper">
-        <BackButton />
-        <div className="d-flex flex-row align-items-center mb-4 mt-4">
-          <h3 className="mr-4">{t`Unknown Tokens`}</h3>
-          <button onClick={this.massiveImport} className="btn btn-hathor">{t`Register Tokens`}</button>
-        </div>
-        <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
-        <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
-        {unknownTokens && renderTokens()}
-        <HathorAlert ref={this.alertSuccessRef} text={this.state.successMessage} type="success" />
+  const renderTokenBalance = (token, isNFT, tokenBalance, tokenHistory) => {
+    const loadingTemplate = () => (
+      <div className="d-flex flex-row align-items-center justify-content-start w-100" style={{ lineHeight: '10px' }}>
+        <Loading width={16} height={16} />
+        <span style={{marginLeft: 10}}><strong>{ renderLoadingMessage(tokenBalance, tokenHistory) }</strong></span>
       </div>
     );
+
+    const balanceTemplate = () => {
+      return (
+        <div className="d-flex flex-row align-items-center justify-content-start w-100">
+          <span><strong>{t`Total:`}</strong> {helpers.renderValue(tokenBalance.data.available + tokenBalance.data.locked, isNFT)}</span>
+          <span className="ml-2"><strong>{t`Available:`}</strong> {helpers.renderValue(tokenBalance.data.available, isNFT)}</span>
+          <span className="ml-2"><strong>{t`Locked:`}</strong> {helpers.renderValue(tokenBalance.data.locked, isNFT)}</span>
+        </div>
+      )
+    };
+
+    const retryTemplate = () => {
+      return (
+        <div className="d-flex flex-row align-items-center justify-content-start w-100">
+          {t`Download failed, please`}&nbsp;
+          <a onClick={(e) => retryDownload(e, token.uid)} href="true">
+            {t`try again`}
+          </a>
+        </div>
+      );
+    }
+
+    if (tokenHistory.status === TOKEN_DOWNLOAD_STATUS.FAILED
+        || tokenBalance.status === TOKEN_DOWNLOAD_STATUS.FAILED) {
+      return retryTemplate();
+    }
+
+    if (tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.READY
+        || tokenBalance.status !== TOKEN_DOWNLOAD_STATUS.READY) {
+      if (tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY
+          && tokenHistory.status === TOKEN_DOWNLOAD_STATUS.INVALIDATED) {
+        return balanceTemplate();
+      }
+
+      return loadingTemplate();
+    }
+
+    return balanceTemplate();
   }
+
+  const renderTokens = () => {
+    if (unknownTokensToRender.length === 0) {
+      return <p>{t`You don't have any unknown tokens`}</p>;
+    }
+
+    return unknownTokensToRender.map((token, index) => {
+      const isNFT = helpers.isTokenNFT(token.uid, tokenMetadata);
+
+      // Note: We can't default to LOADING here otherwise we will never show the `Show History` button
+      const tokenBalance = get(tokensBalance, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.INVALIDATED });
+      const tokenHistory = get(tokensHistory, `${token.uid}`, { status: TOKEN_DOWNLOAD_STATUS.INVALIDATED });
+
+      return (
+        <div key={token.uid} className="unknown-token card">
+          <div className="header d-flex flex-row align-items-center justify-content-between">
+            <div className="d-flex flex-column align-items-center justify-content-center">
+              <p>{token.uid}</p>
+              { renderTokenBalance(token, isNFT, tokenBalance, tokenHistory) }
+            </div>
+            <div className="d-flex flex-row align-items-center">
+              <a onClick={(e) => openHistory(e, index, token.uid)} ref={anchorOpenRefs.current[index]} href="true">
+                {(tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.LOADING
+                  && tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.FAILED) && t`Show history`}
+              </a>
+              <a onClick={(e) => hideHistory(e, index)} ref={anchorHideRefs.current[index]} href="true" style={{display: 'none'}}>
+                {(tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.LOADING
+                  && tokenHistory.status !== TOKEN_DOWNLOAD_STATUS.FAILED) &&  t`Hide history`}
+              </a>
+            </div>
+          </div>
+          <div className="body mt-3" ref={historyRefs.current[index]} style={{display: 'none'}}>
+            { tokenHistory.status === TOKEN_DOWNLOAD_STATUS.READY && (
+              <TokenHistory count={WALLET_HISTORY_COUNT} selectedToken={token.uid} showPage={false} />
+            )}
+          </div>
+        </div>
+      );
+    });
+  }
+
+  return (
+    <div className="content-wrapper">
+      <BackButton />
+      <div className="d-flex flex-row align-items-center mb-4 mt-4">
+        <h3 className="mr-4">{t`Unknown Tokens`}</h3>
+        <button onClick={massiveImport} className="btn btn-hathor">{t`Register Tokens`}</button>
+      </div>
+      <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
+      <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
+      {unknownTokensToRender && renderTokens()}
+      <HathorAlert ref={alertSuccessRef} text={successMessage} type="success" />
+    </div>
+  );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(UnknownTokens);
+export default UnknownTokens;

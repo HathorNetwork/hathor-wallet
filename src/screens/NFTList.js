@@ -5,10 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { t } from 'ttag'
 import { get } from 'lodash';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { NFT_LIST_PER_PAGE } from '../constants';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import HathorPaginate from '../components/HathorPaginate';
@@ -16,7 +16,13 @@ import NFTListElement from '../components/NFTListElement';
 import BackButton from '../components/BackButton';
 
 
-const mapStateToProps = (state) => {
+/**
+ * Retrieves NFT data from the given redux state object.
+ *
+ * @param {object} state - The application redux state object
+ * @returns {{nftData: Array}} - The retrieved NFT data.
+ */
+function retrieveNftDataFromState(state) {
   const tokenMetadata = state.tokenMetadata || {};
   const nftList = Object.values(tokenMetadata).filter((meta) => {
     return meta.nft_media && meta.nft_media.file;
@@ -48,35 +54,34 @@ const mapStateToProps = (state) => {
   return {
     nftData,
   };
-};
+}
 
 /**
  * List all NFTs with explorer asset
  *
  * @memberof Screens
  */
-class NFTList extends React.Component {
+function NFTList() {
   /**
    * page: {Number} Current page of the list
    * `page` is 1-indexed, i.e. `page=1` means the first page and `page=0` is invalid.
    * totalPages: {Number} Total number of pages of the list
    */
-  state = {
-    page: 1,
-    totalPages: 0,
-  }
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const { nftData } = useSelector(retrieveNftDataFromState);
 
-  componentDidMount() {
-    this.setState({ totalPages: this.getTotalPages() });
-  }
+  useEffect(() => {
+    setTotalPages(getTotalPages());
+  }, []);
 
   /**
    * Return total number of pages of the list
    *
    * @return {Number} Total number of pages of the list
    */
-  getTotalPages = () => {
-    return Math.ceil(this.props.nftData.length / NFT_LIST_PER_PAGE);
+  const getTotalPages = () => {
+    return Math.ceil(nftData.length / NFT_LIST_PER_PAGE);
   }
 
   /**
@@ -85,53 +90,51 @@ class NFTList extends React.Component {
    * @param data {Object} Data with clicked page {'selected'}.
    * `selected` is 0-indexed, i.e. `selected=0` means the first page.
    */
-  handlePageClick = (data) => {
-    const page = data.selected + 1;
-    this.setState({ page });
+  const handlePageClick = (data) => {
+    const selectedPage = data.selected + 1;
+    setPage(selectedPage);
   }
 
-  render = () => {
-    const renderList = () => {
-      if (this.props.nftData.length === 0) {
-        return <p>{t`Your list is empty.`}</p>
-      }
-
-      const startIndex = (this.state.page - 1) * NFT_LIST_PER_PAGE;
-      const endIndex = startIndex + NFT_LIST_PER_PAGE;
-      return this.props.nftData.slice(startIndex, endIndex).map((nftElement) => {
-        return (
-          <div key={nftElement.id}>
-            <NFTListElement nftElement={nftElement} />
-          </div>
-        );
-      });
+  const renderList = () => {
+    if (nftData.length === 0) {
+      return <p>{t`Your list is empty.`}</p>
     }
 
-    const loadPagination = () => {
-      if (this.props.nftData.length === 0 || this.state.totalPages === 1) {
-        return null;
-      } else {
-        return (
-          <HathorPaginate pageCount={this.state.totalPages}
-            onPageChange={this.handlePageClick} />
-        );
-      }
-    }
-
-    return (
-      <div className="content-wrapper">
-        <BackButton />
-        <div className="d-flex flex-column mb-3">
-          <h3 className="mt-4">NFT List</h3>
-          <p className="mt-5">{t`This list will have all the registered NFTs that you have balance and that have a digital asset being shown in our explorer.`}</p>
-          <div className="d-flex flex-row flex-wrap justify-content-between mb-3">
-            {renderList()}
-          </div>
-          {loadPagination()}
+    const startIndex = (page - 1) * NFT_LIST_PER_PAGE;
+    const endIndex = startIndex + NFT_LIST_PER_PAGE;
+    return nftData.slice(startIndex, endIndex).map((nftElement) => {
+      return (
+        <div key={nftElement.id}>
+          <NFTListElement nftElement={nftElement} />
         </div>
-      </div>
-    );
+      );
+    });
   }
+
+  const loadPagination = () => {
+    if (nftData.length === 0 || totalPages === 1) {
+      return null;
+    } else {
+      return (
+        <HathorPaginate pageCount={totalPages}
+          onPageChange={handlePageClick} />
+      );
+    }
+  }
+
+  return (
+    <div className="content-wrapper">
+      <BackButton />
+      <div className="d-flex flex-column mb-3">
+        <h3 className="mt-4">NFT List</h3>
+        <p className="mt-5">{t`This list will have all the registered NFTs that you have balance and that have a digital asset being shown in our explorer.`}</p>
+        <div className="d-flex flex-row flex-wrap justify-content-between mb-3">
+          {renderList()}
+        </div>
+        {loadPagination()}
+      </div>
+    </div>
+  );
 }
 
-export default connect(mapStateToProps)(NFTList);
+export default NFTList;
