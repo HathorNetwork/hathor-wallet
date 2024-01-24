@@ -97,7 +97,7 @@ function Wallet() {
     initializeWalletScreen();
   }, [selectedToken]);
 
-  // The tokens history has changed, check the last timestamp to define if we should fetch the token details again
+  // When the tokens history changes, check the last timestamp to define if we should fetch the token details again
   useEffect(() => {
     const selectedTokenHistory = get(tokensHistory, selectedToken, {
       status: TOKEN_DOWNLOAD_STATUS.LOADING,
@@ -105,7 +105,6 @@ function Wallet() {
       data: [],
     });
 
-    // Check if the selected token history has changed from the last fetch
     if (tokenHistoryTimestamp !== selectedTokenHistory.updatedAt) {
       setTokenHistoryTimestamp(selectedTokenHistory.updatedAt);
       updateTokenInfo(selectedToken);
@@ -124,12 +123,12 @@ function Wallet() {
     setTransactionsCount(null);
     setShouldShowAdministrativeTab(false);
 
-    // No need to download token info and wallet info if the token is hathor
+    // No need to download token info and mint/melt info if the token is hathor
     if (selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
       return;
     }
 
-    // Fires the fetching of all token data for the correct exhibition on screen
+    // Fires the fetching of all token data
     calculateShouldShowAdministrativeTab(selectedToken);
     updateTokenInfo(selectedToken);
     updateWalletInfo(selectedToken);
@@ -137,6 +136,7 @@ function Wallet() {
 
   /**
    * Update token state after didmount or props update
+   * @param {string} tokenUid
    */
   const updateWalletInfo = async (tokenUid) => {
     const mintUtxos = await wallet.getMintAuthority(tokenUid, { many: true });
@@ -154,6 +154,11 @@ function Wallet() {
     setMeltCount(meltCount);
   }
 
+  /**
+   * Fetches mint and melt data for a token
+   * @param {string} tokenUid
+   * @returns {Promise<void>}
+   */
   async function updateTokenInfo(tokenUid) {
     // No need to fetch token info if the token is hathor
     if (tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
@@ -174,7 +179,7 @@ function Wallet() {
     setTransactionsCount(totalTransactions);
   }
 
-  /*
+  /**
    * We show the administrative tools tab only for the users that one day had an authority output, even if it was already spent
    *
    * This will set the shouldShowAdministrativeTab state param based on the response of getMintAuthority and getMeltAuthority
