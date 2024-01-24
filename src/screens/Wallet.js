@@ -174,6 +174,27 @@ function Wallet() {
     setTransactionsCount(totalTransactions);
   }
 
+  /*
+   * We show the administrative tools tab only for the users that one day had an authority output, even if it was already spent
+   *
+   * This will set the shouldShowAdministrativeTab state param based on the response of getMintAuthority and getMeltAuthority
+   */
+  const calculateShouldShowAdministrativeTab = async (tokenId) => {
+    const mintAuthorities = await wallet.getMintAuthority(tokenId, { skipSpent: false });
+
+    if (mintAuthorities.length > 0) {
+      return setShouldShowAdministrativeTab(true);
+    }
+
+    const meltAuthorities = await wallet.getMeltAuthority(tokenId, { skipSpent: false });
+
+    if (meltAuthorities.length > 0) {
+      return setShouldShowAdministrativeTab(true);
+    }
+
+    return setShouldShowAdministrativeTab(false);
+  }
+
   /**
    * Triggered when user clicks to do the backup of words, then opens backup modal
    *
@@ -254,28 +275,6 @@ function Wallet() {
       token,
       modalId: 'signTokenDataModal',
     })
-  }
-
-  // TODO: Understand when this calculation should be done. Maybe when token data was updated?
-  /*
-   * We show the administrative tools tab only for the users that one day had an authority output, even if it was already spent
-   *
-   * This will set the shouldShowAdministrativeTab state param based on the response of getMintAuthority and getMeltAuthority
-   */
-  const calculateShouldShowAdministrativeTab = async (tokenId) => {
-    const mintAuthorities = await wallet.getMintAuthority(tokenId, { skipSpent: false });
-
-    if (mintAuthorities.length > 0) {
-      return setShouldShowAdministrativeTab(true);
-    }
-
-    const meltAuthorities = await wallet.getMeltAuthority(tokenId, { skipSpent: false });
-
-    if (meltAuthorities.length > 0) {
-      return setShouldShowAdministrativeTab(true);
-    }
-
-    return setShouldShowAdministrativeTab(false);
   }
 
   /**
