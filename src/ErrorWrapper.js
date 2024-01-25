@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, withRouter } from 'react-router-dom';
 import $ from 'jquery';
 import App from './App';
 import ModalUnhandledError from './components/ModalUnhandledError';
@@ -16,7 +16,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import './index.css';
 
-function ErrorBoundary({ onError }) {
+function ErrorBoundary(props) {
+	const { onError } = props;
+
 	const handleErrorEvent = (event) => {
 		onError(event.error);
 	}
@@ -30,7 +32,9 @@ function ErrorBoundary({ onError }) {
 	}, []);
 
 	return (
-		<Route path="/" children={<App/>}/>
+		<Route path="/">
+			<App {...props}/>
+		</Route>
 	)
 }
 
@@ -59,4 +63,4 @@ function ErrorWrapper(props) {
 	)
 }
 
-export default ErrorWrapper;
+export default withRouter(ErrorWrapper);
