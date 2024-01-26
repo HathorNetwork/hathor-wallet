@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Route, withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import $ from 'jquery';
 import App from './App';
 import ModalUnhandledError, { UNHANDLED_ERROR_MODAL_ID_SELECTOR } from './components/ModalUnhandledError';
@@ -18,6 +18,7 @@ import './index.css';
 
 function ErrorBoundary(props) {
 	const { onError } = props;
+	const history = useHistory();
 
 	const handleErrorEvent = (event) => {
 		onError(event.error);
@@ -32,9 +33,7 @@ function ErrorBoundary(props) {
 	}, []);
 
 	return (
-		<Route path="/">
-			<App {...props}/>
-		</Route>
+		<App history={history} />
 	)
 }
 
@@ -63,4 +62,4 @@ function ErrorWrapper(props) {
 	)
 }
 
-export default withRouter(ErrorWrapper);
+export default ErrorWrapper;
