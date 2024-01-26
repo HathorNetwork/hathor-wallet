@@ -72,7 +72,7 @@ class Root extends React.Component {
     // When Ledger device loses connection or the app is closed
     if (this.props.ledgerClosed && !prevProps.ledgerClosed) {
       LOCAL_STORE.lock();
-      this.props.history.push('/wallet_type/');
+      this.props.history.push('/locked/');
     }
   }
 
