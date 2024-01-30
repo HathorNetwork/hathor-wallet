@@ -9,7 +9,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import hathorLib from '@hathor/wallet-lib';
 import { t } from 'ttag';
 import { get } from 'lodash';
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 import ReactLoading from 'react-loading';
 
 import SpanFmt from '../components/SpanFmt';
@@ -28,7 +28,7 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested, updateWords, } from '../actions/index';
 import LOCAL_STORE from '../storage';
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
 
 
 /**
