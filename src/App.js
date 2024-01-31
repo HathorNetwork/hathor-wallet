@@ -246,7 +246,7 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
   }))
 
   // Handling Windows pathname issues
-  const pathname = history.location.pathname; // TODO: Investigate if this logic can be moved to root
+  const pathname = history.location.pathname;
   if (pathname.length > 3 && pathname.slice(0, 4).toLowerCase() === '/c:/') {
     // On Windows the pathname that is being pushed into history has a prefix of '/C:'
     // So everytime I use 'push' it works, because I set the pathname
@@ -261,7 +261,6 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
 
   // The wallet was not yet started, go to Welcome
   if (!LOCAL_STORE.wasStarted()) {
-    // TODO: Refactor this logic, so that this validation is made before calling the route wrapper
     return <Redirect to={{pathname: '/welcome/'}}/>;
   }
 
@@ -347,7 +346,7 @@ function DefaultComponent({ children }) {
     LOCAL_STORE.isHardwareWallet()) {
     // This will redirect the page to Wallet Type screen
     LOCAL_STORE.cleanWallet();
-    return <Redirect to={ { pathname: '/wallet_type/' } } />; // TODO: Refactor this to a navigate command
+    return <Redirect to={ { pathname: '/wallet_type/' } } />;
   }
 
   // Render the navigation top bar, the component and the error handling modal
