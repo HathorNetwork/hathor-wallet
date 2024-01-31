@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import $ from 'jquery';
 import { VERSION } from '../constants';
-import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
+import { MODAL_TYPES, useGlobalModalContext } from './GlobalModal';
 import SoftwareWalletWarningMessage from './SoftwareWalletWarningMessage';
 import LOCAL_STORE from '../storage';
 
@@ -19,32 +18,31 @@ import LOCAL_STORE from '../storage';
  *
  * @memberof Components
  */
-class Version extends React.Component {
-  static contextType = GlobalModalContext;
+function Version() {
+  const contextType = useGlobalModalContext();
+
   /**
    * If it's software wallet show modal warning
    */
-  walletTypeClicked = () => {
+  const walletTypeClicked = () => {
     if (!LOCAL_STORE.isHardwareWallet()) {
-      this.context.showModal(MODAL_TYPES.ALERT, {
+      contextType.showModal(MODAL_TYPES.ALERT, {
         body: <SoftwareWalletWarningMessage />,
         buttonName: 'Ok',
         id: 'softwareWalletWarningModal',
         title: 'Software wallet warning',
       });
     }
-  }
+  };
 
-  render() {
-    return (
-      <div className='d-flex flex-column version-wrapper align-items-center'>
-        <span className={LOCAL_STORE.isHardwareWallet() ? 'hardware' : 'software'} onClick={this.walletTypeClicked}>
-          {LOCAL_STORE.isHardwareWallet() ? t`Hardware Wallet` : t`Software Wallet`}
-        </span>
-        <span>{VERSION}</span>
-      </div>
-    );
-  }
-};
+  return (
+    <div className='d-flex flex-column version-wrapper align-items-center'>
+      <span className={LOCAL_STORE.isHardwareWallet() ? 'hardware' : 'software'} onClick={walletTypeClicked}>
+        {LOCAL_STORE.isHardwareWallet() ? t`Hardware Wallet` : t`Software Wallet`}
+      </span>
+      <span>{VERSION}</span>
+    </div>
+  );
+}
 
 export default Version;
