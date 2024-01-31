@@ -33,7 +33,7 @@ function Version() {
         title: 'Software wallet warning',
       });
     }
-  }
+  };
 
   return (
     <div className='d-flex flex-column version-wrapper align-items-center'>
