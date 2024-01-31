@@ -38,7 +38,6 @@ import tokensUtils from './utils/tokens';
 import storageUtils from './utils/storage';
 import { useDispatch, useSelector } from 'react-redux';
 import RequestErrorModal from './components/RequestError';
-import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { IPC_RENDERER } from './constants';
@@ -135,7 +134,7 @@ function Root() {
         IPC_RENDERER.removeAllListeners('ledger:closed');
         IPC_RENDERER.removeAllListeners('ledger:manyTokenSignatureValid');
       }
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -186,7 +185,7 @@ function Root() {
       <Route exact path="" children={<StartedComponent children={ <Wallet />} loaded={true} />} />
       <Route path="" children={<Page404 />} />
     </Switch>
-  )
+  );
 }
 
 function LoadedWalletComponent({ children }) {
@@ -204,13 +203,13 @@ function LoadedWalletComponent({ children }) {
   // We allow server screen to be shown from locked screen to allow the user to
   // change the server before from a locked wallet.
   if (isServerScreen) {
-    return <DefaultComponent children={children} />
+    return <DefaultComponent children={children} />;
   }
 
   const { isVersionAllowed, loadingAddresses } = useSelector(state => ({
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
-  }))
+  }));
 
   // Check version
   if (isVersionAllowed === undefined) {
@@ -236,14 +235,14 @@ function LoadedWalletComponent({ children }) {
 
   return (
     <DefaultComponent children={children} />
-  )
+  );
 }
 
 function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
   const history = useHistory();
   const { loadingAddresses } = useSelector(state => ({
     loadingAddresses: state.loadingAddresses
-  }))
+  }));
 
   // Handling Windows pathname issues
   const pathname = history.location.pathname;

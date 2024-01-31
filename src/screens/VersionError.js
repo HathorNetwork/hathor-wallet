@@ -12,7 +12,7 @@ import version from '../utils/version';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from '../components/Version';
 import hathorLib from '@hathor/wallet-lib';
-import { useHistory } from "react-router-dom";
+import { useHistory } from 'react-router-dom';
 
 
 /**
@@ -28,14 +28,14 @@ function VersionError() {
    */
   const versionUpdated = () => {
     version.checkApiVersion();
-  }
+  };
 
   /**
    * Called when user clicks to Change Server, then redirects to change server screen
    */
   const changeServer = () => {
     history.push('/server/');
-  }
+  };
   const min_api_version = hathorLib.constants.MIN_API_VERSION;
 
   return (
