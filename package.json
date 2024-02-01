@@ -43,7 +43,7 @@
     "react-copy-to-clipboard": "5.1.0",
     "react-dom": "18.2.0",
     "react-loading": "2.0.3",
-    "react-paginate": "6.5.0",
+    "react-paginate": "8.2.0",
     "react-redux": "7.2.8",
     "react-router-dom": "5.3.3",
     "react-scripts": "4.0.3",
