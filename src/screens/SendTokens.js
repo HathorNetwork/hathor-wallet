@@ -16,9 +16,8 @@ import SendTxHandler from '../components/SendTxHandler';
 import ledger, { LedgerError } from '../utils/ledger';
 import tokens from '../utils/tokens';
 import version from '../utils/version';
-import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT } from '../constants';
+import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT, colors } from '../constants';
 import ReactLoading from 'react-loading';
-import colors from '../index.scss';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 

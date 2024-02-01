@@ -11,6 +11,7 @@
  */
 
 import { t } from 'ttag';
+import scssColors from './index.module.scss';
 
 /**
  * Quantity of elements to show in the wallet history
@@ -267,3 +268,12 @@ export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
   [ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE]: false,
 };
+
+/**
+ * This property filters the full exported scss properties and exposes only the ones
+ * relevant to the javascript context.
+ * @type {object}
+ */
+export const colors = {
+  purpleHathor: scssColors.purpleHathor,
+}

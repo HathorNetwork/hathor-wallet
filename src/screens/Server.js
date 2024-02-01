@@ -16,8 +16,8 @@ import {
   DEFAULT_SERVERS,
   DEFAULT_WALLET_SERVICE_SERVERS,
   DEFAULT_WALLET_SERVICE_WS_SERVERS,
+  colors,
 } from '../constants';
-import colors from '../index.scss';
 import { connect } from "react-redux";
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';

@@ -6,17 +6,20 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Route } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import $ from 'jquery';
 import App from './App';
-import ModalUnhandledError from './components/ModalUnhandledError';
+import ModalUnhandledError, { UNHANDLED_ERROR_MODAL_ID_SELECTOR } from './components/ModalUnhandledError';
 
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import './index.css';
 
-function ErrorBoundary({ onError }) {
+function ErrorBoundary(props) {
+	const { onError } = props;
+	const history = useHistory();
+
 	const handleErrorEvent = (event) => {
 		onError(event.error);
 	}
@@ -30,7 +33,7 @@ function ErrorBoundary({ onError }) {
 	}, []);
 
 	return (
-		<Route path="/" children={<App/>}/>
+		<App history={history} />
 	)
 }
 
@@ -41,7 +44,7 @@ function ErrorWrapper(props) {
 		// Don't propagate error messages listened more than once
 		if (newError !== error) {
 			setError(error);
-			$('#unhandledErrorModal').modal('show');
+			$(UNHANDLED_ERROR_MODAL_ID_SELECTOR).modal('show');
 		}
 	}
 

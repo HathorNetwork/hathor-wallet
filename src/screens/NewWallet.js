@@ -111,14 +111,14 @@ class NewWallet extends React.Component {
   pinSuccess = () => {
     // Getting redux variables before cleaning all data
     const { words, pin, password } = this.props;
+    LOCAL_STORE.unlock();
     // Generate addresses and load data
     wallet.generateWallet(words, '', pin, password, this.props.history);
+    LOCAL_STORE.open(); // Mark this wallet as open, so that it does not appear locked after loading
     // Clean pin, password and words from redux
     this.props.updatePassword(null);
     this.props.updatePin(null);
     this.props.updateWords(null);
-    // Go to wallet
-    this.props.history.push('/wallet/');
   }
 
   /**
