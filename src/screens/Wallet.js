@@ -47,7 +47,9 @@ function Wallet() {
   const [successMessage, setSuccessMessage] = useState('');
   /* shouldShowAdministrativeTab {boolean} If we should display the Administrative Tools tab */
   const [shouldShowAdministrativeTab, setShouldShowAdministrativeTab] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(''); // TODO: Metadata token error are being suppressed as of now
+  // XXX: There is an important `errorMessage` state that was not being set in the previous version
+  // It should be set for both the tokenMetadata error handling ( that are currently ignored )
+  // and the TokenGeneralInfo child component in a future moment
   const [totalSupply, setTotalSupply] = useState(null);
   const [canMint, setCanMint] = useState(false);
   const [canMelt, setCanMelt] = useState(false);
@@ -401,7 +403,6 @@ function Wallet() {
             <TokenGeneralInfo
               token={token}
               showConfigString={true}
-              errorMessage={errorMessage}
               showAlwaysShowTokenCheckbox={true}
               totalSupply={totalSupply}
               canMint={canMint}
