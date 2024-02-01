@@ -58,7 +58,6 @@ const mapStateToProps = (state) => {
     loadingAddresses: state.loadingAddresses,
     ledgerClosed: state.ledgerWasClosed,
     walletStartState: state.walletStartState,
-    routerHistory: state.routerHistory,
   };
 };
 
@@ -73,9 +72,7 @@ class Root extends React.Component {
     // When Ledger device loses connection or the app is closed
     if (this.props.ledgerClosed && !prevProps.ledgerClosed) {
       LOCAL_STORE.lock();
-      if (this.props.routerHistory) {
-        this.props.routerHistory.push('/locked/');
-      }
+      this.props.history.push('/locked/');
     }
   }
 
