@@ -12,6 +12,9 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { walletReset } from '../actions';
 import { connect } from 'react-redux';
 
+const UNHANDLED_ERROR_MODAL_ID = 'unhandledErrorModal';
+export const UNHANDLED_ERROR_MODAL_ID_SELECTOR = `#${UNHANDLED_ERROR_MODAL_ID}`;
+
 const mapDispatchToProps = dispatch => {
   return {
     walletReset: () => dispatch(walletReset()),
@@ -68,7 +71,7 @@ class ModalUnhandledError extends React.Component {
     const { renderError } = this.props
     const readableError = t`Error Message: ${message}\nStack trace: ${stack}`
     return (
-      <div className="modal fade" id="unhandledErrorModal" tabIndex="-1" role="dialog" aria-labelledby="unhandledErrorModal" aria-hidden="true">
+      <div className="modal fade" id={UNHANDLED_ERROR_MODAL_ID} tabIndex="-1" role="dialog" aria-labelledby="unhandledErrorModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
