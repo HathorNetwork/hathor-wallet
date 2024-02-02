@@ -18,7 +18,7 @@ import tokensUtils from '../utils/tokens';
 import versionUtils from '../utils/version';
 import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT } from '../constants';
 import ReactLoading from 'react-loading';
-import colors from '../index.scss';
+import colors from '../index.module.scss';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';

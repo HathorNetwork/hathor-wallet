@@ -8,7 +8,7 @@
 import React from 'react';
 import { t } from 'ttag';
 import ReactLoading from 'react-loading';
-import colors from '../../index.scss';
+import colors from '../../index.module.scss';
 import { connect } from "react-redux";
 import { MODAL_TYPES, GlobalModalContext } from '../../components/GlobalModal';
 

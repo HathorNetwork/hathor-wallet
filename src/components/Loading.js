@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactLoading from 'react-loading';
-import colors from '../index.scss';
+import colors from '../index.module.scss';
 
 const defaults = {
   width: 18,

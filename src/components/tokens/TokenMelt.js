@@ -16,7 +16,7 @@ import ReactLoading from 'react-loading';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../../sagas/tokens';
-import colors from '../../index.scss';
+import colors from '../../index.module.scss';
 
 const mapStateToProps = (state) => {
   return {

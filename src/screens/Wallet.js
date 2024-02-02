@@ -23,7 +23,7 @@ import tokensUtils from '../utils/tokens';
 import version from '../utils/version';
 import walletUtils from '../utils/wallet';
 import BackButton from '../components/BackButton';
-import colors from '../index.scss';
+import colors from '../index.module.scss';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested, updateWords, } from '../actions/index';

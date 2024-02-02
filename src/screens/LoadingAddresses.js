@@ -15,7 +15,7 @@ import SpanFmt from '../components/SpanFmt';
 import RequestErrorModal from '../components/RequestError';
 import logo from '../assets/images/hathor-logo.png';
 import { updateLoadedData } from "../actions/index";
-import colors from '../index.scss';
+import colors from '../index.module.scss';
 import InitialImages from '../components/InitialImages';
 
 /**
