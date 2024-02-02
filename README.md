@@ -28,7 +28,7 @@ A transaction is displayed.
 
 ### Prerequisites
 
-* Install node v14
+* Install node v20
 
 ### To Install
 

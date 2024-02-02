@@ -23,6 +23,10 @@
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
   "version": "0.27.1-rc4",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "private": true,
   "dependencies": {
     "@hathor/wallet-lib": "1.0.4",
@@ -59,9 +63,9 @@
   "scripts": {
     "build-css": "sass --no-source-map src/index.scss src/index.css",
     "watch-css": "npm run build-css && sass --no-source-map -w src/index.scss src/index.css",
-    "start-js": "react-scripts start",
+    "start-js": "react-scripts --openssl-legacy-provider start",
     "start": "npm-run-all -p watch-css start-js",
-    "build-js": "react-scripts build",
+    "build-js": "react-scripts --openssl-legacy-provider build",
     "build": "npm-run-all build-css build-js",
     "test": "react-scripts test --env=./tests/env.js",
     "e2e": "cypress run",

@@ -1,6 +1,6 @@
 ## Install
 
-Must use node v14
+Must use node v20 or greater
 
 ## Running on Electron
 
