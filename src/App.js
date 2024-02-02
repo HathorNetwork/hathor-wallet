@@ -182,19 +182,18 @@ function Root() {
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/loading_addresses" element={<LoadingAddresses />} />
       <Route path="/permission" element={<SentryPermission />} />
-      <Route path="" element={<StartedComponent children={ <Wallet />} loaded={true} />} />
-      <Route path="" element={<Page404 />} />
+      <Route path="/" element={<StartedComponent children={ <Wallet />} loaded={true} />} />
+      <Route path="*" element={<Page404 />} />
     </Routes>
   );
 }
 
 function LoadedWalletComponent({ children }) {
-  const match = useMatch('');
+  const location = useLocation();
   // For server screen we don't need to check version
   // We also allow the server screen to be reached from the locked screen
   // In the case of an unresponsive fullnode, which would block the wallet start
-  console.log(`[LoadedWalletComponent] match: `, { match });
-  const isServerScreen = match.pathname === '/server';
+  const isServerScreen = location.pathname === '/server';
 
   // If was closed and is loaded we need to redirect to locked screen
   if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) && (!LOCAL_STORE.isHardwareWallet())) {
@@ -214,12 +213,7 @@ function LoadedWalletComponent({ children }) {
 
   // Check version
   if (isVersionAllowed === undefined) {
-    throw new Error('[LoadedWalletComponent] isVersionAllowed is undefined');
-    // return <Redirect to={{
-    //   pathname: '/loading_addresses/',
-    //   state: {path: match.url},
-    //   waitVersionCheck: true
-    // }} />;
+    return null; // Render nothing, as the screen is still loading
   }
   if (isVersionAllowed === false) {
     return <VersionError />;
@@ -230,7 +224,7 @@ function LoadedWalletComponent({ children }) {
     // If wallet is still loading addresses we redirect to the loading screen
     return <Navigate
       to={ '/loading_addresses/' }
-      state={{path: match.pathname}}
+      state={{path: location.pathname}}
     />;
   }
 
@@ -286,9 +280,8 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
 
   // Wallet is not loaded, but it is still loading addresses. Go to the loading screen
   if (loadingAddresses) {
-    const match = useMatch('');
-    console.log(`[StartedComponent] useMatch contents: `, { match }); // TODO: We need the URL instead of pathname... Check if this works
-    return <Navigate to={ '/loading_addresses/' } state={{path: match.pathname}} />;
+    const location = useLocation();
+    return <Navigate to={ '/loading_addresses/' } state={{path: location.pathname}} />;
   }
 
   // Wallet is not loaded or loading, but it is started

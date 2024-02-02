@@ -15,6 +15,7 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import './index.css';
+import TokenBar from "./components/TokenBar";
 
 function ErrorBoundary(props) {
 	const { onError } = props;
@@ -36,7 +37,7 @@ function ErrorBoundary(props) {
 	)
 }
 
-function ErrorWrapper(props) {
+function ErrorWrapper() {
 	const [error, setError] = useState(null);
 
 	const onError = (newError) => {
@@ -48,16 +49,17 @@ function ErrorWrapper(props) {
 	}
 
 	return (
+		<>
+		<TokenBar />
 		<div className="components-wrapper">
 			<ErrorBoundary
-				{...props}
 				onError={onError}
 			/>
 			<ModalUnhandledError
-				{...props}
 				resetError={() => onError(null)}
 			/>
 		</div>
+		</>
 	)
 }
 

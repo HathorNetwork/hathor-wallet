@@ -11,7 +11,6 @@ import { createRoot } from 'react-dom/client';
 import ErrorWrapper from './ErrorWrapper';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { GlobalModal } from './components/GlobalModal';
-import TokenBar from './components/TokenBar';
 
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -22,8 +21,7 @@ import store from "./store/index";
 import { Provider } from "react-redux";
 
 const routerInstance = createBrowserRouter([
-  { element: <TokenBar /> },
-  { element: <ErrorWrapper /> },
+  { path: '*', element: <ErrorWrapper /> },
 ])
 
 const container = document.getElementById('root');
