@@ -12,7 +12,7 @@ import createRequestInstance from '../api/axiosInstance';
 import SpanFmt from './SpanFmt';
 import { useDispatch, useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * DOM Identifier for the modal
@@ -26,7 +26,7 @@ const MODAL_DOM_ID = '#requestErrorModal';
  * @memberof Components
  */
 function RequestErrorModal() {
-  const history = useHistory();
+	const navigate = useNavigate();
   const dispatch = useDispatch();
   const { lastFailedRequest, requestErrorStatusCode } = useSelector(state => ({
     lastFailedRequest: state.lastFailedRequest,
@@ -42,7 +42,7 @@ function RequestErrorModal() {
    */
   const handleChangeServer = () => {
     $(MODAL_DOM_ID).modal('hide');
-    history.push('/server/');
+    navigate('/server/');
   }
 
   /**

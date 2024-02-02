@@ -21,7 +21,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { isVersionAllowedUpdate, selectToken } from "../actions";
 
 
@@ -32,7 +32,7 @@ import { isVersionAllowedUpdate, selectToken } from "../actions";
  */
 function Server() {
   const context = useContext(GlobalModalContext);
-  const history = useHistory();
+	const navigate = useNavigate();
   const dispatch  = useDispatch();
 
   /* newServer {boolean} If user selected checkbox that he wants to set a new server */
@@ -265,8 +265,8 @@ function Server() {
       // We don't have PIN on hardware wallet
       const pin = isHardwareWallet ? null : pinRef.current.value;
       try {
-        await walletUtils.changeServer(wallet, pin, history, networkChanged);
-        history.push('/wallet/');
+        await walletUtils.changeServer(wallet, pin, navigate, networkChanged);
+        navigate('/wallet/');
       } catch (err) {
         setLoading(false);
         setErrorMessage(err.message);

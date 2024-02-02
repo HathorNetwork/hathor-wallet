@@ -22,7 +22,7 @@ import { str2jsx } from '../utils/i18n';
 import { NFT_DATA_MAX_SIZE, NFT_GUIDE_URL, NFT_STANDARD_RFC_URL } from '../constants';
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -33,7 +33,7 @@ import { useHistory } from 'react-router-dom';
 function CreateNFT() {
 
   const globalModalContext = useContext(GlobalModalContext);
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const addressDivRef = useRef();
@@ -211,7 +211,7 @@ function CreateNFT() {
    */
   const alertButtonClick = () => {
     globalModalContext.hideModal();
-    history.push('/wallet/');
+    navigate('/wallet/');
   }
 
   /**

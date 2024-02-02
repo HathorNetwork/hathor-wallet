@@ -14,7 +14,7 @@ import { updateWords, walletReset } from '../actions/index';
 import { useDispatch } from "react-redux";
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -26,7 +26,7 @@ import { useHistory } from 'react-router-dom';
 function WalletVersionError() {
   const context = useContext(GlobalModalContext);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const alertSuccessRef = useRef();
 
   /**
@@ -59,7 +59,7 @@ function WalletVersionError() {
   const handleReset = () => {
     context.hideModal();
     dispatch(walletReset());
-    history.push('/welcome/');
+    navigate('/welcome/');
   }
 
   /**
