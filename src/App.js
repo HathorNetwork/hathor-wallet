@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Redirect, Route, Routes, useRouteMatch } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
@@ -66,13 +66,13 @@ function Root() {
     };
   });
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   // Monitors when Ledger device loses connection or the app is closed
   useEffect(() => {
     if (ledgerClosed) {
       LOCAL_STORE.lock();
-      history.push('/locked/');
+      navigate('/locked/');
     }
   }, [ledgerClosed]);
 
@@ -188,15 +188,16 @@ function Root() {
 }
 
 function LoadedWalletComponent({ children }) {
-  const match = useRouteMatch();
+  const match = useMatch('');
   // For server screen we don't need to check version
   // We also allow the server screen to be reached from the locked screen
   // In the case of an unresponsive fullnode, which would block the wallet start
-  const isServerScreen = match.path === '/server';
+  console.log(`[LoadedWalletComponent] match: `, { match });
+  const isServerScreen = match.pathname === '/server';
 
   // If was closed and is loaded we need to redirect to locked screen
   if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) && (!LOCAL_STORE.isHardwareWallet())) {
-    return <Redirect to={{ pathname: '/locked/' }} />;
+    return <Navigate to={ '/locked/' } />;
   }
 
   // We allow server screen to be shown from locked screen to allow the user to
@@ -213,10 +214,10 @@ function LoadedWalletComponent({ children }) {
   // The addresses are being loaded, redirect user
   if (loadingAddresses) {
     // If wallet is still loading addresses we redirect to the loading screen
-    return <Redirect to={{
-      pathname: '/loading_addresses/',
-      state: {path: match.url}
-    }} />;
+    return <Navigate
+      to={ '/loading_addresses/' }
+      state={{path: match.pathname}}
+    />;
   }
 
   // The wallet has fully loaded: check version
@@ -234,13 +235,13 @@ function LoadedWalletComponent({ children }) {
 }
 
 function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
-  const history = useHistory();
   const { loadingAddresses } = useSelector(state => ({
     loadingAddresses: state.loadingAddresses
   }));
 
   // Handling Windows pathname issues
-  const pathname = history.location.pathname;
+  const location = useLocation();
+  const pathname = location.pathname;
   if (pathname.length > 3 && pathname.slice(0, 4).toLowerCase() === '/c:/') {
     // On Windows the pathname that is being pushed into history has a prefix of '/C:'
     // So everytime I use 'push' it works, because I set the pathname
@@ -249,13 +250,13 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
     // Besides that, when electron loads initially it needs to load index.html from the filesystem
     // So the first load from electron get from '/C:/' in windows. That's why we need the second 'if'
     if (pathname.length > 11 && pathname.slice(-11).toLowerCase() !== '/index.html') {
-      return <Redirect to={{pathname: pathname.slice(3)}} />;
+      return <Navigate to={pathname.slice(3)} replace />;
     }
   }
 
   // The wallet was not yet started, go to Welcome
   if (!LOCAL_STORE.wasStarted()) {
-    return <Redirect to={{pathname: '/welcome/'}}/>;
+    return <Navigate to={ '/welcome/' } replace />;
   }
 
   // The wallet is already loaded
@@ -263,10 +264,10 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
     // The server screen is a special case since we allow the user to change the
     // connected server in case of unresponsiveness, this should be allowed from
     // the locked screen since the wallet would not be able to be started otherwise
-    const isServerScreen = history.location.pathname === '/server';
+    const isServerScreen = location.pathname === '/server';
     // Wallet is locked, go to locked screen
     if (LOCAL_STORE.isLocked() && !isServerScreen && !LOCAL_STORE.isHardwareWallet()) {
-      return <Redirect to={{pathname: '/locked/'}}/>;
+      return <Navigate to={ '/locked/' } replace />;
     }
 
     // Route requires the wallet to be loaded, render it
@@ -275,22 +276,20 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
     }
 
     // Route does not require wallet to be loaded. Redirect to wallet "home" screen
-    return <Redirect to={{pathname: '/wallet/'}}/>;
+    return <Navigate to="/wallet/" replace />;
   }
 
   // Wallet is not loaded, but it is still loading addresses. Go to the loading screen
   if (loadingAddresses) {
-    const match = useRouteMatch();
-    return <Redirect to={{
-      pathname: '/loading_addresses/',
-      state: {path: match.url}
-    }}/>;
+    const match = useMatch('');
+    console.log(`[StartedComponent] useMatch contents: `, { match }); // TODO: We need the URL instead of pathname... Check if this works
+    return <Navigate to={ '/loading_addresses/' } state={{path: match.pathname}} />;
   }
 
   // Wallet is not loaded or loading, but it is started
   // Since the route requires the wallet to be loaded, redirect to the wallet_type screen
   if (routeRequiresWalletToBeLoaded) {
-    return <Redirect to={{pathname: '/wallet_type/'}}/>;
+    return <Navigate to={ '/wallet_type/' } />;
   }
 
   // Wallet is not loaded nor loading, and the route does not require it to be loaded.
@@ -309,7 +308,6 @@ function DefaultComponent({ children }) {
   const { isVersionAllowed } = useSelector(state => ({
     isVersionAllowed: state.isVersionAllowed,
   }));
-  const history = useHistory();
 
   const [versionIsKnown, setVersionIsKnown] = useState(false);
 
@@ -322,12 +320,13 @@ function DefaultComponent({ children }) {
     setVersionIsKnown(true);
   }, [isVersionAllowed]);
 
-  /*
-   * Prevents rendering commmon app usage screens while the wallet version is still unknown.
-   * An exception is made to the 'locked' screen, because the version request is not yet done while the user is in it.
-   * Note: `DefaultComponent` is not used on the screens that initialize new wallets, or the "Welcome" screens
-   */
-  const isLockedScreen = history.location.pathname === '/locked/';
+	/*
+	 * Prevents rendering commmon app usage screens while the wallet version is still unknown.
+	 * An exception is made to the 'locked' screen, because the version request is not yet done while the user is in it.
+	 * Note: `DefaultComponent` is not used on the screens that initialize new wallets, or the "Welcome" screens
+	 */
+  const location = useLocation();
+  const isLockedScreen = location.pathname === '/locked/';
   if (!versionIsKnown) {
     if (!isLockedScreen) {
       return null;
@@ -344,7 +343,7 @@ function DefaultComponent({ children }) {
     LOCAL_STORE.isHardwareWallet()) {
     // This will redirect the page to Wallet Type screen
     LOCAL_STORE.cleanWallet();
-    return <Redirect to={ { pathname: '/wallet_type/' } } />;
+    return <Navigate to={ '/wallet_type/' } />;
   }
 
   // Render the navigation top bar, the component and the error handling modal
