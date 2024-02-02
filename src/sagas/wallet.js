@@ -193,7 +193,7 @@ export function* startWallet(action) {
         /**
          * Lock screen will call `resolve` with the pin screen after validation
          */
-        routerHistory.push('/locked/');
+        routerHistory('/locked/');
         dispatch(lockWalletForResult(resolve));
       }),
       passphrase,
@@ -280,7 +280,7 @@ export function* startWallet(action) {
       console.error(e);
       // Return to locked screen when the wallet fails to start
       LOCAL_STORE.lock();
-      routerHistory.push('/');
+      routerHistory('/');
       return
     }
   }
@@ -299,7 +299,7 @@ export function* startWallet(action) {
   }
 
   // Wallet start called, we need to show the loading addresses screen
-  routerHistory.replace('/loading_addresses');
+  routerHistory('/loading_addresses', { replace: true });
 
   // Wallet might be already ready at this point
   if (!wallet.isReady()) {
@@ -333,7 +333,7 @@ export function* startWallet(action) {
 
   LOCAL_STORE.unlock();
 
-  routerHistory.replace('/wallet/');
+  routerHistory('/wallet/', { replace: true });
 
   yield put(loadingAddresses(false));
 
@@ -541,7 +541,7 @@ export function* handleNewTx(action) {
         return;
       }
 
-      routerHistory.push(`/transaction/${tx.tx_id}/`);
+      routerHistory(`/transaction/${tx.tx_id}/`);
     }
   }
 }
@@ -703,7 +703,7 @@ export function* walletReloading() {
 
     // Load success, we can send the user back to the wallet screen
     yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
-    routerHistory.replace('/wallet/');
+    routerHistory('/wallet/', { replace: true });
     yield put(loadingAddresses(false));
   } catch (e) {
     yield put(startWalletFailed());
@@ -735,7 +735,7 @@ export function* onWalletReset() {
   yield put(walletResetSuccess());
 
   if (routerHistory) {
-    routerHistory.push('/welcome');
+    routerHistory('/welcome');
   }
 }
 

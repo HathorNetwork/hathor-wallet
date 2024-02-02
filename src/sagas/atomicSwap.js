@@ -165,7 +165,7 @@ function* createProposalOnBackend(action) {
 
         // Navigating to the Edit Swap screen with this proposal
         const routerHistory = yield select((state) => state.routerHistory);
-        routerHistory.replace(`/wallet/atomic_swap/proposal/${proposalId}`);
+        routerHistory(`/wallet/atomic_swap/proposal/${proposalId}`, { replace: true });
     } catch (e) {
         yield put(lastFailedRequest({ message: e.message }));
     }
