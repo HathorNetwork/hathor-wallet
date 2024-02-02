@@ -22,7 +22,7 @@ import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { str2jsx } from '../utils/i18n';
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Create a new token
@@ -38,7 +38,7 @@ function CreateToken() {
   }));
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const globalModalContext = useContext(GlobalModalContext);
 
   const addressWrapperRef = useRef(null);
@@ -185,7 +185,7 @@ function CreateToken() {
    */
   const alertButtonClick = () => {
     globalModalContext.hideModal();
-    history.push('/wallet/');
+    navigate('/wallet/');
   }
 
   /**

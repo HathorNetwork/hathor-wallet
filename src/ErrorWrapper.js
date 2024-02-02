@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import $ from 'jquery';
 import App from './App';
 import ModalUnhandledError, { UNHANDLED_ERROR_MODAL_ID_SELECTOR } from './components/ModalUnhandledError';
@@ -18,7 +18,6 @@ import './index.css';
 
 function ErrorBoundary(props) {
 	const { onError } = props;
-	const history = useHistory();
 
 	const handleErrorEvent = (event) => {
 		onError(event.error);
@@ -33,7 +32,7 @@ function ErrorBoundary(props) {
 	}, []);
 
 	return (
-		<App history={history} />
+		<App />
 	)
 }
 

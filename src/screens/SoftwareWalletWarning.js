@@ -11,7 +11,7 @@ import { t } from 'ttag';
 import logo from '../assets/images/hathor-logo.png';
 import SoftwareWalletWarningMessage from '../components/SoftwareWalletWarningMessage';
 import InitialImages from '../components/InitialImages';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -25,13 +25,13 @@ function SoftwareWalletWarning() {
    */
   const [formValidated, setFormValidated] = useState(false);
 
-  const history = useHistory();
+  const navigate = useNavigate();
   const confirmFormRef = useRef(null);
 
   const create = () => {
     let isValid = confirmFormRef.current.checkValidity();
     if (isValid) {
-      history.push('/signin/');
+      navigate('/signin/');
     } else {
       setFormValidated(true);
     }
@@ -52,7 +52,7 @@ function SoftwareWalletWarning() {
                 </div>
               </form>
               <div className="d-flex justify-content-between flex-row w-100">
-                <button onClick={history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
+                <button onClick={() => navigate(-1)} type="button" className="btn btn-secondary">{t`Back`}</button>
                 <button onClick={create} type="button" className="btn btn-hathor">{t`Continue`}</button>
               </div>
             </div>

@@ -10,7 +10,7 @@ import { t } from 'ttag'
 
 import logo from '../assets/images/hathor-logo.png';
 import InitialImages from '../components/InitialImages';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -19,20 +19,20 @@ import { useHistory } from 'react-router-dom';
  * @memberof Screens
  */
 function Signin() {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   /**
    * Go to the new wallet screen
    */
   const goToNewWallet = () => {
-    history.push('/new_wallet/');
+    navigate('/new_wallet/');
   }
 
   /**
    * Go to the load wallet screen
    */
   const goToLoadWallet = () => {
-    history.push('/load_wallet/');
+    navigate('/load_wallet/');
   }
 
   return (
@@ -42,7 +42,7 @@ function Signin() {
           <img className="hathor-logo" src={logo} alt="" />
           <p className="mt-4 mb-4">{t`You can start a new wallet or import data from a wallet that already exists.`}</p>
           <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
-            <button onClick={history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
+            <button onClick={() => navigate(-1)} type="button" className="btn btn-secondary">{t`Back`}</button>
             <button onClick={goToNewWallet} type="button" className="btn btn-hathor mr-3">{t`New wallet`}</button>
             <button onClick={goToLoadWallet} type="button" className="btn btn-hathor">{t`Import wallet`}</button>
           </div>

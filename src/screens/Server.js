@@ -17,7 +17,7 @@ import colors from '../index.scss';
 import { useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -27,7 +27,7 @@ import { useHistory } from 'react-router-dom';
  */
 function Server() {
   const context = useContext(GlobalModalContext);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   /* newServer {boolean} If user selected checkbox that he wants to set a new server */
   const [newServer, setNewServer] = useState(false);
@@ -251,8 +251,8 @@ function Server() {
       // We don't have PIN on hardware wallet
       const pin = isHardwareWallet ? null : pinRef.current.value;
       try {
-        await walletUtils.changeServer(wallet, pin, history, networkChanged);
-        history.push('/wallet/');
+        await walletUtils.changeServer(wallet, pin, navigate, networkChanged);
+        navigate('/wallet/');
       } catch (err) {
         setLoading(false);
         setErrorMessage(err.message);

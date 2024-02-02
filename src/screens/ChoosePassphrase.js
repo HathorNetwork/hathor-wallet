@@ -13,7 +13,7 @@ import walletUtils from '../utils/wallet';
 import BackButton from '../components/BackButton';
 import { useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Screen used to choose a passphrase for your wallet
@@ -30,7 +30,7 @@ function ChoosePassphrase() {
   const pinRef = useRef();
   const blankPassphraseRef = useRef();
   const passphraseWrapperRef = useRef();
-  const history =  useHistory();
+  const navigate =  useNavigate();
 
   /** errorMessage {string} Message to show when error happens on the form */
   const [errorMessage, setErrorMessage] = useState('');
@@ -44,8 +44,8 @@ function ChoosePassphrase() {
    */
   const handlePassphrase = async () => {
     modalContext.hideModal();
-    await walletUtils.addPassphrase(wallet, passphraseRef.current.value, pinRef.current.value, passwordRef.current.value, history)
-    history.push('/wallet/');
+    await walletUtils.addPassphrase(wallet, passphraseRef.current.value, pinRef.current.value, passwordRef.current.value, navigate)
+    navigate('/wallet/');
   }
 
   /**

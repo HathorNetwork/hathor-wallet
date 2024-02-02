@@ -21,7 +21,7 @@ import ReactLoading from 'react-loading';
 import colors from '../index.scss';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Screen used to send tokens to another wallet.
@@ -33,7 +33,7 @@ function SendTokens() {
   const globalModalContext = useContext(GlobalModalContext);
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   // Redux state
   const { selectedToken, tokens, wallet, metadataLoaded, useWalletService } = useSelector(
@@ -227,7 +227,7 @@ function SendTokens() {
 
     // Must update the shared address, in case we have used one for the change
     dispatch(walletRefreshSharedAddress());
-    history.push('/wallet/');
+    navigate('/wallet/');
   }
 
   /**

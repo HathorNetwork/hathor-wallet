@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { t } from 'ttag';
 import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
@@ -19,7 +19,7 @@ import InitialImages from '../components/InitialImages';
  * @memberof Screens
  */
 function SentryPermission() {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   /** @type {boolean} If user has already a permission saved in the wallet */
   const [savedPermission, setSavedPermission] = useState(null);
@@ -47,9 +47,9 @@ function SentryPermission() {
     // If state permission is null, user is still starting the wallet
     // Otherwise, user is changing it in the settings
     if (savedPermission === null) {
-      history.push('/wallet_type/');
+      navigate('/wallet_type/');
     } else {
-      history.goBack();
+      navigate(-1);
     }
   }
 

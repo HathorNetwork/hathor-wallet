@@ -13,7 +13,7 @@ import SpanFmt from './SpanFmt';
 import { useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import wallet from '../utils/wallet';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * DOM Identifier for the modal
@@ -27,7 +27,7 @@ const MODAL_DOM_ID = '#requestErrorModal';
  * @memberof Components
  */
 function RequestErrorModal() {
-  const history = useHistory();
+  const navigate = useNavigate();
   const lastFailedRequest = useSelector(state => state.lastFailedRequest);
   const requestErrorStatusCode = useSelector(state => state.requestErrorStatusCode);
 
@@ -40,7 +40,7 @@ function RequestErrorModal() {
    */
   const handleChangeServer = () => {
     $(MODAL_DOM_ID).modal('hide');
-    history.push('/server/');
+    navigate('/server/');
   }
 
   /**
