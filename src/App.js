@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { Redirect, Route, Routes, useNavigate, useRouteMatch } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
@@ -155,36 +155,36 @@ function Root() {
 
   // Application rendering
   return (
-    <Switch>
-      <Route exact path="/nft" children={<StartedComponent children={ <NFTList />} loaded={true} />} />
-      <Route exact path="/create_token" children={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
-      <Route exact path="/create_nft" children={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
-      <Route exact path="/custom_tokens" children={<StartedComponent children={ <CustomTokens /> } loaded={true} />} />
-      <Route exact path="/unknown_tokens" children={<StartedComponent children={ <UnknownTokens />} loaded={true} />} />
-      <Route exact path="/wallet/send_tokens" children={<StartedComponent children={ <SendTokens /> } loaded={true} />} />
-      <Route exact path="/wallet/atomic_swap" children={<StartedComponent children={ <ProposalList />} loaded={true} />} />
-      <Route exact path="/wallet/atomic_swap/proposal/create" children={<StartedComponent children={ <NewSwap /> } loaded={true} />} />
-      <Route exact path="/wallet/atomic_swap/proposal/import" children={<StartedComponent children={ <ImportExisting />} loaded={true} />} />
-      <Route exact path="/wallet/atomic_swap/proposal/:proposalId" children={<StartedComponent children={ <EditSwap /> } loaded={true} />} />
-      <Route exact path="/wallet" children={<StartedComponent children={ <Wallet />} loaded={true} />} />
-      <Route exact path="/settings" children={<StartedComponent children={ <Settings /> } loaded={true} />} />
-      <Route exact path="/wallet/passphrase" children={<StartedComponent children={ <ChoosePassphrase />} loaded={true} />} />
-      <Route exact path="/server" children={<StartedComponent children={ <Server /> } loaded={true} />} />
-      <Route exact path="/transaction/:id" children={<StartedComponent children={ <TransactionDetail />} loaded={true} />} />
-      <Route exact path="/addresses" children={<StartedComponent children={ <AddressList /> } /> } loaded={true} />
-      <Route exact path="/new_wallet" children={<StartedComponent children={ <NewWallet />} loaded={false} />} />
-      <Route exact path="/load_wallet" children={<StartedComponent children={ <LoadWallet /> } loaded={false} /> } />
-      <Route exact path="/wallet_type" children={<StartedComponent children={<WalletType loaded={false} />} />} />
-      <Route exact path="/software_warning" children={<StartedComponent children={ <SoftwareWalletWarning /> } loaded={false} />} />
-      <Route exact path="/signin" children={<StartedComponent children={ <Signin />} loaded={false} />} />
-      <Route exact path="/hardware_wallet" children={<StartedComponent children={ <StartHardwareWallet /> } loaded={false} />} />
-      <Route exact path="/locked" children={<DefaultComponent children={<LockedWallet />} />} />
-      <Route exact path="/welcome" children={<Welcome />} />
-      <Route exact path="/loading_addresses" children={<LoadingAddresses />} />
-      <Route exact path="/permission" children={<SentryPermission />} />
-      <Route exact path="" children={<StartedComponent children={ <Wallet />} loaded={true} />} />
-      <Route path="" children={<Page404 />} />
-    </Switch>
+    <Routes>
+      <Route path="/nft" element={<StartedComponent children={ <NFTList />} loaded={true} />} />
+      <Route path="/create_token" element={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
+      <Route path="/create_nft" element={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
+      <Route path="/custom_tokens" element={<StartedComponent children={ <CustomTokens /> } loaded={true} />} />
+      <Route path="/unknown_tokens" element={<StartedComponent children={ <UnknownTokens />} loaded={true} />} />
+      <Route path="/wallet/send_tokens" element={<StartedComponent children={ <SendTokens /> } loaded={true} />} />
+      <Route path="/wallet/atomic_swap" element={<StartedComponent children={ <ProposalList />} loaded={true} />} />
+      <Route path="/wallet/atomic_swap/proposal/create" element={<StartedComponent children={ <NewSwap /> } loaded={true} />} />
+      <Route path="/wallet/atomic_swap/proposal/import" element={<StartedComponent children={ <ImportExisting />} loaded={true} />} />
+      <Route path="/wallet/atomic_swap/proposal/:proposalId" element={<StartedComponent children={ <EditSwap /> } loaded={true} />} />
+      <Route path="/wallet" element={<StartedComponent children={ <Wallet />} loaded={true} />} />
+      <Route path="/settings" element={<StartedComponent children={ <Settings /> } loaded={true} />} />
+      <Route path="/wallet/passphrase" element={<StartedComponent children={ <ChoosePassphrase />} loaded={true} />} />
+      <Route path="/server" element={<StartedComponent children={ <Server /> } loaded={true} />} />
+      <Route path="/transaction/:id" element={<StartedComponent children={ <TransactionDetail />} loaded={true} />} />
+      <Route path="/addresses" element={<StartedComponent children={ <AddressList /> } /> } loaded={true} />
+      <Route path="/new_wallet" element={<StartedComponent children={ <NewWallet />} loaded={false} />} />
+      <Route path="/load_wallet" element={<StartedComponent children={ <LoadWallet /> } loaded={false} /> } />
+      <Route path="/wallet_type" element={<StartedComponent children={<WalletType loaded={false} />} />} />
+      <Route path="/software_warning" element={<StartedComponent children={ <SoftwareWalletWarning /> } loaded={false} />} />
+      <Route path="/signin" element={<StartedComponent children={ <Signin />} loaded={false} />} />
+      <Route path="/hardware_wallet" element={<StartedComponent children={ <StartHardwareWallet /> } loaded={false} />} />
+      <Route path="/locked" element={<DefaultComponent children={<LockedWallet />} />} />
+      <Route path="/welcome" element={<Welcome />} />
+      <Route path="/loading_addresses" element={<LoadingAddresses />} />
+      <Route path="/permission" element={<SentryPermission />} />
+      <Route path="" element={<StartedComponent children={ <Wallet />} loaded={true} />} />
+      <Route path="" element={<Page404 />} />
+    </Routes>
   );
 }
 
