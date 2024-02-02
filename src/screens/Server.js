@@ -13,7 +13,7 @@ import helpers from '../utils/helpers';
 import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import { DEFAULT_SERVERS, DEFAULT_WALLET_SERVICE_SERVERS, DEFAULT_WALLET_SERVICE_WS_SERVERS, } from '../constants';
-import colors from '../index.module.scss';
+import { colors } from '../constants';
 import { useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
