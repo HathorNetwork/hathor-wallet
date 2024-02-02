@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Navigate, Redirect, useLocation } from 'react-router-dom';
 import ReactLoading from 'react-loading';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
@@ -37,6 +37,7 @@ function LoadingAddresses() {
 
   const dispatch = useDispatch();
   const location = useLocation();
+  console.log(`[LoadingAddresses] Location: `, {location});
   const { addressesFound, transactionsFound, loadingAddresses } = useSelector(state => ({
     addressesFound: state.loadedData.addresses,
     transactionsFound: state.loadedData.transactions,
@@ -74,9 +75,9 @@ function LoadingAddresses() {
     // was reloaded on the loading_addresses screen. This may happen during development
     // because of the auto reload
     if (!location.state) {
-      return <Redirect to='/wallet/' />;
+      return <Navigate to={ '/wallet/' } />;
     }
-    return <Redirect to={{ pathname: location.state.path }} />;
+    return <Navigate to={ location.state.path } />;
   }
 
   return (
