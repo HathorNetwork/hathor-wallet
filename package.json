@@ -85,7 +85,7 @@
   },
   "devDependencies": {
     "@sentry/browser": "7.99.0",
-    "@sentry/cli": "1.74.4",
+    "@sentry/cli": "2.27.0",
     "@testing-library/cypress": "8.0.7",
     "@testing-library/jest-dom": "6.1.5",
     "@testing-library/react": "14.1.2",
