@@ -98,8 +98,7 @@
     "jsdoc": "3.6.10",
     "nodemon": "2.0.16",
     "sass": "1.52.2",
-    "ttag-cli": "1.9.4",
-    "typescript": "3.9.10"
+    "ttag-cli": "1.9.4"
   },
   "build": {
     "appId": "network.hathor.macos.wallet",
