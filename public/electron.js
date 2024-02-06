@@ -13,7 +13,6 @@ const url = require('url');
 const path = require('path');
 const constants = require('./constants');
 const { instance: Ledger } = require('./ledger');
-const { default: installExtension, REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
@@ -119,7 +118,6 @@ function createWindow () {
       ]}
   ];
 
-  console.debug(`debugMode: ${debugMode}`);
   if (debugMode) {
     template.push({
       label: 'Debug',
@@ -127,42 +125,6 @@ function createWindow () {
         { label: `Open DevTools`, accelerator: 'CmdOrCtrl+B', click: function() { mainWindow.webContents.openDevTools(); }}
       ]
     });
-
-    // Add extensions provided by electron-devtools-installer
-    installExtension([
-      /* NOTE: 
-       * The provider electron-devtools-installer downloads the latest
-       * extension version. By now it is v5.0.0, which implements
-       * Chromium manifest V3. The MV3 implementation broke compatibility
-       * with electron since v4.7.0.
-       * ISSUES:
-       * - react-devtools: https://github.com/facebook/react/issues/25843
-       * - electron-devtools-installar: https://github.com/MarshallOfSound/electron-devtools-installer/issues/232
-       * NOTE:
-       * The MV3 compatibility was resolved in electron in versions v26.6.0,
-       * v27.1.0 and v28.0.0-beta.5.
-       * - https://github.com/electron/electron/pull/40500
-       * However, a bug in react-devtools break the correct loading of the extension:
-       * - react-devtools: https://github.com/facebook/react/issues/27749
-       * Uses the workaround solution given in the following issue:
-       * - electron: https://github.com/electron/electron/issues/36545
-       *
-       * Uncomment the line bellow to enable React DevTools extension.
-       */
-      // REACT_DEVELOPER_TOOLS,
-       /* NOTE:
-       * By now the following extension still uses the Chromium Manifest V2,
-       * which is under sunsetting process and it may not be compatible to the current
-       * Chromium version.
-       * ISSUE:
-       * - redux-devtools: https://github.com/reduxjs/redux-devtools/issues/1037
-       *
-       * Uncomment the line bellow to enable Redux DevTools extension.
-       */
-      // REDUX_DEVTOOLS,
-    ])
-      .then((name) => console.debug(`Added Extension:  ${name}`))
-      .catch((err) => console.error('An error occurred during extension installation.', err));
   };
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
