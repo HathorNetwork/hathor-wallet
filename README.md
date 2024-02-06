@@ -12,16 +12,16 @@ You can download the newest version of the wallet for each specific platform fro
 
 ## Screenshots
 
-The basic view of the wallet.  Note that different types of tokens are made possible in the Hathor Network.  On the left hand side we see both a HTR tab and a MTK tab, for the Hathor token, and a different, ERC-20 like, token.   
+The basic view of the wallet.  Note that different types of tokens are made possible in the Hathor Network.  On the left hand side we see both a HTR tab and a MTK tab, for the Hathor token, and a different, ERC-20 like, token.
 ![Wallet Home](https://drive.google.com/thumbnail?id=1pJ4JAxTXjMHW1Xuc4cCG0d0LKeVBGgM6&sz=w3000-h2250)
 
-Sending tokens.  
+Sending tokens.
 ![Send Tokens](https://drive.google.com/thumbnail?id=1Lq6Q0j2J0989vfYzykVSpYjra3bLTI2u&sz=w3000-h2250)
 
-The wallet includes a block and transaction explorer.  
+The wallet includes a block and transaction explorer.
 ![Explorer](https://drive.google.com/thumbnail?id=1YdEfGB7L9E2tA4vGDTsGdGvoKw5bqdhT&sz=w3000-h2250)
 
-A transaction is displayed.  
+A transaction is displayed.
 ![Transaction Detail](https://drive.google.com/thumbnail?id=1N3IaiT0kBT1QkRq6xU_b_D66EZBVajiB&sz=w3000-h2250)
 
 ## For development
@@ -29,12 +29,6 @@ A transaction is displayed.
 ### Prerequisites
 
 * Install node v20
-
-### To Install
-
-```
-npm install
-```
 
 ### To Run
 
@@ -62,6 +56,17 @@ To use the Chrome Dev Tools associated with Electron for debugging purposes, the
 ```sh
 npm run electron-dev -- --unsafe-mode --hathor-debug
 ```
+
+### Debug mode on installed app
+
+To run the app in debug mode on an installed app you need to pass the flags `--hathor-debug` and `--unsafe-mode` to the app.
+The way to do this depends on your environment.
+
+On Windows the app is installed in the `C:\Users\<username>\AppData\Local\Programs\hathor-wallet` folder.
+You will need to open a terminal (CMD, Powershell, etc.) and run the `Hathor Wallet.exe` executable with the flags above.
+On CMD the command would be `& '.\Hathor Wallet.exe' --unsafe-mode --hathor-debug` or `& 'C:\Users\<username>\AppData\Local\Programs\hathor-wallet\Hathor Wallet.exe' --unsafe-mode --hathor-debug`.
+
+On Linux the app is installed in a way that it is available as the command `hathor-wallet`, so we can simply run `hathor-wallet --unsafe-mode --hathor-debug` from the terminal.
 
 ### To Build
 
