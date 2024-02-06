@@ -31,6 +31,7 @@
   "dependencies": {
     "@hathor/wallet-lib": "1.0.4",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
+    "@reduxjs/toolkit": "^2.1.0",
     "@sentry/electron": "3.0.7",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.6.1",
