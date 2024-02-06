@@ -327,14 +327,18 @@ function DefaultComponent({ children }) {
     setVersionIsKnown(true);
   }, [isVersionAllowed]);
 
-  // Do not any wallet screens if the wallet version is still unknown. Only the Locked Sreen is allowed
+  /*
+   * Prevents rendering commmon app usage screens while the wallet version is still unknown.
+   * An exception is made to the 'locked' screen, because the version request is not yet done while the user is in it.
+   * Note: `DefaultComponent` is not used on the screens that initialize new wallets, or the "Welcome" screens
+   */
   const isLockedScreen = history.location.pathname === '/locked/';
   if (!versionIsKnown) {
     if (!isLockedScreen) {
       return null;
     }
   } else {
-    // Redirect a use with an obsolete wallet version to an informative screen, blocking its use of the application
+    // Wallets with an obsolete version should be redirected to an informative screen, blocking its use of the app
     if (!versionUtils.checkWalletVersion()) {
       return <WalletVersionError />;
     }
