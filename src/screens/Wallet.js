@@ -78,9 +78,6 @@ function Wallet() {
     };
   });
 
-  // Token history timestamp to check if we should fetch the token details again
-  const [tokenHistoryTimestamp, setTokenHistoryTimestamp] = useState(-1);
-
   // Refs
   const alertSuccessRef = useRef(null);
   const unregisterModalRef = useRef(null);
@@ -99,19 +96,10 @@ function Wallet() {
     initializeWalletScreen();
   }, [selectedToken]);
 
-  // When the tokens history changes, check the last timestamp to define if we should fetch the token details again
+  // When the tokens history changes, update the token info
   useEffect(() => {
-    const selectedTokenHistory = get(tokensHistory, selectedToken, {
-      status: TOKEN_DOWNLOAD_STATUS.LOADING,
-      updatedAt: -1,
-      data: [],
-    });
-
-    if (tokenHistoryTimestamp !== selectedTokenHistory.updatedAt) {
-      setTokenHistoryTimestamp(selectedTokenHistory.updatedAt);
-      updateTokenInfo(selectedToken);
-      updateWalletInfo(selectedToken);
-    }
+    updateTokenInfo(selectedToken);
+    updateWalletInfo(selectedToken);
   }, [tokensHistory]);
 
   /**

@@ -104,13 +104,14 @@ function NewWallet() {
    */
   const pinSuccess = () => {
     // Generate addresses and load data
+    LOCAL_STORE.unlock();
     wallet.generateWallet(words, '', pin, password, history);
+    // Mark this wallet as open, so that it does not appear locked after loading
+    LOCAL_STORE.open();
     // Clean pin, password and words from redux
     dispatch(updatePassword(null));
     dispatch(updatePin(null));
     dispatch(updateWords(null));
-    // Go to wallet
-    history.push('/wallet/');
   }
 
   /**
