@@ -143,16 +143,6 @@ export const updateRequestErrorStatusCode = data => ({ type: 'update_request_err
 export const updateHeight = (height, htrUpdatedBalance) => ({ type: 'update_height', payload: { height, htrUpdatedBalance } });
 
 /**
- * wallet {HathorWallet} wallet object
- */
-export const setWallet = (wallet) => ({ type: 'set_wallet', payload: wallet });
-
-/**
- * Stop and clean wallet redux state
- */
-export const resetWallet = () => ({ type: 'reset_wallet' });
-
-/**
  * tokens {Array} array of token uids the the wallet has
  * currentAddress {Object} The current unused address
  */
