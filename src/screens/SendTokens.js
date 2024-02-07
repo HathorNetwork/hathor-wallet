@@ -22,6 +22,7 @@ import colors from '../index.scss';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';
+import { getGlobalWallet } from "../services/wallet.service";
 
 /**
  * Screen used to send tokens to another wallet.
@@ -36,16 +37,16 @@ function SendTokens() {
   const history = useHistory();
 
   // Redux state
-  const { selectedToken, tokens, wallet, metadataLoaded, useWalletService } = useSelector(
+  const { selectedToken, tokens, metadataLoaded, useWalletService } = useSelector(
     (state) => {
       return {
         selectedToken: state.selectedToken,
         tokens: state.tokens,
-        wallet: state.wallet,
         metadataLoaded: state.metadataLoaded,
         useWalletService: state.useWalletService,
       };
     });
+  const wallet = getGlobalWallet();
   /**
    * Get the full object for the selected token on the TokenBar.
    *

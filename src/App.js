@@ -50,23 +50,23 @@ import EditSwap from './screens/atomic-swap/EditSwap';
 import NewSwap from './screens/atomic-swap/NewSwap';
 import ImportExisting from './screens/atomic-swap/ImportExisting';
 import LOCAL_STORE from './storage';
+import { getGlobalWallet } from "./services/wallet.service";
 
 function Root() {
   const {
     ledgerClosed,
     walletStartState,
     isVersionAllowed,
-    wallet,
     navigateTo,
   } = useSelector((state) => {
     return {
       ledgerClosed: state.ledgerWasClosed,
       walletStartState: state.walletStartState,
       isVersionAllowed: state.isVersionAllowed,
-      wallet: state.wallet,
       navigateTo: state.navigateTo,
     };
   });
+  const wallet = getGlobalWallet();
   const dispatch = useDispatch();
   const history = useHistory();
 

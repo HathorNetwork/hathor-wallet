@@ -23,6 +23,7 @@ import { NFT_DATA_MAX_SIZE, NFT_GUIDE_URL, NFT_STANDARD_RFC_URL } from '../const
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useHistory } from 'react-router-dom';
+import { getGlobalWallet } from "../services/wallet.service";
 
 
 /**
@@ -46,16 +47,16 @@ function CreateNFT() {
   const createMintAuthorityRef = useRef();
   const createMeltAuthorityRef = useRef();
 
-  const { htrBalance, wallet, useWalletService } = useSelector((state) => {
+  const { htrBalance, useWalletService } = useSelector((state) => {
     const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
     const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
 
     return {
       htrBalance,
-      wallet: state.wallet,
       useWalletService: state.useWalletService,
     };
   });
+  const wallet = getGlobalWallet();
 
   /** errorMessage {string} Message to show when error happens on the form */
   const [errorMessage, setErrorMessage] = useState('');

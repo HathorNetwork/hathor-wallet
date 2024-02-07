@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';
+import { getGlobalWallet } from "../services/wallet.service";
 
 
 /**
@@ -45,10 +46,10 @@ function Server() {
   const [isHardwareWallet] = useState(LOCAL_STORE.isHardwareWallet());
 
   // Use selector to fetch wallet and useWalletService
-  const { wallet, useWalletService } = useSelector(state => ({
-    wallet: state.wallet,
+  const { useWalletService } = useSelector(state => ({
     useWalletService: state.useWalletService
   }));
+  const wallet = getGlobalWallet();
 
   // Declare refs
   const newServerRef = useRef(null);

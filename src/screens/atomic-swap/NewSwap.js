@@ -13,11 +13,12 @@ import {
 } from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
 import { proposalCreateRequested } from "../../actions";
+import { getGlobalWallet } from "../../services/wallet.service";
 
 export default function NewSwap (props) {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const wallet = useSelector(state => state.wallet);
+    const wallet = getGlobalWallet();
 
     // Global interactions
     const lastFailedRequest = useSelector(state => state.lastFailedRequest);
