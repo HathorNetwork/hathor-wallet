@@ -15,6 +15,7 @@ import { IPC_RENDERER } from '../constants';
 import { sharedAddressUpdate } from '../actions/index';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import LOCAL_STORE from '../storage';
+import { getGlobalWallet } from "../services/wallet.service";
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -26,7 +27,7 @@ const mapStateToProps = (state) => {
   return {
     lastSharedAddress: state.lastSharedAddress,
     lastSharedIndex: state.lastSharedIndex,
-    wallet: state.wallet,
+    wallet: getGlobalWallet(),
   };
 };
 

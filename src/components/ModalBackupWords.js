@@ -14,6 +14,7 @@ import { updateWords } from '../actions/index';
 import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import { WORDS_VALIDATION } from '../constants';
+import { getGlobalWallet } from "../services/wallet.service";
 
 
 const mapDispatchToProps = dispatch => {
@@ -26,7 +27,7 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = (state) => {
   return {
     words: state.words,
-    wallet: state.wallet,
+    wallet: getGlobalWallet(),
   };
 };
 

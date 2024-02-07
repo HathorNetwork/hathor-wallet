@@ -19,6 +19,7 @@ import colors from '../index.scss';
 import TokenPagination from './TokenPagination';
 import HathorAlert from './HathorAlert';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { getGlobalWallet } from "../services/wallet.service";
 
 const mapStateToProps = (state, props) => {
   const defaultTokenHistory = {
@@ -32,7 +33,7 @@ const mapStateToProps = (state, props) => {
 
   return {
     tokenHistory: history,
-    wallet: state.wallet,
+    wallet: getGlobalWallet(),
     tokenMetadata: state.tokenMetadata,
   };
 };

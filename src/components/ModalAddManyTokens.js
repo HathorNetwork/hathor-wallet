@@ -13,10 +13,11 @@ import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
 import tokens from '../utils/tokens';
 import wallet from "../utils/wallet";
+import { getGlobalWallet } from "../services/wallet.service";
 
 
 const mapStateToProps = (state) => {
-  return { storage: state.wallet.storage };
+  return { storage: getGlobalWallet().storage };
 };
 
 /**

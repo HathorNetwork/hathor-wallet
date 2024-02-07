@@ -12,11 +12,12 @@ import { CONFIRM_RESET_MESSAGE } from '../constants';
 import { connect } from 'react-redux';
 import SpanFmt from './SpanFmt';
 import LOCAL_STORE from '../storage';
+import { getGlobalWallet } from "../services/wallet.service";
 
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
+    wallet: getGlobalWallet(),
   };
 };
 

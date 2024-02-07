@@ -13,11 +13,12 @@ import PropTypes from "prop-types";
 import SendTxHandler from '../components/SendTxHandler';
 import ReactLoading from 'react-loading';
 import colors from '../index.scss';
+import { getGlobalWallet } from "../services/wallet.service";
 
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
+    wallet: getGlobalWallet(),
     useWalletService: state.useWalletService,
   };
 };
