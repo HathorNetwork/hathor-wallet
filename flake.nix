@@ -18,6 +18,7 @@
           packages = with pkgs; [
             nixpkgs-fmt
             nodejs-14_x
+            libusb1
           ];
         };
     });

@@ -433,7 +433,7 @@ export function* fetchTokensMetadata(tokens) {
 export function* listenForWalletReady(wallet) {
   const channel = eventChannel((emitter) => {
     const listener = (state) => emitter(state);
-    wallet.on('state', (state) => emitter(state));
+    wallet.on('state', listener);
 
     // Cleanup when the channel is closed
     return () => {
@@ -566,41 +566,35 @@ export function* handleUpdateTx(action) {
 
 export function* setupWalletListeners(wallet) {
   const channel = eventChannel((emitter) => {
-    const listener = (state) => emitter(state);
-    wallet.conn.on('best-block-update', (blockHeight) => emitter({
-      type: 'WALLET_BEST_BLOCK_UPDATE',
-      data: blockHeight,
-    }));
-    wallet.conn.on('wallet-load-partial-update', (data) => emitter({
-      type: 'WALLET_PARTIAL_UPDATE',
-      data,
-    }));
-    wallet.conn.on('state', (state) => emitter({
-      type: 'WALLET_CONN_STATE_UPDATE',
-      data: state,
-    }));
-    wallet.on('reload-data', () => emitter({
-      type: 'WALLET_RELOAD_DATA',
-    }));
-    wallet.on('update-tx', (data) => emitter({
-      type: 'WALLET_UPDATE_TX',
-      data,
-    }));
-    wallet.on('new-tx', (data) => emitter({
-      type: 'WALLET_NEW_TX',
-      data,
-    }));
+    const l1 = (blockHeight) => emitter({ type: 'WALLET_BEST_BLOCK_UPDATE', data: blockHeight });
+    wallet.conn.on('best-block-update', l1);
 
-    wallet.on('state', (data) => emitter(changeWalletState(data)));
+    const l2 = (data) => emitter({ type: 'WALLET_PARTIAL_UPDATE', data });
+    wallet.conn.on('wallet-load-partial-update', l2);
+
+    const l3 = (state) => emitter({ type: 'WALLET_CONN_STATE_UPDATE', data: state });
+    wallet.conn.on('state', l3);
+
+    const l4 = () => emitter({ type: 'WALLET_RELOAD_DATA' });
+    wallet.on('reload-data', l4);
+
+    const l5 = (data) => emitter({ type: 'WALLET_UPDATE_TX', data });
+    wallet.on('update-tx', l5);
+
+    const l6 = (data) => emitter({ type: 'WALLET_NEW_TX', data });
+    wallet.on('new-tx', l6);
+
+    const l7 = (data) => emitter(changeWalletState(data));
+    wallet.on('state', l7);
 
     return () => {
-      wallet.conn.removeListener('best-block-update', listener);
-      wallet.conn.removeListener('wallet-load-partial-update', listener);
-      wallet.conn.removeListener('state', listener);
-      wallet.removeListener('reload-data', listener);
-      wallet.removeListener('update-tx', listener);
-      wallet.removeListener('new-tx', listener);
-      wallet.removeListener('state', listener);
+      wallet.conn.removeListener('best-block-update', l1);
+      wallet.conn.removeListener('wallet-load-partial-update', l2);
+      wallet.conn.removeListener('state', l3);
+      wallet.removeListener('reload-data', l4);
+      wallet.removeListener('update-tx', l5);
+      wallet.removeListener('new-tx', l6);
+      wallet.removeListener('state', l7);
     };
   });
 

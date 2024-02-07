@@ -5,36 +5,23 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
 import SendTokensOne from '../components/SendTokensOne';
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import { walletRefreshSharedAddress } from '../actions';
 import SendTxHandler from '../components/SendTxHandler';
 import ledger, { LedgerError } from '../utils/ledger';
-import tokens from '../utils/tokens';
-import version from '../utils/version';
+import tokensUtils from '../utils/tokens';
+import versionUtils from '../utils/version';
 import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT } from '../constants';
 import ReactLoading from 'react-loading';
 import colors from '../index.scss';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
-
-const mapStateToProps = (state) => {
-  return {
-    selectedToken: state.selectedToken,
-    tokens: state.tokens,
-    wallet: state.wallet,
-    metadataLoaded: state.metadataLoaded,
-    useWalletService: state.useWalletService,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => ({
-  walletRefreshSharedAddress: () => dispatch(walletRefreshSharedAddress()),
-});
+import { useHistory } from 'react-router-dom';
 
 /**
  * Screen used to send tokens to another wallet.
@@ -42,85 +29,94 @@ const mapDispatchToProps = (dispatch) => ({
  *
  * @memberof Screens
  */
-class SendTokens extends React.Component {
-  static contextType = GlobalModalContext;
+function SendTokens() {
+  const globalModalContext = useContext(GlobalModalContext);
 
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  // Redux state
+  const { selectedToken, tokens, wallet, metadataLoaded, useWalletService } = useSelector(
+    (state) => {
+      return {
+        selectedToken: state.selectedToken,
+        tokens: state.tokens,
+        wallet: state.wallet,
+        metadataLoaded: state.metadataLoaded,
+        useWalletService: state.useWalletService,
+      };
+    });
   /**
-   * Get the selected token on the TokenBar.
+   * Get the full object for the selected token on the TokenBar.
    *
-   * @param {mapStateToProps} props
-   * @returns {Object} Token selected
+   * @returns {Object} Selected Token object
    */
-  static getSelectedToken(props) {
-    return props.tokens.filter(t => t.uid === props.selectedToken)
+  const getSelectedToken = () => {
+    return tokens.filter(t => t.uid === selectedToken)
   }
 
-  constructor(props) {
-    super(props);
+  // State
+  /** errorMessage {string} Message to be shown in case of error in form */
+  const [errorMessage, setErrorMessage] = useState('');
+  /** txTokens {Array} Array of tokens configs already added by the user (start with only hathor) */
+  const [txTokens, setTxTokens] = useState([...getSelectedToken()]);
+  /** ledgerStep {number} When sending tx with ledger we have a step that needs user physical input,
+   *                      then we move to next step */
+  const [ledgerStep, setLedgerStep] = useState(0);
 
-    // Holds the children components references
-    this.references = [React.createRef()];
+  // Create refs
+  const formSendTokensRef = useRef();
+  const references = useRef([React.createRef()]);
 
-    // Partial data while waiting tx mining to add nonce and parents
-    this.data = null;
+  // Convert componentDidMount and componentWillUnmount
+  useEffect(() => {
+    if (IPC_RENDERER) {
+      IPC_RENDERER.on('ledger:txSent', handleTxSent);
+      IPC_RENDERER.on('ledger:signatures', handleSignatures);
+      IPC_RENDERER.on('ledger:tokenDataSent', handleSendToken);
+    }
 
-    // Send transaction object used when sending tx with ledger
-    this.sendTransaction = null;
-
-    /**
-     * errorMessage {string} Message to be shown in case of error in form
-     * txTokens {Array} Array of tokens configs already added by the user (start with only hathor)
-     * ledgerStep {number} When sending tx with ledger we have a step that needs user physical input, then we move to next step
-     */
-    this.state = {
-      errorMessage: '',
-      txTokens: [...SendTokens.getSelectedToken(this.props)],
-      ledgerStep: 0,
-      data: null,
+    // Equivalent to componentWillUnmount
+    return () => {
+      if (IPC_RENDERER) {
+        IPC_RENDERER.removeAllListeners('ledger:txSent');
+        IPC_RENDERER.removeAllListeners('ledger:signatures');
+        IPC_RENDERER.removeAllListeners('ledger:tokenDataSent');
+      }
     };
-  }
+  }, []);
 
-  componentDidMount() {
-    if (IPC_RENDERER) {
-      IPC_RENDERER.on("ledger:txSent", this.handleTxSent);
-      IPC_RENDERER.on("ledger:signatures", this.handleSignatures);
-      IPC_RENDERER.on("ledger:tokenDataSent", this.handleSendToken);
-    }
-  }
+  // Partial transaction data while retrieving inputs and building the SendTransaction object
+  let newTxData = null;
 
-  componentWillUnmount() {
-    if (IPC_RENDERER) {
-      IPC_RENDERER.removeAllListeners("ledger:txSent");
-      IPC_RENDERER.removeAllListeners("ledger:signatures");
-      IPC_RENDERER.removeAllListeners("ledger:tokenDataSent");
-    }
-  }
+  // Send transaction object used when sending tx with ledger
+  let sendTransaction = null;
 
   /**
    * Handle the response of a send tx call to Ledger.
    *
-   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {IpcRendererEvent} _event May be used to reply to the event
    * @param {Object} arg Data returned from the send tx call
    */
-  handleTxSent = (_event, arg) => {
+  const handleTxSent = (_event, arg) => {
     if (arg.success) {
-      this.getSignatures();
+      getSignatures();
     } else {
-      this.handleSendError(new LedgerError(arg.error.message));
+      handleSendError(new LedgerError(arg.error.message));
     }
   }
 
   /**
    * Handle the response of a get signatures call to Ledger.
    *
-   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {IpcRendererEvent} _event May be used to reply to the event
    * @param {Object} arg Data returned from the get signatures call
    */
-  handleSignatures = (_event, arg) => {
+  const handleSignatures = (_event, arg) => {
     if (arg.success) {
-      this.onLedgerSuccess(arg.data);
+      onLedgerSuccess(arg.data);
     } else {
-      this.handleSendError(new LedgerError(arg.error.message));
+      handleSendError(new LedgerError(arg.error.message));
     }
   }
 
@@ -128,43 +124,43 @@ class SendTokens extends React.Component {
    * Handle the response of a send token data call to Ledger.
    * Will list all tokens that failed verification, if all pass then start sign tx
    *
-   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {IpcRendererEvent} _event May be used to reply to the event
    * @param {Object} arg Data returned from the send token data call
    */
-  handleSendToken = (_event, arg) => {
+  const handleSendToken = (_event, arg) => {
     // If a token does not pass:
     // modal to warn and either sign or cancel (use component)
     if (arg.success) {
       // arg.data is a list of failed uids
       if (arg.data.length === 0) {
         // send cached data
-        this.executeSendLedger();
+        executeSendLedger();
         return;
       }
       // some token was invalid, it will be on arg, which ones
-      const tokenList = this.state.txTokens.filter(t => arg.data.includes(t.uid))
-      this.context.showModal(MODAL_TYPES.ALERT, {
+      const tokenList = txTokens.filter(t => arg.data.includes(t.uid)) // TODO: Double check if state is updated
+      globalModalContext.showModal(MODAL_TYPES.ALERT, {
         id: 'ledgerAlertModal',
         title: t`Invalid custom tokens`,
         buttonName: t`Close`,
-        body: this.renderAlertTokenList(tokenList),
+        body: renderAlertTokenList(tokenList),
       })
     } else {
-      this.handleSendError(new LedgerError(arg.error.message));
+      handleSendError(new LedgerError(arg.error.message));
     }
   }
 
   /**
-   * Check if form is valid
+   * Check if form is valid and update the DOM class accordingly
    *
    * @return {boolean}
    */
-  validateData = () => {
-    const isValid = this.refs.formSendTokens.checkValidity();
+  const validateData = () => {
+    const isValid = formSendTokensRef.current.checkValidity();
     if (isValid === false) {
-      this.refs.formSendTokens.classList.add('was-validated');
+      formSendTokensRef.current.classList.add('was-validated');
     } else {
-      this.refs.formSendTokens.classList.remove('was-validated');
+      formSendTokensRef.current.classList.remove('was-validated');
     }
     return isValid;
   }
@@ -175,9 +171,9 @@ class SendTokens extends React.Component {
    *
    * @return {Object} Object holding all inputs and outputs {'inputs': [...], 'outputs': [...]}
    */
-  getData = () => {
+  const getData = () => {
     let data = {'inputs': [], 'outputs': [], 'tokens': []};
-    for (const ref of this.references) {
+    for (const ref of references.current) {
       const instance = ref.current;
       let dataOne = instance.getData();
       if (!dataOne) return;
@@ -190,36 +186,34 @@ class SendTokens extends React.Component {
   /**
    * Add signature to each input and execute send transaction
    */
-  onLedgerSuccess = async (signatures) => {
+  const onLedgerSuccess = async (signatures) => {
     try {
       // Prepare data and submit job to tx mining API
       const arr = [];
       for (let i=0;i<signatures.length;i++) {
         arr.push(Buffer.from(signatures[i]));
       }
-      await this.sendTransaction.prepareTxFrom(arr);
-      this.setState({
-        ledgerStep: 1,
-      }, () => {
-        this.context.showModal(MODAL_TYPES.ALERT, {
-          id: 'ledgerAlertModal',
-          title: t`Validate outputs on Ledger`,
-          body: this.renderAlertBody(),
-          showFooter: false,
-        });
+      await sendTransaction.prepareTxFrom(arr);
+      setLedgerStep(1);
+
+      globalModalContext.showModal(MODAL_TYPES.ALERT, {
+        id: 'ledgerAlertModal',
+        title: t`Validate outputs on Ledger`,
+        body: renderAlertBody(),
+        showFooter: false,
       });
     } catch(e) {
-      this.handleSendError(e);
+      handleSendError(e);
     }
   }
 
   /**
    * Execute ledger get signatures
    */
-  getSignatures = () => {
+  const getSignatures = () => {
     ledger.getSignatures(
-      Object.assign({}, this.data),
-      this.props.wallet,
+      Object.assign({}, newTxData),
+      wallet,
     );
   }
 
@@ -228,12 +222,12 @@ class SendTokens extends React.Component {
    *
    * @param {Object} tx Transaction sent data
    */
-  onSendSuccess = (tx) => {
-    this.context.hideModal();
+  const onSendSuccess = (tx) => {
+    globalModalContext.hideModal();
 
     // Must update the shared address, in case we have used one for the change
-    this.props.walletRefreshSharedAddress();
-    this.props.history.push('/wallet/');
+    dispatch(walletRefreshSharedAddress());
+    history.push('/wallet/');
   }
 
   /**
@@ -241,9 +235,10 @@ class SendTokens extends React.Component {
    *
    * @param {String} message Error message
    */
-  onSendError = (message) => {
-    this.context.hideModal();
-    this.setState({ errorMessage: message, ledgerStep: 0 });
+  const onSendError = (message) => {
+    globalModalContext.hideModal();
+    setErrorMessage(message);
+    setLedgerStep(0);
   }
 
   /**
@@ -253,31 +248,31 @@ class SendTokens extends React.Component {
    * If we have custom tokens we must send all tokens first
    * When all tokens are sent we should send the tx to sign
    */
-  beforeSendLedger = () => {
+  const beforeSendLedger = () => {
     // remove HTR if present
-    const txTokens = this.state.txTokens.filter(t => !hathorLib.tokensUtils.isHathorToken(t.uid));
+    const _txTokens = txTokens.filter(t => !hathorLib.tokensUtils.isHathorToken(t.uid));
 
-    if (txTokens.length === 0) {
+    if (_txTokens.length === 0) {
       // no custom tokens, just send
-      this.executeSendLedger();
+      executeSendLedger();
       return;
     }
     // get all custom tokens, and include the signatures
-    const tokenSignatures = tokens.getTokenSignatures();
-    const missingSigs = txTokens.filter(t => !tokenSignatures.hasOwnProperty(t.uid));
+    const tokenSignatures = tokensUtils.getTokenSignatures();
+    const missingSigs = _txTokens.filter(t => !tokenSignatures.hasOwnProperty(t.uid));
     if (missingSigs.length !== 0) {
       // there are tokens without signatures, missingSigs
       // set tittle and content
-      this.context.showModal(MODAL_TYPES.ALERT, {
+      globalModalContext.showModal(MODAL_TYPES.ALERT, {
         id: 'ledgerAlertModal',
         title: t`Unverified custom tokens`,
-        body: this.renderAlertTokenList(missingSigs),
+        body: renderAlertTokenList(missingSigs),
         buttonName: t`Close`,
       });
       return;
     }
 
-    const tokenSigs = txTokens.map(t => {
+    const tokenSigs = _txTokens.map(t => {
       return {
         uid: t.uid,
         symbol: t.symbol,
@@ -293,40 +288,41 @@ class SendTokens extends React.Component {
    * Method executed to send transaction on ledger
    * It opens the ledger modal to wait for user action on the device
    */
-  executeSendLedger = async () => {
+  const executeSendLedger = async () => {
     // Wallet Service currently does not support Ledger, so we default to the regular SendTransaction
-    this.sendTransaction = new hathorLib.SendTransaction({
-      outputs: this.data.outputs,
-      inputs: this.data.inputs,
-      storage: this.props.wallet.storage,
+    sendTransaction = new hathorLib.SendTransaction({
+      outputs: newTxData.outputs,
+      inputs: newTxData.inputs,
+      storage: wallet.storage,
     });
 
     try {
       // Errors may happen in this step ( ex.: insufficient amount of tokens )
-      this.data = await this.sendTransaction.prepareTxData();
+      newTxData = await sendTransaction.prepareTxData();
     }
     catch (e) {
-      this.setState({ errorMessage: e.message, ledgerStep: 0 })
+      setErrorMessage(e.message);
+      setLedgerStep(0);
       return;
     }
 
     const changeInfo = [];
-    for (const [outputIndex, output] of this.data.outputs.entries()) {
+    for (const [outputIndex, output] of newTxData.outputs.entries()) {
       if (output.isChange) {
         changeInfo.push({
           outputIndex,
-          keyIndex: await this.props.wallet.getAddressIndex(output.address),
+          keyIndex: await wallet.getAddressIndex(output.address),
         });
       }
     }
 
-    const useOldProtocol = !version.isLedgerCustomTokenAllowed();
+    const useOldProtocol = !versionUtils.isLedgerCustomTokenAllowed();
 
-    const network = this.props.wallet.getNetworkObject();
-    ledger.sendTx(this.data, changeInfo, useOldProtocol, network);
-    this.context.showModal(MODAL_TYPES.ALERT, {
+    const network = wallet.getNetworkObject();
+    ledger.sendTx(newTxData, changeInfo, useOldProtocol, network);
+    globalModalContext.showModal(MODAL_TYPES.ALERT, {
       title: t`Validate outputs on Ledger`,
-      body: this.renderAlertBody(),
+      body: renderAlertBody(),
       showFooter: false,
     });
   }
@@ -335,31 +331,31 @@ class SendTokens extends React.Component {
    * Method executed when user validates its PIN on the modal
    * Checks if the form is valid, get data from child components, complete the transaction and execute API request
    */
-  beforeSend = () => {
-    const isValid = this.validateData();
+  const beforeSend = () => {
+    const isValid = validateData();
     if (!isValid) return;
-    let data = this.getData();
+    let data = getData();
     if (!data) return;
-    this.setState({ errorMessage: '' });
+    setErrorMessage('');
     try {
-      this.data = data;
+      newTxData = data;
       if (!LOCAL_STORE.isHardwareWallet()) {
-        this.context.showModal(MODAL_TYPES.PIN, {
+        globalModalContext.showModal(MODAL_TYPES.PIN, {
           onSuccess: ({pin}) => {
-            this.context.showModal(MODAL_TYPES.SEND_TX, {
+            globalModalContext.showModal(MODAL_TYPES.SEND_TX, {
               pin,
-              prepareSendTransaction: this.prepareSendTransaction,
-              onSendSuccess: this.onSendSuccess,
-              onSendError: this.onSendError,
+              prepareSendTransaction: prepareSendTransaction,
+              onSendSuccess: onSendSuccess,
+              onSendError: onSendError,
               title: t`Sending transaction`,
             });
           }
         })
       } else {
-        this.beforeSendLedger();
+        beforeSendLedger();
       }
     } catch(e) {
-      this.handleSendError(e);
+      handleSendError(e);
     }
   }
 
@@ -370,30 +366,31 @@ class SendTokens extends React.Component {
    *
    * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
    */
-  prepareSendTransaction = async (pin) => {
-    if (this.props.useWalletService) {
-      return new hathorLib.SendTransactionWalletService(this.props.wallet, {
-        outputs: this.data.outputs,
-        inputs: this.data.inputs,
+  const prepareSendTransaction = async (pin) => {
+    if (useWalletService) {
+      return new hathorLib.SendTransactionWalletService(wallet, {
+        outputs: newTxData.outputs,
+        inputs: newTxData.inputs,
         pin,
       });
     }
 
-    return new hathorLib.SendTransaction({ outputs: this.data.outputs, inputs: this.data.inputs, pin, storage: this.props.wallet.storage });
+    return new hathorLib.SendTransaction({ outputs: newTxData.outputs, inputs: newTxData.inputs, pin, storage: wallet.storage });
   }
 
   /**
    * Handle error when executing sendTransaction method of the lib
    */
-  handleSendError = (e) => {
+  const handleSendError = (e) => {
     if (e instanceof hathorLib.errors.AddressError ||
         e instanceof hathorLib.errors.OutputValueError ||
         e instanceof hathorLib.errors.ConstantNotSet ||
         e instanceof hathorLib.errors.MaximumNumberOutputsError ||
         e instanceof hathorLib.errors.MaximumNumberInputsError ||
         e instanceof LedgerError) {
-      this.context.hideModal();
-      this.setState({ errorMessage: e.message, ledgerStep: 0 });
+      globalModalContext.hideModal();
+      setErrorMessage(e.message);
+      setLedgerStep(0);
     } else {
       // Unhandled error
       throw e;
@@ -404,9 +401,11 @@ class SendTokens extends React.Component {
    * Update class state
    *
    * @param {Object} newState New state for the class
+   * @param {String} newState.errorMessage Error message
    */
-  updateState = (newState) => {
-    this.setState(newState);
+  const updateState = (newState) => {
+    // The only state that SendTokensOne expects to update with this callback is the errorMessage
+    setErrorMessage(newState.errorMessage)
   }
 
   /**
@@ -414,11 +413,11 @@ class SendTokens extends React.Component {
    * Checks if still have a known token available that is not selected yet
    * Create a new child reference with this new token
    */
-  addAnotherToken = () => {
+  const addAnotherToken = () => {
     if (LOCAL_STORE.isHardwareWallet()) {
-      if (!version.isLedgerCustomTokenAllowed()) {
+      if (!versionUtils.isLedgerCustomTokenAllowed()) {
         // Custom token not allowed for this Ledger version
-        this.context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
+        globalModalContext.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
           children: (
             <div>
               <p>{t`Unfortunately this feature is not supported with the Hathor app version on your Ledger device. If you need this feature, you can use it by installing the most recent Hathor app.`}</p>
@@ -427,10 +426,10 @@ class SendTokens extends React.Component {
         })
         return;
       }
-      if (this.state.txTokens.filter(t => !hathorLib.tokensUtils.isHathorToken(t.uid)).length === LEDGER_TX_CUSTOM_TOKEN_LIMIT) {
+      if (txTokens.filter(t => !hathorLib.tokensUtils.isHathorToken(t.uid)).length === LEDGER_TX_CUSTOM_TOKEN_LIMIT) {
         // limit is 10 custom tokens per tx
         const modalBody = <p>{t`Ledger has a limit of ${LEDGER_TX_CUSTOM_TOKEN_LIMIT} different tokens per transaction.`}</p>
-        this.context.showModal(MODAL_TYPES.ALERT, {
+        globalModalContext.showModal(MODAL_TYPES.ALERT, {
           id: 'ledgerAlertModal',
           title: t`Token limit reached`,
           body: modalBody,
@@ -440,21 +439,20 @@ class SendTokens extends React.Component {
       }
     }
 
-    if (this.state.txTokens.length === this.props.tokens.length) {
-      this.setState({ errorMessage: t`All your tokens were already added` });
+    if (txTokens.length === tokens.length) {
+      setErrorMessage(t`All your tokens were already added`);
       return;
     }
 
     // Among all the token options we choose the first one that is not already selected
-    const newToken = this.props.tokens.find((token) => {
-      return this.state.txTokens.find((txToken) =>
+    const newToken = tokens.find((token) => {
+      return txTokens.find((txToken) =>
         txToken.uid === token.uid
       ) === undefined
     });
 
-    this.references.push(React.createRef());
-    const txTokens = [...this.state.txTokens, newToken];
-    this.setState({ txTokens });
+    references.current.push(React.createRef());
+    setTxTokens([...txTokens, newToken]);
   }
 
   /**
@@ -464,10 +462,10 @@ class SendTokens extends React.Component {
    * @param {Object} selected Config of token that was selected {'name', 'symbol', 'uid'}
    * @param {number} index Index of the child component
    */
-  tokenSelectChange = (selected, index) => {
-    let txTokens = [...this.state.txTokens];
-    txTokens[index] = selected;
-    this.setState({ txTokens });
+  const tokenSelectChange = (selected, index) => {
+    const newTxTokens = [...txTokens];
+    newTxTokens[index] = selected;
+    setTxTokens(newTxTokens);
   }
 
   /**
@@ -475,28 +473,28 @@ class SendTokens extends React.Component {
    *
    * @param {number} index Index of the child component
    */
-  removeToken = (index) => {
-    let txTokens = [...this.state.txTokens];
-    txTokens.splice(index, 1);
-    this.setState({ txTokens });
-    this.references.splice(index, 1);
+  const removeToken = (index) => {
+    const newTxTokens = [...txTokens];
+    newTxTokens.splice(index, 1);
+    setTxTokens(newTxTokens);
+    references.current.splice(index, 1);
   }
 
   /**
    * Called when user clicks on send tokens button
    * Open pin modal if software wallet and execute send otherwise
    */
-  onSendTokensClicked = () => {
-    this.beforeSend();
+  const onSendTokensClicked = () => {
+    beforeSend();
   }
 
-  renderAlertTokenList = (tokenList) => {
+  const renderAlertTokenList = (tokenList) => {
     const rows = tokenList.map(t => <li key={t.uid}><p>{t.name} ({t.symbol})</p></li>)
     return <ul>{rows}</ul>
   }
 
-  renderAlertBody = () => {
-    if (this.state.ledgerStep === 0) {
+  const renderAlertBody = () => {
+    if (ledgerStep === 0) {
       return (
         <div>
           <p>{t`Please go to you Ledger and validate each output of your transaction. Press both buttons in case the output is correct.`}</p>
@@ -506,47 +504,54 @@ class SendTokens extends React.Component {
     } else {
       return (
         <div className="d-flex flex-row">
-          <SendTxHandler sendTransaction={this.sendTransaction} onSendSuccess={this.onSendSuccess} onSendError={this.onSendError} />
+          <SendTxHandler sendTransaction={sendTransaction} onSendSuccess={onSendSuccess} onSendError={onSendError} />
           <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
         </div>
       )
     }
   }
 
-  render = () => {
-    const renderOnePage = () => {
-      return this.state.txTokens.map((token, index) => {
-        return <SendTokensOne key={`${token.uid}-${index}`} ref={this.references[index]} config={token} index={index} selectedTokens={this.state.txTokens} tokens={this.props.tokens} tokenSelectChange={this.tokenSelectChange} removeToken={this.removeToken} updateState={this.updateState} />
-      });
-    }
+  const renderOnePage = () => {
+    return txTokens.map((token, index) => {
+      return <SendTokensOne key={`${token.uid}-${index}`}
+                            ref={references.current[index]}
+                            config={token}
+                            index={index}
+                            selectedTokens={txTokens}
+                            tokens={tokens}
+                            tokenSelectChange={tokenSelectChange}
+                            removeToken={removeToken}
+                            updateState={updateState}
+      />
+    });
+  }
 
-    const renderPage = () => {
-      if (!this.props.metadataLoaded) {
-        return <p>{t`Loading metadata...`}</p>
-      }
-
-      return (
-        <div>
-          <form ref="formSendTokens" id="formSendTokens">
-            {renderOnePage()}
-            <div className="mt-5">
-              <button type="button" className="btn btn-secondary mr-4" onClick={this.addAnotherToken}>{t`Add another token`}</button>
-              <button type="button" className="btn btn-hathor" onClick={this.onSendTokensClicked}>{t`Send Tokens`}</button>
-            </div>
-          </form>
-          <p className="text-danger mt-3 white-space-pre-wrap">{this.state.errorMessage}</p>
-        </div>
-      );
+  const renderPage = () => {
+    if (!metadataLoaded) {
+      return <p>{t`Loading metadata...`}</p>
     }
 
     return (
-      <div className="content-wrapper flex align-items-center">
-        <BackButton />
-        <h3 className="mt-4 mb-4">{t`Send Tokens`}</h3>
-        {renderPage()}
+      <div>
+        <form ref={formSendTokensRef} id="formSendTokens">
+          {renderOnePage()}
+          <div className="mt-5">
+            <button type="button" className="btn btn-secondary mr-4" onClick={addAnotherToken}>{t`Add another token`}</button>
+            <button type="button" className="btn btn-hathor" onClick={onSendTokensClicked}>{t`Send Tokens`}</button>
+          </div>
+        </form>
+        <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p>
       </div>
     );
   }
+
+  return (
+    <div className="content-wrapper flex align-items-center">
+      <BackButton />
+      <h3 className="mt-4 mb-4">{t`Send Tokens`}</h3>
+      {renderPage()}
+    </div>
+  );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SendTokens);
+export default SendTokens;

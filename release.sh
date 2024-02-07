@@ -11,6 +11,14 @@
 set -e  # Exit on any command failure.
 set -u  # Exit on unset variables.
 
+step0() {
+	echo Environment:
+	echo - node $(node -v)
+	echo - npm $(npm -v)
+	echo - python $(python --version | awk '{print $2}')
+	echo
+}
+
 step1() {
 	echo step1: cleaning and installing dependencies
 	rm -rf node_modules/
@@ -28,9 +36,10 @@ step2() {
 }
 
 step3() {
-	echo "step3: (empty)"
-	#echo step3: install missing packing tools
-	#npm install electron-builder@latest
+	echo "step3: actions between building and packaging"
+
+	echo "- Quick fix for Issue 484: https://github.com/HathorNetwork/hathor-wallet/issues/484"
+	rm ./node_modules/usb/binding.gyp
 }
 
 step4() {
@@ -41,6 +50,7 @@ step4() {
 	npm run electron-pack-mac
 }
 
+step0
 step1
 step2
 step3

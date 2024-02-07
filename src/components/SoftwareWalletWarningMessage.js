@@ -14,7 +14,7 @@ import { t } from 'ttag'
  *
  * @memberof Components
  */
-const SoftwareWalletWarningMessage = (props) => {
+const SoftwareWalletWarningMessage = () => {
   return (
     <div>
       <p className="mt-4">{t`Using a software wallet is not the safest way to secure your tokens. As your private information is stored in your computer that is connected to the internet, it may be stolen by a virus.`}</p>

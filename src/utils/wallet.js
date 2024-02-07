@@ -257,7 +257,7 @@ const wallet = {
    * @param {Object[]} registeredTokens list of registered tokens
    * @param {Object[]} tokensBalance data about token balances
    * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
-   * @returns {Promise<{uid:string, balance:{available:number,locked:number}}[]>}
+   * @returns {{uid:string, balance:{available:number,locked:number}}[]}
    */
   fetchUnknownTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance) {
     const alwaysShowTokensArray = this.listTokensAlwaysShow();

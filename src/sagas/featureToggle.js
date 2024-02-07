@@ -26,6 +26,7 @@ import {
 import { eventChannel } from 'redux-saga';
 import { config } from '@hathor/wallet-lib';
 import helpers from '../utils/helpers';
+import { VERSION } from '../constants';
 
 import {
   setUnleashClient,
@@ -97,6 +98,7 @@ export function* monitorFeatureFlags(currentRetry = 0) {
     properties: {
       network,
       platform,
+      appVersion: VERSION,
     },
   };
 
