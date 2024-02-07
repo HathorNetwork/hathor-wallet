@@ -26,6 +26,7 @@ import {
   proposalTokenFetchFailed,
 } from '../actions';
 import { t } from "ttag";
+import { getGlobalWallet } from "../services/wallet.service";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 const METADATA_MAX_RETRIES = 3;
@@ -82,7 +83,7 @@ function* fetchTokenBalance(action) {
   const { tokenId, force } = action;
 
   try {
-    const wallet = yield select((state) => state.wallet);
+    const wallet = getGlobalWallet();
     const tokenBalance = yield select((state) => get(state.tokensBalance, tokenId));
 
     if (!force && tokenBalance && tokenBalance.oldStatus === TOKEN_DOWNLOAD_STATUS.READY) {
@@ -192,7 +193,7 @@ function* fetchTokenHistory(action) {
   const { tokenId, force } = action;
 
   try {
-    const wallet = yield select((state) => state.wallet);
+    const wallet = getGlobalWallet();
     const tokenHistory = yield select((state) => get(state.tokensHistory, tokenId));
 
     if (!force && tokenHistory && tokenHistory.oldStatus === TOKEN_DOWNLOAD_STATUS.READY) {
@@ -216,7 +217,7 @@ function* fetchTokenHistory(action) {
  * for this token gets downloaded
  */
 function* routeTokenChange(action) {
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet || !wallet.isReady()) {
     return;
@@ -351,7 +352,7 @@ function* fetchProposalTokenData(action) {
       return;
     }
 
-    const wallet = yield select((state) => state.wallet);
+    const wallet = getGlobalWallet();
 
     // Fetching name and symbol data from the fullnode
     const updatedTokenDetails = yield wallet.getTokenDetails(tokenUid);
