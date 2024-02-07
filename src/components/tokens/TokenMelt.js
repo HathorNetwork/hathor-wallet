@@ -17,10 +17,11 @@ import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../../sagas/tokens';
 import { colors } from '../../constants';
+import { getGlobalWallet } from "../../services/wallet.service";
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
+    wallet: getGlobalWallet(),
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
   };

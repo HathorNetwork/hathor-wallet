@@ -16,10 +16,11 @@ import helpers from '../../utils/helpers';
 import InputNumber from '../InputNumber';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
+import { getGlobalWallet } from "../../services/wallet.service";
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
+    wallet: getGlobalWallet(),
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
   };
