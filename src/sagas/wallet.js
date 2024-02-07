@@ -41,7 +41,6 @@ import {
   tokenMetadataUpdated,
   setUseWalletService,
   updateLoadedData,
-  setWallet,
   tokenFetchBalanceRequested,
   tokenFetchHistoryRequested,
   setServerInfo,
@@ -300,6 +299,7 @@ export function* startWallet(action) {
     });
 
     if (error) {
+      console.error(`[-] Wallet Error while waiting for ready status:`, error);
       yield put(startWalletFailed());
       return;
     }
@@ -318,6 +318,7 @@ export function* startWallet(action) {
     // Store all tokens on redux
     yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
   } catch(e) {
+    console.error(`[-] Wallet Error while loading tokens:`, e);
     yield put(startWalletFailed());
     return;
   }
@@ -689,6 +690,7 @@ export function* walletReloading() {
     yield put(setNavigateTo('/wallet/', true));
     yield put(loadingAddresses(false));
   } catch (e) {
+    console.error(`[walletReloading] Error: `, e);
     yield put(startWalletFailed());
     return;
   }

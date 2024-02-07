@@ -12,10 +12,10 @@ import { str2jsx } from '../utils/i18n';
 import logo from '../assets/images/hathor-logo.png';
 import InitialImages from '../components/InitialImages';
 
-export default function LoadFailed(props) {
+export default function LoadFailed() {
   const lastAction = useSelector((state) => state.startWalletAction);
   const dispatch = useDispatch();
-  
+
   const retry = useCallback((e) => {
     e.preventDefault();
     dispatch(lastAction);
