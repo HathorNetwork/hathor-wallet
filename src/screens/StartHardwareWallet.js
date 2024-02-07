@@ -107,7 +107,6 @@ function StartHardwareWallet() {
         passphrase: '',
         pin: null,
         password: '',
-        routerHistory: history,
         xpub,
         hardware: true,
       }));

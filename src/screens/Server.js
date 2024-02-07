@@ -251,7 +251,7 @@ function Server() {
       // We don't have PIN on hardware wallet
       const pin = isHardwareWallet ? null : pinRef.current.value;
       try {
-        await walletUtils.changeServer(wallet, pin, history, networkChanged);
+        await walletUtils.changeServer(wallet, pin, networkChanged);
         history.push('/wallet/');
       } catch (err) {
         setLoading(false);
