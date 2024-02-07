@@ -52,7 +52,6 @@
     "react-redux": "7.2.8",
     "react-router-dom": "5.3.3",
     "react-scripts": "4.0.3",
-    "redux": "4.2.0",
     "redux-saga": "1.2.1",
     "redux-thunk": "2.4.1",
     "ttag": "1.7.24",
