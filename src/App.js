@@ -234,12 +234,7 @@ function LoadedWalletComponent({ children }) {
 
   // Check version
   if (isVersionAllowed === undefined) {
-    throw new Error('[LoadedWalletComponent] isVersionAllowed is undefined');
-    // return <Redirect to={{
-    //   pathname: '/loading_addresses/',
-    //   state: {path: match.url},
-    //   waitVersionCheck: true
-    // }} />;
+    return null;
   }
   if (isVersionAllowed === false) {
     return <VersionError />;
