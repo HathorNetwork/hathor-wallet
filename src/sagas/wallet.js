@@ -71,6 +71,7 @@ import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
+import { setGlobalWallet } from "../services/wallet.service";
 
 export const WALLET_STATUS = {
   READY: 'ready',
@@ -229,7 +230,7 @@ export function* startWallet(action) {
     wallet = new HathorWallet(walletConfig);
   }
 
-  yield put(setWallet(wallet));
+  setGlobalWallet(wallet);
 
   // Setup listeners before starting the wallet so we don't lose messages
   yield fork(setupWalletListeners, wallet);
