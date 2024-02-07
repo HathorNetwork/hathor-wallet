@@ -167,7 +167,7 @@ function Root() {
       history.push(newRoute.route);
     }
     dispatch(setNavigateTo(''));
-  }, [navigateTo])
+  }, [navigateTo]);
 
   // Handles failed wallet states
   if (walletStartState === WALLET_STATUS.FAILED) {

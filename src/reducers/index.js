@@ -942,7 +942,7 @@ export const onWalletBestBlockUpdate = (state, action) => {
  * @param {boolean} action.replace Whether we should navigate with the replace parameter set
  */
 export const onSetNavigateTo = (state, action) => {
-  const { route, replace } = action;
+  const { route, replace } = action.payload || {};
 
   return {
     ...state,
