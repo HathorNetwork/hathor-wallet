@@ -129,7 +129,6 @@ const initialState = {
       status: TOKEN_DOWNLOAD_STATUS.READY
     }
   },
-  unleashClient: null,
   featureTogglesInitialized: false,
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
@@ -260,8 +259,6 @@ const rootReducer = (state = initialState, action) => {
       return onWalletBestBlockUpdate(state, action);
     case types.STORE_ROUTER_HISTORY:
       return onStoreRouterHistory(state, action);
-    case types.SET_UNLEASH_CLIENT:
-      return onSetUnleashClient(state, action);
     case types.SET_FEATURE_TOGGLES:
       return onSetFeatureToggles(state, action);
     case types.FEATURE_TOGGLE_INITIALIZED:
@@ -372,12 +369,11 @@ const onUpdateLoadedData = (state, action) => ({
 });
 
 const onCleanData = (state) => {
+  // Keep the unleashClient as it should continue running
   return Object.assign({}, initialState, {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
     ledgerWasClosed: state.ledgerWasClosed,
-    // Keep the unleashClient as it should continue running
-    unleashClient: state.unleashClient,
     featureTogglesInitialized: state.featureTogglesInitialized,
   });
 };
@@ -1003,19 +999,10 @@ const onSetFeatureToggles = (state, { payload }) => ({
   featureToggles: payload,
 });
 
-/**
- * @param {Object} action.payload The unleash client to store
- */
-const onSetUnleashClient = (state, { payload }) => ({
-  ...state,
-  unleashClient: payload,
-});
-
-const onWalletResetSuccess = (state) => ({
-  ...state,
+const onWalletResetSuccess = (state) => {
   // Keep the unleashClient as it should continue running
-  unleashClient: state.unleashClient,
-});
+  return state;
+};
 
 export const onUpdateTxHistory = (state, action) => {
   const { tx, tokenId, balance } = action.payload;
