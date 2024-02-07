@@ -11,9 +11,9 @@ import { t } from 'ttag'
 import $ from 'jquery';
 import walletUtils from '../utils/wallet';
 import BackButton from '../components/BackButton';
-import { useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useNavigate } from 'react-router-dom';
+import { getGlobalWallet } from "../services/wallet.service";
 
 /**
  * Screen used to choose a passphrase for your wallet
@@ -21,7 +21,7 @@ import { useNavigate } from 'react-router-dom';
  * @memberof Screens
  */
 function ChoosePassphrase() {
-  const wallet = useSelector(state => state.wallet)
+  const wallet = getGlobalWallet();
   const passphraseFormRef = useRef();
   const confirmFormRef = useRef();
   const passphraseRef = useRef();

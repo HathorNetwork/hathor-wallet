@@ -21,6 +21,7 @@ import ReactLoading from 'react-loading';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
+import { getGlobalWallet } from "../services/wallet.service";
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -41,16 +42,16 @@ function SendTokens() {
   const navigate = useNavigate();
 
   // Redux state
-  const { selectedToken, tokens, wallet, metadataLoaded, useWalletService } = useSelector(
+  const { selectedToken, tokens, metadataLoaded, useWalletService } = useSelector(
     (state) => {
       return {
         selectedToken: state.selectedToken,
         tokens: state.tokens,
-        wallet: state.wallet,
         metadataLoaded: state.metadataLoaded,
         useWalletService: state.useWalletService,
       };
     });
+  const wallet = getGlobalWallet();
   /**
    * Get the full object for the selected token on the TokenBar.
    *

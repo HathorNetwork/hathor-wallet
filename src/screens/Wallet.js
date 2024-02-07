@@ -29,6 +29,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested, updateWords, } from '../actions/index';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
+import { getGlobalWallet } from "../services/wallet.service";
 
 
 /**
@@ -64,7 +65,6 @@ function Wallet() {
     tokensBalance,
     tokenMetadata,
     tokens,
-    wallet,
     walletState,
   } = useSelector((state) => {
     return {
@@ -73,10 +73,10 @@ function Wallet() {
       tokensBalance: state.tokensBalance,
       tokenMetadata: state.tokenMetadata || {},
       tokens: state.tokens,
-      wallet: state.wallet,
       walletState: state.walletState,
     };
   });
+  const wallet = getGlobalWallet();
 
   // Refs
   const alertSuccessRef = useRef(null);

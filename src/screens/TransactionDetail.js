@@ -7,7 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 import ReactLoading from 'react-loading';
-import { useSelector } from 'react-redux';
 import { t } from 'ttag';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
@@ -16,6 +15,7 @@ import { colors } from '../constants';
 import helpers from '../utils/helpers';
 import path from 'path';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getGlobalWallet } from "../services/wallet.service";
 
 /**
  * Shows the detail of a transaction or block
@@ -23,8 +23,8 @@ import { useNavigate, useParams } from 'react-router-dom';
  * @memberof Screens
  */
 function TransactionDetail() {
-  const wallet = useSelector((state) => state.wallet);
-  const navigate = useNavigate();
+  const wallet = getGlobalWallet();
+	const navigate = useNavigate();
   const { id: txId } = useParams();
 
   /* transaction {Object} Loaded transaction */
