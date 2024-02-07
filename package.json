@@ -96,7 +96,7 @@
     "electron-devtools-installer": "3.2.0",
     "eslint-plugin-cypress": "2.12.1",
     "jsdoc": "3.6.10",
-    "nodemon": "2.0.16",
+    "nodemon": "3.0.3",
     "sass": "1.52.2",
     "ttag-cli": "1.9.4"
   },
