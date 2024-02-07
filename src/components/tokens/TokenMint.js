@@ -16,7 +16,7 @@ import helpers from '../../utils/helpers';
 import InputNumber from '../InputNumber';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-import { getGlobalWallet } from "../../services/wallet.singleton";
+import { getGlobalWallet } from "../../modules/wallet";
 
 const mapStateToProps = (state) => {
   return {

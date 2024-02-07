@@ -13,7 +13,7 @@ import PropTypes from "prop-types";
 import SendTxHandler from '../components/SendTxHandler';
 import ReactLoading from 'react-loading';
 import { colors } from '../constants';
-import { getGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet } from "../modules/wallet";
 
 
 const mapStateToProps = (state) => {

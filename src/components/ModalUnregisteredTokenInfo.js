@@ -13,7 +13,7 @@ import SpanFmt from './SpanFmt';
 import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import hathorLib from '@hathor/wallet-lib';
 import PropTypes from 'prop-types';
-import { getGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Component that shows a modal with information about an unregistered token

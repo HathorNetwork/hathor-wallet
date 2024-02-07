@@ -11,7 +11,7 @@ import $ from 'jquery';
 import { CONFIRM_RESET_MESSAGE } from '../constants';
 import SpanFmt from './SpanFmt';
 import LOCAL_STORE from '../storage';
-import { getGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Component that shows a modal to ask form confirmation data to reset the wallet

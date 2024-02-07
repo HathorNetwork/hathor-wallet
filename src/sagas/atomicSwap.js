@@ -26,7 +26,7 @@ import {
 } from "../utils/atomicSwap";
 import { t } from "ttag";
 import { swapService } from '@hathor/wallet-lib'
-import { getGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet } from "../modules/wallet";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 

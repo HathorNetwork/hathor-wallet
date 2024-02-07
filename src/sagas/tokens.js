@@ -26,7 +26,7 @@ import {
   proposalTokenFetchFailed,
 } from '../actions';
 import { t } from "ttag";
-import { getGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet } from "../modules/wallet";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 const METADATA_MAX_RETRIES = 3;

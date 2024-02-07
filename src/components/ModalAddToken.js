@@ -11,7 +11,7 @@ import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
 import walletUtils from "../utils/wallet";
-import { getGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Component that shows a modal to add one specific unknown token to the wallet

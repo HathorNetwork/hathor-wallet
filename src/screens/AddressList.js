@@ -13,7 +13,7 @@ import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
 import path from 'path';
-import { getGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Screen that has a list of addresses of the wallet

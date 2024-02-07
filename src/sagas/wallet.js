@@ -71,7 +71,7 @@ import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
-import { getGlobalWallet, setGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet, setGlobalWallet } from "../modules/wallet";
 
 export const WALLET_STATUS = {
   READY: 'ready',

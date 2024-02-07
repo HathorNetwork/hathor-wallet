@@ -13,7 +13,7 @@ import walletUtils from '../utils/wallet';
 import BackButton from '../components/BackButton';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useNavigate } from 'react-router-dom';
-import { getGlobalWallet } from "../services/wallet.singleton";
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Screen used to choose a passphrase for your wallet

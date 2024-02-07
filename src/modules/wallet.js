@@ -8,14 +8,14 @@
 import hathorLib from "@hathor/wallet-lib";
 
 /**
- *
- * @type {HathorWallet|null}
+ * Application-wide HathorWallet object
+ * @type {hathorLib.HathorWallet|null}
  */
 let globalWallet = null;
 
 /**
  * Sets the global Hathor Wallet
- * @param {HathorWallet} wallet
+ * @param {hathorLib.HathorWallet} wallet
  */
 export function setGlobalWallet(wallet) {
 	if (globalWallet && globalWallet.state !== hathorLib.HathorWallet.CLOSED) {
@@ -26,11 +26,17 @@ export function setGlobalWallet(wallet) {
 	globalWallet = wallet;
 }
 
+/**
+ * Retrieves the application-wide HathorWallet object
+ */
 export function getGlobalWallet() {
 	return globalWallet;
 }
 
-export function resetWallet() {
+/**
+ * Stops the application-wide HathorWallet object and removes it from memory
+ */
+export function stopWallet() {
 	if (!globalWallet) {
 		return;
 	}
