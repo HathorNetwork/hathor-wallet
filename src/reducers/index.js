@@ -73,7 +73,7 @@ const initialState = {
   // Token selected (by default is HATHOR)
   selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
   // List of all tokens seen in transactions
-  allTokens: new Set(),
+  allTokens: {},
   // If is in the proccess of loading addresses transactions from the full node
   // When the request to load addresses fails this variable can continue true
   loadingAddresses: false,
@@ -325,7 +325,7 @@ const onLoadWalletSuccess = (state, action) => {
     loadingAddresses: false,
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
-    allTokens,
+    allTokens: helpersUtils.convertSetToObject(allTokens),
     tokens: registeredTokens,
   };
 };
@@ -541,12 +541,14 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
 */
 export const onNewTokens = (state, action) => {
   // Add new created token to the all tokens set
-  state.allTokens.add(action.payload.uid);
+  const allTokensSet = new Set(state.allTokens);
+  allTokensSet.add(action.payload.uid);
 
   return {
     ...state,
     selectedToken: action.payload.uid,
     tokens: action.payload.tokens,
+    allTokensSet: helpersUtils.convertSetToObject(allTokensSet),
   };
 };
 
