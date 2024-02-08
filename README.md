@@ -68,6 +68,8 @@ On CMD the command would be `& '.\Hathor Wallet.exe' --unsafe-mode --hathor-debu
 
 On Linux the app is installed in a way that it is available as the command `hathor-wallet`, so we can simply run `hathor-wallet --unsafe-mode --hathor-debug` from the terminal.
 
+On MacOS the app is usually installed in `/Applications` in a way that is possible to run the following command `open /Applications/Hathor\ Wallet.app --args --hathor-debug --unsafe-mode` from the terminal.
+
 ### To Build
 
 `npm run build` and it will create a folder build with the files to use
