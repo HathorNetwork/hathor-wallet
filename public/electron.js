@@ -6,7 +6,7 @@
  */
 
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Tray, Menu, dialog, ipcMain} = require('electron')
+const { app, BrowserWindow, Tray, Menu, dialog, ipcMain } = require('electron')
 const contextMenu = require('./contextMenu')
 const Sentry = require('@sentry/electron')
 const url = require('url');

@@ -78,6 +78,7 @@
     "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js",
     "watch-electron": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev nodemon --watch ./public/**/* --watch . --exec 'npm run electron'",
     "electron-dev": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .",
+    "electron-debug": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --unsafe-mode --hathor-debug .",
     "electron-dev-concurrently": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .'",
     "locale-update-pot": "ttag extract -o ./locale/texts.pot ./src/",
     "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps && patch-package",
