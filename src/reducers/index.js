@@ -72,7 +72,11 @@ const initialState = {
   tokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
   // Token selected (by default is HATHOR)
   selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
-  // List of all tokens seen in transactions
+  /**
+   * List of all tokens seen in transactions
+   * @type {Record<string, string>}
+   * @example { 00: "00", abc123: "abc123" }
+   */
   allTokens: {},
   // If is in the proccess of loading addresses transactions from the full node
   // When the request to load addresses fails this variable can continue true
@@ -287,13 +291,20 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
 
 /**
  * Got wallet history. Update wallet data on redux
+ * @param {string[]} action.payload.tokens
+ * @param {string} action.payload.currentAddress
+ * @param {{uid:string, name:string, symbol:string}[]} action.payload.registeredTokens
  */
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
   LOCAL_STORE.setWalletVersion(VERSION);
   const { tokens, registeredTokens, currentAddress } = action.payload;
-  const allTokens = new Set(tokens);
 
+  // Convert the tokens list to a new Set to ensure there are no duplicated tokens
+  const allTokens = new Set();
+  for (const key in tokens) {
+    allTokens.add(tokens[key]);
+  }
   return {
     ...state,
     loadingAddresses: false,
@@ -511,12 +522,18 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   return state;
 };
 
-/*
+/**
  * Used when registering or creating tokens to update the wallet token list.
-*/
+ * @param {Record<string,string>} state.allTokens - Current list of allTokens
+ * @param {string} action.payload.uid - UID of token to add
+ */
 export const onNewTokens = (state, action) => {
+  // Convert `allTokens` to a Set to prevent duplicates
+  const allTokensSet = new Set();
+  for (const token of Object.keys(state.allTokens)) {
+    allTokensSet.add(token);
+  }
   // Add new created token to the all tokens set
-  const allTokensSet = new Set(state.allTokens);
   allTokensSet.add(action.payload.uid);
 
   return {
