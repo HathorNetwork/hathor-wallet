@@ -96,37 +96,36 @@ function Root() {
       LOCAL_STORE.setNetwork('mainnet');
     }
 
-    // If there is no ledger connected, finish execution here
-    if (!IPC_RENDERER) {
-      return;
+    // If there is an `Inter Process Communication` channel available, initialize Ledger logic
+    if (IPC_RENDERER) {
+      // Registers the event handlers for the ledger
+
+      // Event called when user quits hathor app
+      IPC_RENDERER.on('ledger:closed', async () => {
+        const storage = LOCAL_STORE.getStorage();
+        if (
+          storage &&
+          await LOCAL_STORE.isLoaded() &&
+          await storage.isHardwareWallet()
+        ) {
+          dispatch(updateLedgerClosed(true));
+        }
+      });
+
+      IPC_RENDERER.on('ledger:manyTokenSignatureValid', async (_, arg) => {
+        const storage = LOCAL_STORE.getStorage();
+        if (
+          storage &&
+          await storage.isHardwareWallet()
+        ) {
+          // remove all invalid signatures
+          // arg.data is a list of uids with invalid signatures
+          arg.data.forEach(uid => {
+            tokensUtils.removeTokenSignature(uid.toString('hex'));
+          });
+        }
+      });
     }
-
-    // Registers the event handlers for the ledger
-    // Event called when user quits hathor app
-    IPC_RENDERER.on('ledger:closed', async () => {
-      const storage = LOCAL_STORE.getStorage();
-      if (
-        storage &&
-        await LOCAL_STORE.isLoaded() &&
-        await storage.isHardwareWallet()
-      ) {
-        dispatch(updateLedgerClosed(true));
-      }
-    });
-
-    IPC_RENDERER.on('ledger:manyTokenSignatureValid', async (_, arg) => {
-      const storage = LOCAL_STORE.getStorage();
-      if (
-        storage &&
-        await storage.isHardwareWallet()
-      ) {
-        // remove all invalid signatures
-        // arg.data is a list of uids with invalid signatures
-        arg.data.forEach(uid => {
-          tokensUtils.removeTokenSignature(uid.toString('hex'));
-        });
-      }
-    });
 
     // Removes the ledger event listeners on unmount, if necessary
     return () => {
