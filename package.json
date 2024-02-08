@@ -61,8 +61,8 @@
   "main": "public/electron.js",
   "homepage": "./",
   "scripts": {
-    "build-css": "sass --no-source-map src/index.scss src/index.css",
-    "watch-css": "npm run build-css && sass --no-source-map -w src/index.scss src/index.css",
+    "build-css": "sass --no-source-map src/index.module.scss src/index.css",
+    "watch-css": "npm run build-css && sass --no-source-map -w src/index.module.scss src/index.css",
     "start-js": "react-scripts --openssl-legacy-provider start",
     "start": "npm-run-all -p watch-css start-js",
     "build-js": "react-scripts --openssl-legacy-provider build",

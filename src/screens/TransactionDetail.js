@@ -12,7 +12,7 @@ import { t } from 'ttag';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
-import colors from '../index.scss';
+import { colors } from '../constants';
 import helpers from '../utils/helpers';
 import path from 'path';
 import { useHistory, useParams } from 'react-router-dom';
