@@ -18,10 +18,11 @@ import {
   DEFAULT_WALLET_SERVICE_WS_SERVERS,
   colors
 } from '../constants';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';
+import { isVersionAllowedUpdate } from "../actions";
 
 
 /**
@@ -32,6 +33,7 @@ import { useHistory } from 'react-router-dom';
 function Server() {
   const context = useContext(GlobalModalContext);
   const history = useHistory();
+  const dispatch  = useDispatch();
 
   /* newServer {boolean} If user selected checkbox that he wants to set a new server */
   const [newServer, setNewServer] = useState(false);
@@ -207,6 +209,9 @@ function Server() {
       setLoading(false);
       setErrorMessage(e.message);
     }
+
+    // Forces the validation of the allowed version
+    dispatch(isVersionAllowedUpdate({ allowed: undefined }));
   }
 
   /**
