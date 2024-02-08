@@ -171,7 +171,7 @@ function Root() {
       <Route exact path="/wallet/passphrase" children={<StartedComponent children={ <ChoosePassphrase />} loaded={true} />} />
       <Route exact path="/server" children={<StartedComponent children={ <Server /> } loaded={true} />} />
       <Route exact path="/transaction/:id" children={<StartedComponent children={ <TransactionDetail />} loaded={true} />} />
-      <Route exact path="/addresses" children={<StartedComponent children={ <AddressList /> } /> } loaded={true} />
+      <Route exact path="/addresses" children={<StartedComponent children={ <AddressList /> } loaded={true} /> } />
       <Route exact path="/new_wallet" children={<StartedComponent children={ <NewWallet />} loaded={false} />} />
       <Route exact path="/load_wallet" children={<StartedComponent children={ <LoadWallet /> } loaded={false} /> } />
       <Route exact path="/wallet_type" children={<StartedComponent children={<WalletType loaded={false} />} />} />
