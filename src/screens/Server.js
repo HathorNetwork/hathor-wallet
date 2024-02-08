@@ -209,9 +209,6 @@ function Server() {
       setLoading(false);
       setErrorMessage(e.message);
     }
-
-    // Forces the validation of the allowed version
-    dispatch(isVersionAllowedUpdate({ allowed: undefined }));
   }
 
   /**
@@ -257,6 +254,9 @@ function Server() {
      * reloads data and redirects to wallet screen
      */
     const executeServerChange = async (networkChanged) => {
+      // Forces the re-validation of the allowed version after server change
+      dispatch(isVersionAllowedUpdate({ allowed: undefined }));
+
       // We don't have PIN on hardware wallet
       const pin = isHardwareWallet ? null : pinRef.current.value;
       try {
