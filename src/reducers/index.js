@@ -1003,20 +1003,23 @@ export const onUpdateTxHistory = (state, action) => {
     return state;
   }
 
+  const newTokenHistoryData = [...tokenHistory.data];
   for (const [index, histTx] of tokenHistory.data.entries()) {
     if (histTx.tx_id === tx.tx_id) {
-      tokenHistory.data[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
+      newTokenHistoryData[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
       break;
     }
   }
+  const newTokenHistory = {
+    ...tokenHistory,
+    data: newTokenHistoryData,
+  };
 
   return {
     ...state,
     tokensHistory: {
       ...state.tokensHistory,
-      [tokenId]: {
-        ...tokenHistory,
-      }
+      [tokenId]: newTokenHistory,
     },
   };
 };
