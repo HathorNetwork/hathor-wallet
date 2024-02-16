@@ -30,6 +30,12 @@ A transaction is displayed.
 
 * Install node v20
 
+### To install dependencies
+
+```
+npm install
+```
+
 ### To Run
 
 ```
