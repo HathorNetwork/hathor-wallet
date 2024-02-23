@@ -10,10 +10,8 @@ import $ from 'jquery';
 import { t } from 'ttag'
 import { Link } from 'react-router-dom'
 import hathorLib from '@hathor/wallet-lib';
-import ModalRegisterNanoContract from '../../components/nano/ModalRegisterNanoContract';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { NANOCONTRACT_REGISTER_STATUS } from '../../sagas/nanoContract';
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 
 
