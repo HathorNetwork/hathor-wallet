@@ -268,7 +268,7 @@ export const NANO_CONTRACTS_FEATURE_TOGGLE = 'nano-contracts-desktop.rollout';
 export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
   [ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE]: false,
-  [NANO_CONTRACTS_FEATURE_TOGGLE]: true, // TODO move to false when feature is set on unleash
+  [NANO_CONTRACTS_FEATURE_TOGGLE]: false,
 };
 
 /**
