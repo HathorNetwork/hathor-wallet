@@ -5,30 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { t } from 'ttag'
 import $ from 'jquery';
 import BackButton from '../../components/BackButton';
 import ReactLoading from 'react-loading';
 import colors from '../../index.scss';
 import ModalChangeAddress from '../../components/nano/ModalChangeAddress';
-import { connect } from 'react-redux';
 import helpers from '../../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
-import { selectNC } from '../../actions/index';
-
-const mapDispatchToProps = dispatch => {
-  return {
-    selectNC: (data) => dispatch(selectNC(data)),
-  };
-};
-
-const mapStateToProps = (state) => {
-  return {
-    nanoContracts: state.nanoContracts,
-    tokenMetadata: state.tokenMetadata,
-  };
-};
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { get } from 'lodash';
 
 
 /**
@@ -36,18 +24,30 @@ const mapStateToProps = (state) => {
  *
  * @memberof Screens
  */
-class NanoContractDetail extends React.Component {
+function NanoContractDetail(props) {
 
-  state = {
-    loading: true,
-    data: null,
-    errorMessage: null,
-  }
+  const { nanoContracts, tokenMetadata } = useSelector((state) => {
+    return {
+      nanoContracts: state.nanoContracts,
+      tokenMetadata: state.tokenMetadata
+    }
+  });
 
-  componentDidMount = () => {
-    const nc = this.props.nanoContracts[this.props.match.params.nc_id];
-    this.loadNCData(nc.address);
-  }
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const ncId = props.match.params.nc_id;
+  const nc = nanoContracts[ncId];
+
+  // loading {boolean} Bool to show/hide loading element
+  const [loading, setLoading] = useState(true);
+  // data {Object} Nano contract loaded data
+  const [data, setData] = useState(null);
+  // errorMessage {string} Message to show when error happens on the form
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    loadNCData();
+  }, []);
 
   /**
    * Method executed when link to execute a method is clicked
@@ -55,9 +55,17 @@ class NanoContractDetail extends React.Component {
    * @param {Object} e Event emitted by the link clicked
    * @param {String} method Method to be executed
    */
-  executeMethod = (e, method) => {
+  const executeMethod = (e, method) => {
     e.preventDefault();
-    this.props.history.push(`/nano_contract/${this.props.match.params.nc_id}/execute_method/${method}`);
+    history.push({
+      pathname: '/nano_contract/execute_method/',
+      state: {
+        blueprintInformation: nc.blueprint,
+        method,
+        ncId,
+        address: nc.address,
+      },
+    });
   }
 
   /**
@@ -65,104 +73,102 @@ class NanoContractDetail extends React.Component {
    *
    * @param {Object} e Event emitted by the link clicked
    */
-  changeAddress = (e) => {
+  const changeAddress = (e) => {
     e.preventDefault();
     $('#changeAddressModal').modal('show');
   }
 
-  loadNCData = (address) => {
-    this.setState({ loading: true, data: null });
-    hathorLib.ncApi.getNanoContractState(this.props.match.params.nc_id, address, (data) => {
-      this.setState({ loading: false, data });
-      this.props.selectNC({ ...data, address, nc_id: this.props.match.params.nc_id });
-    }, (e) => {
+  const loadNCData = async () => {
+    setLoading(true);
+    setData(null);
+    try {
+      const state = await hathorLib.ncApi.getNanoContractState(ncId, Object.keys(nc.blueprint.attributes), [], []);
+      setLoading(false);
+      setData(state);
+    } catch(e) {
       // Error in request
-      this.setState({ loading: false, errorMessage: 'Error getting nano contract state.' });
+      setLoading(false);
+      setErrorMessage(t`Error getting nano contract state.`);
+    };
+  }
+
+  const onAddressChanged = (newAddress) => {
+    loadNCData(newAddress);
+  }
+
+  const renderBody = () => {
+    if (loading) {
+      return <ReactLoading type='spin' color={colors.purpleHathor} delay={500} />;
+    }
+
+    if (errorMessage) {
+      return <p className='text-danger mb-4'>{errorMessage}</p>;
+    }
+
+    return renderNCData();
+  }
+
+  const renderNanoAttributes = () => {
+    return Object.keys(data.fields).map((field) => {
+      const value = get(data.fields[field], 'value', null);
+      if (!value) {
+        // Error getting field
+        // TODO dict fields are coming with error, we should send the request with the
+        // specific key to filter the dict field
+        return null;
+      }
+
+      // Some fields should be better parsed, e.g., timestamp, address
+      // however we don't have a simple and generic way to knowing it
+      // this was discussed and we will have this in the future, so
+      // for now we keep this UI and when we have this feature in the
+      // hathor-core, we can improve the user UI
+      return <p key={field}><strong>{field}: </strong>{value}</p>;
     });
   }
 
-  onAddressChanged = (newAddress) => {
-    this.loadNCData(newAddress);
-  }
-
-  render() {
-    const nc = this.props.nanoContracts[this.props.match.params.nc_id];
-
-    const renderBody = () => {
-      if (this.state.loading) {
-        return <ReactLoading type='spin' color={colors.purpleHathor} delay={500} />;
-      }
-
-      if (this.state.errorMessage) {
-        return <p className='text-danger mb-4'>{this.state.errorMessage}</p>;
-      }
-
-      return renderNCData();
-    }
-
-    const isNFT = (uid) => {
-      return helpers.isTokenNFT(uid, this.props.tokenMetadata);
-    }
-
-    const renderBets = () => {
-      if (!this.state.data.nc_address_data.bets) {
-        return;
-      }
-
-      return Object.keys(this.state.data.nc_address_data.bets).map((result) => {
-        return (
-          <p key={result}>{result}: {helpers.renderValue(this.state.data.nc_address_data.bets[result], isNFT(this.state.data.nc_data.token))}</p>
-        );
-      });
-    }
-
-    const renderNCData = () => {
-      const isTokenNFT = isNFT(this.state.data.nc_data.token);
+  const renderNanoMethods = () => {
+    return Object.keys(nc.blueprint.public_methods).filter((method) =>
+      method !== 'initialize'
+    ).map((method) => {
       return (
-        <div className="nc-detail-wrapper">
-          <p><strong>Blueprint: </strong>{nc.blueprint.name}</p>
-          <p><strong>Address: </strong>{nc.address} (<a href="true" onClick={this.changeAddress}>{t`Change`}</a>)</p>
-          <p><strong>Token UID: </strong>{this.state.data.nc_data.token}</p>
-          <p><strong>Total deposited: </strong>{helpers.renderValue(this.state.data.nc_data.total, isTokenNFT)}</p>
-          <p><strong>Last offer date: </strong>{hathorLib.dateFormatter.parseTimestamp(this.state.data.nc_data.last_offer)}</p>
-          <p><strong>Final result: </strong>{this.state.data.nc_data.final_result || ' - '}</p>
-          <hr />
-          <p><strong>Bets: </strong>{!this.state.data.nc_address_data.bets && ' - '}</p>
-          {renderBets()}
-          <p><strong>Withdrawal: </strong>{this.state.data.nc_address_data.withdrawals ? helpers.renderValue(this.state.data.nc_address_data.withdrawals, isTokenNFT) : ' - '}</p>
-          <hr />
-          <div>
-            <p className="text-center mb-4"><strong>Available actions:</strong></p>
-            <div className="d-flex flex-row justify-content-around mt-3">
-              <div>
-                <a href="true" onClick={(e) => this.executeMethod(e, 'make_a_bet')}>{t`Deposit`}</a>
-              </div>
-              <div>
-                <a href="true" onClick={(e) => this.executeMethod(e, 'withdraw')}>{t`Withdraw`}</a>
-              </div>
-              <div>
-                <a href="true" onClick={(e) => this.executeMethod(e, 'set-result')}>{t`Set result`}</a>
-              </div>
-            </div>
-          </div>
+        <div key={method}>
+          <a href="true" onClick={(e) => executeMethod(e, method)}>{method}</a>
         </div>
       );
-    }
+    });
+  }
 
+  const renderNCData = () => {
     return (
-      <div className="content-wrapper">
-        <BackButton {...this.props} />
-        <h3 className="mt-4">{t`Nano Contract Detail`}</h3>
-        <div className="mt-5">
-          <p><strong>ID: </strong>{nc.id}</p>
-          <div className="d-flex flex-row justify-content-center mt-5">
-            {renderBody()}
+      <div className="nc-detail-wrapper">
+        <p><strong>Blueprint: </strong>{nc.blueprint.name}</p>
+        <p><strong>Address: </strong>{nc.address} (<a href="true" onClick={changeAddress}>{t`Change`}</a>)</p>
+        {renderNanoAttributes()}
+        <hr />
+        <div>
+          <p className="text-center mb-4"><strong>Available methods:</strong></p>
+          <div className="d-flex flex-row justify-content-around mt-3">
+            {renderNanoMethods()}
           </div>
         </div>
-        <ModalChangeAddress nanoContractID={this.props.match.params.nc_id} onAddressChanged={this.onAddressChanged} />
       </div>
     );
   }
+
+  return (
+    <div className="content-wrapper">
+      <BackButton />
+      <h3 className="mt-4">{t`Nano Contract Detail`}</h3>
+      <div className="mt-5">
+        <p><strong>ID: </strong>{nc.id}</p>
+        <div className="d-flex flex-row justify-content-center mt-5">
+          {renderBody()}
+        </div>
+      </div>
+      <ModalChangeAddress nanoContractID={ncId} onAddressChanged={onAddressChanged} />
+    </div>
+  );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(NanoContractDetail);
+export default NanoContractDetail;

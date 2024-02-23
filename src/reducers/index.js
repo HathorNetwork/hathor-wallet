@@ -133,14 +133,9 @@ const initialState = {
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
-  // Full node version data from /version API
-  fullNodeVersionData: {},
+  // Registered nano contracts in the wallet
+  // { id: string, address: string, history: Array[Object] }
   nanoContracts: {},
-  // Nano contract data after a NC is selected
-  // and we get the information from the full node
-  // Useful for executing actions for the NC without
-  // requesting data from the full node again
-  selectedNC: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -214,16 +209,12 @@ const rootReducer = (state = initialState, action) => {
       return resetSelectedTokenIfNeeded(state, action);
     case 'set_ledger_was_closed':
       return Object.assign({}, state, { ledgerWasClosed: action.payload });
-    case 'set_full_node_version_data':
-      return setFullNodeVersionData(state, action);
     case 'save_nano_contract':
       return onSaveNanoContract(state, action);
     case 'save_nano_contract_history':
       return onSaveNanoContractHistory(state, action);
     case 'edit_address_nano_contract':
       return onEditAddressNanoContract(state, action);
-    case 'select_nano_contract':
-      return onSelectNanoContract(state, action);
     // TODO: Refactor all the above to use `types.` syntax
     case types.SET_SERVER_INFO:
       return onSetServerInfo(state, action);
@@ -556,17 +547,6 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
 
   return state;
 };
-
-/*
- * Used when the wallet connects to a new full node and it save the new version data
-*/
-export const setFullNodeVersionData = (state, action) => {
-  return {
-    ...state,
-    fullNodeVersionData: action.payload,
-  };
-};
-
 
 /*
  * Used when registering or creating tokens to update the wallet token list.
@@ -1147,17 +1127,5 @@ export const onWalletStateChanged = (state, { payload }) => ({
   ...state,
   walletState: payload,
 });
-
-/*
- * Used when selecting a Nano Contract
-*/
-export const onSelectNanoContract = (state, action) => {
-  const data = action.payload;
-
-  return {
-    ...state,
-    selectedNC: data,
-  };
-};
 
 export default rootReducer;

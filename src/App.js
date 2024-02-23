@@ -12,7 +12,7 @@ import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
 import BlueprintList from './screens/nano/BlueprintList';
 import NanoContractList from './screens/nano/NanoContractList';
-import NanoContractCreate from './screens/nano/NanoContractCreate';
+import NanoContractSelectBlueprint from './screens/nano/NanoContractSelectBlueprint';
 import NanoContractDetail from './screens/nano/NanoContractDetail';
 import NanoContractExecuteMethod from './screens/nano/NanoContractExecuteMethod';
 import CreateNFT from './screens/CreateNFT';
@@ -47,7 +47,6 @@ import store from './store/index';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { IPC_RENDERER } from './constants';
-import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
 import { updateLedgerClosed } from './actions/index';
 import {WALLET_STATUS} from './sagas/wallet';
@@ -136,9 +135,9 @@ class Root extends React.Component {
 
     return (
       <Switch>
-        <StartedRoute exact path="/nano_contract/:nc_id/execute_method/:method" component={NanoContractExecuteMethod} loaded={true} />
+        <StartedRoute exact path="/nano_contract/execute_method/" component={NanoContractExecuteMethod} loaded={true} />
         <StartedRoute exact path="/nano_contract/detail/:nc_id" component={NanoContractDetail} loaded={true} />
-        <StartedRoute exact path="/nano_contract/create/" component={NanoContractCreate} loaded={true} />
+        <StartedRoute exact path="/nano_contract/select_blueprint/" component={NanoContractSelectBlueprint} loaded={true} />
         <StartedRoute exact path="/nano_contract/" component={NanoContractList} loaded={true} />
         <StartedRoute exact path="/nft" component={NFTList} loaded={true} />
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />

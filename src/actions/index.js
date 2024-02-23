@@ -508,13 +508,6 @@ export const changeWalletState = (newState) => ({
 });
 
 /**
- * This will set the full node data after we get it from /version API
- *
- * @param {Object} data Object with response data from full node /version
- */
-export const setFullNodeVersionData = data => ({ type: "set_full_node_version_data", payload: data });
-
-/**
  * Save Nano Contract in redux
  *
  * @param {string} id Nano contract id
@@ -538,10 +531,3 @@ export const saveNCHistory = (id, history) => ({ type: "save_nano_contract_histo
  * @param {string} address New address of the nano contract
  */
 export const editAddressNC = (id, address) => ({ type: "edit_address_nano_contract", payload: { id, address } });
-
-/**
- * Save NC data from selected NC
- *
- * @param {Object} data Select NC data
- */
-export const selectNC = (data) => ({ type: "select_nano_contract", payload: data });

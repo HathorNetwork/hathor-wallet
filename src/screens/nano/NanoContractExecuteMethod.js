@@ -5,266 +5,314 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { t } from 'ttag'
 import BackButton from '../../components/BackButton';
-import ModalSendTx from '../../components/ModalSendTx';
-import $ from 'jquery';
-import { Serializer, bufferUtils, scriptsUtils, transactionUtils, transaction as transactionOld, constants, helpersUtils, wallet as walletLib, BetTransactionBuilder, SendTransaction, Address, config, Input, Output, P2PKH, P2SH } from '@hathor/wallet-lib';
-import { HDPrivateKey, crypto } from 'bitcore-lib';
-import { connect } from "react-redux";
-import { saveNC } from '../../actions/index';
 import InputNumber from '../../components/InputNumber';
-import wallet from '../../utils/wallet';
-import { replace, capitalize } from 'lodash';
-import buffer from 'buffer';
+import colors from '../../index.scss';
+import ReactLoading from 'react-loading';
+import hathorLib from '@hathor/wallet-lib';
+import { useHistory } from 'react-router-dom';
+import { get, pullAt } from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
+import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
+import { saveNC } from '../../actions/index';
 
-const mapStateToProps = (state) => {
-  return {
-    selectedNC: state.selectedNC,
-    wallet: state.wallet,
-  };
-};
 
 /**
  * Execute a nano contract method
  *
  * @memberof Screens
  */
-class NanoContractExecuteMethod extends React.Component {
-  valueRef = React.createRef();
-  resultRef = React.createRef();
+function NanoContractExecuteMethod(props) {
+  const data = props.location.state;
+  const wallet = useSelector(state => state.wallet);
+  const formExecuteMethodRef = useRef(null);
+  const addressRef = useRef(null);
+  const formRefs = [];
+  const dispatch = useDispatch();
 
-  /**
-   * Opens PIN modal if form is valid
-   */
-  onExecuteMethod = () => {
-    if (!this.formValid()) {
+  const [actionTypes, setActionTypes] = useState([]);
+  // Map from index to select ref of actions
+  const actionSelectRefs = useRef(null);
+
+  const history = useHistory();
+
+  const [loading, setLoading] = useState(false);
+
+  const globalModalContext = useContext(GlobalModalContext);
+
+  const getActionSelectArray = () => {
+    if (!actionSelectRefs.current) {
+      // Initialize the array on first usage.
+      actionSelectRefs.current = [];
+    }
+    return actionSelectRefs.current;
+  }
+
+  const executeMethod = () => {
+    // TODO Validate form
+    // TODO Handle error when creating tx
+    const isValid = formExecuteMethodRef.current.checkValidity();
+    if (!isValid) {
+      formExecuteMethodRef.current.classList.add('was-validated')
       return;
     }
 
-    $('#pinModal').modal('show');
+    globalModalContext.showModal(MODAL_TYPES.PIN, {
+      onSuccess: ({pin}) => {
+        globalModalContext.showModal(MODAL_TYPES.SEND_TX, {
+          pin,
+          prepareSendTransaction: prepareSendTransaction,
+          onSendSuccess: onMethodExecuted,
+          title: data.ncId ? t`Executing Nano Contract Method` : t`Creating Nano Contract`,
+        });
+      }
+    })
   }
 
   /**
-   * Validates if the create NC form is valid
-   */
-  formValid = () => {
-    const isValid = this.refs.formExecuteMethod.checkValidity();
-    if (!isValid) {
-      this.refs.formExecuteMethod.classList.add('was-validated')
-    }
-
-    // TODO validate max value
-
-    return isValid;
-  }
-
-  prepareSendTransactionSetResult = async (pin) => {
-    const ncId = this.props.match.params.nc_id;
-    const ncAddress = this.props.selectedNC.address;
-    const result = this.refs.result.value;
-    const oracleScriptHex = this.props.selectedNC.nc_data.oracle;
-
-    // TODO get this value from input if not an address of the wallet
-    const oracleInputData = null;
-
-    return this.props.wallet.setBetResult(ncId, ncAddress, result, oracleScriptHex, oracleInputData, { pinCode: pin });
-  }
-
-  prepareSendTransactionBet = async (pin) => {
-    const ncId = this.props.match.params.nc_id;
-    const ncAddress = this.props.selectedNC.address;
-    const betAddress = this.refs.address.value;
-    const result = this.refs.result.value;
-
-    const amountStr = (this.valueRef.current.value || "").replace(/,/g, '');
-    //const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
-    // TODO handle NFT as well
-    const amount = wallet.decimalToInteger(amountStr);
-
-    // XXX Get token from nc
-    return this.props.wallet.makeBet(ncId, ncAddress, betAddress, result, amount, '00', { pinCode: pin });
-  }
-
-  prepareSendTransactionWithdraw = async (pin) => {
-    const ncId = this.props.match.params.nc_id;
-    const ncAddress = this.props.selectedNC.address;
-
-    const amountStr = (this.valueRef.current.value || "").replace(/,/g, '');
-    //const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
-    // TODO handle NFT as well
-    const amount = wallet.decimalToInteger(amountStr);
-    // TODO handle custom token
-    const tokenData = 0;
-
-    return this.props.wallet.makeWithdrawal(ncId, ncAddress, amount, tokenData, { pinCode: pin });
-  }
-
-
-  /**
-   * Prepare to create NC method execution transaction data after PIN is validated
+   * Method executed if transaction with nano contract method execution succeeds
    *
-   * @param {String} pin PIN written by the user
-   *
-   * @return {hathorLib.SendTransaction} SendTransaction object
+   * @param {Object} tx Nano contract transaction created
    */
-  prepareSendTransaction = async (pin) => {
-    const method = this.props.match.params.method;
-
-    if (method === 'make_a_bet') {
-      return this.prepareSendTransactionBet(pin);
+  const onMethodExecuted = (tx) => {
+    if (!data.ncId) {
+      // If it's a nano contract creation, we must save this NC in redux
+      const address = addressRef.current.value;
+      dispatch(saveNC(tx.hash, data.blueprintInformation, address));
     }
-
-    if (method === 'set-result') {
-      return this.prepareSendTransactionSetResult(pin);
-    }
-
-    if (method === 'withdraw') {
-      return this.prepareSendTransactionWithdraw(pin);
-    }
-  }
-
-  isOracleScriptMyAddress = () => {
-    const parsedScript = this.props.wallet.parseOracleScript(this.props.selectedNC.nc_data.oracle);
-
-    // If script couldn't be parsed, not my address
-    if (parsedScript === null) {
-      return false;
-    }
-
-    // If script is not P2PKH and not P2SH, not my address
-    if (!(parsedScript instanceof P2PKH || parsedScript instanceof P2SH)) {
-      return false;
-    }
-
-    return this.props.wallet.isAddressMine(parsedScript.address.base58);
+    const ncId = data.ncId ? data.ncId : tx.hash;
+    history.push(`/nano_contract/detail/${ncId}`);
   }
 
   /**
-   * Method executed if NC method is executed with success
-   *
-   * @param {Object} tx Tx created from method execution
    */
-  onMethodExecuted = (tx) => {
-    this.props.history.goBack();
+  const prepareSendTransaction = async (pin) => {
+    const ncData = {};
+    let address;
+    if (data.ncId) {
+      address = data.address;
+      ncData.ncId = data.ncId;
+    } else {
+      ncData.blueprintId = data.blueprintInformation.id;
+      address = addressRef.current.value;
+    }
+
+    const argValues = [];
+    const args = get(data.blueprintInformation.public_methods, `${data.method}.args`, []);
+    for (let i=0; i<args.length; i++) {
+      const value = formRefs[i].current.value;
+      // Check optional type
+      // Optional fields end with ?
+      const splittedType = arg.type.split('?');
+      const isOptional = splittedType.length === 2;
+      if (isOptional && !value) {
+        // It's an optional field and the data is null, so it's fine
+        argValues.push(null);
+        continue;
+      }
+      let typeToCheck = splittedType[0];
+      if (typeToCheck === 'int') {
+        argValues.push(parseInt(value, 10));
+        continue;
+      }
+
+      if (typeToCheck === 'float') {
+        argValues.push(parseFloat(value));
+        continue;
+      }
+
+      argValues.push(value);
+
+    }
+
+    ncData.args = argValues;
+
+    // TODO handle actions
+
+    return await wallet.createNanoContractTransaction(data.method, address, ncData, { pinCode: pin });
   }
 
-  render() {
-    const method = this.props.match.params.method;
-
-    const renderBet = () => {
-      // TODO render input differently if token is an NFT
-      return (
-        <div>
-          <div className="row">
-            <div className="form-group col-6">
-              <label>{t`Amount to bet`}</label>
-              <InputNumber key="amount-to-bet" ref={this.valueRef} placeholder={helpersUtils.prettyValue(0)} className="form-control col-2" />
-            </div>
-          </div>
-          <div className="row">
-            <div className="form-group col-6">
-              <label>{t`Bet result`}</label>
-              <input required ref="result" type="text" className="form-control" />
-            </div>
-          </div>
-          <div className="row">
-            <div className="form-group col-6">
-              <label>{t`Address`}</label>
-              <input required ref="address" type="text" placeholder={t`Address to withdraw in case of success`} className="form-control" />
-            </div>
-          </div>
-        </div>
-      );
+  const renderInput = (name, type) => {
+    // Check optional type
+    // Optional fields end with ?
+    const splittedType = type.split('?');
+    const isOptional = splittedType.length === 2;
+    let typeToRender = splittedType[0];
+    if (type === 'bytes') {
+      // Bytes arguments are sent in hex
+      typeToRender = 'str';
     }
 
-    const renderOracleSignatureMyAddress = () => {
-      return (
-        <div className="form-group col-6">
-          <label>{t`Oracle signature`}</label>
-          <p>{t`The oracle script is an address of this wallet, the result will be signed automatically.`}</p>
-        </div>
-      );
+    if (type.startsWith('SignedData')) {
+      typeToRender = 'str';
     }
 
-    const renderOracleCustomScript = () => {
-      return (
-        <div className="form-group col-6">
-          <label>{t`Oracle signed input`}</label>
-          <input required ref="oracleSignedInput" type="text" placeholder={t`The signed input result to check with the oracle script`} className="form-control" />
-        </div>
-      );
+    let inputType;
+    if (typeToRender === 'int' || typeToRender === 'float') {
+      inputType = 'number';
+    } else {
+      inputType = 'text';
     }
 
-    const renderSetResult = () => {
-      return (
-        <div>
-          <div className="row">
-            <div className="form-group col-6">
-              <label>{t`Final result`}</label>
-              <input required ref={this.resultRef} type="text" className="form-control" />
-            </div>
-          </div>
-          <div className="row">
-            {this.isOracleScriptMyAddress() ? renderOracleSignatureMyAddress() : renderOracleCustomScript()}
-          </div>
-        </div>
-      );
-    }
-
-    const renderWithdraw = () => {
-      // TODO render input differently if token is an NFT
-      // TODO show correct available amount to withdraw
-      return (
-        <div>
-          <div className="row">
-            <div className="form-group col-12">
-              <label>{t`Amount available to withdraw: `}100.00</label>
-            </div>
-          </div>
-          <div className="row">
-            <div className="form-group col-6">
-              <label>{t`Amount to withdraw`}</label>
-              <InputNumber key="amount-to-bet" ref={this.valueRef} placeholder={helpersUtils.prettyValue(0)} className="form-control col-2" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    const renderForm = () => {
-      if (method === 'make_a_bet') {
-        return renderBet();
-      }
-
-      if (method === 'set-result') {
-        return renderSetResult();
-      }
-
-      if (method === 'withdraw') {
-        return renderWithdraw();
-      }
-    }
-
-    const prettyMethod = (method) => {
-      return capitalize(replace(method, /_|-/g, ' '));
-    }
+    const ref = useRef(null);
+    formRefs.push(ref);
 
     return (
-      <div className="content-wrapper">
-        <BackButton {...this.props} />
-        <h4 className="mt-4">{t`Method: `} {prettyMethod(method)}</h4>
-        <div>
-          <form ref="formExecuteMethod" id="formExecuteMethod">
-            {renderForm()}
-            <button type="button" className="mt-3 btn btn-hathor" onClick={this.onExecuteMethod}>Execute</button>
-          </form>
+      <div className="row" key={name}>
+        <div className="form-group col-6">
+          <label>{name}</label>
+          <input required={!isOptional} ref={ref} type={inputType} className="form-control" />
         </div>
-        <ModalSendTx prepareSendTransaction={this.prepareSendTransaction} onSendSuccess={this.onMethodExecuted} title="Executing method" />
       </div>
     );
   }
+
+  const renderMethodInputs = (method) => {
+    const args = get(data.blueprintInformation.public_methods, `${method}.args`, []);
+    return args.map(arg =>
+      renderInput(arg.name, arg.type)
+    );
+  }
+
+  const renderChooseAddress = () => {
+    return (
+      <div className="row">
+        <div className="form-group col-6">
+          <label>Address to Sign</label>
+          <input required ref={addressRef} type="text" className="form-control" />
+        </div>
+      </div>
+    );
+  }
+
+  const renderAddressInForm = () => {
+    if (data.ncId) {
+      return <p><strong>Address To Sign: </strong>{data.address}</p>
+    } else {
+      return renderChooseAddress();
+    }
+  }
+
+  const changeSelect = (index) => {
+    const actionSelects = getActionSelectArray();
+    const selectRef = actionSelects[index];
+
+    actionTypes[index] = selectRef.value;
+    setActionTypes([...actionTypes]);
+  }
+
+  const renderActionInputs = (index) => {
+    const type = actionTypes[index];
+    if (!type) {
+      return null;
+    }
+
+    // TODO add refs
+    const renderCommon = () => {
+      return (
+        <div className="d-flex">
+          <div className="col-8">
+            <label>{t`Token`}</label>
+            <input required type="text" className="form-control" />
+          </div>
+          <div className="col-4">
+            <label>{t`Amount`}</label>
+            <InputNumber required placeholder={hathorLib.numberUtils.prettyValue(0)} className="form-control output-value" />
+          </div>
+        </div>
+      );
+    };
+
+    const renderRemoveButton = () => {
+      return (
+        <div className="align-items-start d-flex">
+          <button type="button" className="text-danger remove-action-btn" onClick={() => removeAction(index)}>{t`Remove`}</button>
+        </div>
+      )
+    }
+
+    if (type === "withdrawal") {
+      return (
+        <div className="d-flex">
+          {renderCommon()}
+          <div className="ml-4 col-6">
+            <label>{t`Address`}</label>
+            <input required type="text" className="form-control" />
+          </div>
+          {renderRemoveButton()}
+        </div>
+      );
+    }
+
+    return (
+      <div className="d-flex">
+        {renderCommon()}
+        {renderRemoveButton()}
+      </div>
+    );
+  }
+
+  const addAction = (e) => {
+    e.preventDefault();
+    actionTypes.push("");
+    setActionTypes([...actionTypes]);
+  }
+
+  const removeAction = (index) => {
+    pullAt(actionTypes, [index]);
+    const actionSelects = getActionSelectArray();
+    pullAt(actionSelects, [index]);
+    setActionTypes([...actionTypes]);
+  }
+
+  const renderActions = () => {
+    return actionTypes.map((type, index) => {
+      return (
+        <div className="d-flex flex-row mb-4 actions-wrapper" key={index}>
+          <div className="d-flex flex-column justify-content-between">
+            <label>{t`Type`}</label>
+            <select value={type} ref={(node) => {
+                      const actionSelects = getActionSelectArray();
+                      if (node) {
+                        actionSelects[index] = node;
+                      }
+                    }}
+                    onChange={() => changeSelect(index)}>
+              <option value=""> -- </option>
+              <option value="deposit">Deposit</option>
+              <option value="withdrawal">Withdrawal</option>
+            </select>
+          </div>
+          {renderActionInputs(index)}
+        </div>
+      );
+    });
+  }
+
+  return (
+    <div className="content-wrapper">
+      <BackButton />
+      <h4 className="my-4">{data.ncId ? t`Execute Method` : t`Create Nano Contract`}</h4>
+      <div>
+        <form ref={formExecuteMethodRef} id="formExecuteMethod">
+          <p><strong>Method: </strong>{data.method}</p>
+          {renderAddressInForm()}
+          <label className="mb-3 mt-3"><strong>Method Parameters</strong></label>
+          {renderMethodInputs(data.method)}
+          <div className="d-flex flex-row mb-4">
+            <a href="true" onClick={addAction}>{t`Add action`}</a>
+          </div>
+          <div className="d-flex flex-column">
+            {renderActions()}
+          </div>
+          {loading && <ReactLoading type='spin' color={colors.purpleHathor} width={32} height={32} />}
+          <button type="button" className="mt-3 btn btn-hathor" onClick={executeMethod}>{data.ncId ? t`Execute Method` : t`Create`}</button>
+        </form>
+      </div>
+    </div>
+  );
 }
 
-export default connect(mapStateToProps)(NanoContractExecuteMethod);
+export default NanoContractExecuteMethod;

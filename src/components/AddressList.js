@@ -19,7 +19,7 @@ import PropTypes from 'prop-types';
  *
  * @memberof Screens
  */
-function AddressList() {
+function AddressList(props) {
   const wallet = useSelector(state => state.wallet);
 
   const alertErrorRef = useRef(null);
@@ -44,7 +44,7 @@ function AddressList() {
    * @return {Number} Total number of pages of the list
    */
   const getTotalPages = (array) => {
-    return Math.ceil(array.length / this.props.count);
+    return Math.ceil(array.length / props.count);
   }
 
   useEffect(() => {
@@ -138,7 +138,7 @@ function AddressList() {
    */
   const goToAddressSearch = (e, address) => {
     e.preventDefault();
-    this.props.onAddressClick(address);
+    props.onAddressClick(address);
   }
 
   const loadPagination = () => {
@@ -155,21 +155,21 @@ function AddressList() {
   const renderSearch = () => {
     return (
       <div className="d-flex flex-row align-items-center col-12 col-md-6">
-        <input className="form-control mr-2" type="search" placeholder={t`Search address`} aria-label="Search" ref="txSearchRef" onKeyUp={handleKeyUp} />
+        <input className="form-control mr-2" type="search" placeholder={t`Search address`} aria-label="Search" ref={txSearchRef} onKeyUp={handleKeyUp} />
         <i className="fa fa-search pointer" onClick={search}></i>
       </div>
     );
   }
 
   const renderData = () => {
-    const startIndex = (page - 1) * this.props.count;
-    const endIndex = startIndex + this.props.count;
+    const startIndex = (page - 1) * props.count;
+    const endIndex = startIndex + props.count;
     return filteredAddresses.slice(startIndex, endIndex).map((addressObj) => {
       return (
         <tr key={addressObj.address}>
           <td><a href="true" onClick={(e) => goToAddressSearch(e, addressObj.address)}>{addressObj.address}</a></td>
           <td>{addressObj.index}</td>
-          {this.props.showNumberOfTransaction && <td className="number">{addressObj.transactions}</td>}
+          {props.showNumberOfTransaction && <td className="number">{addressObj.transactions}</td>}
         </tr>
       )
     });
@@ -186,7 +186,7 @@ function AddressList() {
             <tr>
               <th>{t`Address`}</th>
               <th>{t`Index`}</th>
-              {this.props.showNumberOfTransaction && <th className="number">{t`Number of transactions`}</th>}
+              {props.showNumberOfTransaction && <th className="number">{t`Number of transactions`}</th>}
             </tr>
           </thead>
           <tbody>

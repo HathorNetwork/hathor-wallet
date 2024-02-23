@@ -156,18 +156,15 @@ function Server() {
     try {
       const versionData = await wallet.getVersionData();
 
-      // Store full node version data
-      // We don't set redux state yet because the server change might
-      // not be completed if it's testnet (the user needs to confirm the change in the screen)
-      this.fullNodeVersionData = versionData;
-
       if (versionData.network !== 'mainnet') {
         const network = versionData.network;
         let newSelectedNetwork = network;
 
-        // Network might be 'testnet-golf' or 'testnet-charlie'
-        if (network.startsWith('testnet')) {
+        // Network might be 'testnet-golf', 'testnet-charlie', 'nano-testnet-alpha'
+        if (network.includes('testnet')) {
           newSelectedNetwork = 'testnet';
+        } else {
+          newSelectedNetwork = 'privatenet';
         }
 
         // Go back to the previous server

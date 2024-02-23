@@ -13,6 +13,8 @@ import Version from './Version';
 import ServerStatus from './ServerStatus';
 import helpers from '../utils/helpers';
 import { useSelector } from 'react-redux';
+import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACTS_FEATURE_TOGGLE } from '../constants';
+import { get } from 'lodash';
 
 /**
  * Component that shows a navigation bar with the menu options
@@ -21,7 +23,9 @@ import { useSelector } from 'react-redux';
  */
 function Navigation() {
   const useAtomicSwap = useSelector(state => state.useAtomicSwap);
-  const fullNodeVersionData = useSelector(state => state.fullNodeVersionData);
+  const featureToggles = useSelector(state => state.featureToggles);
+  const nanoEnabledDefault = get(FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACTS_FEATURE_TOGGLE, false)
+  const nanoEnabled = get(featureToggles, NANO_CONTRACTS_FEATURE_TOGGLE, nanoEnabledDefault);
 
   /**
    * Method called when user clicked on Explorer menu
@@ -34,15 +38,11 @@ function Navigation() {
   }
 
   const renderNCNavigation = () => {
-    if (fullNodeVersionData.capabilities && fullNodeVersionData.capabilities.indexOf('nano-contract') > -1) {
-      return (
-        <li className="nav-item">
-          <NavLink to="/nano_contract/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Nano Contract`}</NavLink>
-        </li>
-      );
-    }
-
-    return null;
+    return (
+      <li className="nav-item">
+        <NavLink to="/nano_contract/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Nano Contract`}</NavLink>
+      </li>
+    );
   }
 
   return (
@@ -76,7 +76,7 @@ function Navigation() {
             <li className="nav-item">
               <a className="nav-link" href="true" onClick={goToExplorer}>{t`Public Explorer`}</a>
             </li>
-            {renderNCNavigation()}
+            {nanoEnabled && renderNCNavigation()}
           </ul>
           <div className="navbar-right d-flex flex-row align-items-center navigation-search">
             <ServerStatus />
