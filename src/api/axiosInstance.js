@@ -47,6 +47,11 @@ const createRequestInstance = (resolve, timeout) => {
     // Adding conditional because if the server forgets to send back the CORS
     // headers, error.response will be undefined
     const statusCode = error.response ? error.response.status : -1;
+    if (statusCode < 500) {
+      // This request error is to handle problems in the server, so the user
+      // can retry a request. So 404 and 400 errors shouldn't show the error modal
+      return error.response;
+    }
     store.dispatch(updateRequestErrorStatusCode(statusCode));
     // Save request config in redux
     let config = error.config;
