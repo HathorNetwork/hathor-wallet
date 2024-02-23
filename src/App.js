@@ -11,6 +11,7 @@ import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
 import NanoContractList from './screens/nano/NanoContractList';
+import NanoContractSelectBlueprint from './screens/nano/NanoContractSelectBlueprint';
 import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import TransactionDetail from './screens/TransactionDetail';
@@ -187,6 +188,7 @@ function Root() {
   return (
     <Routes>
       <Route path="/nano_contract" element={<StartedComponent children={ <NanoContractList />} loaded={true} />} />
+      <Route path="/nano_contract/select_blueprint/" element={<StartedComponent children={ <NanoContractSelectBlueprint />} loaded={true} />} />
       <Route path="/nft" element={<StartedComponent children={ <NFTList />} loaded={true} />} />
       <Route path="/create_token" element={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
       <Route path="/create_nft" element={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
