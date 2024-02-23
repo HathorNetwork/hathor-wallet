@@ -506,3 +506,12 @@ export const changeWalletState = (newState) => ({
   type: types.WALLET_CHANGE_STATE,
   payload: newState,
 });
+
+/**
+ * Save Nano Contract in redux
+ *
+ * @param {string} id Nano contract id
+ * @param {Object} blueprint Blueprint object with name and id
+ * @param {string} address Address associated with the nano contract
+ */
+export const saveNC = (id, blueprint, address) => ({ type: "save_nano_contract", payload: { id, blueprint, address } });
