@@ -10,6 +10,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
+import NanoContractList from './screens/nano/NanoContractList';
 import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import TransactionDetail from './screens/TransactionDetail';
@@ -185,6 +186,7 @@ function Root() {
   // Application rendering
   return (
     <Routes>
+      <Route path="/nano_contract" element={<StartedComponent children={ <NanoContractList />} loaded={true} />} />
       <Route path="/nft" element={<StartedComponent children={ <NFTList />} loaded={true} />} />
       <Route path="/create_token" element={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
       <Route path="/create_nft" element={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
