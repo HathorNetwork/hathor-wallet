@@ -10,6 +10,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
+import NanoContractList from './screens/nano/NanoContractList';
 import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import TransactionDetail from './screens/TransactionDetail';
@@ -130,6 +131,7 @@ class Root extends React.Component {
 
     return (
       <Switch>
+        <StartedRoute exact path="/nano_contract/" component={NanoContractList} loaded={true} />
         <StartedRoute exact path="/nft" component={NFTList} loaded={true} />
         <StartedRoute exact path="/create_token" component={CreateToken} loaded={true} />
         <StartedRoute exact path="/create_nft" component={CreateNFT} loaded={true} />
