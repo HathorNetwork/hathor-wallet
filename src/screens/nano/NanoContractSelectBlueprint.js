@@ -8,7 +8,7 @@
 import React, { useRef, useState } from 'react';
 import { t } from 'ttag'
 import BackButton from '../../components/BackButton';
-import colors from '../../index.scss';
+import colors from '../../index.module.scss';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
 import { useHistory } from 'react-router-dom';
