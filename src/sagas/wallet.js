@@ -179,7 +179,6 @@ export function* startWallet(action) {
 
     const walletConfig = {
       seed: words,
-      // xpub, // Only needed for hardware wallets but this is disabled in wallet-service
       xpriv,
       authxpriv,
       requestPassword: async () => new Promise((resolve) => {
