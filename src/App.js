@@ -210,22 +210,22 @@ function LoadedWalletComponent({ children }) {
     loadingAddresses: state.loadingAddresses,
   }));
 
-  // Check version
-  if (isVersionAllowed === undefined) {
-    // The version information is not yet available, no op
-    return;
-  }
-  if (isVersionAllowed === false) {
-    return <VersionError />;
-  }
-
-  // The version has been checked and allowed
+  // The addresses are being loaded, redirect user
   if (loadingAddresses) {
     // If wallet is still loading addresses we redirect to the loading screen
     return <Redirect to={{
       pathname: '/loading_addresses/',
       state: {path: match.url}
     }} />;
+  }
+
+  // The wallet has fully loaded: check version
+  if (isVersionAllowed === undefined) {
+    // The version information is not yet available, no op
+    return;
+  }
+  if (isVersionAllowed === false) {
+    return <VersionError />;
   }
 
   return (
