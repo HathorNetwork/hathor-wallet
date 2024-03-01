@@ -25,7 +25,7 @@ If not, at least create a custom token and close the wallet before starting.
 1. **Custom token admin**
     1. Click on 'WTST' on the token bar and then on 'Administrative tools'
     1. Use the 'Melt tokens' to melt all tokens you have.
-    1. Go to 'Balance & History' and check that the 'Total' is 0 and that the melt transaction appears on teh list.
+    1. Go to 'Balance & History' and check that the 'Total' is 0 and that the melt transaction appears on the list.
     1. Go back to 'Administrative tools' and use 'Mint tokens' mint 100 tokens.
     1. Click on 'Balance & History' and check the mint transaction is on the list.
     1. Check that the 'Total' and 'Available' are 100.00 WTST
