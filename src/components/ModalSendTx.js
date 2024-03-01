@@ -12,7 +12,7 @@ import $ from 'jquery';
 import PropTypes from "prop-types";
 import SendTxHandler from '../components/SendTxHandler';
 import ReactLoading from 'react-loading';
-import colors from '../index.scss';
+import { colors } from '../constants';
 
 
 const mapStateToProps = (state) => {

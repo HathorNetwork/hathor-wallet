@@ -15,7 +15,7 @@ import { connect } from 'react-redux';
 import { get } from 'lodash';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
-import colors from '../index.scss';
+import { colors } from '../constants';
 import TokenPagination from './TokenPagination';
 import HathorAlert from './HathorAlert';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
