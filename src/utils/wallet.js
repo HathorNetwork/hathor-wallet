@@ -12,10 +12,7 @@ import {
 } from '../constants';
 import store from '../store/index';
 import {
-  loadingAddresses,
   startWalletRequested,
-  historyUpdate,
-  reloadData,
   cleanData,
   updateTokenHistory,
   tokenMetadataUpdated,
@@ -27,7 +24,6 @@ import {
   errors as hathorErrors,
   walletUtils,
   metadataApi,
-  storageUtils,
   Network,
 } from '@hathor/wallet-lib';
 import { chunk, get } from 'lodash';
@@ -162,35 +158,6 @@ const wallet = {
     }
 
     return newHistoryObjects;
-  },
-
-  /**
-   * Method that fetches the balance of a token
-   * and pre process for the expected format
-   *
-   * @param {HathorWallet} wallet wallet instance
-   * @param {String} uid Token uid to fetch balance
-   */
-  async fetchTokenBalance(wallet, uid) {
-    const balance = await wallet.getBalance(uid);
-    const tokenBalance = balance[0].balance;
-    const authorities = balance[0].tokenAuthorities;
-
-    let mint = false;
-    let melt = false;
-
-    if (authorities) {
-      const { unlocked } = authorities;
-      mint = unlocked.mint;
-      melt = unlocked.melt;
-    }
-
-    return {
-      available: tokenBalance.unlocked,
-      locked: tokenBalance.locked,
-      mint,
-      melt,
-    };
   },
 
   /**
@@ -383,36 +350,6 @@ const wallet = {
   },
 
   /**
-   * After load address history we should update redux data
-   *
-   * @param {HathorWallet} wallet The wallet instance
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  async afterLoadAddressHistory(wallet) {
-    // runs after load address history
-    store.dispatch(loadingAddresses(false));
-    // XXX: We used to get the entire history of transactions, but it was not being used.
-
-    const allTokens = await wallet.getTokens();
-    const transactionsFound = await wallet.storage.store.historyCount();
-    const addressesFound = await wallet.storage.store.addressCount();
-
-    const address = await wallet.storage.getCurrentAddress();
-    const addressInfo = await wallet.storage.getAddressInfo(address);
-    const lastSharedIndex = addressInfo.bip32AddressIndex;
-
-    store.dispatch(historyUpdate({
-      allTokens,
-      lastSharedIndex,
-      lastSharedAddress: address,
-      addressesFound,
-      transactionsFound,
-    }));
-  },
-
-  /**
    * Add passphrase to the wallet
    *
    * @param {HathorWallet} wallet The wallet instance
@@ -460,36 +397,6 @@ const wallet = {
       wallet.stop();
     }
     store.dispatch(cleanData());
-  },
-
-  /*
-   * Reload data in the localStorage
-   *
-   * @param {HathorWallet} wallet The wallet instance
-   * @param {Object} [options={}]
-   * @param {boolean} [options.endConnection=false] If should end connection with websocket
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  async reloadData(wallet, {endConnection = false} = {}) {
-    store.dispatch(loadingAddresses(true));
-
-    const tokens = new Set();
-    for await (const token of wallet.storage.getRegisteredTokens()) {
-      tokens.add(token.uid);
-    }
-
-    // Cleaning redux and leaving only tokens data
-    store.dispatch(reloadData({
-      tokensHistory: {},
-      tokensBalance: {},
-      tokens,
-    }));
-
-    // Load history from new server
-    await storageUtils.reloadStorage(wallet.storage, wallet.conn);
-    await this.afterLoadAddressHistory(wallet);
   },
 
   /**
