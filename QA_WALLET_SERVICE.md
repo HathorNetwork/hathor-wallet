@@ -21,6 +21,9 @@ If not, at least create a custom token and close the wallet before starting.
     1. Validate its symbol appeared selected in the token bar.
     1. The list of transactions should have only one, with type 'Token creation' and amount of 100.00.
     1. Click on the HTR token (in the token bar) and check if the first transaction is of type 'Token deposit' with amount of 1.00.
+    1. Copy an address and send 1.00 HTR and 10.00 WTST to your own address.
+    1. Check that you received a notification for the transaction.
+    1. Check that the transaction appears in the list, the balance is unchanged and the address also changed.
 
 1. **Custom token admin**
     1. Click on 'WTST' on the token bar and then on 'Administrative tools'
