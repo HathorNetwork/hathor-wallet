@@ -195,7 +195,9 @@ export function* startWallet(action) {
   } else {
     // Set the server and network as saved on localStorage
     // If the localStorage is empty, fetch data directly from the lib config
-    config.setServerUrl(LOCAL_STORE.getServer() || config.getServerUrl());
+    const serverUrl = LOCAL_STORE.getServer() || config.getServerUrl();
+    config.setServerUrl(serverUrl);
+    LOCAL_STORE.setServers(serverUrl);
 
     connection = new Connection({
       network: network.name,

@@ -464,7 +464,7 @@ export class LocalStorageStore {
   /**
    * Persist server URLs on the localStorage.
    * @param {string} serverURL Fullnode api url
-   * @param {string} wsServerURL websocket server url for wallet-service
+   * @param {string} [wsServerURL] websocket server url for wallet-service
    */
   setServers(serverURL, wsServerURL) {
     this.setItem(SERVER_KEY, serverURL);
