@@ -59,9 +59,6 @@ function SendTokens() {
   const [errorMessage, setErrorMessage] = useState('');
   /** txTokens {Array} Array of tokens configs already added by the user (start with only hathor) */
   const [txTokens, setTxTokens] = useState([...getSelectedToken()]);
-  /** ledgerStep {number} When sending tx with ledger we have a step that needs user physical input,
-   *                      then we move to next step */
-  const [ledgerStep, setLedgerStep] = useState(0);
 
   // Create refs
   const formSendTokensRef = useRef();
@@ -193,12 +190,11 @@ function SendTokens() {
         arr.push(Buffer.from(signatures[i]));
       }
       await sendTransaction.prepareTxFrom(arr);
-      setLedgerStep(1);
 
       globalModalContext.showModal(MODAL_TYPES.ALERT, {
         id: 'ledgerAlertModal',
         title: t`Validate outputs on Ledger`,
-        body: renderAlertBody(),
+        body: renderAlertBody(true),
         showFooter: false,
       });
     } catch(e) {
@@ -237,7 +233,6 @@ function SendTokens() {
   const onSendError = (message) => {
     globalModalContext.hideModal();
     setErrorMessage(message);
-    setLedgerStep(0);
   }
 
   /**
@@ -301,7 +296,6 @@ function SendTokens() {
     }
     catch (e) {
       setErrorMessage(e.message);
-      setLedgerStep(0);
       return;
     }
 
@@ -389,7 +383,6 @@ function SendTokens() {
         e instanceof LedgerError) {
       globalModalContext.hideModal();
       setErrorMessage(e.message);
-      setLedgerStep(0);
     } else {
       // Unhandled error
       throw e;
@@ -492,8 +485,13 @@ function SendTokens() {
     return <ul>{rows}</ul>
   }
 
-  const renderAlertBody = () => {
-    if (ledgerStep === 0) {
+  /**
+   * Renders the body for the ledger alert modal, with instructions on how to approve the transaction.
+   * When called with the `ledgerHasApproved` parameter, it renders a transaction success monitoring component instead.
+   * @param {boolean} [ledgerHasApproved] If informed, a transaction monitor will be rendered instead of instructions.
+   */
+  const renderAlertBody = (ledgerHasApproved) => {
+    if (!ledgerHasApproved) {
       return (
         <div>
           <p>{t`Please go to you Ledger and validate each output of your transaction. Press both buttons in case the output is correct.`}</p>
