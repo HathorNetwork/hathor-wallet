@@ -149,6 +149,7 @@ export function* startWallet(action) {
 
   let wallet, connection;
   if (useWalletService) {
+    let authxpriv = null;
     // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
     try {
       // getWsServer can return null if not previously set
@@ -172,13 +173,14 @@ export function* startWallet(action) {
 
     if (!(words || xpub)) {
       const accessData = yield storage.getAccessData();
-      xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
+      xpriv = cryptoUtils.decryptData(accessData.acctPathKey, pin);
+      authxpriv = cryptoUtils.decryptData(accessData.authKey, pin);
     }
 
     const walletConfig = {
       seed: words,
-      xpub,
       xpriv,
+      authxpriv,
       requestPassword: async () => new Promise((resolve) => {
         /**
          * Lock screen will call `resolve` with the pin screen after validation
@@ -188,6 +190,7 @@ export function* startWallet(action) {
       }),
       passphrase,
       storage,
+      network,
     };
 
     wallet = new HathorWalletServiceWallet(walletConfig);
