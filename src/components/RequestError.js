@@ -10,9 +10,8 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
 import SpanFmt from './SpanFmt';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
-import wallet from '../utils/wallet';
 import { useHistory } from 'react-router-dom';
 
 /**
@@ -28,8 +27,11 @@ const MODAL_DOM_ID = '#requestErrorModal';
  */
 function RequestErrorModal() {
   const history = useHistory();
-  const lastFailedRequest = useSelector(state => state.lastFailedRequest);
-  const requestErrorStatusCode = useSelector(state => state.requestErrorStatusCode);
+  const dispatch = useDispatch();
+  const { lastFailedRequest, requestErrorStatusCode } = useSelector(state => ({
+    lastFailedRequest: state.lastFailedRequest,
+    requestErrorStatusCode: state.requestErrorStatusCode,
+  }));
 
   const advancedDataRef = useRef();
   const showAdvancedLinkRef = useRef();
@@ -75,7 +77,7 @@ function RequestErrorModal() {
       // it's paginated with async/await and does not use promise resolve/reject like the others
       // We already have an issue on the lib to track this (https://github.com/HathorNetwork/hathor-wallet-lib/issues/59)
       // So we handle here this retry manually with a reload (like the one when the connection is lost)
-      wallet.reloadData();
+      dispatch({ type: 'WALLET_RELOADING' });
     } else {
       const config = lastFailedRequest;
       const axios = createRequestInstance(config.resolve);
