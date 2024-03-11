@@ -269,6 +269,7 @@ function Wallet() {
     context.showModal(MODAL_TYPES.LEDGER_SIGN_TOKEN, {
       token,
       modalId: 'signTokenDataModal',
+      cb: (newValue) => console.log(`New token signature state: ${newValue}`)
     })
   }
 
