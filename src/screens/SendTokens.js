@@ -23,6 +23,16 @@ import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';
 
 /**
+ * Instance of the SendTransaction class, used when sending transactions with ledger.
+ * It needs to be outside the screen component because it does not follow the component rendering
+ * flow, and is only manipulated by ledger events.
+ *
+ * This variable should only be read by Ledger event handler functions.
+ * @type {SendTransaction|null}
+ * */
+let event_sendTransaction = null;
+
+/**
  * Screen used to send tokens to another wallet.
  * Can send more than one token in the same transaction.
  *
@@ -82,12 +92,6 @@ function SendTokens() {
     };
   }, []);
 
-  // Partial transaction data while retrieving inputs and building the SendTransaction object
-  let newTxData = null;
-
-  // Send transaction object used when sending tx with ledger
-  let sendTransaction = null;
-
   /**
    * Handle the response of a send tx call to Ledger.
    *
@@ -96,7 +100,7 @@ function SendTokens() {
    */
   const handleTxSent = (_event, arg) => {
     if (arg.success) {
-      getSignatures();
+      getSignatures(event_sendTransaction);
     } else {
       handleSendError(new LedgerError(arg.error.message));
     }
@@ -110,7 +114,7 @@ function SendTokens() {
    */
   const handleSignatures = (_event, arg) => {
     if (arg.success) {
-      onLedgerSuccess(arg.data);
+      onLedgerSuccess(arg.data, event_sendTransaction);
     } else {
       handleSendError(new LedgerError(arg.error.message));
     }
@@ -134,7 +138,7 @@ function SendTokens() {
         return;
       }
       // some token was invalid, it will be on arg, which ones
-      const tokenList = txTokens.filter(t => arg.data.includes(t.uid)) // TODO: Double check if state is updated
+      const tokenList = txTokens.filter(t => arg.data.includes(t.uid));
       globalModalContext.showModal(MODAL_TYPES.ALERT, {
         id: 'ledgerAlertModal',
         title: t`Invalid custom tokens`,
@@ -151,7 +155,7 @@ function SendTokens() {
    *
    * @return {boolean}
    */
-  const validateData = () => {
+  const validateFormData = () => {
     const isValid = formSendTokensRef.current.checkValidity();
     if (isValid === false) {
       formSendTokensRef.current.classList.add('was-validated');
@@ -167,7 +171,7 @@ function SendTokens() {
    *
    * @return {Object} Object holding all inputs and outputs {'inputs': [...], 'outputs': [...]}
    */
-  const getData = () => {
+  const getFormData = () => {
     let data = {'inputs': [], 'outputs': [], 'tokens': []};
     for (const ref of references.current) {
       const instance = ref.current;
@@ -181,8 +185,9 @@ function SendTokens() {
 
   /**
    * Add signature to each input and execute send transaction
+   * @param {SendTransaction} sendTransaction Object containing the signed tx data
    */
-  const onLedgerSuccess = async (signatures) => {
+  const onLedgerSuccess = async (signatures, sendTransaction) => {
     try {
       // Prepare data and submit job to tx mining API
       const arr = [];
@@ -194,7 +199,7 @@ function SendTokens() {
       globalModalContext.showModal(MODAL_TYPES.ALERT, {
         id: 'ledgerAlertModal',
         title: t`Validate outputs on Ledger`,
-        body: renderAlertBody(true),
+        body: renderAlertBody(sendTransaction),
         showFooter: false,
       });
     } catch(e) {
@@ -204,10 +209,12 @@ function SendTokens() {
 
   /**
    * Execute ledger get signatures
+   * @param {SendTransaction} sendTransaction instance to build the tx data from
    */
-  const getSignatures = () => {
+  const getSignatures = async (sendTransaction) => {
+    const txData = await sendTransaction.prepareTxData();
     ledger.getSignatures(
-      Object.assign({}, newTxData),
+      Object.assign({}, txData),
       wallet,
     );
   }
@@ -283,16 +290,17 @@ function SendTokens() {
    * It opens the ledger modal to wait for user action on the device
    */
   const executeSendLedger = async () => {
+    let txData = getFormData();
     // Wallet Service currently does not support Ledger, so we default to the regular SendTransaction
-    sendTransaction = new hathorLib.SendTransaction({
-      outputs: newTxData.outputs,
-      inputs: newTxData.inputs,
+    const sendTransactionObj = new hathorLib.SendTransaction({
+      outputs: txData.outputs,
+      inputs: txData.inputs,
       storage: wallet.storage,
     });
 
     try {
       // Errors may happen in this step ( ex.: insufficient amount of tokens )
-      newTxData = await sendTransaction.prepareTxData();
+      txData = await sendTransactionObj.prepareTxData();
     }
     catch (e) {
       setErrorMessage(e.message);
@@ -300,7 +308,7 @@ function SendTokens() {
     }
 
     const changeInfo = [];
-    for (const [outputIndex, output] of newTxData.outputs.entries()) {
+    for (const [outputIndex, output] of txData.outputs.entries()) {
       if (output.isChange) {
         changeInfo.push({
           outputIndex,
@@ -312,7 +320,10 @@ function SendTokens() {
     const useOldProtocol = !versionUtils.isLedgerCustomTokenAllowed();
 
     const network = wallet.getNetworkObject();
-    ledger.sendTx(newTxData, changeInfo, useOldProtocol, network);
+
+    // Store the SendTransaction instance on the variable exclusive to Ledger event handlers
+    event_sendTransaction = sendTransactionObj;
+    ledger.sendTx(txData, changeInfo, useOldProtocol, network);
     globalModalContext.showModal(MODAL_TYPES.ALERT, {
       title: t`Validate outputs on Ledger`,
       body: renderAlertBody(),
@@ -325,13 +336,17 @@ function SendTokens() {
    * Checks if the form is valid, get data from child components, complete the transaction and execute API request
    */
   const beforeSend = () => {
-    const isValid = validateData();
+    // Validates form
+    const isValid = validateFormData();
     if (!isValid) return;
-    let data = getData();
+
+    // Validates inputs and outputs
+    let data = getFormData();
     if (!data) return;
+
+    // All inputs validated: proceed with the send process
     setErrorMessage('');
     try {
-      newTxData = data;
       if (!LOCAL_STORE.isHardwareWallet()) {
         globalModalContext.showModal(MODAL_TYPES.PIN, {
           onSuccess: ({pin}) => {
@@ -360,15 +375,16 @@ function SendTokens() {
    * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
    */
   const prepareSendTransaction = async (pin) => {
+    const txData = getFormData();
     if (useWalletService) {
       return new hathorLib.SendTransactionWalletService(wallet, {
-        outputs: newTxData.outputs,
-        inputs: newTxData.inputs,
+        outputs: txData.outputs,
+        inputs: txData.inputs,
         pin,
       });
     }
 
-    return new hathorLib.SendTransaction({ outputs: newTxData.outputs, inputs: newTxData.inputs, pin, storage: wallet.storage });
+    return new hathorLib.SendTransaction({ outputs: txData.outputs, inputs: txData.inputs, pin, storage: wallet.storage });
   }
 
   /**
@@ -486,12 +502,13 @@ function SendTokens() {
   }
 
   /**
-   * Renders the body for the ledger alert modal, with instructions on how to approve the transaction.
-   * When called with the `ledgerHasApproved` parameter, it renders a transaction success monitoring component instead.
-   * @param {boolean} [ledgerHasApproved] If informed, a transaction monitor will be rendered instead of instructions.
+   * Renders the body for the ledger alert modal, with instructions on how to approve the tx.
+   * When called with the `sendTransaction` parameter, it renders a transaction success monitoring
+   * component instead, using this parameter as a reference for which transaction to listen to.
+   * @param {SendTransaction} [sendTransactionObj] Reference to tx already signed by Ledger
    */
-  const renderAlertBody = (ledgerHasApproved) => {
-    if (!ledgerHasApproved) {
+  const renderAlertBody = (sendTransactionObj) => {
+    if (!sendTransactionObj) {
       return (
         <div>
           <p>{t`Please go to you Ledger and validate each output of your transaction. Press both buttons in case the output is correct.`}</p>
@@ -501,7 +518,7 @@ function SendTokens() {
     } else {
       return (
         <div className="d-flex flex-row">
-          <SendTxHandler sendTransaction={sendTransaction} onSendSuccess={onSendSuccess} onSendError={onSendError} />
+          <SendTxHandler sendTransaction={sendTransactionObj} onSendSuccess={onSendSuccess} onSendError={onSendError} />
           <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
         </div>
       )
