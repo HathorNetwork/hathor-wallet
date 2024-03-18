@@ -85,7 +85,7 @@
     "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0"
   },
   "devDependencies": {
-    "@sentry/browser": "7.99.0",
+    "@sentry/browser": "7.107.0",
     "@sentry/cli": "2.27.0",
     "@testing-library/cypress": "8.0.7",
     "@testing-library/jest-dom": "6.1.5",
