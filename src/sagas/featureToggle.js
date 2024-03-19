@@ -196,6 +196,7 @@ export function* setupUnleashListeners(unleashClient) {
 }
 
 function mapFeatureToggles(toggles) {
+  console.log('feature toggles', toggles);
   return toggles.reduce((acc, toggle) => {
     acc[toggle.name] = get(
       toggle,

@@ -14,7 +14,7 @@ import RequestErrorModal from '../components/RequestError';
 import ReactLoading from 'react-loading';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { resolveLockWalletPromise, startWalletRequested, walletReset } from '../actions';
-import colors from '../index.scss';
+import { colors } from '../constants';
 import LOCAL_STORE from '../storage';
 
 /**

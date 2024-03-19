@@ -269,10 +269,21 @@ const helpers = {
    * @returns {Promise<ReduxTxHistory>}
    */
   async mapTxHistoryToRedux(wallet, tx, tokenUid) {
-    // tx comes from getTxHistory and does not have token_data
-    // We need the actual history tx to access if it is an authority tx
-    const histTx = await wallet.getTx(tx.txId);
-    const isAllAuthority = this.isAllAuthority(histTx);
+
+    let isAllAuthority = false;
+    try {
+      // tx comes from getTxHistory and does not have token_data
+      // We need the actual history tx to access if it is an authority tx
+      const histTx = await wallet.getTx(tx.txId);
+      const isAllAuthority = this.isAllAuthority(histTx);
+    } catch (err) {
+      // wallet-service facade does not implement getTx yet
+      // This will create a way to safely ignore the isAllAuthority if we cannot get the tx
+      if (err.message.toLowerCase() !== 'not implemented.') {
+        console.error(err);
+        throw err;
+      }
+    }
 
     return {
       tx_id: tx.txId,

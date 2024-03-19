@@ -88,7 +88,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 1. **Transaction detail**
     1. It should be on the main screen with the HTR selected. Click on the first transaction.
     1. The token list now has a warning that TST is not registered.
-    1. Click on the uid and register it. 
+    1. Click on the uid and register it.
 
 1. **Register in the 'Custom tokens' screen**
     1. Click on 'About Test Token' tab.
@@ -200,7 +200,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
 
 1. **Late backup**
     1. Reset the wallet and close it.
-    1. Open the wallet with the parameters `--unsafe-mode --debug`.
+    1. Open the wallet with the parameters `--unsafe-mode --debug` (see the README.md under "Debug mode on installed app" to understand how).
     1. Click on the application menu Debug > Open Dev Tools. Then type `localStorage.clear()`. This is to simulate a fresh install of the app.
     1. Close and open the wallet again and start a new wallet one without doing backup. It must show a yellow warning saying a backup must be done.
     1. Do the backup (following procedures in the 'Initialization' tests). The backup message has to disappear.
