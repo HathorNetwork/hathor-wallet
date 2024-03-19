@@ -151,7 +151,9 @@ export function* startWallet(action) {
   const networkName = LOCAL_STORE.getNetwork() || config.getNetwork().name;
   const serverUrl = LOCAL_STORE.getServer() || config.getServerUrl();
   config.setServerUrl(serverUrl);
+  config.setNetwork(networkName);
   LOCAL_STORE.setServers(serverUrl);
+  LOCAL_STORE.setNetwork(networkName);
 
   let wallet, connection;
   if (useWalletService) {
