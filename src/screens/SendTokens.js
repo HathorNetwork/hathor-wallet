@@ -23,16 +23,6 @@ import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';
 
 /**
- * Instance of the SendTransaction class, used when sending transactions with ledger.
- * It needs to be outside the screen component because it does not follow the component rendering
- * flow, and is only manipulated by ledger events.
- *
- * This variable should only be read by Ledger event handler functions.
- * @type {SendTransaction|null}
- * */
-let event_sendTransaction = null;
-
-/**
  * Screen used to send tokens to another wallet.
  * Can send more than one token in the same transaction.
  *
@@ -73,6 +63,11 @@ function SendTokens() {
   // Create refs
   const formSendTokensRef = useRef();
   const references = useRef([React.createRef()]);
+  /**
+   * Instance of SendTransaction containing tx data specifically for Ledger signing
+   * @type MutableRefObject<SendTransaction>
+   */
+  const sendTransactionRef = useRef(null);
 
   // Convert componentDidMount and componentWillUnmount
   useEffect(() => {
@@ -100,7 +95,7 @@ function SendTokens() {
    */
   const handleTxSent = (_event, arg) => {
     if (arg.success) {
-      getSignatures(event_sendTransaction);
+      getSignatures(sendTransactionRef.current);
     } else {
       handleSendError(new LedgerError(arg.error.message));
     }
@@ -114,7 +109,7 @@ function SendTokens() {
    */
   const handleSignatures = (_event, arg) => {
     if (arg.success) {
-      onLedgerSuccess(arg.data, event_sendTransaction);
+      onLedgerSuccess(arg.data, sendTransactionRef.current);
     } else {
       handleSendError(new LedgerError(arg.error.message));
     }
@@ -185,7 +180,8 @@ function SendTokens() {
 
   /**
    * Add signature to each input and execute send transaction
-   * @param {SendTransaction} sendTransaction Object containing the signed tx data
+   * @param {String[]} signatures Array of serialized signatures to be injected on the tx
+   * @param {SendTransaction} sendTransaction Object containing the unsigned tx data
    */
   const onLedgerSuccess = async (signatures, sendTransaction) => {
     try {
@@ -211,8 +207,8 @@ function SendTokens() {
    * Execute ledger get signatures
    * @param {SendTransaction} sendTransaction instance to build the tx data from
    */
-  const getSignatures = async (sendTransaction) => {
-    const txData = await sendTransaction.prepareTxData();
+  const getSignatures = (sendTransaction) => {
+    const txData = sendTransaction.fullTxData;
     ledger.getSignatures(
       Object.assign({}, txData),
       wallet,
@@ -322,7 +318,7 @@ function SendTokens() {
     const network = wallet.getNetworkObject();
 
     // Store the SendTransaction instance on the variable exclusive to Ledger event handlers
-    event_sendTransaction = sendTransactionObj;
+    sendTransactionRef.current = sendTransactionObj;
     ledger.sendTx(txData, changeInfo, useOldProtocol, network);
     globalModalContext.showModal(MODAL_TYPES.ALERT, {
       title: t`Validate outputs on Ledger`,
