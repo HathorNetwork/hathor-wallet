@@ -124,7 +124,6 @@ export function* startWallet(action) {
     }
   }
 
-  const network = config.getNetwork();
   const storage = LOCAL_STORE.getStorage();
 
   // We are offline, the connection object is yet to be created
@@ -146,6 +145,15 @@ export function* startWallet(action) {
   // If we've lost redux data, we could not properly stop the wallet object
   // then we don't know if we've cleaned up the wallet data in the storage
   yield storage.cleanStorage(true, true);
+
+  // Set the server and network as saved on localStorage
+  // If the localStorage is empty, fetch data directly from the lib config
+  const networkName = LOCAL_STORE.getNetwork() || config.getNetwork().name;
+  const serverUrl = LOCAL_STORE.getServer() || config.getServerUrl();
+  config.setServerUrl(serverUrl);
+  config.setNetwork(networkName);
+  LOCAL_STORE.setServers(serverUrl);
+  LOCAL_STORE.setNetwork(networkName);
 
   let wallet, connection;
   if (useWalletService) {
@@ -196,15 +204,9 @@ export function* startWallet(action) {
     wallet = new HathorWalletServiceWallet(walletConfig);
     connection = wallet.conn;
   } else {
-    // Set the server and network as saved on localStorage
-    // If the localStorage is empty, fetch data directly from the lib config
-    const serverUrl = LOCAL_STORE.getServer() || config.getServerUrl();
-    config.setServerUrl(serverUrl);
-    LOCAL_STORE.setServers(serverUrl);
-
     connection = new Connection({
-      network: network.name,
-      servers: [config.getServerUrl()],
+      network: networkName,
+      servers: [serverUrl],
     });
 
     const beforeReloadCallback = () => {
@@ -250,16 +252,16 @@ export function* startWallet(action) {
     console.log('[+] Start wallet.', serverInfo);
 
     let version;
-    let networkName = network.name;
+    let serverNetworkName = networkName;
 
     if (serverInfo) {
       version = serverInfo.version;
-      networkName = serverInfo.network && serverInfo.network.split('-')[0];
+      serverNetworkName = serverInfo.network && serverInfo.network.split('-')[0];
     }
 
     yield put(setServerInfo({
       version,
-      network: networkName,
+      network: serverNetworkName,
     }));
   } catch(e) {
     if (useWalletService) {
@@ -285,7 +287,7 @@ export function* startWallet(action) {
 
   if (enableAtomicSwap) {
     // Set urls for the Atomic Swap Service. If we have it on storage, use it, otherwise use defaults
-    initializeSwapServiceBaseUrlForWallet(network.name)
+    initializeSwapServiceBaseUrlForWallet(networkName)
     // Initialize listened proposals list
     const listenedProposals = walletUtils.getListenedProposals();
     yield put(proposalListUpdated(listenedProposals));
