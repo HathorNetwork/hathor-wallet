@@ -22,6 +22,12 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';
 
+/** @typedef {0|1} LEDGER_MODAL_STATE */
+const LEDGER_MODAL_STATE = {
+  WAITING_APPROVAL: 0,
+  LEDGER_APPROVED: 1,
+}
+
 /**
  * Screen used to send tokens to another wallet.
  * Can send more than one token in the same transaction.
@@ -195,7 +201,7 @@ function SendTokens() {
       globalModalContext.showModal(MODAL_TYPES.ALERT, {
         id: 'ledgerAlertModal',
         title: t`Validate outputs on Ledger`,
-        body: renderAlertBody(sendTransaction),
+        body: renderAlertBody(LEDGER_MODAL_STATE.LEDGER_APPROVED, sendTransaction),
         showFooter: false,
       });
     } catch(e) {
@@ -322,7 +328,7 @@ function SendTokens() {
     ledger.sendTx(txData, changeInfo, useOldProtocol, network);
     globalModalContext.showModal(MODAL_TYPES.ALERT, {
       title: t`Validate outputs on Ledger`,
-      body: renderAlertBody(),
+      body: renderAlertBody(LEDGER_MODAL_STATE.WAITING_APPROVAL),
       showFooter: false,
     });
   }
@@ -498,26 +504,30 @@ function SendTokens() {
   }
 
   /**
-   * Renders the body for the ledger alert modal, with instructions on how to approve the tx.
-   * When called with the `sendTransaction` parameter, it renders a transaction success monitoring
-   * component instead, using this parameter as a reference for which transaction to listen to.
-   * @param {SendTransaction} [sendTransactionObj] Reference to tx already signed by Ledger
+   * Renders the body for the ledger alert modal.
+   * Depending on the parameters, it can:
+   * - Render instructions on how to approve the tx on ledger or;
+   * - Trigger the transaction sending process and render a tx monitoring component
+   * @param {LEDGER_MODAL_STATE} modalState Defines how the modal will be rendered
+   * @param {SendTransaction} [sendTransactionObj] Reference to tx already signed by Ledger, that will be sent
    */
-  const renderAlertBody = (sendTransactionObj) => {
-    if (!sendTransactionObj) {
+  const renderAlertBody = (modalState, sendTransactionObj) => {
+    if (modalState === LEDGER_MODAL_STATE.WAITING_APPROVAL) {
       return (
         <div>
           <p>{t`Please go to you Ledger and validate each output of your transaction. Press both buttons in case the output is correct.`}</p>
           <p>{t`In the end, a final screen will ask you to confirm sending the transaction.`}</p>
         </div>
       );
-    } else {
+    } else if (modalState === LEDGER_MODAL_STATE.LEDGER_APPROVED) {
       return (
         <div className="d-flex flex-row">
           <SendTxHandler sendTransaction={sendTransactionObj} onSendSuccess={onSendSuccess} onSendError={onSendError} />
           <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
         </div>
       )
+    } else {
+      throw new Error('Invalid modal state');
     }
   }
 
