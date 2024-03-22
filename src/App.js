@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
@@ -210,7 +210,7 @@ function LoadedWalletComponent({ children }) {
     loadingAddresses: state.loadingAddresses,
   }));
 
-  // The version has been checked and allowed
+  // The addresses are being loaded, redirect user
   if (loadingAddresses) {
     // If wallet is still loading addresses we redirect to the loading screen
     return <Navigate
