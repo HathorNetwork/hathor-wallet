@@ -22,6 +22,7 @@ process.once('loaded', () => {
     const accessData = JSON.parse(oldAccessDataRaw);
     const isHardware = localStorage.getItem('wallet:type') === 'hardware';
     if (accessData.from_xpub || isHardware) {
+      const uniqueId = localStorage.getItem('app:uniqueId');
       const backup = localStorage.getItem('wallet:backup');
       const network = localStorage.getItem('wallet:network');
       const server = localStorage.getItem('wallet:server');
@@ -30,6 +31,7 @@ process.once('loaded', () => {
       localStorage.setItem('localstorage:backup', backup);
       localStorage.setItem('localstorage:network', network);
       localStorage.setItem('localstorage:server', server);
+      localStorage.setItem('app:uniqueId', uniqueId);
     }
   }
 
