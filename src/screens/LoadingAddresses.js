@@ -37,7 +37,6 @@ function LoadingAddresses() {
 
   const dispatch = useDispatch();
   const location = useLocation();
-  console.log(`[LoadingAddresses] Location: `, {location});
   const { addressesFound, transactionsFound, loadingAddresses } = useSelector(state => ({
     addressesFound: state.loadedData.addresses,
     transactionsFound: state.loadedData.transactions,
