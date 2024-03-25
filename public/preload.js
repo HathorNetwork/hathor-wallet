@@ -18,19 +18,14 @@ Sentry.init({
 process.once('loaded', () => {
   const oldAccessDataRaw = localStorage.getItem('wallet:accessData');
   if (oldAccessDataRaw) {
-    // When migrating old wallets initialized with hardware wallets we need to clean the localStorage
+    // When migrating from wallets with version v0.26.0 and older initialized with hardware devices
+    // we need to clean the localStorage since some state left over can cause issues
     const accessData = JSON.parse(oldAccessDataRaw);
     const isHardware = localStorage.getItem('wallet:type') === 'hardware';
     if (accessData.from_xpub || isHardware) {
       const uniqueId = localStorage.getItem('app:uniqueId');
-      const backup = localStorage.getItem('wallet:backup');
-      const network = localStorage.getItem('wallet:network');
-      const server = localStorage.getItem('wallet:server');
       localStorage.clear();
       localStorage.setItem('localstorage:started', 'true');
-      localStorage.setItem('localstorage:backup', backup);
-      localStorage.setItem('localstorage:network', network);
-      localStorage.setItem('localstorage:server', server);
       localStorage.setItem('app:uniqueId', uniqueId);
     }
   }
