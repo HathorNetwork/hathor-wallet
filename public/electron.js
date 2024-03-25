@@ -115,7 +115,34 @@ function createWindow () {
         { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
         { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
         { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
-      ]}
+      ]},
+    {
+      label: 'Actions',
+      submenu: [
+        {
+          label: 'Reset all data',
+          click: function() {
+            dialog.showMessageBox(
+              mainWindow,
+              {
+                type: 'warning',
+                buttons: ['Ok', 'Cancel'],
+                title: 'Warning',
+                message: 'Are you sure you want to reset all data?'
+              },
+            ).then((ret) => {
+              console.log(ret);
+              if (ret.response === 0) {
+                // mainWindow.webContents.send('reset_all_data');
+                mainWindow.webContents.executeJavaScript('console.log("WEAHTOR"); localStorage.clear()', true).then(() => {
+                  mainWindow.close();
+                });
+              }
+            });
+          },
+        }
+      ]
+    }
   ];
 
   if (debugMode) {
