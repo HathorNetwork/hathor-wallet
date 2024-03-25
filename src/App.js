@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
@@ -38,6 +38,7 @@ import tokensUtils from './utils/tokens';
 import storageUtils from './utils/storage';
 import { useDispatch, useSelector } from 'react-redux';
 import RequestErrorModal from './components/RequestError';
+import { GlobalModalContext, MODAL_TYPES } from './components/GlobalModal';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { IPC_RENDERER } from './constants';
@@ -67,6 +68,7 @@ function Root() {
   });
   const dispatch = useDispatch();
   const history = useHistory();
+  const context = useContext(GlobalModalContext);
 
   // Monitors when Ledger device loses connection or the app is closed
   useEffect(() => {
@@ -98,6 +100,17 @@ function Root() {
 
     // If there is an `Inter Process Communication` channel available, initialize Ledger logic
     if (IPC_RENDERER) {
+      // Event called when the user wants to reset all data
+      IPC_RENDERER.on('app:reset_all_data', async () => {
+        context.showModal(MODAL_TYPES.CONFIRM_RESET, {
+          success: () => {
+            localStorage.clear();
+            IPC_RENDERER.send('app:reset_all_data_success');
+          },
+        });
+
+      });
+
       // Registers the event handlers for the ledger
 
       // Event called when user quits hathor app

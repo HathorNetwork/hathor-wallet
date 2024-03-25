@@ -122,26 +122,10 @@ function createWindow () {
         {
           label: 'Reset all data',
           click: function() {
-            dialog.showMessageBox(
-              mainWindow,
-              {
-                type: 'warning',
-                buttons: ['Ok', 'Cancel'],
-                title: 'Warning',
-                message: 'Are you sure you want to reset all data?'
-              },
-            ).then((ret) => {
-              console.log(ret);
-              if (ret.response === 0) {
-                // mainWindow.webContents.send('reset_all_data');
-                mainWindow.webContents.executeJavaScript('console.log("WEAHTOR"); localStorage.clear()', true).then(() => {
-                  mainWindow.close();
-                });
-              }
-            });
+            mainWindow.webContents.send('app:reset_all_data');
           },
         }
-      ]
+      ],
     }
   ];
 
@@ -192,6 +176,11 @@ function createWindow () {
       updateSystrayMenu(systrayMenuItemShow);
       mainWindow.hide()
     }
+  });
+
+  ipcMain.on('app:reset_all_data_success', () => {
+    console.log('Data reset success. Closing window...');
+    mainWindow.close();
   });
 
   addLedgerListeners(mainWindow);
