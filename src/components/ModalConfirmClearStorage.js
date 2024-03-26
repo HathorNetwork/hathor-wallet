@@ -44,6 +44,7 @@ export default function ModalConfirmClearStorage({ onClose, success }) {
               <p>{t`Your wallet uniqueId will be reset.`}</p>
               <p>uniqueId: {localStorage.getItem('app:uniqueId')}</p>
               <p>{t`If you want to reset all data, please type '${CONFIRM_RESET_MESSAGE}' in the box below and click on 'Reset all data' button.`}</p>
+              <p>{t`After resetting the data, the application will close, and you will need to open it again.`}</p>
               <div>
                 <input type="text" className="form-control" placeholder={t`Write '${CONFIRM_RESET_MESSAGE}'`} onChange={(e) => setConfirmText(e.target.value)} />
                 <span className="text-danger ml-2">
