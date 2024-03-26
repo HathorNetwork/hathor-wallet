@@ -123,7 +123,7 @@ function createWindow () {
       label: 'Debug',
       submenu: [
         { label: `Open DevTools`, accelerator: 'CmdOrCtrl+B', click: function() { mainWindow.webContents.openDevTools(); }},
-        { label: 'Reset all data', click: function() { mainWindow.webContents.send('app:reset_all_data'); }},
+        { label: 'Reset all data', click: function() { mainWindow.webContents.send('app:clear_storage'); }},
       ]
     });
   };
@@ -168,7 +168,7 @@ function createWindow () {
     }
   });
 
-  ipcMain.on('app:reset_all_data_success', () => {
+  ipcMain.on('app:clear_storage_success', () => {
     console.log('Data reset success. Closing window...');
     mainWindow.close();
   });

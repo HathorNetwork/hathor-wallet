@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
+import SpanFmt from './SpanFmt';
+import { CONFIRM_RESET_MESSAGE } from '../constants';
 
-export default function ModalConfirmResetAllData({ onClose, success }) {
+export default function ModalConfirmClearStorage({ onClose, success }) {
   const [confirmText, setConfirmText] = useState('');
   const [confirmError, setConfirmError] = useState('');
 
@@ -17,7 +19,7 @@ export default function ModalConfirmResetAllData({ onClose, success }) {
   }, []);
 
   const confirmResetData = useCallback(() => {
-    if (confirmText.toLowerCase() !== 'i want to reset all wallet data') {
+    if (confirmText.toLowerCase() !== CONFIRM_RESET_MESSAGE.toLowerCase()) {
       setConfirmError(t`Invalid value.`);
       return;
     }
@@ -36,12 +38,14 @@ export default function ModalConfirmResetAllData({ onClose, success }) {
           </div>
           <div className="modal-body">
             <div>
+              <p><SpanFmt>{t`**Make sure you have the backup of your seed because this will turn your wallet into a fresh install.**`}</SpanFmt></p>
               <p>{t`Do you want to reset all of your wallet data? Only continue if you know what you are doing.`}</p>
-              <p>{t`This action cannot be undone. All your data will be lost.`}</p>
-              <p>{t`Your wallet uniqueId will be reset.`} uniqueId: {localStorage.getItem('app:uniqueId')}</p>
-              <p>{t`If you want to reset all data, please type 'I want to reset all wallet data' in the box below and click on 'Reset all data' button.`}</p>
-              <div className="mt-2 d-flex flex-row align-items-center">
-                <input type="text" className="form-control col-4" defaultValue={confirmText} onChange={(e) => setConfirmText(e.target.value)} />
+              <p>{t`This action cannot be undone. All your data will be erased.`}</p>
+              <p>{t`Your wallet uniqueId will be reset.`}</p>
+              <p>uniqueId: {localStorage.getItem('app:uniqueId')}</p>
+              <p>{t`If you want to reset all data, please type '${CONFIRM_RESET_MESSAGE}' in the box below and click on 'Reset all data' button.`}</p>
+              <div>
+                <input type="text" className="form-control" placeholder={t`Write '${CONFIRM_RESET_MESSAGE}'`} onChange={(e) => setConfirmText(e.target.value)} />
                 <span className="text-danger ml-2">
                   {confirmError}
                 </span>

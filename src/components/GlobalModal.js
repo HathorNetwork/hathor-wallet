@@ -18,7 +18,7 @@ import ModalLedgerResetTokenSignatures from './ModalLedgerResetTokenSignatures';
 import ModalResetAllData from './ModalResetAllData';
 import ModalLedgerSignToken from './ModalLedgerSignToken';
 import ModalConfirmTestnet from './ModalConfirmTestnet';
-import ModalConfirmReset from './ModalConfirmReset';
+import ModalConfirmClearStorage from './ModalConfirmClearStorage';
 import ModalSendTx from './ModalSendTx';
 import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
 import ModalPin from "./ModalPin";
@@ -44,7 +44,7 @@ export const MODAL_TYPES = {
   'RESET_ALL_DATA': 'RESET_ALL_DATA',
   'LEDGER_SIGN_TOKEN': 'LEDGER_SIGN_TOKEN',
   'CONFIRM_TESTNET': 'CONFIRM_TESTNET',
-  'CONFIRM_RESET': 'CONFIRM_RESET',
+  'CONFIRM_CLEAR_STORAGE': 'CONFIRM_CLEAR_STORAGE',
   'SEND_TX': 'SEND_TX',
   'UNREGISTERED_TOKEN_INFO': 'UNREGISTERED_TOKEN_INFO',
   'PIN': 'PIN',
@@ -65,7 +65,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.RESET_ALL_DATA]: ModalResetAllData,
   [MODAL_TYPES.LEDGER_SIGN_TOKEN]: ModalLedgerSignToken,
   [MODAL_TYPES.CONFIRM_TESTNET]: ModalConfirmTestnet,
-  [MODAL_TYPES.CONFIRM_RESET]: ModalConfirmReset,
+  [MODAL_TYPES.CONFIRM_CLEAR_STORAGE]: ModalConfirmClearStorage,
   [MODAL_TYPES.SEND_TX]: ModalSendTx,
   [MODAL_TYPES.UNREGISTERED_TOKEN_INFO]: ModalUnregisteredTokenInfo,
   [MODAL_TYPES.PIN]: ModalPin,

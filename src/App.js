@@ -101,11 +101,11 @@ function Root() {
     // If there is an `Inter Process Communication` channel available, initialize Ledger logic
     if (IPC_RENDERER) {
       // Event called when the user wants to reset all data
-      IPC_RENDERER.on('app:reset_all_data', async () => {
-        context.showModal(MODAL_TYPES.CONFIRM_RESET, {
+      IPC_RENDERER.on('app:clear_storage', async () => {
+        context.showModal(MODAL_TYPES.CONFIRM_CLEAR_STORAGE, {
           success: () => {
             localStorage.clear();
-            IPC_RENDERER.send('app:reset_all_data_success');
+            IPC_RENDERER.send('app:clear_storage_success');
           },
         });
 
