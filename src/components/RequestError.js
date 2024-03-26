@@ -26,7 +26,7 @@ const MODAL_DOM_ID = '#requestErrorModal';
  * @memberof Components
  */
 function RequestErrorModal() {
-	const navigate = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { lastFailedRequest, requestErrorStatusCode } = useSelector(state => ({
     lastFailedRequest: state.lastFailedRequest,
