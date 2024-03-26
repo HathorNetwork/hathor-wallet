@@ -116,24 +116,14 @@ function createWindow () {
         { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
         { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
       ]},
-    {
-      label: 'Actions',
-      submenu: [
-        {
-          label: 'Reset all data',
-          click: function() {
-            mainWindow.webContents.send('app:reset_all_data');
-          },
-        }
-      ],
-    }
   ];
 
   if (debugMode) {
     template.push({
       label: 'Debug',
       submenu: [
-        { label: `Open DevTools`, accelerator: 'CmdOrCtrl+B', click: function() { mainWindow.webContents.openDevTools(); }}
+        { label: `Open DevTools`, accelerator: 'CmdOrCtrl+B', click: function() { mainWindow.webContents.openDevTools(); }},
+        { label: 'Reset all data', click: function() { mainWindow.webContents.send('app:reset_all_data'); }},
       ]
     });
   };
