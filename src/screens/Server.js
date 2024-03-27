@@ -22,7 +22,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useHistory } from 'react-router-dom';
-import { isVersionAllowedUpdate } from "../actions";
+import { isVersionAllowedUpdate, selectToken } from "../actions";
 
 
 /**
@@ -256,6 +256,11 @@ function Server() {
     const executeServerChange = async (networkChanged) => {
       // Forces the re-validation of the allowed version after server change
       dispatch(isVersionAllowedUpdate({ allowed: undefined }));
+
+      // Forces the selected token back to the default, as custom tokens will not be available in different networks
+      if (networkChanged) {
+        dispatch(selectToken(hathorLib.constants.HATHOR_TOKEN_CONFIG.uid));
+      }
 
       // We don't have PIN on hardware wallet
       const pin = isHardwareWallet ? null : pinRef.current.value;
