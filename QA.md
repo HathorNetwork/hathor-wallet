@@ -205,8 +205,14 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Close and open the wallet again and start a new wallet one without doing backup. It must show a yellow warning saying a backup must be done.
     1. Do the backup (following procedures in the 'Initialization' tests). The backup message has to disappear.
 
+1. **Hardware wallet migration**
+    1. Reset the wallet one more time with `localStorage.clear()`.
+    1. Uninstall the wallet and install the last version.
+    1. Connect your Ledger device to the computer. The Ledger should be initialized already.
+    1. Start the wallet with the Ledger device and copy the current address.
+    1. Close the wallet and install the latest version.
+
 1. **Hardware wallet initialization**
-    1. Reset the wallet one more time.
     1. Connect your Ledger device to the computer. The Ledger should be initialized already.
     1. Open the Hathor app on Ledger.
     1. On the desktop wallet, mark the checkbox and click 'Get Started'.
@@ -216,6 +222,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Deny the authorization request on Ledger (scroll with left or right and click both buttons on "Reject" step). It should show an error on the wallet.
     1. Click 'Try again'. It goes through both steps and asks for authorization again.
     1. Grant authorization request (click both buttons on the "Approve" step). It will proceed to 'Loading transactions' screen.
+    1. Once the wallet is loaded check that the current address match the copied address during [**Hardware wallet migration**](#hardware-wallet-migration)
 
 1. **Ledger wallet screen**
     1. On the main wallet screen, confirm 'Address to receive tokens' is truncated (eg: 'HGZmqThwa6...'). There should be a 'Show full address' button next to it.
