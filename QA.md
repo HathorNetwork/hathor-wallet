@@ -222,7 +222,7 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Deny the authorization request on Ledger (scroll with left or right and click both buttons on "Reject" step). It should show an error on the wallet.
     1. Click 'Try again'. It goes through both steps and asks for authorization again.
     1. Grant authorization request (click both buttons on the "Approve" step). It will proceed to 'Loading transactions' screen.
-    1. Once the wallet is loaded check that the current address match the copied address during [**Hardware wallet migration**](#hardware-wallet-migration)
+    1. Once the wallet is loaded check that the current address match the copied address during "**Hardware wallet migration**"
 
 1. **Ledger wallet screen**
     1. On the main wallet screen, confirm 'Address to receive tokens' is truncated (eg: 'HGZmqThwa6...'). There should be a 'Show full address' button next to it.
