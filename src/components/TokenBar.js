@@ -14,7 +14,7 @@ import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
 import Loading from '../components/Loading';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import LOCAL_STORE from '../storage';
 
 // Routes that should display the TokenBar
@@ -26,7 +26,7 @@ const ROUTE_WHITELIST = [
 export default function TokenBar () {
   const [opened, setOpened] = useState(false);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   // These are all tokens that are currently registered on the wallet
@@ -76,14 +76,14 @@ export default function TokenBar () {
    */
   const lockWallet = () => {
     LOCAL_STORE.lock();
-    history.push('/locked/');
+    navigate('/locked/');
   };
 
   /**
    * Called when user clicks to go to settings, then redirects to settings screen
    */
   const goToSettings = () => {
-    history.push('/settings/');
+    navigate('/settings/');
   };
 
   /**
@@ -119,7 +119,7 @@ export default function TokenBar () {
    * Called when user clicks in the unknown tokens number, then redirects to unknown tokens screen
    */
   const unknownClicked = () => {
-    history.push('/unknown_tokens/');
+    navigate('/unknown_tokens/');
   };
 
   const renderLoading = () => (

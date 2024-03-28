@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import $ from 'jquery';
 import App from './App';
 import ModalUnhandledError, { UNHANDLED_ERROR_MODAL_ID_SELECTOR } from './components/ModalUnhandledError';
@@ -15,10 +15,10 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import './index.css';
+import TokenBar from "./components/TokenBar";
 
 function ErrorBoundary(props) {
 	const { onError } = props;
-	const history = useHistory();
 
 	const handleErrorEvent = (event) => {
 		onError(event.error);
@@ -33,11 +33,11 @@ function ErrorBoundary(props) {
 	}, []);
 
 	return (
-		<App history={history} />
+		<App />
 	)
 }
 
-function ErrorWrapper(props) {
+function ErrorWrapper() {
 	const [error, setError] = useState(null);
 
 	const onError = (newError) => {
@@ -49,16 +49,17 @@ function ErrorWrapper(props) {
 	}
 
 	return (
+		<>
+		<TokenBar />
 		<div className="components-wrapper">
 			<ErrorBoundary
-				{...props}
 				onError={onError}
 			/>
 			<ModalUnhandledError
-				{...props}
 				resetError={() => onError(null)}
 			/>
 		</div>
+		</>
 	)
 }
 

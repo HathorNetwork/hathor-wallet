@@ -10,7 +10,7 @@ import { t } from 'ttag';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import wallet from '../utils/wallet';
 import helpers from '../utils/helpers';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import HathorAlert from '../components/HathorAlert';
 import SpanFmt from '../components/SpanFmt';
 import BackButton from '../components/BackButton';
@@ -32,7 +32,7 @@ function Settings() {
   const context = useContext(GlobalModalContext);
   const alertCopiedRef = useRef();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   /** isNotificationOne {boolean} state to update if notification is turned on or off */
   const [isNotificationOn, setIsNotificationOn] = useState(null);
@@ -68,7 +68,7 @@ function Settings() {
   const handleReset = () => {
     context.hideModal();
     dispatch(walletReset());
-    history.push('/welcome/');
+    navigate('/welcome/');
   }
 
   /**
@@ -98,7 +98,7 @@ function Settings() {
         )
       });
     } else {
-      history.push('/wallet/passphrase/');
+      navigate('/wallet/passphrase/');
     }
   }
 
@@ -135,7 +135,7 @@ function Settings() {
    * When user clicks Change Server button we redirect to Change Server screen
    */
   const changeServer = () => {
-    history.push('/server/');
+    navigate('/server/');
   }
 
   /**
