@@ -35,7 +35,7 @@ if (process.platform === 'darwin') {
 }
 
 const appName = 'Hathor Wallet';
-const walletVersion = '0.27.1-rc5';
+const walletVersion = '0.28.0-rc1';
 
 const debugMode = (
   process.argv.indexOf('--unsafe-mode') >= 0 &&
@@ -115,14 +115,15 @@ function createWindow () {
         { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
         { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
         { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
-      ]}
+      ]},
   ];
 
   if (debugMode) {
     template.push({
       label: 'Debug',
       submenu: [
-        { label: `Open DevTools`, accelerator: 'CmdOrCtrl+B', click: function() { mainWindow.webContents.openDevTools(); }}
+        { label: `Open DevTools`, accelerator: 'CmdOrCtrl+B', click: function() { mainWindow.webContents.openDevTools(); }},
+        { label: 'Reset all data', click: function() { mainWindow.webContents.send('app:clear_storage'); }},
       ]
     });
   };
@@ -165,6 +166,11 @@ function createWindow () {
       updateSystrayMenu(systrayMenuItemShow);
       mainWindow.hide()
     }
+  });
+
+  ipcMain.on('app:clear_storage_success', () => {
+    console.log('Data reset success. Closing window...');
+    mainWindow.close();
   });
 
   addLedgerListeners(mainWindow);
