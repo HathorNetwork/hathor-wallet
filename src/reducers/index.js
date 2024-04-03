@@ -101,8 +101,8 @@ const initialState = {
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
   startWalletAction: null,
-  // RouterHistory object
-  routerHistory: null,
+  // A helper for listeners to navigate to another screen on saga events
+  navigateTo: { route: '', replace: false },
 
   /**
    * Indicates if the Atomic Swap feature is available for use
@@ -258,8 +258,8 @@ const rootReducer = (state = initialState, action) => {
       return onStartWalletFailed(state);
     case types.WALLET_BEST_BLOCK_UPDATE:
       return onWalletBestBlockUpdate(state, action);
-    case types.STORE_ROUTER_HISTORY:
-      return onStoreRouterHistory(state, action);
+    case types.SET_NAVIGATE_TO:
+      return onSetNavigateTo(state, action);
     case types.SET_UNLEASH_CLIENT:
       return onSetUnleashClient(state, action);
     case types.SET_FEATURE_TOGGLES:
@@ -969,14 +969,15 @@ export const onWalletBestBlockUpdate = (state, action) => {
 };
 
 /**
- * @param {RouterHistory} action.routerHistory History object from react-dom-navigation
+ * @param {string} action.route Route that should be navigated to in consequence of an event
+ * @param {boolean} action.replace Whether we should navigate with the replace parameter set
  */
-export const onStoreRouterHistory = (state, action) => {
-  const { routerHistory } = action;
+export const onSetNavigateTo = (state, action) => {
+  const { route, replace } = action;
 
   return {
     ...state,
-    routerHistory,
+    navigateTo: { route, replace },
   };
 };
 

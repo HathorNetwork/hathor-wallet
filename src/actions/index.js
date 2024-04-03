@@ -47,7 +47,7 @@ export const types = {
   WALLET_RESET_SUCCESS: 'WALLET_RESET_SUCCESS',
   WALLET_REFRESH_SHARED_ADDRESS: 'WALLET_REFRESH_SHARED_ADDRESS',
   SET_SERVER_INFO: 'SET_SERVER_INFO',
-  STORE_ROUTER_HISTORY: 'STORE_ROUTER_HISTORY',
+  SET_NAVIGATE_TO: 'SET_NAVIGATE_TO',
   WALLET_RELOADING: 'WALLET_RELOADING',
   FEATURE_TOGGLE_INITIALIZED: 'FEATURE_TOGGLE_INITIALIZED',
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
@@ -441,11 +441,13 @@ export const reloadingWallet = () => ({
 });
 
 /**
- * @param {RouterHistory} routerHistory History object from react-dom-navigation
+ * @param {string} navigateTo Route that should be navigated to in consequence of an event
+ * @param {boolean} replace Should we navigate with the replace parameter set
  */
-export const storeRouterHistory = (routerHistory) => ({
-  type: types.STORE_ROUTER_HISTORY,
-  routerHistory,
+export const setNavigateTo = (navigateTo, replace = false) => ({
+  type: types.SET_NAVIGATE_TO,
+  navigateTo,
+  replace,
 });
 
 /**
