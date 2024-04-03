@@ -441,12 +441,12 @@ export const reloadingWallet = () => ({
 });
 
 /**
- * @param {string} navigateTo Route that should be navigated to in consequence of an event
+ * @param {string} route Route that should be navigated to in consequence of an event
  * @param {boolean} replace Should we navigate with the replace parameter set
  */
-export const setNavigateTo = (navigateTo, replace = false) => ({
+export const setNavigateTo = (route, replace = false) => ({
   type: types.SET_NAVIGATE_TO,
-  route: navigateTo,
+  route,
   replace,
 });
 

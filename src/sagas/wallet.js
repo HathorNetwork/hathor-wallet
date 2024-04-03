@@ -531,9 +531,11 @@ export function* handleNewTx(action) {
 
   const notification = walletUtils.sendNotification(message);
 
-  // Navigate to the transaction screen on notification click
-  notification.onclick = () => {
-    put(setNavigateTo(`/transaction/${tx.tx_id}/`))
+  // Set the notification click, in case we have sent one
+  if (notification !== undefined) {
+    notification.onclick = () => {
+      put(setNavigateTo(`/transaction/${ tx.tx_id }/`))
+    }
   }
 }
 
