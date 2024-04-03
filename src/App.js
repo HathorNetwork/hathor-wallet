@@ -172,12 +172,7 @@ function Root() {
     }
 
     // Navigate to the informed route and reset the navigateTo state property
-    const newRoute = navigateTo;
-    if (newRoute.replace) {
-      history.replace(newRoute.route);
-    } else {
-      history.push(newRoute.route);
-    }
+    navigate(navigateTo.route, { replace: navigateTo.replace });
     dispatch(setNavigateTo(''));
   }, [navigateTo])
 

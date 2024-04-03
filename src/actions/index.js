@@ -446,7 +446,7 @@ export const reloadingWallet = () => ({
  */
 export const setNavigateTo = (navigateTo, replace = false) => ({
   type: types.SET_NAVIGATE_TO,
-  navigateTo,
+  route: navigateTo,
   replace,
 });
 
