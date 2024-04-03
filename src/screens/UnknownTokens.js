@@ -278,16 +278,18 @@ function UnknownTokens() {
   }
 
   return (
-    <div className="content-wrapper">
-      <BackButton />
-      <div className="d-flex flex-row align-items-center mb-4 mt-4">
-        <h3 className="mr-4">{t`Unknown Tokens`}</h3>
-        <button onClick={massiveImport} className="btn btn-hathor">{t`Register Tokens`}</button>
+    <div id="wallet-div">
+      <div className="content-wrapper">
+        <BackButton />
+        <div className="d-flex flex-row align-items-center mb-4 mt-4">
+          <h3 className="mr-4">{t`Unknown Tokens`}</h3>
+          <button onClick={massiveImport} className="btn btn-hathor">{t`Register Tokens`}</button>
+        </div>
+        <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
+        <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
+        {unknownTokensToRender && renderTokens()}
+        <HathorAlert ref={alertSuccessRef} text={successMessage} type="success" />
       </div>
-      <p>{t`Those are the custom tokens which you have at least one transaction. They are still unregistered in this wallet. You need to register a custom token in order to send new transactions using it.`}</p>
-      <p className="mb-5">{t`If you have reset your wallet, you need to register your custom tokens again.`}</p>
-      {unknownTokensToRender && renderTokens()}
-      <HathorAlert ref={alertSuccessRef} text={successMessage} type="success" />
     </div>
   );
 }
