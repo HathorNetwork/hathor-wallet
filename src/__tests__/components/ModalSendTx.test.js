@@ -4,7 +4,7 @@ import { act, render, screen } from '@testing-library/react';
 import $ from 'jquery'
 import { SendTransaction } from '@hathor/wallet-lib';
 import { ModalSendTx } from '../../components/ModalSendTx';
-import '@testing-library/jest-dom';
+// import '@testing-library/jest-dom'; Temporarily removed. See https://github.com/HathorNetwork/hathor-wallet/pull/567
 import helpers from '../../utils/helpers';
 
 let container = null;
