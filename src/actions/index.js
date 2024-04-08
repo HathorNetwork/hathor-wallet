@@ -451,6 +451,16 @@ export const setNavigateTo = (route, replace = false) => ({
 });
 
 /**
+ * Resets the `navigateTo` property.
+ * Should be called after every successful navigation executed through this property.
+ */
+export const resetNavigateTo = () => ({
+  type: types.SET_NAVIGATE_TO,
+  route: '',
+  replace: false,
+});
+
+/**
  * version {str} version of the connected server (e.g., 0.26.0-beta)
  * network {str} network of the connected server (e.g., mainnet, testnet)
  * */

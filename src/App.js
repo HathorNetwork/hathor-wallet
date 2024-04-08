@@ -44,7 +44,7 @@ import hathorLib from '@hathor/wallet-lib';
 import { IPC_RENDERER } from './constants';
 import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
-import { setNavigateTo, updateLedgerClosed } from './actions/index';
+import { resetNavigateTo, updateLedgerClosed } from './actions/index';
 import { WALLET_STATUS } from './sagas/wallet';
 import ProposalList from './screens/atomic-swap/ProposalList';
 import EditSwap from './screens/atomic-swap/EditSwap';
@@ -173,7 +173,7 @@ function Root() {
 
     // Navigate to the informed route and reset the navigateTo state property
     navigate(navigateTo.route, { replace: navigateTo.replace });
-    dispatch(setNavigateTo(''));
+    dispatch(resetNavigateTo());
   }, [navigateTo])
 
   // Handles failed wallet states
