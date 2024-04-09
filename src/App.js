@@ -44,7 +44,7 @@ import hathorLib from '@hathor/wallet-lib';
 import { IPC_RENDERER } from './constants';
 import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
-import { updateLedgerClosed } from './actions/index';
+import { resetNavigateTo, updateLedgerClosed } from './actions/index';
 import { WALLET_STATUS } from './sagas/wallet';
 import ProposalList from './screens/atomic-swap/ProposalList';
 import EditSwap from './screens/atomic-swap/EditSwap';
@@ -58,12 +58,14 @@ function Root() {
     walletStartState,
     isVersionAllowed,
     wallet,
+    navigateTo,
   } = useSelector((state) => {
     return {
       ledgerClosed: state.ledgerWasClosed,
       walletStartState: state.walletStartState,
       isVersionAllowed: state.isVersionAllowed,
       wallet: state.wallet,
+      navigateTo: state.navigateTo,
     };
   });
   const dispatch = useDispatch();
@@ -159,6 +161,20 @@ function Root() {
       versionUtils.checkApiVersion(wallet);
     }
   }, [isVersionAllowed, wallet]);
+
+  /**
+   * This effect allows navigation to be triggered from background tasks such as sagas.
+   */
+  useEffect(() => {
+    // Ignore this effect if there is no route to navigateTo
+    if (!navigateTo.route) {
+      return;
+    }
+
+    // Navigate to the informed route and reset the navigateTo state property
+    navigate(navigateTo.route, { replace: navigateTo.replace });
+    dispatch(resetNavigateTo());
+  }, [navigateTo])
 
   // Handles failed wallet states
   if (walletStartState === WALLET_STATUS.FAILED) {

@@ -13,6 +13,7 @@ import {
     proposalFetchFailed,
     proposalFetchSuccess,
     proposalUpdated,
+    setNavigateTo,
     types
 } from "../actions";
 import { specificTypeAndPayload } from "./helpers";
@@ -164,8 +165,7 @@ function* createProposalOnBackend(action) {
         updatePersistentStorage(allProposals);
 
         // Navigating to the Edit Swap screen with this proposal
-        const routerHistory = yield select((state) => state.routerHistory);
-        routerHistory(`/wallet/atomic_swap/proposal/${proposalId}`, { replace: true });
+        yield put(setNavigateTo(`/wallet/atomic_swap/proposal/${proposalId}`, true));
     } catch (e) {
         yield put(lastFailedRequest({ message: e.message }));
     }

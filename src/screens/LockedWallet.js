@@ -83,7 +83,7 @@ function LockedWallet() {
 
     setLoading(true);
 
-    dispatch(startWalletRequested({ pin, routerHistory: navigate }));
+    dispatch(startWalletRequested({ pin }));
   }
 
   /**

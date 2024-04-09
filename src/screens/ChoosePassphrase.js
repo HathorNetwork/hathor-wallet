@@ -44,7 +44,7 @@ function ChoosePassphrase() {
    */
   const handlePassphrase = async () => {
     modalContext.hideModal();
-    await walletUtils.addPassphrase(wallet, passphraseRef.current.value, pinRef.current.value, passwordRef.current.value, navigate)
+    await walletUtils.addPassphrase(wallet, passphraseRef.current.value, pinRef.current.value, passwordRef.current.value)
     navigate('/wallet/');
   }
 
