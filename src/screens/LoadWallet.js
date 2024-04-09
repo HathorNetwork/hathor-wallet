@@ -78,7 +78,7 @@ function LoadWallet() {
   const pinSuccess = () => {
     LOCAL_STORE.unlock();
     // First we clean what can still be there of a last wallet
-    wallet.generateWallet(words, '', pin, password, navigate);
+    wallet.generateWallet(words, '', pin, password);
     LOCAL_STORE.markBackupDone();
     LOCAL_STORE.open(); // Mark this wallet as open, so that it does not appear locked after loading
     // Clean pin and password from redux

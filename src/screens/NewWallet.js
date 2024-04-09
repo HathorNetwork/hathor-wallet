@@ -105,7 +105,7 @@ function NewWallet() {
   const pinSuccess = () => {
     // Generate addresses and load data
     LOCAL_STORE.unlock();
-    wallet.generateWallet(words, '', pin, password, navigate);
+    wallet.generateWallet(words, '', pin, password);
     // Mark this wallet as open, so that it does not appear locked after loading
     LOCAL_STORE.open();
     // Clean pin, password and words from redux

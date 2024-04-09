@@ -48,7 +48,7 @@ import {
   startWalletFailed,
   walletStateError,
   walletStateReady,
-  storeRouterHistory,
+  setNavigateTo,
   reloadingWallet,
   tokenInvalidateHistory,
   sharedAddressUpdate,
@@ -105,14 +105,12 @@ export function* startWallet(action) {
     passphrase,
     pin,
     password,
-    routerHistory,
     xpub,
     hardware,
   } = action.payload;
   let xpriv = null;
 
   yield put(loadingAddresses(true));
-  yield put(storeRouterHistory(routerHistory));
 
   if (hardware) {
     // We need to ensure that the hardware wallet storage is always generated here since we may be
@@ -193,7 +191,7 @@ export function* startWallet(action) {
         /**
          * Lock screen will call `resolve` with the pin screen after validation
          */
-        routerHistory('/locked/');
+        dispatch(setNavigateTo('/locked/'));
         dispatch(lockWalletForResult(resolve));
       }),
       passphrase,
@@ -280,7 +278,7 @@ export function* startWallet(action) {
       console.error(e);
       // Return to locked screen when the wallet fails to start
       LOCAL_STORE.lock();
-      routerHistory('/');
+      yield put(dispatch(setNavigateTo('/')));
       return
     }
   }
@@ -299,7 +297,7 @@ export function* startWallet(action) {
   }
 
   // Wallet start called, we need to show the loading addresses screen
-  routerHistory('/loading_addresses', { replace: true });
+  yield put(setNavigateTo('/loading_addresses', true));
 
   // Wallet might be already ready at this point
   if (!wallet.isReady()) {
@@ -333,7 +331,7 @@ export function* startWallet(action) {
 
   LOCAL_STORE.unlock();
 
-  routerHistory('/wallet/', { replace: true });
+  yield put(setNavigateTo('/wallet/', true));
 
   yield put(loadingAddresses(false));
 
@@ -501,7 +499,6 @@ export function* handleTx(wallet, tx) {
 export function* handleNewTx(action) {
   const tx = action.payload;
   const wallet = yield select((state) => state.wallet);
-  const routerHistory = yield select((state) => state.routerHistory);
 
   if (!wallet.isReady()) {
     return;
@@ -537,11 +534,7 @@ export function* handleNewTx(action) {
   // Set the notification click, in case we have sent one
   if (notification !== undefined) {
     notification.onclick = () => {
-      if (!routerHistory) {
-        return;
-      }
-
-      routerHistory(`/transaction/${tx.tx_id}/`);
+      put(setNavigateTo(`/transaction/${ tx.tx_id }/`))
     }
   }
 }
@@ -661,7 +654,6 @@ export function* walletReloading() {
 
   const wallet = yield select((state) => state.wallet);
   const useWalletService = yield select((state) => state.useWalletService);
-  const routerHistory = yield select((state) => state.routerHistory);
 
   // If we are using the wallet-service, we don't need to wait until the addresses
   // are reloaded since they are stored on the wallet-service itself.
@@ -703,7 +695,7 @@ export function* walletReloading() {
 
     // Load success, we can send the user back to the wallet screen
     yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
-    routerHistory('/wallet/', { replace: true });
+    yield put(setNavigateTo('/wallet/', true));
     yield put(loadingAddresses(false));
   } catch (e) {
     yield put(startWalletFailed());
@@ -723,7 +715,6 @@ export function* refreshSharedAddress() {
 }
 
 export function* onWalletReset() {
-  const routerHistory = yield select((state) => state.routerHistory);
   const wallet = yield select((state) => state.wallet);
 
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
@@ -734,9 +725,7 @@ export function* onWalletReset() {
 
   yield put(walletResetSuccess());
 
-  if (routerHistory) {
-    routerHistory('/welcome');
-  }
+  yield put(setNavigateTo('/welcome'));
 }
 
 export function* onWalletServiceDisabled() {
