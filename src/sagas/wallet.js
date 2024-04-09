@@ -371,7 +371,7 @@ export function* loadTokens() {
   // spawn a new "thread" to handle it.
   //
   // `spawn` is similar to `fork`, but it creates a `detached` fork
-  yield spawn(fetchTokensMetadata, registeredTokens.map(token => token.uid));
+  yield spawn(fetchTokensMetadata, registeredTokens.map(token => token.uid).filter(token => token !== htrUid));
 
   // Dispatch actions to asynchronously load the balances of each token the wallet has
   // ever interacted with. The `put` effect will just dispatch and continue, loading

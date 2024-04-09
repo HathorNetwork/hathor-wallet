@@ -19,7 +19,6 @@ import LOCAL_STORE from '../storage';
 
 // Routes that should display the TokenBar
 const ROUTE_WHITELIST = [
-  '/unknown_tokens/',
   '/wallet/',
 ];
 
