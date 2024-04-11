@@ -12,7 +12,7 @@ import helpers from '../../utils/helpers';
 import TokenAction from './TokenAction';
 import SpanFmt from '../SpanFmt';
 import { connect } from "react-redux";
-import { getGlobalWallet } from "../../services/wallet.service";
+import { getGlobalWallet } from "../../services/wallet.singleton";
 
 const mapStateToProps = (state) => {
   return {

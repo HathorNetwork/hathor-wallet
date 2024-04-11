@@ -23,7 +23,7 @@ import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { str2jsx } from '../utils/i18n';
 import { useNavigate } from "react-router-dom";
-import { getGlobalWallet } from "../services/wallet.service";
+import { getGlobalWallet } from "../services/wallet.singleton";
 
 /**
  * Create a new token

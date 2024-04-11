@@ -22,7 +22,7 @@ import { MAX_GRAPH_LEVEL } from '../constants';
 import helpers from '../utils/helpers';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import Loading from '../components/Loading';
-import { getGlobalWallet } from "../services/wallet.service";
+import { getGlobalWallet } from "../services/wallet.singleton";
 
 
 const mapStateToProps = (state) => {

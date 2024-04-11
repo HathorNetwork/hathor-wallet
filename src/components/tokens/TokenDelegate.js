@@ -10,7 +10,7 @@ import { t } from 'ttag';
 import TokenAction from './TokenAction';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
-import { getGlobalWallet } from "../../services/wallet.service";
+import { getGlobalWallet } from "../../services/wallet.singleton";
 
 const mapStateToProps = (state) => {
   return {

@@ -23,7 +23,7 @@ import { NFT_DATA_MAX_SIZE, NFT_GUIDE_URL, NFT_STANDARD_RFC_URL } from '../const
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useNavigate } from 'react-router-dom';
-import { getGlobalWallet } from "../services/wallet.service";
+import { getGlobalWallet } from "../services/wallet.singleton";
 
 
 /**

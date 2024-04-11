@@ -10,7 +10,7 @@ import { t } from "ttag";
 import InputNumber from "../InputNumber";
 import hathorLib, { Address } from "@hathor/wallet-lib";
 import walletUtils from '../../utils/wallet';
-import { getGlobalWallet } from "../../services/wallet.service";
+import { getGlobalWallet } from "../../services/wallet.singleton";
 
 export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manageDomLifecycle, onClose }) {
     /** @type HathorWallet */

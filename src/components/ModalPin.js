@@ -11,7 +11,7 @@ import $ from 'jquery';
 import PinInput from './PinInput';
 import { connect } from 'react-redux';
 import PropTypes from "prop-types";
-import { getGlobalWallet } from "../services/wallet.service";
+import { getGlobalWallet } from "../services/wallet.singleton";
 
 
 const mapStateToProps = (state) => {

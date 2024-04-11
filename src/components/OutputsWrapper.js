@@ -13,7 +13,7 @@ import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import InputNumber from './InputNumber';
 import LOCAL_STORE from '../storage';
-import { getGlobalWallet } from "../services/wallet.service";
+import { getGlobalWallet } from "../services/wallet.singleton";
 
 
 const mapStateToProps = (state) => {

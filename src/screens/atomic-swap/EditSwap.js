@@ -27,7 +27,7 @@ import { cloneDeep, get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import Loading from "../../components/Loading";
 import { proposalTokenFetchRequested } from "../../actions";
-import { getGlobalWallet } from "../../services/wallet.service";
+import { getGlobalWallet } from "../../services/wallet.singleton";
 
 /**
  * @param {string} props.match.params.proposalId Proposal identifier

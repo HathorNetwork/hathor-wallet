@@ -15,7 +15,7 @@ import { colors } from '../constants';
 import helpers from '../utils/helpers';
 import path from 'path';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getGlobalWallet } from "../services/wallet.service";
+import { getGlobalWallet } from "../services/wallet.singleton";
 
 /**
  * Shows the detail of a transaction or block

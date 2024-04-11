@@ -12,7 +12,7 @@ import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
 import wallet from "../utils/wallet";
-import { getGlobalWallet } from "../services/wallet.service";
+import { getGlobalWallet } from "../services/wallet.singleton";
 
 
 const mapStateToProps = (state) => {

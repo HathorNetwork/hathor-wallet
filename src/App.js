@@ -51,7 +51,7 @@ import EditSwap from './screens/atomic-swap/EditSwap';
 import NewSwap from './screens/atomic-swap/NewSwap';
 import ImportExisting from './screens/atomic-swap/ImportExisting';
 import LOCAL_STORE from './storage';
-import { getGlobalWallet } from "./services/wallet.service";
+import { getGlobalWallet } from "./services/wallet.singleton";
 
 function Root() {
   const {

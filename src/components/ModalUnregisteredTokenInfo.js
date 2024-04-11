@@ -14,7 +14,7 @@ import TokenGeneralInfo from '../components/TokenGeneralInfo';
 import hathorLib from '@hathor/wallet-lib';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { getGlobalWallet } from "../services/wallet.service";
+import { getGlobalWallet } from "../services/wallet.singleton";
 
 const mapStateToProps = (state) => {
   return { storage: getGlobalWallet().storage };
