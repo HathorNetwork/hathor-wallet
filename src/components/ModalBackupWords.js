@@ -27,7 +27,6 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = (state) => {
   return {
     words: state.words,
-    wallet: getGlobalWallet(),
   };
 };
 
@@ -109,7 +108,8 @@ class ModalBackupWords extends React.Component {
       this.setState({ passwordFormValidated: false });
       const password = this.refs.password.value;
       try {
-        const accessData = await this.props.wallet.storage.getAccessData();
+        const wallet = getGlobalWallet();
+        const accessData = await wallet.storage.getAccessData();
         const words = hathorLib.cryptoUtils.decryptData(accessData.words, password);
         this.props.updateWords(words);
         this.setState({ passwordSuccess: true, errorMessage: '' });

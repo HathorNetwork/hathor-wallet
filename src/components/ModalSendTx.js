@@ -18,7 +18,6 @@ import { getGlobalWallet } from "../services/wallet.singleton";
 
 const mapStateToProps = (state) => {
   return {
-    wallet: getGlobalWallet(),
     useWalletService: state.useWalletService,
   };
 };
@@ -82,7 +81,8 @@ export class ModalSendTx extends React.Component {
     // If we are using the wallet service facade, we should avail of the validated PIN
     // to renew the auth token.
     if (this.props.useWalletService) {
-      await this.props.wallet.validateAndRenewAuthToken(pin);
+      const wallet = getGlobalWallet();
+      await wallet.validateAndRenewAuthToken(pin);
     }
 
     const preparedTx = await this.props.prepareSendTransaction(pin);

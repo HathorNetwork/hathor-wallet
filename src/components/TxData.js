@@ -29,7 +29,6 @@ const mapStateToProps = (state) => {
   return {
     tokens: state.tokens,
     tokenMetadata: state.tokenMetadata || {},
-    wallet: getGlobalWallet(),
   };
 };
 
@@ -117,7 +116,8 @@ class TxData extends React.Component {
     });
 
     try {
-      const fundsData = await this.props.wallet.graphvizNeighborsQuery(
+      const wallet = getGlobalWallet();
+      const fundsData = await wallet.graphvizNeighborsQuery(
         this.props.transaction.hash,
         'funds',
         MAX_GRAPH_LEVEL,
@@ -147,7 +147,8 @@ class TxData extends React.Component {
     });
 
     try {
-      const verificationData = await this.props.wallet.graphvizNeighborsQuery(
+      const wallet = getGlobalWallet();
+      const verificationData = await wallet.graphvizNeighborsQuery(
         this.props.transaction.hash,
         'verification',
         MAX_GRAPH_LEVEL,
@@ -185,7 +186,8 @@ class TxData extends React.Component {
     ];
 
     try {
-      const walletAddressesMap = await this.props.wallet.checkAddressesMine(addresses);
+      const wallet = getGlobalWallet();
+      const walletAddressesMap = await wallet.checkAddressesMine(addresses);
       this.setState({
         walletAddressesMap,
       });
@@ -247,7 +249,8 @@ class TxData extends React.Component {
   }
 
   calculateBalance = async () => {
-    const fullBalance = await hathorLib.transactionUtils.getTxBalance(this.props.transaction, this.props.wallet.storage);
+    const wallet = getGlobalWallet();
+    const fullBalance = await hathorLib.transactionUtils.getTxBalance(this.props.transaction, wallet.storage);
     const balance = {};
     for (const token of Object.keys(fullBalance)) {
       const tokenBalance = fullBalance[token];
@@ -370,7 +373,8 @@ class TxData extends React.Component {
       tokenClicked: token,
       unregisteredLoading: true,
     }, async () => {
-      const tokenDetails = await this.props.wallet.getTokenDetails(token.uid);
+      const wallet = getGlobalWallet();
+      const tokenDetails = await wallet.getTokenDetails(token.uid);
 
       const { totalSupply, totalTransactions, authorities } = tokenDetails;
 

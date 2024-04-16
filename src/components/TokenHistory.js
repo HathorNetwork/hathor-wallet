@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-import wallet from '../utils/wallet';
+import walletUtils from '../utils/wallet';
 import helpers from '../utils/helpers';
 import { colors } from '../constants';
 import TokenPagination from './TokenPagination';
@@ -33,7 +33,6 @@ const mapStateToProps = (state, props) => {
 
   return {
     tokenHistory: history,
-    wallet: getGlobalWallet(),
     tokenMetadata: state.tokenMetadata,
   };
 };
@@ -86,8 +85,8 @@ class TokenHistory extends React.Component {
    */
   fetchMoreHistory = async () => {
     if (this.state.shouldFetch) {
-      const newHistory = await wallet.fetchMoreHistory(
-        this.props.wallet,
+      const newHistory = await walletUtils.fetchMoreHistory(
+        getGlobalWallet(),
         this.props.selectedToken,
         this.props.tokenHistory.data
       );

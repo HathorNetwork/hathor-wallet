@@ -9,17 +9,9 @@ import React from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import { CONFIRM_RESET_MESSAGE } from '../constants';
-import { connect } from 'react-redux';
 import SpanFmt from './SpanFmt';
 import LOCAL_STORE from '../storage';
 import { getGlobalWallet } from "../services/wallet.singleton";
-
-
-const mapStateToProps = (state) => {
-  return {
-    wallet: getGlobalWallet(),
-  };
-};
 
 /**
  * Component that shows a modal to ask form confirmation data to reset the wallet
@@ -76,8 +68,9 @@ class ModalResetAllData extends React.Component {
     }
 
     if (!forgotPassword) {
-      // Password was informed and it is incorrect
-      const correctPassword = await this.props.wallet.checkPassword(password);
+      // Password was informed and it is incorr
+      const wallet = getGlobalWallet();
+      const correctPassword = await wallet.checkPassword(password);
       if (password && !correctPassword) {
         this.setState({errorMessage: t`Invalid password`})
         return
@@ -177,4 +170,4 @@ class ModalResetAllData extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(ModalResetAllData);
+export default ModalResetAllData;
