@@ -24,7 +24,7 @@ import { getGlobalWallet } from "../services/wallet.singleton";
  */
 function TransactionDetail() {
   const wallet = getGlobalWallet();
-	const navigate = useNavigate();
+  const navigate = useNavigate();
   const { id: txId } = useParams();
 
   /* transaction {Object} Loaded transaction */
