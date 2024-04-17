@@ -13,7 +13,7 @@ import {
 } from "../../utils/atomicSwap";
 import { useDispatch, useSelector } from "react-redux";
 import { proposalCreateRequested } from "../../actions";
-import { getGlobalWallet } from "../../modules/wallet";
+import { getGlobalWallet } from '../../modules/wallet';
 
 export default function NewSwap (props) {
     const [password, setPassword] = useState('');

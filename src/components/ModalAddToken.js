@@ -10,8 +10,8 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
-import walletUtils from "../utils/wallet";
-import { getGlobalWallet } from "../modules/wallet";
+import walletUtils from '../utils/wallet';
+import { getGlobalWallet } from '../modules/wallet';
 
 /**
  * Component that shows a modal to add one specific unknown token to the wallet
@@ -83,7 +83,7 @@ class ModalAddToken extends React.Component {
     }
 
     try {
-      const storage = getGlobalWallet().storage;
+      const { storage } = getGlobalWallet();
       const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(this.refs.config.value, storage);
       const tokensBalance = this.props.tokensBalance;
 

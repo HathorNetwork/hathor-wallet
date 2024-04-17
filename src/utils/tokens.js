@@ -10,7 +10,7 @@ import { newTokens, removeTokenMetadata } from '../actions/index';
 import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 import LOCAL_STORE from '../storage';
-import { getGlobalWallet } from "../modules/wallet";
+import { getGlobalWallet } from '../modules/wallet';
 
 /**
  * Methods to create and handle tokens

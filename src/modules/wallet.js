@@ -18,29 +18,29 @@ let globalWallet = null;
  * @param {hathorLib.HathorWallet} wallet
  */
 export function setGlobalWallet(wallet) {
-	if (globalWallet && globalWallet.state !== hathorLib.HathorWallet.CLOSED) {
-		// Wallet was not closed
-		globalWallet.stop({ cleanStorage: false });
-	}
+  if (globalWallet && globalWallet.state !== hathorLib.HathorWallet.CLOSED) {
+    // Wallet was not closed
+    globalWallet.stop({ cleanStorage: false });
+  }
 
-	globalWallet = wallet;
+  globalWallet = wallet;
 }
 
 /**
  * Retrieves the application-wide HathorWallet object
  */
 export function getGlobalWallet() {
-	return globalWallet;
+  return globalWallet;
 }
 
 /**
  * Stops the application-wide HathorWallet object and removes it from memory
  */
 export function stopWallet() {
-	if (!globalWallet) {
-		return;
-	}
+  if (!globalWallet) {
+    return;
+  }
 
-	globalWallet.stop();
-	globalWallet = null;
+  globalWallet.stop();
+  globalWallet = null;
 }

@@ -22,7 +22,7 @@ import { MAX_GRAPH_LEVEL } from '../constants';
 import helpers from '../utils/helpers';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import Loading from '../components/Loading';
-import { getGlobalWallet } from "../modules/wallet";
+import { getGlobalWallet } from '../modules/wallet';
 
 
 const mapStateToProps = (state) => {
@@ -249,8 +249,8 @@ class TxData extends React.Component {
   }
 
   calculateBalance = async () => {
-    const wallet = getGlobalWallet();
-    const fullBalance = await hathorLib.transactionUtils.getTxBalance(this.props.transaction, wallet.storage);
+    const { storage } = getGlobalWallet();
+    const fullBalance = await hathorLib.transactionUtils.getTxBalance(this.props.transaction, storage);
     const balance = {};
     for (const token of Object.keys(fullBalance)) {
       const tokenBalance = fullBalance[token];
