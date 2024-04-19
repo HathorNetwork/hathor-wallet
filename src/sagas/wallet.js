@@ -71,6 +71,7 @@ import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
+import { getGlobalWallet, setGlobalWallet } from "../modules/wallet";
 
 export const WALLET_STATUS = {
   READY: 'ready',
@@ -229,7 +230,7 @@ export function* startWallet(action) {
     wallet = new HathorWallet(walletConfig);
   }
 
-  yield put(setWallet(wallet));
+  setGlobalWallet(wallet);
 
   // Setup listeners before starting the wallet so we don't lose messages
   yield fork(setupWalletListeners, wallet);
@@ -361,7 +362,7 @@ export function* loadTokens() {
   const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
 
   yield call(fetchTokenData, htrUid);
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   // Fetch all tokens, including the ones that are not registered yet
   const allTokens = yield call([wallet, wallet.getTokens]);
@@ -498,7 +499,7 @@ export function* handleTx(wallet, tx) {
 
 export function* handleNewTx(action) {
   const tx = action.payload;
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     return;
@@ -541,7 +542,7 @@ export function* handleNewTx(action) {
 
 export function* handleUpdateTx(action) {
   const tx = action.payload;
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     return;
@@ -632,7 +633,7 @@ export function* loadPartialUpdate({ payload }) {
 
 export function* bestBlockUpdate({ payload }) {
   const currentHeight = yield select((state) => state.height);
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     return;
@@ -652,7 +653,7 @@ export function* onWalletConnStateUpdate({ payload }) {
 export function* walletReloading() {
   yield put(loadingAddresses(true));
 
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
   const useWalletService = yield select((state) => state.useWalletService);
 
   // If we are using the wallet-service, we don't need to wait until the addresses
@@ -704,7 +705,7 @@ export function* walletReloading() {
 }
 
 export function* refreshSharedAddress() {
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   const { address, index } = yield call([wallet, wallet.getCurrentAddress]);
 
@@ -715,7 +716,7 @@ export function* refreshSharedAddress() {
 }
 
 export function* onWalletReset() {
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
   LOCAL_STORE.resetStorage();

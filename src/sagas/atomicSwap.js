@@ -26,6 +26,7 @@ import {
 } from "../utils/atomicSwap";
 import { t } from "ttag";
 import { swapService } from '@hathor/wallet-lib'
+import { getGlobalWallet } from "../modules/wallet";
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 
@@ -93,7 +94,7 @@ function* fetchProposalData(action) {
         yield put(proposalFetchSuccess(proposalId, responseData));
 
         // On success, build the proposal object locally and enrich it
-        const wallet = yield select((state) => state.wallet);
+        const wallet = getGlobalWallet();
         const newData = generateReduxObjFromProposal(
           proposalId,
           password,
@@ -148,7 +149,7 @@ function* createProposalOnBackend(action) {
         yield(put(importProposal(proposalId, password)));
 
         // Enrich the PartialTx with exhibition metadata
-        const wallet = yield select((state) => state.wallet);
+        const wallet = getGlobalWallet();
         const newProposalReduxObj = generateReduxObjFromProposal(
           proposalId,
           password,

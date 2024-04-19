@@ -9,15 +9,8 @@ import React from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import PinInput from './PinInput';
-import { connect } from 'react-redux';
 import PropTypes from "prop-types";
-
-
-const mapStateToProps = (state) => {
-  return {
-    wallet: state.wallet,
-  };
-};
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Component that shows a modal with a form to ask for the user PIN
@@ -78,7 +71,8 @@ export class ModalPin extends React.Component {
     const pin = this.refs.pinInput.refs.pin.value;
 
     // Incorrect PIN, show error message and do nothing else
-    if (!await this.props.wallet.checkPin(pin)) {
+    const wallet = getGlobalWallet();
+    if (!await wallet.checkPin(pin)) {
       this.setState({ errorMessage: t`Invalid PIN` })
       return;
     }
@@ -136,7 +130,7 @@ export class ModalPin extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(ModalPin);
+export default ModalPin;
 
 
 ModalPin.propTypes = {

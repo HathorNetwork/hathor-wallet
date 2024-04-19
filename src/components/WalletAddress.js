@@ -15,6 +15,7 @@ import { IPC_RENDERER } from '../constants';
 import { sharedAddressUpdate } from '../actions/index';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import LOCAL_STORE from '../storage';
+import { getGlobalWallet } from '../modules/wallet';
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -26,7 +27,6 @@ const mapStateToProps = (state) => {
   return {
     lastSharedAddress: state.lastSharedAddress,
     lastSharedIndex: state.lastSharedIndex,
-    wallet: state.wallet,
   };
 };
 
@@ -71,7 +71,8 @@ export class WalletAddress extends React.Component {
    */
   generateNewAddress = async (e) => {
     e.preventDefault();
-    const address = await this.props.wallet.getNextAddress();
+    const wallet = getGlobalWallet();
+    const address = await wallet.getNextAddress();
 
     if (address.address === this.props.lastSharedAddress) {
       this.alertErrorRef.current.show(3000);

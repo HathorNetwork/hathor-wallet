@@ -9,7 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
-import wallet from '../../utils/wallet';
+import walletUtils from '../../utils/wallet';
 import helpers from '../../utils/helpers';
 import InputNumber from '../InputNumber';
 import ReactLoading from 'react-loading';
@@ -17,10 +17,10 @@ import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../../sagas/tokens';
 import { colors } from '../../constants';
+import { getGlobalWallet } from "../../modules/wallet";
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
   };
@@ -57,8 +57,9 @@ class TokenMelt extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = async (pin) => {
-    const amountValue = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
-    const transaction = await this.props.wallet.prepareMeltTokensData(
+    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
+    const wallet = getGlobalWallet();
+    const transaction = await wallet.prepareMeltTokensData(
       this.props.token.uid,
       amountValue,
       {
@@ -68,13 +69,13 @@ class TokenMelt extends React.Component {
     );
 
     if (this.props.useWalletService) {
-      return new hathorLib.SendTransactionWalletService(this.props.wallet, {
+      return new hathorLib.SendTransactionWalletService(wallet, {
         transaction,
         pin,
       });
     }
 
-    return new hathorLib.SendTransaction({ transaction, pin, storage: this.props.wallet.storage });
+    return new hathorLib.SendTransaction({ transaction, pin, storage: wallet.storage });
   }
 
   /**
@@ -88,7 +89,7 @@ class TokenMelt extends React.Component {
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const amount = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
+    const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
     const prettyAmountValue = helpers.renderValue(amount, this.isNFT());
     return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;
   }
@@ -100,7 +101,7 @@ class TokenMelt extends React.Component {
    * @return {string} Error message, in case of form invalid. Nothing, otherwise.
    */
   melt = () => {
-    const amountValue = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
+    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
     const walletAmount = get(this.props.tokenBalance, 'data.available', 0);
 
     if (amountValue > walletAmount) {

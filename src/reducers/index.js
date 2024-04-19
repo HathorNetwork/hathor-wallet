@@ -80,7 +80,6 @@ const initialState = {
   loadedData: { transactions: 0, addresses: 0 },
   // Height of the best chain of the network arrived from ws data
   height: 0,
-  wallet: null,
   walletState: null,
   // Metadata of tokens
   tokenMetadata: {},
@@ -179,10 +178,6 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {requestErrorStatusCode: action.payload});
     case 'update_height':
       return onUpdateHeight(state, action);
-    case 'set_wallet':
-      return onSetWallet(state, action);
-    case 'reset_wallet':
-      return onResetWallet(state, action);
     case 'load_wallet_success':
       return onLoadWalletSuccess(state, action);
     case 'update_tx':
@@ -275,30 +270,6 @@ const rootReducer = (state = initialState, action) => {
     default:
       return state;
   }
-};
-
-const onSetWallet = (state, action) => {
-  if (state.wallet && state.wallet.state !== hathorLib.HathorWallet.CLOSED) {
-    // Wallet was not closed
-    state.wallet.stop({ cleanStorage: false });
-  }
-
-  return {
-    ...state,
-    wallet: action.payload
-  };
-};
-
-const onResetWallet = (state, action) => {
-  if (state.wallet) {
-    // Stop wallet
-    state.wallet.stop();
-  }
-
-  return {
-    ...state,
-    wallet: null,
-  };
 };
 
 const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
