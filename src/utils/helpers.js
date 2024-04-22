@@ -376,21 +376,6 @@ const helpers = {
   plural(qty, singleWord, pluralWord) {
     return qty === 1 ? singleWord : pluralWord;
   },
-
-  /**
-   * Converts a javascript `Set` instance to a serializable object, which can be stored in redux
-   * @param {Set} set
-   * @returns {Record<string, unknown>}
-   */
-  convertSetToObject(set) {
-    let obj = {};
-
-    for (const item of set) {
-      obj[item] = item;
-    }
-
-    return obj;
-  }
 }
 
 export default helpers;

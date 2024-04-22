@@ -300,17 +300,17 @@ const onLoadWalletSuccess = (state, action) => {
   LOCAL_STORE.setWalletVersion(VERSION);
   const { tokens, registeredTokens, currentAddress } = action.payload;
 
-  // Convert the tokens list to a new Set to ensure there are no duplicated tokens
-  const allTokens = new Set();
-  for (const key in tokens) {
-    allTokens.add(tokens[key]);
+  // Convert the tokens list to a new object to ensure there are no duplicated tokens
+  const allTokens = {};
+  for (const uid of tokens) {
+    allTokens[uid] = uid;
   }
   return {
     ...state,
     loadingAddresses: false,
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
-    allTokens: helpersUtils.convertSetToObject(allTokens),
+    allTokens: allTokens,
     tokens: registeredTokens,
   };
 };
@@ -529,18 +529,16 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
  */
 export const onNewTokens = (state, action) => {
   // Convert `allTokens` to a Set to prevent duplicates
-  const allTokensSet = new Set();
-  for (const token of Object.keys(state.allTokens)) {
-    allTokensSet.add(token);
-  }
-  // Add new created token to the all tokens set
-  allTokensSet.add(action.payload.uid);
+  const allTokens = {...state.allTokens};
+  // Add new created token to the all tokens object
+  const newTokenUid = action.payload.uid;
+  allTokens[newTokenUid] = newTokenUid;
 
   return {
     ...state,
-    selectedToken: action.payload.uid,
+    selectedToken: newTokenUid,
     tokens: action.payload.tokens,
-    allTokensSet: helpersUtils.convertSetToObject(allTokensSet),
+    allTokens: allTokens,
   };
 };
 

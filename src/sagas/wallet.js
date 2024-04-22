@@ -380,7 +380,7 @@ export function* loadTokens() {
   //
   // Note: We need to download the balance of all the tokens from the wallet so we can
   // hide zero-balance tokens
-  for (const token of Object.values(allTokens)) {
+  for (const token of Object.keys(allTokens)) {
     yield put(tokenFetchBalanceRequested(token));
   }
 
@@ -674,7 +674,7 @@ export function* walletReloading() {
 
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
-    for (const tokenUid of Object.values(allTokens)) {
+    for (const tokenUid of Object.keys(allTokens)) {
       if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
         continue;
       }
