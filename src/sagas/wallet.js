@@ -323,8 +323,15 @@ export function* startWallet(action) {
   try {
     const { allTokens, registeredTokens } = yield call(loadTokens);
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
+
+    // Convert tokens to an object map before storing on Redux
+    const allTokensMap = {};
+    for (const uid of allTokens) {
+      allTokensMap[uid] = uid;
+    }
+
     // Store all tokens on redux
-    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress));
   } catch(e) {
     yield put(startWalletFailed());
     return;
@@ -694,8 +701,14 @@ export function* walletReloading() {
 
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
 
+    // Convert tokens to an object map before storing on Redux
+    const allTokensMap = {};
+    for (const uid of allTokens) {
+      allTokensMap[uid] = uid;
+    }
+
     // Load success, we can send the user back to the wallet screen
-    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress));
     yield put(setNavigateTo('/wallet/', true));
     yield put(loadingAddresses(false));
   } catch (e) {

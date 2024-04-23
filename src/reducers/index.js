@@ -291,7 +291,7 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
 
 /**
  * Got wallet history. Update wallet data on redux
- * @param {string[]} action.payload.tokens
+ * @param {Record<string,string>} action.payload.tokens Object map containing all tokens uids as keys
  * @param {string} action.payload.currentAddress
  * @param {{uid:string, name:string, symbol:string}[]} action.payload.registeredTokens
  */
@@ -300,17 +300,12 @@ const onLoadWalletSuccess = (state, action) => {
   LOCAL_STORE.setWalletVersion(VERSION);
   const { tokens, registeredTokens, currentAddress } = action.payload;
 
-  // Convert the tokens list to a new object to ensure there are no duplicated tokens
-  const allTokens = {};
-  for (const uid of tokens) {
-    allTokens[uid] = uid;
-  }
   return {
     ...state,
     loadingAddresses: false,
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
-    allTokens: allTokens,
+    allTokens: tokens,
     tokens: registeredTokens,
   };
 };
