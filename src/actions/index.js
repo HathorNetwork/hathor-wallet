@@ -471,14 +471,6 @@ export const setFeatureToggles = (toggles) => ({
   payload: toggles,
 });
 
-/**
- * unleashClient {UnleashClient} The unleash client to store
- */
-export const setUnleashClient = (unleashClient) => ({
-  type: types.SET_UNLEASH_CLIENT,
-  payload: unleashClient,
-});
-
 export const walletResetSuccess = () => ({
   type: types.WALLET_RESET_SUCCESS,
 });
