@@ -229,7 +229,7 @@ const wallet = {
     const unknownTokens = [];
 
     // Iterating tokens to filter unregistered ones
-    for (const tokenUid of allTokens) {
+    for (const tokenUid of Object.keys(allTokens)) {
       // If it is already registered, skip it.
       if (registeredTokens.find((x) => x.uid === tokenUid)) {
         continue;

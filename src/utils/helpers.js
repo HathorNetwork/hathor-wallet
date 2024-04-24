@@ -375,7 +375,7 @@ const helpers = {
    */
   plural(qty, singleWord, pluralWord) {
     return qty === 1 ? singleWord : pluralWord;
-  }
+  },
 }
 
 export default helpers;

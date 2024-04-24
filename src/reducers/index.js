@@ -72,8 +72,12 @@ const initialState = {
   tokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
   // Token selected (by default is HATHOR)
   selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
-  // List of all tokens seen in transactions
-  allTokens: new Set(),
+  /**
+   * List of all tokens seen in transactions
+   * @type {Record<string, string>}
+   * @example { 00: "00", abc123: "abc123" }
+   */
+  allTokens: {},
   // If is in the proccess of loading addresses transactions from the full node
   // When the request to load addresses fails this variable can continue true
   loadingAddresses: false,
@@ -287,19 +291,21 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
 
 /**
  * Got wallet history. Update wallet data on redux
+ * @param {Record<string,string>} action.payload.tokens Object map containing all tokens uids as keys
+ * @param {string} action.payload.currentAddress
+ * @param {{uid:string, name:string, symbol:string}[]} action.payload.registeredTokens
  */
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
   LOCAL_STORE.setWalletVersion(VERSION);
   const { tokens, registeredTokens, currentAddress } = action.payload;
-  const allTokens = new Set(tokens);
 
   return {
     ...state,
     loadingAddresses: false,
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
-    allTokens,
+    allTokens: tokens,
     tokens: registeredTokens,
   };
 };
@@ -511,17 +517,23 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   return state;
 };
 
-/*
+/**
  * Used when registering or creating tokens to update the wallet token list.
-*/
+ * @param {Record<string,string>} state.allTokens - Current list of allTokens
+ * @param {string} action.payload.uid - UID of token to add
+ */
 export const onNewTokens = (state, action) => {
-  // Add new created token to the all tokens set
-  state.allTokens.add(action.payload.uid);
+  // Convert `allTokens` to a Set to prevent duplicates
+  const allTokens = {...state.allTokens};
+  // Add new created token to the all tokens object
+  const newTokenUid = action.payload.uid;
+  allTokens[newTokenUid] = newTokenUid;
 
   return {
     ...state,
-    selectedToken: action.payload.uid,
+    selectedToken: newTokenUid,
     tokens: action.payload.tokens,
+    allTokens: allTokens,
   };
 };
 
@@ -997,20 +1009,23 @@ export const onUpdateTxHistory = (state, action) => {
     return state;
   }
 
+  const newTokenHistoryData = [...tokenHistory.data];
   for (const [index, histTx] of tokenHistory.data.entries()) {
     if (histTx.tx_id === tx.tx_id) {
-      tokenHistory.data[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
+      newTokenHistoryData[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
       break;
     }
   }
+  const newTokenHistory = {
+    ...tokenHistory,
+    data: newTokenHistoryData,
+  };
 
   return {
     ...state,
     tokensHistory: {
       ...state.tokensHistory,
-      [tokenId]: {
-        ...tokenHistory,
-      }
+      [tokenId]: newTokenHistory,
     },
   };
 };
