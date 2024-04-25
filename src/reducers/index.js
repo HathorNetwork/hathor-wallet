@@ -264,8 +264,6 @@ const rootReducer = (state = initialState, action) => {
       return onSetFeatureToggles(state, action);
     case types.FEATURE_TOGGLE_INITIALIZED:
       return onFeatureToggleInitialized(state);
-    case types.WALLET_RESET_SUCCESS:
-      return onWalletResetSuccess(state);
     case types.UPDATE_TX_HISTORY:
       return onUpdateTxHistory(state, action);
     case types.WALLET_CHANGE_STATE:
@@ -984,11 +982,6 @@ const onSetFeatureToggles = (state, { payload }) => ({
   ...state,
   featureToggles: payload,
 });
-
-const onWalletResetSuccess = (state) => {
-  // Keep the unleashClient as it should continue running
-  return state;
-};
 
 export const onUpdateTxHistory = (state, action) => {
   const { tx, tokenId, balance } = action.payload;

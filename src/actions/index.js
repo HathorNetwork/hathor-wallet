@@ -44,7 +44,6 @@ export const types = {
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
   WALLET_CHANGE_STATE: 'WALLET_CHANGE_STATE',
   WALLET_RESET: 'WALLET_RESET',
-  WALLET_RESET_SUCCESS: 'WALLET_RESET_SUCCESS',
   WALLET_REFRESH_SHARED_ADDRESS: 'WALLET_REFRESH_SHARED_ADDRESS',
   SET_SERVER_INFO: 'SET_SERVER_INFO',
   SET_NAVIGATE_TO: 'SET_NAVIGATE_TO',
@@ -469,10 +468,6 @@ export const featureToggleInitialized = () => ({
 export const setFeatureToggles = (toggles) => ({
   type: types.SET_FEATURE_TOGGLES,
   payload: toggles,
-});
-
-export const walletResetSuccess = () => ({
-  type: types.WALLET_RESET_SUCCESS,
 });
 
 export const walletReset = () => ({
