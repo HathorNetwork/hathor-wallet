@@ -12,7 +12,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom'
 import HathorAlert from './HathorAlert';
 import SpanFmt from './SpanFmt';
-import { selectToken } from '../actions/index';
+import { selectToken, setNavigateTo } from '../actions/index';
 import { connect } from "react-redux";
 import { get } from 'lodash';
 import Viz from 'viz.js';
@@ -35,6 +35,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => {
   return {
     selectToken: data => dispatch(selectToken(data)),
+    setNavigateTo: (route, replace) => dispatch(setNavigateTo(route, replace)),
   };
 };
 
@@ -410,7 +411,7 @@ class TxData extends React.Component {
    */
   tokenRegistered = (token) => {
     this.props.selectToken(token.uid);
-    this.props.history.push('/wallet/');
+    this.props.setNavigateTo('/wallet/');
   }
 
   isAddressMine = (address) => {
