@@ -346,7 +346,6 @@ const onUpdateLoadedData = (state, action) => ({
 });
 
 const onCleanData = (state) => {
-  // Keep the unleashClient as it should continue running
   return Object.assign({}, initialState, {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,

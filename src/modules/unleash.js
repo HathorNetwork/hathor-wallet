@@ -8,9 +8,9 @@
 let unleashClient = null;
 
 export function setUnleashClient(_unleashClient) {
-	unleashClient = _unleashClient;
+  unleashClient = _unleashClient;
 }
 
 export function getUnleashClient() {
-	return unleashClient;
+  return unleashClient;
 }

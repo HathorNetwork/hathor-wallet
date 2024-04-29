@@ -38,7 +38,7 @@ import {
   UNLEASH_POLLING_INTERVAL,
   FEATURE_TOGGLE_DEFAULTS,
 } from '../constants';
-import { getUnleashClient, setUnleashClient } from "../modules/unleash";
+import { getUnleashClient, setUnleashClient } from '../modules/unleash';
 
 const CONNECT_TIMEOUT = 10000;
 const MAX_RETRIES = 5;
