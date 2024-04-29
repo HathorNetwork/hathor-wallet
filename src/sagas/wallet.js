@@ -56,7 +56,6 @@ import {
   setEnableAtomicSwap,
   proposalListUpdated,
   proposalFetchRequested,
-  walletResetSuccess,
   reloadWalletRequested,
   changeWalletState,
   updateTxHistory,
@@ -736,8 +735,6 @@ export function* onWalletReset() {
   if (wallet) {
     yield call([wallet.storage, wallet.storage.cleanStorage], true, true);
   }
-
-  yield put(walletResetSuccess());
 
   yield put(setNavigateTo('/welcome'));
 }
