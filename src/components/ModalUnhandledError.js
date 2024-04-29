@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { t } from 'ttag';
 import walletUtils from '../utils/wallet';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -28,7 +28,7 @@ function ModalUnhandledError({ resetError, error, renderError, info }) {
   /**
    * successMessage {string} Message to be shown to the user in the modal
    */
-  const [successMessage, setSuccessMessage] = React.useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   /**
    * Called when user clicks the button to reset the wallet, then reset data and go to Welcome screen
