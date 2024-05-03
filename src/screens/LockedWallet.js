@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from "react-redux";
 import wallet from '../utils/wallet';
@@ -34,7 +34,7 @@ function LockedWallet() {
   const context = useContext(GlobalModalContext);
   const lockWalletPromise = useSelector(state => state.lockWalletPromise);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     pinRef.current.focus();
@@ -77,13 +77,13 @@ function LockedWallet() {
     if (lockWalletPromise) {
       dispatch(resolveLockWalletPromise(pin));
       // return to the last screen
-      history.goBack();
+      navigate(-1);
       return;
     }
 
     setLoading(true);
 
-    dispatch(startWalletRequested({ pin, routerHistory: history }));
+    dispatch(startWalletRequested({ pin }));
   }
 
   /**
@@ -92,7 +92,7 @@ function LockedWallet() {
   const handleReset = () => {
     context.hideModal();
     dispatch(walletReset());
-    history.push('/welcome/');
+    navigate('/welcome/');
   }
 
   /**

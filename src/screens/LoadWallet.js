@@ -14,7 +14,7 @@ import ChoosePin from '../components/ChoosePin';
 import logo from '../assets/images/hathor-logo.png';
 import { updatePassword, updatePin } from '../actions/index';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import LOCAL_STORE from '../storage';
@@ -42,7 +42,7 @@ function LoadWallet() {
   const wordsInputRef = useRef();
   const dispatch = useDispatch();
   const { pin, password } = useSelector((state) => ({ pin: state.pin, password: state.password }));
-  const history = useHistory();
+  const navigate = useNavigate();
 
   /**
    * Method called when user clicks the 'Import' button
@@ -78,7 +78,7 @@ function LoadWallet() {
   const pinSuccess = () => {
     LOCAL_STORE.unlock();
     // First we clean what can still be there of a last wallet
-    wallet.generateWallet(words, '', pin, password, history);
+    wallet.generateWallet(words, '', pin, password);
     LOCAL_STORE.markBackupDone();
     LOCAL_STORE.open(); // Mark this wallet as open, so that it does not appear locked after loading
     // Clean pin and password from redux
@@ -141,7 +141,7 @@ function LoadWallet() {
         <p className={`mb-4 ${getWordsCountClassName()}`}>{`${wordsCount}/24 words`}</p>
         {errorMessage && <p className="mb-4 text-danger">{errorMessage}</p>}
         <div className="d-flex justify-content-between flex-row w-100">
-          <button onClick={() => history.goBack()} type="button" className="btn btn-secondary">{t`Back`}</button>
+          <button onClick={() => navigate(-1)} type="button" className="btn btn-secondary">{t`Back`}</button>
           <button onClick={importClick} type="button" className="btn btn-hathor">{t`Import data`}</button>
         </div>
       </div>

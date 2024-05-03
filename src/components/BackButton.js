@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -16,7 +16,7 @@ import { useHistory } from 'react-router-dom';
  * @memberof Components
  */
 function BackButton() {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   /**
    * Called when link is clicked and goes back one page
@@ -25,7 +25,7 @@ function BackButton() {
    */
   const goBack = (e) => {
     e.preventDefault();
-    history.goBack();
+    navigate(-1);
   }
 
   return (

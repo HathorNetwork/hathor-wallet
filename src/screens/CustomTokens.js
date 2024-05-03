@@ -15,7 +15,7 @@ import { NFT_ENABLED } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useSelector } from 'react-redux';
 import LOCAL_STORE from '../storage';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Initial screen of custom tokens
@@ -25,7 +25,7 @@ import { useHistory } from 'react-router-dom';
 function CustomTokens() {
   const context = useContext(GlobalModalContext);
   const alertSuccessRef = useRef(null);
-  const history = useHistory();
+  const navigate = useNavigate();
   const { tokensBalance } = useSelector(state => ({  tokensBalance: state.tokensBalance }));
 
   /**
@@ -53,7 +53,7 @@ function CustomTokens() {
     if (LOCAL_STORE.isHardwareWallet()) {
       context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED);
     } else {
-      history.push('/create_token/');
+      navigate('/create_token/');
     }
   }
 
@@ -64,7 +64,7 @@ function CustomTokens() {
     if (LOCAL_STORE.isHardwareWallet()) {
       context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED);
     } else {
-      history.push('/create_nft/');
+      navigate('/create_nft/');
     }
   }
 

@@ -10,6 +10,7 @@ import { newTokens, removeTokenMetadata } from '../actions/index';
 import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 import LOCAL_STORE from '../storage';
+import { getGlobalWallet } from '../modules/wallet';
 
 /**
  * Methods to create and handle tokens
@@ -56,12 +57,11 @@ const tokens = {
    * @inner
    */
   async addToken(uid, name, symbol) {
-    const reduxState = store.getState();
-    const reduxWallet = reduxState.wallet;
-    await reduxWallet.storage.registerToken({ uid, name, symbol });
-    const tokens = await this.getRegisteredTokens(reduxWallet);
+    const globalWallet = getGlobalWallet();
+    await globalWallet.storage.registerToken({ uid, name, symbol });
+    const tokens = await this.getRegisteredTokens(globalWallet);
     store.dispatch(newTokens({tokens, uid: uid}));
-    wallet.fetchTokensMetadata([uid], reduxWallet.conn.network);
+    wallet.fetchTokensMetadata([uid], globalWallet.conn.network);
   },
 
   /**
@@ -75,10 +75,9 @@ const tokens = {
    * @inner
    */
   async unregisterToken(uid) {
-    const reduxState = store.getState();
-    const reduxWallet = reduxState.wallet;
-    await reduxWallet.storage.unregisterToken(uid);
-    const tokens = await this.getRegisteredTokens(reduxWallet);
+    const globalWallet = getGlobalWallet();
+    await globalWallet.storage.unregisterToken(uid);
+    const tokens = await this.getRegisteredTokens(globalWallet);
     store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
     store.dispatch(removeTokenMetadata(uid));
   },

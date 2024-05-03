@@ -22,7 +22,8 @@ import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { str2jsx } from '../utils/i18n';
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Create a new token
@@ -31,14 +32,14 @@ import { useHistory } from "react-router-dom";
  */
 function CreateToken() {
 
-  const { htrBalance, useWalletService, wallet } = useSelector(state => ({
+  const { htrBalance, useWalletService } = useSelector(state => ({
     htrBalance: get(state.tokensBalance, `${hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}.data.available`, 0),
-    wallet: state.wallet,
     useWalletService: state.useWalletService,
   }));
+  const wallet = getGlobalWallet();
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const globalModalContext = useContext(GlobalModalContext);
 
   const addressWrapperRef = useRef(null);
@@ -185,7 +186,7 @@ function CreateToken() {
    */
   const alertButtonClick = () => {
     globalModalContext.hideModal();
-    history.push('/wallet/');
+    navigate('/wallet/');
   }
 
   /**

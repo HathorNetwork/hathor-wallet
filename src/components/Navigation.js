@@ -46,19 +46,19 @@ function Navigation() {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav mr-auto">
             <li className="nav-item">
-              <NavLink to="/wallet/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Wallet`}</NavLink>
+              <NavLink to="/wallet/" className="nav-link">{t`Wallet`}</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink to="/wallet/send_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Send tokens`}</NavLink>
+              <NavLink to="/wallet/send_tokens/" className="nav-link">{t`Send tokens`}</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink to="/custom_tokens/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Custom tokens`}</NavLink>
+              <NavLink to="/custom_tokens/" className="nav-link">{t`Custom tokens`}</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink to="/nft/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`NFTs`}</NavLink>
+              <NavLink to="/nft/" className="nav-link">{t`NFTs`}</NavLink>
             </li>
             {useAtomicSwap && <li className="nav-item">
-              <NavLink to="/wallet/atomic_swap/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Atomic Swap`}</NavLink>
+              <NavLink to="/wallet/atomic_swap/" className="nav-link">{t`Atomic Swap`}</NavLink>
             </li>}
             <li className="nav-item">
               <a className="nav-link" href="true" onClick={goToExplorer}>{t`Public Explorer`}</a>

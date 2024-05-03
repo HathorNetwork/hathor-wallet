@@ -10,10 +10,10 @@ import { t } from 'ttag';
 import TokenAction from './TokenAction';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
+import { getGlobalWallet } from "../../modules/wallet";
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
     useWalletService: state.useWalletService,
   };
 };
@@ -45,8 +45,9 @@ class TokenDelegate extends React.Component {
    */
   prepareSendTransaction = async (pin) => {
     const type = this.props.action === 'delegate-mint' ? t`Mint` : t`Melt`;
+    const wallet = getGlobalWallet();
 
-    const transaction = await this.props.wallet.prepareDelegateAuthorityData(
+    const transaction = await wallet.prepareDelegateAuthorityData(
       this.props.token.uid,
       type.toLowerCase(),
       this.delegateAddress.current.value,
@@ -57,13 +58,13 @@ class TokenDelegate extends React.Component {
     );
 
     if (this.props.useWalletService) {
-      return new hathorLib.SendTransactionWalletService(this.props.wallet, {
+      return new hathorLib.SendTransactionWalletService(wallet, {
         transaction,
         pin,
       });
     }
 
-    return new hathorLib.SendTransaction({ transaction, pin, storage: this.props.wallet.storage });
+    return new hathorLib.SendTransaction({ transaction, pin, storage: wallet.storage });
   }
 
   /**

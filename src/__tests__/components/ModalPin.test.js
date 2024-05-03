@@ -4,7 +4,7 @@ import { act, render, screen } from '@testing-library/react';
 import $ from 'jquery'
 import { ModalPin } from '../../components/ModalPin';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
+// import '@testing-library/jest-dom'; Temporarily removed. See https://github.com/HathorNetwork/hathor-wallet/pull/567
 
 let container = null;
 const MODAL_ID = '#modalPin';

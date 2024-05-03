@@ -48,7 +48,7 @@ import {
   startWalletFailed,
   walletStateError,
   walletStateReady,
-  storeRouterHistory,
+  setNavigateTo,
   reloadingWallet,
   tokenInvalidateHistory,
   sharedAddressUpdate,
@@ -56,7 +56,6 @@ import {
   setEnableAtomicSwap,
   proposalListUpdated,
   proposalFetchRequested,
-  walletResetSuccess,
   reloadWalletRequested,
   changeWalletState,
   updateTxHistory,
@@ -71,6 +70,7 @@ import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
+import { getGlobalWallet, setGlobalWallet } from "../modules/wallet";
 
 export const WALLET_STATUS = {
   READY: 'ready',
@@ -105,14 +105,12 @@ export function* startWallet(action) {
     passphrase,
     pin,
     password,
-    routerHistory,
     xpub,
     hardware,
   } = action.payload;
   let xpriv = null;
 
   yield put(loadingAddresses(true));
-  yield put(storeRouterHistory(routerHistory));
 
   if (hardware) {
     // We need to ensure that the hardware wallet storage is always generated here since we may be
@@ -193,7 +191,7 @@ export function* startWallet(action) {
         /**
          * Lock screen will call `resolve` with the pin screen after validation
          */
-        routerHistory.push('/locked/');
+        dispatch(setNavigateTo('/locked/'));
         dispatch(lockWalletForResult(resolve));
       }),
       passphrase,
@@ -231,7 +229,7 @@ export function* startWallet(action) {
     wallet = new HathorWallet(walletConfig);
   }
 
-  yield put(setWallet(wallet));
+  setGlobalWallet(wallet);
 
   // Setup listeners before starting the wallet so we don't lose messages
   yield fork(setupWalletListeners, wallet);
@@ -280,7 +278,7 @@ export function* startWallet(action) {
       console.error(e);
       // Return to locked screen when the wallet fails to start
       LOCAL_STORE.lock();
-      routerHistory.push('/');
+      yield put(dispatch(setNavigateTo('/')));
       return
     }
   }
@@ -299,7 +297,7 @@ export function* startWallet(action) {
   }
 
   // Wallet start called, we need to show the loading addresses screen
-  routerHistory.replace('/loading_addresses');
+  yield put(setNavigateTo('/loading_addresses', true));
 
   // Wallet might be already ready at this point
   if (!wallet.isReady()) {
@@ -324,8 +322,15 @@ export function* startWallet(action) {
   try {
     const { allTokens, registeredTokens } = yield call(loadTokens);
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
+
+    // Convert tokens to an object map before storing on Redux
+    const allTokensMap = {};
+    for (const uid of allTokens) {
+      allTokensMap[uid] = uid;
+    }
+
     // Store all tokens on redux
-    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress));
   } catch(e) {
     yield put(startWalletFailed());
     return;
@@ -333,7 +338,7 @@ export function* startWallet(action) {
 
   LOCAL_STORE.unlock();
 
-  routerHistory.replace('/wallet/');
+  yield put(setNavigateTo('/wallet/', true));
 
   yield put(loadingAddresses(false));
 
@@ -363,7 +368,7 @@ export function* loadTokens() {
   const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
 
   yield call(fetchTokenData, htrUid);
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   // Fetch all tokens, including the ones that are not registered yet
   const allTokens = yield call([wallet, wallet.getTokens]);
@@ -373,7 +378,7 @@ export function* loadTokens() {
   // spawn a new "thread" to handle it.
   //
   // `spawn` is similar to `fork`, but it creates a `detached` fork
-  yield spawn(fetchTokensMetadata, registeredTokens.map(token => token.uid));
+  yield spawn(fetchTokensMetadata, registeredTokens.map(token => token.uid).filter(token => token !== htrUid));
 
   // Dispatch actions to asynchronously load the balances of each token the wallet has
   // ever interacted with. The `put` effect will just dispatch and continue, loading
@@ -381,7 +386,7 @@ export function* loadTokens() {
   //
   // Note: We need to download the balance of all the tokens from the wallet so we can
   // hide zero-balance tokens
-  for (const token of allTokens) {
+  for (const token of Object.keys(allTokens)) {
     yield put(tokenFetchBalanceRequested(token));
   }
 
@@ -500,8 +505,7 @@ export function* handleTx(wallet, tx) {
 
 export function* handleNewTx(action) {
   const tx = action.payload;
-  const wallet = yield select((state) => state.wallet);
-  const routerHistory = yield select((state) => state.routerHistory);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     return;
@@ -537,18 +541,14 @@ export function* handleNewTx(action) {
   // Set the notification click, in case we have sent one
   if (notification !== undefined) {
     notification.onclick = () => {
-      if (!routerHistory) {
-        return;
-      }
-
-      routerHistory.push(`/transaction/${tx.tx_id}/`);
+      put(setNavigateTo(`/transaction/${ tx.tx_id }/`))
     }
   }
 }
 
 export function* handleUpdateTx(action) {
   const tx = action.payload;
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     return;
@@ -639,7 +639,7 @@ export function* loadPartialUpdate({ payload }) {
 
 export function* bestBlockUpdate({ payload }) {
   const currentHeight = yield select((state) => state.height);
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     return;
@@ -659,9 +659,8 @@ export function* onWalletConnStateUpdate({ payload }) {
 export function* walletReloading() {
   yield put(loadingAddresses(true));
 
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
   const useWalletService = yield select((state) => state.useWalletService);
-  const routerHistory = yield select((state) => state.routerHistory);
 
   // If we are using the wallet-service, we don't need to wait until the addresses
   // are reloaded since they are stored on the wallet-service itself.
@@ -681,7 +680,7 @@ export function* walletReloading() {
 
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
-    for (const tokenUid of allTokens) {
+    for (const tokenUid of Object.keys(allTokens)) {
       if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
         continue;
       }
@@ -701,9 +700,15 @@ export function* walletReloading() {
 
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
 
+    // Convert tokens to an object map before storing on Redux
+    const allTokensMap = {};
+    for (const uid of allTokens) {
+      allTokensMap[uid] = uid;
+    }
+
     // Load success, we can send the user back to the wallet screen
-    yield put(loadWalletSuccess(allTokens, registeredTokens, currentAddress));
-    routerHistory.replace('/wallet/');
+    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress));
+    yield put(setNavigateTo('/wallet/', true));
     yield put(loadingAddresses(false));
   } catch (e) {
     yield put(startWalletFailed());
@@ -712,7 +717,7 @@ export function* walletReloading() {
 }
 
 export function* refreshSharedAddress() {
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   const { address, index } = yield call([wallet, wallet.getCurrentAddress]);
 
@@ -723,8 +728,7 @@ export function* refreshSharedAddress() {
 }
 
 export function* onWalletReset() {
-  const routerHistory = yield select((state) => state.routerHistory);
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
   LOCAL_STORE.resetStorage();
@@ -732,11 +736,7 @@ export function* onWalletReset() {
     yield call([wallet.storage, wallet.storage.cleanStorage], true, true);
   }
 
-  yield put(walletResetSuccess());
-
-  if (routerHistory) {
-    routerHistory.push('/welcome');
-  }
+  yield put(setNavigateTo('/welcome'));
 }
 
 export function* onWalletServiceDisabled() {

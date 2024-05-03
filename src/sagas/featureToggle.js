@@ -29,7 +29,6 @@ import helpers from '../utils/helpers';
 import { VERSION } from '../constants';
 
 import {
-  setUnleashClient,
   setFeatureToggles,
   featureToggleInitialized,
 } from '../actions';
@@ -39,6 +38,7 @@ import {
   UNLEASH_POLLING_INTERVAL,
   FEATURE_TOGGLE_DEFAULTS,
 } from '../constants';
+import { getUnleashClient, setUnleashClient } from '../modules/unleash';
 
 const CONNECT_TIMEOUT = 10000;
 const MAX_RETRIES = 5;
@@ -46,11 +46,11 @@ const MAX_RETRIES = 5;
 export function* handleInitFailed(currentRetry) {
   if (currentRetry >= MAX_RETRIES) {
     console.error('Max retries reached while trying to create the unleash-proxy client.');
-    const unleashClient = yield select((state) => state.unleashClient);
+    const unleashClient = getUnleashClient();
 
     if (unleashClient) {
       unleashClient.close();
-      yield put(setUnleashClient(null));
+      setUnleashClient(null);
     }
 
     // Even if unleash failed, we should allow the app to continue as it
@@ -68,7 +68,7 @@ export function* fetchTogglesRoutine() {
     // Wait first so we don't double-check on initialization
     yield delay(UNLEASH_POLLING_INTERVAL);
 
-    const unleashClient = yield select((state) => state.unleashClient);
+    const unleashClient = getUnleashClient();
 
     try {
       yield call(() => unleashClient.fetchToggles());
@@ -105,7 +105,7 @@ export function* monitorFeatureFlags(currentRetry = 0) {
   try {
     console.log('starting unleash with', options);
     yield call(() => unleashClient.updateContext(options));
-    yield put(setUnleashClient(unleashClient));
+    setUnleashClient(unleashClient);
 
     // Listeners should be set before unleashClient.start so we don't miss
     // updates
@@ -142,7 +142,7 @@ export function* monitorFeatureFlags(currentRetry = 0) {
     console.error('Error initializing unleash');
     unleashClient.stop();
 
-    yield put(setUnleashClient(null));
+    setUnleashClient(null);
 
     // Wait 500ms before retrying
     yield delay(500);
@@ -209,7 +209,7 @@ function mapFeatureToggles(toggles) {
 }
 
 export function* handleToggleUpdate() {
-  const unleashClient = yield select((state) => state.unleashClient);
+  const unleashClient = getUnleashClient();
   const featureTogglesInitialized = yield select((state) => state.featureTogglesInitialized);
 
   if (!unleashClient || !featureTogglesInitialized) {

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { t } from 'ttag'
 
 import SpanFmt from '../components/SpanFmt';
@@ -30,7 +30,7 @@ function Welcome() {
    */
   const [formValidated, setFormValidated] = useState(false);
 
-  const history = useHistory();
+  const navigate = useNavigate();
   const agreeForm = React.createRef();
 
   /**
@@ -43,7 +43,7 @@ function Welcome() {
       LOCAL_STORE.markWalletAsStarted();
       // For the mainnet sentry will be disabled by default and the user can change this on Settings
       wallet.disallowSentry();
-      history.push('/wallet_type/');
+      navigate('/wallet_type/');
     }
   };
 

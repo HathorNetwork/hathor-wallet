@@ -7,7 +7,7 @@
 
 import React, { useRef, useState, useContext, useEffect } from 'react';
 import { t } from 'ttag'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import wallet from '../utils/wallet';
 import logo from '../assets/images/hathor-logo.png';
 import ChoosePassword from '../components/ChoosePassword';
@@ -32,7 +32,7 @@ import LOCAL_STORE from '../storage';
  * @memberof Screens
  */
 function NewWallet() {
-  const history = useHistory();
+  const navigate = useNavigate();
   const context = useContext(GlobalModalContext);
   const dispatch = useDispatch();
 
@@ -105,7 +105,7 @@ function NewWallet() {
   const pinSuccess = () => {
     // Generate addresses and load data
     LOCAL_STORE.unlock();
-    wallet.generateWallet(words, '', pin, password, history);
+    wallet.generateWallet(words, '', pin, password);
     // Mark this wallet as open, so that it does not appear locked after loading
     LOCAL_STORE.open();
     // Clean pin, password and words from redux
@@ -148,7 +148,7 @@ function NewWallet() {
           </div>
         </form>
         <div className="d-flex justify-content-between flex-row w-100">
-          <button onClick={history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
+          <button onClick={() => navigate(-1)} type="button" className="btn btn-secondary">{t`Back`}</button>
           <button onClick={create} type="button" className="btn btn-hathor">{t`Create my words`}</button>
         </div>
       </div>

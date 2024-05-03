@@ -72,15 +72,18 @@ const initialState = {
   tokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
   // Token selected (by default is HATHOR)
   selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
-  // List of all tokens seen in transactions
-  allTokens: new Set(),
+  /**
+   * List of all tokens seen in transactions
+   * @type {Record<string, string>}
+   * @example { 00: "00", abc123: "abc123" }
+   */
+  allTokens: {},
   // If is in the proccess of loading addresses transactions from the full node
   // When the request to load addresses fails this variable can continue true
   loadingAddresses: false,
   loadedData: { transactions: 0, addresses: 0 },
   // Height of the best chain of the network arrived from ws data
   height: 0,
-  wallet: null,
   walletState: null,
   // Metadata of tokens
   tokenMetadata: {},
@@ -101,8 +104,8 @@ const initialState = {
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
   startWalletAction: null,
-  // RouterHistory object
-  routerHistory: null,
+  // A helper for listeners to navigate to another screen on saga events
+  navigateTo: { route: '', replace: false },
 
   /**
    * Indicates if the Atomic Swap feature is available for use
@@ -129,7 +132,6 @@ const initialState = {
       status: TOKEN_DOWNLOAD_STATUS.READY
     }
   },
-  unleashClient: null,
   featureTogglesInitialized: false,
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
@@ -179,10 +181,6 @@ const rootReducer = (state = initialState, action) => {
       return Object.assign({}, state, {requestErrorStatusCode: action.payload});
     case 'update_height':
       return onUpdateHeight(state, action);
-    case 'set_wallet':
-      return onSetWallet(state, action);
-    case 'reset_wallet':
-      return onResetWallet(state, action);
     case 'load_wallet_success':
       return onLoadWalletSuccess(state, action);
     case 'update_tx':
@@ -258,16 +256,14 @@ const rootReducer = (state = initialState, action) => {
       return onStartWalletFailed(state);
     case types.WALLET_BEST_BLOCK_UPDATE:
       return onWalletBestBlockUpdate(state, action);
-    case types.STORE_ROUTER_HISTORY:
-      return onStoreRouterHistory(state, action);
+    case types.SET_NAVIGATE_TO:
+      return onSetNavigateTo(state, action);
     case types.SET_UNLEASH_CLIENT:
       return onSetUnleashClient(state, action);
     case types.SET_FEATURE_TOGGLES:
       return onSetFeatureToggles(state, action);
     case types.FEATURE_TOGGLE_INITIALIZED:
       return onFeatureToggleInitialized(state);
-    case types.WALLET_RESET_SUCCESS:
-      return onWalletResetSuccess(state);
     case types.UPDATE_TX_HISTORY:
       return onUpdateTxHistory(state, action);
     case types.WALLET_CHANGE_STATE:
@@ -275,30 +271,6 @@ const rootReducer = (state = initialState, action) => {
     default:
       return state;
   }
-};
-
-const onSetWallet = (state, action) => {
-  if (state.wallet && state.wallet.state !== hathorLib.HathorWallet.CLOSED) {
-    // Wallet was not closed
-    state.wallet.stop({ cleanStorage: false });
-  }
-
-  return {
-    ...state,
-    wallet: action.payload
-  };
-};
-
-const onResetWallet = (state, action) => {
-  if (state.wallet) {
-    // Stop wallet
-    state.wallet.stop();
-  }
-
-  return {
-    ...state,
-    wallet: null,
-  };
 };
 
 const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
@@ -316,19 +288,21 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
 
 /**
  * Got wallet history. Update wallet data on redux
+ * @param {Record<string,string>} action.payload.tokens Object map containing all tokens uids as keys
+ * @param {string} action.payload.currentAddress
+ * @param {{uid:string, name:string, symbol:string}[]} action.payload.registeredTokens
  */
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
   LOCAL_STORE.setWalletVersion(VERSION);
   const { tokens, registeredTokens, currentAddress } = action.payload;
-  const allTokens = new Set(tokens);
 
   return {
     ...state,
     loadingAddresses: false,
     lastSharedAddress: currentAddress.address,
     lastSharedIndex: currentAddress.index,
-    allTokens,
+    allTokens: tokens,
     tokens: registeredTokens,
   };
 };
@@ -376,8 +350,6 @@ const onCleanData = (state) => {
     isVersionAllowed: state.isVersionAllowed,
     loadingAddresses: state.loadingAddresses,
     ledgerWasClosed: state.ledgerWasClosed,
-    // Keep the unleashClient as it should continue running
-    unleashClient: state.unleashClient,
     featureTogglesInitialized: state.featureTogglesInitialized,
   });
 };
@@ -540,17 +512,23 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   return state;
 };
 
-/*
+/**
  * Used when registering or creating tokens to update the wallet token list.
-*/
+ * @param {Record<string,string>} state.allTokens - Current list of allTokens
+ * @param {string} action.payload.uid - UID of token to add
+ */
 export const onNewTokens = (state, action) => {
-  // Add new created token to the all tokens set
-  state.allTokens.add(action.payload.uid);
+  // Convert `allTokens` to a Set to prevent duplicates
+  const allTokens = {...state.allTokens};
+  // Add new created token to the all tokens object
+  const newTokenUid = action.payload.uid;
+  allTokens[newTokenUid] = newTokenUid;
 
   return {
     ...state,
-    selectedToken: action.payload.uid,
+    selectedToken: newTokenUid,
     tokens: action.payload.tokens,
+    allTokens: allTokens,
   };
 };
 
@@ -969,14 +947,15 @@ export const onWalletBestBlockUpdate = (state, action) => {
 };
 
 /**
- * @param {RouterHistory} action.routerHistory History object from react-dom-navigation
+ * @param {string} action.route Route that should be navigated to in consequence of an event
+ * @param {boolean} action.replace Whether we should navigate with the replace parameter set
  */
-export const onStoreRouterHistory = (state, action) => {
-  const { routerHistory } = action;
+export const onSetNavigateTo = (state, action) => {
+  const { route, replace } = action;
 
   return {
     ...state,
-    routerHistory,
+    navigateTo: { route, replace },
   };
 };
 
@@ -1003,20 +982,6 @@ const onSetFeatureToggles = (state, { payload }) => ({
   featureToggles: payload,
 });
 
-/**
- * @param {Object} action.payload The unleash client to store
- */
-const onSetUnleashClient = (state, { payload }) => ({
-  ...state,
-  unleashClient: payload,
-});
-
-const onWalletResetSuccess = (state) => ({
-  ...state,
-  // Keep the unleashClient as it should continue running
-  unleashClient: state.unleashClient,
-});
-
 export const onUpdateTxHistory = (state, action) => {
   const { tx, tokenId, balance } = action.payload;
   const tokenHistory = state.tokensHistory[tokenId];
@@ -1025,20 +990,23 @@ export const onUpdateTxHistory = (state, action) => {
     return state;
   }
 
+  const newTokenHistoryData = [...tokenHistory.data];
   for (const [index, histTx] of tokenHistory.data.entries()) {
     if (histTx.tx_id === tx.tx_id) {
-      tokenHistory.data[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
+      newTokenHistoryData[index] = getTxHistoryFromWSTx(tx, tokenId, balance);
       break;
     }
   }
+  const newTokenHistory = {
+    ...tokenHistory,
+    data: newTokenHistoryData,
+  };
 
   return {
     ...state,
     tokensHistory: {
       ...state.tokensHistory,
-      [tokenId]: {
-        ...tokenHistory,
-      }
+      [tokenId]: newTokenHistory,
     },
   };
 };

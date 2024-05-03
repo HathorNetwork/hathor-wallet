@@ -22,7 +22,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.28.0-rc1",
+  "version": "0.28.0",
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
@@ -31,6 +31,7 @@
   "dependencies": {
     "@hathor/wallet-lib": "1.0.4",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
+    "@reduxjs/toolkit": "2.2.3",
     "@sentry/electron": "3.0.7",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.6.1",
@@ -49,9 +50,8 @@
     "react-loading": "2.0.3",
     "react-paginate": "8.2.0",
     "react-redux": "7.2.8",
-    "react-router-dom": "5.3.3",
+    "react-router-dom": "^6.22.3",
     "react-scripts": "4.0.3",
-    "redux": "4.2.0",
     "redux-saga": "1.2.1",
     "redux-thunk": "2.4.1",
     "ttag": "1.8.6",
@@ -88,7 +88,6 @@
     "@sentry/browser": "7.99.0",
     "@sentry/cli": "2.27.0",
     "@testing-library/cypress": "8.0.7",
-    "@testing-library/jest-dom": "6.1.5",
     "@testing-library/react": "14.1.2",
     "@testing-library/user-event": "14.5.1",
     "cypress": "11.2.0",

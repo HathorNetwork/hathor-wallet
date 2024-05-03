@@ -20,7 +20,8 @@ import { IPC_RENDERER, LEDGER_TX_CUSTOM_TOKEN_LIMIT, colors } from '../constants
 import ReactLoading from 'react-loading';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { getGlobalWallet } from "../modules/wallet";
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -38,19 +39,19 @@ function SendTokens() {
   const globalModalContext = useContext(GlobalModalContext);
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   // Redux state
-  const { selectedToken, tokens, wallet, metadataLoaded, useWalletService } = useSelector(
+  const { selectedToken, tokens, metadataLoaded, useWalletService } = useSelector(
     (state) => {
       return {
         selectedToken: state.selectedToken,
         tokens: state.tokens,
-        wallet: state.wallet,
         metadataLoaded: state.metadataLoaded,
         useWalletService: state.useWalletService,
       };
     });
+  const wallet = getGlobalWallet();
   /**
    * Get the full object for the selected token on the TokenBar.
    *
@@ -231,7 +232,7 @@ function SendTokens() {
 
     // Must update the shared address, in case we have used one for the change
     dispatch(walletRefreshSharedAddress());
-    history.push('/wallet/');
+    navigate('/wallet/');
   }
 
   /**
