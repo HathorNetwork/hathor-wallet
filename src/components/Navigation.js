@@ -37,14 +37,6 @@ function Navigation() {
     helpers.openExternalURL(helpers.getExplorerURL());
   }
 
-  const renderNCNavigation = () => {
-    return (
-      <li className="nav-item">
-        <NavLink to="/nano_contract/" exact className="nav-link" activeClassName="active" activeStyle={{ fontWeight: 'bold' }}>{t`Nano Contract`}</NavLink>
-      </li>
-    );
-  }
-
   return (
     <div className="main-nav">
       <nav className="navbar navbar-expand-lg navbar-dark">
@@ -76,7 +68,9 @@ function Navigation() {
             <li className="nav-item">
               <a className="nav-link" href="true" onClick={goToExplorer}>{t`Public Explorer`}</a>
             </li>
-            {nanoEnabled && renderNCNavigation()}
+            {nanoEnabled && <li className="nav-item">
+              <NavLink to="/nano_contract/" className="nav-link">{t`Nano Contract`}</NavLink>
+            </li>}
           </ul>
           <div className="navbar-right d-flex flex-row align-items-center navigation-search">
             <ServerStatus />
