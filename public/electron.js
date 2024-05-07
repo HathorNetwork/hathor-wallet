@@ -16,7 +16,7 @@ const { instance: Ledger } = require('./ledger');
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
-  release: process.env.npm_package_version
+  release: constants.versionNumber
 })
 
 let tray = null
@@ -35,7 +35,6 @@ if (process.platform === 'darwin') {
 }
 
 const appName = 'Hathor Wallet';
-const walletVersion = '0.28.0';
 
 const debugMode = (
   process.argv.indexOf('--unsafe-mode') >= 0 &&
@@ -71,7 +70,7 @@ function createWindow () {
     msgCheckEvent = e;
   });
   // Adding wallet version to user agent, so we can get in all request headers
-  mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + ' HathorWallet/' + walletVersion);
+  mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + ' HathorWallet/' + constants.versionNumber);
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -180,7 +179,7 @@ if (process.platform === 'darwin') {
   // Set "About" options only on macOS
   app.setAboutPanelOptions({
     'applicationName': appName,
-    'applicationVersion': walletVersion,
+    'applicationVersion': constants.versionNumber,
     'version': '',
   });
 }

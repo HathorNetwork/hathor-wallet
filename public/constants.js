@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+const { version } = require('../package.json');
+
 const ledgerVersionMagicString = 'HTR';
 const ledgerVersionMagicStringBuffer = [
   ledgerVersionMagicString.charCodeAt(0),
@@ -15,4 +17,5 @@ const ledgerVersionMagicStringBuffer = [
 module.exports = {
   SENTRY_DSN: process.env.SENTRY_DSN || 'https://69c067d1587c465cac836eaf25467ce1@sentry.io/1410476',
   ledgerVersionMagicStringBuffer,
+  versionNumber: version
 }

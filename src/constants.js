@@ -12,6 +12,7 @@
 
 import { t } from 'ttag';
 import scssColors from './index.module.scss';
+import { version } from '../package.json';
 
 /**
  * Quantity of elements to show in the wallet history
@@ -21,7 +22,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.28.0';
+export const VERSION = version;
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible
