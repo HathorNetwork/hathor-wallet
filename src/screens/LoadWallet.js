@@ -12,8 +12,6 @@ import wallet from '../utils/wallet';
 import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import logo from '../assets/images/hathor-logo.png';
-import { updatePassword, updatePin } from '../actions/index';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
@@ -35,13 +33,13 @@ function LoadWallet() {
   const [words, setWords] = useState('');
   /** askPassword {boolean} If should show password component */
   const [askPassword, setAskPassword] = useState(false);
+  /** password {string} New password being created by the user */
+  const [password, setPassword] = useState('');
   /** askPIN {boolean} If should show PIN component */
   const [askPIN, setAskPIN] = useState(false);
   /** wordsCount {number} Number of words written on words input */
   const [wordsCount, setWordsCount] = useState(0);
   const wordsInputRef = useRef();
-  const dispatch = useDispatch();
-  const { pin, password } = useSelector((state) => ({ pin: state.pin, password: state.password }));
   const navigate = useNavigate();
 
   /**
@@ -66,24 +64,24 @@ function LoadWallet() {
 
   /**
    * Method called when user selects the password with success, so show component to choose pin
+   * @param {string} newPassword New password, already validated
    */
-  const passwordSuccess = () => {
+  const passwordSuccess = (newPassword) => {
+    setPassword(newPassword);
     // This method is called after the ChoosePassword component has a valid password and succeeds
     setAskPIN(true);
   }
 
   /**
    * This method is called after the ChoosePin component has a valid PIN and succeeds
+   * @param {string} newPin New Pin, already validated
    */
-  const pinSuccess = () => {
+  const pinSuccess = (newPin) => {
     LOCAL_STORE.unlock();
     // First we clean what can still be there of a last wallet
-    wallet.generateWallet(words, '', pin, password);
+    wallet.generateWallet(words, '', newPin, password);
     LOCAL_STORE.markBackupDone();
     LOCAL_STORE.open(); // Mark this wallet as open, so that it does not appear locked after loading
-    // Clean pin and password from redux
-    dispatch(updatePassword(null));
-    dispatch(updatePin(null));
   }
 
   /**

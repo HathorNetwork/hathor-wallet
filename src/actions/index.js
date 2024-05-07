@@ -95,16 +95,6 @@ export const networkUpdate = data => ({ type: 'network_update', payload: data })
 export const lastFailedRequest = data => ({ type: 'last_failed_request', payload: data });
 
 /**
- * Save written password in Redux (it's always cleaned after the use)
- */
-export const updatePassword = data => ({ type: 'update_password', payload: data });
-
-/**
- * Save written pin in Redux (it's always cleaned after the use)
- */
-export const updatePin = data => ({ type: 'update_pin', payload: data });
-
-/**
  * Save words in Redux (it's always cleaned after the use)
  */
 export const updateWords = data => ({ type: 'update_words', payload: data });
