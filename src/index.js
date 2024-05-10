@@ -9,7 +9,7 @@ import './i18nInit';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import ErrorWrapper from './ErrorWrapper';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createHashRouter, RouterProvider } from 'react-router-dom';
 import { GlobalModal } from './components/GlobalModal';
 
 import 'bootstrap';
@@ -20,7 +20,12 @@ import './index.css';
 import store from "./store/index";
 import { Provider } from "react-redux";
 
-const routerInstance = createBrowserRouter([
+/*
+ * We use a HashRouter for this application because when it is built for production we no longer interact with
+ * a regular HTTP server, but instead with a filesystem.
+ * @see https://reactrouter.com/en/main/routers/create-hash-router
+ */
+const routerInstance = createHashRouter([
   { path: '*', element: <ErrorWrapper /> },
 ])
 
