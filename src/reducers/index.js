@@ -61,10 +61,6 @@ const initialState = {
   lastFailedRequest: undefined,
   // Status code of last failed response
   requestErrorStatusCode: undefined,
-  // Wallet password
-  password: undefined,
-  // Wallet pin
-  pin: undefined,
   // Wallet words
   words: undefined,
   // Tokens already saved: array of objects
@@ -163,10 +159,6 @@ const rootReducer = (state = initialState, action) => {
       return onCleanData(state, action);
     case 'last_failed_request':
       return Object.assign({}, state, {lastFailedRequest: action.payload});
-    case 'update_password':
-      return Object.assign({}, state, {password: action.payload});
-    case 'update_pin':
-      return Object.assign({}, state, {pin: action.payload});
     case 'update_words':
       return Object.assign({}, state, {words: action.payload});
     case 'select_token':

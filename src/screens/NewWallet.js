@@ -13,7 +13,7 @@ import logo from '../assets/images/hathor-logo.png';
 import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
-import { updatePassword, updatePin, updateWords } from '../actions/index';
+import { updateWords } from '../actions/index';
 import { useDispatch, useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
@@ -36,12 +36,10 @@ function NewWallet() {
   const context = useContext(GlobalModalContext);
   const dispatch = useDispatch();
 
-  const { password, pin, words } = useSelector(state => ({
-    password: state.password,
-    pin: state.pin,
+  const { words } = useSelector(state => ({
     words: state.words,
   }));
-
+  const [password, setPassword] = useState('');
   const [step2, setStep2] = useState(false);
   const [askPassword, setAskPassword] = useState(false);
   const [askPIN, setAskPIN] = useState(false);
@@ -94,23 +92,24 @@ function NewWallet() {
 
   /**
    * User succeded on choosing a password, then show the Choose PIN component
+   * @param {string} newPassword New password, already validated
    */
-  const passwordSuccess = () => {
+  const passwordSuccess = (newPassword) => {
+    setPassword(newPassword);
     setAskPIN(true);
   }
 
   /**
    * After choosing a new PIN with success, executes the wallet creation and redirect to the wallet
+   * @param {string} newPin New pin, already validated
    */
-  const pinSuccess = () => {
+  const pinSuccess = (newPin) => {
     // Generate addresses and load data
     LOCAL_STORE.unlock();
-    wallet.generateWallet(words, '', pin, password);
+    wallet.generateWallet(words, '', newPin, password);
     // Mark this wallet as open, so that it does not appear locked after loading
     LOCAL_STORE.open();
-    // Clean pin, password and words from redux
-    dispatch(updatePassword(null));
-    dispatch(updatePin(null));
+    // Clean words from redux
     dispatch(updateWords(null));
   }
 
