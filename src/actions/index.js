@@ -95,11 +95,6 @@ export const networkUpdate = data => ({ type: 'network_update', payload: data })
 export const lastFailedRequest = data => ({ type: 'last_failed_request', payload: data });
 
 /**
- * Save words in Redux (it's always cleaned after the use)
- */
-export const updateWords = data => ({ type: 'update_words', payload: data });
-
-/**
  * Update token that is selected in the wallet
  */
 export const selectToken = data => ({ type: 'select_token', payload: data });

@@ -26,7 +26,7 @@ import BackButton from '../components/BackButton';
 import { colors } from '../constants';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { tokenFetchBalanceRequested, tokenFetchHistoryRequested, updateWords, } from '../actions/index';
+import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actions/index';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
@@ -210,7 +210,6 @@ function Wallet() {
       context.hideModal();
       LOCAL_STORE.markBackupDone();
 
-      dispatch(updateWords(null));
       setBackupDone(true);
       setSuccessMessage(t`Backup completed!`);
       alertSuccessRef.current.show(3000);

@@ -10,7 +10,7 @@ import { t } from 'ttag';
 import logo from '../assets/images/hathor-white-logo.png';
 import Version from '../components/Version';
 import HathorAlert from '../components/HathorAlert';
-import { updateWords, walletReset } from '../actions/index';
+import { walletReset } from '../actions/index';
 import { useDispatch } from "react-redux";
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
@@ -35,7 +35,6 @@ function WalletVersionError() {
   const backupSuccess = () => {
     context.hideModal();
     LOCAL_STORE.markBackupDone();
-    dispatch(updateWords(null));
     alertSuccessRef.current.show(3000);
   }
 

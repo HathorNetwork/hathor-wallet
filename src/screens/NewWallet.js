@@ -13,8 +13,7 @@ import logo from '../assets/images/hathor-logo.png';
 import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
-import { updateWords } from '../actions/index';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
@@ -36,9 +35,7 @@ function NewWallet() {
   const context = useContext(GlobalModalContext);
   const dispatch = useDispatch();
 
-  const { words } = useSelector(state => ({
-    words: state.words,
-  }));
+  const [words, setWords] = useState('');
   const [password, setPassword] = useState('');
   const [step2, setStep2] = useState(false);
   const [askPassword, setAskPassword] = useState(false);
@@ -55,8 +52,8 @@ function NewWallet() {
     const isValid = confirmFormRef.current.checkValidity();
     if (isValid) {
       confirmFormRef.current.classList.remove('was-validated')
-      const words = hathorLib.walletUtils.generateWalletWords(hathorLib.constants.HD_WALLET_ENTROPY);
-      dispatch(updateWords(words));
+      const newWords = hathorLib.walletUtils.generateWalletWords(hathorLib.constants.HD_WALLET_ENTROPY);
+      setWords(newWords);
       setStep2(true);
     } else {
       confirmFormRef.current.classList.add('was-validated')
@@ -85,6 +82,7 @@ function NewWallet() {
    */
   const backupNow = () => {
     context.showModal(MODAL_TYPES.BACKUP_WORDS, {
+      words,
       needPassword: false,
       validationSuccess,
     });
@@ -109,8 +107,6 @@ function NewWallet() {
     wallet.generateWallet(words, '', newPin, password);
     // Mark this wallet as open, so that it does not appear locked after loading
     LOCAL_STORE.open();
-    // Clean words from redux
-    dispatch(updateWords(null));
   }
 
   /**

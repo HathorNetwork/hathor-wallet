@@ -10,25 +10,9 @@ import { t } from 'ttag';
 
 import $ from 'jquery';
 import _ from 'lodash';
-import { updateWords } from '../actions/index';
-import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import { WORDS_VALIDATION } from '../constants';
 import { getGlobalWallet } from '../modules/wallet';
-
-
-const mapDispatchToProps = dispatch => {
-  return {
-    updateWords: data => dispatch(updateWords(data)),
-  };
-};
-
-
-const mapStateToProps = (state) => {
-  return {
-    words: state.words,
-  };
-};
 
 
 /**
@@ -53,6 +37,7 @@ class ModalBackupWords extends React.Component {
      *    validationStep.options array of strings composed by the correctWord and four wrong options.
      *    validationStep.done if true the step was correctly completed.
      *    validationStep.last if true it is the last step of the array
+     * words? {string} The 24 words that will be used, if there is still no password attached to them
      */
     this.state = {
       errorMessage: '',
@@ -60,6 +45,7 @@ class ModalBackupWords extends React.Component {
       showValidation: false,
       passwordFormValidated: false,
       validationSteps: [],
+      words: props.words || '',
     };
   }
 
@@ -71,10 +57,8 @@ class ModalBackupWords extends React.Component {
         passwordSuccess: false,
         showValidation: false,
         validationSteps: [],
+        words: '',
       });
-      if (this.props.needPassword) {
-        this.props.updateWords(null);
-      }
       if (this.refs.password) {
         this.refs.password.value = '';
       }
@@ -110,15 +94,15 @@ class ModalBackupWords extends React.Component {
       try {
         const { storage } = getGlobalWallet();
         const accessData = await storage.getAccessData();
-        const words = hathorLib.cryptoUtils.decryptData(accessData.words, password);
-        this.props.updateWords(words);
-        this.setState({ passwordSuccess: true, errorMessage: '' });
+        const walletWords = hathorLib.cryptoUtils.decryptData(accessData.words, password);
+        this.setState({ words: walletWords, passwordSuccess: true, errorMessage: '' });
       } catch (err) {
         // XXX: The `ErrorMessages.ErrorMessages` property from the lib needs fixing.
         if (err.errorCode === hathorLib.ErrorMessages.ErrorMessages.DECRYPTION_ERROR
           || err.errorCode === hathorLib.ErrorMessages.ErrorMessages.INVALID_PASSWD) {
           // If the password is invalid it will throw a DecryptionError
           this.setState({ errorMessage: t`Invalid password` });
+          return; // No need to rethrow if the error is an incorrect password
         }
         throw err;
       }
@@ -131,7 +115,7 @@ class ModalBackupWords extends React.Component {
    * As the words were shown previosly, the user should be able to find any word given an index.
    */
   handleWordsSaved = () => {
-    const wordsArray = this.props.words.split(' ');
+    const wordsArray = this.state.words.split(' ');
     const wordsToValidate = _.shuffle(wordsArray).slice(0, WORDS_VALIDATION);
     const validationSteps = wordsToValidate.map((word, index) => {
       const backupIndex = wordsArray.indexOf(word);
@@ -222,13 +206,13 @@ class ModalBackupWords extends React.Component {
     const renderButtons = () => {
       if (this.props.needPassword && !this.state.passwordSuccess) {
         return renderAskPasswordButtons();
-      } else if (this.props.words && !this.state.showValidation) {
+      } else if (this.state.words && !this.state.showValidation) {
         return renderShowWordsButtons();
       }
     };
 
     const renderWordsTd = (start, end) => {
-      return this.props.words.split(' ').slice(start, end).map((word, idx) => {
+      return this.state.words.split(' ').slice(start, end).map((word, idx) => {
         return (
           <td key={word}><strong>{start+idx+1}.</strong> {word} </td>
         )
@@ -341,7 +325,7 @@ class ModalBackupWords extends React.Component {
     const renderBody = () => {
       if (this.props.needPassword && !this.state.passwordSuccess) {
         return renderAskPassword();
-      } else if (this.props.words && !this.state.showValidation) {
+      } else if (this.state.words && !this.state.showValidation) {
         return renderShowWords();
       } else if (this.state.showValidation) {
         return renderValidation();
@@ -398,4 +382,4 @@ class ModalBackupWords extends React.Component {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ModalBackupWords);
+export default ModalBackupWords;
