@@ -32,7 +32,7 @@
     "@hathor/wallet-lib": "1.0.4",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
-    "@sentry/electron": "3.0.7",
+    "@sentry/electron": "4.24.0",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.6.1",
     "eslint-config-airbnb": "19.0.4",
