@@ -80,6 +80,11 @@ function LoadWallet() {
     LOCAL_STORE.unlock();
     // First we clean what can still be there of a last wallet
     wallet.generateWallet(words, '', newPin, password);
+
+    // Being extra cautious with sensitive information
+    setWords('');
+    setPassword('');
+
     LOCAL_STORE.markBackupDone();
     LOCAL_STORE.open(); // Mark this wallet as open, so that it does not appear locked after loading
   }

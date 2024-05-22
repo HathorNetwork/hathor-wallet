@@ -13,7 +13,6 @@ import logo from '../assets/images/hathor-logo.png';
 import ChoosePassword from '../components/ChoosePassword';
 import ChoosePin from '../components/ChoosePin';
 import HathorAlert from '../components/HathorAlert';
-import { useDispatch } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
@@ -33,7 +32,6 @@ import LOCAL_STORE from '../storage';
 function NewWallet() {
   const navigate = useNavigate();
   const context = useContext(GlobalModalContext);
-  const dispatch = useDispatch();
 
   const [words, setWords] = useState('');
   const [password, setPassword] = useState('');
@@ -105,6 +103,11 @@ function NewWallet() {
     // Generate addresses and load data
     LOCAL_STORE.unlock();
     wallet.generateWallet(words, '', newPin, password);
+
+    // Being extra cautious with sensitive information
+    setWords('');
+    setPassword('');
+
     // Mark this wallet as open, so that it does not appear locked after loading
     LOCAL_STORE.open();
   }

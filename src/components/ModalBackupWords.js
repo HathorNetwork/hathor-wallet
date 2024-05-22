@@ -74,6 +74,7 @@ class ModalBackupWords extends React.Component {
   };
 
   componentWillUnmount = () => {
+    this.setState({ words: '' }); // Being extra cautious with sensitive information
     $('#backupWordsModal').modal('hide');
     // Removing all event listeners
     $('#backupWordsModal').off();
@@ -172,6 +173,7 @@ class ModalBackupWords extends React.Component {
       return;
     }
     if (validationStep.last) {
+      this.setState({ words: '' }); // Being extra cautious with sensitive information
       this.props.validationSuccess();
       return;
     }
