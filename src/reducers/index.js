@@ -61,8 +61,6 @@ const initialState = {
   lastFailedRequest: undefined,
   // Status code of last failed response
   requestErrorStatusCode: undefined,
-  // Wallet words
-  words: undefined,
   // Tokens already saved: array of objects
   // {'name', 'symbol', 'uid'}
   tokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
@@ -159,8 +157,6 @@ const rootReducer = (state = initialState, action) => {
       return onCleanData(state, action);
     case 'last_failed_request':
       return Object.assign({}, state, {lastFailedRequest: action.payload});
-    case 'update_words':
-      return Object.assign({}, state, {words: action.payload});
     case 'select_token':
       return Object.assign({}, state, {selectedToken: action.payload});
     case 'new_tokens':
