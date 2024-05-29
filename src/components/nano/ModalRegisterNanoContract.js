@@ -8,9 +8,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
+import { get } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
-import { saveNC } from '../../actions/index';
+import { cleanNanoContractRegisterMetadata, registerNanoContract } from '../../actions/index';
+import { getGlobalWallet } from "../../modules/wallet";
+import { NANOCONTRACT_REGISTER_STATUS } from '../../sagas/nanoContract';
+import { colors } from '../../constants';
 import hathorLib from '@hathor/wallet-lib';
+import ReactLoading from 'react-loading';
 
 /**
  * Component that shows a modal to register a Nano Contract
@@ -18,17 +23,12 @@ import hathorLib from '@hathor/wallet-lib';
  * @memberof Components
  */
 function ModalRegisterNanoContract() {
-  const { nanoContracts, wallet } = useSelector((state) => {
-    return {
-      nanoContracts: state.nanoContracts,
-      wallet: state.wallet
-    }
-  });
-
   const dispatch = useDispatch();
+  const wallet = getGlobalWallet();
 
-  // errorMessage {string} Message to show when error happens on the form
-  const [errorMessage, setErrorMessage] = useState('');
+  const [ncId, setNcId] = useState('');
+  const ncRegisterMetadata = useSelector(state => state.nanoContractsRegisterMetadata);
+  const ncRegisterStatus = get(ncRegisterMetadata, 'status', null);
 
   const formRegisterNCRef = useRef(null);
 
@@ -36,8 +36,8 @@ function ModalRegisterNanoContract() {
 
   useEffect(() => {
     $('#registerNCModal').on('hide.bs.modal', (e) => {
+      dispatch(cleanNanoContractRegisterMetadata());
       idRef.current.value = '';
-      setErrorMessage('');
     });
 
     $('#registerNCModal').on('shown.bs.modal', (e) => {
@@ -51,6 +51,13 @@ function ModalRegisterNanoContract() {
 
   }, []);
 
+  useEffect(() => {
+    // When registration succeeds, we hide the modal
+    if (ncRegisterStatus === NANOCONTRACT_REGISTER_STATUS.SUCCESS) {
+      $('#registerNCModal').modal('hide');
+    }
+  }, [ncRegisterStatus]);
+
   /**
    * Method called when user clicks the button to register the NC
    *
@@ -59,42 +66,19 @@ function ModalRegisterNanoContract() {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    setErrorMessage('');
     const isValid = formRegisterNCRef.current.checkValidity();
     if (!isValid) {
       formRegisterNCRef.current.classList.add('was-validated')
       return;
     }
 
-    const nanoId = idRef.current.value;
-
-    // Check if this NC is already registered
-    if (nanoId in nanoContracts) {
-      setErrorMessage(t`This nano contract is already registered.`);
-      return;
-    }
-
-    // Check if nano contract exists in the full node
-    let nanoTx;
-    try {
-      nanoTx = await wallet.getFullTxById(nanoId);
-      if (nanoTx.tx.version !== hathorLib.constants.NANO_CONTRACTS_VERSION || nanoTx.tx.nc_method !== 'initialize') {
-        // Not a nano contract ID
-        setErrorMessage(t`This transaction is not a nano contract creation.`);
-        return;
-      }
-    } catch(e) {
-      setErrorMessage(t`Invalid nano contract to register.`);
-      return;
-    }
-
-    // Get blueprint name to store in redux
-    const blueprintData = await hathorLib.ncApi.getBlueprintInformation(nanoTx.tx.nc_blueprint_id);
-
     // Use address0 as default address for registered nano contracts
     const address0 = await wallet.getAddressAtIndex(0);
-    dispatch(saveNC(nanoId, blueprintData, address0));
-    $('#registerNCModal').modal('hide');
+
+    const ncIdValue = idRef.current.value;
+    setNcId(ncIdValue);
+
+    dispatch(registerNanoContract(ncIdValue, address0));
   }
 
   return (
@@ -116,13 +100,14 @@ function ModalRegisterNanoContract() {
               <div className="row">
                 <div className="col-12 col-sm-10">
                     <p className="error-message text-danger">
-                      {errorMessage}
+                      {ncRegisterStatus === NANOCONTRACT_REGISTER_STATUS.ERROR && ncRegisterMetadata.error}
                     </p>
                 </div>
               </div>
             </form>
           </div>
           <div className="modal-footer">
+            {ncRegisterStatus === NANOCONTRACT_REGISTER_STATUS.LOADING && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200}/>}
             <button type="button" className="btn btn-secondary" data-dismiss="modal">{t`Cancel`}</button>
             <button onClick={handleRegister} type="button" className="btn btn-hathor">{t`Register`}</button>
           </div>

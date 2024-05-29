@@ -12,7 +12,8 @@ import { Link } from 'react-router-dom'
 import hathorLib from '@hathor/wallet-lib';
 import ModalRegisterNanoContract from '../../components/nano/ModalRegisterNanoContract';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { NANOCONTRACT_REGISTER_STATUS } from '../../sagas/nanoContract';
 
 
 /**
@@ -22,24 +23,24 @@ import { useHistory } from 'react-router-dom';
  */
 function NanoContractList() {
   const nanoContracts = useSelector(state => state.nanoContracts);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const registerNC = () => {
     $('#registerNCModal').modal('show');
   }
 
   const createNC = () => {
-    history.push('/nano_contract/select_blueprint/');
+    navigate('/nano_contract/select_blueprint/');
   }
 
   const renderTableData = () => {
     return Object.values(nanoContracts).map((nc) => {
       return (
-        <tr key={nc.id}>
+        <tr key={nc.ncId}>
           <td>
-            <Link to={`/nano_contract/detail/${nc.id}`}>{hathorLib.helpersUtils.getShortHash(nc.id)}</Link>
+            <Link to={`/nano_contract/detail/${nc.ncId}`}>{hathorLib.helpersUtils.getShortHash(nc.ncId)}</Link>
           </td>
-          <td>{nc.blueprint.name}</td>
+          <td>{nc.blueprintName}</td>
           <td>{nc.address}</td>
         </tr>
       );
