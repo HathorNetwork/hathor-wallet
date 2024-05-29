@@ -29,6 +29,7 @@ export const MINING_SERVER_KEY = 'localstorage:mining:server';
 
 export const ACCESS_DATA_KEY = 'localstorage:accessdata';
 export const REGISTERED_TOKENS_KEY = 'localstorage:registeredTokens';
+export const REGISTERED_NANOCONTRACTS_KEY = 'localstorage:registeredNanoContracts';
 
 export const storageKeys = [
   WALLET_VERSION_KEY,
@@ -46,6 +47,7 @@ export const storageKeys = [
   // Wallet keys
   ACCESS_DATA_KEY,
   REGISTERED_TOKENS_KEY,
+  REGISTERED_NANOCONTRACTS_KEY,
 ];
 
 class HybridStore extends MemoryStore {
@@ -136,9 +138,62 @@ class HybridStore extends MemoryStore {
     await super.cleanStorage(cleanHistory, cleanAddresses, cleanTokens);
     if (cleanTokens) {
       STORE.removeItem(REGISTERED_TOKENS_KEY);
+      STORE.removeItem(REGISTERED_NANOCONTRACTS_KEY);
     }
   }
 
+  /**
+   * Iterate on registered nano contracts.
+   *
+   * @async
+   * @returns {AsyncGenerator<INcData>}
+   */
+  async* registeredNanoContractsIter() {
+    const registeredNanoContracts = STORE.getItem(REGISTERED_NANOCONTRACTS_KEY) || {};
+    for (const ncData of Object.values(registeredNanoContracts)) {
+      yield ncData;
+    }
+  }
+
+  /**
+   * Register a nano contract.
+   *
+   * @param ncId {string} Nano contract id to register
+   * @param ncValue {INcData} Nano contract data to register
+   * @async
+   * @returns {Promise<void>}
+   */
+  async registerNanoContract(ncId, ncValue) {
+    await super.registerNanoContract(ncValue);
+    const registeredNanoContracts = STORE.getItem(REGISTERED_NANOCONTRACTS_KEY) || {};
+    registeredNanoContracts[ncId] = ncValue;
+    STORE.setItem(REGISTERED_NANOCONTRACTS_KEY, registeredNanoContracts);
+  }
+
+  /**
+   * Unregister a nano contract.
+   *
+   * @param {string} ncId Nano contract id
+   * @async
+   * @returns {Promise<void>}
+   */
+  async unregisterNanoContract(ncId) {
+    await super.unregisterNanoContract(ncId);
+    const registeredNanoContracts = STORE.getItem(REGISTERED_NANOCONTRACTS_KEY) || {};
+    delete registeredNanoContracts[ncId];
+    STORE.setItem(REGISTERED_NANOCONTRACTS_KEY, registeredNanoContracts);
+  }
+
+  /**
+   * Return if a nc is registered or not.
+   *
+   * @param {string} ncId - Nano contract id
+   * @returns {Promise<boolean>}
+   */
+  async isNanoContractRegistered(ncId) {
+    const registeredNanoContracts = STORE.getItem(REGISTERED_NANOCONTRACTS_KEY) || {};
+    return ncId in registeredNanoContracts;
+  }
 }
 
 

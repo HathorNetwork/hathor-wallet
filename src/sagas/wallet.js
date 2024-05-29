@@ -73,6 +73,7 @@ import {
 import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
+import nanoUtils from '../utils/nanoContracts';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 import { getGlobalWallet, setGlobalWallet } from "../modules/wallet";
 
@@ -350,8 +351,11 @@ export function* startWallet(action) {
       allTokensMap[uid] = uid;
     }
 
+    // Get all registered nano contracts and save in redux
+    const registeredNanoContracts = yield call(nanoUtils.getRegisteredNanoContracts, wallet);
+
     // Store all tokens on redux
-    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress, registeredNanoContracts));
   } catch(e) {
     yield put(startWalletFailed());
     return;
@@ -727,8 +731,11 @@ export function* walletReloading() {
       allTokensMap[uid] = uid;
     }
 
+    // Get all registered nano contracts and save in redux
+    const registeredNanoContracts = yield call(nanoUtils.getRegisteredNanoContracts, wallet);
+
     // Load success, we can send the user back to the wallet screen
-    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress, registeredNanoContracts));
     yield put(setNavigateTo('/wallet/', true));
     yield put(loadingAddresses(false));
   } catch (e) {
