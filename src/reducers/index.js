@@ -313,8 +313,6 @@ const rootReducer = (state = initialState, action) => {
       return resetSelectedTokenIfNeeded(state, action);
     case 'set_ledger_was_closed':
       return Object.assign({}, state, { ledgerWasClosed: action.payload });
-    case 'save_nano_contract':
-      return onSaveNanoContract(state, action);
     // TODO: Refactor all the above to use `types.` syntax
     case types.SET_SERVER_INFO:
       return onSetServerInfo(state, action);
@@ -676,29 +674,6 @@ export const onTokenFetchBalanceRequested = (state, action) => {
         ...oldState,
         status: TOKEN_DOWNLOAD_STATUS.LOADING,
         oldStatus: oldState.status,
-      },
-    },
-  };
-};
-
-/*
- * Used when saving a new Nano Contract
-*/
-export const onSaveNanoContract = (state, action) => {
-  const nc = action.payload;
-
-  if (nc.id in state.nanoContracts) {
-    // A NC with this id already exist in Redux. This should've been validated before
-    return state;
-  }
-
-  return {
-    ...state,
-    nanoContracts: {
-      ...state.nanoContracts,
-      [nc.id]: {
-        ...nc,
-        history: []
       },
     },
   };

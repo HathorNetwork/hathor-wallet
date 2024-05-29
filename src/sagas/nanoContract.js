@@ -124,7 +124,6 @@ export function* updateNanoContractRegisteredAddress({ payload }) {
   yield call([wallet.storage, wallet.storage.updateNanoContractRegisteredAddress], payload.ncId, payload.address);
 }
 
-
 export function* saga() {
   yield all([
     takeEvery(types.NANOCONTRACT_REGISTER_REQUEST, registerNanoContract),
