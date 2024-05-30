@@ -50,7 +50,7 @@ const createRequestInstance = (resolve, timeout) => {
     if (statusCode < 500) {
       // This request error is to handle problems in the server, so the user
       // can retry a request. So 404 and 400 errors shouldn't show the error modal
-      return error.response;
+      return Promise.reject(error);
     }
     store.dispatch(updateRequestErrorStatusCode(statusCode));
     // Save request config in redux
