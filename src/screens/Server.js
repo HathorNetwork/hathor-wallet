@@ -164,9 +164,11 @@ function Server() {
         const network = versionData.network;
         let newSelectedNetwork = network;
 
-        // Network might be 'testnet-golf' or 'testnet-charlie'
-        if (network.startsWith('testnet')) {
+        // Network might be 'testnet-golf', 'testnet-charlie', 'nano-testnet-alpha'
+        if (network.includes('testnet')) {
           newSelectedNetwork = 'testnet';
+        } else {
+          newSelectedNetwork = 'privatenet';
         }
 
         // Go back to the previous server
