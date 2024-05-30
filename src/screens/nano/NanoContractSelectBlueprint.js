@@ -11,7 +11,7 @@ import BackButton from '../../components/BackButton';
 import colors from '../../index.module.scss';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Select blueprint, fetch information and show it
@@ -23,7 +23,7 @@ function NanoContractSelectBlueprint() {
   const blueprintIdRef = useRef(null);
   const formSelectBlueprintRef = useRef(null);
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   // fetching {boolean} If it's fetching blueprint information data, to show loading
   const [fetching, setFetching] = useState(false);
@@ -47,7 +47,6 @@ function NanoContractSelectBlueprint() {
       const data = await hathorLib.ncApi.getBlueprintInformation(blueprintId);
       setBlueprintInformation(data);
     } catch (e) {
-      // TODO Error handling not working well
       setErrorMessage(e.message);
     } finally {
       setFetching(false);
@@ -60,8 +59,7 @@ function NanoContractSelectBlueprint() {
   }
 
   const onConfirmBlueprintSelection = () => {
-    history.push({
-      pathname: '/nano_contract/execute_method/',
+    navigate('/nano_contract/execute_method/', {
       state: {
         blueprintInformation,
         method: 'initialize'
@@ -72,45 +70,91 @@ function NanoContractSelectBlueprint() {
   const renderButtons = () => {
     if (!blueprintInformation) {
       return (
-        <button type="button" className="mt-3 btn btn-hathor" onClick={onSelectBlueprint}>Confirm</button>
+        <button type="button" className="btn btn-hathor mr-3" onClick={onSelectBlueprint}>{t`Confirm`}</button>
       );
     } else {
       return (
-        <div>
-          <button type="button" className="mt-3 mr-3 btn btn-secondary" onClick={onSelectNewBlueprint}>Select New Blueprint</button>
-          <button type="button" className="mt-3 btn btn-hathor" onClick={onConfirmBlueprintSelection}>Confirm</button>
+        <div className="mb-3">
+          <button type="button" className="mt-3 mr-3 btn btn-secondary" onClick={onSelectNewBlueprint}>{t`Select New Blueprint`}</button>
+          <button type="button" className="mt-3 btn btn-hathor" onClick={onConfirmBlueprintSelection}>{t`Confirm`}</button>
         </div>
       );
     }
   }
 
-  const renderList = (elements) => {
-    return elements.map(el => 
-      <li key={el}>{el}</li>
+  const renderBlueprintAttributes = () => {
+    return (
+      <div className="table-responsive">
+        <table className="table table-striped table-bordered" id="attributes-table">
+          <thead>
+            <tr>
+              <th className="d-lg-table-cell">{t`Name`}</th>
+              <th className="d-lg-table-cell">{t`Type`}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {renderAttributes()}
+          </tbody>
+        </table>
+      </div>
     );
   }
 
+  const renderAttributes = () => {
+    return Object.entries(blueprintInformation.attributes).map(([name, type]) => {
+      return (
+        <tr key={name}>
+          <td>{name}</td>
+          <td>{type}</td>
+        </tr>
+      );
+    });
+  }
+
+  const renderBlueprintMethods = (key, header) => {
+    return (
+      <div className="table-responsive mt-5">
+        <table className="table table-striped table-bordered" id={`methods-table-${key}`}>
+          <thead>
+            <tr>
+              <th className="d-lg-table-cell">{header}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {renderMethods(key)}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  const renderMethods = (key) => {
+    return Object.entries(blueprintInformation[key]).map(([name, detail]) => {
+      return (
+        <tr key={name}>
+          <td>{renderMethodDetails(name, detail.args, detail.return_type)}</td>
+        </tr>
+      );
+    });
+  }
+
+  const renderMethodDetails = (name, args, returnType) => {
+    const parameters = args.map(arg =>
+      `${arg.name}: ${arg.type}`
+    );
+    return `${name}(${parameters.join(', ')}): ${returnType === 'null' ? 'None' : returnType}`;
+  }
+
   const renderBlueprintInformation = () => {
+    const blueprintId = blueprintIdRef.current.value;
     return (
       <div>
-        <div>
-          <label className="mr-2">Blueprint ID:</label><span>{blueprintInformation.id}</span>
-        </div>
-        <div>
-          <label className="mr-2">Name: </label><span>{blueprintInformation.name}</span>
-        </div>
-        <div>
-          <label>Attributes:</label>
-          <ul>
-            {renderList(Object.keys(blueprintInformation.attributes))}
-          </ul>
-        </div>
-        <div>
-          <label>Methods:</label>
-          <ul>
-            {renderList(Object.keys(blueprintInformation.public_methods))}
-          </ul>
-        </div>
+        <p><strong>{t`ID: `}</strong>{blueprintId}</p>
+        <p><strong>{t`Name: `}</strong>{blueprintInformation.name}</p>
+        <h4 className="mt-5 mb-4">{t`Attributes`}</h4>
+        { renderBlueprintAttributes() }
+        { renderBlueprintMethods('public_methods', t`Public Methods`) }
+        { renderBlueprintMethods('private_methods', t`Private Methods`) }
       </div>
     );
   }
@@ -124,12 +168,14 @@ function NanoContractSelectBlueprint() {
           <div className="row">
             <div className="form-group col-6">
               <label>{t`Blueprint ID`}</label>
-              <input required autoFocus ref={blueprintIdRef} type="text" className="form-control" />
+              <input required autoFocus ref={blueprintIdRef} type="text" className="form-control" disabled={blueprintInformation !== null} />
             </div>
           </div>
           {blueprintInformation && renderBlueprintInformation()}
-          {fetching && <div className="d-flex flex-row align-items-center"><span className="mr-2"> Loading blueprint information... </span> <ReactLoading type='spin' color={colors.purpleHathor} width={32} height={32} /></div>}
-          {renderButtons()}
+          <div className="d-flex">
+            {renderButtons()}
+            {fetching && <ReactLoading type='spin' color={colors.purpleHathor} width={32} height={32} />}
+          </div>
           <p className="text-danger mt-3">{errorMessage}</p>
         </form>
       </div>
