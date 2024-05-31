@@ -1246,7 +1246,7 @@ export const onBlueprintAddInformation = (state, { payload }) => {
   * }} action
  */
 export const onNanoContractEditAddress = (state, { payload }) => {
-  const { ncId, address } = action.payload;
+  const { ncId, address } = payload;
 
   if (!(ncId in state.nanoContracts)) {
     // This should never happen, we are trying to edit the address
