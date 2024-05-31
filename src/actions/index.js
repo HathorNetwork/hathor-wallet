@@ -60,6 +60,7 @@ export const types = {
   NANOCONTRACT_REGISTER_ERROR: 'NANOCONTRACT_REGISTER_ERROR',
   NANOCONTRACT_REGISTER_SUCCESS: 'NANOCONTRACT_REGISTER_SUCCESS',
   NANOCONTRACT_CLEAN_REGISTER_METADATA: 'NANOCONTRACT_CLEAN_REGISTER_METADATA',
+  BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
 };
 
 /**
@@ -577,4 +578,14 @@ export const setNativeTokenData = (data) => ({
 export const addRegisteredTokens = (data) => ({
   type: types.ADD_REGISTERED_TOKENS,
   payload: data,
+});
+
+/**
+ * Add blueprint information
+ *
+ * @param {NanoContractBlueprintInformationAPIResponse} blueprintInformation Blueprint information to add to redux
+ */
+export const addBlueprintInformation = (blueprintInformation) => ({
+  type: types.BLUEPRINT_ADD_INFORMATION,
+  payload: { blueprintInformation }
 });

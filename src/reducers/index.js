@@ -214,6 +214,40 @@ const initialState = {
    * }
    */
   nanoContractsRegisterMetadata: {},
+  /**
+   * Stores the blueprint information for each blueprint of registered nano contracts
+   *
+   * {
+   *   id: NanoContractBlueprintInformationAPIResponse
+   * }
+   *
+   * @example
+   * {
+   *   id: '1234',
+   *   name: 'Blueprint test',
+   *   attributes: {
+   *     attribute1: 'string',
+   *     attribute2: 'int',
+   *   },
+   *   public_methods: {
+   *     method1: {
+   *       args: [
+   *         {
+   *           name: 'argument1',
+   *           type: 'byte',
+   *         },
+   *         {
+   *           name: 'argument2',
+   *           type: 'int'
+   *         }
+   *       ],
+   *       return_type: 'int'
+   *     }
+   *   },
+   *   private_methods: {}
+   * }
+  */
+  blueprintsData: {},
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -352,6 +386,8 @@ const rootReducer = (state = initialState, action) => {
       return onNanoContractRegisterSuccess(state, action);
     case types.NANOCONTRACT_CLEAN_REGISTER_METADATA:
       return onNanoContractCleanRegisterMetadata(state);
+    case types.BLUEPRINT_ADD_INFORMATION:
+      return onBlueprintAddInformation(state, action);
     default:
       return state;
   }
@@ -1237,5 +1273,25 @@ export const onNanoContractCleanRegisterMetadata = (state) => ({
   ...state,
   nanoContractsRegisterMetadata: {},
 });
+
+/**
+ * @param {Object} state
+ * @param {{
+ *   payload: {
+ *    blueprintInformation (NanoContractBlueprintInformationAPIResponse)
+ *   }
+  * }} action
+ */
+export const onBlueprintAddInformation = (state, { payload }) => {
+  const { blueprintInformation } = payload;
+
+  return {
+    ...state,
+    blueprintsData: {
+      ...state.blueprintsData,
+      [blueprintInformation.id]: blueprintInformation,
+    },
+  };
+};
 
 export default rootReducer;

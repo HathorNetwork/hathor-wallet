@@ -8,12 +8,15 @@ import { t } from 'ttag';
 import { getGlobalWallet } from "../modules/wallet";
 
 import {
+  addBlueprintInformation,
   nanoContractRegisterError,
   nanoContractRegisterSuccess,
+  types,
 } from '../actions';
 
-import { types } from '../actions';
-import { all, call, put, takeEvery } from 'redux-saga/effects';
+import nanoUtils from '../utils/nanoContracts';
+
+import { all, call, put, select, takeEvery } from 'redux-saga/effects';
 
 export const NANOCONTRACT_REGISTER_STATUS = {
   LOADING: 'loading',
@@ -32,6 +35,8 @@ export const NANOCONTRACT_REGISTER_STATUS = {
  */
 export function* registerNanoContract({ payload }) {
   const { address, ncId } = payload;
+
+  const blueprintsData = yield select((state) => state.blueprintsData);
 
   const wallet = getGlobalWallet();
   if (!wallet.isReady()) {
@@ -54,24 +59,46 @@ export function* registerNanoContract({ payload }) {
     return;
   }
 
-  let ncState = null;
+  let tx = null;
   try {
-    ncState = yield call([ncApi, ncApi.getNanoContractState], ncId);
+    const response = yield call([wallet, wallet.getFullTxById], ncId);
+    tx = response.tx;
   } catch (error) {
-    if (error instanceof hathorLibErrors.NanoRequest404Error) {
-      yield put(nanoContractRegisterError(t`Nano contract not found.`));
-    } else {
-      console.error('Error while registering Nano Contract.', error);
-      yield put(nanoContractRegisterError(t`Error while registering the nano contract.`));
-    }
+    console.error('Error while registering Nano Contract.', error);
+    yield put(nanoContractRegisterError(t`Error while registering the nano contract.`));
     return;
+  }
+
+  if (!nanoUtils.isNanoContractCreate(tx)) {
+    console.debug('Transaction is not a nano contract creation transaction.');
+    yield put(nanoContractRegisterError(t`Invalid nano contract creation transaction.`));
+    return;
+  }
+
+  let blueprintInformation = blueprintsData[tx.nc_blueprint_id];
+  if (!(blueprintInformation)) {
+    // We store the blueprint information in redux because it's used in some screens
+    // then we don't need to request it every time
+    try {
+      blueprintInformation = yield call([ncApi, ncApi.getBlueprintInformation], tx.nc_blueprint_id);
+    } catch (error) {
+      if (error instanceof hathorLibErrors.NanoRequest404Error) {
+        yield put(nanoContractRegisterError(t`Blueprint not found.`));
+      } else {
+        console.error('Error while registering Nano Contract.', error);
+        yield put(nanoContractRegisterError(t`Error while registering the nano contract.`));
+      }
+      return;
+    }
+
+    yield put(addBlueprintInformation(blueprintInformation));
   }
 
   const nc = {
     address,
     ncId,
-    blueprintId: ncState.blueprint_id,
-    blueprintName: ncState.blueprint_name
+    blueprintId: tx.nc_blueprint_id,
+    blueprintName: blueprintInformation.name
   };
   yield call([wallet.storage, wallet.storage.registerNanoContract], ncId, nc);
 

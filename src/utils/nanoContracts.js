@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import hathorLib from '@hathor/wallet-lib';
+
 /**
  * Methods to handle Nano Contracts
  *
@@ -31,6 +33,16 @@ const nanoContracts = {
     }
 
     return nanoContracts;
+  },
+
+  /**
+   * Check if transaction is a nano contract create tx
+   *
+   * @param {Transaction} tx
+   * @returns {boolean}
+   */
+  isNanoContractCreate(tx) {
+    return tx.version === hathorLib.constants.NANO_CONTRACTS_VERSION && tx.nc_method === hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD;
   },
 }
 
