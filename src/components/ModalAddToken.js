@@ -10,13 +10,8 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import tokens from '../utils/tokens';
 import hathorLib from '@hathor/wallet-lib';
-import { connect } from 'react-redux';
-import wallet from "../utils/wallet";
-
-
-const mapStateToProps = (state) => {
-  return { storage: state.wallet.storage };
-};
+import walletUtils from '../utils/wallet';
+import { getGlobalWallet } from '../modules/wallet';
 
 /**
  * Component that shows a modal to add one specific unknown token to the wallet
@@ -88,7 +83,8 @@ class ModalAddToken extends React.Component {
     }
 
     try {
-      const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(this.refs.config.value, this.props.storage);
+      const { storage } = getGlobalWallet();
+      const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(this.refs.config.value, storage);
       const tokensBalance = this.props.tokensBalance;
 
       const tokenUid = tokenData.uid;
@@ -102,7 +98,7 @@ class ModalAddToken extends React.Component {
        * checkbox value as the user decision already.
        */
       if (
-        wallet.areZeroBalanceTokensHidden()
+        walletUtils.areZeroBalanceTokensHidden()
         && tokenHasZeroBalance
         && !this.state.shouldExhibitAlwaysShowCheckbox
       ) {
@@ -115,7 +111,7 @@ class ModalAddToken extends React.Component {
 
       // Adding the token to the wallet and returning with the success callback
       tokens.addToken(tokenUid, tokenData.name, tokenData.symbol);
-      wallet.setTokenAlwaysShow(tokenUid, this.state.alwaysShow);
+      walletUtils.setTokenAlwaysShow(tokenUid, this.state.alwaysShow);
 
       this.props.success();
     } catch (e) {
@@ -195,4 +191,4 @@ class ModalAddToken extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(ModalAddToken);
+export default ModalAddToken;

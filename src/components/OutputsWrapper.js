@@ -9,17 +9,9 @@ import React from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import _ from 'lodash';
-import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import InputNumber from './InputNumber';
 import LOCAL_STORE from '../storage';
-
-
-const mapStateToProps = (state) => {
-  return {
-    wallet: state.wallet,
-  };
-};
 
 /**
  * Component that wraps the outputs of a token in the Send Tokens screen
@@ -85,4 +77,4 @@ class OutputsWrapper extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(OutputsWrapper);
+export default OutputsWrapper;

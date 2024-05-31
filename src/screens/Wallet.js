@@ -28,7 +28,8 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested, updateWords, } from '../actions/index';
 import LOCAL_STORE from '../storage';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { getGlobalWallet } from "../modules/wallet";
 
 
 /**
@@ -64,7 +65,6 @@ function Wallet() {
     tokensBalance,
     tokenMetadata,
     tokens,
-    wallet,
     walletState,
   } = useSelector((state) => {
     return {
@@ -73,17 +73,17 @@ function Wallet() {
       tokensBalance: state.tokensBalance,
       tokenMetadata: state.tokenMetadata || {},
       tokens: state.tokens,
-      wallet: state.wallet,
       walletState: state.walletState,
     };
   });
+  const wallet = getGlobalWallet();
 
   // Refs
   const alertSuccessRef = useRef(null);
   const unregisterModalRef = useRef(null);
 
   // Navigation and actions
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Initialize the screen on mount
@@ -274,10 +274,10 @@ function Wallet() {
   }
 
   /**
-   * @deprecated This should be replaced by usage of `useHistory` inside the child component
+   * @deprecated This should be replaced by usage of `navigate()` inside the child component
    */
   const goToAllAddresses = () => {
-    history.push('/addresses/');
+    navigate('/addresses/');
   }
 
   /**

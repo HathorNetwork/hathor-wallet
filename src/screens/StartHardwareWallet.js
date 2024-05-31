@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { t } from 'ttag'
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
 import logo from '../assets/images/hathor-logo.png';
 import ledger from '../utils/ledger';
@@ -29,7 +29,7 @@ const attemptInterval = 3000;
  * @memberof Screens
  */
 function StartHardwareWallet() {
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Attempt parameters when trying to connect to ledger
@@ -107,7 +107,6 @@ function StartHardwareWallet() {
         passphrase: '',
         pin: null,
         password: '',
-        routerHistory: history,
         xpub,
         hardware: true,
       }));
@@ -179,7 +178,7 @@ function StartHardwareWallet() {
         <p className="mt-4 mb-2 text-center"><strong>{renderTextTitle()}</strong></p>
         <p className="mt-4 mb-4">{renderText()}</p>
         <div className="d-flex align-items-center flex-column w-100 mt-5">
-          <button onClick={history.goBack} type="button" className="btn btn-secondary">{t`Back`}</button>
+          <button onClick={() => navigate(-1)} type="button" className="btn btn-secondary">{t`Back`}</button>
         </div>
       </div>
     )

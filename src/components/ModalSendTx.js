@@ -13,11 +13,11 @@ import PropTypes from "prop-types";
 import SendTxHandler from '../components/SendTxHandler';
 import ReactLoading from 'react-loading';
 import { colors } from '../constants';
+import { getGlobalWallet } from '../modules/wallet';
 
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
     useWalletService: state.useWalletService,
   };
 };
@@ -81,7 +81,8 @@ export class ModalSendTx extends React.Component {
     // If we are using the wallet service facade, we should avail of the validated PIN
     // to renew the auth token.
     if (this.props.useWalletService) {
-      await this.props.wallet.validateAndRenewAuthToken(pin);
+      const wallet = getGlobalWallet();
+      await wallet.validateAndRenewAuthToken(pin);
     }
 
     const preparedTx = await this.props.prepareSendTransaction(pin);

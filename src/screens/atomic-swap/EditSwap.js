@@ -27,6 +27,7 @@ import { cloneDeep, get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import Loading from "../../components/Loading";
 import { proposalTokenFetchRequested } from "../../actions";
+import { getGlobalWallet } from "../../modules/wallet";
 
 /**
  * @param {string} props.match.params.proposalId Proposal identifier
@@ -41,7 +42,7 @@ export default function EditSwap(props) {
     /** @type ReduxProposalData */
     const proposal = useSelector(state => state.proposals[proposalId]);
     /** @type HathorWallet */
-    const wallet = useSelector(state => state.wallet);
+    const wallet = getGlobalWallet();
     /** @type {Record<string, {status:string, data: {available:number, locked:number}}>} */
     const externalTokenBalances = useSelector(state => state.tokensBalance);
     /** @type {Record<string, { uid: string, symbol: string, name: string }>} */

@@ -9,7 +9,7 @@ import BackButton from "../../components/BackButton";
 import { t } from "ttag";
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Loading from "../../components/Loading";
 import { proposalFetchRequested, proposalRemoved } from "../../actions";
 import {
@@ -20,7 +20,7 @@ import walletUtil from "../../utils/wallet";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 
 export default function ProposalList (props) {
-    const history = useHistory();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const modalContext = useContext(GlobalModalContext);
 
@@ -28,15 +28,15 @@ export default function ProposalList (props) {
     const proposals = useSelector(state => state.proposals)
 
     const navigateToProposal = (pId) => {
-        history.push(`/wallet/atomic_swap/proposal/${pId}`)
+        navigate(`/wallet/atomic_swap/proposal/${pId}`)
     }
 
     const navigateToNewProposal = () => {
-        history.push(`/wallet/atomic_swap/proposal/create`)
+        navigate(`/wallet/atomic_swap/proposal/create`)
     }
 
     const importExistingProposal = () => {
-        history.push(`/wallet/atomic_swap/proposal/import`)
+        navigate(`/wallet/atomic_swap/proposal/import`)
     }
 
     /**

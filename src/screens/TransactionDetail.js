@@ -7,7 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 import ReactLoading from 'react-loading';
-import { useSelector } from 'react-redux';
 import { t } from 'ttag';
 import TxData from '../components/TxData';
 import BackButton from '../components/BackButton';
@@ -15,7 +14,8 @@ import hathorLib from '@hathor/wallet-lib';
 import { colors } from '../constants';
 import helpers from '../utils/helpers';
 import path from 'path';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Shows the detail of a transaction or block
@@ -23,8 +23,8 @@ import { useHistory, useParams } from 'react-router-dom';
  * @memberof Screens
  */
 function TransactionDetail() {
-  const wallet = useSelector((state) => state.wallet);
-  const history = useHistory();
+  const wallet = getGlobalWallet();
+  const navigate = useNavigate();
   const { id: txId } = useParams();
 
   /* transaction {Object} Loaded transaction */
@@ -145,7 +145,7 @@ function TransactionDetail() {
             showRaw={true}
             showConflicts={true}
             showGraphs={true}
-            history={history} />
+            history={navigate} />
         ) : (
           <p className="text-danger">
             {isTxNotFound ? (

@@ -14,6 +14,7 @@ import { updateWords } from '../actions/index';
 import { connect } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
 import { WORDS_VALIDATION } from '../constants';
+import { getGlobalWallet } from '../modules/wallet';
 
 
 const mapDispatchToProps = dispatch => {
@@ -26,7 +27,6 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = (state) => {
   return {
     words: state.words,
-    wallet: state.wallet,
   };
 };
 
@@ -108,12 +108,15 @@ class ModalBackupWords extends React.Component {
       this.setState({ passwordFormValidated: false });
       const password = this.refs.password.value;
       try {
-        const accessData = await this.props.wallet.storage.getAccessData();
+        const { storage } = getGlobalWallet();
+        const accessData = await storage.getAccessData();
         const words = hathorLib.cryptoUtils.decryptData(accessData.words, password);
         this.props.updateWords(words);
         this.setState({ passwordSuccess: true, errorMessage: '' });
       } catch (err) {
-        if (err && err.errorCode === hathorLib.ErrorMessages.DECRYPTION_ERROR) {
+        // XXX: The `ErrorMessages.ErrorMessages` property from the lib needs fixing.
+        if (err.errorCode === hathorLib.ErrorMessages.ErrorMessages.DECRYPTION_ERROR
+          || err.errorCode === hathorLib.ErrorMessages.ErrorMessages.INVALID_PASSWD) {
           // If the password is invalid it will throw a DecryptionError
           this.setState({ errorMessage: t`Invalid password` });
         }

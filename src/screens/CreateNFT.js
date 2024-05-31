@@ -22,7 +22,8 @@ import { str2jsx } from '../utils/i18n';
 import { NFT_DATA_MAX_SIZE, NFT_GUIDE_URL, NFT_STANDARD_RFC_URL } from '../constants';
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { getGlobalWallet } from '../modules/wallet';
 
 
 /**
@@ -33,7 +34,7 @@ import { useHistory } from 'react-router-dom';
 function CreateNFT() {
 
   const globalModalContext = useContext(GlobalModalContext);
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const addressDivRef = useRef();
@@ -46,16 +47,16 @@ function CreateNFT() {
   const createMintAuthorityRef = useRef();
   const createMeltAuthorityRef = useRef();
 
-  const { htrBalance, wallet, useWalletService } = useSelector((state) => {
+  const { htrBalance, useWalletService } = useSelector((state) => {
     const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
     const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
 
     return {
       htrBalance,
-      wallet: state.wallet,
       useWalletService: state.useWalletService,
     };
   });
+  const wallet = getGlobalWallet();
 
   /** errorMessage {string} Message to show when error happens on the form */
   const [errorMessage, setErrorMessage] = useState('');
@@ -211,7 +212,7 @@ function CreateNFT() {
    */
   const alertButtonClick = () => {
     globalModalContext.hideModal();
-    history.push('/wallet/');
+    navigate('/wallet/');
   }
 
   /**

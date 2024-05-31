@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useContext } from 'react';
-import { Redirect, Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
@@ -44,37 +44,39 @@ import hathorLib from '@hathor/wallet-lib';
 import { IPC_RENDERER } from './constants';
 import AddressList from './screens/AddressList';
 import NFTList from './screens/NFTList';
-import { updateLedgerClosed } from './actions/index';
+import { resetNavigateTo, updateLedgerClosed } from './actions/index';
 import { WALLET_STATUS } from './sagas/wallet';
 import ProposalList from './screens/atomic-swap/ProposalList';
 import EditSwap from './screens/atomic-swap/EditSwap';
 import NewSwap from './screens/atomic-swap/NewSwap';
 import ImportExisting from './screens/atomic-swap/ImportExisting';
 import LOCAL_STORE from './storage';
+import { getGlobalWallet } from "./modules/wallet";
 
 function Root() {
   const {
     ledgerClosed,
     walletStartState,
     isVersionAllowed,
-    wallet,
+    navigateTo,
   } = useSelector((state) => {
     return {
       ledgerClosed: state.ledgerWasClosed,
       walletStartState: state.walletStartState,
       isVersionAllowed: state.isVersionAllowed,
-      wallet: state.wallet,
+      navigateTo: state.navigateTo,
     };
   });
+  const wallet = getGlobalWallet();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useNavigate();
   const context = useContext(GlobalModalContext);
 
   // Monitors when Ledger device loses connection or the app is closed
   useEffect(() => {
     if (ledgerClosed) {
       LOCAL_STORE.lock();
-      history.push('/locked/');
+      navigate('/locked/');
     }
   }, [ledgerClosed]);
 
@@ -160,6 +162,20 @@ function Root() {
     }
   }, [isVersionAllowed, wallet]);
 
+  /**
+   * This effect allows navigation to be triggered from background tasks such as sagas.
+   */
+  useEffect(() => {
+    // Ignore this effect if there is no route to navigateTo
+    if (!navigateTo.route) {
+      return;
+    }
+
+    // Navigate to the informed route and reset the navigateTo state property
+    navigate(navigateTo.route, { replace: navigateTo.replace });
+    dispatch(resetNavigateTo());
+  }, [navigateTo])
+
   // Handles failed wallet states
   if (walletStartState === WALLET_STATUS.FAILED) {
     return <LoadWalletFailed />;
@@ -167,49 +183,49 @@ function Root() {
 
   // Application rendering
   return (
-    <Switch>
-      <Route exact path="/nft" children={<StartedComponent children={ <NFTList />} loaded={true} />} />
-      <Route exact path="/create_token" children={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
-      <Route exact path="/create_nft" children={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
-      <Route exact path="/custom_tokens" children={<StartedComponent children={ <CustomTokens /> } loaded={true} />} />
-      <Route exact path="/unknown_tokens" children={<StartedComponent children={ <UnknownTokens />} loaded={true} />} />
-      <Route exact path="/wallet/send_tokens" children={<StartedComponent children={ <SendTokens /> } loaded={true} />} />
-      <Route exact path="/wallet/atomic_swap" children={<StartedComponent children={ <ProposalList />} loaded={true} />} />
-      <Route exact path="/wallet/atomic_swap/proposal/create" children={<StartedComponent children={ <NewSwap /> } loaded={true} />} />
-      <Route exact path="/wallet/atomic_swap/proposal/import" children={<StartedComponent children={ <ImportExisting />} loaded={true} />} />
-      <Route exact path="/wallet/atomic_swap/proposal/:proposalId" children={<StartedComponent children={ <EditSwap /> } loaded={true} />} />
-      <Route exact path="/wallet" children={<StartedComponent children={ <Wallet />} loaded={true} />} />
-      <Route exact path="/settings" children={<StartedComponent children={ <Settings /> } loaded={true} />} />
-      <Route exact path="/wallet/passphrase" children={<StartedComponent children={ <ChoosePassphrase />} loaded={true} />} />
-      <Route exact path="/server" children={<StartedComponent children={ <Server /> } loaded={true} />} />
-      <Route exact path="/transaction/:id" children={<StartedComponent children={ <TransactionDetail />} loaded={true} />} />
-      <Route exact path="/addresses" children={<StartedComponent children={ <AddressList /> } loaded={true} /> } />
-      <Route exact path="/new_wallet" children={<StartedComponent children={ <NewWallet />} loaded={false} />} />
-      <Route exact path="/load_wallet" children={<StartedComponent children={ <LoadWallet /> } loaded={false} /> } />
-      <Route exact path="/wallet_type" children={<StartedComponent children={<WalletType loaded={false} />} />} />
-      <Route exact path="/software_warning" children={<StartedComponent children={ <SoftwareWalletWarning /> } loaded={false} />} />
-      <Route exact path="/signin" children={<StartedComponent children={ <Signin />} loaded={false} />} />
-      <Route exact path="/hardware_wallet" children={<StartedComponent children={ <StartHardwareWallet /> } loaded={false} />} />
-      <Route exact path="/locked" children={<DefaultComponent children={<LockedWallet />} />} />
-      <Route exact path="/welcome" children={<Welcome />} />
-      <Route exact path="/loading_addresses" children={<LoadingAddresses />} />
-      <Route exact path="/permission" children={<SentryPermission />} />
-      <Route exact path="" children={<StartedComponent children={ <Wallet />} loaded={true} />} />
-      <Route path="" children={<Page404 />} />
-    </Switch>
+    <Routes>
+      <Route path="/nft" element={<StartedComponent children={ <NFTList />} loaded={true} />} />
+      <Route path="/create_token" element={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
+      <Route path="/create_nft" element={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
+      <Route path="/custom_tokens" element={<StartedComponent children={ <CustomTokens /> } loaded={true} />} />
+      <Route path="/unknown_tokens" element={<StartedComponent children={ <UnknownTokens />} loaded={true} />} />
+      <Route path="/wallet/send_tokens" element={<StartedComponent children={ <SendTokens /> } loaded={true} />} />
+      <Route path="/wallet/atomic_swap" element={<StartedComponent children={ <ProposalList />} loaded={true} />} />
+      <Route path="/wallet/atomic_swap/proposal/create" element={<StartedComponent children={ <NewSwap /> } loaded={true} />} />
+      <Route path="/wallet/atomic_swap/proposal/import" element={<StartedComponent children={ <ImportExisting />} loaded={true} />} />
+      <Route path="/wallet/atomic_swap/proposal/:proposalId" element={<StartedComponent children={ <EditSwap /> } loaded={true} />} />
+      <Route path="/wallet" element={<StartedComponent children={ <Wallet />} loaded={true} />} />
+      <Route path="/settings" element={<StartedComponent children={ <Settings /> } loaded={true} />} />
+      <Route path="/wallet/passphrase" element={<StartedComponent children={ <ChoosePassphrase />} loaded={true} />} />
+      <Route path="/server" element={<StartedComponent children={ <Server /> } loaded={true} />} />
+      <Route path="/transaction/:id" element={<StartedComponent children={ <TransactionDetail />} loaded={true} />} />
+      <Route path="/addresses" element={<StartedComponent children={ <AddressList /> } loaded={true} /> } />
+      <Route path="/new_wallet" element={<StartedComponent children={ <NewWallet />} loaded={false} />} />
+      <Route path="/load_wallet" element={<StartedComponent children={ <LoadWallet /> } loaded={false} /> } />
+      <Route path="/wallet_type" element={<StartedComponent children={<WalletType loaded={false} />} />} />
+      <Route path="/software_warning" element={<StartedComponent children={ <SoftwareWalletWarning /> } loaded={false} />} />
+      <Route path="/signin" element={<StartedComponent children={ <Signin />} loaded={false} />} />
+      <Route path="/hardware_wallet" element={<StartedComponent children={ <StartHardwareWallet /> } loaded={false} />} />
+      <Route path="/locked" element={<DefaultComponent children={<LockedWallet />} />} />
+      <Route path="/welcome" element={<Welcome />} />
+      <Route path="/loading_addresses" element={<LoadingAddresses />} />
+      <Route path="/permission" element={<SentryPermission />} />
+      <Route path="/" element={<StartedComponent children={ <Wallet />} loaded={true} />} />
+      <Route path="*" element={<Page404 />} />
+    </Routes>
   );
 }
 
 function LoadedWalletComponent({ children }) {
-  const match = useRouteMatch();
+  const location = useLocation();
   // For server screen we don't need to check version
   // We also allow the server screen to be reached from the locked screen
   // In the case of an unresponsive fullnode, which would block the wallet start
-  const isServerScreen = match.path === '/server';
+  const isServerScreen = location.pathname === '/server';
 
   // If was closed and is loaded we need to redirect to locked screen
   if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) && (!LOCAL_STORE.isHardwareWallet())) {
-    return <Redirect to={{ pathname: '/locked/' }} />;
+    return <Navigate to={ '/locked/' } />;
   }
 
   // We allow server screen to be shown from locked screen to allow the user to
@@ -226,10 +242,10 @@ function LoadedWalletComponent({ children }) {
   // The addresses are being loaded, redirect user
   if (loadingAddresses) {
     // If wallet is still loading addresses we redirect to the loading screen
-    return <Redirect to={{
-      pathname: '/loading_addresses/',
-      state: {path: match.url}
-    }} />;
+    return <Navigate
+      to={ '/loading_addresses/' }
+      state={{ path: location.pathname }}
+    />;
   }
 
   // The wallet has fully loaded: check version
@@ -247,13 +263,13 @@ function LoadedWalletComponent({ children }) {
 }
 
 function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
-  const history = useHistory();
   const { loadingAddresses } = useSelector(state => ({
     loadingAddresses: state.loadingAddresses
   }));
 
   // Handling Windows pathname issues
-  const pathname = history.location.pathname;
+  const location = useLocation();
+  const pathname = location.pathname;
   if (pathname.length > 3 && pathname.slice(0, 4).toLowerCase() === '/c:/') {
     // On Windows the pathname that is being pushed into history has a prefix of '/C:'
     // So everytime I use 'push' it works, because I set the pathname
@@ -262,13 +278,13 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
     // Besides that, when electron loads initially it needs to load index.html from the filesystem
     // So the first load from electron get from '/C:/' in windows. That's why we need the second 'if'
     if (pathname.length > 11 && pathname.slice(-11).toLowerCase() !== '/index.html') {
-      return <Redirect to={{pathname: pathname.slice(3)}} />;
+      return <Navigate to={pathname.slice(3)} replace />;
     }
   }
 
   // The wallet was not yet started, go to Welcome
   if (!LOCAL_STORE.wasStarted()) {
-    return <Redirect to={{pathname: '/welcome/'}}/>;
+    return <Navigate to={ '/welcome/' } replace />;
   }
 
   // The wallet is already loaded
@@ -276,10 +292,10 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
     // The server screen is a special case since we allow the user to change the
     // connected server in case of unresponsiveness, this should be allowed from
     // the locked screen since the wallet would not be able to be started otherwise
-    const isServerScreen = history.location.pathname === '/server';
+    const isServerScreen = location.pathname === '/server';
     // Wallet is locked, go to locked screen
     if (LOCAL_STORE.isLocked() && !isServerScreen && !LOCAL_STORE.isHardwareWallet()) {
-      return <Redirect to={{pathname: '/locked/'}}/>;
+      return <Navigate to={ '/locked/' } replace />;
     }
 
     // Route requires the wallet to be loaded, render it
@@ -288,22 +304,19 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
     }
 
     // Route does not require wallet to be loaded. Redirect to wallet "home" screen
-    return <Redirect to={{pathname: '/wallet/'}}/>;
+    return <Navigate to="/wallet/" replace />;
   }
 
   // Wallet is not loaded, but it is still loading addresses. Go to the loading screen
   if (loadingAddresses) {
-    const match = useRouteMatch();
-    return <Redirect to={{
-      pathname: '/loading_addresses/',
-      state: {path: match.url}
-    }}/>;
+    const location = useLocation();
+    return <Navigate to={ '/loading_addresses/' } state={{path: location.pathname}} />;
   }
 
   // Wallet is not loaded or loading, but it is started
   // Since the route requires the wallet to be loaded, redirect to the wallet_type screen
   if (routeRequiresWalletToBeLoaded) {
-    return <Redirect to={{pathname: '/wallet_type/'}}/>;
+    return <Navigate to={ '/wallet_type/' } />;
   }
 
   // Wallet is not loaded nor loading, and the route does not require it to be loaded.
@@ -322,7 +335,6 @@ function DefaultComponent({ children }) {
   const { isVersionAllowed } = useSelector(state => ({
     isVersionAllowed: state.isVersionAllowed,
   }));
-  const history = useHistory();
 
   const [versionIsKnown, setVersionIsKnown] = useState(false);
 
@@ -335,12 +347,13 @@ function DefaultComponent({ children }) {
     setVersionIsKnown(true);
   }, [isVersionAllowed]);
 
-  /*
-   * Prevents rendering commmon app usage screens while the wallet version is still unknown.
-   * An exception is made to the 'locked' screen, because the version request is not yet done while the user is in it.
-   * Note: `DefaultComponent` is not used on the screens that initialize new wallets, or the "Welcome" screens
-   */
-  const isLockedScreen = history.location.pathname === '/locked/';
+	/*
+	 * Prevents rendering commmon app usage screens while the wallet version is still unknown.
+	 * An exception is made to the 'locked' screen, because the version request is not yet done while the user is in it.
+	 * Note: `DefaultComponent` is not used on the screens that initialize new wallets, or the "Welcome" screens
+	 */
+  const location = useLocation();
+  const isLockedScreen = location.pathname === '/locked/';
   if (!versionIsKnown) {
     if (!isLockedScreen) {
       return null;
@@ -357,7 +370,7 @@ function DefaultComponent({ children }) {
     LOCAL_STORE.isHardwareWallet()) {
     // This will redirect the page to Wallet Type screen
     LOCAL_STORE.cleanWallet();
-    return <Redirect to={ { pathname: '/wallet_type/' } } />;
+    return <Navigate to={ '/wallet_type/' } />;
   }
 
   // Render the navigation top bar, the component and the error handling modal

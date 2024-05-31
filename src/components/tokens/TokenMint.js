@@ -11,15 +11,16 @@ import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
 import TokenAction from './TokenAction';
 import tokens from '../../utils/tokens';
-import wallet from '../../utils/wallet';
+import walletUtils from '../../utils/wallet';
 import helpers from '../../utils/helpers';
 import InputNumber from '../InputNumber';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
+import { getGlobalWallet } from "../../modules/wallet";
 
 const mapStateToProps = (state) => {
   return {
-    wallet: state.wallet,
+    wallet: getGlobalWallet(),
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
   };
@@ -59,9 +60,10 @@ class TokenMint extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = async (pin) => {
-    const amountValue = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
+    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
     const address = this.chooseAddress.current.checked ? null : this.address.current.value;
-    const transaction = await this.props.wallet.prepareMintTokensData(
+    const wallet = getGlobalWallet();
+    const transaction = await wallet.prepareMintTokensData(
       this.props.token.uid,
       amountValue,
       {
@@ -72,13 +74,13 @@ class TokenMint extends React.Component {
     );
 
     if (this.props.useWalletService) {
-      return new hathorLib.SendTransactionWalletService(this.props.wallet, {
+      return new hathorLib.SendTransactionWalletService(wallet, {
         transaction,
         pin,
       });
     }
 
-    return new hathorLib.SendTransaction({ transaction, pin, storage: this.props.wallet.storage });
+    return new hathorLib.SendTransaction({ transaction, pin, storage: wallet.storage });
   }
 
   /**
@@ -92,7 +94,7 @@ class TokenMint extends React.Component {
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const amount = this.isNFT() ? this.state.amount : wallet.decimalToInteger(this.state.amount);
+    const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
     const prettyAmountValue = helpers.renderValue(amount, this.isNFT());
     return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;
   }
@@ -206,7 +208,8 @@ class TokenMint extends React.Component {
       }
     }
 
-    const depositPercent = this.props.wallet.storage.getTokenDepositPercentage();
+    const wallet = getGlobalWallet();
+    const depositPercent = wallet.storage.getTokenDepositPercentage();
 
     return (
       <TokenAction

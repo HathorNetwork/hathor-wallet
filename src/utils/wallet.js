@@ -115,12 +115,11 @@ const wallet = {
    * @param {string} passphrase
    * @param {string} pin
    * @param {string} password
-   * @param {Object} routerHistory History to push new path in case of notification click
    *
    * @memberof Wallet
    * @inner
    */
-  generateWallet(words, passphrase, pin, password, routerHistory) {
+  generateWallet(words, passphrase, pin, password) {
     try {
       walletUtils.wordsValid(words);
     } catch(e) {
@@ -138,7 +137,6 @@ const wallet = {
       passphrase,
       pin,
       password,
-      routerHistory,
     }))
   },
 
@@ -231,7 +229,7 @@ const wallet = {
     const unknownTokens = [];
 
     // Iterating tokens to filter unregistered ones
-    for (const tokenUid of allTokens) {
+    for (const tokenUid of Object.keys(allTokens)) {
       // If it is already registered, skip it.
       if (registeredTokens.find((x) => x.uid === tokenUid)) {
         continue;
@@ -316,9 +314,9 @@ const wallet = {
    *
    * @param {HathorWallet} wallet The wallet instance
    * @param {string} pin The pin entered by the user
-   * @param {any} routerHistory
+   * @param networkChanged
    */
-  async changeServer(wallet, pin, routerHistory, networkChanged) {
+  async changeServer(wallet, pin, networkChanged) {
     // We only clean the storage if the network has changed
     await wallet.stop({ cleanStorage: true, cleanAddresses: true });
 
@@ -335,14 +333,12 @@ const wallet = {
         passphrase: '',
         pin,
         password: '',
-        routerHistory,
         hardware: false,
       }));
     } else {
       store.dispatch(startWalletRequested({
         passphrase: '',
         password: '',
-        routerHistory,
         xpub: wallet.xpub,
         hardware: true,
       }));
@@ -361,13 +357,13 @@ const wallet = {
    * @memberof Wallet
    * @inner
    */
-  async addPassphrase(wallet, passphrase, pin, password, routerHistory) {
+  async addPassphrase(wallet, passphrase, pin, password) {
     const words = await LOCAL_STORE.getWalletWords(password);
 
     // Clean wallet data, persisted data and redux
     await this.cleanWallet(wallet);
     helpers.loadStorageState();
-    this.generateWallet(words, passphrase, pin, password, routerHistory);
+    this.generateWallet(words, passphrase, pin, password);
   },
 
   /*

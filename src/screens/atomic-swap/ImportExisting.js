@@ -8,7 +8,7 @@ import BackButton from "../../components/BackButton";
 import { t } from "ttag";
 import Loading from "../../components/Loading";
 import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { importProposal, proposalFetchRequested } from "../../actions";
 import {
@@ -25,11 +25,11 @@ export default function ImportExisting(props) {
 
     // Global interactions
     const allProposals = useSelector(state => state.proposals);
-    const history = useHistory();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const navigateToProposal = (pId) => {
-        history.replace(`/wallet/atomic_swap/proposal/${pId}`);
+        navigate(`/wallet/atomic_swap/proposal/${pId}`, { replace: true });
     }
 
     const importClickHandler = () => {

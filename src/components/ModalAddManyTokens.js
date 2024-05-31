@@ -10,14 +10,9 @@ import { t } from 'ttag';
 import { get } from 'lodash';
 import $ from 'jquery';
 import hathorLib from '@hathor/wallet-lib';
-import { connect } from 'react-redux';
 import tokens from '../utils/tokens';
-import wallet from "../utils/wallet";
-
-
-const mapStateToProps = (state) => {
-  return { storage: state.wallet.storage };
-};
+import walletUtils from "../utils/wallet";
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * Component that shows a modal to add many unknown tokens to the wallet (bulk import)
@@ -105,14 +100,15 @@ class ModalAddManyTokens extends React.Component {
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
         // Getting all validation promises
-        validations.push(hathorLib.tokensUtils.validateTokenToAddByConfigurationString(config, this.props.storage));
+        const storage = getGlobalWallet().storage;
+        validations.push(hathorLib.tokensUtils.validateTokenToAddByConfigurationString(config, storage));
       }
     }
 
     try {
       const toAdd = await Promise.all(validations)
       const tokensBalance = this.props.tokensBalance;
-      const areZeroBalanceTokensHidden = wallet.areZeroBalanceTokensHidden();
+      const areZeroBalanceTokensHidden = walletUtils.areZeroBalanceTokensHidden();
       const tokensWithoutBalance = [];
       const tokensToAdd = [];
 
@@ -163,7 +159,7 @@ class ModalAddManyTokens extends React.Component {
       // Adding the tokens to the wallet and returning with the success callback
       for (const config of tokensToAdd) {
         await tokens.addToken(config.uid, config.name, config.symbol);
-        wallet.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
+        walletUtils.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
       }
 
       this.props.success(toAdd.length);
@@ -240,4 +236,4 @@ class ModalAddManyTokens extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(ModalAddManyTokens);
+export default ModalAddManyTokens;

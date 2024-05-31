@@ -44,10 +44,9 @@ export const types = {
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
   WALLET_CHANGE_STATE: 'WALLET_CHANGE_STATE',
   WALLET_RESET: 'WALLET_RESET',
-  WALLET_RESET_SUCCESS: 'WALLET_RESET_SUCCESS',
   WALLET_REFRESH_SHARED_ADDRESS: 'WALLET_REFRESH_SHARED_ADDRESS',
   SET_SERVER_INFO: 'SET_SERVER_INFO',
-  STORE_ROUTER_HISTORY: 'STORE_ROUTER_HISTORY',
+  SET_NAVIGATE_TO: 'SET_NAVIGATE_TO',
   WALLET_RELOADING: 'WALLET_RELOADING',
   FEATURE_TOGGLE_INITIALIZED: 'FEATURE_TOGGLE_INITIALIZED',
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
@@ -141,16 +140,6 @@ export const updateRequestErrorStatusCode = data => ({ type: 'update_request_err
  * htrUpdatedBalance {Object} balance of HTR
  */
 export const updateHeight = (height, htrUpdatedBalance) => ({ type: 'update_height', payload: { height, htrUpdatedBalance } });
-
-/**
- * wallet {HathorWallet} wallet object
- */
-export const setWallet = (wallet) => ({ type: 'set_wallet', payload: wallet });
-
-/**
- * Stop and clean wallet redux state
- */
-export const resetWallet = () => ({ type: 'reset_wallet' });
 
 /**
  * tokens {Array} array of token uids the the wallet has
@@ -441,11 +430,23 @@ export const reloadingWallet = () => ({
 });
 
 /**
- * @param {RouterHistory} routerHistory History object from react-dom-navigation
+ * @param {string} route Route that should be navigated to in consequence of an event
+ * @param {boolean} replace Should we navigate with the replace parameter set
  */
-export const storeRouterHistory = (routerHistory) => ({
-  type: types.STORE_ROUTER_HISTORY,
-  routerHistory,
+export const setNavigateTo = (route, replace = false) => ({
+  type: types.SET_NAVIGATE_TO,
+  route,
+  replace,
+});
+
+/**
+ * Resets the `navigateTo` property.
+ * Should be called after every successful navigation executed through this property.
+ */
+export const resetNavigateTo = () => ({
+  type: types.SET_NAVIGATE_TO,
+  route: '',
+  replace: false,
 });
 
 /**
@@ -467,18 +468,6 @@ export const featureToggleInitialized = () => ({
 export const setFeatureToggles = (toggles) => ({
   type: types.SET_FEATURE_TOGGLES,
   payload: toggles,
-});
-
-/**
- * unleashClient {UnleashClient} The unleash client to store
- */
-export const setUnleashClient = (unleashClient) => ({
-  type: types.SET_UNLEASH_CLIENT,
-  payload: unleashClient,
-});
-
-export const walletResetSuccess = () => ({
-  type: types.WALLET_RESET_SUCCESS,
 });
 
 export const walletReset = () => ({

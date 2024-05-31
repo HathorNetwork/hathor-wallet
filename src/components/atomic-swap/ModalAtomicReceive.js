@@ -9,12 +9,12 @@ import React, { useState, useRef, useEffect } from "react";
 import { t } from "ttag";
 import InputNumber from "../InputNumber";
 import hathorLib, { Address } from "@hathor/wallet-lib";
-import { useSelector } from "react-redux";
 import walletUtils from '../../utils/wallet';
+import { getGlobalWallet } from "../../modules/wallet";
 
 export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manageDomLifecycle, onClose }) {
     /** @type HathorWallet */
-    const wallet = useSelector(state => state.wallet);
+    const wallet = getGlobalWallet();
     const [selectedToken, setSelectedToken] = useState(receivableTokens[0]);
     const [address, setAddress] = useState('');
     let amountRef = useRef();

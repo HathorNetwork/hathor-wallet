@@ -17,7 +17,7 @@ import { str2jsx } from '../utils/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateLedgerClosed } from '../actions/index';
 import LOCAL_STORE from '../storage';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { LEDGER_GUIDE_URL } from '../constants';
 import helpers from '../utils/helpers';
 
@@ -27,7 +27,7 @@ import helpers from '../utils/helpers';
  * @memberof Screens
  */
 function WalletType() {
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const ledgerClosed = useSelector((state) => state.ledgerWasClosed);
 
@@ -45,14 +45,14 @@ function WalletType() {
    */
   const goToSoftwareWallet = () => {
     LOCAL_STORE.setHardwareWallet(false);
-    history.push('/software_warning/');
+    navigate('/software_warning/');
   }
 
   /**
    * Go to hardware wallet start screen
    */
   const goToHardwareWallet = () => {
-    history.push('/hardware_wallet/');
+    navigate('/hardware_wallet/');
   }
 
   /**

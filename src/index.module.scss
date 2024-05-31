@@ -315,6 +315,10 @@ svg.svg-wrapper {
   width: 70px;
 }
 
+.navbar-nav a.nav-link.active {
+  font-weight: bold;
+}
+
 @media (max-width: 992px) {
   .navbar-nav li.nav-item {
     padding: 0rem 1rem;
