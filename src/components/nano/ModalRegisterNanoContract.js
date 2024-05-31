@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import { get } from 'lodash';
@@ -22,7 +22,7 @@ import ReactLoading from 'react-loading';
  *
  * @memberof Components
  */
-function ModalRegisterNanoContract() {
+function ModalRegisterNanoContract({ onClose }) {
   const dispatch = useDispatch();
   const wallet = getGlobalWallet();
 
@@ -35,9 +35,12 @@ function ModalRegisterNanoContract() {
   const idRef = useRef(null);
 
   useEffect(() => {
-    $('#registerNCModal').on('hide.bs.modal', (e) => {
+    $('#registerNCModal').modal('show');
+    $('#registerNCModal').on('hidden.bs.modal', (e) => {
       dispatch(cleanNanoContractRegisterMetadata());
       idRef.current.value = '';
+      // We always need to call on close when using global context modal
+      onClose();
     });
 
     $('#registerNCModal').on('shown.bs.modal', (e) => {
@@ -45,6 +48,7 @@ function ModalRegisterNanoContract() {
     });
 
     return () => {
+      $('#registerNCModal').modal('hide');
       // Removing all event listeners
       $('#registerNCModal').off();
     };
@@ -54,7 +58,7 @@ function ModalRegisterNanoContract() {
   useEffect(() => {
     // When registration succeeds, we hide the modal
     if (ncRegisterStatus === NANOCONTRACT_REGISTER_STATUS.SUCCESS) {
-      $('#registerNCModal').modal('hide');
+      onClose();
     }
   }, [ncRegisterStatus]);
 

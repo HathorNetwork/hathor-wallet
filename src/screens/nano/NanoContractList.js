@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import $ from 'jquery';
 import { t } from 'ttag'
 import { Link } from 'react-router-dom'
@@ -14,6 +14,7 @@ import ModalRegisterNanoContract from '../../components/nano/ModalRegisterNanoCo
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { NANOCONTRACT_REGISTER_STATUS } from '../../sagas/nanoContract';
+import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 
 
 /**
@@ -22,11 +23,12 @@ import { NANOCONTRACT_REGISTER_STATUS } from '../../sagas/nanoContract';
  * @memberof Screens
  */
 function NanoContractList() {
+  const context = useContext(GlobalModalContext);
   const nanoContracts = useSelector(state => state.nanoContracts);
   const navigate = useNavigate();
 
   const registerNC = () => {
-    $('#registerNCModal').modal('show');
+    context.showModal(MODAL_TYPES.NANOCONTRACT_REGISTER);
   }
 
   const createNC = () => {
@@ -69,7 +71,6 @@ function NanoContractList() {
           </table>
         </div>
       </div>
-      <ModalRegisterNanoContract />
     </div>
   );
 }
