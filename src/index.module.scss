@@ -659,13 +659,13 @@ svg.svg-wrapper {
   color: rgba(0,0,0,0.5);
 }
 
-.send-tokens-wrapper {
+.send-tokens-wrapper, .actions-wrapper {
   padding: 1.2rem;
   border: 1px solid #ddd;
   margin-bottom: 2rem;
 }
 
-.remove-token-btn {
+.remove-token-btn, .remove-action-btn {
   background-color: transparent;
   border: 1px solid #dc3545;
   float: right;
@@ -893,4 +893,28 @@ span.software {
 
 .htr-color {
   color: $purpleHathor
+}
+
+.nc-detail-wrapper {
+  padding: 1rem;
+  border: 1px solid;
+}
+
+.nc-detail-wrapper > hr {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  border-top: 1px solid;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+  display: none;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }

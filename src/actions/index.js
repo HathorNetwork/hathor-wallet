@@ -599,6 +599,6 @@ export const addBlueprintInformation = (blueprintInformation) => ({
  * @param {string} address New address of the nano contract
  */
 export const editAddressNC = (ncId, address) => ({
-  type: NANOCONTRACT_EDIT_ADDRESS,
+  type: types.NANOCONTRACT_EDIT_ADDRESS,
   payload: { ncId, address }
 });
