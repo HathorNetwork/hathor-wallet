@@ -10,18 +10,17 @@ import { t } from 'ttag'
 import HathorPaginate from '../components/HathorPaginate';
 import HathorAlert from '../components/HathorAlert';
 import { WALLET_HISTORY_COUNT } from '../constants';
-import helpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
-import path from 'path';
-import { getGlobalWallet } from '../modules/wallet';
+import { useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
 
 /**
  * Screen that has a list of addresses of the wallet
  *
  * @memberof Screens
  */
-function AddressList() {
-  const wallet = getGlobalWallet();
+function AddressList(props) {
+  const wallet = useSelector(state => state.wallet);
 
   const alertErrorRef = useRef(null);
   const txSearchRef = useRef(null);
@@ -45,7 +44,7 @@ function AddressList() {
    * @return {Number} Total number of pages of the list
    */
   const getTotalPages = (array) => {
-    return Math.ceil(array.length / WALLET_HISTORY_COUNT);
+    return Math.ceil(array.length / props.count);
   }
 
   useEffect(() => {
@@ -139,8 +138,7 @@ function AddressList() {
    */
   const goToAddressSearch = (e, address) => {
     e.preventDefault();
-    const url = path.join(helpers.getExplorerURL(), `address/${address}`);
-    helpers.openExternalURL(url);
+    props.onAddressClick(address);
   }
 
   const loadPagination = () => {
@@ -164,45 +162,53 @@ function AddressList() {
   }
 
   const renderData = () => {
-    const startIndex = (page - 1) * WALLET_HISTORY_COUNT;
-    const endIndex = startIndex + WALLET_HISTORY_COUNT;
+    const startIndex = (page - 1) * props.count;
+    const endIndex = startIndex + props.count;
     return filteredAddresses.slice(startIndex, endIndex).map((addressObj) => {
       return (
         <tr key={addressObj.address}>
           <td><a href="true" onClick={(e) => goToAddressSearch(e, addressObj.address)}>{addressObj.address}</a></td>
           <td>{addressObj.index}</td>
-          <td className="number">{addressObj.transactions}</td>
+          {props.showNumberOfTransaction && <td className="number">{addressObj.transactions}</td>}
         </tr>
       )
     });
   }
 
   return (
-    <div className="content-wrapper">
-      <div className="d-flex flex-column">
-        <div className="d-flex flex-row justify-content-between">
-          <h2>{t`Addresses`}</h2>
-          {renderSearch()}
-        </div>
-        <div className="table-responsive">
-          <table className="mt-3 table table-striped" id="address-list">
-            <thead>
-              <tr>
-                <th>{t`Address`}</th>
-                <th>{t`Index`}</th>
-                <th className="number">{t`Number of transactions`}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderData()}
-            </tbody>
-          </table>
-        </div>
-        {loadPagination()}
+    <div className="d-flex flex-column">
+      <div className="d-flex flex-row justify-content-end">
+        {renderSearch()}
       </div>
+      <div className="table-responsive">
+        <table className="mt-3 table table-striped" id="address-list">
+          <thead>
+            <tr>
+              <th>{t`Address`}</th>
+              <th>{t`Index`}</th>
+              {props.showNumberOfTransaction && <th className="number">{t`Number of transactions`}</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {renderData()}
+          </tbody>
+        </table>
+      </div>
+      {loadPagination()}
       <HathorAlert ref={alertErrorRef} text="Invalid address" type="danger" />
     </div>
-  );
+  )
+}
+
+/*
+ * showNumberOfTransaction: If should show the column with number of transactions
+ * onAddressClick: Method called when user clicks on the address
+ * count: Quantity of elements in the list
+ */
+AddressList.propTypes = {
+  showNumberOfTransaction: PropTypes.bool.isRequired,
+  onAddressClick: PropTypes.func.isRequired,
+  count: PropTypes.number.isRequired,
 };
 
 export default AddressList;
