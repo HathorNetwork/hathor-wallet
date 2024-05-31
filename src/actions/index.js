@@ -61,6 +61,7 @@ export const types = {
   NANOCONTRACT_REGISTER_SUCCESS: 'NANOCONTRACT_REGISTER_SUCCESS',
   NANOCONTRACT_CLEAN_REGISTER_METADATA: 'NANOCONTRACT_CLEAN_REGISTER_METADATA',
   BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
+  NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
 };
 
 /**
@@ -589,4 +590,15 @@ export const addRegisteredTokens = (data) => ({
 export const addBlueprintInformation = (blueprintInformation) => ({
   type: types.BLUEPRINT_ADD_INFORMATION,
   payload: { blueprintInformation }
+});
+
+/**
+ * Edit address of a registered nano contract
+ *
+ * @param {string} ncId Nano contract id
+ * @param {string} address New address of the nano contract
+ */
+export const editAddressNC = (ncId, address) => ({
+  type: NANOCONTRACT_EDIT_ADDRESS,
+  payload: { ncId, address }
 });

@@ -390,6 +390,8 @@ const rootReducer = (state = initialState, action) => {
       return onNanoContractCleanRegisterMetadata(state);
     case types.BLUEPRINT_ADD_INFORMATION:
       return onBlueprintAddInformation(state, action);
+    case types.NANOCONTRACT_EDIT_ADDRESS:
+      return onNanoContractEditAddress(state, action);
     default:
       return state;
   }
@@ -1292,6 +1294,36 @@ export const onBlueprintAddInformation = (state, { payload }) => {
     blueprintsData: {
       ...state.blueprintsData,
       [blueprintInformation.id]: blueprintInformation,
+    },
+  };
+};
+
+/**
+ * @param {Object} state
+ * @param {{
+ *   payload: {
+ *     ncId: string,
+ *     address: string,
+ *   }
+  * }} action
+ */
+export const onNanoContractEditAddress = (state, { payload }) => {
+  const { ncId, address } = action.payload;
+
+  if (!(ncId in state.nanoContracts)) {
+    // This should never happen, we are trying to edit the address
+    // of a nano contract that is not registered
+    return state;
+  }
+
+  return {
+    ...state,
+    nanoContracts: {
+      ...state.nanoContracts,
+      [ncId]: {
+        ...payload,
+        address,
+      },
     },
   };
 };
