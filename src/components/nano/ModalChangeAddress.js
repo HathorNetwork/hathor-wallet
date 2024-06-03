@@ -79,9 +79,10 @@ function ModalChangeAddress(props) {
    *
    * @param {Object} e Event emitted on click
    */
-  const executeChange = (e) => {
+  const executeChange = async (e) => {
     e.preventDefault();
     dispatch(editAddressNC(props.nanoContractID, newAddress.address));
+    await wallet.storage.updateNanoContractRegisteredAddress(props.nanoContractID, newAddress.address);
     $('#changeAddressModal').modal('hide');
   }
 

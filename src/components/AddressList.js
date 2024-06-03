@@ -13,6 +13,7 @@ import { WALLET_HISTORY_COUNT } from '../constants';
 import walletUtils from '../utils/wallet';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
+import { getGlobalWallet } from '../modules/wallet';
 
 /**
  * Screen that has a list of addresses of the wallet
@@ -20,7 +21,7 @@ import PropTypes from 'prop-types';
  * @memberof Screens
  */
 function AddressList(props) {
-  const wallet = useSelector(state => state.wallet);
+  const wallet = getGlobalWallet();
 
   const alertErrorRef = useRef(null);
   const txSearchRef = useRef(null);

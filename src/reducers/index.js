@@ -1259,7 +1259,7 @@ export const onNanoContractEditAddress = (state, { payload }) => {
     nanoContracts: {
       ...state.nanoContracts,
       [ncId]: {
-        ...payload,
+        ...state.nanoContracts[ncId],
         address,
       },
     },
