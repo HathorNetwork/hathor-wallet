@@ -37,6 +37,7 @@ function ModalRegisterNanoContract({ onClose }) {
   useEffect(() => {
     $('#registerNCModal').modal('show');
     $('#registerNCModal').on('hidden.bs.modal', (e) => {
+      dispatch(cleanNanoContractRegisterMetadata());
       idRef.current.value = '';
       // We always need to call on close when using global context modal
       onClose();
