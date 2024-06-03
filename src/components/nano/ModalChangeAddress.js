@@ -35,8 +35,11 @@ function ModalChangeAddress(props) {
   const [oldAddressIndex, setOldAddressIndex] = useState(null);
 
   useEffect(() => {
+    $('#changeAddressModal').modal('show');
     $('#changeAddressModal').on('hidden.bs.modal', (e) => {
       setStep(0);
+      // We always need to call on close when using global context modal
+      props.onClose();
     })
 
     async function getAndSetOldAddressIndex() {
@@ -47,6 +50,7 @@ function ModalChangeAddress(props) {
     getAndSetOldAddressIndex();
 
     return () => {
+      $('#changeAddressModal').modal('hide');
       // Removing all event listeners
       $('#changeAddressModal').off();
     };
@@ -83,7 +87,7 @@ function ModalChangeAddress(props) {
     e.preventDefault();
     dispatch(editAddressNC(props.nanoContractID, newAddress.address));
     await wallet.storage.updateNanoContractRegisteredAddress(props.nanoContractID, newAddress.address);
-    $('#changeAddressModal').modal('hide');
+    props.onClose();
   }
 
   const renderSteps = () => {
