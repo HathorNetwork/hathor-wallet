@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { t } from 'ttag'
 import $ from 'jquery';
 import BackButton from '../../components/BackButton';
@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addBlueprintInformation } from '../../actions';
 import { get } from 'lodash';
+import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 
 
 /**
@@ -26,6 +27,7 @@ import { get } from 'lodash';
  * @memberof Screens
  */
 function NanoContractDetail(props) {
+  const context = useContext(GlobalModalContext);
 
   const { nanoContracts, blueprintsData, tokenMetadata } = useSelector((state) => {
     return {
@@ -77,7 +79,9 @@ function NanoContractDetail(props) {
    */
   const changeAddress = (e) => {
     e.preventDefault();
-    $('#changeAddressModal').modal('show');
+    context.showModal(MODAL_TYPES.NANOCONTRACT_CHANGE_ADDRESS, {
+      nanoContractID: ncId
+    });
   }
 
   const loadData = async () => {
@@ -192,7 +196,6 @@ function NanoContractDetail(props) {
           {renderBody()}
         </div>
       </div>
-      <ModalChangeAddress nanoContractID={ncId} />
     </div>
   );
 }
