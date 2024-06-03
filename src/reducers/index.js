@@ -392,6 +392,8 @@ const rootReducer = (state = initialState, action) => {
       return onBlueprintAddInformation(state, action);
     case types.NANOCONTRACT_EDIT_ADDRESS:
       return onNanoContractEditAddress(state, action);
+    case types.NANOCONTRACT_UNREGISTER:
+      return onNanoContractUnregister(state, action);
     default:
       return state;
   }
@@ -1324,6 +1326,30 @@ export const onNanoContractEditAddress = (state, { payload }) => {
         address,
       },
     },
+  };
+};
+
+/**
+ * @param {Object} state
+ * @param {{
+ *   payload: string (ncId)
+  * }} action
+ */
+export const onNanoContractUnregister = (state, { payload }) => {
+  if (!(payload in state.nanoContracts)) {
+    // This should never happen, we are trying to unregister
+    // a nano contract that is not registered
+    return state;
+  }
+
+  const newNanoContracts = {
+    ...state.nanoContracts,
+  };
+  delete newNanoContracts[payload];
+
+  return {
+    ...state,
+    nanoContracts: newNanoContracts,
   };
 };
 
