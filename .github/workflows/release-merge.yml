@@ -22,7 +22,7 @@ jobs:
         run: |
           # Building the PR Data
           PR_DATA=$(gh pr create \
-            --title "Merge release into master" \
+            --title "[${{ github.ref_name }}] Merge release into master" \
             --body "Automated PR to merge `release` branch into `master` based on release event." \
             --base "master" \
             --head "release" \
