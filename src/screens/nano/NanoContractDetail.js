@@ -68,6 +68,7 @@ function NanoContractDetail(props) {
       state: {
         method,
         blueprintInformation,
+        ncId,
       },
     });
   }
