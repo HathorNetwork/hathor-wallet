@@ -31,6 +31,7 @@ const InputNumber = React.forwardRef(
       separator,
       locale,
       onValueChange,
+      requirePositive,
       ...otherProps
     },
     ref
@@ -156,6 +157,11 @@ const InputNumber = React.forwardRef(
       const parsedValue =
         Number(value.replace(/[^\d]/g, "")) / Math.pow(10, precision);
       onValueChange(parsedValue);
+      if (requirePositive && parsedValue <= 0) {
+        innerRef.current.setCustomValidity('Must be a positive number.');
+      } else {
+        innerRef.current.setCustomValidity('');
+      }
     }, [value]);
 
     return <input ref={innerRef} value={value} {...otherProps} type="text" />;
@@ -187,6 +193,10 @@ InputNumber.propTypes = {
    * Same behavior of React input onChange
    */
   onChange: PropTypes.func,
+  /**
+   * If the input value is required to be a positive number, i.e. > 0
+   */
+  requirePositive: PropTypes.bool,
 };
 
 InputNumber.defaultProps = {
@@ -196,6 +206,7 @@ InputNumber.defaultProps = {
   locale: "en-US",
   onValueChange: () => {},
   onChange: () => {},
+  requirePositive: false,
 };
 
 export default InputNumber;
