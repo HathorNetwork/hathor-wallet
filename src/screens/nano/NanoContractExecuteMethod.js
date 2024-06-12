@@ -18,6 +18,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 import { nanoContractRegisterSuccess, addBlueprintInformation } from '../../actions/index';
 import { getGlobalWallet } from "../../modules/wallet";
+import walletUtils from '../../utils/wallet';
+import helpers from '../../utils/helpers';
 
 
 /**
@@ -28,38 +30,39 @@ import { getGlobalWallet } from "../../modules/wallet";
 function NanoContractExecuteMethod(props) {
   const location = useLocation();
   const data = location.state;
-  const blueprintsData = useSelector(state => state.blueprintsData);
+  const isCreateNanoContract = data.method === hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD && data.ncId == null;
+  const {
+    nanoContracts,
+    blueprintsData,
+    tokenMetadata,
+  } = useSelector((state) => {
+    return {
+      nanoContracts: state.nanoContracts,
+      blueprintsData: state.blueprintsData,
+      tokenMetadata: state.tokenMetadata,
+    }
+  });
+
+  let addressToSign = null;
+  if (!isCreateNanoContract) {
+    // The nano must be registered in the wallet with an address
+    addressToSign = nanoContracts[data.ncId].address;
+  }
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const wallet = getGlobalWallet();
+
   const formExecuteMethodRef = useRef(null);
   const addressRef = useRef(null);
   // List of refs of the arguments form
   const formRefs = [];
-  const dispatch = useDispatch();
 
-  const [actionTypes, setActionTypes] = useState([]);
-  // Map from index to select ref of actions
-  const actionSelectRefs = useRef(null);
-  // List of action refs
-  // each element of the array has an object with refs
-  const actionsRefs = useRef([]);
-
-  useEffect(() => {
-    actionsRefs.current = actionsRefs.current.slice(0, actionTypes.length);
-  }, [actionTypes]);
-
-  const navigate = useNavigate();
-
+  // This will store each action in an array of objects
+  // { type, token, amount, address }
+  const [actions, setActions] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const globalModalContext = useContext(GlobalModalContext);
-
-  const getActionSelectArray = () => {
-    if (!actionSelectRefs.current) {
-      // Initialize the array on first usage.
-      actionSelectRefs.current = [];
-    }
-    return actionSelectRefs.current;
-  }
 
   const executeMethod = () => {
     const isValid = formExecuteMethodRef.current.checkValidity();
@@ -68,14 +71,13 @@ function NanoContractExecuteMethod(props) {
       return;
     }
 
-
     globalModalContext.showModal(MODAL_TYPES.PIN, {
       onSuccess: ({pin}) => {
         globalModalContext.showModal(MODAL_TYPES.SEND_TX, {
           pin,
           prepareSendTransaction,
           onSendSuccess: onMethodExecuted,
-          title: data.ncId ? t`Executing Nano Contract Method` : t`Creating Nano Contract`,
+          title: isCreateNanoContract ? t`Creating Nano Contract` : t`Executing Nano Contract Method`,
         });
       }
     })
@@ -87,14 +89,14 @@ function NanoContractExecuteMethod(props) {
    * @param {Object} tx Nano contract transaction created
    */
   const onMethodExecuted = (tx) => {
-    if (!data.ncId) {
+    if (isCreateNanoContract) {
       // If it's a nano contract creation, we must save this NC in redux and in the storage
       // we must also add the blueprint information in redux, if it's not there
       const address = addressRef.current.value;
       const ncData = {
         address,
         ncId: tx.hash,
-        blueprintId: tx.nc_blueprint_id,
+        blueprintId: data.blueprintInformation.id,
         blueprintName: data.blueprintInformation.name
       };
       dispatch(nanoContractRegisterSuccess(ncData));
@@ -103,7 +105,7 @@ function NanoContractExecuteMethod(props) {
         dispatch(addBlueprintInformation(data.blueprintInformation));
       }
     }
-    const ncId = data.ncId ? data.ncId : tx.hash;
+    const ncId = isCreateNanoContract ? tx.hash : data.ncId;
     navigate(`/nano_contract/detail/${ncId}`);
   }
 
@@ -112,18 +114,18 @@ function NanoContractExecuteMethod(props) {
   const prepareSendTransaction = async (pin) => {
     const ncData = {};
     let address;
-    if (data.ncId) {
-      address = data.address;
-      ncData.ncId = data.ncId;
-    } else {
+    if (isCreateNanoContract) {
       ncData.blueprintId = data.blueprintInformation.id;
       address = addressRef.current.value;
+    } else {
+      address = addressToSign;
+      ncData.ncId = data.ncId;
     }
 
     const argValues = [];
     const args = get(data.blueprintInformation.public_methods, `${data.method}.args`, []);
     for (let i=0; i<args.length; i++) {
-      const value = formRefs[i].current.value;
+      let value = formRefs[i].current.value;
       // Check optional type
       // Optional fields end with ?
       const splittedType = args[i].type.split('?');
@@ -144,30 +146,43 @@ function NanoContractExecuteMethod(props) {
         continue;
       }
 
+      if (args[i].name === 'address') {
+        // This is a workaround while we don't get the correct type
+        // from the hathor core
+        const address = new hathorLib.Address(value, { network: hathorLib.config.getNetwork() });
+        const decodedAddress = address.decode();
+        value = decodedAddress.toString('hex');
+      }
+
       argValues.push(value);
 
     }
 
     ncData.args = argValues;
 
-    const actions = [];
-    for (const [index, actionType] of actionTypes.entries()) {
-      const action = { type: actionType };
-      const refs = actionsRefs.current[index];
-
-      action.token = refs.token.current.value;
-      action.amount = refs.amount.current.value;
-
-      if (action === 'withdrawal') {
-        action.address = refs.address.current.value;
+    const actionsData = [];
+    for (const action of actions) {
+      if (!action.type) {
+        // We will skip if the user has just added an empty action
+        continue;
       }
 
-      actions.push(action);
+      const amountValue = isNFT(action.token) ? action.amount : walletUtils.decimalToInteger(action.amount);
+      action.amount = amountValue;
+
+      actionsData.push(action);
     }
 
-    ncData.actions = actions;
+    ncData.actions = actionsData;
 
-    return await wallet.createAndSendNanoContractTransaction(data.method, address, ncData, { pinCode: pin });
+    return await wallet.createNanoContractTransaction(data.method, address, ncData, { pinCode: pin });
+  }
+
+  /**
+   * Return if token is an NFT
+   */
+  const isNFT = (token) => {
+    return helpers.isTokenNFT(token, tokenMetadata);
   }
 
   const renderInput = (name, type) => {
@@ -224,39 +239,54 @@ function NanoContractExecuteMethod(props) {
   }
 
   const renderAddressInForm = () => {
-    if (data.ncId) {
-      return <p><strong>Address To Sign: </strong>{data.address}</p>
-    } else {
+    if (isCreateNanoContract) {
       return renderChooseAddress();
+    } else {
+      return <p><strong>Address To Sign: </strong>{addressToSign}</p>
     }
   }
 
-  const changeSelect = (index) => {
-    const actionSelects = getActionSelectArray();
-    const selectRef = actionSelects[index];
-
-    actionTypes[index] = selectRef.value;
-    setActionTypes([...actionTypes]);
+  const onActionValueChange = (index, key, value) => {
+    actions[index][key] = value;
+    setActions([...actions]);
   }
 
   const renderActionInputs = (index) => {
-    const type = actionTypes[index];
+    const type = actions[index].type;
     if (!type) {
       return null;
     }
 
-    actionsRefs.current[index] = {};
+    const token = actions[index].token;
+    const nft = isNFT(token);
+    let inputNumberProps;
+    if (nft) {
+      inputNumberProps = {
+        placeholder: '0',
+        precision: 0,
+      };
+    } else {
+      inputNumberProps = {
+        placeholder: hathorLib.numberUtils.prettyValue(0)
+      };
+    }
 
     const renderCommon = () => {
       return (
         <div className="d-flex flex-grow-1">
           <div className="col-8">
             <label>{t`Token`}</label>
-            <input required type="text" className="form-control" ref={el => actionsRefs.current[index].token = el} />
+            <input required type="text" className="form-control" onChange={e => onActionValueChange(index, 'token', e.target.value)} />
           </div>
           <div className="col-4">
             <label>{t`Amount`}</label>
-            <InputNumber required placeholder={hathorLib.numberUtils.prettyValue(0)} className="form-control output-value" ref={el => actionsRefs.current[index].amount = el} />
+            <InputNumber
+              required
+              requirePositive={true}
+              onValueChange={amount => onActionValueChange(index, 'amount', amount)}
+              className="form-control output-value"
+              {...inputNumberProps}
+            />
           </div>
         </div>
       );
@@ -280,7 +310,7 @@ function NanoContractExecuteMethod(props) {
           <div className="d-flex w-50 mt-3">
             <div className="d-flex flex-column flex-grow-1">
               <label>{t`Address`}</label>
-              <input required type="text" className="form-control" ref={el => actionsRefs.current[index].address = el} />
+              <input required type="text" className="form-control" onChange={e => onActionValueChange(index, 'address', e.target.value)} />
             </div>
           </div>
         </>
@@ -297,30 +327,22 @@ function NanoContractExecuteMethod(props) {
 
   const addAction = (e) => {
     e.preventDefault();
-    actionTypes.push("");
-    setActionTypes([...actionTypes]);
+    actions.push({});
+    setActions([...actions]);
   }
 
   const removeAction = (index) => {
-    pullAt(actionTypes, [index]);
-    const actionSelects = getActionSelectArray();
-    pullAt(actionSelects, [index]);
-    setActionTypes([...actionTypes]);
+    pullAt(actions, [index]);
+    setActions([...actions]);
   }
 
   const renderActions = () => {
-    return actionTypes.map((type, index) => {
+    return actions.map((action, index) => {
       return (
         <div className="d-flex flex-row mb-4 actions-wrapper flex-wrap" key={index}>
           <div className="d-flex flex-column">
             <label>{t`Type`}</label>
-            <select className="form-control pr-1 pl-1" value={type} ref={(node) => {
-                      const actionSelects = getActionSelectArray();
-                      if (node) {
-                        actionSelects[index] = node;
-                      }
-                    }}
-                    onChange={() => changeSelect(index)}>
+            <select className="form-control pr-1 pl-1" value={action.type} onChange={e => onActionValueChange(index, 'type', e.target.value)}>
               <option value=""> -- </option>
               <option value="deposit">Deposit</option>
               <option value="withdrawal">Withdrawal</option>
@@ -335,7 +357,7 @@ function NanoContractExecuteMethod(props) {
   return (
     <div className="content-wrapper">
       <BackButton />
-      <h4 className="my-4">{data.ncId ? t`Execute Method` : t`Create Nano Contract`}</h4>
+      <h4 className="my-4">{isCreateNanoContract ? t`Create Nano Contract` : t`Execute Method`}</h4>
       <div>
         <form ref={formExecuteMethodRef} id="formExecuteMethod">
           <p><strong>Method: </strong>{data.method}</p>
@@ -349,7 +371,7 @@ function NanoContractExecuteMethod(props) {
             {renderActions()}
           </div>
           {loading && <ReactLoading type='spin' color={colors.purpleHathor} width={32} height={32} />}
-          <button type="button" className="mt-3 btn btn-hathor" onClick={executeMethod}>{data.ncId ? t`Execute Method` : t`Create`}</button>
+          <button type="button" className="mt-3 btn btn-hathor" onClick={executeMethod}>{isCreateNanoContract ? t`Create` : t`Execute Method`}</button>
         </form>
       </div>
     </div>

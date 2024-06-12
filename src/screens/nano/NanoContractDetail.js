@@ -76,6 +76,7 @@ function NanoContractDetail() {
       state: {
         method,
         blueprintInformation,
+        ncId,
       },
     });
   }
