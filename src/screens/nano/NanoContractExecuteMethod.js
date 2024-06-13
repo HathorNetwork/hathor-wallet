@@ -185,6 +185,21 @@ function NanoContractExecuteMethod(props) {
     return helpers.isTokenNFT(token, tokenMetadata);
   }
 
+  /**
+   * Method executed when link to select an address to sign is clicked
+   *
+   * @param {Object} ref Input reference
+   * @param {Object} e Event emitted by the link clicked
+   */
+  const onSelectAddressToSign = (ref, e) => {
+    e.preventDefault();
+    globalModalContext.showModal(MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN, {
+      success: (value) => {
+        ref.current.value = value;
+      },
+    });
+  }
+
   const renderInput = (name, type) => {
     // Check optional type
     // Optional fields end with ?
@@ -196,8 +211,10 @@ function NanoContractExecuteMethod(props) {
       typeToRender = 'str';
     }
 
+    let isSignedData = false;
     if (type.startsWith('SignedData')) {
       typeToRender = 'str';
+      isSignedData = true;
     }
 
     let inputType;
@@ -215,6 +232,7 @@ function NanoContractExecuteMethod(props) {
         <div className="form-group col-6">
           <label>{name}</label>
           <input required={!isOptional} ref={ref} type={inputType} className="form-control" />
+          { isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSign(ref, e)}>{t`Select address to sign`}</a></div> }
         </div>
       </div>
     );
@@ -364,6 +382,7 @@ function NanoContractExecuteMethod(props) {
           {renderAddressInForm()}
           <label className="mb-3 mt-3"><strong>Method Parameters</strong></label>
           {renderMethodInputs(data.method)}
+          <hr className="mb-4 mt-2" />
           <div className="d-flex flex-row mb-4">
             <a href="true" onClick={addAction}>{t`Add action`}</a>
           </div>
