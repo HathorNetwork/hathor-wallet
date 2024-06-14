@@ -286,3 +286,8 @@ export const colors = {
  * when changing the address of a nano contract
  */
 export const CHANGE_ADDRESS_LIST_COUNT = 5;
+
+/**
+ * Number of elements in the list of transactions of a nano contract
+ */
+export const NANO_CONTRACT_HISTORY_COUNT = 5;

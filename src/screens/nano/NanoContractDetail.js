@@ -12,6 +12,7 @@ import BackButton from '../../components/BackButton';
 import ReactLoading from 'react-loading';
 import colors from '../../index.module.scss';
 import ModalChangeAddress from '../../components/nano/ModalChangeAddress';
+import NanoContractHistory from '../../components/nano/NanoContractHistory';
 import helpers from '../../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
 import { useDispatch, useSelector } from 'react-redux';
@@ -196,6 +197,7 @@ function NanoContractDetail(props) {
         <div className="d-flex flex-row justify-content-center mt-5 pb-4">
           {renderBody()}
         </div>
+        <NanoContractHistory ncId={ncId} />
       </div>
     </div>
   );
