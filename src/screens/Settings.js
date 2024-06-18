@@ -139,6 +139,13 @@ function Settings() {
   }
 
   /**
+   * When user clicks Change Mining Server button we redirect to Change Mining Server screen
+   */
+  const changeMiningServer = () => {
+    navigate('/mining_server/');
+  }
+
+  /**
    * Called when user clicks to change notification settings
    * Sets modal state, depending on the current settings and open it
    *
@@ -312,6 +319,7 @@ function Settings() {
               <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
             </span>
           </CopyToClipboard>
+          <button className="btn btn-hathor" onClick={changeMiningServer}>{t`Change mining server`}</button>
           <button className="btn btn-hathor" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
           <button className="btn btn-hathor mt-4" onClick={addPassphrase}>{t`Set a passphrase`}</button>
           {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }

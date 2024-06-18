@@ -15,6 +15,7 @@ import Navigation from './components/Navigation';
 import TransactionDetail from './screens/TransactionDetail';
 import LoadingAddresses from './screens/LoadingAddresses';
 import Server from './screens/Server';
+import MiningServer from './screens/MiningServer';
 import ChoosePassphrase from './screens/ChoosePassphrase';
 import CustomTokens from './screens/CustomTokens';
 import Welcome from './screens/Welcome';
@@ -198,6 +199,7 @@ function Root() {
       <Route path="/settings" element={<StartedComponent children={ <Settings /> } loaded={true} />} />
       <Route path="/wallet/passphrase" element={<StartedComponent children={ <ChoosePassphrase />} loaded={true} />} />
       <Route path="/server" element={<StartedComponent children={ <Server /> } loaded={true} />} />
+      <Route path="/mining_server" element={<StartedComponent children={ <MiningServer /> } loaded={true} />} />
       <Route path="/transaction/:id" element={<StartedComponent children={ <TransactionDetail />} loaded={true} />} />
       <Route path="/addresses" element={<StartedComponent children={ <AddressList /> } loaded={true} /> } />
       <Route path="/new_wallet" element={<StartedComponent children={ <NewWallet />} loaded={false} />} />
