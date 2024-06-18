@@ -69,6 +69,11 @@ const helpers = {
         storage.store.setItem('wallet:wallet_service:ws_server', wsServer);
       }
     }
+
+    let miningServer = LOCAL_STORE.getMiningServer();
+    if (miningServer) {
+      hathorLib.config.setTxMiningUrl(miningServer);
+    }
   },
 
   /**

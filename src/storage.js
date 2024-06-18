@@ -25,6 +25,7 @@ export const TOKEN_SIGNATURES_KEY = 'localstorage:token:signatures';
 export const IS_BACKUP_DONE_KEY = 'localstorage:backup';
 export const SERVER_KEY = 'localstorage:server';
 export const WS_SERVER_KEY = 'localstorage:wsserver';
+export const MINING_SERVER_KEY = 'localstorage:mining:server';
 
 export const ACCESS_DATA_KEY = 'localstorage:accessdata';
 export const REGISTERED_TOKENS_KEY = 'localstorage:registeredTokens';
@@ -41,6 +42,7 @@ export const storageKeys = [
   IS_BACKUP_DONE_KEY,
   SERVER_KEY,
   WS_SERVER_KEY,
+  MINING_SERVER_KEY,
   // Wallet keys
   ACCESS_DATA_KEY,
   REGISTERED_TOKENS_KEY,
@@ -568,6 +570,18 @@ export class LocalStorageStore {
 
   getLedgerAppVersion() {
     return this.getItem(LEDGER_APP_VERSION_KEY);
+  }
+
+  setMiningServer(server) {
+    this.setItem(MINING_SERVER_KEY, server);
+  }
+
+  resetMiningServer(server) {
+    this.removeItem(MINING_SERVER_KEY);
+  }
+
+  getMiningServer() {
+    return this.getItem(MINING_SERVER_KEY);
   }
 }
 
