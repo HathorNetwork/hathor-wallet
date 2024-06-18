@@ -87,11 +87,6 @@ export const DEFAULT_SERVERS = [
   'https://node2.mainnet.hathor.network/v1a/',
 ];
 
-export const DEFAULT_MINING_SERVERS = {
-  'mainnet': 'https://txmining.mainnet.hathor.network/',
-  'testnet': 'https://txmining.testnet.hathor.network/',
-}
-
 /**
  * Default server user will connect when none has been chosen
  */

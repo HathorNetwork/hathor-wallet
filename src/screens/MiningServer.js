@@ -8,7 +8,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
 import {
-  DEFAULT_MINING_SERVERS,
   colors,
 } from '../constants';
 import LOCAL_STORE from '../storage';
