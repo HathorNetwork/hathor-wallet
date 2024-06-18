@@ -52,6 +52,7 @@ export const types = {
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
   SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
   UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
+  UPDATE_MINING_SERVER: 'UPDATE_MINING_SERVER',
 };
 
 /**
@@ -479,4 +480,9 @@ export const updateTxHistory = (tx, tokenId, balance) => ({
 export const changeWalletState = (newState) => ({
   type: types.WALLET_CHANGE_STATE,
   payload: newState,
+});
+
+export const updateMiningServer = (url, reset) => ({
+  type: types.UPDATE_MINING_SERVER,
+  payload: { url, reset },
 });

@@ -15,6 +15,7 @@ import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
 import helpersUtils from '../utils/helpers';
 import LOCAL_STORE from '../storage';
+import { getGlobalWallet } from "../modules/wallet";
 
 /**
  * @typedef TokenHistory
@@ -130,6 +131,7 @@ const initialState = {
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
+  miningServer: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -256,6 +258,8 @@ const rootReducer = (state = initialState, action) => {
       return onUpdateTxHistory(state, action);
     case types.WALLET_CHANGE_STATE:
       return onWalletStateChanged(state, action);
+    case types.UPDATE_MINING_SERVER:
+      return onUpdateMiningServer(state, action);
     default:
       return state;
   }
@@ -1003,5 +1007,24 @@ export const onWalletStateChanged = (state, { payload }) => ({
   ...state,
   walletState: payload,
 });
+
+export const onUpdateMiningServer = (state, { payload }) => {
+  const wallet = getGlobalWallet();
+  if (payload.reset) {
+    wallet.storage.config.setTxMiningUrl();
+    LOCAL_STORE.resetMiningServer();
+    return {
+      ...state,
+      miningServer: null,
+    }
+  } else {
+    wallet.storage.config.setTxMiningUrl(payload.url);
+    LOCAL_STORE.setMiningServer(payload.url);
+    return {
+      ...state,
+      miningServer: payload.url,
+    }
+  }
+}
 
 export default rootReducer;
