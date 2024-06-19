@@ -9,7 +9,7 @@ import path from 'path';
 import hathorLib from '@hathor/wallet-lib';
 import { get } from 'lodash';
 import store from '../store/index';
-import { networkUpdate, updateMiningServer } from '../actions/index';
+import { networkUpdate, setMiningServer } from '../actions/index';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
 import LOCAL_STORE from '../storage';
 
@@ -72,7 +72,7 @@ const helpers = {
 
     let miningServer = LOCAL_STORE.getMiningServer();
     if (miningServer) {
-      store.dispatch(updateMiningServer(miningSever, false));
+      store.dispatch(setMiningServer(miningServer));
     }
   },
 

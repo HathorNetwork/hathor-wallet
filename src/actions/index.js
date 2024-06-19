@@ -53,6 +53,7 @@ export const types = {
   SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
   UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
   UPDATE_MINING_SERVER: 'UPDATE_MINING_SERVER',
+  SET_MINING_SERVER: 'SET_MINING_SERVER',
 };
 
 /**
@@ -482,7 +483,22 @@ export const changeWalletState = (newState) => ({
   payload: newState,
 });
 
+/**
+ * Update the tx mining service config on the lib and redux.
+ *
+ * @param {string|undefined} url
+ * @param {boolean} reset
+ */
 export const updateMiningServer = (url, reset) => ({
   type: types.UPDATE_MINING_SERVER,
   payload: { url, reset },
+});
+
+/**
+ * Set the mining server url
+ * @param {string|undefined} url
+ */
+export const setMiningServer = (url) => ({
+  type: types.SET_MINING_SERVER,
+  payload: url,
 });
