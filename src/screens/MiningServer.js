@@ -16,7 +16,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import BackButton from '../components/BackButton';
 import HathorAlert from '../components/HathorAlert';
 import { updateMiningServer } from "../actions";
-import isURL from 'validator/lib/isURL';
 
 /**
  * Screen to change the tx-mining server that the wallet uses to mine transactions
@@ -64,10 +63,12 @@ function MiningServer() {
         return;
       }
 
-      if (!isURL(
-          newServerRef.current.value,
-          { require_protocol: true, protocols: ['http', 'https'] },
-      )) {
+      try {
+        const url = new URL(newServerRef.current.value);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+          throw new Error();
+        }
+      } catch (err) {
         setErrorMessage(t`New server is not valid`);
         return;
       }
