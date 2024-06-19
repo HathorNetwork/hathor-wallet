@@ -576,7 +576,7 @@ export class LocalStorageStore {
     this.setItem(MINING_SERVER_KEY, server);
   }
 
-  resetMiningServer(server) {
+  resetMiningServer() {
     this.removeItem(MINING_SERVER_KEY);
   }
 
