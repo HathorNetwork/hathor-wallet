@@ -11,7 +11,6 @@ import {
   colors,
 } from '../constants';
 import LOCAL_STORE from '../storage';
-import ReactLoading from 'react-loading';
 import { getGlobalWallet } from "../modules/wallet";
 import { useDispatch, useSelector } from 'react-redux';
 import BackButton from '../components/BackButton';
@@ -33,19 +32,19 @@ function MiningServer() {
   const [errorMessage, setErrorMessage] = useState('');
   /* isHardwareWallet {boolean} If the application is using a hardware wallet */
   const isHardwareWallet = LOCAL_STORE.isHardwareWallet();
-  /* loading {boolean} If should show spinner while waiting for server response */
-  const [loading, setLoading] = useState(false);
 
   // Declare refs
   const newServerRef = useRef(null);
   const pinRef = useRef(null);
   const alertSuccessRef = useRef();
+  const firstRef = useRef(true);
 
   useEffect(() => {
-    if (loading) {
-      alertSuccessRef.current.show(3000);
+    if (firstRef.current) {
+      firstRef.current = false;
+      return;
     }
-    setLoading(false);
+    alertSuccessRef.current.show(3000);
   }, [currentServer]);
 
   /**
@@ -93,7 +92,6 @@ function MiningServer() {
     newServerRef.current.value = '';
     pinRef.current.value = '';
 
-    setLoading(true);
     dispatch(updateMiningServer(newServer, reset));
   }
 
@@ -119,7 +117,6 @@ function MiningServer() {
       <div className="d-flex flex-row align-items-center mt-3">
         <button onClick={() => changeServer(false)} type="button" className="btn btn-hathor mr-3">{t`Set mining server`}</button>
         {currentServer !== null && <button onClick={() => changeServer(true)} type="button" className="btn btn-hathor mr-3">{t`Reset mining server`}</button>}
-        {loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
       </div>
       <p className="text-danger mt-3">{errorMessage}</p>
       <HathorAlert ref={alertSuccessRef} text={t`Mining server changed`} type="success" extraClasses="hathor-floating-alert" />
