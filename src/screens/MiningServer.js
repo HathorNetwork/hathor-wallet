@@ -118,7 +118,7 @@ function MiningServer() {
       </form>
       <div className="d-flex flex-row align-items-center mt-3">
         <button onClick={() => changeServer(false)} type="button" className="btn btn-hathor mr-3">{t`Set mining server`}</button>
-        <button onClick={() => changeServer(true)} type="button" className="btn btn-hathor mr-3">{t`Reset mining server`}</button>
+        {currentServer !== null && <button onClick={() => changeServer(true)} type="button" className="btn btn-hathor mr-3">{t`Reset mining server`}</button>}
         {loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
       </div>
       <p className="text-danger mt-3">{errorMessage}</p>
