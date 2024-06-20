@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { t } from 'ttag';
 import {
   colors,
@@ -36,15 +36,6 @@ function MiningServer() {
   const newServerRef = useRef(null);
   const pinRef = useRef(null);
   const alertSuccessRef = useRef();
-  const firstRef = useRef(true);
-
-  useEffect(() => {
-    if (firstRef.current) {
-      firstRef.current = false;
-      return;
-    }
-    alertSuccessRef.current.show(3000);
-  }, [currentServer]);
 
   /**
    * Called after user click the button to change the server
@@ -94,6 +85,7 @@ function MiningServer() {
     pinRef.current.value = '';
 
     dispatch(updateMiningServer(newServer, reset));
+    alertSuccessRef.current.show(3000);
   }
 
   return (
