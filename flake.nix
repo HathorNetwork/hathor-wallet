@@ -11,13 +11,13 @@
         let pkgs = import nixpkgs {
           inherit system;
 
-          overlays = [ devshell.overlay ];
+          overlays = [ devshell.overlays.default ];
         };
         in
         pkgs.devshell.mkShell {
           packages = with pkgs; [
             nixpkgs-fmt
-            nodejs-14_x
+            nodejs_20
             libusb1
           ];
         };
