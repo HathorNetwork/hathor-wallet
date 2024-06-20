@@ -130,6 +130,7 @@ const initialState = {
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
+  miningServer: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -256,6 +257,8 @@ const rootReducer = (state = initialState, action) => {
       return onUpdateTxHistory(state, action);
     case types.WALLET_CHANGE_STATE:
       return onWalletStateChanged(state, action);
+    case types.SET_MINING_SERVER:
+      return onSetMiningServer(state, action);
     default:
       return state;
   }
@@ -1002,6 +1005,11 @@ export const onUpdateTxHistory = (state, action) => {
 export const onWalletStateChanged = (state, { payload }) => ({
   ...state,
   walletState: payload,
+});
+
+export const onSetMiningServer = (state, { payload }) => ({
+  ...state,
+  miningServer: payload,
 });
 
 export default rootReducer;

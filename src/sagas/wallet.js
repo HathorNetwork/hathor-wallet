@@ -59,6 +59,7 @@ import {
   reloadWalletRequested,
   changeWalletState,
   updateTxHistory,
+  setMiningServer,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -762,6 +763,28 @@ export function* featureToggleUpdateListener() {
   }
 }
 
+/**
+ * Updates the mining server
+ *
+ * @param {Object} data
+ * @param {Object} data.payload payload from the event
+ * @param {string|undefined} data.payload.url Mining server url.
+ * @param {boolean} data.payload.reset Should we reset the tx mining service config
+ */
+export function* onUpdateMiningServer({ payload }) {
+  const wallet = getGlobalWallet();
+
+  if (payload.reset) {
+    wallet.storage.config.setTxMiningUrl();
+    LOCAL_STORE.resetMiningServer();
+    yield put(setMiningServer(null));
+  } else {
+    wallet.storage.config.setTxMiningUrl(payload.url);
+    LOCAL_STORE.setMiningServer(payload.url);
+    yield put(setMiningServer(payload.url));
+  }
+}
+
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
@@ -774,5 +797,6 @@ export function* saga() {
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
     takeEvery('WALLET_RELOAD_DATA', walletReloading),
     takeEvery('WALLET_REFRESH_SHARED_ADDRESS', refreshSharedAddress),
+    takeEvery('UPDATE_MINING_SERVER', onUpdateMiningServer),
   ]);
 }

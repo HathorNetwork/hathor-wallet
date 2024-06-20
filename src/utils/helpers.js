@@ -9,7 +9,7 @@ import path from 'path';
 import hathorLib from '@hathor/wallet-lib';
 import { get } from 'lodash';
 import store from '../store/index';
-import { networkUpdate } from '../actions/index';
+import { networkUpdate, setMiningServer } from '../actions/index';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
 import LOCAL_STORE from '../storage';
 
@@ -68,6 +68,11 @@ const helpers = {
         // There is no issue not awaiting this since we already have this configured on the config
         storage.store.setItem('wallet:wallet_service:ws_server', wsServer);
       }
+    }
+
+    let miningServer = LOCAL_STORE.getMiningServer();
+    if (miningServer) {
+      store.dispatch(setMiningServer(miningServer));
     }
   },
 
