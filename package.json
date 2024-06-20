@@ -30,9 +30,13 @@
   "private": true,
   "dependencies": {
     "@hathor/wallet-lib": "2.0.1",
+    "@ethersproject/shims": "^5.7.0",
+    "@json-rpc-tools/utils": "^1.7.6",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
     "@sentry/electron": "3.0.7",
+    "@walletconnect/core": "^2.13.3",
+    "@walletconnect/web3wallet": "^1.12.3",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.6.1",
     "eslint-config-airbnb": "19.0.4",

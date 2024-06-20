@@ -310,3 +310,5 @@ export const NETWORK_SETTINGS_STATUS = {
   WAITING_NETWORK_CONFIRMATION: 'waitingNetworkConfirmation',
   NETWORK_CONFIRMED: 'networkConfirmed'
 }
+// Project id configured in https://walletconnect.com
+export const WALLET_CONNECT_PROJECT_ID = '8264fff563181da658ce64ee80e80458';
