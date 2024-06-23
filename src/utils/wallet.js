@@ -9,6 +9,7 @@ import {
   SENTRY_DSN,
   WALLET_HISTORY_COUNT,
   METADATA_CONCURRENT_DOWNLOAD,
+  HARDWARE_WALLET_NAME,
 } from '../constants';
 import store from '../store/index';
 import {
@@ -648,6 +649,83 @@ const wallet = {
    */
   setListenedProposals(proposalList) {
     LOCAL_STORE.setItem(storageKeys.atomicProposals, proposalList);
+  },
+
+  // XXX: Adjust to refactor
+  /**
+   * Returns the wallet prefix given its name.
+   *
+   * @param {string} name The name of the wallet
+   *
+   * @return {string} Prefix of the wallet
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  walletNameToPrefix(name) {
+    // Currently, prefix is the same as name
+    return name;
+  },
+
+  /**
+   * Returns the wallet prefix given its name.
+   *
+   * @param {string} name The name of the wallet
+   *
+   * @return {string} Prefix of the wallet
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  setWalletPrefix(prefix) {
+    storage.store.prefix = prefix;
+  },
+
+  /**
+   * Remove the hardware wallet from storage. It first checks it's actually there.
+   *
+   * @return {boolean} If the hardware wallet was present on storage
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  removeHardwareWalletFromStorage() {
+    try {
+      storage.store.removeWallet(HARDWARE_WALLET_NAME);
+      return true;
+    } catch (WalletDoesNotExistError) {
+      return false;
+    }
+  },
+
+  /**
+   * Get the prefix of the first wallet in storage.
+   *
+   * @return {string} Prefix of the first wallet in storage or null if none present
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getFirstWalletPrefix() {
+    const wallets = Object.keys(storage.store.getListOfWallets());
+    if (wallets.length > 0) {
+      return wallets[0];
+    } else {
+      return null;
+    }
+  },
+
+  /*
+   * Clean all data from everything
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  resetWalletData() {
+    FeatureFlags.clearIgnoreWalletServiceFlag();
+
+    this.cleanWalletRedux();
+    oldWalletUtil.resetWalletData();
   },
 }
 

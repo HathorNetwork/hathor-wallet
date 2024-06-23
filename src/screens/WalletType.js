@@ -104,4 +104,4 @@ function WalletType() {
   )
 }
 
-export default WalletType;
+export default connect(mapStateToProps, mapDispatchToProps)(WalletType);
