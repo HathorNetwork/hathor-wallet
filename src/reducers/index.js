@@ -131,6 +131,14 @@ const initialState = {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
   miningServer: null,
+  walletConnect: {
+    client: null,
+    modal: {
+      show: false,
+    },
+    connectionFailed: false,
+    sessions: {},
+  },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -259,6 +267,14 @@ const rootReducer = (state = initialState, action) => {
       return onWalletStateChanged(state, action);
     case types.SET_MINING_SERVER:
       return onSetMiningServer(state, action);
+    case types.SET_WALLET_CONNECT:
+      return onSetWalletConnect(state, action);
+    case types.SET_WALLET_CONNECT_MODAL:
+      return onSetWalletConnectModal(state, action);
+    case types.SET_WALLET_CONNECT_SESSIONS:
+      return onSetWalletConnectSessions(state, action);
+    case types.WC_SET_CONNECTION_FAILED:
+      return onSetWCConnectionFailed(state, action);
     default:
       return state;
   }
@@ -1010,6 +1026,47 @@ export const onWalletStateChanged = (state, { payload }) => ({
 export const onSetMiningServer = (state, { payload }) => ({
   ...state,
   miningServer: payload,
+});
+
+/**
+ * @param {WalletConnect} action.payload The wallet connect instance
+ */
+export const onSetWalletConnect = (state, { payload }) => ({
+  ...state,
+  walletConnect: {
+    ...state.walletConnect,
+    client: payload,
+  }
+});
+
+/**
+ * @param {Object} action.payload The wallet connect modal options
+ */
+export const onSetWalletConnectModal = (state, { payload }) => ({
+  ...state,
+  walletConnect: {
+    ...state.walletConnect,
+    modal: payload,
+  },
+});
+
+/**
+ * @param {Object} action.payload The wallet connect sessions to store
+ */
+export const onSetWalletConnectSessions = (state, { payload }) => ({
+  ...state,
+  walletConnect: {
+    ...state.walletConnect,
+    sessions: payload,
+  },
+});
+
+export const onSetWCConnectionFailed = (state, { payload }) => ({
+  ...state,
+  walletConnect: {
+    ...state.walletConnect,
+    connectionFailed: payload,
+  },
 });
 
 export default rootReducer;

@@ -54,6 +54,15 @@ export const types = {
   UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
   UPDATE_MINING_SERVER: 'UPDATE_MINING_SERVER',
   SET_MINING_SERVER: 'SET_MINING_SERVER',
+
+  // Wallet Connect
+  SET_WALLET_CONNECT: 'SET_WALLET_CONNECT',
+  SET_WALLET_CONNECT_MODAL: 'SET_WALLET_CONNECT_MODAL',
+  SET_WALLET_CONNECT_SESSIONS: 'SET_WALLET_CONNECT_SESSIONS',
+
+  WC_URI_INPUTTED: 'WC_URI_INPUTTED',
+  WC_CANCEL_SESSION: 'WC_CANCEL_SESSION',
+  WC_SET_CONNECTION_FAILED: 'WC_SET_CONNECTION_FAILED',
 };
 
 /**
@@ -501,4 +510,57 @@ export const updateMiningServer = (url, reset) => ({
 export const setMiningServer = (url) => ({
   type: types.SET_MINING_SERVER,
   payload: url,
+});
+
+/**
+ * Stores the walletConnect instance on the redux store
+ *
+ * walletConnect {WalletConnect} The WalletConnect instance
+ */
+export const setWalletConnect = (walletConnect) => ({
+  type: types.SET_WALLET_CONNECT,
+  payload: walletConnect,
+});
+
+/**
+ * sessions {Array} List of sessions to store
+ */
+export const setWalletConnectSessions = (sessions) => ({
+  type: types.SET_WALLET_CONNECT_SESSIONS,
+  payload: sessions,
+});
+
+/**
+ * failed {Boolean} Flag indicating whether WC failed or not.
+ */
+export const setWCConnectionFailed = (failed) => ({
+  type: types.WC_SET_CONNECTION_FAILED,
+  payload: failed,
+});
+
+/**
+ * modal {Object} Modal information to display
+ * modal.show {boolean} Show or hide the modal
+ * modal.type {WalletConnectModalTypes} One of (CONNECT, SIGN_MESSAGE_REQUEST)
+ * modal.onAcceptAction {Object} Action to be dispatched on accept
+ * modal.onRejectAction {Object} Action to be dispatched on reject
+ */
+export const setWalletConnectModal = (modal) => ({
+  type: types.SET_WALLET_CONNECT_MODAL,
+  payload: modal,
+});
+
+export const hideWalletConnectModal = () => ({
+  type: types.SET_WALLET_CONNECT_MODAL,
+  payload: { show: false },
+});
+
+/**
+ * Dispatched with data when a WalletConnect QRCode is read
+ *
+ * data {string} The WalletConnect v2 URI
+ */
+export const walletConnectUriInputted = (data) => ({
+  type: types.WC_URI_INPUTTED,
+  payload: data,
 });

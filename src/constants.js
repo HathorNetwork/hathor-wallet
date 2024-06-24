@@ -280,3 +280,6 @@ export const FEATURE_TOGGLE_DEFAULTS = {
 export const colors = {
   purpleHathor: scssColors.purpleHathor,
 }
+
+// Project id configured in https://walletconnect.com
+export const WALLET_CONNECT_PROJECT_ID = '8264fff563181da658ce64ee80e80458';
