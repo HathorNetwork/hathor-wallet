@@ -312,7 +312,7 @@ class TxData extends React.Component {
   getOutputToken = (tokenData) => {
     if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
       const wallet = getGlobalWallet();
-      return wallet.storage.config.getNativeTokenData();
+      return wallet.storage.getNativeTokenData();
     }
     const tokenConfig = this.props.transaction.tokens[tokenData - 1];
     return tokenConfig;
@@ -328,7 +328,7 @@ class TxData extends React.Component {
   getSymbol = (uid) => {
     if (uid === hathorLib.constants.NATIVE_TOKEN_UID) {
       const wallet = getGlobalWallet();
-      const nativeToken = wallet.storage.config.getNativeTokenData();
+      const nativeToken = wallet.storage.getNativeTokenData();
       return nativeToken.symbol;
     }
     const tokenConfig = this.props.transaction.tokens.find((token) => token.uid === uid);

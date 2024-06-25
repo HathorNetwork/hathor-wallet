@@ -8,7 +8,6 @@ import {
   errors as hathorErrors,
   cryptoUtils,
   versionApi,
-  defaults as hathorLibDefaults,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -254,7 +253,7 @@ export function* startWallet(action) {
     console.log('[+] Start wallet.', serverInfo);
 
     // Use HTR as default
-    let nativeToken = hathorLibDefaults.HATHOR_TOKEN_CONFIG;
+    let nativeToken = hathorLibConstants.DEFAULT_TOKEN_CONFIG;
     if (info.native_token) {
       nativeToken = info.native_token;
     }
@@ -323,7 +322,7 @@ export function* startWallet(action) {
     }
   }
 
-  const nativeToken = wallet.storage.config.getNativeTokenData();
+  const nativeToken = wallet.storage.getNativeTokenData();
   yield call([wallet.storage, wallet.storage.registerToken], nativeToken);
 
   if (hardware) {
