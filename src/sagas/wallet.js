@@ -313,7 +313,8 @@ export function* startWallet(action) {
     }
   }
 
-  yield call([wallet.storage, wallet.storage.registerToken], hathorLibConstants.HATHOR_TOKEN_CONFIG);
+  const nativeToken = wallet.storage.config.getNativeTokenData();
+  yield call([wallet.storage, wallet.storage.registerToken], nativeToken);
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
@@ -366,7 +367,7 @@ export function* startWallet(action) {
  * to asynchronously load all registered tokens
  */
 export function* loadTokens() {
-  const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
+  const htrUid = hathorLibConstants.NATIVE_TOKEN_UID;
 
   yield call(fetchTokenData, htrUid);
   const wallet = getGlobalWallet();
@@ -647,7 +648,7 @@ export function* bestBlockUpdate({ payload }) {
   }
 
   if (currentHeight !== payload) {
-    yield put(tokenFetchBalanceRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid));
+    yield put(tokenFetchBalanceRequested(hathorLibConstants.NATIVE_TOKEN_UID));
   }
 }
 
@@ -682,7 +683,7 @@ export function* walletReloading() {
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
     for (const tokenUid of Object.keys(allTokens)) {
-      if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
+      if (tokenUid === hathorLibConstants.NATIVE_TOKEN_UID) {
         continue;
       }
       yield put(tokenInvalidateHistory(tokenUid));

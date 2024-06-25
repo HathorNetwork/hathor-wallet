@@ -260,7 +260,7 @@ function Server() {
 
       // Forces the selected token back to the default, as custom tokens will not be available in different networks
       if (networkChanged) {
-        dispatch(selectToken(hathorLib.constants.HATHOR_TOKEN_CONFIG.uid));
+        dispatch(selectToken(hathorLib.constants.NATIVE_TOKEN_UID));
       }
 
       // We don't have PIN on hardware wallet
