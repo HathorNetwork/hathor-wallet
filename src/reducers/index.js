@@ -5,10 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import hathorLib from '@hathor/wallet-lib';
 import { FEATURE_TOGGLE_DEFAULTS, VERSION } from '../constants';
 import { types } from '../actions';
-import { get } from 'lodash';
+import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
@@ -252,6 +251,8 @@ const rootReducer = (state = initialState, action) => {
       return onWalletStateChanged(state, action);
     case types.SET_MINING_SERVER:
       return onSetMiningServer(state, action);
+    case types.SET_NATIVE_TOKEN_DATA:
+      return onSetNativeTokenData(state, action);
     default:
       return state;
   }
@@ -366,7 +367,7 @@ const onUpdateTokenHistory = (state, action) => {
 const onUpdateHeight = (state, action) => {
   if (action.payload.height !== state.height) {
     const tokensBalance = {};
-    tokensBalance[hathorLib.constants.NATIVE_TOKEN_UID] = action.payload.htrUpdatedBalance;
+    tokensBalance[NATIVE_TOKEN_UID] = action.payload.htrUpdatedBalance;
     const newTokensBalance = Object.assign({}, state.tokensBalance, tokensBalance);
     return {
       ...state,
@@ -488,7 +489,7 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   if (hasZeroBalance) {
     return {
       ...state,
-      selectedToken: hathorLib.constants.NATIVE_TOKEN_UID,
+      selectedToken: NATIVE_TOKEN_UID,
     };
   }
 
@@ -1003,5 +1004,30 @@ export const onSetMiningServer = (state, { payload }) => ({
   ...state,
   miningServer: payload,
 });
+
+export const onSetNativeTokenData = (state, { payload }) => {
+  let tokens = [...state.tokens];
+  if (state.tokens.length === 0) {
+    tokens = [{...payload, uid: NATIVE_TOKEN_UID}];
+  } else {
+    const nativeTokenIndex = findIndex(state.tokens, (e) => e.uid === NATIVE_TOKEN_UID);
+    tokens[nativeTokenIndex] = {...payload, uid: NATIVE_TOKEN_UID};
+  }
+
+  return {
+    ...state,
+    nativeTokenData: payload,
+    tokens,
+    tokensCache: {
+      ...state.tokensCache,
+      [NATIVE_TOKEN_UID]: {
+        tokenUid: NATIVE_TOKEN_UID,
+        symbol: payload.symbol,
+        name: payload.name,
+        status: TOKEN_DOWNLOAD_STATUS.READY
+      }
+    }
+  };
+};
 
 export default rootReducer;

@@ -7,6 +7,7 @@ import {
   transactionUtils,
   errors as hathorErrors,
   cryptoUtils,
+  versionApi,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -242,6 +243,9 @@ export function* startWallet(action) {
   // wait until the wallet is ready
   yield fork(listenForWalletReady, wallet);
 
+  // Call the server version api and update the server info
+  yield call(updateServerInfo, wallet);
+
   try {
     console.log('[*] Start wallet.');
     const serverInfo = yield call([wallet, wallet.start], {
@@ -249,19 +253,6 @@ export function* startWallet(action) {
       password,
     });
     console.log('[+] Start wallet.', serverInfo);
-
-    let version;
-    let serverNetworkName = networkName;
-
-    if (serverInfo) {
-      version = serverInfo.version;
-      serverNetworkName = serverInfo.network && serverInfo.network.split('-')[0];
-    }
-
-    yield put(setServerInfo({
-      version,
-      network: serverNetworkName,
-    }));
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from
@@ -359,6 +350,27 @@ export function* startWallet(action) {
   if (reload) {
     // Yield the same action again to reload the wallet
     yield put(action);
+  }
+}
+
+/**
+ * Get the configured fullnode's version data and dispatch it to the store.
+ * @returns {Promise<void>}
+ */
+export function* updateServerInfo(wallet) {
+  const versionData = await new Promise((resolve, reject) => {
+    versionApi.getVersion(resolve).catch(error => reject(error));
+  });
+
+  yield put(setServerInfo({
+    version: versionData.version,
+    network: versionData.network && versionData.network.split('-')[0],
+  }));
+
+  if (versionData.native_token) {
+    wallet.storage.config.setNativeTokenData(versionData.native_token);
+    // Update redux store
+    yield put(nativeTokenUpdated(versionData.native_token));
   }
 }
 
