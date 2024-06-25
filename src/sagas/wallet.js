@@ -358,8 +358,10 @@ export function* startWallet(action) {
  * @returns {Promise<void>}
  */
 export function* updateServerInfo(wallet) {
-  const versionData = await new Promise((resolve, reject) => {
-    versionApi.getVersion(resolve).catch(error => reject(error));
+  const versionData = yield call(async () => {
+    return new Promise((resolve, reject) => {
+      versionApi.getVersion(resolve).catch(error => reject(error));
+    });
   });
 
   yield put(setServerInfo({
