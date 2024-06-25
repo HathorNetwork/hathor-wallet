@@ -12,7 +12,7 @@ import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
-import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import { NATIVE_TOKEN_UID } from "@hathor/wallet-lib/lib/constants";
 import helpersUtils from '../utils/helpers';
 import LOCAL_STORE from '../storage';
 
@@ -63,9 +63,9 @@ const initialState = {
   requestErrorStatusCode: undefined,
   // Tokens already saved: array of objects
   // {'name', 'symbol', 'uid'}
-  tokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
+  tokens: [],
   // Token selected (by default is HATHOR)
-  selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
+  selectedToken: NATIVE_TOKEN_UID,
   /**
    * List of all tokens seen in transactions
    * @type {Record<string, string>}
@@ -118,14 +118,7 @@ const initialState = {
    * - Those that were present in at least one proposal in which this wallet participated
    * @type {Record<string,{ tokenUid: string, symbol: string, name: string, status: string, oldStatus?: string }>}
    */
-  tokensCache: {
-    '00': {
-      tokenUid: HATHOR_TOKEN_CONFIG.uid,
-      symbol: HATHOR_TOKEN_CONFIG.symbol,
-      name: HATHOR_TOKEN_CONFIG.name,
-      status: TOKEN_DOWNLOAD_STATUS.READY
-    }
-  },
+  tokensCache: {},
   featureTogglesInitialized: false,
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
@@ -373,8 +366,7 @@ const onUpdateTokenHistory = (state, action) => {
 const onUpdateHeight = (state, action) => {
   if (action.payload.height !== state.height) {
     const tokensBalance = {};
-    const { uid } = hathorLib.constants.HATHOR_TOKEN_CONFIG;
-    tokensBalance[uid] = action.payload.htrUpdatedBalance;
+    tokensBalance[hathorLib.constants.NATIVE_TOKEN_UID] = action.payload.htrUpdatedBalance;
     const newTokensBalance = Object.assign({}, state.tokensBalance, tokensBalance);
     return {
       ...state,
@@ -496,7 +488,7 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   if (hasZeroBalance) {
     return {
       ...state,
-      selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+      selectedToken: hathorLib.constants.NATIVE_TOKEN_UID,
     };
   }
 
