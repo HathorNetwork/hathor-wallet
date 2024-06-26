@@ -210,13 +210,14 @@ class TokenMint extends React.Component {
 
     const wallet = getGlobalWallet();
     const depositPercent = wallet.storage.getTokenDepositPercentage();
+    const nativeTokenConfig = wallet.storage.getNativeTokenData();
 
     return (
       <TokenAction
        renderForm={renderForm}
        title={t`Mint tokens`}
-       subtitle={`A deposit of ${depositPercent * 100}% in HTR of the mint amount is required`}
-       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent)} HTR (${hathorLib.numberUtils.prettyValue(this.props.htrBalance)} HTR available)`}
+       subtitle={`A deposit of ${depositPercent * 100}% in ${nativeTokenConfig.symbol} of the mint amount is required`}
+       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent)} ${nativeTokenConfig.symbol} (${hathorLib.numberUtils.prettyValue(this.props.htrBalance)} ${nativeTokenConfig.symbol} available)`}
        buttonName={t`Go`}
        validateForm={this.mint}
        getSuccessMessage={this.getSuccessMessage}
