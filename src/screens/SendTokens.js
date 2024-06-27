@@ -22,6 +22,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
+import { OutputType } from '@hathor/wallet-lib/lib/wallet/types';
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -181,6 +182,15 @@ function SendTokens() {
       if (!dataOne) return;
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
+    }
+    // if there is any data output, add it to transaction's outputs
+    if (dataOutputs.length) {
+      dataOutputs.forEach((uId) => {
+        data.outputs.push({
+          type: OutputType.DATA,
+          data: String(dataOutputRefs.current[uId].current.value),
+        });
+      });
     }
     return data;
   }
@@ -547,6 +557,36 @@ function SendTokens() {
     });
   }
 
+  // It must be a state to make component render for every change.
+  const [dataOutputs, setDataOutputs] = useState([]);
+  // Scheme: { current: { [uniqueRefId: string]: MutableRefObject } }
+  const dataOutputRefs = useRef({});
+
+  const addDataOutput = () => {
+    const uId = _.uniqueId('data_output');
+    setDataOutputs([...dataOutputs, uId]);
+    dataOutputRefs.current[uId] = React.createRef();
+  };
+
+  const removeDataOutput = (index) => {
+    delete dataOutputRefs.current[dataOutputs[index]];
+    setDataOutputs([
+      ...dataOutputs.slice(0,index),
+      ...dataOutputs.slice(index+1,dataOutputs.length),
+    ]);
+  };
+
+  const renderDataOutputs = () => (
+    dataOutputs.map((uId, index) => (
+      <OutputData
+        key={uId}
+        dataInputRef={dataOutputRefs.current[uId]}
+        index={index}
+        remove={removeDataOutput}
+      />
+    ))
+  );
+
   const renderPage = () => {
     if (!metadataLoaded) {
       return <p>{t`Loading metadata...`}</p>
@@ -556,9 +596,29 @@ function SendTokens() {
       <div>
         <form ref={formSendTokensRef} id="formSendTokens">
           {renderOnePage()}
+          {renderDataOutputs()}
           <div className="mt-5">
-            <button type="button" className="btn btn-secondary mr-4" onClick={addAnotherToken}>{t`Add another token`}</button>
-            <button type="button" className="btn btn-hathor" onClick={onSendTokensClicked}>{t`Send Tokens`}</button>
+            <button
+              type="button"
+              className="btn btn-secondary mr-4"
+              onClick={addDataOutput}
+            >
+              {t`Add data output`}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary mr-4"
+              onClick={addAnotherToken}
+            >
+              {t`Add another token`}
+            </button>
+            <button
+              type="button"
+              className="btn btn-hathor"
+              onClick={onSendTokensClicked}
+            >
+              {t`Send Tokens`}
+            </button>
           </div>
         </form>
         <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p>
@@ -574,5 +634,28 @@ function SendTokens() {
     </div>
   );
 }
+
+const OutputData = ({ dataInputRef, index, remove }) => (
+  <div className='send-tokens-wrapper card'>
+    <div className="outputs-wrapper">
+      <label>{t`Data Output`}</label>
+      <button
+        type="button"
+        className="text-danger remove-token-btn ml-3"
+        onClick={() => remove(index)}
+      >
+        {t`Remove`}
+      </button>
+      <div className="input-group mb-3">
+        <input
+          className="form-control output-address col-5"
+          type="text"
+          ref={dataInputRef}
+          placeholder={t`Data content`}
+        />
+      </div>
+    </div>
+  </div>
+);
 
 export default SendTokens;
