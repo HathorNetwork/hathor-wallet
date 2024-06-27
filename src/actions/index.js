@@ -508,6 +508,7 @@ export const updateMiningServer = (url, reset) => ({
 export const setMiningServer = (url) => ({
   type: types.SET_MINING_SERVER,
   payload: url,
+});
 
 /**
  * Register nano contract in redux
