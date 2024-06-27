@@ -94,6 +94,7 @@ const initialState = {
   serverInfo: {
     network: null,
     version: null,
+    decimalPlaces: hathorLib.constants.DECIMAL_PLACES,
   },
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
@@ -956,6 +957,7 @@ const onSetServerInfo = (state, action) => {
     serverInfo: {
       network: action.payload.network,
       version: action.payload.version,
+      decimalPlaces: action.payload.decimalPlaces,
     },
   }
 };
