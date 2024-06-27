@@ -22,6 +22,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
+import { OutputType } from '@hathor/wallet-lib/lib/wallet/types';
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -181,6 +182,14 @@ function SendTokens() {
       if (!dataOne) return;
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
+    }
+    // add data output if sending transaction to ETH bridge
+    if (sendBridgeFlag) {
+      const bridgeDataOutput = {
+        type: OutputType.DATA,
+        data: { bridgeAddress: bridgeAddressInputRef.current.value },
+      };
+      data.outputs.push(bridgeDataOutput);
     }
     return data;
   }
@@ -547,6 +556,10 @@ function SendTokens() {
     });
   }
 
+  const [sendBridgeFlag, setSendBridgeFlag] = useState(false);
+  const sendBridgeId = _.uniqueId();
+  const bridgeAddressInputRef = useRef(null);
+
   const renderPage = () => {
     if (!metadataLoaded) {
       return <p>{t`Loading metadata...`}</p>
@@ -556,9 +569,49 @@ function SendTokens() {
       <div>
         <form ref={formSendTokensRef} id="formSendTokens">
           {renderOnePage()}
+          <div className="outputs-wrapper mt-3">
+            <div className="form-check checkbox-wrapper">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id={sendBridgeId}
+                value={sendBridgeFlag}
+                onClick={() => setSendBridgeFlag(!sendBridgeFlag)}
+              />
+              <label
+                className="form-check-label"
+                htmlFor={sendBridgeId}
+              >
+                {t`Send to bridge`}
+              </label>
+            </div>
+            <div
+              className="input-group mb-3"
+              hidden={!sendBridgeFlag}
+            >
+              <input
+                ref={bridgeAddressInputRef}
+                type="text"
+                placeholder={t`Bridge addresses`}
+                className="form-control output-address col-5"
+              />
+            </div>
+          </div>
           <div className="mt-5">
-            <button type="button" className="btn btn-secondary mr-4" onClick={addAnotherToken}>{t`Add another token`}</button>
-            <button type="button" className="btn btn-hathor" onClick={onSendTokensClicked}>{t`Send Tokens`}</button>
+            <button
+              type="button"
+              className="btn btn-secondary mr-4"
+              onClick={addAnotherToken}
+            >
+              {t`Add another token`}
+            </button>
+            <button
+              type="button"
+              className="btn btn-hathor"
+              onClick={onSendTokensClicked}
+            >
+              {t`Send Tokens`}
+            </button>
           </div>
         </form>
         <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p>
