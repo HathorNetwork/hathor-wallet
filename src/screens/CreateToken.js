@@ -70,7 +70,7 @@ function CreateToken() {
       // Validating maximum amount
       const tokensValue = walletUtils.decimalToInteger(amount, decimalPlaces);
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-        const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
+        const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, decimalPlaces);
         setErrorMessage(t`Maximum value to mint token is ${max_output_value_str}`);
         return false;
       }
@@ -275,7 +275,7 @@ function CreateToken() {
              required
              className="form-control"
              onValueChange={onAmountChange}
-             placeholder={hathorLib.numberUtils.prettyValue(0)}
+             placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
             />
           </div>
           <div className="form-group d-flex flex-row align-items-center address-checkbox">
@@ -291,7 +291,7 @@ function CreateToken() {
             <input ref={addressInputRef} type="text" placeholder={t`Address`} className="form-control" />
           </div>
         </div>
-        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} HTR ({hathorLib.numberUtils.prettyValue(htrBalance)} HTR available)</p>
+        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} HTR ({hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} HTR available)</p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>

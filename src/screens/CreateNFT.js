@@ -264,7 +264,7 @@ function CreateNFT() {
   // Since NFT have 0 for DECIMAL_PLACES we get htrDeposit * 100/100 which is htrDeposit
   const htrDeposit = wallet.storage.getTokenDepositPercentage();
   const depositAmount = hathorLib.tokensUtils.getDepositAmount(amount, htrDeposit, decimalPlaces);
-  const nftFee = hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee());
+  const nftFee = hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee(), decimalPlaces);
 
   return (
     <div className="content-wrapper">
@@ -346,10 +346,10 @@ function CreateNFT() {
           </div>
         </div>
         <hr className="mb-5 mt-5"/>
-        <p><strong>HTR available:</strong> {hathorLib.numberUtils.prettyValue(htrBalance)} HTR</p>
-        <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount)} HTR</p>
+        <p><strong>HTR available:</strong> {hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} HTR</p>
+        <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount, decimalPlaces)} HTR</p>
         <p><strong>Fee:</strong> {nftFee} HTR</p>
-        <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee() + depositAmount)} HTR</p>
+        <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee() + depositAmount, decimalPlaces)} HTR</p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>

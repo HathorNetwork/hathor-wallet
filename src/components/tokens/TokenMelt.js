@@ -91,7 +91,7 @@ class TokenMelt extends React.Component {
    */
   getSuccessMessage = () => {
     const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
-    const prettyAmountValue = helpers.renderValue(amount, this.isNFT());
+    const prettyAmountValue = hathorLib.numberUtils.prettyValue(amount, this.isNFT() ? 0 : this.props.decimalPlaces);
     return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;
   }
 
@@ -106,7 +106,7 @@ class TokenMelt extends React.Component {
     const walletAmount = get(this.props.tokenBalance, 'data.available', 0);
 
     if (amountValue > walletAmount) {
-      const prettyWalletAmount = helpers.renderValue(walletAmount, this.isNFT());
+      const prettyWalletAmount = hathorLib.numberUtils.prettyValue(walletAmount, this.isNFT() ? 0 : this.props.decimalPlaces);
       return t`The total amount you have is only ${prettyWalletAmount}.`;
     }
   }
@@ -136,7 +136,7 @@ class TokenMelt extends React.Component {
           <InputNumber
            required
            ref={this.amount}
-           placeholder={hathorLib.numberUtils.prettyValue(0)}
+           placeholder={hathorLib.numberUtils.prettyValue(0, this.props.decimalPlaces)}
            className="form-control"
            onValueChange={this.onAmountChange}
           />

@@ -117,8 +117,8 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
                                 <InputNumber key="value"
                                              name="amount"
                                              ref={amountRef}
-                                             defaultValue={hathorLib.numberUtils.prettyValue(amount)}
-                                             placeholder={hathorLib.numberUtils.prettyValue(0)}
+                                             defaultValue={hathorLib.numberUtils.prettyValue(amount, decimalPlaces)}
+                                             placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
                                              onValueChange={value => setAmount(value)}
                                              className="form-control output-value col-3"/>
                             </div>
