@@ -15,6 +15,7 @@ import { get } from 'lodash';
 import Loading from "../Loading";
 import helpers from "../../utils/helpers";
 import walletUtils from '../../utils/wallet';
+import { useSelector } from 'react-redux';
 
 function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHandler, setErrMessage }) {
     const [txId, setTxId] = useState(utxo.tx_id || '');
@@ -133,6 +134,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
     const [amount, setAmount] = useState(0);
     const [errMessage, setErrMessage] = useState('');
     const modalDomId = 'atomicSendModal';
+    const decimalPlaces = useSelector(state => state.serverInfo.decimalPlaces);
 
     const [showUtxoSelection, setShowUtxoSelection] = useState(false);
     const [utxos, setUtxos] = useState([{}]);
@@ -201,7 +203,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         }
 
         // Validating available balance
-        const selectedAmount = walletUtils.decimalToInteger(amount);
+        const selectedAmount = walletUtils.decimalToInteger(amount, decimalPlaces);
         const availableAmount = selectedTokenBalance.data.available;
         if (selectedAmount > availableAmount) {
             setErrMessage(t`Insufficient balance`);
@@ -237,7 +239,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         sendClickHandler({
             selectedToken,
             changeAddress: changeAddress,
-            amount: walletUtils.decimalToInteger(amount),
+            amount: walletUtils.decimalToInteger(amount, decimalPlaces),
             utxos: selectedUtxos,
         });
         onClose(`#${modalDomId}`);

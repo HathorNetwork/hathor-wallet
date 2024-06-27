@@ -23,6 +23,7 @@ const mapStateToProps = (state) => {
   return {
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   };
 };
 
@@ -57,7 +58,7 @@ class TokenMelt extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = async (pin) => {
-    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
+    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
     const wallet = getGlobalWallet();
     const transaction = await wallet.prepareMeltTokensData(
       this.props.token.uid,
@@ -89,7 +90,7 @@ class TokenMelt extends React.Component {
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
+    const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
     const prettyAmountValue = helpers.renderValue(amount, this.isNFT());
     return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;
   }
@@ -101,7 +102,7 @@ class TokenMelt extends React.Component {
    * @return {string} Error message, in case of form invalid. Nothing, otherwise.
    */
   melt = () => {
-    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
+    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
     const walletAmount = get(this.props.tokenBalance, 'data.available', 0);
 
     if (amountValue > walletAmount) {

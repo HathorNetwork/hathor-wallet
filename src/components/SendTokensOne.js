@@ -29,6 +29,7 @@ const mapStateToProps = (state) => {
     tokensBalance: state.tokensBalance,
     tokenMetadata: state.tokenMetadata,
     height: state.height,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   };
 };
 
@@ -109,7 +110,7 @@ class SendTokensOne extends React.Component {
 
       if (address && valueStr) {
         // Doing the check here because need to validate before doing parseInt
-        const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
+        const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr, this.props.decimalPlaces);
         if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
           this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${helpers.renderValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT())}` });
           return null;

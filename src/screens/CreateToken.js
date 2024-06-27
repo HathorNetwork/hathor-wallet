@@ -32,9 +32,10 @@ import { getGlobalWallet } from "../modules/wallet";
  */
 function CreateToken() {
 
-  const { htrBalance, useWalletService } = useSelector(state => ({
+  const { htrBalance, useWalletService, decimalPlaces } = useSelector(state => ({
     htrBalance: get(state.tokensBalance, `${hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}.data.available`, 0),
     useWalletService: state.useWalletService,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   }));
   const wallet = getGlobalWallet();
 
@@ -67,7 +68,7 @@ function CreateToken() {
       }
 
       // Validating maximum amount
-      const tokensValue = walletUtils.decimalToInteger(amount)
+      const tokensValue = walletUtils.decimalToInteger(amount, decimalPlaces);
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
         const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
         setErrorMessage(t`Maximum value to mint token is ${max_output_value_str}`);
@@ -121,7 +122,7 @@ function CreateToken() {
       transaction = await wallet.prepareCreateNewToken(
         shortNameRef.current.value,
         symbolRef.current.value,
-        walletUtils.decimalToInteger(amount),
+        walletUtils.decimalToInteger(amount, decimalPlaces),
         { address, pinCode: pin }
       );
 

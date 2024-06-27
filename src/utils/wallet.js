@@ -620,14 +620,15 @@ const wallet = {
    * Math.round(35.05*100) = 3505
    *
    * @param {number} value The decimal amount
+   * @param {number} decimalPlaces Number of decimal places
    *
    * @return {number} Value as an integer
    *
    * @memberof Wallet
    * @inner
    */
-  decimalToInteger(value) {
-    return Math.round(value*(10**hathorConstants.DECIMAL_PLACES));
+  decimalToInteger(value, decimalPlaces) {
+    return Math.round(value*(10**decimalPlaces));
   },
 
   /**
