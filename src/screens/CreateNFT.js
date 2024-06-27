@@ -47,13 +47,14 @@ function CreateNFT() {
   const createMintAuthorityRef = useRef();
   const createMeltAuthorityRef = useRef();
 
-  const { htrBalance, useWalletService } = useSelector((state) => {
+  const { htrBalance, useWalletService, decimalPlaces } = useSelector((state) => {
     const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
     const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
 
     return {
       htrBalance,
       useWalletService: state.useWalletService,
+      decimalPlaces: state.serverInfo.decimalPlaces,
     };
   });
   const wallet = getGlobalWallet();
@@ -262,7 +263,7 @@ function CreateNFT() {
   // The actual math for the UI value would be htrDeposit * 100 / (10^(2-DECIMAL_PLACES))
   // Since NFT have 0 for DECIMAL_PLACES we get htrDeposit * 100/100 which is htrDeposit
   const htrDeposit = wallet.storage.getTokenDepositPercentage();
-  const depositAmount = hathorLib.tokensUtils.getDepositAmount(amount, htrDeposit);
+  const depositAmount = hathorLib.tokensUtils.getDepositAmount(amount, htrDeposit, decimalPlaces);
   const nftFee = hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee());
 
   return (

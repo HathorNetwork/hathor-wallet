@@ -217,7 +217,7 @@ class TokenMint extends React.Component {
        renderForm={renderForm}
        title={t`Mint tokens`}
        subtitle={`A deposit of ${depositPercent * 100}% in HTR of the mint amount is required`}
-       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent)} HTR (${hathorLib.numberUtils.prettyValue(this.props.htrBalance)} HTR available)`}
+       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent, this.props.decimalPlaces)} HTR (${hathorLib.numberUtils.prettyValue(this.props.htrBalance)} HTR available)`}
        buttonName={t`Go`}
        validateForm={this.mint}
        getSuccessMessage={this.getSuccessMessage}

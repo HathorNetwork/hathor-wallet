@@ -291,7 +291,7 @@ function CreateToken() {
             <input ref={addressInputRef} type="text" placeholder={t`Address`} className="form-control" />
           </div>
         </div>
-        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent)} HTR ({hathorLib.numberUtils.prettyValue(htrBalance)} HTR available)</p>
+        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} HTR ({hathorLib.numberUtils.prettyValue(htrBalance)} HTR available)</p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>
