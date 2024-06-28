@@ -504,6 +504,9 @@ export const setMiningServer = (url) => ({
   payload: url,
 });
 
+/**
+ * Set the native token data
+ */
 export const setNativeTokenData = (data) => ({
   type: types.SET_NATIVE_TOKEN_DATA,
   payload: data,

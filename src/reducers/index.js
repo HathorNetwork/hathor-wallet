@@ -123,6 +123,7 @@ const initialState = {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
   miningServer: null,
+  nativeTokenData: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -1011,6 +1012,10 @@ export const onSetNativeTokenData = (state, { payload }) => {
     tokens = [{...payload, uid: NATIVE_TOKEN_UID}];
   } else {
     const nativeTokenIndex = findIndex(state.tokens, (e) => e.uid === NATIVE_TOKEN_UID);
+    if (nativeTokenIndex === -1) {
+      // In case the native token is not in the list, we add it as the first token
+      tokens = [{...payload, uid: NATIVE_TOKEN_UID}, ...state.tokens];
+    }
     tokens[nativeTokenIndex] = {...payload, uid: NATIVE_TOKEN_UID};
   }
 

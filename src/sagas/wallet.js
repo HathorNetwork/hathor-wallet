@@ -252,11 +252,7 @@ export function* startWallet(action) {
     });
     console.log('[+] Start wallet.', serverInfo);
 
-    // Use HTR as default
-    let nativeToken = hathorLibConstants.DEFAULT_TOKEN_CONFIG;
-    if (info.native_token) {
-      nativeToken = info.native_token;
-    }
+    const nativeToken = wallet.storage.getNativeTokenData();
     yield put(setNativeTokenData(nativeToken));
 
     let version;
