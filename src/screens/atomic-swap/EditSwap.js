@@ -20,9 +20,8 @@ import {
     enrichTxData
 } from "../../utils/atomicSwap";
 import { ProposalBalanceTable } from "../../components/atomic-swap/ProposalBalanceTable";
-import helpers from "../../utils/helpers";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
-import { PartialTxProposal, PartialTx } from "@hathor/wallet-lib";
+import { PartialTxProposal, PartialTx, numberUtils } from "@hathor/wallet-lib";
 import { cloneDeep, get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import Loading from "../../components/Loading";
@@ -39,8 +38,15 @@ export default function EditSwap(props) {
     //-------------------------------------------------------
     const proposalId = props.match.params.proposalId;
 
-    /** @type ReduxProposalData */
-    const proposal = useSelector(state => state.proposals[proposalId]);
+    /**
+     * @type Object
+     * @property {ReduxProposalData} proposal
+     * @property {number} decimalPlaces
+     */
+    const { proposal, decimalPlaces } = useSelector(state => ({
+      proposal: state.proposals[proposalId],
+      decimalPlaces: state.serverInfo.decimalPlaces,
+    }));
     /** @type HathorWallet */
     const wallet = getGlobalWallet();
     /** @type {Record<string, {status:string, data: {available:number, locked:number}}>} */
@@ -128,7 +134,7 @@ export default function EditSwap(props) {
                             title={t`This input is signed`}></i>}
                     </td>
                     <td className="text-right">
-                        {helpers.renderValue(input.value, false)}
+                        {numberUtils.prettyValue(input.value, decimalPlaces)}
                     </td>
                     <td className="text-right">
                         {input.index}
@@ -147,7 +153,7 @@ export default function EditSwap(props) {
             return outputs.map((output,index) => {
                 return <tr key={`${output.address}-${index}`}>
                     <td>{output.address}</td>
-                    <td className="text-right">{helpers.renderValue(output.value, false)}</td>
+                    <td className="text-right">{numberUtils.prettyValue(output.value, decimalPlaces)}</td>
                     <td className="text-center">
                         {output.isMine && output.isChange && <i
                             className="fa fa-check ml-1"

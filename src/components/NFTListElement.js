@@ -15,6 +15,15 @@ import {
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import helpers from '../utils/helpers';
 import Loading from '../components/Loading';
+import { connect } from 'react-redux';
+import { numberUtils } from '@hathor/wallet-lib';
+
+
+const mapStateToProps = (state) => {
+  return {
+    decimalPlaces: state.serverInfo.decimalPlaces,
+  };
+};
 
 
 /**
@@ -102,7 +111,7 @@ class NFTListElement extends React.Component {
             </figure>
             <p>
               <strong>Balance: </strong>
-              { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && helpers.renderValue(this.props.nftElement.balance.data.available, true) }
+              { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && numberUtils.prettyValue(this.props.nftElement.balance.data.available, 0) }
               { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
                 <Loading />
               )}
@@ -110,11 +119,11 @@ class NFTListElement extends React.Component {
               { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && this.props.nftElement.symbol }
             </p>
             <p><a href="true" onClick={(e) => this.goToTokenDetail(e, this.props.nftElement.id)}>{t`See on explorer`}</a></p>
-          </div>        
+          </div>
         </div>
       </>
     )
   }
 }
 
-export default NFTListElement;
+export default connect(mapStateToProps)(NFTListElement);

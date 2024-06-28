@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
+import { numberUtils } from '@hathor/wallet-lib';
 import { selectToken } from '../actions/index';
 import { get } from 'lodash';
 import helpers from '../utils/helpers';
@@ -34,6 +35,7 @@ export default function TokenBar () {
   const selectedToken = useSelector((state) => state.selectedToken);
   const tokensBalance = useSelector((state) => state.tokensBalance);
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
+  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
 
   // If the current route is not in the whitelist, we should not render the tokenbar
   if (ROUTE_WHITELIST.indexOf(location.pathname) < 0) {
@@ -111,7 +113,7 @@ export default function TokenBar () {
 
     // Formatting to string for exhibition
     const isNFT = helpers.isTokenNFT(uid, tokenMetadata);
-    return helpers.renderValue(total, isNFT);
+    return numberUtils.prettyValue(total, isNFT ? 0 : decimalPlaces);
   };
 
   /**
