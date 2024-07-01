@@ -23,6 +23,7 @@ import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
 import { OutputType } from '@hathor/wallet-lib/lib/wallet/types';
+import { OutputData } from '../components/OutputData';
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -67,6 +68,8 @@ function SendTokens() {
   const [errorMessage, setErrorMessage] = useState('');
   /** txTokens {Array} Array of tokens configs already added by the user (start with only hathor) */
   const [txTokens, setTxTokens] = useState([...getSelectedToken()]);
+  /** dataOutputs {Array} Array of data output added by the user */
+  const [dataOutputs, setDataOutputs] = useState([]);
 
   // Create refs
   const formSendTokensRef = useRef();
@@ -76,6 +79,12 @@ function SendTokens() {
    * @type MutableRefObject<SendTransaction>
    */
   const sendTransactionRef = useRef(null);
+  /**
+   * It contains a map of data output ref values by its unique ID.
+   * @type MutableRefObject<{ [uniqueRefId: string]: MutableRefObject }>
+   */
+  const dataOutputRefs = useRef({});
+
 
   // Convert componentDidMount and componentWillUnmount
   useEffect(() => {
@@ -557,11 +566,6 @@ function SendTokens() {
     });
   }
 
-  // It must be a state to make component render for every change.
-  const [dataOutputs, setDataOutputs] = useState([]);
-  // Scheme: { current: { [uniqueRefId: string]: MutableRefObject } }
-  const dataOutputRefs = useRef({});
-
   const addDataOutput = () => {
     const uId = _.uniqueId('data_output');
     setDataOutputs([...dataOutputs, uId]);
@@ -576,6 +580,9 @@ function SendTokens() {
     ]);
   };
 
+  /**
+   * It renders a list of data output as cards.
+   */
   const renderDataOutputs = () => (
     dataOutputs.map((uId, index) => (
       <OutputData
@@ -634,28 +641,5 @@ function SendTokens() {
     </div>
   );
 }
-
-const OutputData = ({ dataInputRef, index, remove }) => (
-  <div className='send-tokens-wrapper card'>
-    <div className="outputs-wrapper">
-      <label>{t`Data Output`}</label>
-      <button
-        type="button"
-        className="text-danger remove-token-btn ml-3"
-        onClick={() => remove(index)}
-      >
-        {t`Remove`}
-      </button>
-      <div className="input-group mb-3">
-        <input
-          className="form-control output-address col-5"
-          type="text"
-          ref={dataInputRef}
-          placeholder={t`Data content`}
-        />
-      </div>
-    </div>
-  </div>
-);
 
 export default SendTokens;
