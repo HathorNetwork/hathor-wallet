@@ -194,6 +194,25 @@ class HybridStore extends MemoryStore {
     const registeredNanoContracts = STORE.getItem(REGISTERED_NANOCONTRACTS_KEY) || {};
     return ncId in registeredNanoContracts;
   }
+
+  /**
+   * Update nano contract registered address
+   *
+   * @param {string} ncId Nano contract id
+   * @param {string} address New nano contract address
+   *
+   * @async
+   * @returns {Promise<void>}
+   */
+  async updateNanoContractRegisteredAddress(ncId, address) {
+    if (!(await this.isNanoContractRegistered(ncId))) {
+      return;
+    }
+    await super.updateNanoContractRegisteredAddress(ncId, address);
+    const registeredNanoContracts = STORE.getItem(REGISTERED_NANOCONTRACTS_KEY) || {};
+    registeredNanoContracts[ncId] = {...registeredNanoContracts[ncId], address };
+    STORE.setItem(REGISTERED_NANOCONTRACTS_KEY, registeredNanoContracts);
+  }
 }
 
 
