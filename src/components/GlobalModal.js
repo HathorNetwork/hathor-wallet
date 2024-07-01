@@ -24,6 +24,7 @@ import ModalUnregisteredTokenInfo from './ModalUnregisteredTokenInfo';
 import ModalPin from "./ModalPin";
 import ModalRegisterNanoContract from "./nano/ModalRegisterNanoContract";
 import ModalChangeAddress from "./nano/ModalChangeAddress";
+import ModalConfirmUnregister from "./nano/ModalConfirmUnregister";
 import { ModalAtomicSend } from "./atomic-swap/ModalAtomicSend";
 import { ModalAtomicReceive } from "./atomic-swap/ModalAtomicReceive";
 import { ModalAtomicExternalChange } from "./atomic-swap/ExternalChangeModal";
@@ -55,6 +56,7 @@ export const MODAL_TYPES = {
   'ATOMIC_EXTERNAL_CHANGE': 'ATOMIC_EXTERNAL_CHANGE',
   'NANOCONTRACT_REGISTER': 'NANOCONTRACT_REGISTER',
   'NANOCONTRACT_CHANGE_ADDRESS': 'NANOCONTRACT_CHANGE_ADDRESS',
+  'NANOCONTRACT_CONFIRM_UNREGISTER': 'NANOCONTRACT_CONFIRM_UNREGISTER',
 };
 
 export const MODAL_COMPONENTS = {
@@ -78,6 +80,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.ATOMIC_EXTERNAL_CHANGE]: ModalAtomicExternalChange,
   [MODAL_TYPES.NANOCONTRACT_REGISTER]: ModalRegisterNanoContract,
   [MODAL_TYPES.NANOCONTRACT_CHANGE_ADDRESS]: ModalChangeAddress,
+  [MODAL_TYPES.NANOCONTRACT_CONFIRM_UNREGISTER]: ModalConfirmUnregister,
 };
 
 export const GlobalModalContext = createContext(initialState);

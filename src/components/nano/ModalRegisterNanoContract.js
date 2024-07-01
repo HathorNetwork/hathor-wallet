@@ -58,6 +58,7 @@ function ModalRegisterNanoContract({ onClose }) {
   useEffect(() => {
     // When registration succeeds, we hide the modal
     if (ncRegisterStatus === NANOCONTRACT_REGISTER_STATUS.SUCCESS) {
+      dispatch(cleanNanoContractRegisterMetadata());
       onClose();
     }
   }, [ncRegisterStatus]);
