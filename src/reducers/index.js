@@ -123,6 +123,8 @@ const initialState = {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
   miningServer: null,
+  // The native token data of the current network
+  // @type {{symbol: string, name: string, uid: string}}
   nativeTokenData: null,
 };
 
@@ -1006,16 +1008,26 @@ export const onSetMiningServer = (state, { payload }) => ({
   miningServer: payload,
 });
 
+/**
+ * When starting a wallet we need to update the native token data on store.
+ * This includes:
+ * - adding the native token to the registered tokens (state.tokens)
+ * - adding the native token as ready on loading cache (state.tokensCache)
+ * - updating the native token data (state.nativeTokenData)
+ *
+ * @param {Object} state
+ * @param {Object} payload
+ * @param {string} payload.symbol
+ * @param {string} payload.name
+ * @param {string} payload.uid
+ */
 export const onSetNativeTokenData = (state, { payload }) => {
   let tokens = [...state.tokens];
-  if (state.tokens.length === 0) {
-    tokens = [{...payload, uid: NATIVE_TOKEN_UID}];
+  const nativeTokenIndex = findIndex(state.tokens, (e) => e.uid === NATIVE_TOKEN_UID);
+  if (nativeTokenIndex === -1) {
+    // In case the native token is not in the list, we add it as the first token
+    tokens = [{...payload, uid: NATIVE_TOKEN_UID}, ...state.tokens];
   } else {
-    const nativeTokenIndex = findIndex(state.tokens, (e) => e.uid === NATIVE_TOKEN_UID);
-    if (nativeTokenIndex === -1) {
-      // In case the native token is not in the list, we add it as the first token
-      tokens = [{...payload, uid: NATIVE_TOKEN_UID}, ...state.tokens];
-    }
     tokens[nativeTokenIndex] = {...payload, uid: NATIVE_TOKEN_UID};
   }
 
