@@ -54,6 +54,11 @@ export const types = {
   UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
   UPDATE_MINING_SERVER: 'UPDATE_MINING_SERVER',
   SET_MINING_SERVER: 'SET_MINING_SERVER',
+  NANOCONTRACT_REGISTER_REQUEST: 'NANOCONTRACT_REGISTER_REQUEST',
+  NANOCONTRACT_REGISTER_ERROR: 'NANOCONTRACT_REGISTER_ERROR',
+  NANOCONTRACT_REGISTER_SUCCESS: 'NANOCONTRACT_REGISTER_SUCCESS',
+  NANOCONTRACT_CLEAN_REGISTER_METADATA: 'NANOCONTRACT_CLEAN_REGISTER_METADATA',
+  BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
 };
 
 /**
@@ -130,9 +135,11 @@ export const updateHeight = (height, htrUpdatedBalance) => ({ type: 'update_heig
 
 /**
  * tokens {Array} array of token uids the the wallet has
+ * registeredTokens {{uid:string, name:string, symbol:string}[]} The registered tokens from the storage
  * currentAddress {Object} The current unused address
+ * registeredNanoContracts {NanoContractData} The registered nano contracts from the storage
  */
-export const loadWalletSuccess = (tokens, registeredTokens, currentAddress) => ({ type: 'load_wallet_success', payload: { tokens, registeredTokens, currentAddress } });
+export const loadWalletSuccess = (tokens, registeredTokens, currentAddress, registeredNanoContracts) => ({ type: 'load_wallet_success', payload: { tokens, registeredTokens, currentAddress, registeredNanoContracts } });
 
 /**
  * tx {Object} the new transaction
@@ -501,4 +508,52 @@ export const updateMiningServer = (url, reset) => ({
 export const setMiningServer = (url) => ({
   type: types.SET_MINING_SERVER,
   payload: url,
+});
+
+/**
+ * Register nano contract in redux
+ *
+ * @param {string} ncId Nano contract id
+ * @param {string} address Address associated with the nano contract
+ */
+export const registerNanoContract = (ncId, address) => ({
+  type: types.NANOCONTRACT_REGISTER_REQUEST,
+  payload: { ncId, address },
+});
+
+/**
+ * Error when registering a nano contract
+ * @param {string} error Error reason
+ */
+export const nanoContractRegisterError = (error) => ({
+  type: types.NANOCONTRACT_REGISTER_ERROR,
+  payload: { error },
+});
+
+/**
+ * Success when registering nano contract
+ *
+ * @param {INcData} ncData nano contract data
+ */
+export const nanoContractRegisterSuccess = (ncData) => ({
+  type: types.NANOCONTRACT_REGISTER_SUCCESS,
+  payload: ncData,
+});
+
+/**
+ * Clean register metadata of nano contracts
+ *
+ */
+export const cleanNanoContractRegisterMetadata = () => ({
+  type: types.NANOCONTRACT_CLEAN_REGISTER_METADATA,
+});
+
+/**
+ * Add blueprint information
+ *
+ * @param {NanoContractBlueprintInformationAPIResponse} blueprintInformation Blueprint information to add to redux
+ */
+export const addBlueprintInformation = (blueprintInformation) => ({
+  type: types.BLUEPRINT_ADD_INFORMATION,
+  payload: { blueprintInformation }
 });
