@@ -26,6 +26,8 @@ function ModalRegisterNanoContract({ onClose }) {
   const dispatch = useDispatch();
   const wallet = getGlobalWallet();
 
+  const registerNCModalID = 'registerNCModal';
+
   const [ncId, setNcId] = useState('');
   const ncRegisterMetadata = useSelector(state => state.nanoContractsRegisterMetadata);
   const ncRegisterStatus = get(ncRegisterMetadata, 'status', null);
@@ -35,15 +37,15 @@ function ModalRegisterNanoContract({ onClose }) {
   const idRef = useRef(null);
 
   useEffect(() => {
-    $('#registerNCModal').modal('show');
-    $('#registerNCModal').on('hidden.bs.modal', (e) => {
+    $(`#${registerNCModalID}`).modal('show');
+    $(`#${registerNCModalID}`).on('hidden.bs.modal', (e) => {
       dispatch(cleanNanoContractRegisterMetadata());
       idRef.current.value = '';
       // We always need to call on close when using global context modal
       onClose();
     });
 
-    $('#registerNCModal').on('shown.bs.modal', (e) => {
+    $(`#${registerNCModalID}`).on('shown.bs.modal', (e) => {
       idRef.current.focus();
     });
 
@@ -52,7 +54,6 @@ function ModalRegisterNanoContract({ onClose }) {
       // Removing all event listeners
       $('#registerNCModal').off();
     };
-
   }, []);
 
   useEffect(() => {
@@ -86,7 +87,7 @@ function ModalRegisterNanoContract({ onClose }) {
   }
 
   return (
-    <div className="modal fade" id="registerNCModal" tabIndex="-1" role="dialog" aria-labelledby="registerNCModal" aria-hidden="true">
+    <div className="modal fade" id={registerNCModalID} tabIndex="-1" role="dialog" aria-labelledby={registerNCModalID} aria-hidden="true">
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
