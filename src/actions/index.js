@@ -137,9 +137,9 @@ export const updateHeight = (height, htrUpdatedBalance) => ({ type: 'update_heig
 
 /**
  * tokens {Array} array of token uids the the wallet has
- * registeredTokens {{uid:string, name:string, symbol:string}[]} The registered tokens from the storege
+ * registeredTokens {{uid:string, name:string, symbol:string}[]} The registered tokens from the storage
  * currentAddress {Object} The current unused address
- * registeredNanoContracts {NanoContractData} The registered nano contracts from the storege
+ * registeredNanoContracts {NanoContractData} The registered nano contracts from the storage
  */
 export const loadWalletSuccess = (tokens, registeredTokens, currentAddress, registeredNanoContracts) => ({ type: 'load_wallet_success', payload: { tokens, registeredTokens, currentAddress, registeredNanoContracts } });
 
