@@ -76,7 +76,7 @@ function Welcome() {
             <p className="mt-4 mb-4">{t`Welcome to Hathor Wallet!`}</p>
           </div>
           <p className="mb-4"><SpanFmt>{t`This wallet is connected to the **mainnet**.`}</SpanFmt></p>
-          <p>{t`Using this wallet you can (i) check your balance and history, (ii) send & receive HTR and other tokens running on Hathor, and (iii) create and manage your own tokens.`}</p>
+          <p>{t`Using this wallet you can (i) check your balance and history, (ii) send & receive tokens running on Hathor, and (iii) create and manage your own tokens.`}</p>
           <p>{t`You should never share any information besides your addresses to other people. You're fully responsible for keeping your tokens safe.`}</p>
           <p>{t`For further information, check our website (https://hathor.network/).`}</p>
           <form ref={agreeForm} className={`w-100 mb-4 ${formValidated ? 'was-validated' : ''}`}>

@@ -72,7 +72,7 @@ function TransactionDetail() {
       for (const output of data.tx.outputs) {
         if (!output.token) {
           if (output.token_data === 0) {
-            output.token = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+            output.token = hathorLib.constants.NATIVE_TOKEN_UID;
           } else {
             output.token = data.tx.tokens[(output.token_data & hathorLib.constants.TOKEN_INDEX_MASK) -1].uid;
           }
@@ -82,7 +82,7 @@ function TransactionDetail() {
       for (const input of data.tx.inputs) {
         if (!input.token) {
           if (input.token_data === 0) {
-            input.token = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+            input.token = hathorLib.constants.NATIVE_TOKEN_UID;
           } else {
             input.token = data.tx.tokens[(input.token_data & hathorLib.constants.TOKEN_INDEX_MASK) -1].uid;
           }

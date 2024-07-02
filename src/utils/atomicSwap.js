@@ -13,7 +13,7 @@ import {
   tokensUtils,
   config as hathorLibConfig,
 } from "@hathor/wallet-lib";
-import { TOKEN_MINT_MASK, TOKEN_MELT_MASK, HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import { TOKEN_MINT_MASK, TOKEN_MELT_MASK, NATIVE_TOKEN_UID } from "@hathor/wallet-lib/lib/constants";
 import { get } from 'lodash';
 import walletUtil from "./wallet";
 
@@ -306,7 +306,7 @@ export const translateTxToProposalUtxo = async (txId, index, wallet) => {
   if (!tokenId) {
     // This should never happen since the fullnode always sends the token uid.
     const tokenIndex = tokensUtils.getTokenIndexFromData(txout.token_data);
-    tokenId = [HATHOR_TOKEN_CONFIG.uid, ...tx.tokens][tokenIndex];
+    tokenId = [NATIVE_TOKEN_UID, ...tx.tokens][tokenIndex];
   }
 
   return {

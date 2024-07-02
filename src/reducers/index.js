@@ -5,14 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import hathorLib from '@hathor/wallet-lib';
 import { FEATURE_TOGGLE_DEFAULTS, VERSION } from '../constants';
 import { types } from '../actions';
-import { get } from 'lodash';
+import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
-import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import { NATIVE_TOKEN_UID } from "@hathor/wallet-lib/lib/constants";
 import helpersUtils from '../utils/helpers';
 import LOCAL_STORE from '../storage';
 
@@ -63,9 +62,9 @@ const initialState = {
   requestErrorStatusCode: undefined,
   // Tokens already saved: array of objects
   // {'name', 'symbol', 'uid'}
-  tokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
+  tokens: [],
   // Token selected (by default is HATHOR)
-  selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
+  selectedToken: NATIVE_TOKEN_UID,
   /**
    * List of all tokens seen in transactions
    * @type {Record<string, string>}
@@ -118,19 +117,15 @@ const initialState = {
    * - Those that were present in at least one proposal in which this wallet participated
    * @type {Record<string,{ tokenUid: string, symbol: string, name: string, status: string, oldStatus?: string }>}
    */
-  tokensCache: {
-    '00': {
-      tokenUid: HATHOR_TOKEN_CONFIG.uid,
-      symbol: HATHOR_TOKEN_CONFIG.symbol,
-      name: HATHOR_TOKEN_CONFIG.name,
-      status: TOKEN_DOWNLOAD_STATUS.READY
-    }
-  },
+  tokensCache: {},
   featureTogglesInitialized: false,
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
   miningServer: null,
+  // The native token data of the current network
+  // @type {{symbol: string, name: string, uid: string}}
+  nativeTokenData: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -259,6 +254,8 @@ const rootReducer = (state = initialState, action) => {
       return onWalletStateChanged(state, action);
     case types.SET_MINING_SERVER:
       return onSetMiningServer(state, action);
+    case types.SET_NATIVE_TOKEN_DATA:
+      return onSetNativeTokenData(state, action);
     default:
       return state;
   }
@@ -373,8 +370,7 @@ const onUpdateTokenHistory = (state, action) => {
 const onUpdateHeight = (state, action) => {
   if (action.payload.height !== state.height) {
     const tokensBalance = {};
-    const { uid } = hathorLib.constants.HATHOR_TOKEN_CONFIG;
-    tokensBalance[uid] = action.payload.htrUpdatedBalance;
+    tokensBalance[NATIVE_TOKEN_UID] = action.payload.htrUpdatedBalance;
     const newTokensBalance = Object.assign({}, state.tokensBalance, tokensBalance);
     return {
       ...state,
@@ -496,7 +492,7 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   if (hasZeroBalance) {
     return {
       ...state,
-      selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+      selectedToken: NATIVE_TOKEN_UID,
     };
   }
 
@@ -1011,5 +1007,44 @@ export const onSetMiningServer = (state, { payload }) => ({
   ...state,
   miningServer: payload,
 });
+
+/**
+ * When starting a wallet we need to update the native token data on store.
+ * This includes:
+ * - adding the native token to the registered tokens (state.tokens)
+ * - adding the native token as ready on loading cache (state.tokensCache)
+ * - updating the native token data (state.nativeTokenData)
+ *
+ * @param {Object} state
+ * @param {Object} payload
+ * @param {string} payload.symbol
+ * @param {string} payload.name
+ * @param {string} payload.uid
+ */
+export const onSetNativeTokenData = (state, { payload }) => {
+  let tokens = [...state.tokens];
+  const nativeTokenIndex = findIndex(state.tokens, (e) => e.uid === NATIVE_TOKEN_UID);
+  if (nativeTokenIndex === -1) {
+    // In case the native token is not in the list, we add it as the first token
+    tokens = [{...payload, uid: NATIVE_TOKEN_UID}, ...state.tokens];
+  } else {
+    tokens[nativeTokenIndex] = {...payload, uid: NATIVE_TOKEN_UID};
+  }
+
+  return {
+    ...state,
+    nativeTokenData: payload,
+    tokens,
+    tokensCache: {
+      ...state.tokensCache,
+      [NATIVE_TOKEN_UID]: {
+        tokenUid: NATIVE_TOKEN_UID,
+        symbol: payload.symbol,
+        name: payload.name,
+        status: TOKEN_DOWNLOAD_STATUS.READY
+      }
+    }
+  };
+};
 
 export default rootReducer;

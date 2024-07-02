@@ -311,7 +311,8 @@ class TxData extends React.Component {
    */
   getOutputToken = (tokenData) => {
     if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
-      return hathorLib.constants.HATHOR_TOKEN_CONFIG;
+      const wallet = getGlobalWallet();
+      return wallet.storage.getNativeTokenData();
     }
     const tokenConfig = this.props.transaction.tokens[tokenData - 1];
     return tokenConfig;
@@ -325,8 +326,10 @@ class TxData extends React.Component {
    * @return {string} Token symbol
    */
   getSymbol = (uid) => {
-    if (uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
-      return hathorLib.constants.HATHOR_TOKEN_CONFIG.symbol;
+    if (uid === hathorLib.constants.NATIVE_TOKEN_UID) {
+      const wallet = getGlobalWallet();
+      const nativeToken = wallet.storage.getNativeTokenData();
+      return nativeToken.symbol;
     }
     const tokenConfig = this.props.transaction.tokens.find((token) => token.uid === uid);
     if (tokenConfig === undefined) return '';
@@ -342,7 +345,7 @@ class TxData extends React.Component {
    */
   getUIDFromTokenData = (tokenData) => {
     if (tokenData === hathorLib.constants.HATHOR_TOKEN_INDEX) {
-      return hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+      return hathorLib.constants.NATIVE_TOKEN_UID;
     }
     const tokenConfig = this.props.transaction.tokens[tokenData - 1];
     return tokenConfig.uid;
@@ -718,7 +721,7 @@ class TxData extends React.Component {
 
     const renderTokenList = () => {
       const renderTokenUID = (token) => {
-        if (token.uid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+        if (token.uid === hathorLib.constants.NATIVE_TOKEN_UID) {
           return <span>token.uid</span>;
         } else if (token.unknown) {
           return (

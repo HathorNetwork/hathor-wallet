@@ -26,7 +26,7 @@ const tokens = {
    * @returns {Promise<ITokenData[]>}
    */
   async getRegisteredTokens(wallet, excludeDefaultToken = false) {
-    const htrUid = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+    const htrUid = hathorLib.constants.NATIVE_TOKEN_UID;
     const tokens = [];
 
     // redux-saga generator magic does not work well with the "for await..of" syntax
@@ -78,7 +78,7 @@ const tokens = {
     const globalWallet = getGlobalWallet();
     await globalWallet.storage.unregisterToken(uid);
     const tokens = await this.getRegisteredTokens(globalWallet);
-    store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
+    store.dispatch(newTokens({tokens, uid: hathorLib.constants.NATIVE_TOKEN_UID}));
     store.dispatch(removeTokenMetadata(uid));
   },
 

@@ -111,7 +111,7 @@ function Settings() {
     // First we get all token configs from registered tokens array,
     // remove the HTR token with filter, then map to each configuration string
     const configurationStrings = registeredTokens.filter((token) => {
-      return token.uid !== hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+      return token.uid !== hathorLib.constants.NATIVE_TOKEN_UID;
     }).map((token) => {
       return hathorLib.tokensUtils.getConfigurationString(token.uid, token.name, token.symbol);
     });
