@@ -216,6 +216,8 @@ const initialState = {
   nanoContractsRegisterMetadata: {},
   /**
    * Stores the blueprint information for each blueprint of registered nano contracts
+   * We store it in the redux because the same blueprint might be used in some screens
+   * then we don't need to request this every time
    *
    * {
    *   id: NanoContractBlueprintInformationAPIResponse
