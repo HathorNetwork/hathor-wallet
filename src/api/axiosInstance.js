@@ -47,9 +47,10 @@ const createRequestInstance = (resolve, timeout) => {
     // Adding conditional because if the server forgets to send back the CORS
     // headers, error.response will be undefined
     const statusCode = error.response ? error.response.status : -1;
-    if (statusCode < 500) {
+    const statusCodeCustomHandler = [400, 404];
+    if (statusCodeCustomHandler.includes(statusCode)) {
       // This request error is to handle problems in the server, so the user
-      // can retry a request. So 404 and 400 errors shouldn't show the error modal
+      // can retry a request. 404 and 400 errors shouldn't show the error modal
       return Promise.reject(error);
     }
     store.dispatch(updateRequestErrorStatusCode(statusCode));
