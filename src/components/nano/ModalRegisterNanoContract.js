@@ -99,7 +99,7 @@ function ModalRegisterNanoContract({ onClose }) {
             <p>{t`To register your nano contract, just write down the ID of the contract.`}</p>
             <form ref={formRegisterNCRef}>
               <div className="form-group">
-                <input autoFocus required type="text" className="form-control" ref={idRef} placeholder={t`Nano Contract ID`} />
+                <input autoFocus required type="text" pattern="[a-fA-F\d]{64}" className="form-control" ref={idRef} placeholder={t`Nano Contract ID`} />
               </div>
               <div className="row">
                 <div className="col-12 col-sm-10">
