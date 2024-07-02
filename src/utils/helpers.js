@@ -70,8 +70,9 @@ const helpers = {
       }
     }
 
-    let miningServer = LOCAL_STORE.getMiningServer();
+    const miningServer = LOCAL_STORE.getMiningServer();
     if (miningServer) {
+      hathorLib.config.setTxMiningUrl(miningServer);
       store.dispatch(setMiningServer(miningServer));
     }
   },
