@@ -100,7 +100,13 @@ export function* registerNanoContract({ payload }) {
     blueprintId: tx.nc_blueprint_id,
     blueprintName: blueprintInformation.name
   };
-  yield call([wallet.storage, wallet.storage.registerNanoContract], ncId, nc);
+
+  try {
+    yield call([wallet.storage, wallet.storage.registerNanoContract], ncId, nc);
+  } catch (error) {
+    console.error('Error while registering Nano Contract.', error);
+    yield put(nanoContractRegisterError(t`Error while registering the nano contract.`));
+  }
 
   console.debug('Success registering Nano Contract.');
   // emit action NANOCONTRACT_REGISTER_SUCCESS
