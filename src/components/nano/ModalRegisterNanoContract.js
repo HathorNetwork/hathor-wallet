@@ -42,24 +42,18 @@ function ModalRegisterNanoContract({ onClose }) {
       dispatch(cleanNanoContractRegisterMetadata());
       idRef.current.value = '';
       // We always need to call on close when using global context modal
-      onClose();
+      onClose(registerNCModalID);
     });
 
     $(`#${registerNCModalID}`).on('shown.bs.modal', (e) => {
       idRef.current.focus();
     });
-
-    return () => {
-      $('#registerNCModal').modal('hide');
-      // Removing all event listeners
-      $('#registerNCModal').off();
-    };
   }, []);
 
   useEffect(() => {
     // When registration succeeds, we hide the modal
     if (ncRegisterStatus === NANOCONTRACT_REGISTER_STATUS.SUCCESS) {
-      onClose();
+      onClose(registerNCModalID);
     }
   }, [ncRegisterStatus]);
 
