@@ -134,6 +134,8 @@ export function* startWallet(action) {
   const useWalletService = hardware ? false : yield call(isWalletServiceEnabled);
   const enableAtomicSwap = yield call(isAtomicSwapEnabled);
 
+  let customTokens = [];
+
   yield put(setUseWalletService(useWalletService));
   yield put(setEnableAtomicSwap(enableAtomicSwap));
 
@@ -257,6 +259,7 @@ export function* startWallet(action) {
 
     let version;
     let serverNetworkName = networkName;
+    customTokens = serverInfo?.custom_token ?? [];
 
     if (serverInfo) {
       version = serverInfo.version;
@@ -266,6 +269,7 @@ export function* startWallet(action) {
     yield put(setServerInfo({
       version,
       network: serverNetworkName,
+      customTokens,
     }));
   } catch(e) {
     if (useWalletService) {
@@ -318,8 +322,17 @@ export function* startWallet(action) {
     }
   }
 
+  // Register native token + network tokens in order
   const nativeToken = wallet.storage.getNativeTokenData();
   yield call([wallet.storage, wallet.storage.registerToken], nativeToken);
+  for (const token of customTokens) {
+    yield call([wallet.storage, wallet.storage.registerToken], token);
+  }
+
+  // Register all network tokens on the redux store
+  yield put(addRegisteredTokens(customTokens));
+  // Fetch all tokens metadata in non blocking call.
+  yield fork(walletUtils.fetchTokensMetadata, customTokens.map(token => token.uid), wallet.conn.network);
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
