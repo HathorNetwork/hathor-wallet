@@ -506,6 +506,10 @@ export const setMiningServer = (url) => ({
 
 /**
  * Set the native token data
+ * @param {Object} data
+ * @param {string} data.symbol
+ * @param {string} data.name
+ * @param {string} data.uid
  */
 export const setNativeTokenData = (data) => ({
   type: types.SET_NATIVE_TOKEN_DATA,
