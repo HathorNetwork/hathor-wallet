@@ -114,7 +114,7 @@ function Wallet() {
     setShouldShowAdministrativeTab(false);
 
     // No need to download token info and mint/melt info if the token is hathor
-    if (selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+    if (selectedToken === hathorLib.constants.NATIVE_TOKEN_UID) {
       return;
     }
 
@@ -151,7 +151,7 @@ function Wallet() {
    */
   async function updateTokenInfo(tokenUid) {
     // No need to fetch token info if the token is hathor
-    if (tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+    if (tokenUid === hathorLib.constants.NATIVE_TOKEN_UID) {
       return;
     }
     const tokenDetails = await wallet.getTokenDetails(tokenUid);

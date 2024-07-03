@@ -7,6 +7,7 @@ import {
   transactionUtils,
   errors as hathorErrors,
   cryptoUtils,
+  versionApi,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -60,6 +61,7 @@ import {
   changeWalletState,
   updateTxHistory,
   setMiningServer,
+  setNativeTokenData,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -250,6 +252,9 @@ export function* startWallet(action) {
     });
     console.log('[+] Start wallet.', serverInfo);
 
+    const nativeToken = wallet.storage.getNativeTokenData();
+    yield put(setNativeTokenData(nativeToken));
+
     let version;
     let serverNetworkName = networkName;
     const decimalPlaces = serverInfo?.decimal_places ?? hathorLibConstants.DECIMAL_PLACES;
@@ -315,7 +320,8 @@ export function* startWallet(action) {
     }
   }
 
-  yield call([wallet.storage, wallet.storage.registerToken], hathorLibConstants.HATHOR_TOKEN_CONFIG);
+  const nativeToken = wallet.storage.getNativeTokenData();
+  yield call([wallet.storage, wallet.storage.registerToken], nativeToken);
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
@@ -368,7 +374,7 @@ export function* startWallet(action) {
  * to asynchronously load all registered tokens
  */
 export function* loadTokens() {
-  const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
+  const htrUid = hathorLibConstants.NATIVE_TOKEN_UID;
 
   yield call(fetchTokenData, htrUid);
   const wallet = getGlobalWallet();
@@ -649,7 +655,7 @@ export function* bestBlockUpdate({ payload }) {
   }
 
   if (currentHeight !== payload) {
-    yield put(tokenFetchBalanceRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid));
+    yield put(tokenFetchBalanceRequested(hathorLibConstants.NATIVE_TOKEN_UID));
   }
 }
 
@@ -684,7 +690,7 @@ export function* walletReloading() {
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
     for (const tokenUid of Object.keys(allTokens)) {
-      if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
+      if (tokenUid === hathorLibConstants.NATIVE_TOKEN_UID) {
         continue;
       }
       yield put(tokenInvalidateHistory(tokenUid));

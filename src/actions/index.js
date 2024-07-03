@@ -54,6 +54,7 @@ export const types = {
   UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
   UPDATE_MINING_SERVER: 'UPDATE_MINING_SERVER',
   SET_MINING_SERVER: 'SET_MINING_SERVER',
+  SET_NATIVE_TOKEN_DATA: 'SET_NATIVE_TOKEN_DATA',
 };
 
 /**
@@ -501,4 +502,16 @@ export const updateMiningServer = (url, reset) => ({
 export const setMiningServer = (url) => ({
   type: types.SET_MINING_SERVER,
   payload: url,
+});
+
+/**
+ * Set the native token data
+ * @param {Object} data
+ * @param {string} data.symbol
+ * @param {string} data.name
+ * @param {string} data.uid
+ */
+export const setNativeTokenData = (data) => ({
+  type: types.SET_NATIVE_TOKEN_DATA,
+  payload: data,
 });

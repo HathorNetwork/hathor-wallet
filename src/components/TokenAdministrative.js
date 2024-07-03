@@ -22,7 +22,7 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {
-  const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+  const HTR_UID = hathorLib.constants.NATIVE_TOKEN_UID;
   const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
 
   return {

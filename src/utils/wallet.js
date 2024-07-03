@@ -175,7 +175,7 @@ const wallet = {
     const tokenChunks = chunk(tokens, METADATA_CONCURRENT_DOWNLOAD);
     for (const chunk of tokenChunks) {
       await Promise.all(chunk.map(async (token) => {
-        if (token === hathorConstants.HATHOR_TOKEN_CONFIG.uid) {
+        if (token === hathorConstants.NATIVE_TOKEN_UID) {
           return;
         }
 
@@ -286,7 +286,7 @@ const wallet = {
       };
 
       // If we indicated this token should always be exhibited, add it already.
-      const isTokenHTR = tokenUid === hathorConstants.HATHOR_TOKEN_CONFIG.uid;
+      const isTokenHTR = tokenUid === hathorConstants.NATIVE_TOKEN_UID;
       const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
 
       if (isTokenHTR || alwaysShowThisToken) {
