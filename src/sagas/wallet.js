@@ -62,6 +62,7 @@ import {
   updateTxHistory,
   setMiningServer,
   setNativeTokenData,
+  addRegisteredTokens,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -259,7 +260,7 @@ export function* startWallet(action) {
 
     let version;
     let serverNetworkName = networkName;
-    customTokens = serverInfo?.custom_token ?? [];
+    customTokens = serverInfo?.custom_tokens ?? [];
 
     if (serverInfo) {
       version = serverInfo.version;

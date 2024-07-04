@@ -447,7 +447,7 @@ export const resetNavigateTo = () => ({
  * @param {string} customTokens[].symbol
  */
 export const setServerInfo = ({ version, network, customTokens }) => (
-  { type: types.SET_SERVER_INFO, payload: { version, network } }
+  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens } }
 );
 
 export const featureToggleInitialized = () => ({
