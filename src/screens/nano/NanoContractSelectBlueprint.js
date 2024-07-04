@@ -70,7 +70,7 @@ function NanoContractSelectBlueprint() {
   const renderButtons = () => {
     if (!blueprintInformation) {
       return (
-        <button type="button" className="btn btn-hathor mr-3" onClick={onSelectBlueprint}>{t`Confirm`}</button>
+        <button type="button" className="btn btn-hathor mr-3" onClick={onSelectBlueprint}>{t`Fetch Blueprint Information`}</button>
       );
     } else {
       return (
@@ -166,16 +166,16 @@ function NanoContractSelectBlueprint() {
       <div>
         <form ref={formSelectBlueprintRef} id="formSelectBlueprint">
           <div className="row">
-            <div className="form-group col-6">
+            <div className="form-group col-8">
               <label>{t`Blueprint ID`}</label>
               <input required autoFocus ref={blueprintIdRef} type="text" className="form-control" disabled={blueprintInformation !== null} />
             </div>
           </div>
-          {blueprintInformation && renderBlueprintInformation()}
           <div className="d-flex">
             {renderButtons()}
             {fetching && <ReactLoading type='spin' color={colors.purpleHathor} width={32} height={32} />}
           </div>
+          {blueprintInformation && renderBlueprintInformation()}
           <p className="text-danger mt-3">{errorMessage}</p>
         </form>
       </div>
