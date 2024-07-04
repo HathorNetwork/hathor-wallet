@@ -332,8 +332,6 @@ export function* startWallet(action) {
 
   // Register all network tokens on the redux store
   yield put(addRegisteredTokens(customTokens));
-  // Fetch all tokens metadata in non blocking call.
-  yield fork(walletUtils.fetchTokensMetadata, customTokens.map(token => token.uid), wallet.conn.network);
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity

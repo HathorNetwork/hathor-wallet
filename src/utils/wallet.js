@@ -289,7 +289,7 @@ const wallet = {
       // If we indicated this token should always be exhibited, add it already.
       const isTokenHTR = tokenUid === hathorConstants.NATIVE_TOKEN_UID;
       const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
-      const isNetworkToken = networkTokens.find(networkToken => networkToken === tokenUid);
+      const isNetworkToken = networkTokens.find(networkToken => networkToken.uid === tokenUid);
 
       if (isTokenHTR || alwaysShowThisToken || isNetworkToken) {
         filteredTokens.push(tokenData);
