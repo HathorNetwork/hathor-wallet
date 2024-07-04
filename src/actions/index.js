@@ -522,7 +522,8 @@ export const setNativeTokenData = (data) => ({
 });
 
 /**
- * Add registered tokens
+ * Add a list of tokens to the store as registered.
+ *
  * @param {Object[]} data
  * @param {string} data[].symbol
  * @param {string} data[].name

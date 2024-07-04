@@ -1050,7 +1050,7 @@ export const onSetNativeTokenData = (state, { payload }) => {
 };
 
 /**
- * Update store with registered tokens.
+ * Add a list of tokens to the store registered tokens.
  *
  * @param {Object} state
  * @param {Object[]} payload
@@ -1059,20 +1059,12 @@ export const onSetNativeTokenData = (state, { payload }) => {
  * @param {string} payload[].symbol
  */
 export const onAddRegisteredTokens = (state, { payload }) => {
-  const allTokens = {...state.allTokens};
-
-  // Add new tokens to allTokens
-  for (const token of payload) {
-    allTokens[token.uid] = token.uid;
-  }
-
   // Add new tokens to registered tokens
   const tokens = [...state.tokens, ...payload];
 
   return {
     ...state,
     tokens,
-    allTokens,
   };
 };
 
