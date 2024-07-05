@@ -257,7 +257,7 @@ export function* startWallet(action) {
 
     let version;
     let serverNetworkName = networkName;
-    const decimalPlaces = serverInfo?.decimal_places ?? hathorLibConstants.DECIMAL_PLACES;
+    const decimalPlaces = wallet.storage.getDecimalPlaces();
 
     if (serverInfo) {
       version = serverInfo.version;

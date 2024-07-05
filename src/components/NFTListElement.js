@@ -15,15 +15,7 @@ import {
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import helpers from '../utils/helpers';
 import Loading from '../components/Loading';
-import { connect } from 'react-redux';
 import { numberUtils } from '@hathor/wallet-lib';
-
-
-const mapStateToProps = (state) => {
-  return {
-    decimalPlaces: state.serverInfo.decimalPlaces,
-  };
-};
 
 
 /**
@@ -126,4 +118,4 @@ class NFTListElement extends React.Component {
   }
 }
 
-export default connect(mapStateToProps)(NFTListElement);
+export default NFTListElement;

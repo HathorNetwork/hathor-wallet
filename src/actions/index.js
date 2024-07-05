@@ -440,9 +440,10 @@ export const resetNavigateTo = () => ({
 /**
  * version {str} version of the connected server (e.g., 0.26.0-beta)
  * network {str} network of the connected server (e.g., mainnet, testnet)
- * */
-export const setServerInfo = ({ version, network }) => (
-  { type: types.SET_SERVER_INFO, payload: { version, network } }
+ * decimalPlaces {number} number of decimal places (e.g. 2, 4)
+ */
+export const setServerInfo = ({ version, network, decimalPlaces }) => (
+  { type: types.SET_SERVER_INFO, payload: { version, network, decimalPlaces } }
 );
 
 export const featureToggleInitialized = () => ({

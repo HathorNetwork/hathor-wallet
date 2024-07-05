@@ -15,11 +15,9 @@ import LOCAL_STORE from '../storage';
 import { connect } from 'react-redux';
 
 
-const mapStateToProps = (state) => {
-  return {
-    decimalPlaces: state.serverInfo.decimalPlaces,
-  };
-};
+const mapStateToProps = (state) => ({
+  decimalPlaces: state.serverInfo.decimalPlaces,
+});
 
 
 /**

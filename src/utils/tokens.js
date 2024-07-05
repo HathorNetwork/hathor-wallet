@@ -100,7 +100,7 @@ const tokens = {
       const deposit = hathorLib.tokensUtils.getDepositAmount(amountValue, depositPercent);
       return hathorLib.numberUtils.prettyValue(deposit, decimalPlaces);
     } else {
-      return 0;
+      return '0';
     }
   },
 

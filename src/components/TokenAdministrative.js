@@ -192,7 +192,7 @@ class TokenAdministrative extends React.Component {
 
     const renderReadyBalance = () => (
       <>
-        { hathorLib.numberUtils.prettyValue(this.props.tokenBalance.data.available, isNFT ? 0 : decimalPlaces) }
+        { hathorLib.numberUtils.prettyValue(this.props.tokenBalance.data.available, isNFT ? 0 : this.props.decimalPlaces) }
         &nbsp;
         { this.props.token.symbol }
       </>
@@ -203,7 +203,7 @@ class TokenAdministrative extends React.Component {
 
     return (
       <div className="flex align-items-center">
-        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.props.totalSupply ? hathorLib.numberUtils.prettyValue(this.props.totalSupply, isNFT ? 0 : decimalPlaces) : '-'} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.props.totalSupply ? hathorLib.numberUtils.prettyValue(this.props.totalSupply, isNFT ? 0 : this.props.decimalPlaces) : '-'} {this.props.token.symbol}</p>
         <div className="mt-2 mb-2">
           <strong>{t`Your balance available:`} </strong>
           { this.props.tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (

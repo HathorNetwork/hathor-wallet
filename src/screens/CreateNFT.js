@@ -263,7 +263,7 @@ function CreateNFT() {
   // The actual math for the UI value would be htrDeposit * 100 / (10^(2-DECIMAL_PLACES))
   // Since NFT have 0 for DECIMAL_PLACES we get htrDeposit * 100/100 which is htrDeposit
   const htrDeposit = wallet.storage.getTokenDepositPercentage();
-  const depositAmount = hathorLib.tokensUtils.getDepositAmount(amount, htrDeposit, decimalPlaces);
+  const depositAmount = hathorLib.tokensUtils.getDepositAmount(amount, htrDeposit);
   const nftFee = hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee(), decimalPlaces);
   const nativeTokenConfig = wallet.storage.getNativeTokenData();
 
