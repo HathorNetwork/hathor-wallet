@@ -135,24 +135,27 @@ function NanoContractDetail() {
     return renderNCData();
   }
 
+  const formatNCField = (field, value) => {
+    if (value === undefined) {
+      // Error getting field
+      // Since we are using the attributes from the blueprint information API to
+      // get the state, we know that the fields exist. If value is undefined, it
+      // means they are dict fields, which we should just show the types of them for now
+      return get(blueprintInformation.attributes, field);
+    }
+
+    // Some fields should be better parsed, e.g., timestamp, address
+    // however we don't have a simple and generic way to knowing it
+    // this was discussed and we will have this in the future, so
+    // for now we keep this UI and when we have this feature in the
+    // hathor-core, we can improve the user UI
+    return value === null ? ' - ' : value;
+  }
+
   const renderNanoAttributes = () => {
     return Object.keys(data.fields).map((field) => {
       const value = get(data.fields[field], 'value', undefined);
-      if (value === undefined) {
-        // Error getting field
-        // Since we are using the attributes from the blueprint information API to
-        // get the state, we know that the fields exist. If value is undefined, it
-        // means they are dict fields, which we should just show the types of them for now
-        const type = get(blueprintInformation.attributes, field);
-        return <p key={field}><strong>{field}: </strong>{type}</p>;
-      }
-
-      // Some fields should be better parsed, e.g., timestamp, address
-      // however we don't have a simple and generic way to knowing it
-      // this was discussed and we will have this in the future, so
-      // for now we keep this UI and when we have this feature in the
-      // hathor-core, we can improve the user UI
-      return <p key={field}><strong>{field}: </strong>{value === null ? ' - ' : value}</p>;
+      return <p key={field}><strong>{field}: </strong>{formatNCField(field, value)}</p>;
     });
   }
 
