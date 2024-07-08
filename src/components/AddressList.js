@@ -20,7 +20,7 @@ import { getGlobalWallet } from '../modules/wallet';
  *
  * @memberof Screens
  */
-function AddressList(props) {
+function AddressList({ count, onAddressClick, showNumberOfTransaction }) {
   const wallet = getGlobalWallet();
 
   const alertErrorRef = useRef(null);
@@ -45,7 +45,7 @@ function AddressList(props) {
    * @return {Number} Total number of pages of the list
    */
   const getTotalPages = (array) => {
-    return Math.ceil(array.length / props.count);
+    return Math.ceil(array.length / count);
   }
 
   useEffect(() => {
@@ -139,7 +139,7 @@ function AddressList(props) {
    */
   const goToAddressSearch = (e, address) => {
     e.preventDefault();
-    props.onAddressClick(address);
+    onAddressClick(address);
   }
 
   const loadPagination = () => {
@@ -163,14 +163,14 @@ function AddressList(props) {
   }
 
   const renderData = () => {
-    const startIndex = (page - 1) * props.count;
-    const endIndex = startIndex + props.count;
+    const startIndex = (page - 1) * count;
+    const endIndex = startIndex + count;
     return filteredAddresses.slice(startIndex, endIndex).map((addressObj) => {
       return (
         <tr key={addressObj.address}>
           <td><a href="true" onClick={(e) => goToAddressSearch(e, addressObj.address)}>{addressObj.address}</a></td>
           <td>{addressObj.index}</td>
-          {props.showNumberOfTransaction && <td className="number">{addressObj.transactions}</td>}
+          {showNumberOfTransaction && <td className="number">{addressObj.transactions}</td>}
         </tr>
       )
     });
@@ -187,7 +187,7 @@ function AddressList(props) {
             <tr>
               <th>{t`Address`}</th>
               <th>{t`Index`}</th>
-              {props.showNumberOfTransaction && <th className="number">{t`Number of transactions`}</th>}
+              {showNumberOfTransaction && <th className="number">{t`Number of transactions`}</th>}
             </tr>
           </thead>
           <tbody>
