@@ -21,11 +21,12 @@ import { getGlobalWallet } from '../../modules/wallet';
  *
  * @memberof Components
  */
-function ModalChangeAddress(props) {
+function ModalChangeAddress({ nanoContractID, onClose }) {
   const dispatch = useDispatch();
   const wallet = getGlobalWallet();
   const nanoContracts = useSelector(state => state.nanoContracts);
-  const oldAddress = nanoContracts[props.nanoContractID].address;
+  const oldAddress = nanoContracts[nanoContractID].address;
+  const changeAddressModalID = 'changeAddressModal';
 
   // {number} step The modal has 3 steps: 0 is the warning screen, 1 is the address list and 2 is the confirmation
   const [step, setStep] = useState(0);
@@ -35,11 +36,11 @@ function ModalChangeAddress(props) {
   const [oldAddressIndex, setOldAddressIndex] = useState(null);
 
   useEffect(() => {
-    $('#changeAddressModal').modal('show');
-    $('#changeAddressModal').on('hidden.bs.modal', (e) => {
+    $(`#${changeAddressModalID}`).modal('show');
+    $(`#${changeAddressModalID}`).on('hidden.bs.modal', (e) => {
       setStep(0);
       // We always need to call on close when using global context modal
-      props.onClose();
+      onClose(`#${changeAddressModalID}`);
     })
 
     async function getAndSetOldAddressIndex() {
@@ -48,13 +49,6 @@ function ModalChangeAddress(props) {
     }
 
     getAndSetOldAddressIndex();
-
-    return () => {
-      $('#changeAddressModal').modal('hide');
-      // Removing all event listeners
-      $('#changeAddressModal').off();
-    };
-
   }, []);
 
   /**
@@ -85,9 +79,8 @@ function ModalChangeAddress(props) {
    */
   const executeChange = async (e) => {
     e.preventDefault();
-    dispatch(editAddressNC(props.nanoContractID, newAddress.address));
-    await wallet.storage.updateNanoContractRegisteredAddress(props.nanoContractID, newAddress.address);
-    props.onClose();
+    dispatch(editAddressNC(nanoContractID, newAddress.address));
+    onClose(`#${changeAddressModalID}`);
   }
 
   const renderSteps = () => {
@@ -139,7 +132,7 @@ function ModalChangeAddress(props) {
   }
 
   return (
-    <div className="modal fade" id="changeAddressModal" tabIndex="-1" role="dialog" aria-labelledby="changeAddressModal" aria-hidden="true">
+    <div className="modal fade" id={changeAddressModalID} tabIndex="-1" role="dialog" aria-labelledby={changeAddressModalID} aria-hidden="true">
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
@@ -162,7 +155,6 @@ function ModalChangeAddress(props) {
 
 /*
  * nanoContractID: ID of nano contract to change address
- * onAddressChanged: function executed after address is changed
  */
 ModalChangeAddress.propTypes = {
   nanoContractID: PropTypes.string.isRequired,
