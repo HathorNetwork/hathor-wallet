@@ -105,7 +105,6 @@ function NanoContractDetail() {
       dispatch(addBlueprintInformation(blueprintInformationResponse));
     } catch(e) {
       // Error in request
-      setLoading(false);
       setErrorMessage(t`Error getting blueprint details.`);
     };
   }
@@ -115,12 +114,12 @@ function NanoContractDetail() {
     setData(null);
     try {
       const state = await hathorLib.ncApi.getNanoContractState(ncId, Object.keys(blueprintInformationAux.attributes), [], []);
-      setLoading(false);
       setData(state);
     } catch(e) {
       // Error in request
-      setLoading(false);
       setErrorMessage(t`Error getting nano contract state.`);
+    } finally {
+      setLoading(false);
     };
   }
 
