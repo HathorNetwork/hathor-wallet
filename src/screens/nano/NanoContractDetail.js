@@ -56,7 +56,8 @@ function NanoContractDetail() {
 
   useEffect(() => {
     if (nc) {
-      // The nano contract has just been unregistered
+      // Load data only if nano contract exists in redux,
+      // otherwise it has just been unregistered
       loadData();
     }
   }, []);
