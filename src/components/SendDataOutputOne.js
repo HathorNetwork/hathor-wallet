@@ -17,7 +17,7 @@ import { t } from 'ttag';
  * @property {number} index Data output position in the list
  * @property {(index: number) => void} remove Callback to remove the data output from the list
  */
-export const OutputData = ({ dataInputRef, index, remove }) => (
+export const SendDataOutputOne = ({ dataInputRef, index, remove }) => (
   <div className='send-tokens-wrapper card'>
     <div className="outputs-wrapper">
       <label>{t`Data Output`}</label>

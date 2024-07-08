@@ -518,7 +518,7 @@ msgstr ""
 msgid "You tried to access a page that does not exist in Hathor Wallet"
 msgstr ""
 
-#: src/screens/SendTokens.js:147
+#: src/screens/SendTokens.js:156
 msgid "Invalid custom tokens"
 msgstr ""
 
@@ -526,28 +526,28 @@ msgstr ""
 #: src/components/ModalAlertNotSupported.js:34
 #: src/components/ModalLedgerResetTokenSignatures.js:122
 #: src/components/ModalLedgerSignToken.js:243
-#: src/screens/SendTokens.js:148
-#: src/screens/SendTokens.js:284
-#: src/screens/SendTokens.js:457
+#: src/screens/SendTokens.js:157
+#: src/screens/SendTokens.js:293
+#: src/screens/SendTokens.js:466
 msgid "Close"
 msgstr ""
 
-#: src/screens/SendTokens.js:214
-#: src/screens/SendTokens.js:341
+#: src/screens/SendTokens.js:223
+#: src/screens/SendTokens.js:350
 msgid "Validate outputs on Ledger"
 msgstr ""
 
-#: src/screens/SendTokens.js:282
+#: src/screens/SendTokens.js:291
 #.  there are tokens without signatures, missingSigs
 #.  set tittle and content
 msgid "Unverified custom tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:371
+#: src/screens/SendTokens.js:380
 msgid "Sending transaction"
 msgstr ""
 
-#: src/screens/SendTokens.js:444
+#: src/screens/SendTokens.js:453
 #.  Custom token not allowed for this Ledger version
 msgid ""
 "Unfortunately this feature is not supported with the Hathor app version on "
@@ -555,7 +555,7 @@ msgid ""
 "the most recent Hathor app."
 msgstr ""
 
-#: src/screens/SendTokens.js:452
+#: src/screens/SendTokens.js:461
 #.  limit is 10 custom tokens per tx
 #, javascript-format
 msgid ""
@@ -563,55 +563,41 @@ msgid ""
 "per transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:455
+#: src/screens/SendTokens.js:464
 msgid "Token limit reached"
 msgstr ""
 
-#: src/screens/SendTokens.js:464
+#: src/screens/SendTokens.js:473
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:529
+#: src/screens/SendTokens.js:538
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:530
+#: src/screens/SendTokens.js:539
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
 #: src/components/tokens/TokenAction.js:147
-#: src/screens/SendTokens.js:592
+#: src/screens/SendTokens.js:599
 msgid "Loading metadata..."
-msgstr ""
-
-#: src/screens/SendTokens.js:606
-msgid "Add data output"
 msgstr ""
 
 #: src/screens/SendTokens.js:613
 msgid "Add another token"
 msgstr ""
 
-#: src/components/atomic-swap/ModalAtomicSend.js:296
 #: src/screens/SendTokens.js:620
-#: src/screens/SendTokens.js:632
+msgid "Add data output"
+msgstr ""
+
+#: src/components/atomic-swap/ModalAtomicSend.js:296
+#: src/screens/SendTokens.js:627
+#: src/screens/SendTokens.js:639
 msgid "Send Tokens"
-msgstr ""
-
-#: src/screens/SendTokens.js:641
-msgid "Data Output"
-msgstr ""
-
-#: src/components/SendTokensOne.js:244
-#: src/screens/SendTokens.js:647
-#: src/screens/atomic-swap/ProposalList.js:107
-msgid "Remove"
-msgstr ""
-
-#: src/screens/SendTokens.js:654
-msgid "Data content"
 msgstr ""
 
 #: src/screens/SentryPermission.js:71
@@ -1352,7 +1338,8 @@ msgstr ""
 msgid "Create"
 msgstr ""
 
-#: src/components/SendTokensOne.js:245
+#: src/components/SendDataOutputOne.js:29
+#: src/components/SendTokensOne.js:244
 #: src/screens/atomic-swap/ProposalList.js:107
 msgid "Remove"
 msgstr ""
@@ -2010,7 +1997,15 @@ msgstr ""
 msgid "Retry request"
 msgstr ""
 
-#: src/components/SendTokensOne.js:202
+#: src/components/SendDataOutputOne.js:23
+msgid "Data Output"
+msgstr ""
+
+#: src/components/SendDataOutputOne.js:36
+msgid "Data content"
+msgstr ""
+
+#: src/components/SendTokensOne.js:201
 msgid "Select token"
 msgstr ""
 

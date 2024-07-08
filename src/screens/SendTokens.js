@@ -23,7 +23,7 @@ import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
 import { OutputType } from '@hathor/wallet-lib/lib/wallet/types';
-import { OutputData } from '../components/OutputData';
+import { SendDataOutputOne } from '../components/SendDataOutputOne';
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -585,7 +585,7 @@ function SendTokens() {
    */
   const renderDataOutputs = () => (
     dataOutputs.map((uId, index) => (
-      <OutputData
+      <SendDataOutputOne
         key={uId}
         dataInputRef={dataOutputRefs.current[uId]}
         index={index}
@@ -608,16 +608,16 @@ function SendTokens() {
             <button
               type="button"
               className="btn btn-secondary mr-4"
-              onClick={addDataOutput}
+              onClick={addAnotherToken}
             >
-              {t`Add data output`}
+              {t`Add another token`}
             </button>
             <button
               type="button"
               className="btn btn-secondary mr-4"
-              onClick={addAnotherToken}
+              onClick={addDataOutput}
             >
-              {t`Add another token`}
+              {t`Add data output`}
             </button>
             <button
               type="button"
