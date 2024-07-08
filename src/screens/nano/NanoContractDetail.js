@@ -26,7 +26,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
  *
  * @memberof Screens
  */
-function NanoContractDetail(props) {
+function NanoContractDetail() {
   const context = useContext(GlobalModalContext);
 
   const { nanoContracts, blueprintsData, tokenMetadata } = useSelector((state) => {
