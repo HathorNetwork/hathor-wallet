@@ -1342,10 +1342,7 @@ export const onNanoContractUnregister = (state, { payload }) => {
     return state;
   }
 
-  const newNanoContracts = {
-    ...state.nanoContracts,
-  };
-  delete newNanoContracts[payload];
+  const {[payload]: _, ...newNanoContracts} = state.nanoContracts;
 
   return {
     ...state,
