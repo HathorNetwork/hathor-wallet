@@ -113,9 +113,24 @@ export function* registerNanoContract({ payload }) {
   yield put(nanoContractRegisterSuccess(nc));
 }
 
+/**
+ * Updates nano contract registered address in the wallet storage
+ * @param {{
+ *   payload: {
+ *     address: string,
+ *     ncId: string,
+ *   }
+ * }} action with request payload.
+ */
+export function* updateNanoContractRegisteredAddress({ payload }) {
+  const wallet = getGlobalWallet();
+  yield call([wallet.storage, wallet.storage.updateNanoContractRegisteredAddress], payload.ncId, payload.address);
+}
+
 
 export function* saga() {
   yield all([
     takeEvery(types.NANOCONTRACT_REGISTER_REQUEST, registerNanoContract),
+    takeEvery(types.NANOCONTRACT_EDIT_ADDRESS, updateNanoContractRegisteredAddress),
   ]);
 }
