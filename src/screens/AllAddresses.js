@@ -17,7 +17,7 @@ import AddressList from '../components/AddressList';
  *
  * @memberof Screens
  */
-class AllAddresses extends React.Component {
+function AllAddresses() {
   /**
    * Method called when user clicked on address in the list
    * Go to explorer address search page
@@ -25,19 +25,17 @@ class AllAddresses extends React.Component {
    * @param {Object} e Event for the click
    * @param {String} address Address to see page on explorer
    */
-  onAddressClick = (address) => {
+  const onAddressClick = (address) => {
     const url = path.join(helpers.getExplorerURL(), `address/${address}`);
     helpers.openExternalURL(url);
   }
 
-  render() {
-    return (
-      <div className="content-wrapper">
-        <h2 className="mb-4">{t`Addresses`}</h2>
-        <AddressList showNumberOfTransaction={true} onAddressClick={this.onAddressClick} count={WALLET_HISTORY_COUNT} />
-      </div>
-    )
-  }
+  return (
+    <div className="content-wrapper">
+      <h2 className="mb-4">{t`Addresses`}</h2>
+      <AddressList showNumberOfTransaction={true} onAddressClick={onAddressClick} count={WALLET_HISTORY_COUNT} />
+    </div>
+  )
 }
 
 export default AllAddresses;
