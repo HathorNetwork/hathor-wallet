@@ -10,23 +10,22 @@ import { t } from 'ttag';
 import $ from 'jquery';
 
 export default function ModalConfirmUnregisterNanoContract({ onClose, ncId, success }) {
-  useEffect(() => {
-    $('#modalConfirmUnregister').modal('show');
-    $('#modalConfirmUnregister').on('hidden.bs.modal', onClose);
+  const unregisterNCModalID = 'modalConfirmUnregister';
 
-    return () => {
-      $('#modalConfirmUnregister').modal('hide');
-      $('#modalConfirmUnregister').off();
-    };
+  useEffect(() => {
+    $(`#${unregisterNCModalID}`).modal('show');
+    $(`#${unregisterNCModalID}`).on('hidden.bs.modal', (e) => {
+      onClose(`#${unregisterNCModalID}`);
+    });
   }, []);
 
   const confirmUnregister = async () => {
-    onClose();
+    onClose(`#${unregisterNCModalID}`);
     await success();
   }
 
   return (
-    <div className="modal fade" id="modalConfirmUnregister" tabIndex="-1" role="dialog" aria-labelledby="alertModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div className="modal fade" id={unregisterNCModalID} tabIndex="-1" role="dialog" aria-labelledby="alertModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
