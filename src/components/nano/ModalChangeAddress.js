@@ -10,7 +10,7 @@ import { t } from 'ttag';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
 import AddressList from '../../components/AddressList';
-import { CHANGE_ADDRESS_LIST_COUNT } from '../../constants';
+import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../constants';
 import { connect } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
 import { editAddressNC } from '../../actions/index';
@@ -120,7 +120,7 @@ function ModalChangeAddress(props) {
     return (
       <div>
         <p>{t`Please select the new address below`}</p>
-        <AddressList showNumberOfTransaction={false} onAddressClick={onAddressClick} count={CHANGE_ADDRESS_LIST_COUNT} />
+        <AddressList showNumberOfTransaction={false} onAddressClick={onAddressClick} count={NANO_UPDATE_ADDRESS_LIST_COUNT} />
       </div>
     );
   }

@@ -285,4 +285,4 @@ export const colors = {
  * Number of elements in the list of addresses
  * when changing the address of a nano contract
  */
-export const CHANGE_ADDRESS_LIST_COUNT = 5;
+export const NANO_UPDATE_ADDRESS_LIST_COUNT = 5;
