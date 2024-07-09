@@ -14,6 +14,7 @@ import HathorAlert from '../components/HathorAlert';
 import wallet from "../utils/wallet";
 import { useGlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import TokenInfoBox from './TokenInfoBox';
+import { useSelector } from 'react-redux';
 
 /**
  * @property {string} errorMessage Message to show in case of error getting token info
@@ -38,6 +39,8 @@ export default function TokenGeneralInfo ({
   const context = useGlobalModalContext();
 
   const alertSuccessRef = useRef();
+
+  const networkTokens = useSelector((state) => state.serverInfo.customTokens);
 
   /**
    * Handles the click on the "Always show this token" link
@@ -131,6 +134,12 @@ export default function TokenGeneralInfo ({
   };
 
   const renderAlwaysShowTokenCheckbox = () => {
+    const isNetworkToken = networkTokens.find(networkToken => networkToken.uid === token.uid);
+
+    if (isNetworkToken) {
+      return null;
+    }
+
     return (
       <p className="mt-2 mb-4">
         <strong>{t`Always show this token:`}</strong> {

@@ -55,6 +55,7 @@ export const types = {
   UPDATE_MINING_SERVER: 'UPDATE_MINING_SERVER',
   SET_MINING_SERVER: 'SET_MINING_SERVER',
   SET_NATIVE_TOKEN_DATA: 'SET_NATIVE_TOKEN_DATA',
+  ADD_REGISTERED_TOKENS: 'ADD_REGISTERED_TOKENS',
 };
 
 /**
@@ -438,12 +439,16 @@ export const resetNavigateTo = () => ({
 });
 
 /**
- * version {str} version of the connected server (e.g., 0.26.0-beta)
- * network {str} network of the connected server (e.g., mainnet, testnet)
- * decimalPlaces {number} number of decimal places (e.g. 2, 4)
+ * @param {string} version - version of the connected server (e.g., 0.26.0-beta)
+ * @param {string} network - network of the connected server (e.g., mainnet, testnet)
+ * @param {number} decimalPlaces - number of decimal places (e.g. 2, 4)
+ * @param {Object[]} customTokens - list of network custom tokens
+ * @param {string} customTokens[].uid
+ * @param {string} customTokens[].name
+ * @param {string} customTokens[].symbol
  */
-export const setServerInfo = ({ version, network, decimalPlaces }) => (
-  { type: types.SET_SERVER_INFO, payload: { version, network, decimalPlaces } }
+export const setServerInfo = ({ version, network, customTokens, decimalPlaces }) => (
+  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces } }
 );
 
 export const featureToggleInitialized = () => ({
@@ -514,5 +519,19 @@ export const setMiningServer = (url) => ({
  */
 export const setNativeTokenData = (data) => ({
   type: types.SET_NATIVE_TOKEN_DATA,
+  payload: data,
+});
+
+/**
+ * Add a list of tokens to the store as registered.
+ *
+ * @param {Object[]} data
+ * @param {string} data[].symbol
+ * @param {string} data[].name
+ * @param {string} data[].uid
+ *
+ */
+export const addRegisteredTokens = (data) => ({
+  type: types.ADD_REGISTERED_TOKENS,
   payload: data,
 });

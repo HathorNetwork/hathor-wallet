@@ -62,6 +62,7 @@ import {
   updateTxHistory,
   setMiningServer,
   setNativeTokenData,
+  addRegisteredTokens,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -133,6 +134,8 @@ export function* startWallet(action) {
   // For now, the wallet service does not support hardware wallet, so default to the old facade
   const useWalletService = hardware ? false : yield call(isWalletServiceEnabled);
   const enableAtomicSwap = yield call(isAtomicSwapEnabled);
+
+  let customTokens = [];
 
   yield put(setUseWalletService(useWalletService));
   yield put(setEnableAtomicSwap(enableAtomicSwap));
@@ -258,6 +261,7 @@ export function* startWallet(action) {
     let version;
     let serverNetworkName = networkName;
     const decimalPlaces = wallet.storage.getDecimalPlaces();
+    customTokens = serverInfo?.custom_tokens ?? [];
 
     if (serverInfo) {
       version = serverInfo.version;
@@ -268,6 +272,7 @@ export function* startWallet(action) {
       version,
       network: serverNetworkName,
       decimalPlaces,
+      customTokens,
     }));
   } catch(e) {
     if (useWalletService) {
@@ -320,8 +325,15 @@ export function* startWallet(action) {
     }
   }
 
+  // Register native token + network tokens in order
   const nativeToken = wallet.storage.getNativeTokenData();
   yield call([wallet.storage, wallet.storage.registerToken], nativeToken);
+  for (const token of customTokens) {
+    yield call([wallet.storage, wallet.storage.registerToken], token);
+  }
+
+  // Register all network tokens on the redux store
+  yield put(addRegisteredTokens(customTokens));
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity

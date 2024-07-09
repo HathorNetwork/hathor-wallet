@@ -268,9 +268,10 @@ const wallet = {
    * @param {Object[]} registeredTokens list of registered tokens
    * @param {Object[]} tokensBalance data about token balances
    * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
+   * @param {Object[]} networkTokens List of custom tokens to always show on current network
    * @returns {object[]}
    */
-  fetchRegisteredTokens(registeredTokens, tokensBalance, hideZeroBalance) {
+  fetchRegisteredTokens(registeredTokens, tokensBalance, hideZeroBalance, networkTokens) {
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const filteredTokens = [];
 
@@ -288,8 +289,9 @@ const wallet = {
       // If we indicated this token should always be exhibited, add it already.
       const isTokenHTR = tokenUid === hathorConstants.NATIVE_TOKEN_UID;
       const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
+      const isNetworkToken = networkTokens.find(networkToken => networkToken.uid === tokenUid);
 
-      if (isTokenHTR || alwaysShowThisToken) {
+      if (isTokenHTR || alwaysShowThisToken || isNetworkToken) {
         filteredTokens.push(tokenData);
         continue;
       }
