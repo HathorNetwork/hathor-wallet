@@ -93,6 +93,7 @@ const initialState = {
   serverInfo: {
     network: null,
     version: null,
+    customTokens: [],
   },
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
@@ -952,6 +953,7 @@ const onSetServerInfo = (state, action) => {
     serverInfo: {
       network: action.payload.network,
       version: action.payload.version,
+      customTokens: action.payload.customTokens,
     },
   }
 };
@@ -1044,6 +1046,25 @@ export const onSetNativeTokenData = (state, { payload }) => {
         status: TOKEN_DOWNLOAD_STATUS.READY
       }
     }
+  };
+};
+
+/**
+ * Add a list of tokens to the store registered tokens.
+ *
+ * @param {Object} state
+ * @param {Object[]} payload
+ * @param {string} payload[].uid
+ * @param {string} payload[].name
+ * @param {string} payload[].symbol
+ */
+export const onAddRegisteredTokens = (state, { payload }) => {
+  // Add new tokens to registered tokens
+  const tokens = [...state.tokens, ...payload];
+
+  return {
+    ...state,
+    tokens,
   };
 };
 
