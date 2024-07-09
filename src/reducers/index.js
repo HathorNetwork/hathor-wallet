@@ -11,9 +11,11 @@ import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
 import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
-import { NATIVE_TOKEN_UID } from "@hathor/wallet-lib/lib/constants";
+import { constants as hathorLibConstants } from "@hathor/wallet-lib";
 import helpersUtils from '../utils/helpers';
 import LOCAL_STORE from '../storage';
+
+const { NATIVE_TOKEN_UID, DECIMAL_PLACES } = hathorLibConstants;
 
 /**
  * @typedef TokenHistory
@@ -93,7 +95,7 @@ const initialState = {
   serverInfo: {
     network: null,
     version: null,
-    decimalPlaces: hathorLib.constants.DECIMAL_PLACES,
+    decimalPlaces: DECIMAL_PLACES,
     customTokens: [],
   },
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry

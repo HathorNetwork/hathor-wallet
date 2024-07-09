@@ -271,7 +271,7 @@ class TokenHistory extends React.Component {
       return this.state.transactions.map((tx) => {
         let statusElement = '';
         let trClass = '';
-        let value = numberUtils.prettyValue(tx.balance, isNFT ? 0 : this.props.decimalPlaces);
+        let value = hathorLib.numberUtils.prettyValue(tx.balance, isNFT ? 0 : this.props.decimalPlaces);
         if (tx.balance > 0) {
           if (tx.version === hathorLib.constants.CREATE_TOKEN_TX_VERSION) {
             statusElement = <span>{t`Token creation`} <i className={`fa ml-3 fa-long-arrow-down`}></i></span>;

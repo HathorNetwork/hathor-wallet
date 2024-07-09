@@ -17,7 +17,7 @@ import { connect } from "react-redux";
 import { get } from 'lodash';
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
-import hathorLib from '@hathor/wallet-lib';
+import hathorLib, { numberUtils } from '@hathor/wallet-lib';
 import { MAX_GRAPH_LEVEL } from '../constants';
 import helpers from '../utils/helpers';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
