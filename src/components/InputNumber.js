@@ -7,6 +7,7 @@
 
 import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
+import { useSelector } from 'react-redux';
 import hathorLib from "@hathor/wallet-lib";
 
 /**
@@ -35,6 +36,10 @@ const InputNumber = React.forwardRef(
     },
     ref
   ) => {
+
+    const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
+    const decimalPrecision = precision ?? decimalPlaces;
+
     /**
      * Formats a string following the pattern 9,999.99. It decomposes rawValue into decimal and fractional parts, mainly to add the thousands separator.
      *
@@ -45,11 +50,11 @@ const InputNumber = React.forwardRef(
     const format = (rawValue = "") => {
       const value = String(rawValue)
         .replace(/[^\d]/g, "")
-        .padStart(precision + 1, "0");
+        .padStart(decimalPrecision + 1, "0");
       const decimalPart = Intl.NumberFormat(locale).format(
-        value.substr(0, value.length - precision)
+        value.substr(0, value.length - decimalPrecision)
       );
-      const fractionalPart = value.substr(value.length - precision);
+      const fractionalPart = value.substr(value.length - decimalPrecision);
       if (fractionalPart.length === 0) {
         return decimalPart;
       } else {
@@ -154,7 +159,7 @@ const InputNumber = React.forwardRef(
      */
     useEffect(() => {
       const parsedValue =
-        Number(value.replace(/[^\d]/g, "")) / Math.pow(10, precision);
+        Number(value.replace(/[^\d]/g, "")) / Math.pow(10, decimalPrecision);
       onValueChange(parsedValue);
     }, [value]);
 
@@ -191,7 +196,7 @@ InputNumber.propTypes = {
 
 InputNumber.defaultProps = {
   defaultValue: "",
-  precision: hathorLib.constants.DECIMAL_PLACES,
+  precision: null,
   separator: ".",
   locale: "en-US",
   onValueChange: () => {},

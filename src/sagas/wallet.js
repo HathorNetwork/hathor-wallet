@@ -260,6 +260,7 @@ export function* startWallet(action) {
 
     let version;
     let serverNetworkName = networkName;
+    const decimalPlaces = wallet.storage.getDecimalPlaces();
     customTokens = serverInfo?.custom_tokens ?? [];
 
     if (serverInfo) {
@@ -270,6 +271,7 @@ export function* startWallet(action) {
     yield put(setServerInfo({
       version,
       network: serverNetworkName,
+      decimalPlaces,
       customTokens,
     }));
   } catch(e) {

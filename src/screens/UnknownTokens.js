@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 import { get } from 'lodash';
 import $ from 'jquery';
+import { numberUtils } from '@hathor/wallet-lib';
 import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
 import BackButton from '../components/BackButton';
@@ -29,13 +30,21 @@ import Loading from '../components/Loading';
 function UnknownTokens() {
   const dispatch = useDispatch();
 
-  const { registeredTokens, allTokens, tokensBalance, tokensHistory, tokenMetadata } = useSelector(
+  const {
+    registeredTokens,
+    allTokens,
+    tokensBalance,
+    tokensHistory,
+    tokenMetadata,
+    decimalPlaces,
+  } = useSelector(
     (state) => ({
       registeredTokens: state.tokens,
       allTokens: state.allTokens,
       tokensBalance: state.tokensBalance,
       tokensHistory: state.tokensHistory,
       tokenMetadata: state.tokenMetadata,
+      decimalPlaces: state.serverInfo.decimalPlaces,
     })
   );
 
@@ -201,9 +210,9 @@ function UnknownTokens() {
     const balanceTemplate = () => {
       return (
         <div className="d-flex flex-row align-items-center justify-content-start w-100">
-          <span><strong>{t`Total:`}</strong> {helpers.renderValue(tokenBalance.data.available + tokenBalance.data.locked, isNFT)}</span>
-          <span className="ml-2"><strong>{t`Available:`}</strong> {helpers.renderValue(tokenBalance.data.available, isNFT)}</span>
-          <span className="ml-2"><strong>{t`Locked:`}</strong> {helpers.renderValue(tokenBalance.data.locked, isNFT)}</span>
+          <span><strong>{t`Total:`}</strong> {numberUtils.prettyValue(tokenBalance.data.available + tokenBalance.data.locked, isNFT ? 0 : decimalPlaces)}</span>
+          <span className="ml-2"><strong>{t`Available:`}</strong> {numberUtils.prettyValue(tokenBalance.data.available, isNFT ? 0 : decimalPlaces)}</span>
+          <span className="ml-2"><strong>{t`Locked:`}</strong> {numberUtils.prettyValue(tokenBalance.data.locked, isNFT ? 0 : decimalPlaces)}</span>
         </div>
       )
     };

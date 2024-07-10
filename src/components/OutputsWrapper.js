@@ -12,6 +12,13 @@ import _ from 'lodash';
 import hathorLib from '@hathor/wallet-lib';
 import InputNumber from './InputNumber';
 import LOCAL_STORE from '../storage';
+import { connect } from 'react-redux';
+
+
+const mapStateToProps = (state) => ({
+  decimalPlaces: state.serverInfo.decimalPlaces,
+});
+
 
 /**
  * Component that wraps the outputs of a token in the Send Tokens screen
@@ -51,7 +58,7 @@ class OutputsWrapper extends React.Component {
       if (this.props.isNFT) {
         return <InputNumber key="nft-value" ref={this.value} className={classNames} placeholder="0" precision={0} />;
       } else {
-        return <InputNumber key="value" ref={this.value} placeholder={hathorLib.numberUtils.prettyValue(0)} className={classNames} />;
+        return <InputNumber key="value" ref={this.value} placeholder={hathorLib.numberUtils.prettyValue(0, this.props.decimalPlaces)} className={classNames} />;
       }
     }
 
@@ -77,4 +84,4 @@ class OutputsWrapper extends React.Component {
   }
 }
 
-export default OutputsWrapper;
+export default connect(mapStateToProps)(OutputsWrapper);

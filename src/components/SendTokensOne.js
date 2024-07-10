@@ -29,6 +29,7 @@ const mapStateToProps = (state) => {
     tokensBalance: state.tokensBalance,
     tokenMetadata: state.tokenMetadata,
     height: state.height,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   };
 };
 
@@ -109,9 +110,9 @@ class SendTokensOne extends React.Component {
 
       if (address && valueStr) {
         // Doing the check here because need to validate before doing parseInt
-        const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr);
+        const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr, this.props.decimalPlaces);
         if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${helpers.renderValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT())}` });
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
           return null;
         }
         let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'token': this.state.selected.uid};
@@ -221,7 +222,7 @@ class SendTokensOne extends React.Component {
             { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
               <Loading />
             )}
-            { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && helpers.renderValue(tokenBalance.data.available, this.isNFT()) }
+            { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && hathorLib.numberUtils.prettyValue(tokenBalance.data.available, this.isNFT() ? 0 : this.props.decimalPlaces) }
           )
         </span>
       );

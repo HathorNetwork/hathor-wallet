@@ -47,13 +47,14 @@ function CreateNFT() {
   const createMintAuthorityRef = useRef();
   const createMeltAuthorityRef = useRef();
 
-  const { htrBalance, useWalletService } = useSelector((state) => {
+  const { htrBalance, useWalletService, decimalPlaces } = useSelector((state) => {
     const HTR_UID = hathorLib.constants.NATIVE_TOKEN_UID;
     const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
 
     return {
       htrBalance,
       useWalletService: state.useWalletService,
+      decimalPlaces: state.serverInfo.decimalPlaces,
     };
   });
   const wallet = getGlobalWallet();
@@ -263,7 +264,7 @@ function CreateNFT() {
   // Since NFT have 0 for DECIMAL_PLACES we get htrDeposit * 100/100 which is htrDeposit
   const htrDeposit = wallet.storage.getTokenDepositPercentage();
   const depositAmount = hathorLib.tokensUtils.getDepositAmount(amount, htrDeposit);
-  const nftFee = hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee());
+  const nftFee = hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee(), decimalPlaces);
   const nativeTokenConfig = wallet.storage.getNativeTokenData();
 
   return (
@@ -346,10 +347,10 @@ function CreateNFT() {
           </div>
         </div>
         <hr className="mb-5 mt-5"/>
-        <p><strong>${nativeTokenConfig.symbol} available:</strong> {hathorLib.numberUtils.prettyValue(htrBalance)} ${nativeTokenConfig.symbol}</p>
-        <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount)} ${nativeTokenConfig.symbol}</p>
+        <p><strong>${nativeTokenConfig.symbol} available:</strong> {hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} ${nativeTokenConfig.symbol}</p>
+        <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount, decimalPlaces)} ${nativeTokenConfig.symbol}</p>
         <p><strong>Fee:</strong> {nftFee} ${nativeTokenConfig.symbol}</p>
-        <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee() + depositAmount)} ${nativeTokenConfig.symbol}</p>
+        <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee() + depositAmount, decimalPlaces)} ${nativeTokenConfig.symbol}</p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>

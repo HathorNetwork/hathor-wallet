@@ -110,24 +110,6 @@ const helpers = {
   },
 
   /**
-   * Render value to integer or decimal
-   *
-   * @param {number} amount Amount to render
-   * @param {boolean} isInteger If it's an integer or decimal
-   *
-   * @return {string} rendered value
-   * @memberof Helpers
-   * @inner
-   */
-  renderValue(amount, isInteger) {
-    if (isInteger) {
-      return hathorLib.numberUtils.prettyIntegerValue(amount);
-    } else {
-      return hathorLib.numberUtils.prettyValue(amount);
-    }
-  },
-
-  /**
    * Get file extension by name and path
    *
    * @param {string} file Full file path with name

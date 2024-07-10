@@ -87,17 +87,20 @@ const tokens = {
    *
    * @param {number} mintAmount Amount of tokens to mint
    * @param {number} depositPercent deposit percentage for creating tokens
+   * @param {number} decimalPlaces Number of decimal places
+   *
+   * @return {string} deposit amount
    *
    * @memberof Tokens
    * @inner
    */
-  getDepositAmount(mintAmount, depositPercent) {
+  getDepositAmount(mintAmount, depositPercent, decimalPlaces) {
     if (mintAmount) {
-      const amountValue = wallet.decimalToInteger(mintAmount);
+      const amountValue = wallet.decimalToInteger(mintAmount, decimalPlaces);
       const deposit = hathorLib.tokensUtils.getDepositAmount(amountValue, depositPercent);
-      return hathorLib.numberUtils.prettyValue(deposit);
+      return hathorLib.numberUtils.prettyValue(deposit, decimalPlaces);
     } else {
-      return 0;
+      return '0';
     }
   },
 

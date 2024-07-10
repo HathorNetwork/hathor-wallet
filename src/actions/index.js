@@ -441,13 +441,14 @@ export const resetNavigateTo = () => ({
 /**
  * @param {string} version - version of the connected server (e.g., 0.26.0-beta)
  * @param {string} network - network of the connected server (e.g., mainnet, testnet)
+ * @param {number} decimalPlaces - number of decimal places (e.g. 2, 4)
  * @param {Object[]} customTokens - list of network custom tokens
  * @param {string} customTokens[].uid
  * @param {string} customTokens[].name
  * @param {string} customTokens[].symbol
  */
-export const setServerInfo = ({ version, network, customTokens }) => (
-  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens } }
+export const setServerInfo = ({ version, network, customTokens, decimalPlaces }) => (
+  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces } }
 );
 
 export const featureToggleInitialized = () => ({

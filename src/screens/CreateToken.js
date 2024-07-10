@@ -32,9 +32,10 @@ import { getGlobalWallet } from "../modules/wallet";
  */
 function CreateToken() {
 
-  const { htrBalance, useWalletService } = useSelector(state => ({
+  const { htrBalance, useWalletService, decimalPlaces } = useSelector(state => ({
     htrBalance: get(state.tokensBalance, `${hathorLib.constants.NATIVE_TOKEN_UID}.data.available`, 0),
     useWalletService: state.useWalletService,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   }));
   const wallet = getGlobalWallet();
 
@@ -67,9 +68,9 @@ function CreateToken() {
       }
 
       // Validating maximum amount
-      const tokensValue = walletUtils.decimalToInteger(amount)
+      const tokensValue = walletUtils.decimalToInteger(amount, decimalPlaces);
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-        const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
+        const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, decimalPlaces);
         setErrorMessage(t`Maximum value to mint token is ${max_output_value_str}`);
         return false;
       }
@@ -121,7 +122,7 @@ function CreateToken() {
       transaction = await wallet.prepareCreateNewToken(
         shortNameRef.current.value,
         symbolRef.current.value,
-        walletUtils.decimalToInteger(amount),
+        walletUtils.decimalToInteger(amount, decimalPlaces),
         { address, pinCode: pin }
       );
 
@@ -275,7 +276,7 @@ function CreateToken() {
              required
              className="form-control"
              onValueChange={onAmountChange}
-             placeholder={hathorLib.numberUtils.prettyValue(0)}
+             placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
             />
           </div>
           <div className="form-group d-flex flex-row align-items-center address-checkbox">
@@ -291,7 +292,7 @@ function CreateToken() {
             <input ref={addressInputRef} type="text" placeholder={t`Address`} className="form-control" />
           </div>
         </div>
-        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent)} ${nativeTokenConfig.symbol} ({hathorLib.numberUtils.prettyValue(htrBalance)} ${nativeTokenConfig.symbol} available)</p>
+        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} ${nativeTokenConfig.symbol} ({hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} ${nativeTokenConfig.symbol} available)</p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>
