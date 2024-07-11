@@ -85,8 +85,13 @@ function NanoContractDetail() {
   }
 
   const loadData = async () => {
-    await loadBlueprintInformation();
-    await loadNCData();
+    setLoading(true);
+    try {
+      await loadBlueprintInformation();
+      await loadNCData();
+    } finally {
+      setLoading(false);
+    }
   }
 
   const loadBlueprintInformation = async () => {
@@ -94,7 +99,6 @@ function NanoContractDetail() {
       return;
     }
 
-    setLoading(true);
     try {
       const blueprintInformationResponse = await hathorLib.ncApi.getBlueprintInformation(nc.blueprintId);
       // We need this blueprint information response to call the following get state
@@ -110,7 +114,6 @@ function NanoContractDetail() {
   }
 
   const loadNCData = async () => {
-    setLoading(true);
     setData(null);
     try {
       const state = await hathorLib.ncApi.getNanoContractState(ncId, Object.keys(blueprintInformationAux.attributes), [], []);
@@ -118,8 +121,6 @@ function NanoContractDetail() {
     } catch(e) {
       // Error in request
       setErrorMessage(t`Error getting nano contract state.`);
-    } finally {
-      setLoading(false);
     };
   }
 
