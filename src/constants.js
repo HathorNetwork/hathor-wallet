@@ -280,3 +280,9 @@ export const FEATURE_TOGGLE_DEFAULTS = {
 export const colors = {
   purpleHathor: scssColors.purpleHathor,
 }
+
+/**
+ * Number of elements in the list of addresses
+ * when changing the address of a nano contract
+ */
+export const NANO_UPDATE_ADDRESS_LIST_COUNT = 5;

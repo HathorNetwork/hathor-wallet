@@ -390,6 +390,10 @@ const rootReducer = (state = initialState, action) => {
       return onNanoContractCleanRegisterMetadata(state);
     case types.BLUEPRINT_ADD_INFORMATION:
       return onBlueprintAddInformation(state, action);
+    case types.NANOCONTRACT_EDIT_ADDRESS:
+      return onNanoContractEditAddress(state, action);
+    case types.NANOCONTRACT_UNREGISTER:
+      return onNanoContractUnregister(state, action);
     default:
       return state;
   }
@@ -1293,6 +1297,59 @@ export const onBlueprintAddInformation = (state, { payload }) => {
       ...state.blueprintsData,
       [blueprintInformation.id]: blueprintInformation,
     },
+  };
+};
+
+/**
+ * This method updates the registered address of the nano contract
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {string} action.payload.ncId
+ * @param {string} action.payload.address
+ */
+export const onNanoContractEditAddress = (state, { payload }) => {
+  const { ncId, address } = payload;
+
+  if (!(ncId in state.nanoContracts)) {
+    // This should never happen, we are trying to edit the address
+    // of a nano contract that is not registered
+    return state;
+  }
+
+  return {
+    ...state,
+    nanoContracts: {
+      ...state.nanoContracts,
+      [ncId]: {
+        ...state.nanoContracts[ncId],
+        address,
+      },
+    },
+  };
+};
+
+/**
+ * Remove the given nano contract from the registered nano contracts state.
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {string} action.payload
+ * @returns {Object}
+ */
+export const onNanoContractUnregister = (state, { payload }) => {
+  if (!(payload in state.nanoContracts)) {
+    // This should never happen, we are trying to unregister
+    // a nano contract that is not registered
+    return state;
+  }
+
+  // Create a new object with all keys from state.nanoContracts except `payload`
+  const {[payload]: _, ...newNanoContracts} = state.nanoContracts;
+
+  return {
+    ...state,
+    nanoContracts: newNanoContracts,
   };
 };
 
