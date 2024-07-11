@@ -115,12 +115,9 @@ export function* registerNanoContract({ payload }) {
 
 /**
  * Updates nano contract registered address in the wallet storage
- * @param {{
- *   payload: {
- *     address: string,
- *     ncId: string,
- *   }
- * }} action with request payload.
+ * @param {Object} action with request payload.
+ * @param {string} action.payload.ncId
+ * @param {string} action.payload.address
  */
 export function* updateNanoContractRegisteredAddress({ payload }) {
   const wallet = getGlobalWallet();
