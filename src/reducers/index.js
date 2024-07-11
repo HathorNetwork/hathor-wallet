@@ -1299,13 +1299,12 @@ export const onBlueprintAddInformation = (state, { payload }) => {
 };
 
 /**
+ * This method updates the registered address of the nano contract
+ *
  * @param {Object} state
- * @param {{
- *   payload: {
- *     ncId: string,
- *     address: string,
- *   }
-  * }} action
+ * @param {Object} action
+ * @param {string} action.payload.ncId
+ * @param {string} action.payload.address
  */
 export const onNanoContractEditAddress = (state, { payload }) => {
   const { ncId, address } = payload;
