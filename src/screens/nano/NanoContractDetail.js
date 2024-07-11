@@ -16,9 +16,10 @@ import helpers from '../../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { addBlueprintInformation } from '../../actions';
+import { addBlueprintInformation, nanoContractUnregister } from '../../actions';
 import { get } from 'lodash';
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
+import { getGlobalWallet } from "../../modules/wallet";
 
 
 /**
@@ -28,6 +29,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
  */
 function NanoContractDetail() {
   const context = useContext(GlobalModalContext);
+  const wallet = getGlobalWallet();
 
   const { nanoContracts, blueprintsData, tokenMetadata } = useSelector((state) => {
     return {
@@ -41,7 +43,7 @@ function NanoContractDetail() {
   const navigate = useNavigate();
   const { nc_id: ncId } = useParams();
   const nc = nanoContracts[ncId];
-  let blueprintInformationAux = blueprintsData[nc.blueprintId];
+  let blueprintInformationAux = nc != null ? blueprintsData[nc.blueprintId] : null;
 
   // loading {boolean} Bool to show/hide loading element
   const [loading, setLoading] = useState(true);
@@ -53,7 +55,11 @@ function NanoContractDetail() {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    loadData();
+    if (nc) {
+      // Load data only if nano contract exists in redux,
+      // otherwise it has just been unregistered
+      loadData();
+    }
   }, []);
 
   /**
@@ -81,6 +87,23 @@ function NanoContractDetail() {
     e.preventDefault();
     context.showModal(MODAL_TYPES.NANOCONTRACT_CHANGE_ADDRESS, {
       nanoContractID: ncId
+    });
+  }
+
+  /**
+   * Method executed when link to unregister nano is clicked
+   *
+   * @param {Object} e Event emitted by the link clicked
+   */
+  const unregister = (e) => {
+    e.preventDefault();
+    context.showModal(MODAL_TYPES.NANOCONTRACT_CONFIRM_UNREGISTER, {
+      ncId,
+      success: async () => {
+        dispatch(nanoContractUnregister(ncId));
+        await wallet.storage.unregisterNanoContract(ncId);
+        navigate('/nano_contract/');
+      },
     });
   }
 
@@ -190,12 +213,14 @@ function NanoContractDetail() {
     );
   }
 
+  if (!nc) return null;
+
   return (
     <div className="content-wrapper">
       <BackButton />
       <h3 className="mt-4">{t`Nano Contract Detail`}</h3>
       <div className="mt-5">
-        <p><strong>ID: </strong>{ncId}</p>
+        <p><strong>ID: </strong>{ncId} <span className="ml-1">(<a href="true" onClick={unregister}>{t`Unregister`}</a>)</span></p>
         <div className="d-flex flex-row justify-content-center mt-5 pb-4">
           {renderBody()}
         </div>
