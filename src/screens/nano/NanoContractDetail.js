@@ -160,7 +160,8 @@ function NanoContractDetail() {
   }
 
   const renderNanoMethods = () => {
-    return Object.keys(blueprintInformation.public_methods).filter((method) =>
+    const publicMethods = get(blueprintInformation, 'public_methods', {});
+    return Object.keys(publicMethods).filter((method) =>
       method !== 'initialize'
     ).map((method) => {
       return (
