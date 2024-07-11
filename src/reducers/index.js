@@ -1330,10 +1330,12 @@ export const onNanoContractEditAddress = (state, { payload }) => {
 };
 
 /**
+ * Remove the given nano contract from the registered nano contracts state.
+ *
  * @param {Object} state
- * @param {{
- *   payload: string (ncId)
-  * }} action
+ * @param {Object} action
+ * @param {string} action.payload
+ * @returns {Object}
  */
 export const onNanoContractUnregister = (state, { payload }) => {
   if (!(payload in state.nanoContracts)) {
@@ -1342,6 +1344,7 @@ export const onNanoContractUnregister = (state, { payload }) => {
     return state;
   }
 
+  // Create a new object with all keys from state.nanoContracts except `payload`
   const {[payload]: _, ...newNanoContracts} = state.nanoContracts;
 
   return {
