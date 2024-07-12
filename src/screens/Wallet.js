@@ -26,7 +26,7 @@ import BackButton from '../components/BackButton';
 import { colors } from '../constants';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { tokenFetchBalanceRequested, tokenFetchHistoryRequested, updateWords, } from '../actions/index';
+import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actions/index';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
@@ -114,7 +114,7 @@ function Wallet() {
     setShouldShowAdministrativeTab(false);
 
     // No need to download token info and mint/melt info if the token is hathor
-    if (selectedToken === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+    if (selectedToken === hathorLib.constants.NATIVE_TOKEN_UID) {
       return;
     }
 
@@ -151,7 +151,7 @@ function Wallet() {
    */
   async function updateTokenInfo(tokenUid) {
     // No need to fetch token info if the token is hathor
-    if (tokenUid === hathorLib.constants.HATHOR_TOKEN_CONFIG.uid) {
+    if (tokenUid === hathorLib.constants.NATIVE_TOKEN_UID) {
       return;
     }
     const tokenDetails = await wallet.getTokenDetails(tokenUid);
@@ -210,7 +210,6 @@ function Wallet() {
       context.hideModal();
       LOCAL_STORE.markBackupDone();
 
-      dispatch(updateWords(null));
       setBackupDone(true);
       setSuccessMessage(t`Backup completed!`);
       alertSuccessRef.current.show(3000);

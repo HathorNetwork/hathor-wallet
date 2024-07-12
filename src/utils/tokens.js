@@ -26,7 +26,7 @@ const tokens = {
    * @returns {Promise<ITokenData[]>}
    */
   async getRegisteredTokens(wallet, excludeDefaultToken = false) {
-    const htrUid = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+    const htrUid = hathorLib.constants.NATIVE_TOKEN_UID;
     const tokens = [];
 
     // redux-saga generator magic does not work well with the "for await..of" syntax
@@ -78,7 +78,7 @@ const tokens = {
     const globalWallet = getGlobalWallet();
     await globalWallet.storage.unregisterToken(uid);
     const tokens = await this.getRegisteredTokens(globalWallet);
-    store.dispatch(newTokens({tokens, uid: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}));
+    store.dispatch(newTokens({tokens, uid: hathorLib.constants.NATIVE_TOKEN_UID}));
     store.dispatch(removeTokenMetadata(uid));
   },
 
@@ -87,17 +87,20 @@ const tokens = {
    *
    * @param {number} mintAmount Amount of tokens to mint
    * @param {number} depositPercent deposit percentage for creating tokens
+   * @param {number} decimalPlaces Number of decimal places
+   *
+   * @return {string} deposit amount
    *
    * @memberof Tokens
    * @inner
    */
-  getDepositAmount(mintAmount, depositPercent) {
+  getDepositAmount(mintAmount, depositPercent, decimalPlaces) {
     if (mintAmount) {
-      const amountValue = wallet.decimalToInteger(mintAmount);
+      const amountValue = wallet.decimalToInteger(mintAmount, decimalPlaces);
       const deposit = hathorLib.tokensUtils.getDepositAmount(amountValue, depositPercent);
-      return hathorLib.numberUtils.prettyValue(deposit);
+      return hathorLib.numberUtils.prettyValue(deposit, decimalPlaces);
     } else {
-      return 0;
+      return '0';
     }
   },
 

@@ -38,6 +38,7 @@ function LockedWallet() {
 
   useEffect(() => {
     pinRef.current.focus();
+    window.scrollTo(0, 0); // Ensures the user interface is correct when loading this screen
     wallet.updateSentryState(); // Update Sentry when user started wallet now
   }, []);
 

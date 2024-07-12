@@ -16,6 +16,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useSelector } from 'react-redux';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
+import { getGlobalWallet } from '../modules/wallet';
 
 /**
  * Initial screen of custom tokens
@@ -27,6 +28,8 @@ function CustomTokens() {
   const alertSuccessRef = useRef(null);
   const navigate = useNavigate();
   const { tokensBalance } = useSelector(state => ({  tokensBalance: state.tokensBalance }));
+  const wallet = getGlobalWallet();
+  const nativeToken = wallet.storage.getNativeTokenData();
 
   /**
    * Called when a new token was registered with success, then close the modal and show alert success
@@ -72,7 +75,7 @@ function CustomTokens() {
     <div className="content-wrapper">
       <BackButton />
       <h3 className="mt-4">{t`Custom Tokens`}</h3>
-      <p className="mt-5">{t`You can create your own digital token with customized specifications on Hathor Network with only a few clicks. They will fully work under the same technical assumptions of high scalability and decentralized consensus of our native HTR tokens. Custom tokens will always work independently of the price of the native HTR token, and they can serve multiple purposes.`}</p>
+      <p className="mt-5">{t`You can create your own digital token with customized specifications on Hathor Network with only a few clicks. They will fully work under the same technical assumptions of high scalability and decentralized consensus of our native ${nativeToken.symbol} tokens. Custom tokens will always work independently of the price of the native ${nativeToken.symbol} token, and they can serve multiple purposes.`}</p>
       <p><SpanFmt>{t`Every custom token has a unique **Configuration String** which must be shared with all other people that will use the custom token.`}</SpanFmt></p>
       <p>{t`If you want to use a custom token that already exists, you need to register this token in your Hathor Wallet. For this, you will need the custom token's Configuration String, which you can get from the creators of the token.`}</p>
       <div className="d-flex flex-row align-items-center justify-content-center mt-5">

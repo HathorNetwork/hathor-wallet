@@ -175,7 +175,7 @@ const wallet = {
     const tokenChunks = chunk(tokens, METADATA_CONCURRENT_DOWNLOAD);
     for (const chunk of tokenChunks) {
       await Promise.all(chunk.map(async (token) => {
-        if (token === hathorConstants.HATHOR_TOKEN_CONFIG.uid) {
+        if (token === hathorConstants.NATIVE_TOKEN_UID) {
           return;
         }
 
@@ -268,9 +268,10 @@ const wallet = {
    * @param {Object[]} registeredTokens list of registered tokens
    * @param {Object[]} tokensBalance data about token balances
    * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
+   * @param {Object[]} networkTokens List of custom tokens to always show on current network
    * @returns {object[]}
    */
-  fetchRegisteredTokens(registeredTokens, tokensBalance, hideZeroBalance) {
+  fetchRegisteredTokens(registeredTokens, tokensBalance, hideZeroBalance, networkTokens) {
     const alwaysShowTokensArray = this.listTokensAlwaysShow();
     const filteredTokens = [];
 
@@ -286,10 +287,11 @@ const wallet = {
       };
 
       // If we indicated this token should always be exhibited, add it already.
-      const isTokenHTR = tokenUid === hathorConstants.HATHOR_TOKEN_CONFIG.uid;
+      const isTokenHTR = tokenUid === hathorConstants.NATIVE_TOKEN_UID;
       const alwaysShowThisToken = alwaysShowTokensArray.find(alwaysShowUid => alwaysShowUid === tokenUid);
+      const isNetworkToken = networkTokens.find(networkToken => networkToken.uid === tokenUid);
 
-      if (isTokenHTR || alwaysShowThisToken) {
+      if (isTokenHTR || alwaysShowThisToken || isNetworkToken) {
         filteredTokens.push(tokenData);
         continue;
       }
@@ -620,14 +622,15 @@ const wallet = {
    * Math.round(35.05*100) = 3505
    *
    * @param {number} value The decimal amount
+   * @param {number} decimalPlaces Number of decimal places
    *
    * @return {number} Value as an integer
    *
    * @memberof Wallet
    * @inner
    */
-  decimalToInteger(value) {
-    return Math.round(value*(10**hathorConstants.DECIMAL_PLACES));
+  decimalToInteger(value, decimalPlaces) {
+    return Math.round(value*(10**decimalPlaces));
   },
 
   /**

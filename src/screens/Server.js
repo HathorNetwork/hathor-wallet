@@ -164,9 +164,11 @@ function Server() {
         const network = versionData.network;
         let newSelectedNetwork = network;
 
-        // Network might be 'testnet-golf' or 'testnet-charlie'
-        if (network.startsWith('testnet')) {
+        // Network might be 'testnet-golf', 'testnet-charlie', 'nano-testnet-alpha'
+        if (network.includes('testnet')) {
           newSelectedNetwork = 'testnet';
+        } else {
+          newSelectedNetwork = 'privatenet';
         }
 
         // Go back to the previous server
@@ -260,7 +262,7 @@ function Server() {
 
       // Forces the selected token back to the default, as custom tokens will not be available in different networks
       if (networkChanged) {
-        dispatch(selectToken(hathorLib.constants.HATHOR_TOKEN_CONFIG.uid));
+        dispatch(selectToken(hathorLib.constants.NATIVE_TOKEN_UID));
       }
 
       // We don't have PIN on hardware wallet

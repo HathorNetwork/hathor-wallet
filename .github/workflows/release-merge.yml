@@ -1,0 +1,30 @@
+name: Create PR on Release
+
+# Triggered when a new version is released publicly
+on:
+  release:
+    types: [released]
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        # https://github.com/actions/checkout/releases/tag/v4.1.6
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+
+      - name: Create Pull Request
+        id: create_pull
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          # Building the PR Data
+          PR_DATA=$(gh pr create \
+            --title "[${{ github.ref_name }}] Merge release into master" \
+            --body "Automated PR to merge `release` branch into `master` based on release event." \
+            --base "master" \
+            --head "release" \
+            --assignee "@me")
+          echo "Merge PR url: $PR_DATA"

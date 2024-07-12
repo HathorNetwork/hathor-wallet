@@ -7,6 +7,7 @@ import {
   transactionUtils,
   errors as hathorErrors,
   cryptoUtils,
+  versionApi,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -59,6 +60,9 @@ import {
   reloadWalletRequested,
   changeWalletState,
   updateTxHistory,
+  setMiningServer,
+  setNativeTokenData,
+  addRegisteredTokens,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -69,6 +73,7 @@ import {
 import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
+import nanoUtils from '../utils/nanoContracts';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 import { getGlobalWallet, setGlobalWallet } from "../modules/wallet";
 
@@ -130,6 +135,8 @@ export function* startWallet(action) {
   // For now, the wallet service does not support hardware wallet, so default to the old facade
   const useWalletService = hardware ? false : yield call(isWalletServiceEnabled);
   const enableAtomicSwap = yield call(isAtomicSwapEnabled);
+
+  let customTokens = [];
 
   yield put(setUseWalletService(useWalletService));
   yield put(setEnableAtomicSwap(enableAtomicSwap));
@@ -249,8 +256,13 @@ export function* startWallet(action) {
     });
     console.log('[+] Start wallet.', serverInfo);
 
+    const nativeToken = wallet.storage.getNativeTokenData();
+    yield put(setNativeTokenData(nativeToken));
+
     let version;
     let serverNetworkName = networkName;
+    const decimalPlaces = wallet.storage.getDecimalPlaces();
+    customTokens = serverInfo?.custom_tokens ?? [];
 
     if (serverInfo) {
       version = serverInfo.version;
@@ -260,6 +272,8 @@ export function* startWallet(action) {
     yield put(setServerInfo({
       version,
       network: serverNetworkName,
+      decimalPlaces,
+      customTokens,
     }));
   } catch(e) {
     if (useWalletService) {
@@ -312,7 +326,15 @@ export function* startWallet(action) {
     }
   }
 
-  yield call([wallet.storage, wallet.storage.registerToken], hathorLibConstants.HATHOR_TOKEN_CONFIG);
+  // Register native token + network tokens in order
+  const nativeToken = wallet.storage.getNativeTokenData();
+  yield call([wallet.storage, wallet.storage.registerToken], nativeToken);
+  for (const token of customTokens) {
+    yield call([wallet.storage, wallet.storage.registerToken], token);
+  }
+
+  // Register all network tokens on the redux store
+  yield put(addRegisteredTokens(customTokens));
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
@@ -329,8 +351,11 @@ export function* startWallet(action) {
       allTokensMap[uid] = uid;
     }
 
+    // Get all registered nano contracts and save in redux
+    const registeredNanoContracts = yield call(nanoUtils.getRegisteredNanoContracts, wallet);
+
     // Store all tokens on redux
-    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress, registeredNanoContracts));
   } catch(e) {
     yield put(startWalletFailed());
     return;
@@ -365,7 +390,7 @@ export function* startWallet(action) {
  * to asynchronously load all registered tokens
  */
 export function* loadTokens() {
-  const htrUid = hathorLibConstants.HATHOR_TOKEN_CONFIG.uid;
+  const htrUid = hathorLibConstants.NATIVE_TOKEN_UID;
 
   yield call(fetchTokenData, htrUid);
   const wallet = getGlobalWallet();
@@ -646,7 +671,7 @@ export function* bestBlockUpdate({ payload }) {
   }
 
   if (currentHeight !== payload) {
-    yield put(tokenFetchBalanceRequested(hathorLibConstants.HATHOR_TOKEN_CONFIG.uid));
+    yield put(tokenFetchBalanceRequested(hathorLibConstants.NATIVE_TOKEN_UID));
   }
 }
 
@@ -681,7 +706,7 @@ export function* walletReloading() {
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
     for (const tokenUid of Object.keys(allTokens)) {
-      if (tokenUid === hathorLibConstants.HATHOR_TOKEN_CONFIG.uid) {
+      if (tokenUid === hathorLibConstants.NATIVE_TOKEN_UID) {
         continue;
       }
       yield put(tokenInvalidateHistory(tokenUid));
@@ -706,8 +731,11 @@ export function* walletReloading() {
       allTokensMap[uid] = uid;
     }
 
+    // Get all registered nano contracts and save in redux
+    const registeredNanoContracts = yield call(nanoUtils.getRegisteredNanoContracts, wallet);
+
     // Load success, we can send the user back to the wallet screen
-    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress));
+    yield put(loadWalletSuccess(allTokensMap, registeredTokens, currentAddress, registeredNanoContracts));
     yield put(setNavigateTo('/wallet/', true));
     yield put(loadingAddresses(false));
   } catch (e) {
@@ -762,6 +790,28 @@ export function* featureToggleUpdateListener() {
   }
 }
 
+/**
+ * Updates the mining server
+ *
+ * @param {Object} data
+ * @param {Object} data.payload payload from the event
+ * @param {string|undefined} data.payload.url Mining server url.
+ * @param {boolean} data.payload.reset Should we reset the tx mining service config
+ */
+export function* onUpdateMiningServer({ payload }) {
+  const wallet = getGlobalWallet();
+
+  if (payload.reset) {
+    wallet.storage.config.setTxMiningUrl();
+    LOCAL_STORE.resetMiningServer();
+    yield put(setMiningServer(null));
+  } else {
+    wallet.storage.config.setTxMiningUrl(payload.url);
+    LOCAL_STORE.setMiningServer(payload.url);
+    yield put(setMiningServer(payload.url));
+  }
+}
+
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
@@ -774,5 +824,6 @@ export function* saga() {
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
     takeEvery('WALLET_RELOAD_DATA', walletReloading),
     takeEvery('WALLET_REFRESH_SHARED_ADDRESS', refreshSharedAddress),
+    takeEvery('UPDATE_MINING_SERVER', onUpdateMiningServer),
   ]);
 }

@@ -111,7 +111,7 @@ function Settings() {
     // First we get all token configs from registered tokens array,
     // remove the HTR token with filter, then map to each configuration string
     const configurationStrings = registeredTokens.filter((token) => {
-      return token.uid !== hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+      return token.uid !== hathorLib.constants.NATIVE_TOKEN_UID;
     }).map((token) => {
       return hathorLib.tokensUtils.getConfigurationString(token.uid, token.name, token.symbol);
     });
@@ -136,6 +136,13 @@ function Settings() {
    */
   const changeServer = () => {
     navigate('/server/');
+  }
+
+  /**
+   * When user clicks Change Mining Server button we redirect to Change Mining Server screen
+   */
+  const changeMiningServer = () => {
+    navigate('/mining_server/');
   }
 
   /**
@@ -312,7 +319,8 @@ function Settings() {
               <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
             </span>
           </CopyToClipboard>
-          <button className="btn btn-hathor" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
+          <button className="btn btn-hathor mt-4" onClick={changeMiningServer}>{t`Change mining server`}</button>
+          <button className="btn btn-hathor mt-4" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
           <button className="btn btn-hathor mt-4" onClick={addPassphrase}>{t`Set a passphrase`}</button>
           {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
           <button className="btn btn-hathor mt-4" onClick={resetClicked}>{t`Reset all data`}</button>

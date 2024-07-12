@@ -9,7 +9,7 @@ import path from 'path';
 import hathorLib from '@hathor/wallet-lib';
 import { get } from 'lodash';
 import store from '../store/index';
-import { networkUpdate } from '../actions/index';
+import { networkUpdate, setMiningServer } from '../actions/index';
 import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
 import LOCAL_STORE from '../storage';
 
@@ -69,6 +69,11 @@ const helpers = {
         storage.store.setItem('wallet:wallet_service:ws_server', wsServer);
       }
     }
+
+    let miningServer = LOCAL_STORE.getMiningServer();
+    if (miningServer) {
+      store.dispatch(setMiningServer(miningServer));
+    }
   },
 
   /**
@@ -101,24 +106,6 @@ const helpers = {
       return EXPLORER_BASE_URL;
     } else {
       return TESTNET_EXPLORER_BASE_URL;
-    }
-  },
-
-  /**
-   * Render value to integer or decimal
-   *
-   * @param {number} amount Amount to render
-   * @param {boolean} isInteger If it's an integer or decimal
-   *
-   * @return {string} rendered value
-   * @memberof Helpers
-   * @inner
-   */
-  renderValue(amount, isInteger) {
-    if (isInteger) {
-      return hathorLib.numberUtils.prettyIntegerValue(amount);
-    } else {
-      return hathorLib.numberUtils.prettyValue(amount);
     }
   },
 
