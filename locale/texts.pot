@@ -594,7 +594,7 @@ msgstr ""
 msgid "Add data output"
 msgstr ""
 
-#: src/components/atomic-swap/ModalAtomicSend.js:296
+#: src/components/atomic-swap/ModalAtomicSend.js:298
 #: src/screens/SendTokens.js:627
 #: src/screens/SendTokens.js:639
 msgid "Send Tokens"
@@ -1339,7 +1339,7 @@ msgid "Create"
 msgstr ""
 
 #: src/components/SendDataOutputOne.js:29
-#: src/components/SendTokensOne.js:244
+#: src/components/SendTokensOne.js:245
 #: src/screens/atomic-swap/ProposalList.js:107
 msgid "Remove"
 msgstr ""
@@ -2005,7 +2005,7 @@ msgstr ""
 msgid "Data content"
 msgstr ""
 
-#: src/components/SendTokensOne.js:201
+#: src/components/SendTokensOne.js:202
 msgid "Select token"
 msgstr ""
 
