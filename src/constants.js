@@ -12,6 +12,7 @@
 
 import { t } from 'ttag';
 import scssColors from './index.module.scss';
+import { version } from '../package.json';
 
 /**
  * Quantity of elements to show in the wallet history
@@ -21,7 +22,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = '0.28.1';
+export const VERSION = version;
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible
@@ -263,10 +264,12 @@ export const IGNORE_WS_TOGGLE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
  */
 export const WALLET_SERVICE_FEATURE_TOGGLE = 'wallet-service-desktop.rollout';
 export const ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE = 'atomic-swap-service-desktop.rollout';
+export const NANO_CONTRACTS_FEATURE_TOGGLE = 'nano-contracts-desktop.rollout';
 
 export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
   [ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE]: false,
+  [NANO_CONTRACTS_FEATURE_TOGGLE]: false,
 };
 
 /**
@@ -277,3 +280,9 @@ export const FEATURE_TOGGLE_DEFAULTS = {
 export const colors = {
   purpleHathor: scssColors.purpleHathor,
 }
+
+/**
+ * Number of elements in the list of addresses
+ * when changing the address of a nano contract
+ */
+export const NANO_UPDATE_ADDRESS_LIST_COUNT = 5;

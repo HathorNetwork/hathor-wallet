@@ -23,6 +23,7 @@ const mapStateToProps = (state) => {
     wallet: getGlobalWallet(),
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   };
 };
 
@@ -60,7 +61,7 @@ class TokenMint extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = async (pin) => {
-    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
+    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
     const address = this.chooseAddress.current.checked ? null : this.address.current.value;
     const wallet = getGlobalWallet();
     const transaction = await wallet.prepareMintTokensData(
@@ -94,8 +95,8 @@ class TokenMint extends React.Component {
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount);
-    const prettyAmountValue = helpers.renderValue(amount, this.isNFT());
+    const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
+    const prettyAmountValue = hathorLib.numberUtils.prettyValue(amount, this.isNFT() ? 0 : this.props.decimalPlaces);
     return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;
   }
 
@@ -168,7 +169,7 @@ class TokenMint extends React.Component {
            required
            className="form-control"
            onValueChange={this.onAmountChange}
-           placeholder={hathorLib.numberUtils.prettyValue(0)}
+           placeholder={hathorLib.numberUtils.prettyValue(0, this.props.decimalPlaces)}
           />
         );
       }
@@ -210,13 +211,14 @@ class TokenMint extends React.Component {
 
     const wallet = getGlobalWallet();
     const depositPercent = wallet.storage.getTokenDepositPercentage();
+    const nativeTokenConfig = wallet.storage.getNativeTokenData();
 
     return (
       <TokenAction
        renderForm={renderForm}
        title={t`Mint tokens`}
-       subtitle={`A deposit of ${depositPercent * 100}% in HTR of the mint amount is required`}
-       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent)} HTR (${hathorLib.numberUtils.prettyValue(this.props.htrBalance)} HTR available)`}
+       subtitle={`A deposit of ${depositPercent * 100}% in ${nativeTokenConfig.symbol} of the mint amount is required`}
+       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent, this.props.decimalPlaces)} ${nativeTokenConfig.symbol} (${hathorLib.numberUtils.prettyValue(this.props.htrBalance, this.props.decimalPlaces)} ${nativeTokenConfig.symbol} available)`}
        buttonName={t`Go`}
        validateForm={this.mint}
        getSuccessMessage={this.getSuccessMessage}

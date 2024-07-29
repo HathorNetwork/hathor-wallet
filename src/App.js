@@ -10,11 +10,15 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
+import NanoContractDetail from './screens/nano/NanoContractDetail';
+import NanoContractList from './screens/nano/NanoContractList';
+import NanoContractSelectBlueprint from './screens/nano/NanoContractSelectBlueprint';
 import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import TransactionDetail from './screens/TransactionDetail';
 import LoadingAddresses from './screens/LoadingAddresses';
 import Server from './screens/Server';
+import MiningServer from './screens/MiningServer';
 import ChoosePassphrase from './screens/ChoosePassphrase';
 import CustomTokens from './screens/CustomTokens';
 import Welcome from './screens/Welcome';
@@ -42,7 +46,7 @@ import { GlobalModalContext, MODAL_TYPES } from './components/GlobalModal';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
 import { IPC_RENDERER } from './constants';
-import AddressList from './screens/AddressList';
+import AllAddresses from './screens/AllAddresses';
 import NFTList from './screens/NFTList';
 import { resetNavigateTo, updateLedgerClosed } from './actions/index';
 import { WALLET_STATUS } from './sagas/wallet';
@@ -184,6 +188,9 @@ function Root() {
   // Application rendering
   return (
     <Routes>
+      <Route path="/nano_contract" element={<StartedComponent children={ <NanoContractList />} loaded={true} />} />
+      <Route path="/nano_contract/select_blueprint/" element={<StartedComponent children={ <NanoContractSelectBlueprint />} loaded={true} />} />
+      <Route path="/nano_contract/detail/:nc_id" element={<StartedComponent children={ <NanoContractDetail />} loaded={true} />} />
       <Route path="/nft" element={<StartedComponent children={ <NFTList />} loaded={true} />} />
       <Route path="/create_token" element={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
       <Route path="/create_nft" element={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
@@ -198,8 +205,9 @@ function Root() {
       <Route path="/settings" element={<StartedComponent children={ <Settings /> } loaded={true} />} />
       <Route path="/wallet/passphrase" element={<StartedComponent children={ <ChoosePassphrase />} loaded={true} />} />
       <Route path="/server" element={<StartedComponent children={ <Server /> } loaded={true} />} />
+      <Route path="/mining_server" element={<StartedComponent children={ <MiningServer /> } loaded={true} />} />
       <Route path="/transaction/:id" element={<StartedComponent children={ <TransactionDetail />} loaded={true} />} />
-      <Route path="/addresses" element={<StartedComponent children={ <AddressList /> } loaded={true} /> } />
+      <Route path="/addresses" element={<StartedComponent children={ <AllAddresses /> } loaded={true} /> } />
       <Route path="/new_wallet" element={<StartedComponent children={ <NewWallet />} loaded={false} />} />
       <Route path="/load_wallet" element={<StartedComponent children={ <LoadWallet /> } loaded={false} /> } />
       <Route path="/wallet_type" element={<StartedComponent children={<WalletType loaded={false} />} />} />

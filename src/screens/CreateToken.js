@@ -32,9 +32,10 @@ import { getGlobalWallet } from "../modules/wallet";
  */
 function CreateToken() {
 
-  const { htrBalance, useWalletService } = useSelector(state => ({
-    htrBalance: get(state.tokensBalance, `${hathorLib.constants.HATHOR_TOKEN_CONFIG.uid}.data.available`, 0),
+  const { htrBalance, useWalletService, decimalPlaces } = useSelector(state => ({
+    htrBalance: get(state.tokensBalance, `${hathorLib.constants.NATIVE_TOKEN_UID}.data.available`, 0),
     useWalletService: state.useWalletService,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   }));
   const wallet = getGlobalWallet();
 
@@ -67,9 +68,9 @@ function CreateToken() {
       }
 
       // Validating maximum amount
-      const tokensValue = walletUtils.decimalToInteger(amount)
+      const tokensValue = walletUtils.decimalToInteger(amount, decimalPlaces);
       if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
-        const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE);
+        const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, decimalPlaces);
         setErrorMessage(t`Maximum value to mint token is ${max_output_value_str}`);
         return false;
       }
@@ -121,7 +122,7 @@ function CreateToken() {
       transaction = await wallet.prepareCreateNewToken(
         shortNameRef.current.value,
         symbolRef.current.value,
-        walletUtils.decimalToInteger(amount),
+        walletUtils.decimalToInteger(amount, decimalPlaces),
         { address, pinCode: pin }
       );
 
@@ -238,17 +239,18 @@ function CreateToken() {
 
   const depositPercent = wallet.storage.getTokenDepositPercentage();
   const htrDeposit = depositPercent * 100;
+  const nativeTokenConfig = wallet.storage.getNativeTokenData();
 
   return (
     <div className="content-wrapper">
       <BackButton />
       <h3 className="mt-4">Create Token</h3>
       <p className="mt-5">{t`Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.`}</p>
-      <p>{t`Custom tokens share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>
+      <p>{t`Custom tokens share the address space with all other tokens, including ${nativeTokenConfig.symbol}. This means that you can send and receive tokens using any valid address.`}</p>
       <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.`}</p>
       <p>
         {str2jsx(
-          t`When creating and minting tokens, a |bold:deposit of ${htrDeposit}%| in HTR is required. If these tokens are later melted, this HTR deposit will be returned. Read more about it |link:here|.`,
+          t`When creating and minting tokens, a |bold:deposit of ${htrDeposit}%| in ${nativeTokenConfig.symbol} is required. If these tokens are later melted, this ${nativeTokenConfig.symbol} deposit will be returned. Read more about it |link:here|.`,
           {
             bold: (x, i) => <strong key={i}>{x}</strong>,
             link: (x, i) => <a key={i} href="true" onClick={goToRFC}>{x}</a>,
@@ -274,7 +276,7 @@ function CreateToken() {
              required
              className="form-control"
              onValueChange={onAmountChange}
-             placeholder={hathorLib.numberUtils.prettyValue(0)}
+             placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
             />
           </div>
           <div className="form-group d-flex flex-row align-items-center address-checkbox">
@@ -290,7 +292,7 @@ function CreateToken() {
             <input ref={addressInputRef} type="text" placeholder={t`Address`} className="form-control" />
           </div>
         </div>
-        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent)} HTR ({hathorLib.numberUtils.prettyValue(htrBalance)} HTR available)</p>
+        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} {nativeTokenConfig.symbol} ({hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} {nativeTokenConfig.symbol} available)</p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>

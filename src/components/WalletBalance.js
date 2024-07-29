@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import { connect } from "react-redux";
 import helpers from '../utils/helpers';
 import { get } from 'lodash';
+import { numberUtils } from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {
@@ -18,6 +19,7 @@ const mapStateToProps = (state) => {
     tokens: state.tokens,
     tokensBalance: state.tokensBalance,
     tokenMetadata: state.tokenMetadata,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   };
 };
 
@@ -42,9 +44,9 @@ class WalletBalance extends React.Component {
     const renderBalance = () => {
       return (
         <div>
-          <p><strong>{t`Total:`}</strong> {helpers.renderValue(balance.available + balance.locked, isNFT)} {symbol}</p>
-          <p><strong>{t`Available:`}</strong> {helpers.renderValue(balance.available, isNFT)} {symbol}</p>
-          <p><strong>{t`Locked:`}</strong> {helpers.renderValue(balance.locked, isNFT)} {symbol}</p>
+          <p><strong>{t`Total:`}</strong> {numberUtils.prettyValue(balance.available + balance.locked, isNFT ? 0 : this.props.decimalPlaces)} {symbol}</p>
+          <p><strong>{t`Available:`}</strong> {numberUtils.prettyValue(balance.available, isNFT ? 0 : this.props.decimalPlaces)} {symbol}</p>
+          <p><strong>{t`Locked:`}</strong> {numberUtils.prettyValue(balance.locked, isNFT ? 0 : this.props.decimalPlaces)} {symbol}</p>
         </div>
       );
     }

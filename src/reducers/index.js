@@ -5,16 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import hathorLib from '@hathor/wallet-lib';
 import { FEATURE_TOGGLE_DEFAULTS, VERSION } from '../constants';
 import { types } from '../actions';
-import { get } from 'lodash';
+import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { WALLET_STATUS } from '../sagas/wallet';
+import { NANOCONTRACT_REGISTER_STATUS } from '../sagas/nanoContract';
 import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
-import { HATHOR_TOKEN_CONFIG } from "@hathor/wallet-lib/lib/constants";
+import { constants as hathorLibConstants } from "@hathor/wallet-lib";
 import helpersUtils from '../utils/helpers';
 import LOCAL_STORE from '../storage';
+
+const { NATIVE_TOKEN_UID, DECIMAL_PLACES } = hathorLibConstants;
 
 /**
  * @typedef TokenHistory
@@ -34,6 +36,18 @@ import LOCAL_STORE from '../storage';
  * @property data
  * @property {number} data.available
  * @property {number} data.locked
+ *
+ * @typedef NanoContractData
+ * Stores information about a nano contract
+ * @property {string} address
+ * @property {string} ncId
+ * @property {string} blueprintId
+ * @property {string} blueprintName
+ * @property {TxHistory[]} history
+ * @property historyMetadata
+ * @property {boolean} historyMetadata.isLoading
+ * @property {string} historyMetadata.error
+ * @property {string} historyMetadata.after
  */
 
 const initialState = {
@@ -61,17 +75,11 @@ const initialState = {
   lastFailedRequest: undefined,
   // Status code of last failed response
   requestErrorStatusCode: undefined,
-  // Wallet password
-  password: undefined,
-  // Wallet pin
-  pin: undefined,
-  // Wallet words
-  words: undefined,
   // Tokens already saved: array of objects
   // {'name', 'symbol', 'uid'}
-  tokens: [hathorLib.constants.HATHOR_TOKEN_CONFIG],
+  tokens: [],
   // Token selected (by default is HATHOR)
-  selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid,
+  selectedToken: NATIVE_TOKEN_UID,
   /**
    * List of all tokens seen in transactions
    * @type {Record<string, string>}
@@ -100,6 +108,8 @@ const initialState = {
   serverInfo: {
     network: null,
     version: null,
+    decimalPlaces: DECIMAL_PLACES,
+    customTokens: [],
   },
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
@@ -124,18 +134,122 @@ const initialState = {
    * - Those that were present in at least one proposal in which this wallet participated
    * @type {Record<string,{ tokenUid: string, symbol: string, name: string, status: string, oldStatus?: string }>}
    */
-  tokensCache: {
-    '00': {
-      tokenUid: HATHOR_TOKEN_CONFIG.uid,
-      symbol: HATHOR_TOKEN_CONFIG.symbol,
-      name: HATHOR_TOKEN_CONFIG.name,
-      status: TOKEN_DOWNLOAD_STATUS.READY
-    }
-  },
+  tokensCache: {},
   featureTogglesInitialized: false,
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
+  miningServer: null,
+  // The native token data of the current network
+  // @type {{symbol: string, name: string, uid: string}}
+  nativeTokenData: null,
+  /**
+   * This object will store registered nano contracts, history,
+   * and metadata, all inside a key which is the nano id
+   *
+   * {
+   *   [ncId: string]: {
+   *     address: string,
+   *     ncId: string,
+   *     blueprintId: string,
+   *     blueprintName: string,
+   *     history: NanoTxData[],
+   *     historyMetadata: {
+   *       isLoading: boolean,
+   *       error: string,
+   *       after: string,
+   *     }
+   *   }
+   * @example
+   * {
+   *   '000001342d3c5b858a4d4835baea93fcc683fa615ff5892bd044459621a0340a': {
+   *     address: 'HTeZeYTCv7cZ8u7pBGHkWsPwhZAuoq5j3V',
+   *     ncId: '000001342d3c5b858a4d4835baea93fcc683fa615ff5892bd044459621a0340a',
+   *     blueprintId: '0025dadebe337a79006f181c05e4799ce98639aedfbd26335806790bdea4b1d4',
+   *     blueprintName: 'Swap',
+   *     history: [
+   *      {
+   *        txId: '000000203e87e8575f121de16d0eb347bd1473eedd9f46cc76c1bc8d4e5a5fce',
+   *        timestamp: 1708356261,
+   *        tokens: [
+   *          '00000117b0502e9eef9ccbe987af65f153aa899d6eba88d50a6c89e78644713d',
+   *          '0000038c49253f86e6792006dd9124e2c50e6487fde3296b7bd637e3e1a497e7'
+   *        ],
+   *        isVoided: false,
+   *        ncId: '000001342d3c5b858a4d4835baea93fcc683fa615ff5892bd044459621a0340a',
+   *        ncMethod: 'swap',
+   *        blueprintId: '0025dadebe337a79006f181c05e4799ce98639aedfbd26335806790bdea4b1d4';
+   *        caller: { base58: 'HTeZeYTCv7cZ8u7pBGHkWsPwhZAuoq5j3V' },
+   *        isMine: true,
+   *        balance: {
+   *          '00': 300,
+   *        },
+   *      },
+   *     ],
+   *     historyMetadata: {
+   *       isLoading: false,
+   *       error: null,
+   *       after: '000075e15f015dc768065763acd9b563ec002e37182869965ff2c712bed83e1e',
+   *     },
+   *   },
+   * }
+   */
+  nanoContracts: {},
+
+  /**
+   * This object will store the metadata when registering
+   * a nano contract, with id, loading status and eventual error
+   *
+   * {
+   *   status: NANOCONTRACT_REGISTER_STATUS,
+   *   error: string | null,
+   *   ncId: string,
+   * }
+   *
+   * @example
+   * {
+   *   status: loading|error|success,
+   *   error: null,
+   *   ncId: '1234'
+   * }
+   */
+  nanoContractsRegisterMetadata: {},
+  /**
+   * Stores the blueprint information for each blueprint of registered nano contracts
+   * We store it in the redux because the same blueprint might be used in some screens
+   * then we don't need to request this every time
+   *
+   * {
+   *   id: NanoContractBlueprintInformationAPIResponse
+   * }
+   *
+   * @example
+   * {
+   *   id: '1234',
+   *   name: 'Blueprint test',
+   *   attributes: {
+   *     attribute1: 'string',
+   *     attribute2: 'int',
+   *   },
+   *   public_methods: {
+   *     method1: {
+   *       args: [
+   *         {
+   *           name: 'argument1',
+   *           type: 'byte',
+   *         },
+   *         {
+   *           name: 'argument2',
+   *           type: 'int'
+   *         }
+   *       ],
+   *       return_type: 'int'
+   *     }
+   *   },
+   *   private_methods: {}
+   * }
+  */
+  blueprintsData: {},
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -163,12 +277,6 @@ const rootReducer = (state = initialState, action) => {
       return onCleanData(state, action);
     case 'last_failed_request':
       return Object.assign({}, state, {lastFailedRequest: action.payload});
-    case 'update_password':
-      return Object.assign({}, state, {password: action.payload});
-    case 'update_pin':
-      return Object.assign({}, state, {pin: action.payload});
-    case 'update_words':
-      return Object.assign({}, state, {words: action.payload});
     case 'select_token':
       return Object.assign({}, state, {selectedToken: action.payload});
     case 'new_tokens':
@@ -268,6 +376,24 @@ const rootReducer = (state = initialState, action) => {
       return onUpdateTxHistory(state, action);
     case types.WALLET_CHANGE_STATE:
       return onWalletStateChanged(state, action);
+    case types.SET_MINING_SERVER:
+      return onSetMiningServer(state, action);
+    case types.SET_NATIVE_TOKEN_DATA:
+      return onSetNativeTokenData(state, action);
+    case types.NANOCONTRACT_REGISTER_REQUEST:
+      return onNanoContractRegisterRequest(state, action);
+    case types.NANOCONTRACT_REGISTER_ERROR:
+      return onNanoContractRegisterError(state, action);
+    case types.NANOCONTRACT_REGISTER_SUCCESS:
+      return onNanoContractRegisterSuccess(state, action);
+    case types.NANOCONTRACT_CLEAN_REGISTER_METADATA:
+      return onNanoContractCleanRegisterMetadata(state);
+    case types.BLUEPRINT_ADD_INFORMATION:
+      return onBlueprintAddInformation(state, action);
+    case types.NANOCONTRACT_EDIT_ADDRESS:
+      return onNanoContractEditAddress(state, action);
+    case types.NANOCONTRACT_UNREGISTER:
+      return onNanoContractUnregister(state, action);
     default:
       return state;
   }
@@ -291,11 +417,12 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
  * @param {Record<string,string>} action.payload.tokens Object map containing all tokens uids as keys
  * @param {string} action.payload.currentAddress
  * @param {{uid:string, name:string, symbol:string}[]} action.payload.registeredTokens
+ * @param {Record<string, NanoContractData>} action.payload.registeredNanoContracts
  */
 const onLoadWalletSuccess = (state, action) => {
   // Update the version of the wallet that the data was loaded
   LOCAL_STORE.setWalletVersion(VERSION);
-  const { tokens, registeredTokens, currentAddress } = action.payload;
+  const { tokens, registeredTokens, currentAddress, registeredNanoContracts } = action.payload;
 
   return {
     ...state,
@@ -304,6 +431,7 @@ const onLoadWalletSuccess = (state, action) => {
     lastSharedIndex: currentAddress.index,
     allTokens: tokens,
     tokens: registeredTokens,
+    nanoContracts: registeredNanoContracts,
   };
 };
 
@@ -382,8 +510,7 @@ const onUpdateTokenHistory = (state, action) => {
 const onUpdateHeight = (state, action) => {
   if (action.payload.height !== state.height) {
     const tokensBalance = {};
-    const { uid } = hathorLib.constants.HATHOR_TOKEN_CONFIG;
-    tokensBalance[uid] = action.payload.htrUpdatedBalance;
+    tokensBalance[NATIVE_TOKEN_UID] = action.payload.htrUpdatedBalance;
     const newTokensBalance = Object.assign({}, state.tokensBalance, tokensBalance);
     return {
       ...state,
@@ -505,7 +632,7 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   if (hasZeroBalance) {
     return {
       ...state,
-      selectedToken: hathorLib.constants.HATHOR_TOKEN_CONFIG.uid
+      selectedToken: NATIVE_TOKEN_UID,
     };
   }
 
@@ -965,6 +1092,8 @@ const onSetServerInfo = (state, action) => {
     serverInfo: {
       network: action.payload.network,
       version: action.payload.version,
+      decimalPlaces: action.payload.decimalPlaces,
+      customTokens: action.payload.customTokens,
     },
   }
 };
@@ -1015,5 +1144,213 @@ export const onWalletStateChanged = (state, { payload }) => ({
   ...state,
   walletState: payload,
 });
+
+export const onSetMiningServer = (state, { payload }) => ({
+  ...state,
+  miningServer: payload,
+});
+
+/**
+ * When starting a wallet we need to update the native token data on store.
+ * This includes:
+ * - adding the native token to the registered tokens (state.tokens)
+ * - adding the native token as ready on loading cache (state.tokensCache)
+ * - updating the native token data (state.nativeTokenData)
+ *
+ * @param {Object} state
+ * @param {Object} payload
+ * @param {string} payload.symbol
+ * @param {string} payload.name
+ * @param {string} payload.uid
+ */
+export const onSetNativeTokenData = (state, { payload }) => {
+  let tokens = [...state.tokens];
+  const nativeTokenIndex = findIndex(state.tokens, (e) => e.uid === NATIVE_TOKEN_UID);
+  if (nativeTokenIndex === -1) {
+    // In case the native token is not in the list, we add it as the first token
+    tokens = [{...payload, uid: NATIVE_TOKEN_UID}, ...state.tokens];
+  } else {
+    tokens[nativeTokenIndex] = {...payload, uid: NATIVE_TOKEN_UID};
+  }
+
+  return {
+    ...state,
+    nativeTokenData: payload,
+    tokens,
+    tokensCache: {
+      ...state.tokensCache,
+      [NATIVE_TOKEN_UID]: {
+        tokenUid: NATIVE_TOKEN_UID,
+        symbol: payload.symbol,
+        name: payload.name,
+        status: TOKEN_DOWNLOAD_STATUS.READY
+      }
+    }
+  };
+};
+
+/**
+ * Add a list of tokens to the store registered tokens.
+ *
+ * @param {Object} state
+ * @param {Object[]} payload
+ * @param {string} payload[].uid
+ * @param {string} payload[].name
+ * @param {string} payload[].symbol
+ */
+export const onAddRegisteredTokens = (state, { payload }) => {
+  // Add new tokens to registered tokens
+  const tokens = [...state.tokens, ...payload];
+
+  return {
+    ...state,
+    tokens,
+  };
+};
+
+
+/**
+ * @param {Object} state
+ * @param {{
+ *   payload: {
+ *     address: string,
+ *     ncId: string,
+ *     blueprintId: string,
+ *     blueprintName: string
+ *   }
+  * }} action
+ */
+export const onNanoContractRegisterSuccess = (state, { payload }) => ({
+  ...state,
+  nanoContractsRegisterMetadata: {
+    ...state.nanoContractsRegisterMetadata,
+    error: null,
+    status: NANOCONTRACT_REGISTER_STATUS.SUCCESS,
+  },
+  nanoContracts: {
+    ...state.nanoContracts,
+    [payload.ncId]: {
+      ...payload,
+      history: [],
+      historyMetadata: {},
+    },
+  },
+});
+
+/**
+ * @param {Object} state
+ * @param {{
+ *   payload: {
+ *     error: string,
+*    }
+  * }} action
+ */
+export const onNanoContractRegisterError = (state, { payload }) => ({
+  ...state,
+  nanoContractsRegisterMetadata: {
+    ...state.nanoContractsRegisterMetadata,
+    error: payload.error,
+    status: NANOCONTRACT_REGISTER_STATUS.ERROR,
+  },
+});
+
+/**
+ * @param {Object} state
+ * @param {{
+ *   payload: {
+ *     ncId: string,
+ *     address: string,
+ *   }
+  * }} action
+ */
+export const onNanoContractRegisterRequest = (state, { payload }) => ({
+  ...state,
+  nanoContractsRegisterMetadata: {
+    error: null,
+    ncId: payload.ncId,
+    status: NANOCONTRACT_REGISTER_STATUS.LOADING,
+  },
+});
+
+/**
+ * @param {Object} state
+ */
+export const onNanoContractCleanRegisterMetadata = (state) => ({
+  ...state,
+  nanoContractsRegisterMetadata: {},
+});
+
+/**
+ * @param {Object} state
+ * @param {{
+ *   payload: {
+ *    blueprintInformation (NanoContractBlueprintInformationAPIResponse)
+ *   }
+  * }} action
+ */
+export const onBlueprintAddInformation = (state, { payload }) => {
+  const { blueprintInformation } = payload;
+
+  return {
+    ...state,
+    blueprintsData: {
+      ...state.blueprintsData,
+      [blueprintInformation.id]: blueprintInformation,
+    },
+  };
+};
+
+/**
+ * This method updates the registered address of the nano contract
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {string} action.payload.ncId
+ * @param {string} action.payload.address
+ */
+export const onNanoContractEditAddress = (state, { payload }) => {
+  const { ncId, address } = payload;
+
+  if (!(ncId in state.nanoContracts)) {
+    // This should never happen, we are trying to edit the address
+    // of a nano contract that is not registered
+    return state;
+  }
+
+  return {
+    ...state,
+    nanoContracts: {
+      ...state.nanoContracts,
+      [ncId]: {
+        ...state.nanoContracts[ncId],
+        address,
+      },
+    },
+  };
+};
+
+/**
+ * Remove the given nano contract from the registered nano contracts state.
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {string} action.payload
+ * @returns {Object}
+ */
+export const onNanoContractUnregister = (state, { payload }) => {
+  if (!(payload in state.nanoContracts)) {
+    // This should never happen, we are trying to unregister
+    // a nano contract that is not registered
+    return state;
+  }
+
+  // Create a new object with all keys from state.nanoContracts except `payload`
+  const {[payload]: _, ...newNanoContracts} = state.nanoContracts;
+
+  return {
+    ...state,
+    nanoContracts: newNanoContracts,
+  };
+};
 
 export default rootReducer;

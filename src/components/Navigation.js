@@ -13,6 +13,8 @@ import Version from './Version';
 import ServerStatus from './ServerStatus';
 import helpers from '../utils/helpers';
 import { useSelector } from 'react-redux';
+import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACTS_FEATURE_TOGGLE } from '../constants';
+import { get } from 'lodash';
 
 /**
  * Component that shows a navigation bar with the menu options
@@ -21,6 +23,9 @@ import { useSelector } from 'react-redux';
  */
 function Navigation() {
   const useAtomicSwap = useSelector(state => state.useAtomicSwap);
+  const featureToggles = useSelector(state => state.featureToggles);
+  const nanoEnabledDefault = get(FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACTS_FEATURE_TOGGLE, false)
+  const nanoEnabled = get(featureToggles, NANO_CONTRACTS_FEATURE_TOGGLE, nanoEnabledDefault);
 
   /**
    * Method called when user clicked on Explorer menu
@@ -63,6 +68,9 @@ function Navigation() {
             <li className="nav-item">
               <a className="nav-link" href="true" onClick={goToExplorer}>{t`Public Explorer`}</a>
             </li>
+            {nanoEnabled && <li className="nav-item">
+              <NavLink to="/nano_contract/" className="nav-link">{t`Nano Contract`}</NavLink>
+            </li>}
           </ul>
           <div className="navbar-right d-flex flex-row align-items-center navigation-search">
             <ServerStatus />

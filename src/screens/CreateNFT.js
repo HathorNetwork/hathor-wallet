@@ -47,13 +47,14 @@ function CreateNFT() {
   const createMintAuthorityRef = useRef();
   const createMeltAuthorityRef = useRef();
 
-  const { htrBalance, useWalletService } = useSelector((state) => {
-    const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+  const { htrBalance, useWalletService, decimalPlaces } = useSelector((state) => {
+    const HTR_UID = hathorLib.constants.NATIVE_TOKEN_UID;
     const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
 
     return {
       htrBalance,
       useWalletService: state.useWalletService,
+      decimalPlaces: state.serverInfo.decimalPlaces,
     };
   });
   const wallet = getGlobalWallet();
@@ -263,18 +264,19 @@ function CreateNFT() {
   // Since NFT have 0 for DECIMAL_PLACES we get htrDeposit * 100/100 which is htrDeposit
   const htrDeposit = wallet.storage.getTokenDepositPercentage();
   const depositAmount = hathorLib.tokensUtils.getDepositAmount(amount, htrDeposit);
-  const nftFee = hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee());
+  const nftFee = hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee(), decimalPlaces);
+  const nativeTokenConfig = wallet.storage.getNativeTokenData();
 
   return (
     <div className="content-wrapper">
       <BackButton />
       <h3 className="mt-4">Create NFT</h3>
       <p className="mt-5">{t`Here you will create a new NFT. After the creation, you will be able to send the units of this NFT to other addresses.`}</p>
-      <p>{t`NFTs share the address space with all other tokens, including HTR. This means that you can send and receive tokens using any valid address.`}</p>
+      <p>{t`NFTs share the address space with all other tokens, including ${nativeTokenConfig.symbol}. This means that you can send and receive tokens using any valid address.`}</p>
       <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your NFT.`}</p>
       <p>
         {str2jsx(
-          t`When creating and minting NFTs, a |bold:deposit of ${htrDeposit}%| in HTR is required and an additional |bold:fee of ${nftFee} HTR|. If these tokens are later melted, this HTR deposit will be returned (depending on the amount melted) and the fee will never be returned. Read more about the NFT standard |link:here|.`,
+          t`When creating and minting NFTs, a |bold:deposit of ${htrDeposit}%| in ${nativeTokenConfig.symbol} is required and an additional |bold:fee of ${nftFee} ${nativeTokenConfig.symbol}|. If these tokens are later melted, this ${nativeTokenConfig.symbol} deposit will be returned (depending on the amount melted) and the fee will never be returned. Read more about the NFT standard |link:here|.`,
           {
             bold: (x, i) => <strong key={i}>{x}</strong>,
             link: (x, i) => <a key={i} href="true" onClick={goToRFC}>{x}</a>,
@@ -345,10 +347,10 @@ function CreateNFT() {
           </div>
         </div>
         <hr className="mb-5 mt-5"/>
-        <p><strong>HTR available:</strong> {hathorLib.numberUtils.prettyValue(htrBalance)} HTR</p>
-        <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount)} HTR</p>
-        <p><strong>Fee:</strong> {nftFee} HTR</p>
-        <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee() + depositAmount)} HTR</p>
+        <p><strong>{nativeTokenConfig.symbol} available:</strong> {hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} {nativeTokenConfig.symbol}</p>
+        <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount, decimalPlaces)} {nativeTokenConfig.symbol}</p>
+        <p><strong>Fee:</strong> {nftFee} {nativeTokenConfig.symbol}</p>
+        <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee() + depositAmount, decimalPlaces)} {nativeTokenConfig.symbol}</p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>

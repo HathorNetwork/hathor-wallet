@@ -22,7 +22,7 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {
-  const HTR_UID = hathorLib.constants.HATHOR_TOKEN_CONFIG.uid;
+  const HTR_UID = hathorLib.constants.NATIVE_TOKEN_UID;
   const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
 
   return {
@@ -31,6 +31,7 @@ const mapStateToProps = (state) => {
     tokensBalance: state.tokensBalance,
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
+    decimalPlaces: state.serverInfo.decimalPlaces,
   };
 };
 
@@ -191,7 +192,7 @@ class TokenAdministrative extends React.Component {
 
     const renderReadyBalance = () => (
       <>
-        { helpers.renderValue(this.props.tokenBalance.data.available, isNFT) }
+        { hathorLib.numberUtils.prettyValue(this.props.tokenBalance.data.available, isNFT ? 0 : this.props.decimalPlaces) }
         &nbsp;
         { this.props.token.symbol }
       </>
@@ -202,7 +203,7 @@ class TokenAdministrative extends React.Component {
 
     return (
       <div className="flex align-items-center">
-        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.props.totalSupply ? helpers.renderValue(this.props.totalSupply, isNFT) : '-'} {this.props.token.symbol}</p>
+        <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{this.props.totalSupply ? hathorLib.numberUtils.prettyValue(this.props.totalSupply, isNFT ? 0 : this.props.decimalPlaces) : '-'} {this.props.token.symbol}</p>
         <div className="mt-2 mb-2">
           <strong>{t`Your balance available:`} </strong>
           { this.props.tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (

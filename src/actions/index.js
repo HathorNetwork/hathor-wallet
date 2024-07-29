@@ -52,6 +52,17 @@ export const types = {
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
   SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
   UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
+  UPDATE_MINING_SERVER: 'UPDATE_MINING_SERVER',
+  SET_MINING_SERVER: 'SET_MINING_SERVER',
+  SET_NATIVE_TOKEN_DATA: 'SET_NATIVE_TOKEN_DATA',
+  ADD_REGISTERED_TOKENS: 'ADD_REGISTERED_TOKENS',
+  NANOCONTRACT_REGISTER_REQUEST: 'NANOCONTRACT_REGISTER_REQUEST',
+  NANOCONTRACT_REGISTER_ERROR: 'NANOCONTRACT_REGISTER_ERROR',
+  NANOCONTRACT_REGISTER_SUCCESS: 'NANOCONTRACT_REGISTER_SUCCESS',
+  NANOCONTRACT_CLEAN_REGISTER_METADATA: 'NANOCONTRACT_CLEAN_REGISTER_METADATA',
+  NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
+  NANOCONTRACT_UNREGISTER: 'NANOCONTRACT_UNREGISTER',
+  BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
 };
 
 /**
@@ -95,21 +106,6 @@ export const networkUpdate = data => ({ type: 'network_update', payload: data })
 export const lastFailedRequest = data => ({ type: 'last_failed_request', payload: data });
 
 /**
- * Save written password in Redux (it's always cleaned after the use)
- */
-export const updatePassword = data => ({ type: 'update_password', payload: data });
-
-/**
- * Save written pin in Redux (it's always cleaned after the use)
- */
-export const updatePin = data => ({ type: 'update_pin', payload: data });
-
-/**
- * Save words in Redux (it's always cleaned after the use)
- */
-export const updateWords = data => ({ type: 'update_words', payload: data });
-
-/**
  * Update token that is selected in the wallet
  */
 export const selectToken = data => ({ type: 'select_token', payload: data });
@@ -143,9 +139,11 @@ export const updateHeight = (height, htrUpdatedBalance) => ({ type: 'update_heig
 
 /**
  * tokens {Array} array of token uids the the wallet has
+ * registeredTokens {{uid:string, name:string, symbol:string}[]} The registered tokens from the storage
  * currentAddress {Object} The current unused address
+ * registeredNanoContracts {NanoContractData} The registered nano contracts from the storage
  */
-export const loadWalletSuccess = (tokens, registeredTokens, currentAddress) => ({ type: 'load_wallet_success', payload: { tokens, registeredTokens, currentAddress } });
+export const loadWalletSuccess = (tokens, registeredTokens, currentAddress, registeredNanoContracts) => ({ type: 'load_wallet_success', payload: { tokens, registeredTokens, currentAddress, registeredNanoContracts } });
 
 /**
  * tx {Object} the new transaction
@@ -450,11 +448,16 @@ export const resetNavigateTo = () => ({
 });
 
 /**
- * version {str} version of the connected server (e.g., 0.26.0-beta)
- * network {str} network of the connected server (e.g., mainnet, testnet)
- * */
-export const setServerInfo = ({ version, network }) => (
-  { type: types.SET_SERVER_INFO, payload: { version, network } }
+ * @param {string} version - version of the connected server (e.g., 0.26.0-beta)
+ * @param {string} network - network of the connected server (e.g., mainnet, testnet)
+ * @param {number} decimalPlaces - number of decimal places (e.g. 2, 4)
+ * @param {Object[]} customTokens - list of network custom tokens
+ * @param {string} customTokens[].uid
+ * @param {string} customTokens[].name
+ * @param {string} customTokens[].symbol
+ */
+export const setServerInfo = ({ version, network, customTokens, decimalPlaces }) => (
+  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces } }
 );
 
 export const featureToggleInitialized = () => ({
@@ -494,4 +497,119 @@ export const updateTxHistory = (tx, tokenId, balance) => ({
 export const changeWalletState = (newState) => ({
   type: types.WALLET_CHANGE_STATE,
   payload: newState,
+});
+
+/**
+ * Update the tx mining service config on the lib and redux.
+ *
+ * @param {string|undefined} url
+ * @param {boolean} reset
+ */
+export const updateMiningServer = (url, reset) => ({
+  type: types.UPDATE_MINING_SERVER,
+  payload: { url, reset },
+});
+
+/**
+ * Set the mining server url
+ * @param {string|undefined} url
+ */
+export const setMiningServer = (url) => ({
+  type: types.SET_MINING_SERVER,
+  payload: url,
+});
+
+/**
+ * Register nano contract in redux
+ *
+ * @param {string} ncId Nano contract id
+ * @param {string} address Address associated with the nano contract
+ */
+export const registerNanoContract = (ncId, address) => ({
+  type: types.NANOCONTRACT_REGISTER_REQUEST,
+  payload: { ncId, address },
+});
+
+/**
+ * Error when registering a nano contract
+ * @param {string} error Error reason
+ */
+export const nanoContractRegisterError = (error) => ({
+  type: types.NANOCONTRACT_REGISTER_ERROR,
+  payload: { error },
+});
+
+/**
+ * Success when registering nano contract
+ *
+ * @param {INcData} ncData nano contract data
+ */
+export const nanoContractRegisterSuccess = (ncData) => ({
+  type: types.NANOCONTRACT_REGISTER_SUCCESS,
+  payload: ncData,
+});
+
+/**
+ * Clean register metadata of nano contracts
+ *
+ */
+export const cleanNanoContractRegisterMetadata = () => ({
+  type: types.NANOCONTRACT_CLEAN_REGISTER_METADATA,
+});
+
+/**
+ * Set the native token data
+ * @param {Object} data
+ * @param {string} data.symbol
+ * @param {string} data.name
+ * @param {string} data.uid
+ */
+export const setNativeTokenData = (data) => ({
+  type: types.SET_NATIVE_TOKEN_DATA,
+  payload: data,
+});
+
+/**
+ * Add a list of tokens to the store as registered.
+ *
+ * @param {Object[]} data
+ * @param {string} data[].symbol
+ * @param {string} data[].name
+ * @param {string} data[].uid
+ *
+ */
+export const addRegisteredTokens = (data) => ({
+  type: types.ADD_REGISTERED_TOKENS,
+  payload: data,
+});
+
+/**
+ * Add blueprint information
+ *
+ * @param {NanoContractBlueprintInformationAPIResponse} blueprintInformation Blueprint information to add to redux
+ */
+export const addBlueprintInformation = (blueprintInformation) => ({
+  type: types.BLUEPRINT_ADD_INFORMATION,
+  payload: { blueprintInformation }
+});
+
+/**
+ * Edit address of a registered nano contract
+ *
+ * @param {string} ncId Nano contract id
+ * @param {string} address New address of the nano contract
+ */
+export const editAddressNC = (ncId, address) => ({
+  type: types.NANOCONTRACT_EDIT_ADDRESS,
+  payload: { ncId, address }
+});
+
+/**
+ * Unregister nano contract
+ *
+ * @param {string} ncId ID of nano contract to unregister
+ */
+export const nanoContractUnregister = (ncId) => ({
+  type: types.NANOCONTRACT_UNREGISTER,
+  payload: ncId,
 });
