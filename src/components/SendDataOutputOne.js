@@ -9,7 +9,7 @@ import React from 'react';
 import { t } from 'ttag';
 
 /**
- * It renders a card containing a input field for the data cotent as string,
+ * It renders a card containing an input field for the data content as string,
  * and an action to remove the card.
  *
  * @param {Object} props
