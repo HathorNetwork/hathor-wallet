@@ -63,7 +63,6 @@ export const types = {
   NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
   NANOCONTRACT_UNREGISTER: 'NANOCONTRACT_UNREGISTER',
   BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
-  NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
 };
 
 /**
@@ -518,44 +517,6 @@ export const updateMiningServer = (url, reset) => ({
 export const setMiningServer = (url) => ({
   type: types.SET_MINING_SERVER,
   payload: url,
-});
-
-/**
- * Register nano contract in redux
- *
- * @param {string} ncId Nano contract id
- * @param {string} address Address associated with the nano contract
- */
-export const registerNanoContract = (ncId, address) => ({
-  type: types.NANOCONTRACT_REGISTER_REQUEST,
-  payload: { ncId, address },
-});
-
-/**
- * Error when registering a nano contract
- * @param {string} error Error reason
- */
-export const nanoContractRegisterError = (error) => ({
-  type: types.NANOCONTRACT_REGISTER_ERROR,
-  payload: { error },
-});
-
-/**
- * Success when registering nano contract
- *
- * @param {INcData} ncData nano contract data
- */
-export const nanoContractRegisterSuccess = (ncData) => ({
-  type: types.NANOCONTRACT_REGISTER_SUCCESS,
-  payload: ncData,
-});
-
-/**
- * Clean register metadata of nano contracts
- *
- */
-export const cleanNanoContractRegisterMetadata = () => ({
-  type: types.NANOCONTRACT_CLEAN_REGISTER_METADATA,
 });
 
 /**
