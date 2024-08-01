@@ -145,32 +145,6 @@ function NanoContractDetail() {
     };
   }
 
-  const loadData = async () => {
-    await loadBlueprintInformation();
-    await loadNCData();
-  }
-
-  const loadBlueprintInformation = async () => {
-    if (blueprintInformationAux) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const blueprintInformationResponse = await hathorLib.ncApi.getBlueprintInformation(nc.blueprintId);
-      // We need this blueprint information response to call the following get state
-      // The set state is not sync, so we need to store it in a common variable to be used in the next call
-      blueprintInformationAux = blueprintInformationResponse;
-      setBlueprintInformation(blueprintInformationResponse);
-      // Store in redux, so it can be reused by other nano contracts
-      dispatch(addBlueprintInformation(blueprintInformationResponse));
-    } catch(e) {
-      // Error in request
-      setLoading(false);
-      setErrorMessage(t`Error getting blueprint details.`);
-    };
-  }
-
   const loadNCData = async () => {
     setData(null);
     try {
