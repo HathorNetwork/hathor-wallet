@@ -29,6 +29,11 @@ class ModalResetAllData extends React.Component {
   componentDidMount() {
     $('#confirmResetModal').modal('show');
     $('#confirmResetModal').on('hidden.bs.modal', this.props.onClose);
+    // when the modal closes, make sures the fields are reset
+    // XXX: Check if hide and hidden expressions are redundant
+    $('#confirmResetModal').on('hide.bs.modal', () => {
+      this.onDismiss();
+    });
   }
 
   componentWillUnmount() {

@@ -17,7 +17,7 @@ import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
-import { useDispatch, useSelector } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../constants';
 import { walletReset } from '../actions';
@@ -67,8 +67,18 @@ function Settings() {
    */
   const handleReset = () => {
     context.hideModal();
+    // Remove from list of wallets
+    hathorLib.storage.store.removeWallet(hathorLib.storage.store.prefix);
     dispatch(walletReset());
-    navigate('/welcome/');
+    // If there are other wallets, go to screen to choose wallet
+    const firstWallet = wallet.getFirstWalletPrefix();
+    if (firstWallet) {
+      wallet.setWalletPrefix(firstWallet);
+      navigate('/choose_wallet');
+    } else {
+      wallet.setWalletPrefix(null);
+      navigate('/welcome/');
+    }
   }
 
   /**
@@ -225,6 +235,37 @@ function Settings() {
   }
 
   /**
+   * Go to change wallet
+   */
+  handleChangeWallet = () => {
+    // XXX: Adapt
+    hathorLib.wallet.cleanWallet({ cleanAccessData: false });
+    hathorLib.wallet.lock();
+
+    // if this is a hardware wallet, remove it from storage as well
+    if (hathorLib.wallet.isHardwareWallet()) {
+      hathorLib.storage.store.removeWallet(hathorLib.storage.store.prefix);
+    }
+    this.props.history.push('/choose_wallet');
+    $('#confirmModal').modal('hide');
+  }
+
+  /**
+   * Called when user clicks on "Change Wallet" button.
+   */
+  changeWallet = () => {
+    // XXX: Adapt
+    this.setState({
+      confirmData: {
+        title: t`Change wallet`,
+        body: t`Change to a different wallet? You may also connect to a hardware wallet.`,
+        handleYes: this.handleChangeWallet
+      }
+    });
+    $('#confirmModal').modal('show');
+  }
+
+  /**
    * Method called to open external Ledger page.
    *
    * @param {Object} e Event for the click
@@ -323,6 +364,7 @@ function Settings() {
           <button className="btn btn-hathor mt-4" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
           <button className="btn btn-hathor mt-4" onClick={addPassphrase}>{t`Set a passphrase`}</button>
           {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
+          <button className="btn btn-hathor mt-4" onClick={changeWallet}>{t`Change wallet`}</button>
           <button className="btn btn-hathor mt-4" onClick={resetClicked}>{t`Reset all data`}</button>
         </div>
       </div>
@@ -337,4 +379,4 @@ function Settings() {
   );
 }
 
-export default Settings;
+export default connect(mapStateToProps)(Settings);

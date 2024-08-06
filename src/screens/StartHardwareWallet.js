@@ -13,7 +13,13 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/images/hathor-logo.png';
 import ledger from '../utils/ledger';
 import helpers from '../utils/helpers';
-import { IPC_RENDERER, LEDGER_MIN_VERSION, LEDGER_MAX_VERSION } from '../constants';
+import {
+  IPC_RENDERER,
+  LEDGER_MIN_VERSION,
+  LEDGER_MAX_VERSION,
+  LEDGER_GUIDE_URL,
+  HARDWARE_WALLET_NAME,
+} from '../constants';
 import { startWalletRequested } from '../actions';
 import InitialImages from '../components/InitialImages';
 import hathorLib from '@hathor/wallet-lib';
@@ -99,6 +105,13 @@ function StartHardwareWallet() {
       const chainCode = data.slice(65, 97);
       const fingerprint = data.slice(97, 101);
       const xpub = hathorLib.walletUtils.xpubFromData(compressedPubkey, chainCode, fingerprint);
+
+      // For hardware wallets, we first remove it and add again so there's no chance of
+      // wallet name conflict in case it was not properly cleaned up the last time
+      wallet.removeHardwareWalletFromStorage();
+      const prefix = wallet.walletNameToPrefix(HARDWARE_WALLET_NAME);
+      LOCAL_STORE.addWallet(HARDWARE_WALLET_NAME, prefix);
+      wallet.setWalletPrefix(prefix);
 
       LOCAL_STORE.setHardwareWallet(true);
       LOCAL_STORE.markBackupDone();
