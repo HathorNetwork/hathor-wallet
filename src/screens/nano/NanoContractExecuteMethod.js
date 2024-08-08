@@ -268,8 +268,10 @@ function NanoContractExecuteMethod(props) {
       typeToRender = 'str';
     }
 
+    let isSignedData = false;
     if (type.startsWith('SignedData')) {
       typeToRender = 'str';
+      isSignedData = true;
     }
 
     const ref = useRef(null);
@@ -430,6 +432,7 @@ function NanoContractExecuteMethod(props) {
           {renderAddressInForm()}
           <label className="mb-3 mt-3"><strong>Method Parameters</strong></label>
           {renderMethodInputs(data.method)}
+          <hr className="mb-4 mt-2" />
           <div className="d-flex flex-row mb-4">
             <a href="true" onClick={addAction}>{t`Add action`}</a>
           </div>
