@@ -31,11 +31,17 @@ function NanoContractDetail() {
   const context = useContext(GlobalModalContext);
   const wallet = getGlobalWallet();
 
-  const { nanoContracts, blueprintsData, tokenMetadata } = useSelector((state) => {
+  const {
+    nanoContracts,
+    blueprintsData,
+    tokenMetadata,
+    decimalPlaces,
+  } = useSelector((state) => {
     return {
       nanoContracts: state.nanoContracts,
       blueprintsData: state.blueprintsData,
-      tokenMetadata: state.tokenMetadata
+      tokenMetadata: state.tokenMetadata,
+      decimalPlaces: state.serverInfo.decimalPlaces,
     }
   });
 
@@ -168,12 +174,23 @@ function NanoContractDetail() {
       return get(blueprintInformation.attributes, field);
     }
 
-    // Some fields should be better parsed, e.g., timestamp, address
-    // however we don't have a simple and generic way to knowing it
-    // this was discussed and we will have this in the future, so
-    // for now we keep this UI and when we have this feature in the
-    // hathor-core, we can improve the user UI
-    return value === null ? ' - ' : value;
+    if (value == null) {
+      // If value is null or undefined, we show empty string
+      return null;
+    }
+
+    // Get type of value but removing possible optional mark (?) to format the value correctly
+    const type = blueprintInformation.attributes[field].replace('?', '');
+
+    if (type === 'Timestamp') {
+      return hathorLib.dateUtils.parseTimestamp(value);
+    }
+
+    if (type === 'Amount') {
+      return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
+    }
+
+    return value;
   }
 
   const renderNanoAttributes = () => {
