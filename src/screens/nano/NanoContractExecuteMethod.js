@@ -35,11 +35,15 @@ function NanoContractExecuteMethod(props) {
     nanoContracts,
     blueprintsData,
     tokenMetadata,
+    decimalPlaces,
+    registeredTokens,
   } = useSelector((state) => {
     return {
       nanoContracts: state.nanoContracts,
       blueprintsData: state.blueprintsData,
       tokenMetadata: state.tokenMetadata,
+      decimalPlaces: state.serverInfo.decimalPlaces,
+      registeredTokens: state.tokens,
     }
   });
 
@@ -146,16 +150,19 @@ function NanoContractExecuteMethod(props) {
         continue;
       }
 
-      if (args[i].name === 'address') {
-        // This is a workaround while we don't get the correct type
-        // from the hathor core
-        const address = new hathorLib.Address(value, { network: hathorLib.config.getNetwork() });
-        const decodedAddress = address.decode();
-        value = decodedAddress.toString('hex');
+      if (typeToCheck === 'Timestamp') {
+        const timestamp = Date.parse(value) / 1000;
+        argValues.push(timestamp);
+        continue;
+      }
+
+      if (typeToCheck === 'Amount') {
+        const amountValue = walletUtils.decimalToInteger(value, decimalPlaces);
+        argValues.push(amountValue);
+        continue;
       }
 
       argValues.push(value);
-
     }
 
     ncData.args = argValues;
@@ -167,7 +174,7 @@ function NanoContractExecuteMethod(props) {
         continue;
       }
 
-      const amountValue = isNFT(action.token) ? action.amount : walletUtils.decimalToInteger(action.amount);
+      const amountValue = isNFT(action.token) ? action.amount : walletUtils.decimalToInteger(action.amount, decimalPlaces);
       action.amount = amountValue;
 
       actionsData.push(action);
@@ -185,7 +192,72 @@ function NanoContractExecuteMethod(props) {
     return helpers.isTokenNFT(token, tokenMetadata);
   }
 
-  const renderInput = (name, type) => {
+  /**
+   * Method executed when link to select an address to sign is clicked
+   *
+   * @param {Object} ref Input reference
+   * @param {Object} e Event emitted by the link clicked
+   */
+  const onSelectAddressToSign = (ref, e) => {
+    e.preventDefault();
+    globalModalContext.showModal(MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN, {
+      success: (value) => {
+        ref.current.value = value;
+      },
+    });
+  }
+
+  const renderTokenOptions = () => {
+    return registeredTokens.map((token) => {
+      return <option value={token.uid} key={token.uid}>{token.name} ({token.symbol})</option>;
+    })
+  }
+
+  const renderTokenSelect = (ref, required, onChange) => {
+    return (
+      <select ref={ref} required={required} className="form-control" onChange={onChange}>
+        <option value='' key=''> - </option>
+        {renderTokenOptions()}
+      </select>
+    );
+  }
+
+  const renderInput = (type, isOptional, ref) => {
+
+    if (type === 'Amount') {
+      return <InputNumber
+              required={!isOptional}
+              requirePositive={true}
+              ref={ref}
+              className="form-control output-value"
+              placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
+            />
+    }
+
+    if (type === 'TokenUid') {
+      return renderTokenSelect(ref, !isOptional);
+    }
+
+    // TODO Validation
+    // 'VertexId': hexadecimal
+    // 'TxOutputScript': hexadecimal
+    // 'Address': address base58
+    // 'TokenUid': select with token_uid hexadecimal
+    // 'Amount': amount depending on decimal places
+    // 'Timestamp': no validation, only get timestamp from date input
+    let inputType;
+    if (type === 'int' || type === 'float') {
+      inputType = 'number';
+    } else if (type === 'Timestamp') {
+      inputType = 'datetime-local';
+    } else {
+      inputType = 'text';
+    }
+
+    return <input required={!isOptional} ref={ref} type={inputType} className="form-control" />;
+  }
+
+  const renderInputDiv = (name, type) => {
     // Check optional type
     // Optional fields end with ?
     const splittedType = type.split('?');
@@ -200,21 +272,15 @@ function NanoContractExecuteMethod(props) {
       typeToRender = 'str';
     }
 
-    let inputType;
-    if (typeToRender === 'int' || typeToRender === 'float') {
-      inputType = 'number';
-    } else {
-      inputType = 'text';
-    }
-
     const ref = useRef(null);
     formRefs.push(ref);
 
     return (
       <div className="row" key={name}>
         <div className="form-group col-6">
-          <label>{name}</label>
-          <input required={!isOptional} ref={ref} type={inputType} className="form-control" />
+          <label>{name} {!isOptional && '*'}</label>
+          {renderInput(typeToRender, isOptional, ref)}
+          { isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSign(ref, e)}>{t`Select address to sign`}</a></div> }
         </div>
       </div>
     );
@@ -223,7 +289,7 @@ function NanoContractExecuteMethod(props) {
   const renderMethodInputs = (method) => {
     const args = get(data.blueprintInformation.public_methods, `${method}.args`, []);
     return args.map(arg =>
-      renderInput(arg.name, arg.type)
+      renderInputDiv(arg.name, arg.type)
     );
   }
 
@@ -267,7 +333,7 @@ function NanoContractExecuteMethod(props) {
       };
     } else {
       inputNumberProps = {
-        placeholder: hathorLib.numberUtils.prettyValue(0)
+        placeholder: hathorLib.numberUtils.prettyValue(0, decimalPlaces)
       };
     }
 
@@ -276,7 +342,7 @@ function NanoContractExecuteMethod(props) {
         <div className="d-flex flex-grow-1">
           <div className="col-8">
             <label>{t`Token`}</label>
-            <input required type="text" className="form-control" onChange={e => onActionValueChange(index, 'token', e.target.value)} />
+            {renderTokenSelect(null, true, (e) => onActionValueChange(index, 'token', e.target.value))}
           </div>
           <div className="col-4">
             <label>{t`Amount`}</label>
