@@ -14,6 +14,7 @@ import colors from '../../index.module.scss';
 import ModalChangeAddress from '../../components/nano/ModalChangeAddress';
 import helpers from '../../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
+import path from 'path';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addBlueprintInformation, nanoContractUnregister } from '../../actions';
@@ -31,11 +32,12 @@ function NanoContractDetail() {
   const context = useContext(GlobalModalContext);
   const wallet = getGlobalWallet();
 
-  const { nanoContracts, blueprintsData, tokenMetadata } = useSelector((state) => {
+  const { nanoContracts, blueprintsData, tokenMetadata, decimalPlaces } = useSelector((state) => {
     return {
       nanoContracts: state.nanoContracts,
       blueprintsData: state.blueprintsData,
-      tokenMetadata: state.tokenMetadata
+      tokenMetadata: state.tokenMetadata,
+      decimalPlaces: state.serverInfo.decimalPlaces,
     }
   });
 
@@ -139,7 +141,7 @@ function NanoContractDetail() {
   const loadNCData = async () => {
     setData(null);
     try {
-      const state = await hathorLib.ncApi.getNanoContractState(ncId, Object.keys(blueprintInformationAux.attributes), [], []);
+      const state = await hathorLib.ncApi.getNanoContractState(ncId, Object.keys(blueprintInformationAux.attributes), ['__all__'], []);
       setData(state);
     } catch(e) {
       // Error in request
@@ -176,6 +178,30 @@ function NanoContractDetail() {
     return value === null ? ' - ' : value;
   }
 
+  /**
+   * Method called when user clicked on the token in the balance list
+   *
+   * @param {Object} e Event for the click
+   * @param {string} token Token uid clicked
+   */
+  const goToExplorer = (e, token) => {
+    e.preventDefault();
+    const url = path.join(helpers.getExplorerURL(), `/token_detail/${token}`);
+    helpers.openExternalURL(url);
+  }
+
+  const renderNanoBalances = () => {
+    return Object.entries(data.balances).map(([token, amount]) => {
+      return (
+        <div key={token} className="d-flex flex-column">
+          <p><strong>Token: </strong>{token === hathorLib.constants.NATIVE_TOKEN_UID ? token : <a href="true" onClick={(e) => goToExplorer(e, token)}>{token}</a>}</p>
+          <p><strong>Amount: </strong>{hathorLib.numberUtils.prettyValue(amount.value, decimalPlaces)}</p>
+          <hr />
+        </div>
+      );
+    });
+  }
+
   const renderNanoAttributes = () => {
     return Object.keys(data.fields).map((field) => {
       const value = get(data.fields[field], 'value', undefined);
@@ -202,6 +228,13 @@ function NanoContractDetail() {
         <p><strong>Blueprint: </strong>{blueprintInformation.name}</p>
         <p><strong>Address: </strong>{nc.address} (<a href="true" onClick={changeAddress}>{t`Change`}</a>)</p>
         {renderNanoAttributes()}
+        <hr />
+        <div>
+          <p className="text-center mb-4"><strong>Balances:</strong></p>
+          <div className="d-flex flex-column mt-3">
+            {renderNanoBalances()}
+          </div>
+        </div>
         <hr />
         <div>
           <p className="text-center mb-4"><strong>Available methods:</strong></p>
