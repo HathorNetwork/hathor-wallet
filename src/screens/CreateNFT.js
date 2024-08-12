@@ -347,10 +347,10 @@ function CreateNFT() {
           </div>
         </div>
         <hr className="mb-5 mt-5"/>
-        <p><strong>${nativeTokenConfig.symbol} available:</strong> {hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} ${nativeTokenConfig.symbol}</p>
-        <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount, decimalPlaces)} ${nativeTokenConfig.symbol}</p>
-        <p><strong>Fee:</strong> {nftFee} ${nativeTokenConfig.symbol}</p>
-        <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee() + depositAmount, decimalPlaces)} ${nativeTokenConfig.symbol}</p>
+        <p><strong>{nativeTokenConfig.symbol} available:</strong> {hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} {nativeTokenConfig.symbol}</p>
+        <p><strong>Deposit:</strong> {hathorLib.numberUtils.prettyValue(depositAmount, decimalPlaces)} {nativeTokenConfig.symbol}</p>
+        <p><strong>Fee:</strong> {nftFee} {nativeTokenConfig.symbol}</p>
+        <p><strong>Total:</strong> {hathorLib.numberUtils.prettyValue(tokensUtils.getNFTFee() + depositAmount, decimalPlaces)} {nativeTokenConfig.symbol}</p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>
