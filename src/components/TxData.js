@@ -14,7 +14,7 @@ import HathorAlert from './HathorAlert';
 import SpanFmt from './SpanFmt';
 import { selectToken, setNavigateTo } from '../actions/index';
 import { connect } from "react-redux";
-import { get } from 'lodash';
+import { get, upperFirst } from 'lodash';
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
 import hathorLib, { numberUtils } from '@hathor/wallet-lib';
@@ -891,6 +891,29 @@ class TxData extends React.Component {
       return helpers.isTokenNFT(createdToken.uid, this.props.tokenMetadata);
     }
 
+    const renderNCActionsList = () => {
+      return this.props.transaction.nc_context.actions.map((action, index) => (
+        <div key={index} className="d-flex flex-column align-items-start">
+          <div>
+            <label>Type:</label> {upperFirst(action.type)}
+          </div>
+          <div>
+            <label>Amount:</label> {numberUtils.prettyValue(action.amount, this.props.decimalPlaces)} {this.getSymbol(action.token_uid)}
+          </div>
+        </div>
+      ));
+    }
+
+    const renderNCActions = () => {
+      const actionsCount = get(this.props.transaction, 'nc_context.actions.length', 0);
+      return (
+        <div className="d-flex flex-column align-items-start common-div bordered-wrapper mr-3">
+          <div><label>Actions ({ actionsCount })</label></div>
+          {actionsCount > 0 && renderNCActionsList()}
+        </div>
+      );
+    }
+
     const renderNCData = () => {
       if (this.state.ncLoading) {
         return (
@@ -917,6 +940,10 @@ class TxData extends React.Component {
     }
 
     const renderNCArguments = (args) => {
+      if (!Array.isArray(args) || args.length === 0) {
+        return ' - ';
+      }
+
       return args.map((arg) => (
         <div key={arg.name}>
           <label>{arg.name}:</label> {renderArgValue(arg)}
@@ -955,6 +982,9 @@ class TxData extends React.Component {
           </div>
           <div className="d-flex flex-row align-items-start mb-3">
             {this.props.transaction.version === hathorLib.constants.NANO_CONTRACTS_VERSION && renderNCData()}
+          </div>
+          <div className="d-flex flex-row align-items-start mb-3">
+            {this.props.transaction.version === hathorLib.constants.NANO_CONTRACTS_VERSION && renderNCActions()}
           </div>
           <div className="d-flex flex-row align-items-start mb-3">
             <div className="f-flex flex-column align-items-start common-div bordered-wrapper mr-3">
