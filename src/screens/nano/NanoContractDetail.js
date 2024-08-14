@@ -193,10 +193,9 @@ function NanoContractDetail() {
   const renderNanoBalances = () => {
     return Object.entries(data.balances).map(([token, amount]) => {
       return (
-        <div key={token} className="d-flex flex-column">
+        <div key={token} className="d-flex flex-column nc-token-balance">
           <p><strong>Token: </strong>{token === hathorLib.constants.NATIVE_TOKEN_UID ? token : <a href="true" onClick={(e) => goToExplorer(e, token)}>{token}</a>}</p>
           <p><strong>Amount: </strong>{hathorLib.numberUtils.prettyValue(amount.value, decimalPlaces)}</p>
-          <hr />
         </div>
       );
     });

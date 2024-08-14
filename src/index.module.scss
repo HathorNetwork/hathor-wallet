@@ -918,3 +918,8 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+div .nc-token-balance:not(:last-child) {
+  border-bottom: 1px solid #000;
+  margin-bottom: 1rem;
+}
