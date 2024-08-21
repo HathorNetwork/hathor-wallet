@@ -78,8 +78,11 @@ export default function TokenBar () {
    */
   const lockWallet = () => {
     LOCAL_STORE.lock();
-    navigate('/locked/');
-  };
+    if (hathorLib.wallet.isHardwareWallet()) {
+      wallet.removeHardwareWalletFromStorage();
+    }
+    navigate('/choose_wallet/');
+  }
 
   /**
    * Called when user clicks to go to settings, then redirects to settings screen

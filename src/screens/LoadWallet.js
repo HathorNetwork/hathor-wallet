@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import hathorLib from '@hathor/wallet-lib';
 import InitialImages from '../components/InitialImages';
 import LOCAL_STORE from '../storage';
+import { useDispatch } from 'react-redux';
 
 /**
  * Screen used to load a wallet that already exists
@@ -34,13 +35,19 @@ function LoadWallet() {
   /** askPassword {boolean} If should show password component */
   const [askPassword, setAskPassword] = useState(false);
   /** password {string} New password being created by the user */
-  const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   /** askPIN {boolean} If should show PIN component */
   const [askPIN, setAskPIN] = useState(false);
   /** wordsCount {number} Number of words written on words input */
   const [wordsCount, setWordsCount] = useState(0);
   const wordsInputRef = useRef();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { pin, password, initWalletName } = useSelector((state) => ({
+    pin: state.pin,
+    password: state.password,
+    initWalletName: state.initWalletName
+  }));
 
   /**
    * Method called when user clicks the 'Import' button
@@ -67,7 +74,7 @@ function LoadWallet() {
    * @param {string} newPassword New password, already validated
    */
   const passwordSuccess = (newPassword) => {
-    setPassword(newPassword);
+    setNewPassword(newPassword);
     // This method is called after the ChoosePassword component has a valid password and succeeds
     setAskPIN(true);
   }
@@ -77,16 +84,26 @@ function LoadWallet() {
    * @param {string} newPin New Pin, already validated
    */
   const pinSuccess = (newPin) => {
+    const pinToUse = newPin.trim() ? newPin : pin;
+    const passwordToUse = newPassword.trim() ? newPassword : password;
+
     LOCAL_STORE.unlock();
     // First we clean what can still be there of a last wallet
-    wallet.generateWallet(words, '', newPin, password);
-
+    const prefix = wallet.walletNameToPrefix(initWalletName);
+    LOCAL_STORE.addWallet(initWalletName, prefix);
+    wallet.setWalletPrefix(prefix);
+    hathorLib.wallet.setWalletType('software');
+    wallet.generateWallet(words, '', pinToUse, passwordToUse, history);
     // Being extra cautious with sensitive information
     setWords('');
-    setPassword('');
-
+    setNewPassword('');
     LOCAL_STORE.markBackupDone();
+    hathorLib.wallet.markWalletAsStarted(); // XXX: Check if it is redundant with `open`
     LOCAL_STORE.open(); // Mark this wallet as open, so that it does not appear locked after loading
+    navigate('/wallet/');
+    // Clean pin and password from redux
+    dispatch(updatePassword(null));
+    dispatch(updatePin(null));
   }
 
   /**
