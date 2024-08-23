@@ -20,6 +20,11 @@ import { getGlobalWallet } from "../../modules/wallet";
 import walletUtils from '../../utils/wallet';
 import helpers from '../../utils/helpers';
 
+// We should export library types
+const NanoContractActionType = {
+  DEPOSIT: 'deposit',
+  WITHDRAWAL: 'withdrawal',
+};
 
 /**
  * Execute a nano contract method
@@ -77,24 +82,89 @@ function NanoContractExecuteMethod(props) {
   // List of refs of the arguments form
   const formRefs = [];
 
+  // {string | null} If there is an error message when sending
+  const [errorMessage, setErrorMessage] = useState(null);
+
   // This will store each action in an array of objects
   // { type, token, amount, address }
   const [actions, setActions] = useState([]);
   const globalModalContext = useContext(GlobalModalContext);
+
+  // We must store the ref of action addresses because we use for the validation
+  const actionAddressesRef = useRef([]);
 
   /**
    * Method executed when user clicks to execute the method
    * We validate the arguments form and open the PIN modal
    */
   const executeMethod = () => {
-    // TODO Validation
-    // 'VertexId': hexadecimal
-    // 'TxOutputScript': hexadecimal
-    // 'Address': address base58
-    // TODO what happens if the address to sign is not from this wallet?
+    let hasError = false;
+
+    /**
+     * Helper method to valida address and set custom validity in the refs
+     *
+     * @param {string} value Value from the address input
+     * @param {Object} ref Input reference to set custom validity
+     */
+    const validateAddress = (value, ref) => {
+      // Optional values were already handled
+      if (!value) {
+        ref.setCustomValidity(t`Address is required.`);
+        return;
+      }
+
+      const addressObj = new hathorLib.Address(value, { network: wallet.getNetworkObject() });
+      if (addressObj.isValid()) {
+        ref.setCustomValidity('');
+        return;
+      }
+
+      if (!addressObj.isValid()) {
+        ref.setCustomValidity(t`Invalid address.`);
+        hasError = true;
+      }
+    }
+
+    // The Address regex can be achieved but it's not good for readability or maintenance
+    // then I prefer to validate all Address inputs here
+    // First I validate the Address inputs in the arguments list, then I validate the addresses
+    // in the withdrawal actions
+    const args = get(data.blueprintInformation.public_methods, `${data.method}.args`, []);
+    for (let i=0; i<args.length; i++) {
+      const splittedType = args[i].type.split('?');
+      const isOptional = splittedType.length === 2;
+      // Skip optional arguments that are null
+      if (isOptional && value == null) {
+        continue;
+      }
+
+      const typeToCheck = splittedType[0];
+      if (typeToCheck !== 'Address') {
+        continue;
+      }
+      const addressInputValue = formRefs[i].current.value;
+      validateAddress(addressInputValue, formRefs[i].current);
+    }
+
+    for (let i=0; i<actions.length; i++) {
+      const action = actions[i];
+      if (action.type !== NanoContractActionType.WITHDRAWAL) {
+        continue;
+      }
+
+      validateAddress(action.address, actionAddressesRef.current[i]);
+    }
+
+    // Check form with required and pattern html input parameters
+    // This check must be the last because we clean the setCustomValidity
+    // of the address fields above in case they are valid now
     const isValid = formExecuteMethodRef.current.checkValidity();
     if (!isValid) {
       formExecuteMethodRef.current.classList.add('was-validated')
+      hasError = true;
+    }
+
+    if (hasError) {
       return;
     }
 
@@ -104,6 +174,7 @@ function NanoContractExecuteMethod(props) {
           pin,
           prepareSendTransaction,
           onSendSuccess: onMethodExecuted,
+          onSendError: setErrorMessage,
           title: isCreateNanoContract ? t`Creating Nano Contract` : t`Executing Nano Contract Method`,
         });
       }
@@ -289,7 +360,18 @@ function NanoContractExecuteMethod(props) {
       inputType = 'text';
     }
 
-    return <input required={!isOptional} ref={ref} type={inputType} className="form-control" />;
+    let pattern = '';
+    // Arguments VertexId, ContractId must be a 64 chars hexadecimal string
+    if (type === 'VertexId' || type === 'ContractId') {
+      pattern = "[a-fA-F\d]{64}";
+    }
+
+    // TxOutputScript and bytes must be in hexadecimal
+    if (type === 'bytes' || type === 'TxOutputScript') {
+      pattern = "[a-fA-F\d]+";
+    }
+
+    return <input required={!isOptional} ref={ref} type={inputType} pattern={pattern} className="form-control" />;
   }
 
   /**
@@ -390,6 +472,9 @@ function NanoContractExecuteMethod(props) {
       return null;
     }
 
+    // I start the ref as null, then I set it in the input if it's a withdrawal
+    actionAddressesRef.current[index] = null;
+
     const token = actions[index].token;
     // Depending on the token, the input for the amount changes because it might be an NFT
     const nft = isNFT(token);
@@ -429,12 +514,18 @@ function NanoContractExecuteMethod(props) {
     const renderRemoveButton = () => {
       return (
         <div className="align-items-end d-flex">
-          <button type="button" className="form-control text-danger remove-action-btn" onClick={() => removeAction(index)}>{t`Remove`}</button>
+          <button
+            type="button"
+            className="form-control text-danger remove-action-btn"
+            onClick={() => removeAction(index)}
+          >
+            {t`Remove`}
+          </button>
         </div>
       )
     }
 
-    if (type === "withdrawal") {
+    if (type === NanoContractActionType.WITHDRAWAL) {
       return (
         <>
           <div className="d-flex flex-grow-1">
@@ -444,7 +535,15 @@ function NanoContractExecuteMethod(props) {
           <div className="d-flex w-50 mt-3">
             <div className="d-flex flex-column flex-grow-1">
               <label>{t`Address`}</label>
-              <input required type="text" className="form-control" onChange={e => onActionValueChange(index, 'address', e.target.value)} />
+              <input
+                required
+                type="text"
+                ref={ref => {
+                  actionAddressesRef.current[index] = ref
+                }}
+                className="form-control"
+                onChange={e => onActionValueChange(index, 'address', e.target.value)}
+              />
             </div>
           </div>
         </>
@@ -493,8 +592,8 @@ function NanoContractExecuteMethod(props) {
             <label>{t`Type`}</label>
             <select className="form-control pr-1 pl-1" value={action.type} onChange={e => onActionValueChange(index, 'type', e.target.value)}>
               <option value=""> -- </option>
-              <option value="deposit">Deposit</option>
-              <option value="withdrawal">Withdrawal</option>
+              <option value={NanoContractActionType.DEPOSIT}>Deposit</option>
+              <option value={NanoContractActionType.WITHDRAWAL}>Withdrawal</option>
             </select>
           </div>
           {renderActionInputs(index)}
@@ -520,6 +619,7 @@ function NanoContractExecuteMethod(props) {
             {renderActions()}
           </div>
           <button type="button" className="mt-3 btn btn-hathor" onClick={executeMethod}>{isCreateNanoContract ? t`Create` : t`Execute Method`}</button>
+          { errorMessage && <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p> }
         </form>
       </div>
     </div>
