@@ -10,7 +10,6 @@ import { t } from 'ttag'
 import BackButton from '../../components/BackButton';
 import InputNumber from '../../components/InputNumber';
 import colors from '../../index.module.scss';
-import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { get, pullAt } from 'lodash';
@@ -24,6 +23,22 @@ import helpers from '../../utils/helpers';
 
 /**
  * Execute a nano contract method
+ *
+ * This component renders a generic form to create a nano contract transaction
+ *
+ * Using the blueprint information from the full node and the method to be executed
+ * the screen knows which arguments and its types are expected for this method execution.
+ *
+ * With this, we render the form, so the required (and optional) arguments are filled.
+ *
+ * Apart from arguments, a nano contract transaction might have actions. We currently
+ * don't have a way to know if a method requires actions, so we can't validate that. 
+ * So we leave for the user to add as many actions as he needs/wants.
+ *
+ * Adding a wrong amount of actions (or the wrong type) will make the transaction fail
+ * in the full node, so the user must know this before going to this screen.
+ * 
+ * In the future we should have a way to validate this.
  *
  * @memberof Screens
  */
@@ -65,10 +80,18 @@ function NanoContractExecuteMethod(props) {
   // This will store each action in an array of objects
   // { type, token, amount, address }
   const [actions, setActions] = useState([]);
-  const [loading, setLoading] = useState(false);
   const globalModalContext = useContext(GlobalModalContext);
 
+  /**
+   * Method executed when user clicks to execute the method
+   * We validate the arguments form and open the PIN modal
+   */
   const executeMethod = () => {
+    // TODO Validation
+    // 'VertexId': hexadecimal
+    // 'TxOutputScript': hexadecimal
+    // 'Address': address base58
+    // TODO what happens if the address to sign is not from this wallet?
     const isValid = formExecuteMethodRef.current.checkValidity();
     if (!isValid) {
       formExecuteMethodRef.current.classList.add('was-validated')
@@ -114,10 +137,16 @@ function NanoContractExecuteMethod(props) {
   }
 
   /**
+   * This is the method that will be executed after the user types the PIN
+   * It will prepare and send the nano contract transaction
+   *
+   * @param {string} pin PIN typed by the user
    */
   const prepareSendTransaction = async (pin) => {
     const ncData = {};
     let address;
+    // If it's a nano contract creation, we get the address from the input
+    // otherwise we get it from the registered data in redux
     if (isCreateNanoContract) {
       ncData.blueprintId = data.blueprintInformation.id;
       address = addressRef.current.value;
@@ -126,6 +155,7 @@ function NanoContractExecuteMethod(props) {
       ncData.ncId = data.ncId;
     }
 
+    // First we get all the argument values and parse the input values to the expected type
     const argValues = [];
     const args = get(data.blueprintInformation.public_methods, `${data.method}.args`, []);
     for (let i=0; i<args.length; i++) {
@@ -162,11 +192,13 @@ function NanoContractExecuteMethod(props) {
         continue;
       }
 
+      // All other types we expect as strings
       argValues.push(value);
     }
 
     ncData.args = argValues;
 
+    // Then we get the list of actions
     const actionsData = [];
     for (const action of actions) {
       if (!action.type) {
@@ -187,6 +219,8 @@ function NanoContractExecuteMethod(props) {
 
   /**
    * Return if token is an NFT
+   *
+   * @param {string} token Token uid to check if it's NFT
    */
   const isNFT = (token) => {
     return helpers.isTokenNFT(token, tokenMetadata);
@@ -207,12 +241,23 @@ function NanoContractExecuteMethod(props) {
     });
   }
 
+  /**
+   * This renders all the options of the token select for a tokenUid argument
+   */
   const renderTokenOptions = () => {
     return registeredTokens.map((token) => {
       return <option value={token.uid} key={token.uid}>{token.name} ({token.symbol})</option>;
     })
   }
 
+  /**
+   * If an argument of the method is a token uid, we show a select
+   * with all tokens registered in the wallet
+   *
+   * @param {Object} ref React reference object
+   * @param {boolean} required If this argument is required
+   * @param {Function} onChange Method called when the select changes
+   */
   const renderTokenSelect = (ref, required, onChange) => {
     return (
       <select ref={ref} required={required} className="form-control" onChange={onChange}>
@@ -222,8 +267,20 @@ function NanoContractExecuteMethod(props) {
     );
   }
 
+  /**
+   * Method that has the logic to render the input for each argument
+   *
+   * Amount argument is an InputNumber
+   * TokenUid will show a select with registered tokens
+   * int and float are simple numbers
+   * Timestamp will have a datetime-local
+   * The rest will be a text input
+   *
+   * @param {string} type Argument type to render the input
+   * @param {boolean} isOptional If this argument is optional
+   * @param {Object} ref React reference object
+   */
   const renderInput = (type, isOptional, ref) => {
-
     if (type === 'Amount') {
       return <InputNumber
               required={!isOptional}
@@ -238,13 +295,6 @@ function NanoContractExecuteMethod(props) {
       return renderTokenSelect(ref, !isOptional);
     }
 
-    // TODO Validation
-    // 'VertexId': hexadecimal
-    // 'TxOutputScript': hexadecimal
-    // 'Address': address base58
-    // 'TokenUid': select with token_uid hexadecimal
-    // 'Amount': amount depending on decimal places
-    // 'Timestamp': no validation, only get timestamp from date input
     let inputType;
     if (type === 'int' || type === 'float') {
       inputType = 'number';
@@ -257,6 +307,12 @@ function NanoContractExecuteMethod(props) {
     return <input required={!isOptional} ref={ref} type={inputType} className="form-control" />;
   }
 
+  /**
+   * Renders the div that contains the argument input
+   *
+   * @param {string} name Argument name
+   * @param {string} type Argument type to render the input
+   */
   const renderInputDiv = (name, type) => {
     // Check optional type
     // Optional fields end with ?
@@ -268,10 +324,12 @@ function NanoContractExecuteMethod(props) {
       typeToRender = 'str';
     }
 
+    // SignedData values are strings
     if (type.startsWith('SignedData')) {
       typeToRender = 'str';
     }
 
+    // Create a new ref for this argument to be used in the input and adds it to the array of refs
     const ref = useRef(null);
     formRefs.push(ref);
 
@@ -286,6 +344,11 @@ function NanoContractExecuteMethod(props) {
     );
   }
 
+  /**
+   * Renders all the inputs for the blueprint method that will be executed
+   *
+   * @param {string} method Method that will be executed
+   */
   const renderMethodInputs = (method) => {
     const args = get(data.blueprintInformation.public_methods, `${method}.args`, []);
     return args.map(arg =>
@@ -293,6 +356,10 @@ function NanoContractExecuteMethod(props) {
     );
   }
 
+  /**
+   * If it's a nano contract creation (initialize method)
+   * we must ask the user to select an address
+   */
   const renderChooseAddress = () => {
     return (
       <div className="row">
@@ -304,6 +371,9 @@ function NanoContractExecuteMethod(props) {
     );
   }
 
+  /**
+   * Shows select address or the registered address, in case it's not initialize
+   */
   const renderAddressInForm = () => {
     if (isCreateNanoContract) {
       return renderChooseAddress();
@@ -312,11 +382,24 @@ function NanoContractExecuteMethod(props) {
     }
   }
 
+  /**
+   * This method is executed when any value of any action attribute changes
+   * It updates the state array of actions
+   *
+   * @param {number} index Index of the action that was changed
+   * @param {string} key Key attribute that was changed
+   * @param {string} value The new value of the attribute
+   */
   const onActionValueChange = (index, key, value) => {
     actions[index][key] = value;
     setActions([...actions]);
   }
 
+  /**
+   * Renders the input for each action depending if it's withdrawal or deposit
+   *
+   * @param {number} index Index of the action to render
+   */
   const renderActionInputs = (index) => {
     const type = actions[index].type;
     if (!type) {
@@ -324,6 +407,7 @@ function NanoContractExecuteMethod(props) {
     }
 
     const token = actions[index].token;
+    // Depending on the token, the input for the amount changes because it might be an NFT
     const nft = isNFT(token);
     let inputNumberProps;
     if (nft) {
@@ -391,17 +475,32 @@ function NanoContractExecuteMethod(props) {
     );
   }
 
+  /**
+   * Method executed when user clicks the link to add a new action
+   * It adds an empty action to the actions list
+   *
+   * @param {Event} e Event triggered by the anchor click
+   */
   const addAction = (e) => {
     e.preventDefault();
     actions.push({});
     setActions([...actions]);
   }
 
+  /**
+   * Method executed when user clicks the button to remove an action
+   * It removes the action from the list and updates the state
+   *
+   * @param {number} index Index of the action to be removed
+   */
   const removeAction = (index) => {
     pullAt(actions, [index]);
     setActions([...actions]);
   }
 
+  /**
+   * Render the actions from the array in the state
+   */
   const renderActions = () => {
     return actions.map((action, index) => {
       return (
@@ -436,7 +535,6 @@ function NanoContractExecuteMethod(props) {
           <div className="d-flex flex-column">
             {renderActions()}
           </div>
-          {loading && <ReactLoading type='spin' color={colors.purpleHathor} width={32} height={32} />}
           <button type="button" className="mt-3 btn btn-hathor" onClick={executeMethod}>{isCreateNanoContract ? t`Create` : t`Execute Method`}</button>
         </form>
       </div>
