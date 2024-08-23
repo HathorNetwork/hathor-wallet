@@ -360,7 +360,7 @@ function NanoContractExecuteMethod(props) {
       inputType = 'text';
     }
 
-    let pattern = '';
+    let pattern = null;
     // Arguments VertexId, ContractId must be a 64 chars hexadecimal string
     if (type === 'VertexId' || type === 'ContractId') {
       pattern = "[a-fA-F\d]{64}";
