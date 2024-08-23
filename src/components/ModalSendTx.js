@@ -14,6 +14,7 @@ import SendTxHandler from '../components/SendTxHandler';
 import ReactLoading from 'react-loading';
 import { colors } from '../constants';
 import { getGlobalWallet } from '../modules/wallet';
+import { errors as hathorErrors } from '@hathor/wallet-lib';
 
 
 const mapStateToProps = (state) => {
@@ -85,7 +86,23 @@ export class ModalSendTx extends React.Component {
       await wallet.validateAndRenewAuthToken(pin);
     }
 
-    const preparedTx = await this.props.prepareSendTransaction(pin);
+    let preparedTx = null;
+    try {
+      preparedTx = await this.props.prepareSendTransaction(pin);
+    } catch (e) {
+      let errorMessage = t`Error sending transaction.`;
+      if (e instanceof hathorErrors.NanoContractTransactionError) {
+        // Nano contract transaction errors return a user friendly error message
+        // All send errors should extend from a single error class, so we can
+        // capture all of them here and show a nice message to the user, but
+        // for now we can only do this.
+        // In the future we should use error code, to have error messages translated
+        errorMessage = e.message;
+      }
+      console.error(e);
+      this.sendErrorHandler(errorMessage);
+    }
+
     if (preparedTx) {
       // Show send tx handler component and start sending
       this.setState({ preparedTransaction: preparedTx });
