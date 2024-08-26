@@ -101,7 +101,7 @@ function NanoContractExecuteMethod(props) {
     let hasError = false;
 
     /**
-     * Helper method to valida address and set custom validity in the refs
+     * Helper method to validate address and set custom validity in the refs
      *
      * @param {string} value Value from the address input
      * @param {Object} ref Input reference to set custom validity
@@ -109,6 +109,7 @@ function NanoContractExecuteMethod(props) {
     const validateAddress = (value, ref) => {
       // Optional values were already handled
       if (!value) {
+        hasError = true;
         ref.setCustomValidity(t`Address is required.`);
         return;
       }
@@ -119,10 +120,8 @@ function NanoContractExecuteMethod(props) {
         return;
       }
 
-      if (!addressObj.isValid()) {
-        ref.setCustomValidity(t`Invalid address.`);
-        hasError = true;
-      }
+      ref.setCustomValidity(t`Invalid address.`);
+      hasError = true;
     }
 
     // The Address regex can be achieved but it's not good for readability or maintenance
@@ -148,11 +147,17 @@ function NanoContractExecuteMethod(props) {
 
     for (let i=0; i<actions.length; i++) {
       const action = actions[i];
+      // Only withdrawal actions have address
       if (action.type !== NanoContractActionType.WITHDRAWAL) {
         continue;
       }
 
       validateAddress(action.address, actionAddressesRef.current[i]);
+    }
+
+    // If it's a nano contract creation, the address to sign also must be validated
+    if (isCreateNanoContract) {
+      validateAddress(addressRef.current.value, addressRef.current);
     }
 
     // Check form with required and pattern html input parameters
@@ -168,6 +173,7 @@ function NanoContractExecuteMethod(props) {
       return;
     }
 
+    // Here the form is valid, so we show the PIN modal to send the tx
     globalModalContext.showModal(MODAL_TYPES.PIN, {
       onSuccess: ({pin}) => {
         globalModalContext.showModal(MODAL_TYPES.SEND_TX, {
@@ -363,12 +369,12 @@ function NanoContractExecuteMethod(props) {
     let pattern = null;
     // Arguments VertexId, ContractId must be a 64 chars hexadecimal string
     if (type === 'VertexId' || type === 'ContractId') {
-      pattern = "[a-fA-F\d]{64}";
+      pattern = "[a-fA-F0-9]{64}";
     }
 
     // TxOutputScript and bytes must be in hexadecimal
     if (type === 'bytes' || type === 'TxOutputScript') {
-      pattern = "[a-fA-F\d]+";
+      pattern = "[a-fA-F0-9]+";
     }
 
     return <input required={!isOptional} ref={ref} type={inputType} pattern={pattern} className="form-control" />;
