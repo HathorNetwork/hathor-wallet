@@ -952,7 +952,7 @@ class TxData extends React.Component {
     }
 
     const renderArgValue = (arg) => {
-      const typeBytesOrigin = ['bytes', 'TxOutputScript', 'TokenUid', 'VertexId'];
+      const typeBytesOrigin = ['bytes', 'TxOutputScript', 'TokenUid', 'VertexId', 'ContractId'];
       if (typeBytesOrigin.includes(arg.type)) {
         return arg.parsed.toString('hex');
       }
