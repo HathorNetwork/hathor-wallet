@@ -14,6 +14,7 @@ import hathorLib from '@hathor/wallet-lib';
 import { useDispatch } from 'react-redux';
 import { NANO_CONTRACT_HISTORY_COUNT } from '../../constants';
 import TokenPagination from '../TokenPagination';
+import { reverse } from 'lodash';
 
 
 /**
@@ -58,7 +59,7 @@ function NanoContractHistory(props) {
       if (!after && !before) {
         // This is the first load without query params, so if has_more === true
         // we must enable next button
-        setHasAfter(data.has_more);
+        setHasAfter(historyData.has_more);
         setHasBefore(false);
         return;
       }
@@ -66,7 +67,7 @@ function NanoContractHistory(props) {
       if (after) {
         // We clicked the next button, so we have before page
         // and we will have the next page if has_more === true
-        setHasAfter(data.has_more);
+        setHasAfter(historyData.has_more);
         setHasBefore(true);
         return;
       }
@@ -75,7 +76,7 @@ function NanoContractHistory(props) {
         // We clicked the previous button, so we have next page
         // and we will have the previous page if has_more === true
         setHasAfter(true);
-        setHasBefore(data.has_more);
+        setHasBefore(historyData.has_more);
         return;
       }
     } catch(e) {
@@ -133,6 +134,7 @@ function NanoContractHistory(props) {
           <td>
             <Link to={`/transaction/${tx.hash}`}>{hathorLib.helpersUtils.getShortHash(tx.hash)}</Link>
           </td>
+          <td>{tx.nc_method}</td>
           <td>{status}</td>
         </tr>
       );
@@ -147,6 +149,7 @@ function NanoContractHistory(props) {
             <tr>
               <th>{t`Date`}</th>
               <th>{t`ID`}</th>
+              <th>{t`Method`}</th>
               <th>{t`Status`}</th>
             </tr>
           </thead>
