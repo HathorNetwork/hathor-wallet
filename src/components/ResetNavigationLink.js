@@ -11,6 +11,9 @@ import React from 'react';
 /**
  * Component that has a left arrow and a link to another page
  *
+ * @param props.to Method that will be used to navigate to another screen
+ * @param props.name Name of the link
+ *
  * @memberof Components
  */
 function ResetNavigationLink({ to, name }) {
