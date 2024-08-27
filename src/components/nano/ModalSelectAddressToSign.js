@@ -19,13 +19,15 @@ import PinInput from '../PinInput';
  * Component that shows a modal to select an address
  * to sign a nano contract signed data parameter
  *
- * @param props.success Method to be called when the sign succeeds
+ * @param props.onSuccess Method to be called when the sign succeeds
  * @param props.onClose GlobalModal method added in all modals
  *
  * @memberof Components
  */
-function ModalSelectAddressToSign(props) {
+function ModalSelectAddressToSign({ onClose, onSuccess }) {
   const wallet = getGlobalWallet();
+
+  const addressToSignModalID = 'selectAddressToSignModal';
 
   // {number} step The modal has 2 steps: step 0 is the address selection to sign the data,
   //               step1 is the data and PIN input, so we can sign the data and close the modal
@@ -40,19 +42,13 @@ function ModalSelectAddressToSign(props) {
   const dataRef = useRef(null);
 
   useEffect(() => {
-    $('#selectAddressToSignModal').modal('show');
-    $('#selectAddressToSignModal').on('hidden.bs.modal', (e) => {
+    $(`#${addressToSignModalID}`).modal('show');
+    $(`#${addressToSignModalID}`).on('hidden.bs.modal', (e) => {
       setStep(0);
       // We always need to call on close when using global context modal
-      props.onClose();
+      // it will remove event listeners
+      onClose();
     })
-
-    return () => {
-      $('#selectAddressToSignModal').modal('hide');
-      // Removing all event listeners
-      $('#selectAddressToSignModal').off();
-    };
-
   }, []);
 
   /**
@@ -96,8 +92,8 @@ function ModalSelectAddressToSign(props) {
     wallet.pinCode = pin;
     const inputData = await hathorLib.nanoUtils.getOracleInputData(oracleData, dataSerialized, wallet);
     const signedData = `${hathorLib.bufferUtils.bufferToHex(inputData)},${data},str`;
-    props.success(signedData);
-    props.onClose();
+    onSuccess(signedData);
+    onClose();
   }
 
   const renderSteps = () => {
@@ -145,7 +141,7 @@ function ModalSelectAddressToSign(props) {
   }
 
   return (
-    <div className="modal fade" id="selectAddressToSignModal" tabIndex="-1" role="dialog" aria-labelledby="selectAddressToSignModal" aria-hidden="true">
+    <div className="modal fade" id={addressToSignModalID} tabIndex="-1" role="dialog" aria-labelledby={addressToSignModalID} aria-hidden="true">
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">

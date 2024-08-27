@@ -312,7 +312,7 @@ function NanoContractExecuteMethod() {
   const onSelectAddressToSign = (ref, e) => {
     e.preventDefault();
     globalModalContext.showModal(MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN, {
-      success: (value) => {
+      onSuccess: (value) => {
         ref.current.value = value;
       },
     });
