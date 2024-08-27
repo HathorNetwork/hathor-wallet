@@ -106,8 +106,8 @@ class TxData extends React.Component {
 
     const network = hathorLib.config.getNetwork();
     const ncData = this.props.transaction;
-    const deserializer = new hathorLib.NanoContractTransactionParser(ncData.nc_blueprint_id, ncData.nc_method, ncData.nc_pubkey, ncData.nc_args);
-    deserializer.parseAddress(network);
+    const deserializer = new hathorLib.NanoContractTransactionParser(ncData.nc_blueprint_id, ncData.nc_method, ncData.nc_pubkey, network, ncData.nc_args);
+    deserializer.parseAddress();
     await deserializer.parseArguments();
     this.setState({ ncDeserializer: deserializer, ncLoading: false });
   }
@@ -952,8 +952,17 @@ class TxData extends React.Component {
     }
 
     const renderArgValue = (arg) => {
-      if (arg.type === 'bytes') {
+      const typeBytesOrigin = ['bytes', 'TxOutputScript', 'TokenUid', 'VertexId', 'ContractId'];
+      if (typeBytesOrigin.includes(arg.type)) {
         return arg.parsed.toString('hex');
+      }
+
+      if (arg.type === 'Timestamp') {
+        return hathorLib.dateFormatter.parseTimestamp(arg.parsed);
+      }
+
+      if (arg.type === 'Amount') {
+        return numberUtils.prettyValue(arg.parsed, this.props.decimalPlaces);
       }
 
       return arg.parsed;
