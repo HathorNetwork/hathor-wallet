@@ -8,7 +8,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { t } from 'ttag'
 import $ from 'jquery';
-import BackButton from '../../components/BackButton';
+import ResetNavigationLink from '../../components/ResetNavigationLink';
 import ReactLoading from 'react-loading';
 import colors from '../../index.module.scss';
 import ModalChangeAddress from '../../components/nano/ModalChangeAddress';
@@ -207,6 +207,13 @@ function NanoContractDetail() {
     helpers.openExternalURL(url);
   }
 
+  /**
+   * Method called when user clicked the link to go to the nano list
+   */
+  const goToRegisteredList = () => {
+    navigate('/nano_contract/');
+  }
+
   const renderNanoBalances = () => {
     return Object.entries(data.balances).map(([tokenUid, amount]) => {
       return (
@@ -266,7 +273,7 @@ function NanoContractDetail() {
 
   return (
     <div className="content-wrapper">
-      <BackButton />
+      <ResetNavigationLink name={t`Go to list`} to={goToRegisteredList} />
       <h3 className="mt-4">{t`Nano Contract Detail`}</h3>
       <div className="mt-5">
         <p><strong>ID: </strong>{ncId} <span className="ml-1">(<a href="true" onClick={unregister}>{t`Unregister`}</a>)</span></p>
