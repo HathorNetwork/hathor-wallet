@@ -24,7 +24,7 @@ import PinInput from '../PinInput';
  *
  * @memberof Components
  */
-function ModalSelectAddressToSign({ onClose, onSuccess }) {
+function ModalSelectAddressToSignData({ onClose, onSuccess }) {
   const wallet = getGlobalWallet();
 
   const addressToSignModalID = 'selectAddressToSignModal';
@@ -111,7 +111,12 @@ function ModalSelectAddressToSign({ onClose, onSuccess }) {
     return (
       <div>
         <p>{t`Please select the address that will be used to sign the data`}</p>
-        <AddressList showNumberOfTransaction={false} onAddressClick={onAddressClick} count={NANO_UPDATE_ADDRESS_LIST_COUNT} />
+        <AddressList
+          showNumberOfTransaction={false}
+          onAddressClick={onAddressClick}
+          count={NANO_UPDATE_ADDRESS_LIST_COUNT}
+          isModal={true}
+        />
       </div>
     );
   }
@@ -163,4 +168,4 @@ function ModalSelectAddressToSign({ onClose, onSuccess }) {
   );
 }
 
-export default ModalSelectAddressToSign;
+export default ModalSelectAddressToSignData;

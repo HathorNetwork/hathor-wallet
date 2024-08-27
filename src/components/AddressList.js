@@ -18,9 +18,14 @@ import { getGlobalWallet } from '../modules/wallet';
 /**
  * Screen that has a list of addresses of the wallet
  *
+ * @param props.count Quantity of elements to show in each page of the list
+ * @param props.onAddressClick Callback function to call when address is clicked
+ * @param props.showNumberOfTransactions Boolean to validate if should show the number of txs on the list
+ * @param props.isModal Boolean to set if the component will be used in a modal, to set the width of the search
+ *
  * @memberof Screens
  */
-function AddressList({ count, onAddressClick, showNumberOfTransaction }) {
+function AddressList({ count, onAddressClick, showNumberOfTransaction, isModal }) {
   const wallet = getGlobalWallet();
 
   const alertErrorRef = useRef(null);
@@ -155,7 +160,7 @@ function AddressList({ count, onAddressClick, showNumberOfTransaction }) {
 
   const renderSearch = () => {
     return (
-      <div className="d-flex flex-row align-items-center col-12 col-md-6">
+      <div className={`d-flex flex-row align-items-center ${isModal ? 'col-12' : 'col-6'}`}>
         <input className="form-control mr-2" type="search" placeholder={t`Search address`} aria-label="Search" ref={txSearchRef} onKeyUp={handleKeyUp} />
         <i className="fa fa-search pointer" onClick={search}></i>
       </div>

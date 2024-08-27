@@ -304,14 +304,14 @@ function NanoContractExecuteMethod() {
   }
 
   /**
-   * Method executed when link to select an address to sign is clicked
+   * Method executed when link to select an address to sign data is clicked
    *
    * @param {Object} ref Input reference
    * @param {Object} e Event emitted by the link clicked
    */
-  const onSelectAddressToSign = (ref, e) => {
+  const onSelectAddressToSignData = (ref, e) => {
     e.preventDefault();
-    globalModalContext.showModal(MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN, {
+    globalModalContext.showModal(MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_DATA, {
       onSuccess: (value) => {
         ref.current.value = value;
       },
@@ -432,7 +432,7 @@ function NanoContractExecuteMethod() {
         <div className="form-group col-6">
           <label>{name} {!isOptional && '*'}</label>
           {renderInput(typeToRender, isOptional, ref)}
-          { isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSign(ref, e)}>{t`Select address to sign`}</a></div> }
+          { isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSignData(ref, e)}>{t`Select address to sign`}</a></div> }
         </div>
       </div>
     );
