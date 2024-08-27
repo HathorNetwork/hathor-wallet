@@ -20,7 +20,7 @@ import { reverse } from 'lodash';
 /**
  * History of a nano contract
  *
- * @memberof Screens
+ * @memberof Components
  */
 function NanoContractHistory(props) {
   const dispatch = useDispatch();
