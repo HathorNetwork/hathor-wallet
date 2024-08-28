@@ -82,8 +82,8 @@ function NanoContractExecuteMethod() {
   // List of refs of the arguments form
   const formRefs = [];
 
-  // {string | null} If there is an error message when sending
-  const [errorMessage, setErrorMessage] = useState(null);
+  // {string} If there is an error message when sending
+  const [errorMessage, setErrorMessage] = useState('');
 
   // This will store each action in an array of objects
   // { type, token, amount, address }
