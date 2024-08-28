@@ -544,6 +544,10 @@ function NanoContractExecuteMethod() {
               <input
                 required
                 type="text"
+                // We don't know how many actions will be added to the nano contract transaction
+                // and we must store the addresses refs to validate them before creating the transaction.
+                // To achieve this, we store each actionAddressRef in an array (if it's a deposit, it
+                // will be undefined), so we can easily get them and validate each value
                 ref={ref => {
                   actionAddressesRef.current[index] = ref
                 }}
