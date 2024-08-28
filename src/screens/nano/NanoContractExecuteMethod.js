@@ -304,6 +304,36 @@ function NanoContractExecuteMethod() {
   }
 
   /**
+   * Method executed when link to select an address to sign data is clicked
+   *
+   * @param {Object} ref Input reference
+   * @param {Object} e Event emitted by the link clicked
+   */
+  const onSelectAddressToSignData = (ref, e) => {
+    e.preventDefault();
+    globalModalContext.showModal(MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_DATA, {
+      onSuccess: (value) => {
+        ref.current.value = value;
+      },
+    });
+  }
+
+  /**
+   * Method executed when link to select an address to sign the tx is clicked
+   *
+   * @param {Object} ref Input reference
+   * @param {Object} e Event emitted by the link clicked
+   */
+  const onSelectAddressToSignTx = (ref, e) => {
+    e.preventDefault();
+    globalModalContext.showModal(MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_TX, {
+      onAddressSelect: (value) => {
+        ref.current.value = value;
+      },
+    });
+  }
+
+  /**
    * This renders all the options of the token select for a tokenUid argument
    */
   const renderTokenOptions = () => {
@@ -401,9 +431,11 @@ function NanoContractExecuteMethod() {
       typeToRender = 'str';
     }
 
-    // SignedData values are strings
+    let isSignedData = false;
     if (type.startsWith('SignedData')) {
+      // SignedData values are strings
       typeToRender = 'str';
+      isSignedData = true;
     }
 
     // Create a new ref for this argument to be used in the input and adds it to the array of refs
@@ -415,6 +447,7 @@ function NanoContractExecuteMethod() {
         <div className="form-group col-6">
           <label>{name} {!isOptional && '*'}</label>
           {renderInput(typeToRender, isOptional, ref)}
+          { isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSignData(ref, e)}>{t`Select address to sign`}</a></div> }
         </div>
       </div>
     );
@@ -442,6 +475,7 @@ function NanoContractExecuteMethod() {
         <div className="form-group col-6">
           <label>Address to Sign</label>
           <input required ref={addressRef} type="text" className="form-control" />
+          <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSignTx(addressRef, e)}>{t`Select from a list`}</a></div>
         </div>
       </div>
     );
@@ -628,6 +662,7 @@ function NanoContractExecuteMethod() {
           {renderAddressInForm()}
           <label className="mb-3 mt-3"><strong>Method Parameters</strong></label>
           {renderMethodInputs(data.method)}
+          <hr className="mb-4 mt-2" />
           <div className="d-flex flex-row mb-4">
             <a href="true" onClick={addAction}>{t`Add action`}</a>
           </div>
