@@ -358,12 +358,16 @@ function NanoContractExecuteMethod() {
     }
 
     let inputType;
-    if (type === 'int' || type === 'float') {
-      inputType = 'number';
-    } else if (type === 'Timestamp') {
-      inputType = 'datetime-local';
-    } else {
-      inputType = 'text';
+    switch(type) {
+      case 'int':
+      case 'float':
+        inputType = 'number';
+        break;
+      case 'Timestamp':
+        inputType = 'datetime-local';
+        break;
+      default:
+        inputType = 'text';
     }
 
     let pattern = null;
