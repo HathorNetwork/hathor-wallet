@@ -319,6 +319,21 @@ function NanoContractExecuteMethod() {
   }
 
   /**
+   * Method executed when link to select an address to sign the tx is clicked
+   *
+   * @param {Object} ref Input reference
+   * @param {Object} e Event emitted by the link clicked
+   */
+  const onSelectAddressToSignTx = (ref, e) => {
+    e.preventDefault();
+    globalModalContext.showModal(MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_TX, {
+      onAddressSelect: (value) => {
+        ref.current.value = value;
+      },
+    });
+  }
+
+  /**
    * This renders all the options of the token select for a tokenUid argument
    */
   const renderTokenOptions = () => {
@@ -460,6 +475,7 @@ function NanoContractExecuteMethod() {
         <div className="form-group col-6">
           <label>Address to Sign</label>
           <input required ref={addressRef} type="text" className="form-control" />
+          <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSignTx(addressRef, e)}>{t`Select from a list`}</a></div>
         </div>
       </div>
     );
