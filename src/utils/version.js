@@ -46,12 +46,7 @@ const version = {
     }));
 
     // Set network in lib to use the correct address byte
-    let network = data.network;
-
-    if (data.network.includes('testnet')) {
-      network = 'testnet';
-    }
-
+    const network = hathorLib.helpersUtils.getNetworkFromFullNodeNetwork(data.network);
     helpers.updateNetwork(network);
     return {
       ...data,

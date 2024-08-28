@@ -236,7 +236,7 @@ function NanoContractDetail() {
   const renderNanoMethods = () => {
     const publicMethods = get(blueprintInformation, 'public_methods', {});
     return Object.keys(publicMethods).filter((method) =>
-      method !== 'initialize'
+      method !== hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD
     ).map((method) => {
       return (
         <div key={method}>
