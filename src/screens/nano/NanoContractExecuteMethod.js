@@ -463,8 +463,9 @@ function NanoContractExecuteMethod() {
    * @param {string} value The new value of the attribute
    */
   const onActionValueChange = (index, key, value) => {
-    actions[index][key] = value;
-    setActions([...actions]);
+    const newActions = [...actions];
+    newActions[index][key] = value;
+    setActions(newActions);
   }
 
   /**
@@ -576,8 +577,8 @@ function NanoContractExecuteMethod() {
    */
   const addAction = (e) => {
     e.preventDefault();
-    actions.push({});
-    setActions([...actions]);
+    const newActions = [...actions, {}];
+    setActions(newActions);
   }
 
   /**
@@ -587,8 +588,9 @@ function NanoContractExecuteMethod() {
    * @param {number} index Index of the action to be removed
    */
   const removeAction = (index) => {
-    pullAt(actions, [index]);
-    setActions([...actions]);
+    const newActions = [...actions];
+    pullAt(newActions, [index]);
+    setActions(newActions);
   }
 
   /**
