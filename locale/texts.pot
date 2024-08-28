@@ -89,7 +89,7 @@ msgid ""
 "passphrase, you will never have access to your tokens again."
 msgstr ""
 
-#: src/components/nano/ModalChangeAddress.js:106
+#: src/components/nano/ModalChangeAddress.js:107
 #: src/screens/ChoosePassphrase.js:174
 #: src/screens/SentryPermission.js:89
 #: src/screens/SoftwareWalletWarning.js:56
@@ -206,6 +206,7 @@ msgstr ""
 #: src/components/atomic-swap/ModalAtomicSend.js:325
 #: src/screens/CreateNFT.js:315
 #: src/screens/CreateToken.js:274
+#: src/screens/nano/NanoContractExecuteMethod.js:507
 msgid "Amount"
 msgstr ""
 
@@ -227,7 +228,8 @@ msgstr ""
 #: src/components/tokens/TokenMint.js:149
 #: src/screens/CreateNFT.js:328
 #: src/screens/CreateToken.js:292
-#: src/screens/nano/NanoContractList.js:65
+#: src/screens/nano/NanoContractExecuteMethod.js:543
+#: src/screens/nano/NanoContractList.js:63
 msgid "Address"
 msgstr ""
 
@@ -766,7 +768,7 @@ msgstr ""
 #: src/screens/Settings.js:304
 #: src/screens/Settings.js:311
 #: src/screens/Settings.js:316
-#: src/screens/nano/NanoContractDetail.js:203
+#: src/screens/nano/NanoContractDetail.js:229
 msgid "Change"
 msgstr ""
 
@@ -809,7 +811,7 @@ msgstr ""
 msgid "Untrust all tokens on Ledger"
 msgstr ""
 
-#: src/components/TxData.js:1022
+#: src/components/TxData.js:1052
 #: src/components/WalletAddress.js:195
 #: src/screens/Settings.js:335
 #: src/screens/atomic-swap/EditSwap.js:596
@@ -1132,40 +1134,95 @@ msgstr ""
 msgid "Get started"
 msgstr ""
 
-#: src/screens/nano/NanoContractDetail.js:135
+#: src/screens/nano/NanoContractDetail.js:138
 #.  Error in request
 msgid "Error getting blueprint details."
 msgstr ""
 
-#: src/screens/nano/NanoContractDetail.js:146
+#: src/screens/nano/NanoContractDetail.js:149
 #.  Error in request
 msgid "Error getting nano contract state."
 msgstr ""
 
-#: src/screens/nano/NanoContractDetail.js:221
+#: src/screens/nano/NanoContractDetail.js:254
 msgid "Nano Contract Detail"
 msgstr ""
 
 #: src/components/nano/ModalConfirmUnregister.js:47
-#: src/screens/nano/NanoContractDetail.js:223
+#: src/screens/nano/NanoContractDetail.js:256
 msgid "Unregister"
 msgstr ""
 
-#: src/screens/nano/NanoContractList.js:56
+#: src/screens/nano/NanoContractExecuteMethod.js:113
+msgid "Address is required."
+msgstr ""
+
+#: src/components/atomic-swap/ModalAtomicReceive.js:45
+#: src/screens/nano/NanoContractExecuteMethod.js:123
+msgid "Invalid address."
+msgstr ""
+
+#: src/screens/nano/NanoContractExecuteMethod.js:184
+msgid "Creating Nano Contract"
+msgstr ""
+
+#: src/screens/nano/NanoContractExecuteMethod.js:184
+msgid "Executing Nano Contract Method"
+msgstr ""
+
+#: src/components/atomic-swap/ModalAtomicReceive.js:97
+#: src/components/atomic-swap/ModalAtomicSend.js:306
+#: src/screens/atomic-swap/EditSwap.js:190
+#: src/screens/nano/NanoContractExecuteMethod.js:503
+msgid "Token"
+msgstr ""
+
+#: src/components/SendDataOutputOne.js:29
+#: src/components/SendTokensOne.js:245
+#: src/screens/atomic-swap/ProposalList.js:107
+#: src/screens/nano/NanoContractExecuteMethod.js:528
+msgid "Remove"
+msgstr ""
+
+#: src/components/TokenHistory.js:228
+#: src/screens/nano/NanoContractExecuteMethod.js:598
+#: src/screens/nano/NanoContractSelectBlueprint.js:92
+msgid "Type"
+msgstr ""
+
+#: src/screens/nano/NanoContractExecuteMethod.js:614
+msgid "Create Nano Contract"
+msgstr ""
+
+#: src/screens/nano/NanoContractExecuteMethod.js:614
+#: src/screens/nano/NanoContractExecuteMethod.js:627
+msgid "Execute Method"
+msgstr ""
+
+#: src/screens/nano/NanoContractExecuteMethod.js:622
+msgid "Add action"
+msgstr ""
+
+#: src/screens/atomic-swap/NewSwap.js:92
+#: src/screens/nano/NanoContractExecuteMethod.js:627
+msgid "Create"
+msgstr ""
+
+#: src/screens/nano/NanoContractList.js:54
 msgid "Create a nano contract"
 msgstr ""
 
 #: src/components/nano/ModalRegisterNanoContract.js:89
-#: src/screens/nano/NanoContractList.js:57
+#: src/screens/nano/NanoContractList.js:55
 msgid "Register a nano contract"
 msgstr ""
 
 #: src/components/TokenHistory.js:227
-#: src/screens/nano/NanoContractList.js:63
+#: src/screens/nano/NanoContractList.js:61
 msgid "ID"
 msgstr ""
 
-#: src/screens/nano/NanoContractList.js:64
+#: src/screens/nano/NanoContractList.js:62
 msgid "Blueprint"
 msgstr ""
 
@@ -1179,11 +1236,6 @@ msgstr ""
 
 #: src/screens/nano/NanoContractSelectBlueprint.js:91
 msgid "Name"
-msgstr ""
-
-#: src/components/TokenHistory.js:228
-#: src/screens/nano/NanoContractSelectBlueprint.js:92
-msgid "Type"
 msgstr ""
 
 #: src/screens/nano/NanoContractSelectBlueprint.js:152
@@ -1244,12 +1296,6 @@ msgstr ""
 
 #: src/screens/atomic-swap/EditSwap.js:174
 msgid "No tokens exchanged on this proposal"
-msgstr ""
-
-#: src/components/atomic-swap/ModalAtomicReceive.js:97
-#: src/components/atomic-swap/ModalAtomicSend.js:306
-#: src/screens/atomic-swap/EditSwap.js:190
-msgid "Token"
 msgstr ""
 
 #: src/screens/atomic-swap/EditSwap.js:211
@@ -1332,16 +1378,6 @@ msgstr ""
 
 #: src/screens/atomic-swap/NewSwap.js:74
 msgid "Proposal password"
-msgstr ""
-
-#: src/screens/atomic-swap/NewSwap.js:92
-msgid "Create"
-msgstr ""
-
-#: src/components/SendDataOutputOne.js:29
-#: src/components/SendTokensOne.js:245
-#: src/screens/atomic-swap/ProposalList.js:107
-msgid "Remove"
 msgstr ""
 
 #: src/screens/atomic-swap/ProposalList.js:134
@@ -1507,7 +1543,7 @@ msgstr ""
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/atomic-swap/ModalAtomicReceive.js:132
 #: src/components/atomic-swap/ModalAtomicSend.js:369
-#: src/components/nano/ModalChangeAddress.js:148
+#: src/components/nano/ModalChangeAddress.js:149
 #: src/components/nano/ModalConfirmUnregister.js:44
 #: src/components/nano/ModalRegisterNanoContract.js:111
 #: src/components/tokens/TokenAction.js:155
@@ -1814,7 +1850,11 @@ msgstr ""
 msgid "I forgot my password"
 msgstr ""
 
-#: src/components/ModalSendTx.js:158
+#: src/components/ModalSendTx.js:93
+msgid "Error sending transaction."
+msgstr ""
+
+#: src/components/ModalSendTx.js:175
 msgid "Ok"
 msgstr ""
 
@@ -2227,7 +2267,7 @@ msgid "Page ${ page }"
 msgstr ""
 
 #: src/components/TokenInfoBox.js:30
-#: src/components/TxData.js:943
+#: src/components/TxData.js:970
 msgid "Type:"
 msgstr ""
 
@@ -2391,67 +2431,67 @@ msgstr ""
 msgid "Confirmation level:"
 msgstr ""
 
-#: src/components/TxData.js:939
+#: src/components/TxData.js:966
 msgid "Block"
 msgstr ""
 
-#: src/components/TxData.js:939
+#: src/components/TxData.js:966
 msgid "Transaction"
 msgstr ""
 
-#: src/components/TxData.js:944
+#: src/components/TxData.js:971
 msgid "Time:"
 msgstr ""
 
-#: src/components/TxData.js:945
+#: src/components/TxData.js:972
 msgid "Nonce:"
 msgstr ""
 
-#: src/components/TxData.js:946
+#: src/components/TxData.js:973
 msgid "Weight:"
 msgstr ""
 
-#: src/components/TxData.js:961
+#: src/components/TxData.js:991
 msgid "Inputs:"
 msgstr ""
 
-#: src/components/TxData.js:965
+#: src/components/TxData.js:995
 msgid "Outputs:"
 msgstr ""
 
-#: src/components/TxData.js:972
+#: src/components/TxData.js:1002
 msgid "Parents:"
 msgstr ""
 
-#: src/components/TxData.js:976
+#: src/components/TxData.js:1006
 msgid "Children:"
 msgstr ""
 
-#: src/components/TxData.js:976
+#: src/components/TxData.js:1006
 msgid "Click to hide"
 msgstr ""
 
-#: src/components/TxData.js:976
+#: src/components/TxData.js:1006
 msgid "Click to show"
 msgstr ""
 
-#: src/components/TxData.js:982
+#: src/components/TxData.js:1012
 msgid "Verification neighbors"
 msgstr ""
 
-#: src/components/TxData.js:991
+#: src/components/TxData.js:1021
 msgid "Funds neighbors"
 msgstr ""
 
-#: src/components/TxData.js:1008
+#: src/components/TxData.js:1038
 msgid "Hide raw transaction"
 msgstr ""
 
-#: src/components/TxData.js:1008
+#: src/components/TxData.js:1038
 msgid "Show raw transaction"
 msgstr ""
 
-#: src/components/TxData.js:1011
+#: src/components/TxData.js:1041
 msgid "Copy raw tx to clipboard"
 msgstr ""
 
@@ -2642,35 +2682,35 @@ msgstr ""
 msgid "Minting tokens"
 msgstr ""
 
-#: src/components/nano/ModalChangeAddress.js:102
+#: src/components/nano/ModalChangeAddress.js:103
 msgid ""
 "You can have only one address associated with a nano contract at a time. If "
 "you decide to change your address, any action that you execute in this nano "
 "contract will be associated with this new address."
 msgstr ""
 
-#: src/components/nano/ModalChangeAddress.js:103
+#: src/components/nano/ModalChangeAddress.js:104
 msgid ""
 "It's important that you remember which address you are using to execute the "
 "nano contract methods."
 msgstr ""
 
-#: src/components/nano/ModalChangeAddress.js:104
+#: src/components/nano/ModalChangeAddress.js:105
 msgid ""
 "Please continue only if you understand your risks and know what you are "
 "doing."
 msgstr ""
 
-#: src/components/nano/ModalChangeAddress.js:115
+#: src/components/nano/ModalChangeAddress.js:116
 msgid "Please select the new address below"
 msgstr ""
 
-#: src/components/nano/ModalChangeAddress.js:124
+#: src/components/nano/ModalChangeAddress.js:125
 msgid "Please confirm the information below"
 msgstr ""
 
-#: src/components/nano/ModalChangeAddress.js:128
-#: src/components/nano/ModalChangeAddress.js:139
+#: src/components/nano/ModalChangeAddress.js:129
+#: src/components/nano/ModalChangeAddress.js:140
 msgid "Change address"
 msgstr ""
 
@@ -2709,10 +2749,6 @@ msgstr ""
 
 #: src/components/atomic-swap/ExternalChangeModal.js:40
 msgid "OK"
-msgstr ""
-
-#: src/components/atomic-swap/ModalAtomicReceive.js:45
-msgid "Invalid address."
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicReceive.js:50

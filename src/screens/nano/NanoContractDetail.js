@@ -81,6 +81,7 @@ function NanoContractDetail() {
     navigate('/nano_contract/execute_method/', {
       state: {
         method,
+        blueprintInformation,
         ncId,
       },
     });
