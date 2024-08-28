@@ -47,7 +47,7 @@ const NanoContractActionType = {
  *
  * @memberof Screens
  */
-function NanoContractExecuteMethod(props) {
+function NanoContractExecuteMethod() {
   const location = useLocation();
   const data = location.state;
   const isCreateNanoContract = data.method === hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD && data.ncId == null;
