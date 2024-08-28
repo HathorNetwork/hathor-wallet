@@ -91,6 +91,7 @@ function ModalSelectAddressToSignData({ onClose, onSuccess }) {
     // TODO getOracleInputData method should be able to receive the PIN as optional parameter as well
     wallet.pinCode = pin;
     const inputData = await hathorLib.nanoUtils.getOracleInputData(oracleData, dataSerialized, wallet);
+    wallet.pinCode = null;
     const signedData = `${hathorLib.bufferUtils.bufferToHex(inputData)},${data},str`;
     onSuccess(signedData);
     onClose();
