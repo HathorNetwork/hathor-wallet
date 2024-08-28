@@ -18,10 +18,11 @@ import { getGlobalWallet } from '../modules/wallet';
 /**
  * Screen that has a list of addresses of the wallet
  *
- * @param props.count Quantity of elements to show in each page of the list
- * @param props.onAddressClick Callback function to call when address is clicked
- * @param props.showNumberOfTransactions Boolean to validate if should show the number of txs on the list
- * @param props.isModal Boolean to set if the component will be used in a modal, to set the width of the search
+ * @param {Object} props
+ * @param {number} props.count Quantity of elements to show in each page of the list
+ * @param {(address: string) => void} props.onAddressClick Callback function to call when address is clicked
+ * @param {boolean} props.showNumberOfTransactions Boolean to validate if should show the number of txs on the list
+ * @param {boolean} props.isModal Boolean to set if the component will be used in a modal, to set the width of the search
  *
  * @memberof Screens
  */
