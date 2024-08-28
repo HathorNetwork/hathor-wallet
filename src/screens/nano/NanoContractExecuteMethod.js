@@ -258,7 +258,7 @@ function NanoContractExecuteMethod() {
       }
 
       if (typeToCheck === 'Timestamp') {
-        const timestamp = Date.parse(value) / 1000;
+        const timestamp = hathorLib.dateUtils.dateToTimestamp(new Date(value))
         argValues.push(timestamp);
         continue;
       }
