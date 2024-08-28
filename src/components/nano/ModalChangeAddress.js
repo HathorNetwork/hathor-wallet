@@ -80,7 +80,6 @@ function ModalChangeAddress({ nanoContractID, onClose }) {
   const executeChange = async (e) => {
     e.preventDefault();
     dispatch(editAddressNC(nanoContractID, newAddress.address));
-    await wallet.storage.updateNanoContractRegisteredAddress(nanoContractID, newAddress.address);
     onClose(`#${changeAddressModalID}`);
   }
 
