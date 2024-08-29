@@ -10,10 +10,10 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
-import NanoContractDetail from './screens/nano/NanoContractDetail';
-import NanoContractList from './screens/nano/NanoContractList';
-import NanoContractSelectBlueprint from './screens/nano/NanoContractSelectBlueprint';
-import NanoContractExecuteMethod from './screens/nano/NanoContractExecuteMethod';
+import NanoContractDetail from './screens/nano-contract/NanoContractDetail';
+import NanoContractList from './screens/nano-contract/NanoContractList';
+import NanoContractSelectBlueprint from './screens/nano-contract/NanoContractSelectBlueprint';
+import NanoContractExecuteMethod from './screens/nano-contract/NanoContractExecuteMethod';
 import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import TransactionDetail from './screens/TransactionDetail';
