@@ -12,7 +12,7 @@ import HathorAlert from '../components/HathorAlert';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
-import path from 'path';
+// import path from 'path';
 import { getGlobalWallet } from '../modules/wallet';
 
 /**
@@ -139,7 +139,8 @@ function AddressList() {
    */
   const goToAddressSearch = (e, address) => {
     e.preventDefault();
-    const url = path.join(helpers.getExplorerURL(), `address/${address}`);
+    // const url = path.join(helpers.getExplorerURL(), `address/${address}`);
+    const url = '';
     helpers.openExternalURL(url);
   }
 
