@@ -33,7 +33,12 @@ function AllAddresses() {
   return (
     <div className="content-wrapper">
       <h2 className="mb-4">{t`Addresses`}</h2>
-      <AddressList showNumberOfTransaction={true} onAddressClick={onAddressClick} count={WALLET_HISTORY_COUNT} />
+      <AddressList
+        showNumberOfTransaction={true}
+        onAddressClick={onAddressClick}
+        count={WALLET_HISTORY_COUNT}
+        isModal={false}
+      />
     </div>
   )
 }

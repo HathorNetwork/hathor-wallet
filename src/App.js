@@ -10,9 +10,10 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import Wallet from './screens/Wallet';
 import SendTokens from './screens/SendTokens';
 import CreateToken from './screens/CreateToken';
-import NanoContractDetail from './screens/nano/NanoContractDetail';
-import NanoContractList from './screens/nano/NanoContractList';
-import NanoContractSelectBlueprint from './screens/nano/NanoContractSelectBlueprint';
+import NanoContractDetail from './screens/nano-contract/NanoContractDetail';
+import NanoContractList from './screens/nano-contract/NanoContractList';
+import NanoContractSelectBlueprint from './screens/nano-contract/NanoContractSelectBlueprint';
+import NanoContractExecuteMethod from './screens/nano-contract/NanoContractExecuteMethod';
 import CreateNFT from './screens/CreateNFT';
 import Navigation from './components/Navigation';
 import TransactionDetail from './screens/TransactionDetail';
@@ -191,6 +192,7 @@ function Root() {
       <Route path="/nano_contract" element={<StartedComponent children={ <NanoContractList />} loaded={true} />} />
       <Route path="/nano_contract/select_blueprint/" element={<StartedComponent children={ <NanoContractSelectBlueprint />} loaded={true} />} />
       <Route path="/nano_contract/detail/:nc_id" element={<StartedComponent children={ <NanoContractDetail />} loaded={true} />} />
+      <Route path="/nano_contract/execute_method/" element={<StartedComponent children={ <NanoContractExecuteMethod />} loaded={true} />} />
       <Route path="/nft" element={<StartedComponent children={ <NFTList />} loaded={true} />} />
       <Route path="/create_token" element={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
       <Route path="/create_nft" element={<StartedComponent children={ <CreateNFT />} loaded={true} />} />

@@ -22,6 +22,8 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
+import { OutputType } from '@hathor/wallet-lib/lib/wallet/types';
+import { SendDataOutputOne } from '../components/SendDataOutputOne';
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -66,6 +68,8 @@ function SendTokens() {
   const [errorMessage, setErrorMessage] = useState('');
   /** txTokens {Array} Array of tokens configs already added by the user (start with only hathor) */
   const [txTokens, setTxTokens] = useState([...getSelectedToken()]);
+  /** dataOutputs {Array} Array of data output added by the user */
+  const [dataOutputs, setDataOutputs] = useState([]);
 
   // Create refs
   const formSendTokensRef = useRef();
@@ -75,6 +79,12 @@ function SendTokens() {
    * @type MutableRefObject<SendTransaction>
    */
   const sendTransactionRef = useRef(null);
+  /**
+   * It contains a map of data output ref values by its unique ID.
+   * @type MutableRefObject<{ [uniqueRefId: string]: MutableRefObject }>
+   */
+  const dataOutputRefs = useRef({});
+
 
   // Convert componentDidMount and componentWillUnmount
   useEffect(() => {
@@ -181,6 +191,15 @@ function SendTokens() {
       if (!dataOne) return;
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
+    }
+    // if there is any data output, add it to transaction's outputs
+    if (dataOutputs.length) {
+      dataOutputs.forEach((uId) => {
+        data.outputs.push({
+          type: OutputType.DATA,
+          data: String(dataOutputRefs.current[uId].current.value),
+        });
+      });
     }
     return data;
   }
@@ -547,6 +566,34 @@ function SendTokens() {
     });
   }
 
+  const addDataOutput = () => {
+    const uId = _.uniqueId('data_output');
+    setDataOutputs([...dataOutputs, uId]);
+    dataOutputRefs.current[uId] = React.createRef();
+  };
+
+  const removeDataOutput = (index) => {
+    delete dataOutputRefs.current[dataOutputs[index]];
+    setDataOutputs([
+      ...dataOutputs.slice(0,index),
+      ...dataOutputs.slice(index+1,dataOutputs.length),
+    ]);
+  };
+
+  /**
+   * It renders a list of data output as cards.
+   */
+  const renderDataOutputs = () => (
+    dataOutputs.map((uId, index) => (
+      <SendDataOutputOne
+        key={uId}
+        dataInputRef={dataOutputRefs.current[uId]}
+        index={index}
+        remove={removeDataOutput}
+      />
+    ))
+  );
+
   const renderPage = () => {
     if (!metadataLoaded) {
       return <p>{t`Loading metadata...`}</p>
@@ -556,9 +603,29 @@ function SendTokens() {
       <div>
         <form ref={formSendTokensRef} id="formSendTokens">
           {renderOnePage()}
+          {renderDataOutputs()}
           <div className="mt-5">
-            <button type="button" className="btn btn-secondary mr-4" onClick={addAnotherToken}>{t`Add another token`}</button>
-            <button type="button" className="btn btn-hathor" onClick={onSendTokensClicked}>{t`Send Tokens`}</button>
+            <button
+              type="button"
+              className="btn btn-secondary mr-4"
+              onClick={addAnotherToken}
+            >
+              {t`Add another token`}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary mr-4"
+              onClick={addDataOutput}
+            >
+              {t`Add data output`}
+            </button>
+            <button
+              type="button"
+              className="btn btn-hathor"
+              onClick={onSendTokensClicked}
+            >
+              {t`Send Tokens`}
+            </button>
           </div>
         </form>
         <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p>
