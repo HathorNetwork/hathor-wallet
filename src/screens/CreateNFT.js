@@ -136,7 +136,8 @@ function CreateNFT() {
         symbol,
         parseInt(amount),
         {
-          nftData,
+          data: [nftData],
+          isCreateNFT: true,
           address,
           pinCode: pin,
           createMint,
