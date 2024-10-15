@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { t } from 'ttag';
 import { walletConnectUriInputted } from '../../actions';
-import { handleRpcRequest } from 'hathor-rpc-handler';
 
 /**
  * Wallet Connect dashboard

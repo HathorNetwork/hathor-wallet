@@ -19,6 +19,11 @@ import './index.css';
 
 import store from "./store/index";
 import { Provider } from "react-redux";
+import { Buffer } from 'buffer';
+
+// Shims:
+global.Buffer = Buffer;
+global.process = require('process');
 
 /*
  * We use a HashRouter for this application because when it is built for production we no longer interact with

@@ -24,10 +24,8 @@ import { get, values } from 'lodash';
 import {
   TriggerTypes,
   TriggerResponseTypes,
-  RpcResponseTypes,
-  SendNanoContractTxFailure,
   handleRpcRequest,
-} from 'hathor-rpc-handler';
+} from '@hathor/hathor-rpc-handler';
 import {
   WALLET_CONNECT_PROJECT_ID,
 } from '../constants';
@@ -39,7 +37,6 @@ import {
 import { getGlobalWallet } from '../modules/wallet';
 import { Core } from '@walletconnect/core';
 import { Web3Wallet } from '@walletconnect/web3wallet';
-import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 
 let web3wallet, core;
 
