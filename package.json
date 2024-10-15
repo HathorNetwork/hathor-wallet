@@ -29,7 +29,7 @@
   },
   "private": true,
   "dependencies": {
-    "@hathor/wallet-lib": "1.10.0",
+    "@hathor/wallet-lib": "1.14.1",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
     "@sentry/electron": "3.0.7",
