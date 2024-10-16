@@ -125,7 +125,16 @@
       "target": [
         "AppImage",
         "deb"
+      ],
+      "extraResources": [
+        {
+          "from": "build_resources/linux/apparmor-profile",
+          "to": "./apparmor-profile"
+        }
       ]
+    },
+    "directories": {
+      "buildResources": "build_resources"
     }
   },
   "browserslist": [
