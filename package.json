@@ -75,6 +75,7 @@
     "electron-pack": "electron-builder --mac --win --linux -c.extraMetadata.main=build/electron.js",
     "electron-pack-mac": "electron-builder --mac -c.extraMetadata.main=build/electron.js",
     "electron-pack-linux": "electron-builder --linux -c.extraMetadata.main=build/electron.js",
+    "electron-pack-linux-arm64": "electron-builder --linux --arm64 -c.extraMetadata.main=build/electron.js",
     "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js",
     "watch-electron": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev nodemon --watch ./public/**/* --watch . --exec 'npm run electron'",
     "electron-dev": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .",
