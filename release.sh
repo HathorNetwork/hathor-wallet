@@ -55,6 +55,9 @@ step4() {
 	npm run electron-pack-linux
 	npm run electron-pack-win
 	npm run electron-pack-mac
+	# This release target aims to be used in tests only
+	# We may not provide support for it
+	npm run electron-pack-linux-arm64
 }
 
 step0
