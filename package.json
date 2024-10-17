@@ -125,7 +125,20 @@
       "target": [
         "AppImage",
         "deb"
+      ],
+      "extraResources": [
+        {
+          "from": "build_resources/linux/apparmor-profile",
+          "to": "./apparmor-profile"
+        }
       ]
+    },
+    "deb": {
+      "afterInstall": "build_resources/linux/after-install.tpl",
+      "afterRemove": "build_resources/linux/after-remove.tpl"
+    },
+    "directories": {
+      "buildResources": "build_resources"
     }
   },
   "browserslist": [
