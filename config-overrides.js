@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const LavaMoatPlugin = require('@lavamoat/webpack')
 
 module.exports = function override(config, env) {
     config.resolve.fallback = {
@@ -24,6 +25,9 @@ module.exports = function override(config, env) {
         new webpack.DefinePlugin({
             'process.env': JSON.stringify(process.env),
         }),
+        new LavaMoatPlugin({
+          writeAutoConfig: true,
+        })
     ];
 
     config.module.rules.push({
