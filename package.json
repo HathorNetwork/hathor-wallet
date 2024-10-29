@@ -29,7 +29,7 @@
   },
   "private": true,
   "dependencies": {
-    "@hathor/wallet-lib": "1.10.0",
+    "@hathor/wallet-lib": "1.14.1",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
     "@sentry/electron": "3.0.7",
@@ -125,7 +125,20 @@
       "target": [
         "AppImage",
         "deb"
+      ],
+      "extraResources": [
+        {
+          "from": "build_resources/linux/apparmor-profile",
+          "to": "./apparmor-profile"
+        }
       ]
+    },
+    "deb": {
+      "afterInstall": "build_resources/linux/after-install.tpl",
+      "afterRemove": "build_resources/linux/after-remove.tpl"
+    },
+    "directories": {
+      "buildResources": "build_resources"
     }
   },
   "browserslist": [
