@@ -113,7 +113,12 @@ function ModalChangeAddress({ nanoContractID, onClose }) {
     return (
       <div>
         <p>{t`Please select the new address below`}</p>
-        <AddressList showNumberOfTransaction={false} onAddressClick={onAddressClick} count={NANO_UPDATE_ADDRESS_LIST_COUNT} />
+        <AddressList
+          showNumberOfTransaction={false}
+          onAddressClick={onAddressClick}
+          count={NANO_UPDATE_ADDRESS_LIST_COUNT}
+          isModal={true}
+        />
       </div>
     );
   }

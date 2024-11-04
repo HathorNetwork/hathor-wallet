@@ -161,15 +161,7 @@ function Server() {
       const versionData = await wallet.getVersionData();
 
       if (versionData.network !== 'mainnet') {
-        const network = versionData.network;
-        let newSelectedNetwork = network;
-
-        // Network might be 'testnet-golf', 'testnet-charlie', 'nano-testnet-alpha'
-        if (network.includes('testnet')) {
-          newSelectedNetwork = 'testnet';
-        } else {
-          newSelectedNetwork = 'privatenet';
-        }
+        const newSelectedNetwork = hathorLib.helpersUtils.getNetworkFromFullNodeNetwork(versionData.network);
 
         // Go back to the previous server
         // If the user decides to continue with this change, we will update again

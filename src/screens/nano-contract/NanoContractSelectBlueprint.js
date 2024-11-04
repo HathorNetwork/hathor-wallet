@@ -62,7 +62,7 @@ function NanoContractSelectBlueprint() {
     navigate('/nano_contract/execute_method/', {
       state: {
         blueprintInformation,
-        method: 'initialize'
+        method: hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD
       },
     });
   }

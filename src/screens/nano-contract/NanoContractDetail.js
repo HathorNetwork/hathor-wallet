@@ -8,12 +8,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { t } from 'ttag'
 import $ from 'jquery';
-import BackButton from '../../components/BackButton';
+import ResetNavigationLink from '../../components/ResetNavigationLink';
 import ReactLoading from 'react-loading';
 import colors from '../../index.module.scss';
-import ModalChangeAddress from '../../components/nano/ModalChangeAddress';
+import ModalChangeAddress from '../../components/nano-contract/ModalChangeAddress';
+import NanoContractHistory from '../../components/nano-contract/NanoContractHistory';
 import helpers from '../../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
+import path from 'path';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addBlueprintInformation, nanoContractUnregister } from '../../actions';
@@ -31,11 +33,17 @@ function NanoContractDetail() {
   const context = useContext(GlobalModalContext);
   const wallet = getGlobalWallet();
 
-  const { nanoContracts, blueprintsData, tokenMetadata } = useSelector((state) => {
+  const {
+    nanoContracts,
+    blueprintsData,
+    tokenMetadata,
+    decimalPlaces,
+  } = useSelector((state) => {
     return {
       nanoContracts: state.nanoContracts,
       blueprintsData: state.blueprintsData,
-      tokenMetadata: state.tokenMetadata
+      tokenMetadata: state.tokenMetadata,
+      decimalPlaces: state.serverInfo.decimalPlaces,
     }
   });
 
@@ -73,6 +81,7 @@ function NanoContractDetail() {
     navigate('/nano_contract/execute_method/', {
       state: {
         method,
+        blueprintInformation,
         ncId,
       },
     });
@@ -139,7 +148,7 @@ function NanoContractDetail() {
   const loadNCData = async () => {
     setData(null);
     try {
-      const state = await hathorLib.ncApi.getNanoContractState(ncId, Object.keys(blueprintInformationAux.attributes), [], []);
+      const state = await hathorLib.ncApi.getNanoContractState(ncId, Object.keys(blueprintInformationAux.attributes), ['__all__'], []);
       setData(state);
     } catch(e) {
       // Error in request
@@ -168,12 +177,53 @@ function NanoContractDetail() {
       return get(blueprintInformation.attributes, field);
     }
 
-    // Some fields should be better parsed, e.g., timestamp, address
-    // however we don't have a simple and generic way to knowing it
-    // this was discussed and we will have this in the future, so
-    // for now we keep this UI and when we have this feature in the
-    // hathor-core, we can improve the user UI
-    return value === null ? ' - ' : value;
+    if (value == null) {
+      // If value is null or undefined, we show empty string
+      return null;
+    }
+
+    // Get type of value but removing possible optional mark (?) to format the value correctly
+    const type = blueprintInformation.attributes[field].replace('?', '');
+
+    if (type === 'Timestamp') {
+      return hathorLib.dateUtils.parseTimestamp(value);
+    }
+
+    if (type === 'Amount') {
+      return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
+    }
+
+    return value;
+  }
+
+  /**
+   * Method called when user clicked on the token in the balance list
+   *
+   * @param {Object} e Event for the click
+   * @param {string} token Token uid clicked
+   */
+  const goToExplorer = (e, token) => {
+    e.preventDefault();
+    const url = path.join(helpers.getExplorerURL(), `/token_detail/${token}`);
+    helpers.openExternalURL(url);
+  }
+
+  /**
+   * Method called when user clicked the link to go to the nano list
+   */
+  const goToRegisteredList = () => {
+    navigate('/nano_contract/');
+  }
+
+  const renderNanoBalances = () => {
+    return Object.entries(data.balances).map(([tokenUid, amount]) => {
+      return (
+        <div key={tokenUid} className="d-flex flex-column nc-token-balance">
+          <p><strong>Token: </strong>{tokenUid === hathorLib.constants.NATIVE_TOKEN_UID ? tokenUid : <a href="true" onClick={(e) => goToExplorer(e, tokenUid)}>{tokenUid}</a>}</p>
+          <p><strong>Amount: </strong>{hathorLib.numberUtils.prettyValue(amount.value, decimalPlaces)}</p>
+        </div>
+      );
+    });
   }
 
   const renderNanoAttributes = () => {
@@ -186,7 +236,7 @@ function NanoContractDetail() {
   const renderNanoMethods = () => {
     const publicMethods = get(blueprintInformation, 'public_methods', {});
     return Object.keys(publicMethods).filter((method) =>
-      method !== 'initialize'
+      method !== hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD
     ).map((method) => {
       return (
         <div key={method}>
@@ -204,6 +254,13 @@ function NanoContractDetail() {
         {renderNanoAttributes()}
         <hr />
         <div>
+          <p className="text-center mb-4"><strong>Balances:</strong></p>
+          <div className="d-flex flex-column mt-3">
+            {renderNanoBalances()}
+          </div>
+        </div>
+        <hr />
+        <div>
           <p className="text-center mb-4"><strong>Available methods:</strong></p>
           <div className="d-flex flex-row justify-content-around mt-3">
             {renderNanoMethods()}
@@ -217,13 +274,14 @@ function NanoContractDetail() {
 
   return (
     <div className="content-wrapper">
-      <BackButton />
+      <ResetNavigationLink name={t`Go to list`} to={goToRegisteredList} />
       <h3 className="mt-4">{t`Nano Contract Detail`}</h3>
       <div className="mt-5">
         <p><strong>ID: </strong>{ncId} <span className="ml-1">(<a href="true" onClick={unregister}>{t`Unregister`}</a>)</span></p>
         <div className="d-flex flex-row justify-content-center mt-5 pb-4">
           {renderBody()}
         </div>
+        <NanoContractHistory ncId={ncId} />
       </div>
     </div>
   );

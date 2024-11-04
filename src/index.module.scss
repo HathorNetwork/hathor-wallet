@@ -148,7 +148,7 @@ a:hover {
   cursor: pointer;
 }
 
-#peer-table tbody td, #peer-table thead th, #tx-table tbody td, #tx-table thead th, #token-history tbody td, #token-history thead th, #address-list tbody td, #address-list thead th {
+#peer-table tbody td, #peer-table thead th, #tx-table tbody td, #tx-table thead th, #token-history tbody td, #token-history thead th, #address-list tbody td, #address-list thead th, #nano-history tbody td, #nano-history thead th {
   text-align: center;
 }
 
@@ -917,4 +917,13 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+div .nc-token-balance:not(:last-child) {
+  border-bottom: 1px solid #000;
+  margin-bottom: 1rem;
+}
+
+.remove-action-btn {
+  margin-bottom: 1px;
 }
