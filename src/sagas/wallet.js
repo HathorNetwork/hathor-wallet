@@ -261,12 +261,14 @@ export function* startWallet(action) {
 
     let version;
     let serverNetworkName = networkName;
+    let nanoContractsEnabled = false;
     const decimalPlaces = wallet.storage.getDecimalPlaces();
     customTokens = serverInfo?.custom_tokens ?? [];
 
     if (serverInfo) {
       version = serverInfo.version;
       serverNetworkName = serverInfo.network && serverInfo.network.split('-')[0];
+      nanoContractsEnabled = serverInfo.nano_contracts_enabled ?? false;
     }
 
     yield put(setServerInfo({
@@ -274,6 +276,7 @@ export function* startWallet(action) {
       network: serverNetworkName,
       decimalPlaces,
       customTokens,
+      nanoContractsEnabled,
     }));
   } catch(e) {
     if (useWalletService) {
