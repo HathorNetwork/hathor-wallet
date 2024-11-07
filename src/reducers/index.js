@@ -110,6 +110,7 @@ const initialState = {
     version: null,
     decimalPlaces: DECIMAL_PLACES,
     customTokens: [],
+    nanoContractsEnabled: false
   },
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
@@ -1094,6 +1095,7 @@ const onSetServerInfo = (state, action) => {
       version: action.payload.version,
       decimalPlaces: action.payload.decimalPlaces,
       customTokens: action.payload.customTokens,
+      nanoContractsEnabled: action.payload.nanoContractsEnabled,
     },
   }
 };
