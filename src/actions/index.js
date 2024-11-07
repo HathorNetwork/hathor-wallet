@@ -455,9 +455,10 @@ export const resetNavigateTo = () => ({
  * @param {string} customTokens[].uid
  * @param {string} customTokens[].name
  * @param {string} customTokens[].symbol
+ * @param {boolean} nanoContractsEnabled - if full node set nano contract as enabled
  */
-export const setServerInfo = ({ version, network, customTokens, decimalPlaces }) => (
-  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces } }
+export const setServerInfo = ({ version, network, customTokens, decimalPlaces, nanoContractsEnabled }) => (
+  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces, nanoContractsEnabled } }
 );
 
 export const featureToggleInitialized = () => ({

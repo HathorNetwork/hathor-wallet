@@ -25,7 +25,11 @@ function Navigation() {
   const useAtomicSwap = useSelector(state => state.useAtomicSwap);
   const featureToggles = useSelector(state => state.featureToggles);
   const nanoEnabledDefault = get(FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACTS_FEATURE_TOGGLE, false)
-  const nanoEnabled = get(featureToggles, NANO_CONTRACTS_FEATURE_TOGGLE, nanoEnabledDefault);
+  const nanoEnabledFeatureToggle = get(featureToggles, NANO_CONTRACTS_FEATURE_TOGGLE, nanoEnabledDefault);
+  const fullNodeNanoEnabled = useSelector(state => state.serverInfo.nanoContractsEnabled);
+  // To enable nano contract navigation, the unleash feature toggle must
+  // be enabled and the full node must support it as well
+  const nanoEnabled = nanoEnabledFeatureToggle && fullNodeNanoEnabled;
 
   /**
    * Method called when user clicked on Explorer menu
