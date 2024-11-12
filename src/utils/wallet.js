@@ -215,10 +215,10 @@ const wallet = {
   },
 
   /**
-   * Filters only the non-registered tokens from the allTokens list.
+   * Filters only the non-registered tokens from the allTokens object.
    * Optionally filters only those with non-zero balance.
    *
-   * @param {Object[]} allTokens list of all available tokens
+   * @param {Record<string, string>} allTokens object with tokenUid as key and value
    * @param {Object[]} registeredTokens list of registered tokens
    * @param {Object[]} tokensBalance data about token balances
    * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
