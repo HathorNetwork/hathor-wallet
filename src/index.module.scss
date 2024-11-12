@@ -898,7 +898,7 @@ span.software {
 .nc-detail-wrapper {
   padding: 1rem;
   border: 1px solid;
-  width: 100%;
+  max-width: 100%;
 }
 
 .nc-detail-wrapper > hr {
