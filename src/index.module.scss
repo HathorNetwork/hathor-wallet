@@ -898,12 +898,26 @@ span.software {
 .nc-detail-wrapper {
   padding: 1rem;
   border: 1px solid;
+  max-width: 100%;
 }
 
 .nc-detail-wrapper > hr {
   margin-left: -1rem;
   margin-right: -1rem;
   border-top: 1px solid;
+}
+
+.five-column-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  list-style: none;
+  padding-left: 0;
+}
+
+.five-column-list li {
+  padding: 0.5rem;
+  text-align: center;
 }
 
 /* Chrome, Safari, Edge, Opera */
