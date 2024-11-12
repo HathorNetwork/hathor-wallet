@@ -708,7 +708,7 @@ export function* walletReloading() {
 
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
-    for (const tokenUid of Object.keys(allTokens)) {
+    for (const tokenUid of allTokens) {
       if (tokenUid === hathorLibConstants.NATIVE_TOKEN_UID) {
         continue;
       }
