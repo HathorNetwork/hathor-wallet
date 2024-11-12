@@ -414,7 +414,7 @@ export function* loadTokens() {
   //
   // Note: We need to download the balance of all the tokens from the wallet so we can
   // hide zero-balance tokens
-  for (const token of Object.keys(allTokens)) {
+  for (const token of allTokens) {
     yield put(tokenFetchBalanceRequested(token));
   }
 
