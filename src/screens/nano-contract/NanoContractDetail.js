@@ -239,9 +239,9 @@ function NanoContractDetail() {
       method !== hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD
     ).map((method) => {
       return (
-        <div key={method}>
+        <li key={method}>
           <a href="true" onClick={(e) => executeMethod(e, method)}>{method}</a>
-        </div>
+        </li>
       );
     });
   }
@@ -262,9 +262,9 @@ function NanoContractDetail() {
         <hr />
         <div>
           <p className="text-center mb-4"><strong>Available methods:</strong></p>
-          <div className="d-flex flex-row justify-content-around mt-3">
+          <ul className="five-column-list mt-3">
             {renderNanoMethods()}
-          </div>
+          </ul>
         </div>
       </div>
     );
