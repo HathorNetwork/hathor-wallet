@@ -14,6 +14,7 @@ import colors from '../../index.module.scss';
 import ModalChangeAddress from '../../components/nano-contract/ModalChangeAddress';
 import NanoContractHistory from '../../components/nano-contract/NanoContractHistory';
 import helpers from '../../utils/helpers';
+import nanoUtils from '../../utils/nanoContracts';
 import hathorLib from '@hathor/wallet-lib';
 import path from 'path';
 import { useDispatch, useSelector } from 'react-redux';
@@ -61,12 +62,16 @@ function NanoContractDetail() {
   const [blueprintInformation, setBlueprintInformation] = useState(blueprintInformationAux);
   // errorMessage {string} Message to show when error happens on the form
   const [errorMessage, setErrorMessage] = useState('');
+  // waitingConfirmation {boolean} If transaction was loading and is waiting first block confirmation
+  const [waitingConfirmation, setWaitingConfirmation] = useState(false);
+  // txIsValid {boolean} If transaction is a valid nano contract creation tx that is already confirmed by a block
+  const [txIsValid, setTxIsValid] = useState(false);
 
   useEffect(() => {
     if (nc) {
       // Load data only if nano contract exists in redux,
       // otherwise it has just been unregistered
-      loadData();
+      validateAndLoad();
     }
   }, []);
 
@@ -116,8 +121,55 @@ function NanoContractDetail() {
     });
   }
 
-  const loadData = async () => {
+  /**
+   * Validates if the transaction is a valid nano contract creation tx
+   * and if it's confirmed by a block already.
+   *
+   * If everything is ok, calls loadData, otherwise calls itself again
+   * in 5s if it's waiting for a block confirmation
+   *
+   * We need this because the state and history are only loaded when the tx is confirmed
+   */
+  const validateAndLoad = async () => {
     setLoading(true);
+    let response;
+    try {
+      response = await wallet.getFullTxById(ncId);
+    } catch (e) {
+      // invalid tx
+      setErrorMessage(t`Transaction is invalid.`);
+      setLoading(false);
+      return;
+    }
+
+    const isVoided = response.meta.voided_by.length > 0;
+    if (isVoided) {
+      setErrorMessage(t`Transaction is voided.`);
+      setLoading(false);
+      return;
+    }
+
+    const isNanoContractCreate = nanoUtils.isNanoContractCreate(response.tx);
+    if (!isNanoContractCreate) {
+      setErrorMessage(t`Transaction must be a nano contract creation.`);
+      setLoading(false);
+      return;
+    }
+
+    const isConfirmed = response.meta.first_block !== null;
+    if (!isConfirmed) {
+      // Wait for transaction to be confirmed
+      setWaitingConfirmation(true);
+      setTimeout(validateAndLoad, 5000);
+      return;
+    }
+
+    setWaitingConfirmation(false);
+    setTxIsValid(true);
+    return loadData();
+  }
+
+  const loadData = async () => {
     try {
       await loadBlueprintInformation();
       await loadNCData();
@@ -158,7 +210,13 @@ function NanoContractDetail() {
 
   const renderBody = () => {
     if (loading) {
-      return <ReactLoading type='spin' color={colors.purpleHathor} delay={500} />;
+      const message = waitingConfirmation ? t`Waiting for transaction to be confirmed...` : t`Loading data...`
+      return (
+        <div className="d-flex flex-row align-items-center">
+          <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
+          <span className="ml-3">{message}</span>
+        </div>
+      );
     }
 
     if (errorMessage) {
@@ -281,7 +339,7 @@ function NanoContractDetail() {
         <div className="d-flex flex-row justify-content-center mt-5 pb-4">
           {renderBody()}
         </div>
-        <NanoContractHistory ncId={ncId} />
+        {txIsValid && <NanoContractHistory ncId={ncId} />}
       </div>
     </div>
   );
