@@ -5,7 +5,7 @@ More about Nano Contracts on our [official docs](https://docs.hathor.network/exp
 
 # Initializing connection
 - Open the Desktop Wallet with an existing seed
-- Go to "Settings" and change its server to `https://hathorplay.nano-testnet.hathor.network/v1a/`
+- Go to "Settings" and change its server to `https://node1.nano-testnet.hathor.network/v1a/version`
 - Go to "Settings" and change its mining server to `https://txmining.nano-testnet.hathor.network/`
 - Activate the `nano-contracts-desktop.rollout` feature toggle on unleash for this wallet's unique id
 - Wait a while for the "Nano Contract" tab to appear at the navigation header
@@ -32,7 +32,7 @@ More about Nano Contracts on our [official docs](https://docs.hathor.network/exp
 ### Oracle Script
 - Insert "s" into this field. It should still be red.
 - Insert "a". The field should turn green immediately, without need to press the "Create" button.
-- Insert a valid script like `76a914db6fe378a8af070b332104c66c0a83dcb2d03e8b88ac`.
+- Insert an oracle script obtained from the code in the annex at the end of this QA file.
 
 ### Other fields
 - Select any token from the list and it should become green.
@@ -85,9 +85,9 @@ This first interaction should happen before the "Date of Last Bet", so that the 
 - Now, on "Nano Contract Detail" screen, select `set_result`
 - Without filling any fields, click "Execute". The "result" field should become red.
 - Enter any character in it and it should become green immediately
-- Click "Select Address to Sign" and select the same address used as "Address to Sign" on initialization
+- Click "Select Address to Sign" and select the same address used to generate the oracle script at initialization
 - Click on "Sign Data" without filling any fields. They should become red.
-- Insert `2` on "Data to Sign" and fill the wrong pin, then click "Sign Data". An "Invalid PIN" error should appear immediately
+- Insert `1` on "Data to Sign" and fill the wrong pin, then click "Sign Data". An "Invalid PIN" error should appear immediately
 - Fill the correct PIN and click "Sign Data". You should be back at the "Execute Method" screen with a hashed result on the "result" field
 - Click "Execute Method" and add the correct PIN
 - On the detail screen, the `final_result` field should be filled with `1`
@@ -105,3 +105,16 @@ This first interaction should happen before the "Date of Last Bet", so that the 
 - Create an action with the withdrawal of `0.03` HTR to the address that voted on result `1`.
 - Execute the method and check that the transaction was successful
 - Click on the transaction details and confirm that the output of `0.03` HTR was sent to the correct address
+
+# Annexes
+### Generating scripts
+To generate the oracle script for an address/network, use the sample script below:
+```mjs
+import hl from '@hathor/wallet-lib';
+
+const oracleAddress = 'WYLW8ujPemSuLJwbeNvvH6y7nakaJ6cEwT';
+const networkName = 'testnet';
+const oracleScript = hl.nanoUtils.getOracleBuffer(oracleAddress, new hl.Network(networkName)).toString('hex')
+
+console.log(oracleScript);
+```
