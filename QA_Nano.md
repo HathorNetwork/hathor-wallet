@@ -5,7 +5,7 @@ More about Nano Contracts on our [official docs](https://docs.hathor.network/exp
 
 # Initializing connection
 - Open the Desktop Wallet with an existing seed
-- Go to "Settings" and change its server to `https://node1.nano-testnet.hathor.network/v1a/version`
+- Go to "Settings" and change its server to `https://node1.nano-testnet.hathor.network/v1a/`
 - Go to "Settings" and change its mining server to `https://txmining.nano-testnet.hathor.network/`
 - Activate the `nano-contracts-desktop.rollout` feature toggle on unleash for this wallet's unique id
 - Wait a while for the "Nano Contract" tab to appear at the navigation header
@@ -32,7 +32,7 @@ More about Nano Contracts on our [official docs](https://docs.hathor.network/exp
 ### Oracle Script
 - Insert "s" into this field. It should still be red.
 - Insert "a". The field should turn green immediately, without need to press the "Create" button.
-- Insert an oracle script obtained from the code in the annex at the end of this QA file.
+- Generate an oracle script using the code in the annex at the end of this QA file, using the address selected above and the correct network.
 
 ### Other fields
 - Select any token from the list and it should become green.
@@ -108,7 +108,7 @@ This first interaction should happen before the "Date of Last Bet", so that the 
 
 # Annexes
 ### Generating scripts
-To generate the oracle script for an address/network, use the sample script below:
+To generate the oracle script for an address/network, use the sample script below, replacing the variable contents accordingly:
 ```mjs
 import hl from '@hathor/wallet-lib';
 
