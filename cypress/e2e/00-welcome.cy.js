@@ -1,7 +1,27 @@
+/**
+ * Sets the localstorage with the flag indicating the "Welcome" screen terms were already accepted
+ * @see import('../../src/storage').STARTED_KEY
+ */
 function setTermsAccepted() {
   cy.session('localStorage', () => {
     localStorage.setItem('localstorage:started', 'true');
   })
+}
+
+/**
+ * Asserts that the given form is invalid
+ * @param {keyof HTMLElementTagNameMap} [selector='form'] Selector that fetched the form in the HTML.
+ * If empty, it will assume there is only one single form on screen and select it
+ * @see https://glebbahmutov.com/cypress-examples/recipes/form-validation.html
+ * @example
+ * cy.findByText('Next').click();
+ * assertFormIsInvalid('#myForm');
+ * cy.contains('You need to type something before continuing');
+ */
+function assertFormIsInvalid(selector) {
+  cy.get(selector || 'form').then(
+    ($form) => expect($form[0].checkValidity()).to.be.false,
+  )
 }
 
 describe('welcome and wallet type selection', () => {
@@ -19,10 +39,7 @@ describe('welcome and wallet type selection', () => {
     const buttonLabel = 'Get started'
     cy.findByText(buttonLabel).click();
 
-    // Recipe from: https://glebbahmutov.com/cypress-examples/8.7.0/recipes/form-validation.html
-    cy.get('form').then(
-      ($form) => expect($form[0].checkValidity()).to.be.false,
-    )
+    assertFormIsInvalid();
 
     // Agree and click again
     cy.get('#confirmAgree').click();
@@ -54,9 +71,7 @@ describe('welcome and wallet type selection', () => {
     cy.contains('Using a software wallet is not the safest way');
     const continueButton = 'Continue';
     cy.findByText(continueButton).click();
-    cy.get('form').then(
-      ($form) => expect($form[0].checkValidity()).to.be.false,
-    )
+    assertFormIsInvalid();
 
     // Agree and click again
     cy.get('#confirmWallet').click();
@@ -89,15 +104,13 @@ describe('create a new wallet and back it up', () => {
     // Check that it requires clicking the confirmation checkbox
     const continueButton = 'Create my words';
     cy.findByText(continueButton).click();
-    cy.get('form').then(
-      ($form) => expect($form[0].checkValidity()).to.be.false,
-    )
+    assertFormIsInvalid();
 
     // Agree and click again
     cy.get('#confirmWallet').click();
     cy.findByText(continueButton).click();
 
-    // Confirm we're in the new words screen
+    // Confirm we're in the new words screen and skip the backup words flow
     cy.contains('Your words have been created!');
     cy.findByText('Do it later').click();
 
@@ -106,9 +119,7 @@ describe('create a new wallet and back it up', () => {
     cy.get('input[placeholder="Password"]').type('abc');
     cy.get('input[placeholder="Confirm Password"]').type('abc');
     cy.findByText('Next').click();
-    cy.get('#passwordWrapperForm').then(
-      ($form) => expect($form[0].checkValidity()).to.be.false,
-    )
+    assertFormIsInvalid();
 
     // Fill the password field with non-matching values
     cy.get('input[placeholder="Password"]').clear();
@@ -133,9 +144,7 @@ describe('create a new wallet and back it up', () => {
     cy.get('input[placeholder="PIN"]').type('abc');
     cy.get('input[placeholder="Confirm PIN"]').type('abc');
     cy.findByText('Next').click();
-    cy.get('#passwordWrapperForm').then(
-      ($form) => expect($form[0].checkValidity()).to.be.false,
-    )
+    assertFormIsInvalid();
 
     // Fill the PIN field with non-matching values
     cy.get('input[placeholder="PIN"]').clear();
