@@ -106,7 +106,7 @@ class SendTokensOne extends React.Component {
     let data = {'outputs': [], 'inputs': []};
     for (const output of this.outputs) {
       const address = output.current.address.current.value.replace(/\s/g, '');
-      const valueStr = (output.current.value.current.value || "").replace(/,/g, '');
+      const valueStr = (output.current.value.current.value || "")
 
       if (address && valueStr) {
         // Doing the check here because need to validate before doing parseInt

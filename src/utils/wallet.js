@@ -610,7 +610,7 @@ const wallet = {
    * @returns {string[]}
    */
   listTokensAlwaysShow() {
-    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};;
+    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};
     return Object.keys(alwaysShowMap);
   },
 

@@ -8,7 +8,6 @@
 import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from 'react-redux';
-import hathorLib from "@hathor/wallet-lib";
 
 /**
  * Component that enhances typing numbers
