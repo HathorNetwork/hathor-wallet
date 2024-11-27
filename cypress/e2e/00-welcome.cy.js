@@ -117,6 +117,8 @@ describe('create a new wallet and back it up', () => {
     cy.findByText('Next').click();
 
     // PIN was successful
-    cy.contains('Loading Addresses');
+    cy.contains('Loading transactions');
+    cy.contains('Total: 0.00 HTR', { timeout: 20000 });
+    cy.contains(`You haven't done the backup`);
   })
 })
