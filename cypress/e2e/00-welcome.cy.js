@@ -68,7 +68,7 @@ describe('welcome and wallet type selection', () => {
 
 describe('create a new wallet and back it up', () => {
   const passwd = 'Abc1234%';
-  const pin = '999999';
+  const pin = '123456';
 
   beforeEach(() => {
     setTermsAccepted();
@@ -101,8 +101,27 @@ describe('create a new wallet and back it up', () => {
     cy.contains('Your words have been created!');
     cy.findByText('Do it later').click();
 
-    // TODO: Test invalid passwords
-    // Fill the password field
+    // Fill the password field with short password
+    cy.contains('Please, choose a password')
+    cy.get('input[placeholder="Password"]').type('abc');
+    cy.get('input[placeholder="Confirm Password"]').type('abc');
+    cy.findByText('Next').click();
+    cy.get('#passwordWrapperForm').then(
+      ($form) => expect($form[0].checkValidity()).to.be.false,
+    )
+
+    // Fill the password field with non-matching values
+    cy.get('input[placeholder="Password"]').clear();
+    cy.get('input[placeholder="Confirm Password"]').clear();
+    cy.get('input[placeholder="Password"]').type(passwd);
+    cy.get('input[placeholder="Confirm Password"]').type(passwd.split('').reverse().join(''));
+    cy.findByText('Next').click();
+    cy.contains('Both fields must be equal');
+    cy.contains('Please, choose a password')
+
+    // Fill the password field properly
+    cy.get('input[placeholder="Password"]').clear();
+    cy.get('input[placeholder="Confirm Password"]').clear();
     cy.get('input[placeholder="Password"]').type(passwd);
     cy.get('input[placeholder="Confirm Password"]').type(passwd);
     cy.findByText('Next').click();
@@ -110,14 +129,34 @@ describe('create a new wallet and back it up', () => {
     // Password was successful
     cy.contains('The PIN is a 6-digit password');
 
-    // TODO: Test invalid PINs
-    // Fill the PIN field
+    // Fill the PIN field with invalid characters
+    cy.get('input[placeholder="PIN"]').type('abc');
+    cy.get('input[placeholder="Confirm PIN"]').type('abc');
+    cy.findByText('Next').click();
+    cy.get('#passwordWrapperForm').then(
+      ($form) => expect($form[0].checkValidity()).to.be.false,
+    )
+
+    // Fill the PIN field with non-matching values
+    cy.get('input[placeholder="PIN"]').clear();
+    cy.get('input[placeholder="Confirm PIN"]').clear();
+    cy.get('input[placeholder="PIN"]').type(pin);
+    cy.get('input[placeholder="Confirm PIN"]').type(pin.split('').reverse().join(''));
+    cy.findByText('Next').click();
+    cy.contains('Both fields must be equal');
+    cy.contains('The PIN is a 6-digit password'); // This should be immediate
+
+    // Fill the PIN field properly
+    cy.get('input[placeholder="PIN"]').clear();
+    cy.get('input[placeholder="Confirm PIN"]').clear();
     cy.get('input[placeholder="PIN"]').type(pin);
     cy.get('input[placeholder="Confirm PIN"]').type(pin);
     cy.findByText('Next').click();
 
     // PIN was successful
-    cy.contains('Loading transactions');
+    cy.contains('Loading transactions'); // For a few seconds this screen will be shown
+
+    // After a possibly large amount of time, the fullnode will have answered the empty tx history for the new wallet
     cy.contains('Total: 0.00 HTR', { timeout: 20000 });
     cy.contains(`You haven't done the backup`);
   })
