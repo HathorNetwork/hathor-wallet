@@ -96,8 +96,7 @@ const tokens = {
    */
   getDepositAmount(mintAmount, depositPercent, decimalPlaces) {
     if (mintAmount) {
-      const amountValue = wallet.decimalToInteger(mintAmount, decimalPlaces);
-      const deposit = hathorLib.tokensUtils.getDepositAmount(amountValue, depositPercent);
+      const deposit = hathorLib.tokensUtils.getDepositAmount(mintAmount, depositPercent);
       return hathorLib.numberUtils.prettyValue(deposit, decimalPlaces);
     } else {
       return '0';
