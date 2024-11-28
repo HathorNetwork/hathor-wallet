@@ -314,7 +314,7 @@ function CreateNFT() {
         <div className="row">
           <div className="form-group col-4">
             <label>{t`Amount`}</label>
-            <InputNumber required className="form-control" precision={0} placeholder="How many NFT units to create" onValueChange={onAmountChange} />
+            <InputNumber required className="form-control" isNFT={true} onValueChange={onAmountChange} />
           </div>
           <div className="form-group d-flex flex-row align-items-center address-checkbox">
             <div className="form-check">
