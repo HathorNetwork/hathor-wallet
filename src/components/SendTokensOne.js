@@ -106,16 +106,15 @@ class SendTokensOne extends React.Component {
     let data = {'outputs': [], 'inputs': []};
     for (const output of this.outputs) {
       const address = output.current.address.current.value.replace(/\s/g, '');
-      const valueStr = (output.current.value.current.value || "").replace(/,/g, '');
+      const value = output.current.value;
 
-      if (address && valueStr) {
+      if (address && value) {
         // Doing the check here because need to validate before doing parseInt
-        const tokensValue = this.isNFT() ? parseInt(valueStr) : wallet.decimalToInteger(valueStr, this.props.decimalPlaces);
-        if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
+        if (value > hathorLib.constants.MAX_OUTPUT_VALUE) {
           this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
           return null;
         }
-        let dataOutput = {'address': address, 'value': parseInt(tokensValue, 10), 'token': this.state.selected.uid};
+        let dataOutput = {'address': address, 'value': value, 'token': this.state.selected.uid};
 
         const hasTimelock = output.current.timelockCheckbox.current.checked;
         if (hasTimelock) {
