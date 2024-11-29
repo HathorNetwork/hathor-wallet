@@ -23,7 +23,7 @@ import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {
   const HTR_UID = hathorLib.constants.NATIVE_TOKEN_UID;
-  const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
+  const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0n);
 
   return {
     htrBalance,
@@ -53,7 +53,7 @@ class TokenAdministrative extends React.Component {
    * action {String} selected action (mint, melt, delegate-mint, delegate-melt, destroy-mint, destroy-melt)
    * successMessage {String} success message to show
    * errorMessage {String} Message to show in case of error getting token info
-   * totalSupply {Number} Token total supply
+   * totalSupply {bigint} Token total supply
    * balance.status {String} The current status of the token balance download
    * balance.data.available {Number} Amount available of the current token
    * balance.data.locked {Number} Amount locked of the current token
@@ -68,8 +68,8 @@ class TokenAdministrative extends React.Component {
     balance: {
       status: TOKEN_DOWNLOAD_STATUS.LOADING,
       data: {
-        available: 0,
-        locked: 0,
+        available: 0n,
+        locked: 0n,
       },
     },
   };

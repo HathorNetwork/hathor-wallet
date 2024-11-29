@@ -6,7 +6,6 @@
  */
 
 import React, { useContext } from 'react';
-import $ from 'jquery';
 import { t } from 'ttag'
 import { Link } from 'react-router-dom'
 import hathorLib from '@hathor/wallet-lib';

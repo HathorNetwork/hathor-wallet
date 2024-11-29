@@ -152,7 +152,7 @@ ModalUnregisteredTokenInfo.propTypes = {
   canMint: PropTypes.bool,
   transactionsCount: PropTypes.number,
   tokenMetadata: PropTypes.object,
-  totalSupply: PropTypes.number,
+  totalSupply: PropTypes.bigint,
 };
 
 export default ModalUnregisteredTokenInfo;

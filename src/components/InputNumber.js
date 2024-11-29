@@ -45,16 +45,11 @@ const InputNumber = React.forwardRef(
     /**
      * Formats a number following the pattern 9,999.99
      *
-     * @param {number} rawValue Number to be formatted
+     * @param {bigint} rawValue Number to be formatted
      *
      * @return {string} Formatted string
      */
-    const format = (rawValue) => {
-      if (typeof rawValue !== 'number') {
-          throw Error(`value must be a number: ${rawValue}`)
-      }
-      return numberUtils.prettyValue(rawValue, decimalPlaces)
-    };
+    const format = (rawValue) => numberUtils.prettyValue(rawValue, decimalPlaces);
 
     const innerRef = useRef();
     const [value, setValue] = useState(defaultValue);
@@ -81,11 +76,11 @@ const InputNumber = React.forwardRef(
 
         let newValue = value;
         if (isDeleteAll) {
-          newValue = 0;
+          newValue = 0n;
         } else if (isNumberChar) {
-          newValue = value * 10 + Number(evt.key);
+          newValue = value * 10n + BigInt(evt.key);
         } else if (isBackspace) {
-          newValue = Math.floor(value / 10);
+          newValue = value / 10n;
         }
         updateCaretPosition(newValue);
         return newValue;
@@ -102,7 +97,7 @@ const InputNumber = React.forwardRef(
     /**
      * Put the caret always at the end.
      *
-     * @param  {number} value Current input value
+     * @param  {bigint} value Current input value
      */
     const updateCaretPosition = (value) => {
       setTimeout(() => {
@@ -123,7 +118,7 @@ const InputNumber = React.forwardRef(
     const onPaste = (evt) =>
       setValue(() => {
         const paste = (evt.clipboardData || window.clipboardData).getData("text");
-        const newValue = Number(paste.replace(/\D/g, ''))
+        const newValue = BigInt(paste.replace(/\D/g, ''))
         updateCaretPosition(newValue);
         return newValue;
       });
@@ -165,7 +160,7 @@ InputNumber.propTypes = {
   /**
    * Same behavior of React input defaultValue
    */
-  defaultValue: PropTypes.number,
+  defaultValue: PropTypes.bigint,
   /**
    * Whether this is a NFT input
    */
@@ -181,7 +176,7 @@ InputNumber.propTypes = {
 };
 
 InputNumber.defaultProps = {
-  defaultValue: 0,
+  defaultValue: 0n,
   isNFT: false,
   onValueChange: () => {},
   requirePositive: false,

@@ -294,7 +294,7 @@ export const translateTxToProposalUtxo = async (txId, index, wallet) => {
   const addressIndex = addressInfo.bip32AddressIndex;
 
   const addressPath = addressIndex ? await wallet.getAddressPathForIndex(addressIndex) : '';
-  let authorities = 0;
+  let authorities = 0n;
   if (transactionUtils.isMint(txout)) {
     authorities += TOKEN_MINT_MASK;
   }

@@ -110,7 +110,7 @@ const tokens = {
    * @inner
    */
   getNFTFee() {
-    return 1;
+    return 1n;
   },
 
   /**
