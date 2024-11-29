@@ -37,7 +37,7 @@ class TokenMelt extends React.Component {
   /**
    * amount {number} Amount of tokens to melt
    */
-  state = { amount: 0 };
+  state = { amount: 0n };
 
   constructor(props) {
     super(props);
