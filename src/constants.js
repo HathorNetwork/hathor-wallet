@@ -80,29 +80,6 @@ export const DEBUG_LOCAL_DATA_KEYS = [
 export const SENTRY_DSN = process.env.SENTRY_DSN || 'https://69c067d1587c465cac836eaf25467ce1@sentry.io/1410476';
 
 /**
- * Server options for the user to choose which one to connect
- */
-export const DEFAULT_SERVERS = [
-  'https://node1.mainnet.hathor.network/v1a/',
-  'https://node2.mainnet.hathor.network/v1a/',
-];
-
-/**
- * Default server user will connect when none has been chosen
- */
-export const DEFAULT_SERVER = DEFAULT_SERVERS[0];
-
-/**
- * Explorer base url
- */
-export const EXPLORER_BASE_URL = "https://explorer.hathor.network";
-
-/**
- * Testnet explorer base url
- */
-export const TESTNET_EXPLORER_BASE_URL = "https://explorer.testnet.hathor.network";
-
-/**
  * URL of token deposit RFC
  */
 export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
@@ -227,26 +204,6 @@ export const LEDGER_MAX_VERSION = '2.0.0';
  */
 export const LEDGER_FIRST_CUSTOM_TOKEN_COMPATIBLE_VERSION = '1.1.0'
 
-
-/**
- * Wallet service URLs
- */
-export const WALLET_SERVICE_MAINNET_BASE_URL = 'https://wallet-service.hathor.network/';
-export const WALLET_SERVICE_MAINNET_BASE_WS_URL = 'wss://ws.wallet-service.hathor.network/';
-
-/**
- * Default Wallet Service servers
- */
-export const DEFAULT_WALLET_SERVICE_SERVERS = [
-  WALLET_SERVICE_MAINNET_BASE_URL,
-];
-
-/**
- * Default Wallet Service websocket servers
- */
-export const DEFAULT_WALLET_SERVICE_WS_SERVERS = [
-  WALLET_SERVICE_MAINNET_BASE_WS_URL,
-];
 /**
  * Unleash constants
  */
@@ -293,6 +250,40 @@ export const NANO_UPDATE_ADDRESS_LIST_COUNT = 5;
 export const NANO_CONTRACT_HISTORY_COUNT = 5;
 
 /**
+ * Pre settings for mainnet, testnet, and nano testnet
+ * We define the values for network, node, txMining, explorer, explorer service, wallet service and its ws
+ */
+export const NETWORK_SETTINGS = {
+  mainnet: {
+    network: 'mainnet',
+    node: 'https://node1.mainnet.hathor.network/v1a/',
+    txMining: 'https://txmining.mainnet.hathor.network/',
+    explorer: 'https://explorer.hathor.network',
+    explorerService: 'https://explorer-service.hathor.network/',
+    walletService: 'https://wallet-service.hathor.network/',
+    walletServiceWS: 'wss://ws.wallet-service.hathor.network/',
+  },
+  testnet: {
+    network: 'testnet',
+    node: 'https://node1.testnet.hathor.network/v1a/',
+    txMining: 'https://txmining.testnet.hathor.network/',
+    explorer: 'https://explorer.testnet.hathor.network',
+    explorerService: 'https://explorer-service.testnet.hathor.network/',
+    walletService: 'https://wallet-service.testnet.hathor.network/',
+    walletServiceWS: 'wss://ws.wallet-service.testnet.hathor.network/',
+  },
+  nanoTestnet: {
+    network: 'testnet',
+    node: 'https://node1.nano-testnet.hathor.network/v1a/',
+    txMining: 'https://txmining.nano-testnet.hathor.network/',
+    explorer: 'https://explorer.alpha.nano-testnet.hathor.network/',
+    explorerService: 'https://explorer-service.nano-testnet.hathor.network/',
+    walletService: 'https://wallet-service.nano-testnet.hathor.network/',
+    walletServiceWS: 'wss://ws.wallet-service.nano-testnet.hathor.network/',
+  }
+}
+
+/**
  * Base statuses for saga reducer handlers
  * Used by all other statuses objects
  */
@@ -309,4 +300,13 @@ const BASE_STATUS = {
 export const NANO_CONTRACT_DETAIL_STATUS = {
   ...BASE_STATUS,
   WAITING_TX_CONFIRMATION: 'waitingTxConfirmation',
+}
+
+/**
+ * Network settings statuses for saga reducer handlers
+ */
+export const NETWORK_SETTINGS_STATUS = {
+  ...BASE_STATUS,
+  WAITING_NETWORK_CONFIRMATION: 'waitingNetworkConfirmation',
+  NETWORK_CONFIRMED: 'networkConfirmed'
 }

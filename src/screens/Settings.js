@@ -132,17 +132,10 @@ function Settings() {
   }
 
   /**
-   * When user clicks Change Server button we redirect to Change Server screen
+   * When user clicks Change Network button we redirect to Network Settings screen
    */
-  const changeServer = () => {
-    navigate('/server/');
-  }
-
-  /**
-   * When user clicks Change Mining Server button we redirect to Change Mining Server screen
-   */
-  const changeMiningServer = () => {
-    navigate('/mining_server/');
+  const changeNetwork = () => {
+    navigate('/network_settings/');
   }
 
   /**
@@ -294,7 +287,7 @@ function Settings() {
             <p><SpanFmt>{t`**Real-time server:** You are connected to ${wsServerURL}`}</SpanFmt></p>
           )
         }
-        <button className="btn btn-hathor" onClick={changeServer}>{t`Change server`}</button>
+        <button className="btn btn-hathor" onClick={changeNetwork}>{t`Change network`}</button>
       </div>
       <hr />
 
@@ -319,7 +312,6 @@ function Settings() {
               <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
             </span>
           </CopyToClipboard>
-          <button className="btn btn-hathor mt-4" onClick={changeMiningServer}>{t`Change mining server`}</button>
           <button className="btn btn-hathor mt-4" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
           <button className="btn btn-hathor mt-4" onClick={addPassphrase}>{t`Set a passphrase`}</button>
           {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
