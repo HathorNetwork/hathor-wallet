@@ -88,17 +88,11 @@ function NetworkSettings() {
     if (networkSettings.status === NETWORK_SETTINGS_STATUS.READY) {
       setLoading(false);
     }
-
-    if (networkSettings.status === NETWORK_SETTINGS_STATUS.SUCCESS) {
-      setLoading(false);
-      dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.READY }));
-      navigate('/wallet/');
-    }
-
-
   }, [networkSettings.status]);
 
   useEffect(() => {
+    // Start with the status change to READY, in case it had been left in an inconsistent state
+    dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.READY }));
     return () => {
       // Reset status data on unmount
       dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.READY }));
