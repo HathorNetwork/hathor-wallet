@@ -6,7 +6,7 @@
  */
 
 import CryptoJS from 'crypto-js';
-import { MemoryStore, Storage, walletUtils, config, network, cryptoUtils, WalletType } from "@hathor/wallet-lib";
+import { MemoryStore, Storage, walletUtils, config, cryptoUtils, WalletType } from "@hathor/wallet-lib";
 import { VERSION } from "./constants";
 
 export const WALLET_VERSION_KEY = 'localstorage:version';
@@ -19,13 +19,10 @@ export const LOCKED_KEY = 'localstorage:lock';
 export const CLOSED_KEY = 'localstorage:closed';
 // This key marks that the user has seen the welcome page and clicked on get started
 export const STARTED_KEY = 'localstorage:started';
-export const NETWORK_KEY = 'localstorage:network';
 export const IS_HARDWARE_KEY = 'localstorage:ishardware';
 export const TOKEN_SIGNATURES_KEY = 'localstorage:token:signatures';
 export const IS_BACKUP_DONE_KEY = 'localstorage:backup';
-export const SERVER_KEY = 'localstorage:server';
-export const WS_SERVER_KEY = 'localstorage:wsserver';
-export const MINING_SERVER_KEY = 'localstorage:mining:server';
+export const NETWORK_SETTINGS_KEY = 'localstorage:networkSettings';
 
 export const ACCESS_DATA_KEY = 'localstorage:accessdata';
 export const REGISTERED_TOKENS_KEY = 'localstorage:registeredTokens';
@@ -37,13 +34,10 @@ export const storageKeys = [
   LOCKED_KEY,
   CLOSED_KEY,
   STARTED_KEY,
-  NETWORK_KEY,
   IS_HARDWARE_KEY,
   TOKEN_SIGNATURES_KEY,
   IS_BACKUP_DONE_KEY,
-  SERVER_KEY,
-  WS_SERVER_KEY,
-  MINING_SERVER_KEY,
+  NETWORK_SETTINGS_KEY,
   // Wallet keys
   ACCESS_DATA_KEY,
   REGISTERED_TOKENS_KEY,
@@ -537,26 +531,6 @@ export class LocalStorageStore {
     return cryptoUtils.checkPassword(mainEncryptedData, pinCode);
   }
 
-  /**
-   * Persist server URLs on the localStorage.
-   * @param {string} serverURL Fullnode api url
-   * @param {string} [wsServerURL] websocket server url for wallet-service
-   */
-  setServers(serverURL, wsServerURL) {
-    this.setItem(SERVER_KEY, serverURL);
-    if (wsServerURL) {
-      this.setItem(WS_SERVER_KEY, serverURL);
-    }
-  }
-
-  getServer() {
-    return this.getItem(SERVER_KEY);
-  }
-
-  getWsServer() {
-    return this.getItem(WS_SERVER_KEY);
-  }
-
   lock() {
     this.setItem(LOCKED_KEY, true);
   }
@@ -595,15 +569,6 @@ export class LocalStorageStore {
 
   setWalletVersion() {
     this.setItem(WALLET_VERSION_KEY, VERSION);
-  }
-
-  setNetwork(networkName) {
-    this.setItem(NETWORK_KEY, networkName);
-    network.setNetwork(networkName);
-  }
-
-  getNetwork() {
-    return this.getItem(NETWORK_KEY);
   }
 
   setHardwareWallet(value) {
@@ -646,16 +611,12 @@ export class LocalStorageStore {
     return this.getItem(LEDGER_APP_VERSION_KEY);
   }
 
-  setMiningServer(server) {
-    this.setItem(MINING_SERVER_KEY, server);
+  getNetworkSettings() {
+    return this.getItem(NETWORK_SETTINGS_KEY);
   }
 
-  resetMiningServer() {
-    this.removeItem(MINING_SERVER_KEY);
-  }
-
-  getMiningServer() {
-    return this.getItem(MINING_SERVER_KEY);
+  setNetworkSettings(data) {
+    this.setItem(NETWORK_SETTINGS_KEY, data);
   }
 }
 
