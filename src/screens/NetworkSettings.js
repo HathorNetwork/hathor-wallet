@@ -36,7 +36,7 @@ import BackButton from '../components/BackButton';
  */
 function NetworkSettings() {
   const context = useContext(GlobalModalContext);
-	const navigate = useNavigate();
+  const navigate = useNavigate();
   const dispatch  = useDispatch();
 
   const networkSelectRef = useRef(null);
@@ -68,6 +68,8 @@ function NetworkSettings() {
 
   useEffect(() => {
     if (networkSettings.status === NETWORK_SETTINGS_STATUS.WAITING_NETWORK_CONFIRMATION) {
+      // User requested to change to a node that is a testnet or privatenet
+      // so we must show the confirmation modal before changing the network
       context.showModal(MODAL_TYPES.CONFIRM_TESTNET, {
         success: () => onNetworkConfirmed(),
         onUserCancel: () => onNetworkConfirmationCancel(),
