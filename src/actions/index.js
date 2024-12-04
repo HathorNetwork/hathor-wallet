@@ -63,6 +63,9 @@ export const types = {
   NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
   NANOCONTRACT_UNREGISTER: 'NANOCONTRACT_UNREGISTER',
   BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
+  NANOCONTRACT_DETAIL_REQUEST: 'NANO_CONTRACT_DETAIL_REQUEST',
+  NANOCONTRACT_DETAIL_SET_STATUS: 'NANO_CONTRACT_DETAIL_SET_STATUS',
+  NANOCONTRACT_DETAIL_LOADED: 'NANO_CONTRACT_DETAIL_LOADED',
 };
 
 /**
@@ -613,4 +616,36 @@ export const editAddressNC = (ncId, address) => ({
 export const nanoContractUnregister = (ncId) => ({
   type: types.NANOCONTRACT_UNREGISTER,
   payload: ncId,
+});
+
+/**
+ * Start a request to load nano contract detail
+ *
+ * @param {string} ncId ID of nano contract to load the data
+ */
+export const nanoContractDetailRequest = (ncId) => ({
+  type: types.NANOCONTRACT_DETAIL_REQUEST,
+  ncId,
+});
+
+/**
+ * Set status of a nano contract detail load
+ *
+ * @param {Object} payload
+ * @param {string} payload.status Status of the load to set in redux
+ * @param {string} payload.error Error when loading data
+ */
+export const nanoContractDetailSetStatus = ({ status, error }) => ({
+  type: types.NANOCONTRACT_DETAIL_SET_STATUS,
+  payload: { status, error },
+});
+
+/**
+ * Set nano contract detail state in redux
+ *
+ * @param {hathorLib.nano_contracts.types.NanoContractStateAPIResponse} state
+ */
+export const nanoContractDetailLoaded = (state) => ({
+  type: types.NANOCONTRACT_DETAIL_LOADED,
+  state,
 });
