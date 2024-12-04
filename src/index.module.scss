@@ -907,15 +907,15 @@ span.software {
   border-top: 1px solid;
 }
 
-.five-column-list {
+.three-column-list {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   list-style: none;
   padding-left: 0;
 }
 
-.five-column-list li {
+.three-column-list li {
   padding: 0.5rem;
   text-align: center;
 }
