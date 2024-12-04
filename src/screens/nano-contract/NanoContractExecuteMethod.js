@@ -9,7 +9,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { t } from 'ttag'
 import BackButton from '../../components/BackButton';
 import InputNumber from '../../components/InputNumber';
-import colors from '../../index.module.scss';
 import hathorLib from '@hathor/wallet-lib';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { get, pullAt } from 'lodash';
@@ -264,8 +263,7 @@ function NanoContractExecuteMethod() {
       }
 
       if (typeToCheck === 'Amount') {
-        const amountValue = walletUtils.decimalToInteger(value, decimalPlaces);
-        argValues.push(amountValue);
+        argValues.push(value);
         continue;
       }
 
@@ -282,10 +280,6 @@ function NanoContractExecuteMethod() {
         // We will skip if the user has just added an empty action
         continue;
       }
-
-      const amountValue = isNFT(action.token) ? action.amount : walletUtils.decimalToInteger(action.amount, decimalPlaces);
-      action.amount = amountValue;
-
       actionsData.push(action);
     }
 
@@ -377,9 +371,9 @@ function NanoContractExecuteMethod() {
       return <InputNumber
               required={!isOptional}
               requirePositive={true}
-              ref={ref}
+              // workaround to use ref with onValueChange so we get the actual numeric value instead of the string value
+              onValueChange={(value) => ref.current.value = value}
               className="form-control output-value"
-              placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
             />
     }
 
@@ -520,21 +514,6 @@ function NanoContractExecuteMethod() {
     // I start the ref as null, then I set it in the input if it's a withdrawal
     actionAddressesRef.current[index] = null;
 
-    const token = actions[index].token;
-    // Depending on the token, the input for the amount changes because it might be an NFT
-    const nft = isNFT(token);
-    let inputNumberProps;
-    if (nft) {
-      inputNumberProps = {
-        placeholder: '0',
-        precision: 0,
-      };
-    } else {
-      inputNumberProps = {
-        placeholder: hathorLib.numberUtils.prettyValue(0, decimalPlaces)
-      };
-    }
-
     const renderCommon = () => {
       return (
         <div className="d-flex flex-grow-1">
@@ -549,7 +528,7 @@ function NanoContractExecuteMethod() {
               requirePositive={true}
               onValueChange={amount => onActionValueChange(index, 'amount', amount)}
               className="form-control output-value"
-              {...inputNumberProps}
+              isNFT={isNFT(actions[index].token)}
             />
           </div>
         </div>
