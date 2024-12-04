@@ -19,10 +19,11 @@ import hathorLib from '@hathor/wallet-lib';
 import path from 'path';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { addBlueprintInformation, nanoContractUnregister } from '../../actions';
+import { addBlueprintInformation, nanoContractDetailRequest, nanoContractDetailSetStatus, nanoContractUnregister } from '../../actions';
 import { get } from 'lodash';
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
-import { getGlobalWallet } from "../../modules/wallet";
+import { getGlobalWallet } from '../../modules/wallet';
+import { NANO_CONTRACT_DETAIL_STATUS } from '../../constants';
 
 
 /**
@@ -36,14 +37,14 @@ function NanoContractDetail() {
 
   const {
     nanoContracts,
+    nanoContractDetailState,
     blueprintsData,
-    tokenMetadata,
     decimalPlaces,
   } = useSelector((state) => {
     return {
       nanoContracts: state.nanoContracts,
+      nanoContractDetailState: state.nanoContractDetailState,
       blueprintsData: state.blueprintsData,
-      tokenMetadata: state.tokenMetadata,
       decimalPlaces: state.serverInfo.decimalPlaces,
     }
   });
@@ -52,28 +53,56 @@ function NanoContractDetail() {
   const navigate = useNavigate();
   const { nc_id: ncId } = useParams();
   const nc = nanoContracts[ncId];
-  let blueprintInformationAux = nc != null ? blueprintsData[nc.blueprintId] : null;
 
   // loading {boolean} Bool to show/hide loading element
   const [loading, setLoading] = useState(true);
   // data {Object} Nano contract loaded data
   const [data, setData] = useState(null);
   // blueprintInformation {Object} Blueprint information data
-  const [blueprintInformation, setBlueprintInformation] = useState(blueprintInformationAux);
+  const [blueprintInformation, setBlueprintInformation] = useState(null);
   // errorMessage {string} Message to show when error happens on the form
   const [errorMessage, setErrorMessage] = useState('');
   // waitingConfirmation {boolean} If transaction was loading and is waiting first block confirmation
   const [waitingConfirmation, setWaitingConfirmation] = useState(false);
-  // txIsValid {boolean} If transaction is a valid nano contract creation tx that is already confirmed by a block
-  const [txIsValid, setTxIsValid] = useState(false);
 
   useEffect(() => {
     if (nc) {
       // Load data only if nano contract exists in redux,
       // otherwise it has just been unregistered
-      validateAndLoad();
+      dispatch(nanoContractDetailRequest(ncId));
+    }
+
+    return () => {
+      // Move state to ready when unmounting
+      dispatch(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.READY }));
     }
   }, []);
+
+  useEffect(() => {
+    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.LOADING) {
+      setLoading(true);
+    }
+
+    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.ERROR) {
+      setLoading(false);
+      setErrorMessage(nanoContractDetailState.error);
+    }
+
+    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.WAITING_TX_CONFIRMATION) {
+      setWaitingConfirmation(true);
+    }
+
+    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.SUCCESS) {
+      setWaitingConfirmation(false);
+      setLoading(false);
+      // We know that we will have the blueprint data in redux here
+      const blueprintInformation = blueprintsData[nc.blueprintId];
+      setBlueprintInformation(blueprintInformation);
+      setData(nanoContractDetailState.state);
+      dispatch(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.READY }));
+    }
+
+  }, [nanoContractDetailState.status]);
 
   /**
    * Method executed when link to execute a method is clicked
@@ -119,93 +148,6 @@ function NanoContractDetail() {
         navigate('/nano_contract/');
       },
     });
-  }
-
-  /**
-   * Validates if the transaction is a valid nano contract creation tx
-   * and if it's confirmed by a block already.
-   *
-   * If everything is ok, calls loadData, otherwise calls itself again
-   * in 5s if it's waiting for a block confirmation
-   *
-   * We need this because the state and history are only loaded when the tx is confirmed
-   */
-  const validateAndLoad = async () => {
-    setLoading(true);
-    let response;
-    try {
-      response = await wallet.getFullTxById(ncId);
-    } catch (e) {
-      // invalid tx
-      setErrorMessage(t`Transaction is invalid.`);
-      setLoading(false);
-      return;
-    }
-
-    const isVoided = response.meta.voided_by.length > 0;
-    if (isVoided) {
-      setErrorMessage(t`Transaction is voided.`);
-      setLoading(false);
-      return;
-    }
-
-    const isNanoContractCreate = nanoUtils.isNanoContractCreate(response.tx);
-    if (!isNanoContractCreate) {
-      setErrorMessage(t`Transaction must be a nano contract creation.`);
-      setLoading(false);
-      return;
-    }
-
-    const isConfirmed = response.meta.first_block !== null;
-    if (!isConfirmed) {
-      // Wait for transaction to be confirmed
-      setWaitingConfirmation(true);
-      setTimeout(validateAndLoad, 5000);
-      return;
-    }
-
-    setWaitingConfirmation(false);
-    setTxIsValid(true);
-    return loadData();
-  }
-
-  const loadData = async () => {
-    try {
-      await loadBlueprintInformation();
-      await loadNCData();
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const loadBlueprintInformation = async () => {
-    if (blueprintInformationAux) {
-      return;
-    }
-
-    try {
-      const blueprintInformationResponse = await hathorLib.ncApi.getBlueprintInformation(nc.blueprintId);
-      // We need this blueprint information response to call the following get state
-      // The set state is not sync, so we need to store it in a common variable to be used in the next call
-      blueprintInformationAux = blueprintInformationResponse;
-      setBlueprintInformation(blueprintInformationResponse);
-      // Store in redux, so it can be reused by other nano contracts
-      dispatch(addBlueprintInformation(blueprintInformationResponse));
-    } catch(e) {
-      // Error in request
-      setErrorMessage(t`Error getting blueprint details.`);
-    };
-  }
-
-  const loadNCData = async () => {
-    setData(null);
-    try {
-      const state = await hathorLib.ncApi.getNanoContractState(ncId, Object.keys(blueprintInformationAux.attributes), ['__all__'], []);
-      setData(state);
-    } catch(e) {
-      // Error in request
-      setErrorMessage(t`Error getting nano contract state.`);
-    };
   }
 
   const renderBody = () => {
@@ -339,7 +281,7 @@ function NanoContractDetail() {
         <div className="d-flex flex-row justify-content-center mt-5 pb-4">
           {renderBody()}
         </div>
-        {txIsValid && <NanoContractHistory ncId={ncId} />}
+        {data && <NanoContractHistory ncId={ncId} />}
       </div>
     </div>
   );

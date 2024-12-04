@@ -6,15 +6,19 @@ import {
 import { t } from 'ttag';
 
 import { getGlobalWallet } from "../modules/wallet";
+import hathorLib from '@hathor/wallet-lib';
 
 import {
   addBlueprintInformation,
+  nanoContractDetailLoaded,
+  nanoContractDetailSetStatus,
   nanoContractRegisterError,
   nanoContractRegisterSuccess,
   types,
 } from '../actions';
 
 import nanoUtils from '../utils/nanoContracts';
+import { NANO_CONTRACT_DETAIL_STATUS } from '../constants';
 
 import { all, call, put, select, takeEvery } from 'redux-saga/effects';
 
@@ -124,9 +128,108 @@ export function* updateNanoContractRegisteredAddress({ payload }) {
   yield call([wallet.storage, wallet.storage.updateNanoContractRegisteredAddress], payload.ncId, payload.address);
 }
 
+
+/**
+ * Load nano contract detail state
+ * @param {{
+ *   payload: {
+ *     ncId: string,
+ *   }
+ * }} action with request payload.
+ */
+export function* loadNanoContractDetail({ ncId }) {
+  const wallet = getGlobalWallet();
+  let response;
+  try {
+    response = yield call([wallet, wallet.getFullTxById], ncId);
+  } catch (e) {
+    // invalid tx
+    console.debug(`Fail loading Nano Contract detail because [ncId=${ncId}] is an invalid tx.`);
+    yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Transaction is invalid.` }));
+    return;
+  }
+
+  const isVoided = response.meta.voided_by.length > 0;
+  if (isVoided) {
+    console.debug(`Fail loading Nano Contract detail because [ncId=${ncId}] is a voided tx.`);
+    yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Transaction is voided.` }));
+    return;
+  }
+
+  const isNanoContractCreate = nanoUtils.isNanoContractCreate(response.tx);
+  if (!isNanoContractCreate) {
+    console.debug(`Fail loading Nano Contract detail because [ncId=${ncId}] is not a nano contract creation tx.`);
+    yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Transaction must be a nano contract creation.` }));
+    return;
+  }
+
+  const isConfirmed = response.meta.first_block !== null;
+  if (!isConfirmed) {
+    // Wait for transaction to be confirmed
+    yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.WAITING_TX_CONFIRMATION }));
+
+    // This confirmation might take some minutes, depending on network mining power
+    // then it's ok to wait until it's confirmed, or until the user gives up and
+    // leaves the screen
+    while (true) {
+      // Wait 5s, then we fetch the data again to check if is has been confirmed
+      yield delay(5000);
+      const nanoContractDetailState = yield select((state) => state.nanoContractDetailState);
+      if (nanoContractDetailState.status !== NANO_CONTRACT_DETAIL_STATUS.WAITING_TX_CONFIRMATION) {
+        // User unmounted the screen, so we must stop the saga
+        return;
+      }
+
+      try {
+        const responseFullTx  = yield call([wallet, wallet.getFullTxById], ncId);
+        const isConfirmed = responseFullTx.meta.first_block !== null;
+        if (isConfirmed) {
+          break;
+        }
+      } catch (e) {
+        // error loading full tx
+        console.error('Error while loading full tx.', e);
+        yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Error loading transaction data.` }));
+        return;
+      }
+    }
+  }
+
+  const nanoContracts = yield select((state) => state.nanoContracts);
+  const blueprintsData = yield select((state) => state.blueprintsData);
+  const nc = nanoContracts[ncId];
+  let blueprintInformation = blueprintsData[nc.blueprintId];
+
+  if (!blueprintInformation) {
+    // If it hasn't been loaded, we load and store in redux
+    try {
+      blueprintInformation = yield call(hathorLib.ncApi.getBlueprintInformation, nc.blueprintId);
+      // We need this blueprint information response to call the following get state
+      // Store in redux, so it can be reused by other nano contracts
+      yield put(addBlueprintInformation(blueprintInformation));
+    } catch(e) {
+      // Error in request
+      console.error('Error while loading blueprint information.', e);
+      yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Error getting blueprint details.` }));
+      return;
+    }
+  }
+
+  try {
+    const state = yield call(hathorLib.ncApi.getNanoContractState, ncId, Object.keys(blueprintInformation.attributes), ['__all__'], []);
+    yield put(nanoContractDetailLoaded(state));
+  } catch(e) {
+    // Error in request
+    console.error('Error while loading nano contract state.', e);
+    yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Error getting nano contract state.` }));
+    return;
+  }
+}
+
 export function* saga() {
   yield all([
     takeEvery(types.NANOCONTRACT_REGISTER_REQUEST, registerNanoContract),
     takeEvery(types.NANOCONTRACT_EDIT_ADDRESS, updateNanoContractRegisteredAddress),
+    takeEvery(types.NANOCONTRACT_DETAIL_REQUEST, loadNanoContractDetail),
   ]);
 }
