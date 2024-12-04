@@ -262,7 +262,7 @@ function NanoContractDetail() {
         <hr />
         <div>
           <p className="text-center mb-4"><strong>Available methods:</strong></p>
-          <ul className="five-column-list mt-3">
+          <ul className="three-column-list mt-3">
             {renderNanoMethods()}
           </ul>
         </div>
