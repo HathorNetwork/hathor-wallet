@@ -30,6 +30,7 @@ describe('welcome and wallet type selection', () => {
     cy.visit('/');
     cy.findByText(/Welcome to Hathor Wallet/i)
       .should("have.length", 1);
+    cy.compareSnapshot('welcome-screen');
   });
 
   it('should only allow clicking the button after accepting terms', () => {
@@ -170,7 +171,7 @@ describe('create a new wallet and back it up', () => {
     cy.contains(`You haven't done the backup`);
   })
 
-  it.only('should backup words and handle fullnode failure', () => {
+  it('should backup words and handle fullnode failure', () => {
     // Navigate to the "Software Wallet" screen after the warning);
     cy.contains('You can start a new wallet or import data');
 
