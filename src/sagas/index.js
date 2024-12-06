@@ -4,6 +4,7 @@ import { saga as tokensSagas } from './tokens';
 import { saga as proposalsSagas } from './atomicSwap';
 import { saga as featureToggleSagas } from './featureToggle';
 import { saga as nanoContractSagas } from './nanoContract';
+import { saga as networkSettingsSagas } from './networkSettings';
 
 function* defaultSaga() {
   yield all([
@@ -12,6 +13,7 @@ function* defaultSaga() {
     fork(proposalsSagas),
     fork(featureToggleSagas),
     fork(nanoContractSagas),
+    fork(networkSettingsSagas),
   ]);
 }
 

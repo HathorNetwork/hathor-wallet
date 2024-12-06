@@ -97,7 +97,8 @@ const wallet = {
    * @return {boolean} boolean indicating if address is valid
    */
   validateAddress(address) {
-    const networkName = LOCAL_STORE.getNetwork() || 'mainnet';
+    const networkSettings = LOCAL_STORE.getNetworkSettings();
+    const networkName = networkSettings ? networkSettings.network : 'mainnet';
     const networkObj = new Network(networkName);
     try {
       const addressObj = new Address(address, { network: networkObj });
