@@ -87,6 +87,10 @@ function NanoContractExecuteMethod() {
   // This will store each action in an array of objects
   // { type, token, amount, address }
   const [actions, setActions] = useState([]);
+
+  // Store values for Amount fields based on arg names
+  const [amountValues, setAmountValues] = useState({});
+
   const globalModalContext = useContext(GlobalModalContext);
 
   // We must store the ref of action addresses because we use for the validation
@@ -140,8 +144,8 @@ function NanoContractExecuteMethod() {
       if (typeToCheck !== 'Address') {
         continue;
       }
-      const addressInputValue = formRefs[i].current.value;
-      validateAddress(addressInputValue, formRefs[i].current);
+      const addressInputValue = formRefs[i].getValue();
+      validateAddress(addressInputValue, formRefs[i].ref);
     }
 
     for (let i=0; i<actions.length; i++) {
@@ -235,7 +239,7 @@ function NanoContractExecuteMethod() {
     const argValues = [];
     const args = get(data.blueprintInformation.public_methods, `${data.method}.args`, []);
     for (let i=0; i<args.length; i++) {
-      let value = formRefs[i].current.value;
+      let value = formRefs[i].getValue();
       // Check optional type
       // Optional fields end with ?
       const splittedType = args[i].type.split('?');
@@ -362,17 +366,17 @@ function NanoContractExecuteMethod() {
    * Timestamp will have a datetime-local
    * The rest will be a text input
    *
+   * @param {string} name Argument name of the input
    * @param {string} type Argument type to render the input
    * @param {boolean} isOptional If this argument is optional
    * @param {Object} ref React reference object
    */
-  const renderInput = (type, isOptional, ref) => {
+  const renderInput = (name, type, isOptional, ref) => {
     if (type === 'Amount') {
       return <InputNumber
               required={!isOptional}
               requirePositive={true}
-              // workaround to use ref with onValueChange so we get the actual numeric value instead of the string value
-              onValueChange={(value) => ref.current.value = value}
+              onValueChange={(value) => setAmountValues({...amountValues, [name]: value})}
               className="form-control output-value"
             />
     }
@@ -433,14 +437,23 @@ function NanoContractExecuteMethod() {
     }
 
     // Create a new ref for this argument to be used in the input and adds it to the array of refs
-    const ref = useRef(null);
-    formRefs.push(ref);
+    let ref;
+    let getValue;
+    if (type.startsWith('Amount')) {
+      // Amount fields don't use refs, so we store and retrieve values manually
+      ref = null;
+      getValue = () => amountValues[name];
+    } else {
+      ref = useRef(null);
+      getValue = () => ref.current.value;
+    }
+    formRefs.push({ ref, getValue});
 
     return (
       <div className="row" key={name}>
         <div className="form-group col-6">
           <label>{name} {!isOptional && '*'}</label>
-          {renderInput(typeToRender, isOptional, ref)}
+          {renderInput(name, typeToRender, isOptional, ref)}
           { isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSignData(ref, e)}>{t`Select address to sign`}</a></div> }
         </div>
       </div>
