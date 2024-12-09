@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 
 /**
  * @property {string} errorMessage Message to show in case of error getting token info
- * @property {number} totalSupply Token total supply
+ * @property {bigint} totalSupply Token total supply
  * @property {boolean} canMint If this token can still be minted
  * @property {boolean} canMelt If this token can still be melted
  * @property {number} transactionsCount Total number of transactions of this token

@@ -8,8 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { t } from 'ttag'
-import ReactLoading from 'react-loading';
-import colors from '../../index.module.scss';
 import hathorLib from '@hathor/wallet-lib';
 import { useDispatch } from 'react-redux';
 import { NANO_CONTRACT_HISTORY_COUNT } from '../../constants';

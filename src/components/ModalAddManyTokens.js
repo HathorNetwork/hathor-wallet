@@ -116,8 +116,8 @@ class ModalAddManyTokens extends React.Component {
       for (const config of toAdd) {
         const tokenUid = config.uid;
         const { available, locked } = get(tokensBalance, `${tokenUid}.data`, {
-          available: 0,
-          locked: 0,
+          available: 0n,
+          locked: 0n,
         });
         const tokenHasZeroBalance = (available + locked) === 0;
 

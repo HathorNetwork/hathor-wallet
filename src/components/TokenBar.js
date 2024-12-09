@@ -92,12 +92,12 @@ export default function TokenBar () {
    * Gets the balance of one token
    *
    * @param {string} uid UID to get balance from
-   * @return {number} Total token balance
+   * @return {bigint} Total token balance
    */
   const getTokenBalance = (uid) => {
     const { available, locked } = get(tokensBalance, `${uid}.data`, {
-      available: 0,
-      locked: 0,
+      available: 0n,
+      locked: 0n,
     });
 
     return available + locked;
@@ -146,8 +146,8 @@ export default function TokenBar () {
       const tokenBalance = get(tokensBalance, `${token.uid}`, {
         status: TOKEN_DOWNLOAD_STATUS.LOADING,
         data: {
-          locked: 0,
-          available: 0
+          locked: 0n,
+          available: 0n
         }
       });
 

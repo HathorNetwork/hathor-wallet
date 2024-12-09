@@ -18,7 +18,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
     const wallet = getGlobalWallet();
     const [selectedToken, setSelectedToken] = useState(receivableTokens[0]);
     const [address, setAddress] = useState('');
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState(0n);
     const [errMessage, setErrMessage] = useState('');
     const modalDomId = 'atomicReceiveModal';
     const decimalPlaces = useSelector(state => state.serverInfo.decimalPlaces);

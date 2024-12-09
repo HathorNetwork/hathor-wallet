@@ -33,7 +33,7 @@ import { getGlobalWallet } from "../modules/wallet";
 function CreateToken() {
 
   const { htrBalance, useWalletService, decimalPlaces } = useSelector(state => ({
-    htrBalance: get(state.tokensBalance, `${hathorLib.constants.NATIVE_TOKEN_UID}.data.available`, 0),
+    htrBalance: get(state.tokensBalance, `${hathorLib.constants.NATIVE_TOKEN_UID}.data.available`, 0n),
     useWalletService: state.useWalletService,
     decimalPlaces: state.serverInfo.decimalPlaces,
   }));
