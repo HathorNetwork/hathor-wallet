@@ -38,7 +38,9 @@ const InputNumber = React.forwardRef(
     if (ref !== null) {
         // TODO: We should just convert InputNumber from a React.forwardRef to a normal React.Component,
         //  but we may do this in a separate PR
-        throw Error('do not use ref in InputNumber, instead use onValueChange')
+        const msg = 'do not use ref in InputNumber, instead use onValueChange'
+        console.error(msg)
+        throw Error(msg)
     }
     const decimalPlaces = isNFT ? 0 : useSelector((state) => state.serverInfo.decimalPlaces);
 
