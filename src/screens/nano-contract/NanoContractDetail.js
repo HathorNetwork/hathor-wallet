@@ -58,7 +58,7 @@ function NanoContractDetail() {
   const [loading, setLoading] = useState(true);
   // data {Object} Nano contract loaded data
   const [data, setData] = useState(null);
-  // blueprintInformation {Object} Blueprint information data
+  // blueprintInformation {Object | null} Blueprint information data
   const [blueprintInformation, setBlueprintInformation] = useState(null);
   // errorMessage {string} Message to show when error happens on the form
   const [errorMessage, setErrorMessage] = useState('');
