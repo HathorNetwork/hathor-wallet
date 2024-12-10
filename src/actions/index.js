@@ -63,9 +63,9 @@ export const types = {
   NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
   NANOCONTRACT_UNREGISTER: 'NANOCONTRACT_UNREGISTER',
   BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
-  NANOCONTRACT_DETAIL_REQUEST: 'NANO_CONTRACT_DETAIL_REQUEST',
-  NANOCONTRACT_DETAIL_SET_STATUS: 'NANO_CONTRACT_DETAIL_SET_STATUS',
-  NANOCONTRACT_DETAIL_LOADED: 'NANO_CONTRACT_DETAIL_LOADED',
+  NANOCONTRACT_LOAD_DETAILS_REQUESTED: 'NANOCONTRACT_LOAD_DETAILS_REQUESTED',
+  NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE: 'NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE',
+  NANOCONTRACT_LOAD_DETAILS_SUCCESS: 'NANOCONTRACT_LOAD_DETAILS_SUCCESS',
 };
 
 /**
@@ -624,7 +624,7 @@ export const nanoContractUnregister = (ncId) => ({
  * @param {string} ncId ID of nano contract to load the data
  */
 export const nanoContractDetailRequest = (ncId) => ({
-  type: types.NANOCONTRACT_DETAIL_REQUEST,
+  type: types.NANOCONTRACT_LOAD_DETAILS_REQUESTED,
   ncId,
 });
 
@@ -636,7 +636,7 @@ export const nanoContractDetailRequest = (ncId) => ({
  * @param {string} payload.error Error when loading data
  */
 export const nanoContractDetailSetStatus = ({ status, error }) => ({
-  type: types.NANOCONTRACT_DETAIL_SET_STATUS,
+  type: types.NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE,
   payload: { status, error },
 });
 

@@ -230,6 +230,6 @@ export function* saga() {
   yield all([
     takeEvery(types.NANOCONTRACT_REGISTER_REQUEST, registerNanoContract),
     takeEvery(types.NANOCONTRACT_EDIT_ADDRESS, updateNanoContractRegisteredAddress),
-    takeEvery(types.NANOCONTRACT_DETAIL_REQUEST, loadNanoContractDetail),
+    takeEvery(types.NANOCONTRACT_LOAD_DETAILS_REQUESTED, loadNanoContractDetail),
   ]);
 }
