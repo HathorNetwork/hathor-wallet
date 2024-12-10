@@ -643,9 +643,9 @@ export const nanoContractDetailSetStatus = ({ status, error }) => ({
 /**
  * Set nano contract detail state in redux
  *
- * @param {hathorLib.nano_contracts.types.NanoContractStateAPIResponse} state
+ * @param {hathorLib.nano_contracts.types.NanoContractStateAPIResponse} ncState
  */
-export const nanoContractDetailLoaded = (state) => ({
-  type: types.NANOCONTRACT_DETAIL_LOADED,
-  state,
+export const nanoContractDetailLoaded = (ncState) => ({
+  type: types.NANOCONTRACT_LOAD_DETAILS_SUCCESS,
+  state: ncState,
 });
