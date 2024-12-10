@@ -9,7 +9,6 @@ import React from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import _ from 'lodash';
-import hathorLib from '@hathor/wallet-lib';
 import InputNumber from './InputNumber';
 import LOCAL_STORE from '../storage';
 import { connect } from 'react-redux';
@@ -30,7 +29,7 @@ class OutputsWrapper extends React.Component {
     super(props);
 
     this.address = React.createRef();
-    this.value = React.createRef();
+    this.value = null;
     this.timelock = React.createRef();
     this.timelockCheckbox = React.createRef();
     this.uniqueID = _.uniqueId()
@@ -55,11 +54,7 @@ class OutputsWrapper extends React.Component {
   render = () => {
     const renderInputNumber = () => {
       const classNames = "form-control output-value col-2";
-      if (this.props.isNFT) {
-        return <InputNumber key="nft-value" ref={this.value} className={classNames} placeholder="0" precision={0} />;
-      } else {
-        return <InputNumber key="value" ref={this.value} placeholder={hathorLib.numberUtils.prettyValue(0, this.props.decimalPlaces)} className={classNames} />;
-      }
+      return <InputNumber key={this.props.isNFT ? "nft-value" : "value"} onValueChange={(value) => this.value = value} className={classNames} isNFT={this.props.isNFT} />;
     }
 
     return (
