@@ -28,6 +28,8 @@ export const NANOCONTRACT_REGISTER_STATUS = {
   SUCCESS: 'success',
 };
 
+const NANOCONTRACT_WAIT_TX_CONFIRMED_DELAY = 5000;
+
 /**
  * Process Nano Contract registration request.
  * @param {{
@@ -173,7 +175,7 @@ export function* loadNanoContractDetail({ ncId }) {
     // leaves the screen
     while (true) {
       // Wait 5s, then we fetch the data again to check if is has been confirmed
-      yield delay(5000);
+      yield delay(NANOCONTRACT_WAIT_TX_CONFIRMED_DELAY);
       const nanoContractDetailState = yield select((state) => state.nanoContractDetailState);
       if (nanoContractDetailState.status !== NANO_CONTRACT_DETAIL_STATUS.WAITING_TX_CONFIRMATION) {
         // User unmounted the screen, so we must stop the saga
