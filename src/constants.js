@@ -296,7 +296,7 @@ export const NANO_CONTRACT_HISTORY_COUNT = 5;
  * Base statuses for saga reducer handlers
  * Used by all other statuses objects
  */
-const SAGA_BASE_STATUS = {
+const BASE_STATUS = {
   READY: 'ready',
   ERROR: 'error',
   LOADING: 'loading',
@@ -307,6 +307,6 @@ const SAGA_BASE_STATUS = {
  * Nano contract detail load data statuses for saga reducer handlers
  */
 export const NANO_CONTRACT_DETAIL_STATUS = {
-  ...SAGA_BASE_STATUS,
+  ...BASE_STATUS,
   WAITING_TX_CONFIRMATION: 'waitingTxConfirmation',
 }
