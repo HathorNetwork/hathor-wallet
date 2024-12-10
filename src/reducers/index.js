@@ -409,9 +409,9 @@ const rootReducer = (state = initialState, action) => {
       return onNanoContractEditAddress(state, action);
     case types.NANOCONTRACT_UNREGISTER:
       return onNanoContractUnregister(state, action);
-    case types.NANOCONTRACT_DETAIL_SET_STATUS:
+    case types.NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE:
       return onSetNanoContractDetailStatus(state, action);
-    case types.NANOCONTRACT_DETAIL_LOADED:
+    case types.NANOCONTRACT_LOAD_DETAILS_SUCCESS:
       return onNanoContractDetailLoaded(state, action);
     default:
       return state;
