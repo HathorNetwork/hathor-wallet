@@ -54,16 +54,10 @@ function NanoContractDetail() {
   const { nc_id: ncId } = useParams();
   const nc = nanoContracts[ncId];
 
-  // loading {boolean} Bool to show/hide loading element
-  const [loading, setLoading] = useState(true);
   // data {Object} Nano contract loaded data
   const [data, setData] = useState(null);
   // blueprintInformation {Object | null} Blueprint information data
   const [blueprintInformation, setBlueprintInformation] = useState(null);
-  // errorMessage {string} Message to show when error happens on the form
-  const [errorMessage, setErrorMessage] = useState('');
-  // waitingConfirmation {boolean} If transaction was loading and is waiting first block confirmation
-  const [waitingConfirmation, setWaitingConfirmation] = useState(false);
 
   useEffect(() => {
     if (nc) {
@@ -79,22 +73,7 @@ function NanoContractDetail() {
   }, []);
 
   useEffect(() => {
-    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.LOADING) {
-      setLoading(true);
-    }
-
-    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.ERROR) {
-      setLoading(false);
-      setErrorMessage(nanoContractDetailState.error);
-    }
-
-    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.WAITING_TX_CONFIRMATION) {
-      setWaitingConfirmation(true);
-    }
-
     if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.SUCCESS) {
-      setWaitingConfirmation(false);
-      setLoading(false);
       // We know that we will have the blueprint data in redux here
       const blueprintInformation = blueprintsData[nc.blueprintId];
       setBlueprintInformation(blueprintInformation);
@@ -151,8 +130,8 @@ function NanoContractDetail() {
   }
 
   const renderBody = () => {
-    if (loading) {
-      const message = waitingConfirmation ? t`Waiting for transaction to be confirmed...` : t`Loading data...`
+    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.LOADING || nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.WAITING_TX_CONFIRMATION) {
+      const message = nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.WAITING_TX_CONFIRMATION ? t`Waiting for transaction to be confirmed...` : t`Loading data...`;
       return (
         <div className="d-flex flex-row align-items-center">
           <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
@@ -161,9 +140,11 @@ function NanoContractDetail() {
       );
     }
 
-    if (errorMessage) {
-      return <p className='text-danger mb-4'>{errorMessage}</p>;
+    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.ERROR) {
+      return <p className='text-danger mb-4'>{nanoContractDetailState.error}</p>;
     }
+
+    if (!data) return null;
 
     return renderNCData();
   }

@@ -140,6 +140,7 @@ export function* updateNanoContractRegisteredAddress({ payload }) {
  * }} action with request payload.
  */
 export function* loadNanoContractDetail({ ncId }) {
+  yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.LOADING }));
   const wallet = getGlobalWallet();
   let response;
   try {
