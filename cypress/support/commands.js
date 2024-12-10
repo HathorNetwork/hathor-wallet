@@ -1,5 +1,8 @@
 import "@testing-library/cypress/add-commands";
 
+import compareSnapshotCommand from 'cypress-image-diff-js';
+compareSnapshotCommand();
+
 /// <reference types="cypress" />
 // ***********************************************
 // This example commands.ts shows you how to
