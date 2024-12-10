@@ -291,3 +291,22 @@ export const NANO_UPDATE_ADDRESS_LIST_COUNT = 5;
  * Number of elements in the list of transactions of a nano contract
  */
 export const NANO_CONTRACT_HISTORY_COUNT = 5;
+
+/**
+ * Base statuses for saga reducer handlers
+ * Used by all other statuses objects
+ */
+const BASE_STATUS = {
+  READY: 'ready',
+  ERROR: 'error',
+  LOADING: 'loading',
+  SUCCESS: 'success',
+}
+
+/**
+ * Nano contract detail load data statuses for saga reducer handlers
+ */
+export const NANO_CONTRACT_DETAIL_STATUS = {
+  ...BASE_STATUS,
+  WAITING_TX_CONFIRMATION: 'waitingTxConfirmation',
+}
