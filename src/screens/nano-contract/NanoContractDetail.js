@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { t } from 'ttag'
 import $ from 'jquery';
 import ResetNavigationLink from '../../components/ResetNavigationLink';
@@ -19,7 +19,7 @@ import hathorLib from '@hathor/wallet-lib';
 import path from 'path';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { addBlueprintInformation, nanoContractDetailRequest, nanoContractDetailSetStatus, nanoContractUnregister } from '../../actions';
+import { nanoContractDetailRequest, nanoContractDetailSetStatus, nanoContractUnregister } from '../../actions';
 import { get } from 'lodash';
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 import { getGlobalWallet } from '../../modules/wallet';
@@ -54,11 +54,6 @@ function NanoContractDetail() {
   const { nc_id: ncId } = useParams();
   const nc = nanoContracts[ncId];
 
-  // data {Object} Nano contract loaded data
-  const [data, setData] = useState(null);
-  // blueprintInformation {Object | null} Blueprint information data
-  const [blueprintInformation, setBlueprintInformation] = useState(null);
-
   useEffect(() => {
     if (nc) {
       // Load data only if nano contract exists in redux,
@@ -72,17 +67,6 @@ function NanoContractDetail() {
     }
   }, []);
 
-  useEffect(() => {
-    if (nanoContractDetailState.status === NANO_CONTRACT_DETAIL_STATUS.SUCCESS) {
-      // We know that we will have the blueprint data in redux here
-      const blueprintInformation = blueprintsData[nc.blueprintId];
-      setBlueprintInformation(blueprintInformation);
-      setData(nanoContractDetailState.state);
-      dispatch(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.READY }));
-    }
-
-  }, [nanoContractDetailState.status]);
-
   /**
    * Method executed when link to execute a method is clicked
    *
@@ -91,6 +75,7 @@ function NanoContractDetail() {
    */
   const executeMethod = (e, method) => {
     e.preventDefault();
+    const blueprintInformation = blueprintsData[nc.blueprintId];
     navigate('/nano_contract/execute_method/', {
       state: {
         method,
@@ -144,12 +129,15 @@ function NanoContractDetail() {
       return <p className='text-danger mb-4'>{nanoContractDetailState.error}</p>;
     }
 
-    if (!data) return null;
+    if (nanoContractDetailState.status !== NANO_CONTRACT_DETAIL_STATUS.SUCCESS) {
+      return null;
+    }
 
     return renderNCData();
   }
 
   const formatNCField = (field, value) => {
+    const blueprintInformation = blueprintsData[nc.blueprintId];
     if (value === undefined) {
       // Error getting field
       // Since we are using the attributes from the blueprint information API to
@@ -197,6 +185,7 @@ function NanoContractDetail() {
   }
 
   const renderNanoBalances = () => {
+    const data = nanoContractDetailState.state;
     return Object.entries(data.balances).map(([tokenUid, amount]) => {
       return (
         <div key={tokenUid} className="d-flex flex-column nc-token-balance">
@@ -208,6 +197,7 @@ function NanoContractDetail() {
   }
 
   const renderNanoAttributes = () => {
+    const data = nanoContractDetailState.state;
     return Object.keys(data.fields).map((field) => {
       const value = get(data.fields[field], 'value', undefined);
       return <p key={field}><strong>{field}: </strong>{formatNCField(field, value)}</p>;
@@ -215,6 +205,7 @@ function NanoContractDetail() {
   }
 
   const renderNanoMethods = () => {
+    const blueprintInformation = blueprintsData[nc.blueprintId];
     const publicMethods = get(blueprintInformation, 'public_methods', {});
     return Object.keys(publicMethods).filter((method) =>
       method !== hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD
@@ -228,6 +219,7 @@ function NanoContractDetail() {
   }
 
   const renderNCData = () => {
+    const blueprintInformation = blueprintsData[nc.blueprintId];
     return (
       <div className="nc-detail-wrapper">
         <p><strong>Blueprint: </strong>{blueprintInformation.name}</p>
@@ -262,7 +254,7 @@ function NanoContractDetail() {
         <div className="d-flex flex-row justify-content-center mt-5 pb-4">
           {renderBody()}
         </div>
-        {data && <NanoContractHistory ncId={ncId} />}
+        {nanoContractDetailState.state && <NanoContractHistory ncId={ncId} />}
       </div>
     </div>
   );
