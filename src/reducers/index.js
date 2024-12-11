@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { FEATURE_TOGGLE_DEFAULTS, VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
@@ -251,6 +251,20 @@ const initialState = {
    * }
   */
   blueprintsData: {},
+  /**
+   * Stores the status for requesting data for the nano contract detail screen
+   *
+   * {
+   *   state: hathorLib.nano_contracts.types.NanoContractStateAPIResponse,
+   *   status: NANO_CONTRACT_DETAIL_STATUS,
+   *   error: string | null,
+   * }
+  */
+  nanoContractDetailState: {
+    state: null,
+    status: NANO_CONTRACT_DETAIL_STATUS.READY,
+    error: null,
+  },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -395,6 +409,10 @@ const rootReducer = (state = initialState, action) => {
       return onNanoContractEditAddress(state, action);
     case types.NANOCONTRACT_UNREGISTER:
       return onNanoContractUnregister(state, action);
+    case types.NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE:
+      return onSetNanoContractDetailStatus(state, action);
+    case types.NANOCONTRACT_LOAD_DETAILS_SUCCESS:
+      return onNanoContractDetailLoaded(state, action);
     default:
       return state;
   }
@@ -1354,5 +1372,50 @@ export const onNanoContractUnregister = (state, { payload }) => {
     nanoContracts: newNanoContracts,
   };
 };
+
+/**
+ * Set nano contract details status
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.status
+ * @param {string | null | undefined} action.payload.error
+ *
+ * @returns {Object}
+ */
+export const onSetNanoContractDetailStatus = (state, { payload }) => {
+  return {
+    ...state,
+    nanoContractDetailState: {
+      ...state.nanoContractDetailState,
+      status: payload.status,
+      error: payload.error,
+      state: null,
+    }
+  }
+}
+
+/**
+ * Set nano contract loaded state and status to success
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {hathorLib.nano_contracts.types.NanoContractStateAPIResponse} action.payload.state
+ *
+ * @returns {Object}
+ */
+export const onNanoContractDetailLoaded = (state, payload) => {
+  return {
+    ...state,
+    nanoContractDetailState: {
+      ...state.nanoContractDetailState,
+      state: payload.state,
+      status: NANO_CONTRACT_DETAIL_STATUS.SUCCESS,
+      error: null,
+    }
+  }
+}
 
 export default rootReducer;
