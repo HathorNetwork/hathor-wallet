@@ -145,7 +145,7 @@ function NanoContractExecuteMethod() {
         continue;
       }
       const addressInputValue = formRefs[i].getValue();
-      validateAddress(addressInputValue, formRefs[i].ref);
+      validateAddress(addressInputValue, formRefs[i].ref.current);
     }
 
     for (let i=0; i<actions.length; i++) {
