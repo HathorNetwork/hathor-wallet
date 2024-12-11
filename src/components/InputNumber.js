@@ -8,7 +8,7 @@
 import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from 'react-redux';
-import hathorLib from "@hathor/wallet-lib";
+import { numberUtils } from "@hathor/wallet-lib";
 
 /**
  * Component that enhances typing numbers
@@ -28,43 +28,38 @@ const InputNumber = React.forwardRef(
   (
     {
       defaultValue,
-      precision,
-      separator,
-      locale,
+      isNFT,
       onValueChange,
       requirePositive,
       ...otherProps
     },
     ref
   ) => {
-
-    const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
-    const decimalPrecision = precision ?? decimalPlaces;
+    if (ref !== null) {
+        // TODO: We should just convert InputNumber from a React.forwardRef to a normal React.Component,
+        //  but we may do this in a separate PR
+        const msg = 'do not use ref in InputNumber, instead use onValueChange'
+        console.error(msg)
+        throw Error(msg)
+    }
+    const decimalPlaces = isNFT ? 0 : useSelector((state) => state.serverInfo.decimalPlaces);
 
     /**
-     * Formats a string following the pattern 9,999.99. It decomposes rawValue into decimal and fractional parts, mainly to add the thousands separator.
+     * Formats a number following the pattern 9,999.99
      *
-     * @param {string} rawValue String to be formatted
+     * @param {number} rawValue Number to be formatted
      *
      * @return {string} Formatted string
      */
-    const format = (rawValue = "") => {
-      const value = String(rawValue)
-        .replace(/[^\d]/g, "")
-        .padStart(decimalPrecision + 1, "0");
-      const decimalPart = Intl.NumberFormat(locale).format(
-        value.substr(0, value.length - decimalPrecision)
-      );
-      const fractionalPart = value.substr(value.length - decimalPrecision);
-      if (fractionalPart.length === 0) {
-        return decimalPart;
-      } else {
-        return `${decimalPart}${separator}${fractionalPart}`;
+    const format = (rawValue) => {
+      if (typeof rawValue !== 'number') {
+          throw Error(`value must be a number: ${rawValue}`)
       }
+      return numberUtils.prettyValue(rawValue, decimalPlaces)
     };
 
-    const innerRef = ref || useRef();
-    const [value, setValue] = useState(format(defaultValue));
+    const innerRef = useRef();
+    const [value, setValue] = useState(defaultValue);
 
     /**
      * Listen keydown events while this component is focused overriding the default native input behavior.
@@ -78,7 +73,7 @@ const InputNumber = React.forwardRef(
         const isBackspace = evt.key === "Backspace" || evt.key === "Delete";
         const isDeleteAll =
           isBackspace &&
-          evt.target.selectionEnd - evt.target.selectionStart >= value.length;
+          evt.target.selectionEnd - evt.target.selectionStart >= format(value).length;
         const isCtrlOrMeta = evt.ctrlKey || evt.metaKey;
 
         // Do not handle keyboard events when ctrlKey or metaKey are present
@@ -88,36 +83,34 @@ const InputNumber = React.forwardRef(
 
         let newValue = value;
         if (isDeleteAll) {
-          newValue = "";
+          newValue = 0;
         } else if (isNumberChar) {
-          newValue = value.concat(evt.key);
+          newValue = value * 10 + Number(evt.key);
         } else if (isBackspace) {
-          newValue = value.slice(0, -1);
+          newValue = Math.floor(value / 10);
         }
-        newValue = format(newValue);
         updateCaretPosition(newValue);
         return newValue;
       });
 
     /**
      * Handle onClick events just to update the caret position.
-     *
-     * @param  {MouseEvent} evt MouseEvent triggered when the input or its inner content is clicked
      */
-    const onClick = (evt) => {
-      updateCaretPosition(format(evt.target.value));
-    };
+    const onClick = () => setValue((currentValue) => {
+      updateCaretPosition(currentValue);
+      return currentValue;
+    });
 
     /**
      * Put the caret always at the end.
      *
-     * @param  {string} value Current input value
+     * @param  {number} value Current input value
      */
     const updateCaretPosition = (value) => {
       setTimeout(() => {
         const { current } = innerRef;
         if (current) {
-          current.selectionStart = value.length;
+          current.selectionStart = format(value).length;
         }
       });
     };
@@ -131,11 +124,10 @@ const InputNumber = React.forwardRef(
      */
     const onPaste = (evt) =>
       setValue(() => {
-        const paste = format(
-          (evt.clipboardData || window.clipboardData).getData("text")
-        );
-        updateCaretPosition(paste);
-        return paste;
+        const paste = (evt.clipboardData || window.clipboardData).getData("text");
+        const newValue = Number(paste.replace(/\D/g, ''))
+        updateCaretPosition(newValue);
+        return newValue;
       });
 
     /**
@@ -159,17 +151,15 @@ const InputNumber = React.forwardRef(
      * Call onValueChange every time the value changes, similarly the native onChange callback.
      */
     useEffect(() => {
-      const parsedValue =
-        Number(value.replace(/[^\d]/g, "")) / Math.pow(10, decimalPrecision);
-      onValueChange(parsedValue);
-      if (requirePositive && parsedValue <= 0) {
+      onValueChange(value);
+      if (requirePositive && value <= 0) {
         innerRef.current.setCustomValidity('Must be a positive number.');
       } else {
         innerRef.current.setCustomValidity('');
       }
     }, [value]);
 
-    return <input ref={innerRef} value={value} {...otherProps} type="text" />;
+    return <input ref={innerRef} value={format(value)} {...otherProps} type="text" />;
   }
 );
 
@@ -177,27 +167,15 @@ InputNumber.propTypes = {
   /**
    * Same behavior of React input defaultValue
    */
-  defaultValue: PropTypes.string,
+  defaultValue: PropTypes.number,
   /**
-   * Number of digits after the separator
+   * Whether this is a NFT input
    */
-  precision: PropTypes.number,
-  /**
-   * Generally a dot or a comma char
-   */
-  separator: PropTypes.string,
-  /**
-   * Locale (e.g.: 'en-US', 'pt-br'). Must be used in conjunction with `separator`
-   */
-  locale: PropTypes.string,
+  isNFT: PropTypes.bool,
   /**
    * Similar to onChange, but it receives the parsed value as single parameter
    */
   onValueChange: PropTypes.func,
-  /**
-   * Same behavior of React input onChange
-   */
-  onChange: PropTypes.func,
   /**
    * If the input value is required to be a positive number, i.e. > 0
    */
@@ -205,12 +183,9 @@ InputNumber.propTypes = {
 };
 
 InputNumber.defaultProps = {
-  defaultValue: "",
-  precision: null,
-  separator: ".",
-  locale: "en-US",
+  defaultValue: 0,
+  isNFT: false,
   onValueChange: () => {},
-  onChange: () => {},
   requirePositive: false,
 };
 

@@ -42,8 +42,6 @@ class TokenMelt extends React.Component {
   constructor(props) {
     super(props);
 
-    // Reference to amount input
-    this.amount = React.createRef();
     // Reference to create another melt output checkbox
     this.createAnother = React.createRef();
   }
@@ -58,11 +56,10 @@ class TokenMelt extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = async (pin) => {
-    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
     const wallet = getGlobalWallet();
     const transaction = await wallet.prepareMeltTokensData(
       this.props.token.uid,
-      amountValue,
+      this.state.amount,
       {
         createAnotherMelt: this.createAnother.current.checked,
         pinCode: pin
@@ -90,8 +87,7 @@ class TokenMelt extends React.Component {
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
-    const prettyAmountValue = hathorLib.numberUtils.prettyValue(amount, this.isNFT() ? 0 : this.props.decimalPlaces);
+    const prettyAmountValue = hathorLib.numberUtils.prettyValue(this.state.amount, this.isNFT() ? 0 : this.props.decimalPlaces);
     return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;
   }
 
@@ -102,10 +98,9 @@ class TokenMelt extends React.Component {
    * @return {string} Error message, in case of form invalid. Nothing, otherwise.
    */
   melt = () => {
-    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
     const walletAmount = get(this.props.tokenBalance, 'data.available', 0);
 
-    if (amountValue > walletAmount) {
+    if (this.state.amount > walletAmount) {
       const prettyWalletAmount = hathorLib.numberUtils.prettyValue(walletAmount, this.isNFT() ? 0 : this.props.decimalPlaces);
       return t`The total amount you have is only ${prettyWalletAmount}.`;
     }
@@ -119,30 +114,14 @@ class TokenMelt extends React.Component {
   }
 
   render() {
-    const renderInputNumber = () => {
-      if (this.isNFT()) {
-        return (
-          <InputNumber
-           required
-           ref={this.amount}
-           placeholder="0"
-           className="form-control"
-           precision={0}
-           onValueChange={this.onAmountChange}
-          />
-        )
-      } else {
-        return (
-          <InputNumber
-           required
-           ref={this.amount}
-           placeholder={hathorLib.numberUtils.prettyValue(0, this.props.decimalPlaces)}
-           className="form-control"
-           onValueChange={this.onAmountChange}
-          />
-        )
-      }
-    }
+    const renderInputNumber = () => (
+      <InputNumber
+       required
+       className="form-control"
+       isNFT={this.isNFT()}
+       onValueChange={this.onAmountChange}
+      />
+    )
 
     const renderForm = () => {
       return (

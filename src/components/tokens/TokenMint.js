@@ -61,12 +61,11 @@ class TokenMint extends React.Component {
    * In case of error, an object with {success: false, message}
    */
   prepareSendTransaction = async (pin) => {
-    const amountValue = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
     const address = this.chooseAddress.current.checked ? null : this.address.current.value;
     const wallet = getGlobalWallet();
     const transaction = await wallet.prepareMintTokensData(
       this.props.token.uid,
-      amountValue,
+      this.state.amount,
       {
         address,
         createAnotherMint: this.createAnother.current.checked,
@@ -95,8 +94,7 @@ class TokenMint extends React.Component {
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const amount = this.isNFT() ? this.state.amount : walletUtils.decimalToInteger(this.state.amount, this.props.decimalPlaces);
-    const prettyAmountValue = hathorLib.numberUtils.prettyValue(amount, this.isNFT() ? 0 : this.props.decimalPlaces);
+    const prettyAmountValue = hathorLib.numberUtils.prettyValue(this.state.amount, this.isNFT() ? 0 : this.props.decimalPlaces);
     return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;
   }
 
@@ -152,28 +150,14 @@ class TokenMint extends React.Component {
       );
     }
 
-    const renderInputNumber = () => {
-      if (this.isNFT()) {
-        return (
-          <InputNumber
-           required
-           className="form-control"
-           onValueChange={this.onAmountChange}
-           placeholder="0"
-           precision={0}
-          />
-        );
-      } else {
-        return (
-          <InputNumber
-           required
-           className="form-control"
-           onValueChange={this.onAmountChange}
-           placeholder={hathorLib.numberUtils.prettyValue(0, this.props.decimalPlaces)}
-          />
-        );
-      }
-    }
+    const renderInputNumber = () => (
+      <InputNumber
+       required
+       className="form-control"
+       onValueChange={this.onAmountChange}
+       isNFT={this.isNFT()}
+      />
+    );
 
     const renderForm = () => {
       return (
