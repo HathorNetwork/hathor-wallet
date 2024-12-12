@@ -615,25 +615,6 @@ const wallet = {
   },
 
   /**
-   * Converts a decimal value to integer. On the full node and the wallet lib, we only deal with
-   * integer values for amount. So a value of 45.97 for the user is handled by them as 4597.
-   * We need the Math.round because of some precision errors in js
-   * 35.05*100 = 3504.9999999999995 Precision error
-   * Math.round(35.05*100) = 3505
-   *
-   * @param {number} value The decimal amount
-   * @param {number} decimalPlaces Number of decimal places
-   *
-   * @return {number} Value as an integer
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  decimalToInteger(value, decimalPlaces) {
-    return Math.round(value*(10**decimalPlaces));
-  },
-
-  /**
    * Returns a string map containing the identifiers for proposals currently being watched.
    * @returns {Record<string,{ id:string, password:string }>}
    */
