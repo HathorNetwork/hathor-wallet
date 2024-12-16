@@ -49,7 +49,7 @@ function CreateNFT() {
 
   const { htrBalance, useWalletService, decimalPlaces } = useSelector((state) => {
     const HTR_UID = hathorLib.constants.NATIVE_TOKEN_UID;
-    const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
+    const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0n);
 
     return {
       htrBalance,
@@ -134,7 +134,7 @@ function CreateNFT() {
       transaction = await wallet.prepareCreateNewToken(
         name,
         symbol,
-        parseInt(amount),
+        amount,
         {
           data: [nftData],
           isCreateNFT: true,

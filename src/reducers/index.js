@@ -572,7 +572,7 @@ const removeTokenMetadata = (state, action) => {
   const newBalance = Object.assign({}, state.tokensBalance);
   if (uid in newBalance && (!!newBalance[uid].data)) {
     const balance = newBalance[uid].data;
-    if ((balance.unlocked + balance.locked) === 0) {
+    if ((balance.available + balance.locked) === 0n) {
       delete newBalance[uid];
     }
   }
@@ -645,8 +645,8 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   const tokensBalance = state.tokensBalance;
   const selectedToken = state.selectedToken;
 
-  const balance = tokensBalance[selectedToken] || { available: 0, locked: 0 };
-  const hasZeroBalance = (balance.available + balance.locked) === 0;
+  const balance = tokensBalance[selectedToken] || { available: 0n, locked: 0n };
+  const hasZeroBalance = (balance.available + balance.locked) === 0n;
 
   if (hasZeroBalance) {
     return {

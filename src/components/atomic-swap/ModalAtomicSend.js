@@ -27,7 +27,7 @@ function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHa
         setAmount('');
         setIsInvalid(true);
         setErrMessage(t`Invalid input for this token`)
-        utxoChanged({ txId, index: outputIndex, amount: 0, tokenId: '' });
+        utxoChanged({ txId, index: outputIndex, amount: 0n, tokenId: '' });
     }
 
     const localDataChanged = async () => {
@@ -130,7 +130,7 @@ function UtxoSelection ({ wallet, utxos, token, utxosChanged, setErrMessage }) {
 export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalances, manageDomLifecycle, onClose, wallet }) {
     const [selectedToken, setSelectedToken] = useState(sendableTokens.length && sendableTokens[0]);
     const [changeAddress, setChangeAddress] = useState('');
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState(0n);
     const [errMessage, setErrMessage] = useState('');
     const modalDomId = 'atomicSendModal';
     const decimalPlaces = useSelector(state => state.serverInfo.decimalPlaces);
@@ -145,8 +145,8 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         {
         status: TOKEN_DOWNLOAD_STATUS.LOADING,
         data: {
-            available: 0,
-            locked: 0,
+            available: 0n,
+            locked: 0n,
         },
     }
     );

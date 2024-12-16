@@ -7,7 +7,6 @@ import {
   transactionUtils,
   errors as hathorErrors,
   cryptoUtils,
-  versionApi,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -596,7 +595,7 @@ export function* handleUpdateTx(action) {
 
     // Always reload balance
     yield put(tokenFetchBalanceRequested(tokenUid, true));
-    yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0));
+    yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0n));
   }
 }
 
