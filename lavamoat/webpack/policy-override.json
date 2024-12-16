@@ -1,0 +1,139 @@
+{
+  "resources": {
+    "viz.js": {
+      "globals": {
+        "document.title": true
+      }
+    },
+    "jquery": {
+      "globals": {
+        "document": true,
+        "window": true,
+        "window.getComputedStyle": true,
+        "getComputedStyle": true,
+        "navigator": true,
+        "location": true,
+        "setTimeout": true,
+        "clearTimeout": true,
+        "setInterval": true,
+        "clearInterval": true
+      }
+    },
+    "unleash-proxy-client": {
+      "globals": {
+        "fetch": true,
+        "window": true,
+        "window.fetch": true
+      }
+    },
+    "react": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Symbol": true,
+        "Map": true,
+        "Set": true,
+        "WeakMap": true,
+        "WeakSet": true,
+        "Proxy": true,
+        "Reflect": true,
+        "process.env.NODE_ENV": true,
+        "Function.prototype": true,
+        "Object.prototype": true
+      }
+    },
+    "react-dom": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Symbol": true,
+        "Map": true,
+        "Set": true,
+        "WeakMap": true,
+        "WeakSet": true,
+        "window": true,
+        "document": true,
+        "MessageChannel": true,
+        "MutationObserver": true,
+        "requestAnimationFrame": true,
+        "cancelAnimationFrame": true,
+        "performance": true,
+        "Event": true,
+        "Node": true,
+        "Element": true,
+        "HTMLElement": true,
+        "HTMLIFrameElement": true,
+        "DocumentFragment": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Error.prototype": true
+      }
+    },
+    "scheduler": {
+      "globals": {
+        "MessageChannel": true,
+        "clearTimeout": true,
+        "setTimeout": true,
+        "window": true,
+        "Error": true,
+        "Object": true,
+        "Function.prototype": true,
+        "Object.prototype": true
+      }
+    },
+    "bitcore-lib": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Math": true,
+        "Buffer": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Error.prototype": true,
+        "Math.prototype": true,
+        "console": true,
+        "Function": true,
+        "Array": true,
+        "Number": true,
+        "BigInt": true
+      },
+      "packages": {
+        "bn.js": true,
+        "elliptic": true,
+        "buffer": true
+      }
+    },
+    "bn.js": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Math": true,
+        "Buffer": true,
+        "Number": true,
+        "Array": true,
+        "Function": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Array.prototype": true
+      }
+    },
+    "elliptic": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Math": true,
+        "Buffer": true,
+        "Function": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Error.prototype": true,
+        "Math.prototype": true,
+        "Array": true,
+        "Number": true
+      },
+      "packages": {
+        "bn.js": true
+      }
+    }
+  }
+}
