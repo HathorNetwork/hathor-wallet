@@ -41,19 +41,43 @@ const helpers = {
   },
 
   /**
-   * Load the network and server url from localstorage into hathorlib and redux.
-   * If not configured, get the default from hathorlib.
+   * Get the network settings from LOCAL_STORE
+   * but it gets the default using the lib default network,
+   * if it doesn't exist in the LOCAL_STORE
+   *
+   * @return {Object} networkSettings with the data
+   * {string} networkSettings.node
+   * {string} networkSettings.network
+   * {string} networkSettings.txMining
+   * {string} networkSettings.explorer
+   * {string} networkSettings.explorerService
+   * {string} networkSettings.walletService
+   * {string} networkSettings.walletServiceWS
+   *
+   * @memberof helpers
+   * @inner
    */
-  loadStorageState() {
+  getSafeNetworkSettings() {
     let networkSettings = LOCAL_STORE.getNetworkSettings();
     if (!networkSettings) {
       // If it doesn't exist in the store, it's a fresh install
       // or a migration from older versions, so we just use the
       // default network from the lib
       const libDefaultNetwork = hathorLib.config.getNetwork().name;
-      networkSettings = NETWORK_SETTINGS[network];
+      networkSettings = NETWORK_SETTINGS[libDefaultNetwork];
     }
+    return networkSettings;
+  },
 
+  /**
+   * Load the network and server url from localstorage into hathorlib and redux.
+   * If not configured, get the default from hathorlib.
+   *
+   * @memberof helpers
+   * @inner
+   */
+  loadStorageState() {
+    const networkSettings = this.getSafeNetworkSettings();
     this.updateNetworkSettings(networkSettings);
   },
 
@@ -124,14 +148,7 @@ const helpers = {
    * @inner
    */
   getExplorerURL() {
-    let networkSettings = LOCAL_STORE.getNetworkSettings();
-    if (!networkSettings) {
-      // If it doesn't exist in the store, it's a fresh install
-      // or a migration from older versions, so we just use the
-      // default network from the lib
-      const libDefaultNetwork = hathorLib.config.getNetwork().name;
-      networkSettings = NETWORK_SETTINGS[network];
-    }
+    const networkSettings = this.getSafeNetworkSettings();
     return networkSettings.explorer;
   },
 

@@ -71,6 +71,7 @@ import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import nanoUtils from '../utils/nanoContracts';
+import helpersUtils from '../utils/helpers';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 import { getGlobalWallet, setGlobalWallet } from "../modules/wallet";
 import { isEmpty } from 'lodash';
@@ -159,12 +160,7 @@ export function* startWallet(action) {
   // then we don't know if we've cleaned up the wallet data in the storage
   yield storage.cleanStorage(true, true);
 
-  let networkSettings = LOCAL_STORE.getNetworkSettings();
-  if (!networkSettings) {
-    // We default for the settings from the lib config network
-    const libNetwork = config.getNetwork().name
-    networkSettings = NETWORK_SETTINGS[libNetwork];
-  }
+  const networkSettings = helpersUtils.getSafeNetworkSettings()
   const networkName = networkSettings.network;
   const serverUrl = networkSettings.node;
 
