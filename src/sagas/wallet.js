@@ -746,6 +746,11 @@ export function* onWalletReset() {
 
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
   LOCAL_STORE.resetStorage();
+  // We must set the lib config network to mainnet because it's the default network
+  // XXX we should have a method in the config to reset all configs
+  config.setNetwork('mainnet');
+  // This will update the lib config and redux state with the default network settings
+  helpersUtils.loadStorageState();
   if (wallet) {
     yield call([wallet.storage, wallet.storage.cleanStorage], true, true);
   }
