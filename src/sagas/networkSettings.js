@@ -18,6 +18,7 @@ import walletUtils from '../utils/wallet'
  * @param {string} action.pin
  */
 export function* changeNetworkSettings({ data, pin }) {
+  yield put(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.LOADING }));
   const useWalletService = yield select((state) => state.useWalletService);
   const wallet = getGlobalWallet();
   const currentServer = useWalletService ?
@@ -112,6 +113,6 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
 
 export function* saga() {
   yield all([
-    takeEvery(types.NETWORKSETTINGS_REQUEST_UPDATE, changeNetworkSettings),
+    takeEvery(types.NETWORKSETTINGS_UPDATE_REQUESTED, changeNetworkSettings),
   ]);
 }

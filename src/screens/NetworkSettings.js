@@ -51,20 +51,15 @@ function NetworkSettings() {
   const walletServiceWSRef = useRef(null);
 
   const wallet = getGlobalWallet();
+  const isHardwareWallet = LOCAL_STORE.isHardwareWallet();
 
   // Use selector to fetch current network settings
   const { networkSettings } = useSelector(state => ({
     networkSettings: state.networkSettings
   }));
 
-  /* loading {boolean} If should show spinner while waiting for server response */
-  const [loading, setLoading] = useState(false);
-  /* errorMessage {string} Message to be shown in case of error in form */
-  const [errorMessage, setErrorMessage] = useState('');
   /* networkSelected {string} Network that the user wants to connect */
   const [networkSelected, setNetworkSelected] = useState('');
-  /* isHardwareWallet {boolean} If the application is using a hardware wallet */
-  const [isHardwareWallet] = useState(LOCAL_STORE.isHardwareWallet());
 
   useEffect(() => {
     if (networkSettings.status === NETWORK_SETTINGS_STATUS.WAITING_NETWORK_CONFIRMATION) {
@@ -75,20 +70,6 @@ function NetworkSettings() {
         onUserCancel: () => onNetworkConfirmationCancel(),
         network: networkSettings.newNetwork,
       });
-      setLoading(false);
-    }
-
-    if (networkSettings.status === NETWORK_SETTINGS_STATUS.LOADING) {
-      setLoading(true);
-    }
-
-    if (networkSettings.status === NETWORK_SETTINGS_STATUS.ERROR) {
-      setErrorMessage(networkSettings.error)
-      setLoading(false);
-    }
-
-    if (networkSettings.status === NETWORK_SETTINGS_STATUS.READY) {
-      setLoading(false);
     }
   }, [networkSettings.status]);
 
@@ -106,7 +87,6 @@ function NetworkSettings() {
    * to the testnet/privatenet in the confirmation modal
    */
   const onNetworkConfirmed = () => {
-    setLoading(true);
     dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.NETWORK_CONFIRMED }));
   }
 
@@ -138,13 +118,12 @@ function NetworkSettings() {
     const pin = pinRef.current.value;
     if (!isHardwareWallet) {
       if (!await wallet.checkPin(pin)) {
-        setErrorMessage(t`Invalid PIN`);
+        dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.ERROR, error: t`Invalid PIN.` }));
         return;
       }
     }
 
     dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.LOADING }));
-    setErrorMessage('');
 
     let data = {};
     const newNetwork = networkSelectRef.current.value;
@@ -206,9 +185,12 @@ function NetworkSettings() {
       </form>
       <div className="d-flex flex-row align-items-center mt-3">
         <button onClick={onNetworkConnect} type="button" className="btn btn-hathor mr-3">{t`Connect`}</button>
-        {loading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />}
+        {
+          (networkSettings.status === NETWORK_SETTINGS_STATUS.LOADING || networkSettings.status === NETWORK_SETTINGS_STATUS.NETWORK_CONFIRMED)
+          && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
+        }
       </div>
-      <p className="text-danger mt-3">{errorMessage}</p>
+      <p className="text-danger mt-3">{networkSettings.status === NETWORK_SETTINGS_STATUS.ERROR && networkSettings.error}</p>
     </div>
   )
 }
