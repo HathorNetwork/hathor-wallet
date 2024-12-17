@@ -33,7 +33,7 @@ class WalletBalance extends React.Component {
     const token = this.props.tokens.find((token) => token.uid === this.props.selectedToken);
     const symbol = token ? token.symbol : '';
 
-    const tokenBalance = get(this.props.tokensBalance, `${token.uid}.data`, { available: 0, locked: 0 });
+    const tokenBalance = get(this.props.tokensBalance, `${token.uid}.data`, { available: 0n, locked: 0n });
     const balance = {
       available: tokenBalance.available,
       locked: tokenBalance.locked,

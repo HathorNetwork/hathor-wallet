@@ -209,8 +209,8 @@ class SendTokensOne extends React.Component {
       const tokenBalance = get(this.props.tokensBalance, this.state.selected.uid, {
         status: TOKEN_DOWNLOAD_STATUS.LOADING,
         data: {
-          available: 0,
-          locked: 0,
+          available: 0n,
+          locked: 0n,
         },
       });
 

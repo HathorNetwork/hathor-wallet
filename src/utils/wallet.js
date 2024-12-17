@@ -234,7 +234,7 @@ const wallet = {
       if (registeredTokens.find((x) => x.uid === tokenUid)) {
         continue;
       }
-      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
+      const balance = tokensBalance[tokenUid] || { available: 0n, locked: 0n };
       const tokenData = {
         uid: tokenUid,
         balance: balance,
@@ -280,7 +280,7 @@ const wallet = {
       const tokenUid = registeredObject.uid;
 
       // If there is no entry for this token on tokensBalance, generate an empty balance object.
-      const balance = get(tokensBalance, `${tokenUid}.data`, { available: 0, locked: 0 });
+      const balance = get(tokensBalance, `${tokenUid}.data`, { available: 0n, locked: 0n });
       const tokenData = {
         ...registeredObject,
         balance: balance,
@@ -610,7 +610,7 @@ const wallet = {
    * @returns {string[]}
    */
   listTokensAlwaysShow() {
-    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};;
+    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};
     return Object.keys(alwaysShowMap);
   },
 
