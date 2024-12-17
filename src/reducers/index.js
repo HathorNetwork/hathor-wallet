@@ -435,7 +435,7 @@ const rootReducer = (state = initialState, action) => {
       return onNanoContractDetailLoaded(state, action);
     case types.NETWORKSETTINGS_SET_STATUS:
       return onSetNetworkSettingsStatus(state, action);
-    case types.NETWORKSETTINGS_UPDATE:
+    case types.NETWORKSETTINGS_UPDATED:
       return onUpdateNetworkSettings(state, action);
     default:
       return state;
@@ -1477,6 +1477,7 @@ export const onUpdateNetworkSettings = (state, { payload }) => {
     networkSettings: {
       ...state.networkSettings,
       data: payload,
+      status: NETWORK_SETTINGS_STATUS.SUCCESS,
     }
   }
 }
