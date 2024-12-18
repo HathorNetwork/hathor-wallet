@@ -33,7 +33,7 @@ import { getGlobalWallet } from "../modules/wallet";
 function CreateToken() {
 
   const { htrBalance, useWalletService, decimalPlaces } = useSelector(state => ({
-    htrBalance: get(state.tokensBalance, `${hathorLib.constants.NATIVE_TOKEN_UID}.data.available`, 0),
+    htrBalance: get(state.tokensBalance, `${hathorLib.constants.NATIVE_TOKEN_UID}.data.available`, 0n),
     useWalletService: state.useWalletService,
     decimalPlaces: state.serverInfo.decimalPlaces,
   }));
@@ -68,8 +68,7 @@ function CreateToken() {
       }
 
       // Validating maximum amount
-      const tokensValue = walletUtils.decimalToInteger(amount, decimalPlaces);
-      if (tokensValue > hathorLib.constants.MAX_OUTPUT_VALUE) {
+      if (amount > hathorLib.constants.MAX_OUTPUT_VALUE) {
         const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, decimalPlaces);
         setErrorMessage(t`Maximum value to mint token is ${max_output_value_str}`);
         return false;
@@ -122,7 +121,7 @@ function CreateToken() {
       transaction = await wallet.prepareCreateNewToken(
         shortNameRef.current.value,
         symbolRef.current.value,
-        walletUtils.decimalToInteger(amount, decimalPlaces),
+        amount,
         { address, pinCode: pin }
       );
 
@@ -276,7 +275,6 @@ function CreateToken() {
              required
              className="form-control"
              onValueChange={onAmountChange}
-             placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
             />
           </div>
           <div className="form-group d-flex flex-row align-items-center address-checkbox">

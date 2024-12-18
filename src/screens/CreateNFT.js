@@ -49,7 +49,7 @@ function CreateNFT() {
 
   const { htrBalance, useWalletService, decimalPlaces } = useSelector((state) => {
     const HTR_UID = hathorLib.constants.NATIVE_TOKEN_UID;
-    const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0);
+    const htrBalance = get(state.tokensBalance, `${HTR_UID}.data.available`, 0n);
 
     return {
       htrBalance,
@@ -134,7 +134,7 @@ function CreateNFT() {
       transaction = await wallet.prepareCreateNewToken(
         name,
         symbol,
-        parseInt(amount),
+        amount,
         {
           data: [nftData],
           isCreateNFT: true,
@@ -314,7 +314,7 @@ function CreateNFT() {
         <div className="row">
           <div className="form-group col-4">
             <label>{t`Amount`}</label>
-            <InputNumber required className="form-control" precision={0} placeholder="How many NFT units to create" onValueChange={onAmountChange} />
+            <InputNumber required className="form-control" isNFT={true} onValueChange={onAmountChange} />
           </div>
           <div className="form-group d-flex flex-row align-items-center address-checkbox">
             <div className="form-check">

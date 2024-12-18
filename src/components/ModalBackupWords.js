@@ -244,6 +244,9 @@ class ModalBackupWords extends React.Component {
               {renderWords(6)}
             </tbody>
           </table>
+          <div id="hiddenWordsForTest" style={{ display: 'none' }} >
+            {this.state.words}
+          </div>
         </div>
       )
     }

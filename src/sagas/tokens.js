@@ -95,8 +95,8 @@ function* fetchTokenBalance(action) {
     const response = yield call(wallet.getBalance.bind(wallet), tokenId);
     const token = get(response, 0, {
       balance: {
-        unlocked: 0,
-        locked: 0,
+        unlocked: 0n,
+        locked: 0n,
       }
     });
 

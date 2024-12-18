@@ -14,7 +14,6 @@ import { cleanNanoContractRegisterMetadata, registerNanoContract } from '../../a
 import { getGlobalWallet } from "../../modules/wallet";
 import { NANOCONTRACT_REGISTER_STATUS } from '../../sagas/nanoContract';
 import { colors } from '../../constants';
-import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
 
 /**

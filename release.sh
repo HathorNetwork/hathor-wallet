@@ -17,6 +17,13 @@ step0() {
 	echo - npm $(npm -v)
 	echo - python $(python --version | awk '{print $2}')
 	echo
+	git log -n1
+	echo
+
+	if grep "TEAM-ID-HERE" package.json >/dev/null; then
+		echo [ERROR] Team ID not in package.json.
+		exit -1
+	fi
 }
 
 step1() {

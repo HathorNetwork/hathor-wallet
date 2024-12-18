@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { t } from "ttag";
 import InputNumber from "../InputNumber";
-import hathorLib, { Address, numberUtils } from "@hathor/wallet-lib";
+import { Address, numberUtils } from "@hathor/wallet-lib";
 import { translateTxToProposalUtxo } from "../../utils/atomicSwap";
 import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import { get } from 'lodash';
@@ -27,7 +27,7 @@ function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHa
         setAmount('');
         setIsInvalid(true);
         setErrMessage(t`Invalid input for this token`)
-        utxoChanged({ txId, index: outputIndex, amount: 0, tokenId: '' });
+        utxoChanged({ txId, index: outputIndex, amount: 0n, tokenId: '' });
     }
 
     const localDataChanged = async () => {
@@ -130,8 +130,7 @@ function UtxoSelection ({ wallet, utxos, token, utxosChanged, setErrMessage }) {
 export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalances, manageDomLifecycle, onClose, wallet }) {
     const [selectedToken, setSelectedToken] = useState(sendableTokens.length && sendableTokens[0]);
     const [changeAddress, setChangeAddress] = useState('');
-    let amountRef = useRef();
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState(0n);
     const [errMessage, setErrMessage] = useState('');
     const modalDomId = 'atomicSendModal';
     const decimalPlaces = useSelector(state => state.serverInfo.decimalPlaces);
@@ -146,8 +145,8 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         {
         status: TOKEN_DOWNLOAD_STATUS.LOADING,
         data: {
-            available: 0,
-            locked: 0,
+            available: 0n,
+            locked: 0n,
         },
     }
     );
@@ -203,9 +202,8 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         }
 
         // Validating available balance
-        const selectedAmount = walletUtils.decimalToInteger(amount, decimalPlaces);
         const availableAmount = selectedTokenBalance.data.available;
-        if (selectedAmount > availableAmount) {
+        if (amount > availableAmount) {
             setErrMessage(t`Insufficient balance`);
             return false;
         }
@@ -214,7 +212,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         if (showUtxoSelection) {
             const validUtxos = utxos.filter(u => u.amount);
             const totalAmount = validUtxos.reduce((acc, u) => acc + u.amount, 0);
-            if (selectedAmount > totalAmount) {
+            if (amount > totalAmount) {
                 setErrMessage(t`Insufficient balance on selected inputs`);
                 return false;
             }
@@ -239,7 +237,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         sendClickHandler({
             selectedToken,
             changeAddress: changeAddress,
-            amount: walletUtils.decimalToInteger(amount, decimalPlaces),
+            amount,
             utxos: selectedUtxos,
         });
         onClose(`#${modalDomId}`);
@@ -325,9 +323,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
                                 <label htmlFor="amount" className="col-3 my-auto">{t`Amount`}: </label>
                                 <InputNumber key="value"
                                              name="amount"
-                                             ref={amountRef}
-                                             defaultValue={numberUtils.prettyValue(amount, decimalPlaces)}
-                                             placeholder={numberUtils.prettyValue(0, decimalPlaces)}
+                                             defaultValue={amount}
                                              onValueChange={value => setAmount(value)}
                                              className="form-control output-value col-3"/>
                             </div>

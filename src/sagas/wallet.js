@@ -7,7 +7,6 @@ import {
   transactionUtils,
   errors as hathorErrors,
   cryptoUtils,
-  versionApi,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -26,8 +25,7 @@ import {
 import { eventChannel } from 'redux-saga';
 import LOCAL_STORE from '../storage';
 import {
-  WALLET_SERVICE_MAINNET_BASE_WS_URL,
-  WALLET_SERVICE_MAINNET_BASE_URL,
+  NETWORK_SETTINGS,
   WALLET_SERVICE_FEATURE_TOGGLE,
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
   IGNORE_WS_TOGGLE_FLAG,
@@ -60,7 +58,6 @@ import {
   reloadWalletRequested,
   changeWalletState,
   updateTxHistory,
-  setMiningServer,
   setNativeTokenData,
   addRegisteredTokens,
 } from '../actions';
@@ -74,8 +71,10 @@ import { fetchTokenData } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import nanoUtils from '../utils/nanoContracts';
+import helpersUtils from '../utils/helpers';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 import { getGlobalWallet, setGlobalWallet } from "../modules/wallet";
+import { isEmpty } from 'lodash';
 
 export const WALLET_STATUS = {
   READY: 'ready',
@@ -93,7 +92,17 @@ export function* isWalletServiceEnabled() {
     return false;
   }
 
-  const walletServiceEnabled = yield call(checkForFeatureFlag, WALLET_SERVICE_FEATURE_TOGGLE);
+  let walletServiceEnabled = yield call(checkForFeatureFlag, WALLET_SERVICE_FEATURE_TOGGLE);
+
+  const networkSettings = yield select((state) => state.networkSettings.data);
+
+  if (walletServiceEnabled && isEmpty(networkSettings.walletServiceUrl)) {
+    // In case of an empty value for walletServiceUrl, it means the user
+    // doesn't intend to use the Wallet Service. Therefore, we need to force
+    // a disable on it.
+    walletServiceEnabled = false;
+    yield put(setUseWalletService(false));
+  }
 
   return walletServiceEnabled;
 }
@@ -151,39 +160,13 @@ export function* startWallet(action) {
   // then we don't know if we've cleaned up the wallet data in the storage
   yield storage.cleanStorage(true, true);
 
-  // Set the server and network as saved on localStorage
-  // If the localStorage is empty, fetch data directly from the lib config
-  const networkName = LOCAL_STORE.getNetwork() || config.getNetwork().name;
-  const serverUrl = LOCAL_STORE.getServer() || config.getServerUrl();
-  config.setServerUrl(serverUrl);
-  config.setNetwork(networkName);
-  LOCAL_STORE.setServers(serverUrl);
-  LOCAL_STORE.setNetwork(networkName);
+  const networkSettings = helpersUtils.getSafeNetworkSettings()
+  const networkName = networkSettings.network;
+  const serverUrl = networkSettings.node;
 
   let wallet, connection;
   if (useWalletService) {
     let authxpriv = null;
-    // Set urls for wallet service. If we have it on storage, use it, otherwise use defaults
-    try {
-      // getWsServer can return null if not previously set
-      config.setWalletServiceBaseUrl(LOCAL_STORE.getWsServer());
-      config.getWalletServiceBaseUrl();
-    } catch(err) {
-      if (err instanceof hathorErrors.GetWalletServiceUrlError) {
-        // Throwing this error means there is not a base url set
-        // So we update with the default url
-        config.setWalletServiceBaseUrl(WALLET_SERVICE_MAINNET_BASE_URL);
-      }
-    }
-
-    try {
-      config.getWalletServiceBaseWsUrl();
-    } catch(err) {
-      if (err instanceof hathorErrors.GetWalletServiceWsUrlError) {
-        config.setWalletServiceBaseWsUrl(WALLET_SERVICE_MAINNET_BASE_WS_URL);
-      }
-    }
-
     if (!(words || xpub)) {
       const accessData = yield storage.getAccessData();
       xpriv = cryptoUtils.decryptData(accessData.acctPathKey, pin);
@@ -414,7 +397,7 @@ export function* loadTokens() {
   //
   // Note: We need to download the balance of all the tokens from the wallet so we can
   // hide zero-balance tokens
-  for (const token of Object.keys(allTokens)) {
+  for (const token of allTokens) {
     yield put(tokenFetchBalanceRequested(token));
   }
 
@@ -596,7 +579,7 @@ export function* handleUpdateTx(action) {
 
     // Always reload balance
     yield put(tokenFetchBalanceRequested(tokenUid, true));
-    yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0));
+    yield put(updateTxHistory(tx, tokenUid, txbalance[tokenUid] || 0n));
   }
 }
 
@@ -708,7 +691,7 @@ export function* walletReloading() {
 
     // We might have lost transactions during the reload, so we must invalidate the
     // token histories:
-    for (const tokenUid of Object.keys(allTokens)) {
+    for (const tokenUid of allTokens) {
       if (tokenUid === hathorLibConstants.NATIVE_TOKEN_UID) {
         continue;
       }
@@ -763,6 +746,11 @@ export function* onWalletReset() {
 
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
   LOCAL_STORE.resetStorage();
+  // We must set the lib config network to mainnet because it's the default network
+  // XXX we should have a method in the config to reset all configs
+  config.setNetwork('mainnet');
+  // This will update the lib config and redux state with the default network settings
+  helpersUtils.loadStorageState();
   if (wallet) {
     yield call([wallet.storage, wallet.storage.cleanStorage], true, true);
   }
@@ -793,28 +781,6 @@ export function* featureToggleUpdateListener() {
   }
 }
 
-/**
- * Updates the mining server
- *
- * @param {Object} data
- * @param {Object} data.payload payload from the event
- * @param {string|undefined} data.payload.url Mining server url.
- * @param {boolean} data.payload.reset Should we reset the tx mining service config
- */
-export function* onUpdateMiningServer({ payload }) {
-  const wallet = getGlobalWallet();
-
-  if (payload.reset) {
-    wallet.storage.config.setTxMiningUrl();
-    LOCAL_STORE.resetMiningServer();
-    yield put(setMiningServer(null));
-  } else {
-    wallet.storage.config.setTxMiningUrl(payload.url);
-    LOCAL_STORE.setMiningServer(payload.url);
-    yield put(setMiningServer(payload.url));
-  }
-}
-
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
@@ -827,6 +793,5 @@ export function* saga() {
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
     takeEvery('WALLET_RELOAD_DATA', walletReloading),
     takeEvery('WALLET_REFRESH_SHARED_ADDRESS', refreshSharedAddress),
-    takeEvery('UPDATE_MINING_SERVER', onUpdateMiningServer),
   ]);
 }

@@ -97,7 +97,8 @@ const wallet = {
    * @return {boolean} boolean indicating if address is valid
    */
   validateAddress(address) {
-    const networkName = LOCAL_STORE.getNetwork() || 'mainnet';
+    const networkSettings = LOCAL_STORE.getNetworkSettings();
+    const networkName = networkSettings ? networkSettings.network : 'mainnet';
     const networkObj = new Network(networkName);
     try {
       const addressObj = new Address(address, { network: networkObj });
@@ -215,10 +216,10 @@ const wallet = {
   },
 
   /**
-   * Filters only the non-registered tokens from the allTokens list.
+   * Filters only the non-registered tokens from the allTokens object.
    * Optionally filters only those with non-zero balance.
    *
-   * @param {Object[]} allTokens list of all available tokens
+   * @param {Record<string, string>} allTokens object with tokenUid as key and value
    * @param {Object[]} registeredTokens list of registered tokens
    * @param {Object[]} tokensBalance data about token balances
    * @param {boolean} hideZeroBalance If true, omits tokens with zero balance
@@ -234,7 +235,7 @@ const wallet = {
       if (registeredTokens.find((x) => x.uid === tokenUid)) {
         continue;
       }
-      const balance = tokensBalance[tokenUid] || { available: 0, locked: 0 };
+      const balance = tokensBalance[tokenUid] || { available: 0n, locked: 0n };
       const tokenData = {
         uid: tokenUid,
         balance: balance,
@@ -280,7 +281,7 @@ const wallet = {
       const tokenUid = registeredObject.uid;
 
       // If there is no entry for this token on tokensBalance, generate an empty balance object.
-      const balance = get(tokensBalance, `${tokenUid}.data`, { available: 0, locked: 0 });
+      const balance = get(tokensBalance, `${tokenUid}.data`, { available: 0n, locked: 0n });
       const tokenData = {
         ...registeredObject,
         balance: balance,
@@ -610,27 +611,8 @@ const wallet = {
    * @returns {string[]}
    */
   listTokensAlwaysShow() {
-    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};;
+    const alwaysShowMap = LOCAL_STORE.getItem(storageKeys.alwaysShowTokens) || {};
     return Object.keys(alwaysShowMap);
-  },
-
-  /**
-   * Converts a decimal value to integer. On the full node and the wallet lib, we only deal with
-   * integer values for amount. So a value of 45.97 for the user is handled by them as 4597.
-   * We need the Math.round because of some precision errors in js
-   * 35.05*100 = 3504.9999999999995 Precision error
-   * Math.round(35.05*100) = 3505
-   *
-   * @param {number} value The decimal amount
-   * @param {number} decimalPlaces Number of decimal places
-   *
-   * @return {number} Value as an integer
-   *
-   * @memberof Wallet
-   * @inner
-   */
-  decimalToInteger(value, decimalPlaces) {
-    return Math.round(value*(10**decimalPlaces));
   },
 
   /**

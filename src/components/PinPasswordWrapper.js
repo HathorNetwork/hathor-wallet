@@ -10,7 +10,7 @@ import { t } from 'ttag'
 
 
 /**
- * Component to choose a password  
+ * Component to choose a password
  * Shows two password fields with required pattern and validations
  *
  * @memberof Components
@@ -28,7 +28,7 @@ class PinPasswordWrapper extends React.Component {
   }
 
   /**
-   * Called when user finish filling the inputs  
+   * Called when user finish filling the inputs
    * Validates the form and call the success message
    */
   next = () => {
@@ -51,7 +51,7 @@ class PinPasswordWrapper extends React.Component {
     return (
       <div className="d-flex align-items-start flex-column">
         {this.props.message}
-        <form ref="passwordForm" className="w-100">
+        <form ref="passwordForm" className="w-100" id="passwordWrapperForm">
           <input required ref="password" type="password" pattern={this.props.pattern} inputMode={this.props.inputMode} autoComplete="off" placeholder={this.props.field} className="form-control" onChange={(e) => {this.props.handleChange(e.target.value)}}/>
           <input required ref="confirmPassword" type="password" pattern={this.props.pattern} inputMode={this.props.inputMode} autoComplete="off" placeholder={`Confirm ${this.props.field}`} className="form-control mt-4 mb-4" />
         </form>
