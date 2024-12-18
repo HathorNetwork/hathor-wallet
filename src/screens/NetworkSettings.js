@@ -115,7 +115,7 @@ function NetworkSettings() {
     }
 
     // we don't ask for the pin on the hardware wallet
-    const pin = pinRef.current.value;
+    const pin = isHardwareWallet ? null : pinRef.current.value;
     if (!isHardwareWallet) {
       if (!await wallet.checkPin(pin)) {
         dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.ERROR, error: t`Invalid PIN.` }));
