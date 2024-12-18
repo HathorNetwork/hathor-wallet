@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
@@ -140,7 +140,6 @@ const initialState = {
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
-  miningServer: null,
   // The native token data of the current network
   // @type {{symbol: string, name: string, uid: string}}
   nativeTokenData: null,
@@ -263,6 +262,29 @@ const initialState = {
   nanoContractDetailState: {
     state: null,
     status: NANO_CONTRACT_DETAIL_STATUS.READY,
+    error: null,
+  },
+  /**
+   * Stores the current network settings of the wallet and the status when changing it
+   *
+   * {
+   *   data: {
+   *     node: string,
+   *     txMining: string,
+   *     explorer: string
+   *     explorerService: string,
+   *     walletService: string,
+   *     walletServiceWS: string,
+   *   },
+   *   status: NETWORK_SETTINGS_STATUS,
+   *   newNetwork: string | null,
+   *   error: string | null,
+   * }
+  */
+  networkSettings: {
+    data: NETWORK_SETTINGS.mainnet,
+    status: NETWORK_SETTINGS_STATUS.READY,
+    newNetwork: null,
     error: null,
   },
 };
@@ -391,8 +413,6 @@ const rootReducer = (state = initialState, action) => {
       return onUpdateTxHistory(state, action);
     case types.WALLET_CHANGE_STATE:
       return onWalletStateChanged(state, action);
-    case types.SET_MINING_SERVER:
-      return onSetMiningServer(state, action);
     case types.SET_NATIVE_TOKEN_DATA:
       return onSetNativeTokenData(state, action);
     case types.NANOCONTRACT_REGISTER_REQUEST:
@@ -413,6 +433,10 @@ const rootReducer = (state = initialState, action) => {
       return onSetNanoContractDetailStatus(state, action);
     case types.NANOCONTRACT_LOAD_DETAILS_SUCCESS:
       return onNanoContractDetailLoaded(state, action);
+    case types.NETWORKSETTINGS_SET_STATUS:
+      return onSetNetworkSettingsStatus(state, action);
+    case types.NETWORKSETTINGS_UPDATED:
+      return onUpdateNetworkSettings(state, action);
     default:
       return state;
   }
@@ -1165,11 +1189,6 @@ export const onWalletStateChanged = (state, { payload }) => ({
   walletState: payload,
 });
 
-export const onSetMiningServer = (state, { payload }) => ({
-  ...state,
-  miningServer: payload,
-});
-
 /**
  * When starting a wallet we need to update the native token data on store.
  * This includes:
@@ -1414,6 +1433,51 @@ export const onNanoContractDetailLoaded = (state, payload) => {
       state: payload.state,
       status: NANO_CONTRACT_DETAIL_STATUS.SUCCESS,
       error: null,
+    }
+  }
+}
+
+/**
+ * Set network settings status
+ * @param {string | null | undefined} action.payload.newNetwork
+ *
+ * @returns {Object}
+ */
+export const onSetNetworkSettingsStatus = (state, { payload }) => {
+  return {
+    ...state,
+    networkSettings: {
+      ...state.networkSettings,
+      status: payload.status,
+      error: payload.error,
+      newNetwork: payload.newNetwork
+    }
+  }
+}
+
+/**
+ * Update network settings data
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.node
+ * @param {string} action.payload.network
+ * @param {string} action.payload.txMining
+ * @param {string} action.payload.explorer
+ * @param {string} action.payload.explorerService
+ * @param {string} action.payload.walletService
+ * @param {string} action.payload.walletServiceWS
+ *
+ * @returns {Object}
+ */
+export const onUpdateNetworkSettings = (state, { payload }) => {
+  return {
+    ...state,
+    networkSettings: {
+      ...state.networkSettings,
+      data: payload,
+      status: NETWORK_SETTINGS_STATUS.SUCCESS,
     }
   }
 }
