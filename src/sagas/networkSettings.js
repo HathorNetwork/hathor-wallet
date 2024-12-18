@@ -58,10 +58,13 @@ export function* changeNetworkSettings({ data, pin }) {
   }
 
   // We must get user confirmation because the new network is a testnet or privatenet
+  // This new status will open a modal for the user to confirm that wants to connect to a testnet/privatenet
   const newNetwork = hathorLib.helpersUtils.getNetworkFromFullNodeNetwork(versionData.network);
   yield put(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.WAITING_NETWORK_CONFIRMATION, newNetwork }));
 
   // Wait until network settings status changes
+  // If user confirms the network, the status will change to NETWORK_CONFIRMED
+  // otherwise it will change to READY, if user closes the modal without confirming
   yield take(types.NETWORKSETTINGS_SET_STATUS);
 
   const networkSettingsStatus = yield select((state) => state.networkSettings.status);
