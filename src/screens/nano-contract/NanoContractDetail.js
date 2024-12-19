@@ -16,7 +16,7 @@ import NanoContractHistory from '../../components/nano-contract/NanoContractHist
 import helpers from '../../utils/helpers';
 import nanoUtils from '../../utils/nanoContracts';
 import hathorLib from '@hathor/wallet-lib';
-import path from 'path';
+import path from 'path-browserify';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { nanoContractDetailRequest, nanoContractDetailSetStatus, nanoContractUnregister } from '../../actions';

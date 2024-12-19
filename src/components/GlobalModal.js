@@ -125,6 +125,7 @@ export const GlobalModal = ({ children }) => {
   };
 
   const showModal = (modalType, modalProps = {}) => {
+    console.log('Will show modal (global).');
     setStore({
       ...store,
       modalType,
@@ -134,6 +135,8 @@ export const GlobalModal = ({ children }) => {
     // Sometimes the modal backdrop won't show up again after being
     // removed forcefully by the hideModal, so we should just show it
     // again.
+    const modal = $('.modal-backdrop');
+    console.log('modal:', modal);
     $('.modal-backdrop').fadeIn(150);
   };
 

@@ -64,6 +64,9 @@ function Navigation() {
               <NavLink to="/custom_tokens/" className="nav-link">{t`Custom tokens`}</NavLink>
             </li>
             <li className="nav-item">
+              <NavLink to="/wallet_connect/" className="nav-link">{t`Connect`}</NavLink>
+            </li>
+            <li className="nav-item">
               <NavLink to="/nft/" className="nav-link">{t`NFTs`}</NavLink>
             </li>
             {useAtomicSwap && <li className="nav-item">

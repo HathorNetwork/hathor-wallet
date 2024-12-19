@@ -9,7 +9,7 @@ import React from 'react';
 import { t } from 'ttag'
 import { WALLET_HISTORY_COUNT } from '../constants';
 import helpers from '../utils/helpers';
-import path from 'path';
+import path from 'path-browserify';
 import AddressList from '../components/AddressList';
 
 /**

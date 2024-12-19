@@ -21,6 +21,7 @@ import LoadingAddresses from './screens/LoadingAddresses';
 import NetworkSettings from './screens/NetworkSettings';
 import ChoosePassphrase from './screens/ChoosePassphrase';
 import CustomTokens from './screens/CustomTokens';
+import WalletConnect from './screens/wallet-connect/WalletConnect';
 import Welcome from './screens/Welcome';
 import SentryPermission from './screens/SentryPermission';
 import UnknownTokens from './screens/UnknownTokens';
@@ -56,6 +57,7 @@ import NewSwap from './screens/atomic-swap/NewSwap';
 import ImportExisting from './screens/atomic-swap/ImportExisting';
 import LOCAL_STORE from './storage';
 import { getGlobalWallet } from "./modules/wallet";
+import { sagaMiddleware } from './store';
 
 function Root() {
   const {
@@ -74,7 +76,11 @@ function Root() {
   const wallet = getGlobalWallet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const context = useContext(GlobalModalContext);
+  const modalContext = useContext(GlobalModalContext);
+  // Set 
+  sagaMiddleware.setContext({
+    modalContext,
+  });
 
   // Monitors when Ledger device loses connection or the app is closed
   useEffect(() => {
@@ -109,13 +115,12 @@ function Root() {
     if (IPC_RENDERER) {
       // Event called when the user wants to reset all data
       IPC_RENDERER.on('app:clear_storage', async () => {
-        context.showModal(MODAL_TYPES.CONFIRM_CLEAR_STORAGE, {
+        modalContext.showModal(MODAL_TYPES.CONFIRM_CLEAR_STORAGE, {
           success: () => {
             localStorage.clear();
             IPC_RENDERER.send('app:clear_storage_success');
           },
         });
-
       });
 
       // Registers the event handlers for the ledger
@@ -197,6 +202,7 @@ function Root() {
       <Route path="/create_token" element={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
       <Route path="/create_nft" element={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
       <Route path="/custom_tokens" element={<StartedComponent children={ <CustomTokens /> } loaded={true} />} />
+      <Route path="/wallet_connect" element={<StartedComponent children={ <WalletConnect/> } loaded={true} />} />
       <Route path="/unknown_tokens" element={<StartedComponent children={ <UnknownTokens />} loaded={true} />} />
       <Route path="/wallet/send_tokens" element={<StartedComponent children={ <SendTokens /> } loaded={true} />} />
       <Route path="/wallet/atomic_swap" element={<StartedComponent children={ <ProposalList />} loaded={true} />} />

@@ -29,26 +29,12 @@ export class ModalPin extends React.Component {
 
   componentDidMount = () => {
     $('#modalPin').modal('show');
-    $('#modalPin').on('hidden.bs.modal', (e) => {
-      // Mandatory cleanup by GlobalModal
-      this.props.onClose();
-
-      // If the correct PIN was inserted, call the `onSuccess` callback
-      if (this.pin) {
-        this.props.onSuccess({ pin: this.pin })
-      }
-    });
 
     // Focus the PIN field on modal load
-    $('#modalPin').on('shown.bs.modal', (e) => {
+    this.refs.pinInput.refs.pin.focus();
+    /* $('#modalPin').on('shown.bs.modal', (e) => {
       this.refs.pinInput.refs.pin.focus();
-    });
-  }
-
-  componentWillUnmount = () => {
-    // Removing all event listeners
-    $('#modalPin').off();
-    $('#modalPin').modal('hide');
+    });*/
   }
 
   /**
@@ -79,9 +65,22 @@ export class ModalPin extends React.Component {
 
     // Set the PIN on the instance variable and close the modal.
     this.pin = pin;
+    this.onSuccess();
 
     // Necessary callbacks will be executed at the `onHidden` modal event
-    $('#modalPin').modal('hide');
+    // $('#modalPin').modal('hide');
+  }
+
+  onSuccess() {
+    this.props.onSuccess({ pin: this.pin })
+    this.props.onClose();
+  }
+
+  onCancel(e) {
+    e.preventDefault();
+
+    this.props.onCancel();
+    this.props.onClose();
   }
 
   render() {
@@ -101,14 +100,15 @@ export class ModalPin extends React.Component {
         </form>
       </div>
 
-    return <div>
+    return (
+      <div>
         <div className="modal fade" id="modalPin" tabIndex="-1" role="dialog" aria-labelledby="modalPin"
              aria-hidden="true">
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title" id="exampleModalLabel">{t`Write your PIN`}</h5>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" className="close" onClick={this.onCancel.bind(this)} aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -117,16 +117,25 @@ export class ModalPin extends React.Component {
               </div>
               <div className="modal-footer">
                 <div className="d-flex flex-row">
-                  <button type="button" className="btn btn-secondary mr-3"
-                          data-dismiss="modal">{t`Cancel`}</button>
-                  <button onClick={this.handlePin} type="button"
-                          className="btn btn-hathor">{t`Go`}</button>
+                  <button
+                    type="button"
+                    onClick={this.onCancel.bind(this)}
+                    className="btn btn-secondary mr-3">
+                    {t`Cancel`}
+                  </button>
+                  <button
+                    onClick={this.handlePin}
+                    type="button"
+                    className="btn btn-hathor">
+                    {t`Go`}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    );
   }
 }
 
@@ -146,6 +155,10 @@ ModalPin.propTypes = {
    * Callback invoked when tx is sent with success
    */
   onSuccess: PropTypes.func.isRequired,
+  /**
+   * Callback invoked when tx is sent with success
+   */
+  onCancel: PropTypes.func.isRequired,
   /**
    * Callback provided by the GlobalModal helper to manage the modal lifecycle
    */
