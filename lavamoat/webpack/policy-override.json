@@ -154,12 +154,24 @@
         "__esModule": true,
         "require": true,
         "module": true,
-        "exports": true
+        "exports": true,
+        "Function": true,
+        "Array": true,
+        "String": true,
+        "Promise": true,
+        "Array.prototype": true,
+        "String.prototype": true
       },
       "packages": {
         "follow-redirects": true,
         "form-data": true,
-        "proxy-from-env": true
+        "proxy-from-env": true,
+        "url": true,
+        "http": true,
+        "https": true,
+        "assert": true,
+        "stream": true,
+        "util": true
       }
     },
     "@hathor/wallet-lib": {
