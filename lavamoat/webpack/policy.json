@@ -19,7 +19,6 @@
         "setTimeout": true
       },
       "packages": {
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>axios": true,
         "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic": true,
@@ -27,39 +26,11 @@
         "@hathor/wallet-lib>isomorphic-ws": true,
         "@walletconnect/core>events": true,
         "assert": true,
+        "axios": true,
         "buffer": true,
         "crypto-browserify": true,
         "cypress>lodash": true,
         "path-browserify": true
-      }
-    },
-    "@hathor/hathor-rpc-handler>@hathor/wallet-lib>axios": {
-      "globals": {
-        "AbortController": true,
-        "Blob": true,
-        "Buffer.alloc": true,
-        "Buffer.byteLength": true,
-        "Buffer.concat": true,
-        "Buffer.from": true,
-        "Buffer.isBuffer": true,
-        "FormData": true,
-        "ReadableStream": true,
-        "Request": true,
-        "Response": true,
-        "TextEncoder": true,
-        "URL": true,
-        "WorkerGlobalScope": true,
-        "XMLHttpRequest": true,
-        "btoa": true,
-        "clearTimeout": true,
-        "console.warn": true,
-        "document": true,
-        "fetch": true,
-        "importScripts": true,
-        "location.href": true,
-        "navigator": true,
-        "process": true,
-        "setTimeout": true
       }
     },
     "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": {
@@ -1175,17 +1146,13 @@
       "globals": {
         "AbortController": true,
         "Blob": true,
-        "Buffer.alloc": true,
-        "Buffer.byteLength": true,
-        "Buffer.concat": true,
         "Buffer.from": true,
-        "Buffer.isBuffer": true,
         "FormData": true,
         "ReadableStream": true,
         "Request": true,
         "Response": true,
         "TextEncoder": true,
-        "URL": true,
+        "URLSearchParams": true,
         "WorkerGlobalScope": true,
         "XMLHttpRequest": true,
         "btoa": true,
@@ -1200,6 +1167,10 @@
         "queueMicrotask": true,
         "setImmediate": true,
         "setTimeout": true
+      },
+      "packages": {
+        "buffer": true,
+        "process": true
       }
     },
     "bootstrap": {
