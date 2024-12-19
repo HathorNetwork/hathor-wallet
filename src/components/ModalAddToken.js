@@ -90,7 +90,7 @@ class ModalAddToken extends React.Component {
       const tokenUid = tokenData.uid;
       const tokenBalance = tokensBalance[tokenUid]?.data;
       const tokenHasZeroBalance = !tokenBalance
-        || (tokenBalance.available + tokenBalance.locked) === 0;
+        || (tokenBalance.available + tokenBalance.locked) === 0n;
 
       /*
        * We only make this validation if the "Hide Zero-Balance Tokens" setting is active,
