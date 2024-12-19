@@ -20,11 +20,11 @@
       },
       "packages": {
         "@hathor/hathor-rpc-handler>@hathor/wallet-lib>axios": true,
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>bitcore-lib": true,
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>bitcore-mnemonic": true,
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>crypto-js": true,
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>isomorphic-ws": true,
         "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": true,
+        "@hathor/wallet-lib>bitcore-lib": true,
+        "@hathor/wallet-lib>bitcore-mnemonic": true,
+        "@hathor/wallet-lib>crypto-js": true,
+        "@hathor/wallet-lib>isomorphic-ws": true,
         "@hathor/wallet-lib>level": true,
         "@walletconnect/core>events": true,
         "assert": true,
@@ -58,57 +58,6 @@
         "setTimeout": true
       }
     },
-    "@hathor/hathor-rpc-handler>@hathor/wallet-lib>bitcore-lib": {
-      "globals": {
-        "Buffer": true,
-        "SEQUENCE_LOCKTIME_DISABLE_FLAG": true,
-        "_bitcore": "write",
-        "console.error": true,
-        "crypto": true,
-        "msCrypto": true,
-        "process.browser": true
-      },
-      "packages": {
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>bitcore-lib>bech32": true,
-        "@hathor/wallet-lib>bitcore-lib>bs58": true,
-        "@hathor/wallet-lib>bitcore-lib>buffer-compare": true,
-        "assert": true,
-        "buffer": true,
-        "crypto-browserify": true,
-        "crypto-browserify>create-ecdh>bn.js": true,
-        "crypto-browserify>create-ecdh>elliptic": true,
-        "crypto-browserify>inherits": true,
-        "cypress>lodash": true,
-        "process": true,
-        "url": true
-      }
-    },
-    "@hathor/hathor-rpc-handler>@hathor/wallet-lib>bitcore-mnemonic": {
-      "globals": {
-        "Buffer.alloc": true,
-        "Buffer.from": true,
-        "Buffer.isBuffer": true
-      },
-      "packages": {
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>bitcore-lib": true,
-        "@hathor/wallet-lib>bitcore-mnemonic>unorm": true,
-        "buffer": true,
-        "crypto-browserify": true
-      }
-    },
-    "@hathor/hathor-rpc-handler>@hathor/wallet-lib>crypto-js": {
-      "globals": {
-        "crypto": true,
-        "define": true,
-        "msCrypto": true
-      }
-    },
-    "@hathor/hathor-rpc-handler>@hathor/wallet-lib>isomorphic-ws": {
-      "globals": {
-        "MozWebSocket": true,
-        "WebSocket": true
-      }
-    },
     "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": {
       "globals": {
         "WebAssembly.Instance": true,
@@ -118,48 +67,52 @@
     },
     "@hathor/wallet-lib": {
       "globals": {
+        "AbortController": true,
         "Buffer.alloc": true,
         "Buffer.concat": true,
         "Buffer.from": true,
         "Intl.NumberFormat": true,
         "clearInterval": true,
         "clearTimeout": true,
-        "console.error": true,
-        "console.warn": true,
+        "console": true,
         "setInterval": true,
         "setTimeout": true
       },
       "packages": {
-        "@hathor/wallet-lib>axios": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic": true,
         "@hathor/wallet-lib>crypto-js": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
         "@hathor/wallet-lib>level": true,
-        "@hathor/wallet-lib>long": true,
+        "@hathor/wallet-lib>queue-microtask": true,
+        "@hathor/wallet-lib>zod": true,
         "@walletconnect/core>events": true,
         "assert": true,
+        "axios": true,
         "buffer": true,
         "crypto-browserify": true,
         "cypress>lodash": true,
         "path-browserify": true
       }
     },
-    "@hathor/wallet-lib>axios": {
+    "@hathor/wallet-lib>abstract-level": {
       "globals": {
-        "FormData": true,
-        "URLSearchParams": true,
-        "XMLHttpRequest": true,
-        "btoa": true,
-        "console.warn": true,
-        "document": true,
-        "location.href": true,
-        "navigator": true,
-        "process": true,
-        "setTimeout": true
+        "TextEncoder": true,
+        "console": true
       },
       "packages": {
-        "process": true
+        "@hathor/wallet-lib>abstract-level>catering": true,
+        "@hathor/wallet-lib>abstract-level>level-supports": true,
+        "@hathor/wallet-lib>abstract-level>module-error": true,
+        "@hathor/wallet-lib>level-transcoder": true,
+        "@hathor/wallet-lib>queue-microtask": true,
+        "@walletconnect/core>events": true,
+        "buffer": true
+      }
+    },
+    "@hathor/wallet-lib>abstract-level>catering": {
+      "globals": {
+        "queueMicrotask": true
       }
     },
     "@hathor/wallet-lib>bitcore-lib": {
@@ -174,7 +127,6 @@
       },
       "packages": {
         "@hathor/wallet-lib>bitcore-lib>bech32": true,
-        "@hathor/wallet-lib>bitcore-lib>bip-schnorr": true,
         "@hathor/wallet-lib>bitcore-lib>bs58": true,
         "@hathor/wallet-lib>bitcore-lib>buffer-compare": true,
         "assert": true,
@@ -186,40 +138,6 @@
         "cypress>lodash": true,
         "process": true,
         "url": true
-      }
-    },
-    "@hathor/wallet-lib>bitcore-lib>bip-schnorr": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>bip-schnorr>bigi": true,
-        "@hathor/wallet-lib>bitcore-lib>bip-schnorr>ecurve": true,
-        "@hathor/wallet-lib>bitcore-lib>bip-schnorr>js-sha256": true,
-        "crypto-browserify>randombytes": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "@hathor/wallet-lib>bitcore-lib>bip-schnorr>bigi": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "assert": true,
-        "buffer": true
-      }
-    },
-    "@hathor/wallet-lib>bitcore-lib>bip-schnorr>ecurve": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>bip-schnorr>bigi": true,
-        "assert": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "@hathor/wallet-lib>bitcore-lib>bip-schnorr>js-sha256": {
-      "globals": {
-        "define": true,
-        "process": true
-      },
-      "packages": {
-        "process": true
       }
     },
     "@hathor/wallet-lib>bitcore-lib>bs58": {
@@ -252,7 +170,9 @@
     },
     "@hathor/wallet-lib>crypto-js": {
       "globals": {
-        "define": true
+        "crypto": true,
+        "define": true,
+        "msCrypto": true
       }
     },
     "@hathor/wallet-lib>isomorphic-ws": {
@@ -266,35 +186,14 @@
         "@hathor/wallet-lib>level>browser-level": true
       }
     },
-    "@hathor/wallet-lib>level>abstract-level": {
-      "globals": {
-        "TextEncoder": true,
-        "console": true
-      },
-      "packages": {
-        "@hathor/wallet-lib>level>abstract-level>level-supports": true,
-        "@hathor/wallet-lib>level>abstract-level>level-transcoder": true,
-        "@hathor/wallet-lib>level>abstract-level>queue-microtask": true,
-        "@hathor/wallet-lib>level>browser-level>catering": true,
-        "@hathor/wallet-lib>level>browser-level>module-error": true,
-        "@walletconnect/core>events": true,
-        "buffer": true
-      }
-    },
-    "@hathor/wallet-lib>level>abstract-level>level-transcoder": {
+    "@hathor/wallet-lib>level-transcoder": {
       "globals": {
         "TextDecoder": true,
         "TextEncoder": true
       },
       "packages": {
-        "@hathor/wallet-lib>level>browser-level>module-error": true,
+        "@hathor/wallet-lib>abstract-level>module-error": true,
         "buffer": true
-      }
-    },
-    "@hathor/wallet-lib>level>abstract-level>queue-microtask": {
-      "globals": {
-        "queueMicrotask": true,
-        "setTimeout": true
       }
     },
     "@hathor/wallet-lib>level>browser-level": {
@@ -307,68 +206,31 @@
         "indexedDB.open": true
       },
       "packages": {
-        "@hathor/wallet-lib>level>abstract-level": true,
-        "@hathor/wallet-lib>level>browser-level>catering": true,
-        "@hathor/wallet-lib>level>browser-level>module-error": true,
+        "@hathor/wallet-lib>abstract-level": true,
+        "@hathor/wallet-lib>abstract-level>catering": true,
+        "@hathor/wallet-lib>abstract-level>module-error": true,
         "@hathor/wallet-lib>level>browser-level>run-parallel-limit": true
-      }
-    },
-    "@hathor/wallet-lib>level>browser-level>catering": {
-      "globals": {
-        "queueMicrotask": true
       }
     },
     "@hathor/wallet-lib>level>browser-level>run-parallel-limit": {
       "packages": {
-        "@hathor/wallet-lib>level>abstract-level>queue-microtask": true
+        "@hathor/wallet-lib>queue-microtask": true
       }
     },
-    "@hathor/wallet-lib>long": {
+    "@hathor/wallet-lib>queue-microtask": {
       "globals": {
-        "WebAssembly.Instance": true,
-        "WebAssembly.Module": true
+        "queueMicrotask": true,
+        "setTimeout": true
+      }
+    },
+    "@hathor/wallet-lib>zod": {
+      "globals": {
+        "URL": true
       }
     },
     "@reduxjs/toolkit": {
       "globals": {
-        "AbortController": true,
-        "__REDUX_DEVTOOLS_EXTENSION_COMPOSE__": true,
-        "__REDUX_DEVTOOLS_EXTENSION__": true,
-        "console.error": true,
-        "console.warn": true,
-        "process": true,
-        "queueMicrotask": true,
-        "requestAnimationFrame": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "@reduxjs/toolkit>immer": true,
-        "@reduxjs/toolkit>redux": true,
-        "@reduxjs/toolkit>redux-thunk": true,
-        "@reduxjs/toolkit>reselect": true,
-        "process": true,
-        "react-redux>@babel/runtime": true
-      }
-    },
-    "@reduxjs/toolkit>immer": {
-      "globals": {
         "process.env.NODE_ENV": true
-      }
-    },
-    "@reduxjs/toolkit>redux": {
-      "globals": {
-        "console": true,
-        "process.env.NODE_ENV": true
-      }
-    },
-    "@reduxjs/toolkit>reselect": {
-      "globals": {
-        "WeakRef": true,
-        "console.warn": true,
-        "process.env.NODE_ENV": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser": {
@@ -624,6 +486,11 @@
         "setTimeout": true
       }
     },
+    "@sentry/electron>@sentry/core>tslib": {
+      "globals": {
+        "define": true
+      }
+    },
     "@walletconnect/core": {
       "globals": {
         "AbortController": true,
@@ -703,7 +570,7 @@
         "require": true
       },
       "packages": {
-        "@hathor/wallet-lib>ws": true,
+        "@hathor/wallet-lib>isomorphic-ws>ws": true,
         "@walletconnect/core>@walletconnect/jsonrpc-utils": true,
         "@walletconnect/core>@walletconnect/safe-json": true,
         "@walletconnect/core>events": true
@@ -728,17 +595,7 @@
     },
     "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage": {
       "globals": {
-        "Buffer": true,
         "console.error": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": true,
-        "buffer": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": {
-      "globals": {
-        "console.warn": true
       }
     },
     "@walletconnect/core>@walletconnect/logger": {
@@ -1324,6 +1181,33 @@
         "assert>util>is-typed-array>available-typed-arrays": true,
         "assert>util>is-typed-array>for-each": true,
         "assert>util>is-typed-array>gopd": true
+      }
+    },
+    "axios": {
+      "globals": {
+        "AbortController": true,
+        "Blob": true,
+        "Buffer.from": true,
+        "FormData": true,
+        "ReadableStream": true,
+        "Request": true,
+        "Response": true,
+        "TextEncoder": true,
+        "URLSearchParams": true,
+        "WorkerGlobalScope": true,
+        "XMLHttpRequest": true,
+        "btoa": true,
+        "clearTimeout": true,
+        "console.warn": true,
+        "document": true,
+        "fetch": true,
+        "importScripts": true,
+        "location.href": true,
+        "navigator": true,
+        "process": true,
+        "queueMicrotask": true,
+        "setImmediate": true,
+        "setTimeout": true
       }
     },
     "bootstrap": {
@@ -2110,6 +1994,7 @@
       },
       "packages": {
         "buffer": true,
+        "path-browserify": true,
         "process": true
       }
     },
