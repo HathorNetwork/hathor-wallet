@@ -5,10 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import {
-  UnleashClient,
-  EVENTS as UnleashEvents,
-} from 'unleash-proxy-client';
+import UnleashClient from 'unleash-proxy-client';
+const UnleashEvents = UnleashClient.EVENTS;
 import { get } from 'lodash';
 import {
   takeEvery,
