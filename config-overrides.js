@@ -12,7 +12,7 @@ module.exports = function override(config, env) {
 
   config.resolve.fallback = {
     url: require.resolve('url'),
-    fs: require.resolve('fs'),
+    fs: false,
     assert: require.resolve('assert'),
     crypto: require.resolve('crypto-browserify'),
     http: require.resolve('stream-http'),
@@ -22,13 +22,27 @@ module.exports = function override(config, env) {
     stream: require.resolve('stream-browserify'),
     vm: require.resolve('vm-browserify'),
     path: require.resolve("path-browserify"),
+    worker_threads: false,
+    perf_hooks: false,
+    tls: false,
+    net: false
   };
 
   // Configure module resolution
   config.resolve = {
     ...config.resolve,
     mainFields: ['browser', 'module', 'main'],
-    conditionNames: ['require', 'browser', 'default']
+    conditionNames: ['import', 'require', 'node', 'default'],
+    extensionAlias: {
+      '.js': ['.js', '.ts', '.tsx']
+    },
+    alias: {
+      'classic-level': false,
+      'level': false,
+      'pino-worker': false,
+      'pino/file': false,
+      'pino-pretty': false
+    }
   };
 
   // Add a rule to inject debug logs into axios-related files
@@ -55,6 +69,12 @@ module.exports = function override(config, env) {
     resolve: {
       fullySpecified: false
     }
+  });
+
+  // Add a rule to handle classic-level and pino
+  config.module.rules.push({
+    test: /[\\/](classic-level|pino)[\\/]/,
+    use: 'null-loader'
   });
 
   config.plugins = [

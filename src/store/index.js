@@ -11,7 +11,6 @@ import createSagaMiddleware from 'redux-saga';
 import rootReducer from '../reducers/index';
 import rootSagas from '../sagas';
 
-
 export const sagaMiddleware = createSagaMiddleware();
 const middlewares = [sagaMiddleware, thunk];
 

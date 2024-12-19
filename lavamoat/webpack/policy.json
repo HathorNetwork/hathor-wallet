@@ -25,7 +25,6 @@
         "@hathor/wallet-lib>bitcore-mnemonic": true,
         "@hathor/wallet-lib>crypto-js": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
-        "@hathor/wallet-lib>level": true,
         "@walletconnect/core>events": true,
         "assert": true,
         "buffer": true,
@@ -38,13 +37,17 @@
       "globals": {
         "AbortController": true,
         "Blob": true,
+        "Buffer.alloc": true,
+        "Buffer.byteLength": true,
+        "Buffer.concat": true,
         "Buffer.from": true,
+        "Buffer.isBuffer": true,
         "FormData": true,
         "ReadableStream": true,
         "Request": true,
         "Response": true,
         "TextEncoder": true,
-        "URLSearchParams": true,
+        "URL": true,
         "WorkerGlobalScope": true,
         "XMLHttpRequest": true,
         "btoa": true,
@@ -55,14 +58,14 @@
         "importScripts": true,
         "location.href": true,
         "navigator": true,
+        "process": true,
         "setTimeout": true
       }
     },
     "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": {
       "globals": {
         "WebAssembly.Instance": true,
-        "WebAssembly.Module": true,
-        "define": true
+        "WebAssembly.Module": true
       }
     },
     "@hathor/wallet-lib": {
@@ -83,7 +86,6 @@
         "@hathor/wallet-lib>bitcore-mnemonic": true,
         "@hathor/wallet-lib>crypto-js": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
-        "@hathor/wallet-lib>level": true,
         "@hathor/wallet-lib>queue-microtask": true,
         "@hathor/wallet-lib>zod": true,
         "@walletconnect/core>events": true,
@@ -93,26 +95,6 @@
         "crypto-browserify": true,
         "cypress>lodash": true,
         "path-browserify": true
-      }
-    },
-    "@hathor/wallet-lib>abstract-level": {
-      "globals": {
-        "TextEncoder": true,
-        "console": true
-      },
-      "packages": {
-        "@hathor/wallet-lib>abstract-level>catering": true,
-        "@hathor/wallet-lib>abstract-level>level-supports": true,
-        "@hathor/wallet-lib>abstract-level>module-error": true,
-        "@hathor/wallet-lib>level-transcoder": true,
-        "@hathor/wallet-lib>queue-microtask": true,
-        "@walletconnect/core>events": true,
-        "buffer": true
-      }
-    },
-    "@hathor/wallet-lib>abstract-level>catering": {
-      "globals": {
-        "queueMicrotask": true
       }
     },
     "@hathor/wallet-lib>bitcore-lib": {
@@ -181,42 +163,6 @@
         "WebSocket": true
       }
     },
-    "@hathor/wallet-lib>level": {
-      "packages": {
-        "@hathor/wallet-lib>level>browser-level": true
-      }
-    },
-    "@hathor/wallet-lib>level-transcoder": {
-      "globals": {
-        "TextDecoder": true,
-        "TextEncoder": true
-      },
-      "packages": {
-        "@hathor/wallet-lib>abstract-level>module-error": true,
-        "buffer": true
-      }
-    },
-    "@hathor/wallet-lib>level>browser-level": {
-      "globals": {
-        "IDBKeyRange.bound": true,
-        "IDBKeyRange.lowerBound": true,
-        "IDBKeyRange.upperBound": true,
-        "TextEncoder": true,
-        "indexedDB.deleteDatabase": true,
-        "indexedDB.open": true
-      },
-      "packages": {
-        "@hathor/wallet-lib>abstract-level": true,
-        "@hathor/wallet-lib>abstract-level>catering": true,
-        "@hathor/wallet-lib>abstract-level>module-error": true,
-        "@hathor/wallet-lib>level>browser-level>run-parallel-limit": true
-      }
-    },
-    "@hathor/wallet-lib>level>browser-level>run-parallel-limit": {
-      "packages": {
-        "@hathor/wallet-lib>queue-microtask": true
-      }
-    },
     "@hathor/wallet-lib>queue-microtask": {
       "globals": {
         "queueMicrotask": true,
@@ -230,7 +176,44 @@
     },
     "@reduxjs/toolkit": {
       "globals": {
+        "AbortController": true,
+        "__REDUX_DEVTOOLS_EXTENSION_COMPOSE__": true,
+        "__REDUX_DEVTOOLS_EXTENSION__": true,
+        "console.error": true,
+        "console.warn": true,
+        "process": true,
+        "queueMicrotask": true,
+        "requestAnimationFrame": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@reduxjs/toolkit>immer": true,
+        "@reduxjs/toolkit>redux": true,
+        "@reduxjs/toolkit>redux-thunk": true,
+        "@reduxjs/toolkit>reselect": true,
+        "process": true,
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@reduxjs/toolkit>immer": {
+      "globals": {
         "process.env.NODE_ENV": true
+      }
+    },
+    "@reduxjs/toolkit>redux": {
+      "globals": {
+        "console": true,
+        "process.env.NODE_ENV": true
+      }
+    },
+    "@reduxjs/toolkit>reselect": {
+      "globals": {
+        "WeakRef": true,
+        "console.warn": true,
+        "process.env.NODE_ENV": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser": {
@@ -595,7 +578,17 @@
     },
     "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage": {
       "globals": {
+        "Buffer": true,
         "console.error": true
+      },
+      "packages": {
+        "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": true,
+        "buffer": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": {
+      "globals": {
+        "console.warn": true
       }
     },
     "@walletconnect/core>@walletconnect/logger": {
@@ -616,11 +609,6 @@
       "packages": {
         "@walletconnect/core>@walletconnect/logger>pino": true,
         "@walletconnect/core>@walletconnect/safe-json": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/logger>pino": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/logger>pino>quick-format-unescaped": true
       }
     },
     "@walletconnect/core>@walletconnect/relay-auth": {
@@ -1187,13 +1175,17 @@
       "globals": {
         "AbortController": true,
         "Blob": true,
+        "Buffer.alloc": true,
+        "Buffer.byteLength": true,
+        "Buffer.concat": true,
         "Buffer.from": true,
+        "Buffer.isBuffer": true,
         "FormData": true,
         "ReadableStream": true,
         "Request": true,
         "Response": true,
         "TextEncoder": true,
-        "URLSearchParams": true,
+        "URL": true,
         "WorkerGlobalScope": true,
         "XMLHttpRequest": true,
         "btoa": true,
