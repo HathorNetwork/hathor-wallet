@@ -1,0 +1,62 @@
+version: "3.9"
+services:
+
+  # For more information on these configs, refer to:
+  # https://github.com/HathorNetwork/rfcs/blob/master/text/0033-private-network-guide.md
+
+  fullnode:
+    image:
+      ${HATHOR_LIB_INTEGRATION_TESTS_FULLNODE_IMAGE:-hathornetwork/hathor-core}
+    command: [
+      "run_node",
+      "--listen", "tcp:40404",
+      "--status", "8080",
+      "--test-mode-tx-weight",
+      "--wallet-index",
+      "--allow-mining-without-peers",
+      "--unsafe-mode", "testnet-golf",
+      "--memory-storage",
+      "--config-yaml", "privnet/conf/privnet.yml"
+    ]
+    ports:
+      - "8083:8080"
+      - "40404:40404"
+    volumes:
+      - type: bind
+        source: ./
+        target: /privnet/conf
+    networks:
+      - hathor-privnet
+
+  tx-mining-service:
+    image:
+      ${HATHOR_LIB_INTEGRATION_TESTS_TXMINING_IMAGE:-hathornetwork/tx-mining-service}
+    depends_on:
+      - fullnode
+    ports:
+      - "8034:8034" # Not mandatory to keep this port open, but helpful for developer machine debugging
+      - "8035:8035"
+    command: [
+      "http://fullnode:8080",
+      "--stratum-port=8034",
+      "--api-port=8035"
+    ]
+    networks:
+      - hathor-privnet
+
+  cpuminer:
+    image: hathornetwork/cpuminer
+    depends_on:
+      - tx-mining-service
+    command: [
+      "-a", "sha256d",
+      "--coinbase-addr", "WTjhJXzQJETVx7BVXdyZmvk396DRRsubdw", # Refer to test-utils-integration.js, WALLET_CONSTANTS
+      "-o", "stratum+tcp://tx-mining-service:8034",
+      "--retry-pause", "5", # 5 seconds between retries
+      "-t", "1" # Number of threads used to mine
+    ]
+    networks:
+      - hathor-privnet
+
+networks:
+  hathor-privnet:
