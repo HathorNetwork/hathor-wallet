@@ -45,7 +45,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
             return false;
         }
 
-        if (amount === 0 || !amount) {
+        if (amount === 0n || !amount) {
             setErrMessage(t`Must receive a positive amount of tokens`);
             return false;
         }

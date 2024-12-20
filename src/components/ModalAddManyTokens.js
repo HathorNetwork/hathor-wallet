@@ -119,7 +119,7 @@ class ModalAddManyTokens extends React.Component {
           available: 0n,
           locked: 0n,
         });
-        const tokenHasZeroBalance = (available + locked) === 0;
+        const tokenHasZeroBalance = (available + locked) === 0n;
 
         /*
          * We only make this validation if the "Hide Zero-Balance Tokens" setting is active,
