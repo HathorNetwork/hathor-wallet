@@ -13,52 +13,40 @@ module.exports = function override(config, env) {
     concatenateModules: false
   };
 
-  // Node.js built-in modules and their browser fallbacks/polyfills
-  // Some modules are set to 'false' because they are:
-  // 1. Node.js specific and don't work in browsers (like 'fs' and 'worker_threads')
-  // 2. Only used in the Electron main process, not in the renderer
-  // 3. Have browser alternatives (e.g., IndexedDB instead of 'fs')
-  config.resolve.fallback = {
-    url: require.resolve('url'),
-    fs: false,
-    assert: require.resolve('assert'),
-    crypto: require.resolve('crypto-browserify'),
-    http: require.resolve('stream-http'),
-    https: require.resolve('https-browserify'),
-    os: require.resolve('os-browserify/browser'),
-    buffer: require.resolve('buffer'),
-    stream: require.resolve('stream-browserify'),
-    vm: require.resolve('vm-browserify'),
-    path: require.resolve("path-browserify"),
-    worker_threads: false,
-    perf_hooks: false,
-    tls: false,
-    net: false
-  };
-
   // Configure module resolution
   config.resolve = {
     ...config.resolve,
+    fallback: {
+      url: require.resolve('url'),
+      fs: false,
+      assert: require.resolve('assert'),
+      crypto: require.resolve('crypto-browserify'),
+      http: require.resolve('stream-http'),
+      https: require.resolve('https-browserify'),
+      os: require.resolve('os-browserify/browser'),
+      buffer: require.resolve('buffer'),
+      stream: require.resolve('stream-browserify'),
+      vm: require.resolve('vm-browserify'),
+      path: require.resolve("path-browserify"),
+      worker_threads: false,
+      perf_hooks: false,
+      tls: false,
+      net: false
+    },
     mainFields: ['browser', 'module', 'main'],
     conditionNames: ['import', 'require', 'node', 'default'],
     extensionAlias: {
       '.js': ['.js', '.ts', '.tsx']
     },
-    // Prevent bundling of certain Node.js-specific modules in renderer process
-    // - classic-level/level: Node.js database packages that require filesystem access
-    // - pino and related: Node.js logging library that uses worker_threads and filesystem
-    // These modules are likely used only in the Electron main process
-    // and their functionality should be:
-    // 1. Executed in main process and communicated via IPC, or
-    // 2. Replaced with browser-compatible alternatives
     alias: {
       'classic-level': false,
       'level': false,
       'pino-worker': false,
       'pino/file': false,
       'pino-pretty': false,
-      // Force all axios imports to use the same version
-      'axios': path.resolve(__dirname, 'node_modules/axios')
+      'axios': path.resolve(__dirname, 'node_modules/axios'),
+      // Add an alias for our buffer shim
+      'buffer-shim': path.resolve(__dirname, 'src/buffer-shim.js')
     }
   };
 
@@ -79,11 +67,7 @@ module.exports = function override(config, env) {
     }
   });
 
-  // Use null-loader for Node.js-specific packages that shouldn't be bundled
-  // in the renderer process. These packages are either:
-  // 1. Used only in the main process
-  // 2. Need to be replaced with browser-compatible alternatives
-  // 3. Their functionality should be accessed via IPC
+  // Use null-loader for Node.js-specific packages
   config.module.rules.push({
     test: /[\\/](classic-level|pino)[\\/]/,
     use: 'null-loader'
@@ -102,14 +86,14 @@ module.exports = function override(config, env) {
         overrideTaming: 'severe',
       }
     }),
-    ...config.plugins,
+    ...config.plugins.filter(p => !(p instanceof webpack.ProvidePlugin)),
     new webpack.ProvidePlugin({
       process: 'process/browser',
-      Buffer: ['buffer', 'Buffer'],
-      path: ['path-browserify', 'default']
+      Buffer: ['buffer-shim', 'default']
     }),
     new webpack.DefinePlugin({
-      'process.env': JSON.stringify(process.env)
+      'process.env': JSON.stringify(process.env),
+      'global': 'window'
     })
   ];
 

@@ -1,22 +1,100 @@
 {
   "resources": {
-    "viz.js": {
+    "bootstrap": {
       "globals": {
-        "document.title": true
+        "document": true,
+        "window": true,
+        "Element": true,
+        "HTMLElement": true,
+        "Node": true,
+        "Event": true,
+        "CustomEvent": true,
+        "document.body": true,
+        "document.documentElement": true,
+        "document.createElement": true,
+        "document.createEvent": true,
+        "document.querySelector": true,
+        "document.querySelectorAll": true,
+        "document.addEventListener": true,
+        "document.removeEventListener": true,
+        "window.addEventListener": true,
+        "window.removeEventListener": true,
+        "window.setTimeout": true,
+        "window.clearTimeout": true,
+        "window.setInterval": true,
+        "window.clearInterval": true,
+        "window.requestAnimationFrame": true,
+        "window.cancelAnimationFrame": true,
+        "window.getComputedStyle": true,
+        "window.Event": true,
+        "window.CustomEvent": true,
+        "window.MutationObserver": true,
+        "MutationObserver": true,
+        "performance": true
+      },
+      "packages": {
+        "jquery": true,
+        "popper.js": true
+      }
+    },
+    "popper.js": {
+      "globals": {
+        "document": true,
+        "window": true,
+        "Element": true,
+        "HTMLElement": true,
+        "getComputedStyle": true,
+        "window.getComputedStyle": true,
+        "performance": true,
+        "requestAnimationFrame": true,
+        "cancelAnimationFrame": true
       }
     },
     "jquery": {
       "globals": {
         "document": true,
         "window": true,
-        "window.getComputedStyle": true,
+        "Element": true,
+        "HTMLElement": true,
+        "Node": true,
+        "Event": true,
+        "CustomEvent": true,
+        "MutationObserver": true,
+        "performance": true,
         "getComputedStyle": true,
-        "navigator": true,
-        "location": true,
+        "requestAnimationFrame": true,
+        "cancelAnimationFrame": true,
         "setTimeout": true,
         "clearTimeout": true,
         "setInterval": true,
-        "clearInterval": true
+        "clearInterval": true,
+        "document.body": true,
+        "document.documentElement": true,
+        "document.createElement": true,
+        "document.createEvent": true,
+        "document.querySelector": true,
+        "document.querySelectorAll": true,
+        "document.addEventListener": true,
+        "document.removeEventListener": true,
+        "window.addEventListener": true,
+        "window.removeEventListener": true,
+        "window.setTimeout": true,
+        "window.clearTimeout": true,
+        "window.setInterval": true,
+        "window.clearInterval": true,
+        "window.requestAnimationFrame": true,
+        "window.cancelAnimationFrame": true,
+        "window.getComputedStyle": true,
+        "window.Event": true,
+        "window.CustomEvent": true,
+        "window.MutationObserver": true,
+        "navigator": true,
+        "location": true
+      }
+    },
+    "viz.js": {
+      "globals": {
+        "document.title": true
       }
     },
     "unleash-proxy-client": {
@@ -221,6 +299,33 @@
         "tty": true,
         "util": true,
         "zlib": true
+      }
+    },
+    "elliptic>bn.js": {
+      "globals": {
+        "Buffer": true,
+        "Error": true,
+        "Object": true,
+        "Math": true,
+        "Number": true,
+        "Array": true,
+        "Function": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Array.prototype": true
+      },
+      "packages": {
+        "buffer": true
+      }
+    },
+    "buffer": {
+      "globals": {
+        "Buffer": true,
+        "process": true,
+        "global": true,
+        "globalThis": true,
+        "window": true,
+        "self": true
       }
     }
   }
