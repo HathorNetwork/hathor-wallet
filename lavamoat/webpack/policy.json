@@ -1,44 +1,5 @@
 {
   "resources": {
-    "@hathor/hathor-rpc-handler": {
-      "packages": {
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true
-      }
-    },
-    "@hathor/hathor-rpc-handler>@hathor/wallet-lib": {
-      "globals": {
-        "AbortController": true,
-        "Buffer.alloc": true,
-        "Buffer.concat": true,
-        "Buffer.from": true,
-        "Intl.NumberFormat": true,
-        "clearInterval": true,
-        "clearTimeout": true,
-        "console": true,
-        "setInterval": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": true,
-        "@hathor/wallet-lib>bitcore-lib": true,
-        "@hathor/wallet-lib>bitcore-mnemonic": true,
-        "@hathor/wallet-lib>crypto-js": true,
-        "@hathor/wallet-lib>isomorphic-ws": true,
-        "@walletconnect/core>events": true,
-        "assert": true,
-        "axios": true,
-        "buffer": true,
-        "crypto-browserify": true,
-        "cypress>lodash": true,
-        "path-browserify": true
-      }
-    },
-    "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": {
-      "globals": {
-        "WebAssembly.Instance": true,
-        "WebAssembly.Module": true
-      }
-    },
     "@hathor/wallet-lib": {
       "globals": {
         "AbortController": true,
@@ -53,6 +14,7 @@
         "setTimeout": true
       },
       "packages": {
+        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic": true,
         "@hathor/wallet-lib>crypto-js": true,
@@ -79,6 +41,7 @@
         "process.browser": true
       },
       "packages": {
+        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib>bech32": true,
         "@hathor/wallet-lib>bitcore-lib>bs58": true,
         "@hathor/wallet-lib>bitcore-lib>buffer-compare": true,
@@ -110,9 +73,9 @@
         "Buffer.isBuffer": true
       },
       "packages": {
+        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic>unorm": true,
-        "buffer": true,
         "crypto-browserify": true
       }
     },
@@ -440,560 +403,9 @@
         "setTimeout": true
       }
     },
-    "@sentry/electron>@sentry/core>tslib": {
-      "globals": {
-        "define": true
-      }
-    },
-    "@walletconnect/core": {
-      "globals": {
-        "AbortController": true,
-        "Buffer": true,
-        "TextDecoder": true,
-        "TextEncoder": true,
-        "addEventListener": true,
-        "clearInterval": true,
-        "clearTimeout": true,
-        "crypto.subtle.digest": true,
-        "document.body.append": true,
-        "document.createElement": true,
-        "document.getElementById": true,
-        "fetch": true,
-        "process.env.IS_VITEST": true,
-        "removeEventListener": true,
-        "setInterval": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/heartbeat": true,
-        "@walletconnect/core>@walletconnect/jsonrpc-provider": true,
-        "@walletconnect/core>@walletconnect/jsonrpc-utils": true,
-        "@walletconnect/core>@walletconnect/jsonrpc-ws-connection": true,
-        "@walletconnect/core>@walletconnect/keyvaluestorage": true,
-        "@walletconnect/core>@walletconnect/logger": true,
-        "@walletconnect/core>@walletconnect/relay-auth": true,
-        "@walletconnect/core>@walletconnect/safe-json": true,
-        "@walletconnect/core>@walletconnect/time": true,
-        "@walletconnect/core>@walletconnect/types": true,
-        "@walletconnect/core>@walletconnect/utils": true,
-        "@walletconnect/core>events": true,
-        "@walletconnect/core>lodash.isequal": true,
-        "@walletconnect/core>uint8arrays": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/heartbeat": {
-      "globals": {
-        "clearInterval": true,
-        "setInterval": true
-      },
-      "packages": {
-        "@sentry/electron>@sentry/core>tslib": true,
-        "@walletconnect/core>@walletconnect/time": true,
-        "@walletconnect/core>@walletconnect/types>@walletconnect/events": true,
-        "@walletconnect/core>events": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/jsonrpc-provider": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/jsonrpc-utils": true,
-        "@walletconnect/core>events": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/jsonrpc-utils": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/jsonrpc-utils>@walletconnect/environment": true,
-        "@walletconnect/core>@walletconnect/relay-api>@walletconnect/jsonrpc-types": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/jsonrpc-utils>@walletconnect/environment": {
-      "globals": {
-        "crypto": true,
-        "document": true,
-        "msCrypto": true,
-        "navigator": true,
-        "process": true
-      },
-      "packages": {
-        "@sentry/electron>@sentry/core>tslib": true,
-        "process": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/jsonrpc-ws-connection": {
-      "globals": {
-        "WebSocket": true,
-        "require": true
-      },
-      "packages": {
-        "@hathor/wallet-lib>isomorphic-ws>ws": true,
-        "@walletconnect/core>@walletconnect/jsonrpc-utils": true,
-        "@walletconnect/core>@walletconnect/safe-json": true,
-        "@walletconnect/core>events": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/keyvaluestorage": {
-      "globals": {
-        "clearInterval": true,
-        "localStorage": true,
-        "setInterval": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/keyvaluestorage>idb-keyval": true,
-        "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage": true,
-        "@walletconnect/core>@walletconnect/safe-json": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/keyvaluestorage>idb-keyval": {
-      "globals": {
-        "indexedDB.open": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage": {
-      "globals": {
-        "Buffer": true,
-        "console.error": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": true,
-        "buffer": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": {
-      "globals": {
-        "console.warn": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/logger": {
-      "globals": {
-        "Blob": true,
-        "TextEncoder": true,
-        "URL.createObjectURL": true,
-        "URL.revokeObjectURL": true,
-        "console.debug": true,
-        "console.error": true,
-        "console.log": true,
-        "console.trace": true,
-        "console.warn": true,
-        "document.body.appendChild": true,
-        "document.body.removeChild": true,
-        "document.createElement": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/logger>pino": true,
-        "@walletconnect/core>@walletconnect/safe-json": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/relay-auth": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/relay-auth>@stablelib/ed25519": true,
-        "@walletconnect/core>@walletconnect/safe-json": true,
-        "@walletconnect/core>@walletconnect/time": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random": true,
-        "@walletconnect/core>uint8arrays": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/relay-auth>@stablelib/ed25519": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/relay-auth>@stablelib/ed25519>@stablelib/sha512": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/relay-auth>@stablelib/ed25519>@stablelib/sha512": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random>@stablelib/binary": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/time": {
-      "globals": {
-        "setTimeout": true
-      },
-      "packages": {
-        "@sentry/electron>@sentry/core>tslib": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/types": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/types>@walletconnect/events": true,
-        "@walletconnect/core>events": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils": {
-      "globals": {
-        "Linking": true,
-        "NetInfo": true,
-        "Platform": true,
-        "URL": true,
-        "addEventListener": true,
-        "clearTimeout": true,
-        "console.error": true,
-        "navigator": true,
-        "open": true,
-        "process": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/relay-api": true,
-        "@walletconnect/core>@walletconnect/time": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/sha256": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/x25519": true,
-        "@walletconnect/core>@walletconnect/utils>@walletconnect/window-getters": true,
-        "@walletconnect/core>@walletconnect/utils>@walletconnect/window-metadata": true,
-        "@walletconnect/core>@walletconnect/utils>detect-browser": true,
-        "@walletconnect/core>@walletconnect/utils>query-string": true,
-        "@walletconnect/core>uint8arrays": true,
-        "process": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/chacha": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/constant-time": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/poly1305": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random>@stablelib/binary": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/chacha": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random>@stablelib/binary": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/poly1305": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/constant-time": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/hmac": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/hmac": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/constant-time": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/hash": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/random": {
-      "globals": {
-        "crypto": true,
-        "msCrypto": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random>@stablelib/binary": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/random>@stablelib/binary": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random>@stablelib/binary>@stablelib/int": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/sha256": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random>@stablelib/binary": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@stablelib/x25519": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>@walletconnect/window-metadata": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>@walletconnect/window-getters": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>detect-browser": {
-      "globals": {
-        "document": true,
-        "navigator": true,
-        "process": true
-      },
-      "packages": {
-        "process": true
-      }
-    },
-    "@walletconnect/core>@walletconnect/utils>query-string": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>query-string>decode-uri-component": true,
-        "@walletconnect/core>@walletconnect/utils>query-string>filter-obj": true,
-        "@walletconnect/core>@walletconnect/utils>query-string>split-on-first": true,
-        "@walletconnect/core>@walletconnect/utils>query-string>strict-uri-encode": true
-      }
-    },
     "@walletconnect/core>events": {
       "globals": {
         "console": true
-      }
-    },
-    "@walletconnect/core>uint8arrays": {
-      "globals": {
-        "Buffer": true,
-        "TextDecoder": true,
-        "TextEncoder": true
-      },
-      "packages": {
-        "@walletconnect/core>uint8arrays>multiformats": true
-      }
-    },
-    "@walletconnect/core>uint8arrays>multiformats": {
-      "globals": {
-        "TextDecoder": true,
-        "TextEncoder": true,
-        "console.warn": true,
-        "crypto.subtle.digest": true
-      }
-    },
-    "@walletconnect/web3wallet": {
-      "globals": {
-        "console": true
-      },
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client": true,
-        "@walletconnect/web3wallet>@walletconnect/sign-client": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client": {
-      "globals": {
-        "Buffer": true,
-        "TextDecoder": true,
-        "TextEncoder": true,
-        "URL": true,
-        "console.error": true,
-        "crypto.subtle.digest": true,
-        "origin": true
-      },
-      "packages": {
-        "@walletconnect/core": true,
-        "@walletconnect/core>@walletconnect/jsonrpc-utils": true,
-        "@walletconnect/core>@walletconnect/logger": true,
-        "@walletconnect/core>@walletconnect/time": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/sha256": true,
-        "@walletconnect/core>events": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@walletconnect/utils": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>isomorphic-unfetch": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bytes": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/keccak256": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/strings": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/address": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bignumber": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bytes": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/keccak256": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/logger": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions>@ethersproject/rlp": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bignumber": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bignumber>bn.js": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bytes": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/logger": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bignumber>bn.js": {
-      "globals": {
-        "Buffer": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bytes": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/logger": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/keccak256": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bytes": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/keccak256>js-sha3": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/keccak256>js-sha3": {
-      "globals": {
-        "define": true,
-        "process": true
-      },
-      "packages": {
-        "process": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/logger": {
-      "globals": {
-        "console": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/properties": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/logger": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/strings": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bytes": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/logger": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/address": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bignumber": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bytes": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/keccak256": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/logger": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/properties": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions>@ethersproject/constants": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions>@ethersproject/rlp": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions>@ethersproject/signing-key": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions>@ethersproject/signing-key": {
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/bytes": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/logger": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/hash>@ethersproject/properties": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions>@ethersproject/signing-key>bn.js": true,
-        "crypto-browserify>create-ecdh>elliptic>hash.js": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@ethersproject/transactions>@ethersproject/signing-key>bn.js": {
-      "globals": {
-        "Buffer": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@walletconnect/utils": {
-      "globals": {
-        "Application": true,
-        "Buffer": true,
-        "Linking": true,
-        "NetInfo": true,
-        "Platform": true,
-        "URL": true,
-        "addEventListener": true,
-        "atob": true,
-        "clearTimeout": true,
-        "console": true,
-        "fetch": true,
-        "localStorage.getItem": true,
-        "navigator": true,
-        "open": true,
-        "process": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/relay-api": true,
-        "@walletconnect/core>@walletconnect/time": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/sha256": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/x25519": true,
-        "@walletconnect/core>@walletconnect/utils>@walletconnect/window-getters": true,
-        "@walletconnect/core>@walletconnect/utils>@walletconnect/window-metadata": true,
-        "@walletconnect/core>@walletconnect/utils>detect-browser": true,
-        "@walletconnect/core>uint8arrays": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@walletconnect/utils>query-string": true,
-        "buffer": true,
-        "process": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>@walletconnect/utils>query-string": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>query-string>decode-uri-component": true,
-        "@walletconnect/core>@walletconnect/utils>query-string>filter-obj": true,
-        "@walletconnect/core>@walletconnect/utils>query-string>split-on-first": true,
-        "@walletconnect/web3wallet>@walletconnect/auth-client>@walletconnect/utils>query-string>strict-uri-encode": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>isomorphic-unfetch": {
-      "globals": {
-        "fetch": "write"
-      },
-      "packages": {
-        "@walletconnect/web3wallet>@walletconnect/auth-client>isomorphic-unfetch>unfetch": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/auth-client>isomorphic-unfetch>unfetch": {
-      "globals": {
-        "Blob": true,
-        "XMLHttpRequest": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/sign-client": {
-      "globals": {
-        "URL": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "@walletconnect/core": true,
-        "@walletconnect/core>@walletconnect/jsonrpc-utils": true,
-        "@walletconnect/core>@walletconnect/logger": true,
-        "@walletconnect/core>@walletconnect/time": true,
-        "@walletconnect/core>events": true,
-        "@walletconnect/web3wallet>@walletconnect/sign-client>@walletconnect/types": true,
-        "@walletconnect/web3wallet>@walletconnect/sign-client>@walletconnect/utils": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/sign-client>@walletconnect/types": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/types>@walletconnect/events": true,
-        "@walletconnect/core>events": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/sign-client>@walletconnect/utils": {
-      "globals": {
-        "Linking": true,
-        "NetInfo": true,
-        "Platform": true,
-        "URL": true,
-        "addEventListener": true,
-        "clearTimeout": true,
-        "console.error": true,
-        "navigator": true,
-        "open": true,
-        "process": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "@walletconnect/core>@walletconnect/relay-api": true,
-        "@walletconnect/core>@walletconnect/time": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/chacha20poly1305": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/hkdf": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/random": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/sha256": true,
-        "@walletconnect/core>@walletconnect/utils>@stablelib/x25519": true,
-        "@walletconnect/core>@walletconnect/utils>@walletconnect/window-getters": true,
-        "@walletconnect/core>@walletconnect/utils>@walletconnect/window-metadata": true,
-        "@walletconnect/core>@walletconnect/utils>detect-browser": true,
-        "@walletconnect/core>uint8arrays": true,
-        "@walletconnect/web3wallet>@walletconnect/sign-client>@walletconnect/utils>query-string": true,
-        "process": true
-      }
-    },
-    "@walletconnect/web3wallet>@walletconnect/sign-client>@walletconnect/utils>query-string": {
-      "packages": {
-        "@walletconnect/core>@walletconnect/utils>query-string>decode-uri-component": true,
-        "@walletconnect/core>@walletconnect/utils>query-string>filter-obj": true,
-        "@walletconnect/core>@walletconnect/utils>query-string>split-on-first": true,
-        "@walletconnect/web3wallet>@walletconnect/sign-client>@walletconnect/utils>query-string>strict-uri-encode": true
       }
     },
     "assert": {
@@ -1169,7 +581,7 @@
         "setTimeout": true
       },
       "packages": {
-        "buffer": true,
+        "$root$": true,
         "process": true
       }
     },
@@ -1230,7 +642,7 @@
         "Buffer.concat": true
       },
       "packages": {
-        "buffer": true,
+        "$root$": true,
         "crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": true,
         "crypto-browserify>browserify-cipher>evp_bytestokey": true,
         "crypto-browserify>create-hash>cipher-base": true,
@@ -1243,7 +655,7 @@
         "Buffer": true
       },
       "packages": {
-        "buffer": true
+        "$root$": true
       }
     },
     "crypto-browserify>browserify-cipher>browserify-des": {
@@ -1350,7 +762,7 @@
         "Buffer": true
       },
       "packages": {
-        "buffer": true,
+        "$root$": true,
         "crypto-browserify>create-ecdh>bn.js": true,
         "crypto-browserify>create-ecdh>elliptic": true
       }
@@ -1367,8 +779,8 @@
       }
     },
     "crypto-browserify>create-ecdh>elliptic>bn.js": {
-      "globals": {
-        "Buffer": true
+      "packages": {
+        "$root$": true
       }
     },
     "crypto-browserify>create-ecdh>elliptic>brorand": {
@@ -1429,7 +841,7 @@
         "Buffer": true
       },
       "packages": {
-        "buffer": true,
+        "$root$": true,
         "crypto-browserify>create-ecdh>bn.js": true,
         "crypto-browserify>diffie-hellman>miller-rabin": true,
         "crypto-browserify>randombytes": true
@@ -1485,7 +897,7 @@
         "Buffer": true
       },
       "packages": {
-        "buffer": true,
+        "$root$": true,
         "crypto-browserify>public-encrypt>browserify-rsa>bn.js": true,
         "crypto-browserify>randombytes": true
       }
@@ -1956,8 +1368,7 @@
         "webkitIndexedDB": true
       },
       "packages": {
-        "buffer": true,
-        "path-browserify": true,
+        "$root$": true,
         "process": true
       }
     },

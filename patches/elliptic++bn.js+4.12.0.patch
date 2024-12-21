@@ -2,7 +2,7 @@ diff --git a/node_modules/elliptic/node_modules/bn.js/lib/bn.js b/node_modules/e
 index 3a4371e..629ed9c 100644
 --- a/node_modules/elliptic/node_modules/bn.js/lib/bn.js
 +++ b/node_modules/elliptic/node_modules/bn.js/lib/bn.js
-@@ -48,12 +48,16 @@
+@@ -48,12 +48,14 @@
    BN.BN = BN;
    BN.wordSize = 26;
  
@@ -11,19 +11,19 @@ index 3a4371e..629ed9c 100644
    try {
 -    if (typeof window !== 'undefined' && typeof window.Buffer !== 'undefined') {
 -      Buffer = window.Buffer;
-+    if (typeof Buffer !== 'undefined') {
-+      BNBuffer = Buffer;
-     } else {
+-    } else {
 -      Buffer = require('buffer').Buffer;
-+      if (typeof window !== 'undefined' && typeof window.Buffer !== 'undefined') {
-+        BNBuffer = window.Buffer;
-+      } else {
-+        BNBuffer = require('buffer');
-+      }
++    var customBuffer = require('../../../../../src/buffer-shim');
++    BNBuffer = customBuffer.Buffer || customBuffer.default;
++  } catch (e) {
++    try {
++      BNBuffer = require('buffer/').Buffer;
++    } catch (e2) {
++      BNBuffer = null;
      }
-   } catch (e) {
    }
-@@ -526,8 +530,8 @@
+ 
+@@ -526,8 +528,8 @@
    };
  
    BN.prototype.toBuffer = function toBuffer (endian, length) {
