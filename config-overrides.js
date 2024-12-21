@@ -91,10 +91,6 @@ module.exports = function override(config, env) {
       process: 'process/browser',
       Buffer: ['buffer-shim', 'default']
     }),
-    new webpack.DefinePlugin({
-      'process.env': JSON.stringify(process.env),
-      'global': 'window'
-    })
   ];
 
   return config;
