@@ -1,8 +1,7 @@
 diff --git a/node_modules/elliptic/node_modules/bn.js/lib/bn.js b/node_modules/elliptic/node_modules/bn.js/lib/bn.js
-index 3a4371e..629ed9c 100644
 --- a/node_modules/elliptic/node_modules/bn.js/lib/bn.js
 +++ b/node_modules/elliptic/node_modules/bn.js/lib/bn.js
-@@ -48,12 +48,14 @@
+@@ -48,14 +48,16 @@
    BN.BN = BN;
    BN.wordSize = 26;
  
@@ -13,16 +12,18 @@ index 3a4371e..629ed9c 100644
 -      Buffer = window.Buffer;
 -    } else {
 -      Buffer = require('buffer').Buffer;
+-    }
 +    var customBuffer = require('../../../../../src/buffer-shim');
 +    BNBuffer = customBuffer.Buffer || customBuffer.default;
-+  } catch (e) {
+   } catch (e) {
 +    try {
 +      BNBuffer = require('buffer/').Buffer;
 +    } catch (e2) {
 +      BNBuffer = null;
-     }
++    }
    }
  
+   BN.isBN = function isBN (num) {
 @@ -526,8 +528,8 @@
    };
  
