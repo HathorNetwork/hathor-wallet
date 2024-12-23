@@ -72,7 +72,7 @@
     "build-css": "sass --no-source-map src/index.module.scss src/index.css",
     "watch-css": "npm run build-css && sass --no-source-map -w src/index.module.scss src/index.css",
     "start-js": "react-app-rewired --openssl-legacy-provider start",
-    "start": "react-app-rewired start",
+    "start": "npm-run-all -p watch-css start-js",
     "build-js": "react-app-rewired --openssl-legacy-provider build",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
