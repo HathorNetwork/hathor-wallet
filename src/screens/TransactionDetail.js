@@ -13,7 +13,8 @@ import BackButton from '../components/BackButton';
 import hathorLib from '@hathor/wallet-lib';
 import { colors } from '../constants';
 import helpers from '../utils/helpers';
-// import path from 'path';
+import path from 'path-browserify';
+
 import { useNavigate, useParams } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
 
@@ -125,8 +126,8 @@ function TransactionDetail() {
    */
   const goToExplorer = (e) => {
     e.preventDefault();
-    // const url = path.join(helpers.getExplorerURL(), `transaction/${transaction.hash}`);
-    const url = '';
+    const url = path.join(helpers.getExplorerURL(), `transaction/${transaction.hash}`);
+
     helpers.openExternalURL(url);
   }
 
