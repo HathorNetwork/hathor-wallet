@@ -26,8 +26,6 @@ let msgCheck = false;
 // We need to save the event that brought the check message from the renderer process, in order to send back to it
 let msgCheckEvent = null;
 
-// contextBridge.exposeInMainWorld('process', process);
-
 if (process.platform === 'darwin') {
   iconOS = 'icon.icns';
   trayIcon = 'icon_tray.png';
@@ -37,10 +35,10 @@ if (process.platform === 'darwin') {
 
 const appName = 'Hathor Wallet';
 
-const debugMode = true; /*(
+const debugMode = (
   process.argv.indexOf('--unsafe-mode') >= 0 &&
   process.argv.indexOf('--hathor-debug') >= 0
-)*/;
+);
 
 // Creates the context menu on mouse right-click for allowing copy/paste and other configurable actions
 contextMenu({
