@@ -73,25 +73,35 @@ module.exports = function override(config, env) {
     use: 'null-loader'
   });
 
-  config.plugins = [
-    new LavaMoatPlugin({
-      generatePolicy: true,
-      HtmlWebpackPluginInterop: true,
-      readableResourceIds: true,
-      diagnosticsVerbosity: 1,
-      lockdown: {
-        consoleTaming: 'unsafe',
-        errorTrapping: 'none',
-        unhandledRejectionTrapping: 'none',
-        overrideTaming: 'severe',
-      }
-    }),
+  // Base plugins that we always want
+  const basePlugins = [
     ...config.plugins.filter(p => !(p instanceof webpack.ProvidePlugin)),
     new webpack.ProvidePlugin({
       process: 'process/browser',
       Buffer: ['buffer-shim', 'default']
     }),
   ];
+
+  // Only add LavaMoat in production
+  if (env === 'production') {
+    config.plugins = [
+      new LavaMoatPlugin({
+        generatePolicy: true,
+        HtmlWebpackPluginInterop: true,
+        readableResourceIds: true,
+        diagnosticsVerbosity: 1,
+        lockdown: {
+          consoleTaming: 'unsafe',
+          errorTrapping: 'none',
+          unhandledRejectionTrapping: 'none',
+          overrideTaming: 'severe',
+        }
+      }),
+      ...basePlugins
+    ];
+  } else {
+    config.plugins = basePlugins;
+  }
 
   return config;
 }
