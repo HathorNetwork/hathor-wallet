@@ -56,7 +56,6 @@ import NewSwap from './screens/atomic-swap/NewSwap';
 import ImportExisting from './screens/atomic-swap/ImportExisting';
 import LOCAL_STORE from './storage';
 import { getGlobalWallet } from "./modules/wallet";
-import { sagaMiddleware } from './store';
 
 function Root() {
   const {
@@ -75,11 +74,6 @@ function Root() {
   const wallet = getGlobalWallet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const modalContext = useContext(GlobalModalContext);
-  // Set 
-  sagaMiddleware.setContext({
-    modalContext,
-  });
 
   // Monitors when Ledger device loses connection or the app is closed
   useEffect(() => {

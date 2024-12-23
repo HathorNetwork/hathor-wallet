@@ -774,8 +774,8 @@
       }
     },
     "crypto-browserify>create-ecdh>elliptic>bn.js": {
-      "packages": {
-        "$root$": true
+      "globals": {
+        "Buffer": true
       }
     },
     "crypto-browserify>create-ecdh>elliptic>brorand": {
