@@ -27,14 +27,26 @@ export class ModalPin extends React.Component {
 
   pin = '';
 
+  onModalHidden = () => {
+    // Mandatory cleanup by GlobalModal
+    this.props.onClose();
+
+    // If the correct PIN was inserted, call the `onSuccess` callback
+    if (this.pin) {
+      this.props.onSuccess({ pin: this.pin })
+    }
+  }
+
   componentDidMount = () => {
     $('#modalPin').modal('show');
+    $('#modalPin').on('hidden.bs.modal', this.onModalHidden);
 
     // Focus the PIN field on modal load
     this.refs.pinInput.refs.pin.focus();
-    /* $('#modalPin').on('shown.bs.modal', (e) => {
-      this.refs.pinInput.refs.pin.focus();
-    });*/
+  }
+
+  componentWillUnmount() {
+    $('#modalPin').off('hidden.bs.modal', this.onModalHidden);
   }
 
   /**
@@ -66,9 +78,6 @@ export class ModalPin extends React.Component {
     // Set the PIN on the instance variable and close the modal.
     this.pin = pin;
     this.onSuccess();
-
-    // Necessary callbacks will be executed at the `onHidden` modal event
-    // $('#modalPin').modal('hide');
   }
 
   onSuccess() {
@@ -79,7 +88,6 @@ export class ModalPin extends React.Component {
   onCancel(e) {
     e.preventDefault();
 
-    this.props.onCancel();
     this.props.onClose();
   }
 
@@ -107,8 +115,8 @@ export class ModalPin extends React.Component {
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">{t`Write your PIN`}</h5>
-                <button type="button" className="close" onClick={this.onCancel.bind(this)} aria-label="Close">
+                <h5 className="modal-title" id="pinModal">{t`Write your PIN`}</h5>
+                <button type="button" className="close" data-dismiss="modal" onClick={this.onCancel.bind(this)} aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -155,10 +163,6 @@ ModalPin.propTypes = {
    * Callback invoked when tx is sent with success
    */
   onSuccess: PropTypes.func.isRequired,
-  /**
-   * Callback invoked when tx is sent with success
-   */
-  onCancel: PropTypes.func.isRequired,
   /**
    * Callback provided by the GlobalModal helper to manage the modal lifecycle
    */
