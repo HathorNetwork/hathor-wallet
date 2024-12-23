@@ -21,12 +21,12 @@
         "@hathor/wallet-lib>isomorphic-ws": true,
         "@hathor/wallet-lib>queue-microtask": true,
         "@hathor/wallet-lib>zod": true,
-        "@walletconnect/core>events": true,
         "assert": true,
         "axios": true,
         "buffer": true,
         "crypto-browserify": true,
         "cypress>lodash": true,
+        "null-loader>webpack>events": true,
         "path-browserify": true
       }
     },
@@ -403,11 +403,6 @@
         "setTimeout": true
       }
     },
-    "@walletconnect/core>events": {
-      "globals": {
-        "console": true
-      }
-    },
     "assert": {
       "globals": {
         "console": true,
@@ -728,12 +723,12 @@
         "setImmediate": true
       },
       "packages": {
-        "@walletconnect/core>events": true,
         "crypto-browserify>browserify-sign>readable-stream>core-util-is": true,
         "crypto-browserify>browserify-sign>readable-stream>inherits": true,
         "crypto-browserify>browserify-sign>readable-stream>isarray": true,
         "crypto-browserify>browserify-sign>readable-stream>process-nextick-args": true,
         "crypto-browserify>browserify-sign>readable-stream>safe-buffer": true,
+        "null-loader>webpack>events": true,
         "process": true,
         "stream-http>readable-stream>string_decoder": true,
         "stream-http>readable-stream>util-deprecate": true
@@ -977,6 +972,11 @@
     "npm-run-all>string.prototype.padend>es-abstract>is-callable": {
       "globals": {
         "document": true
+      }
+    },
+    "null-loader>webpack>events": {
+      "globals": {
+        "console": true
       }
     },
     "path-browserify": {
@@ -1229,7 +1229,7 @@
     },
     "stream-browserify": {
       "packages": {
-        "@walletconnect/core>events": true,
+        "null-loader>webpack>events": true,
         "stream-browserify>inherits": true,
         "stream-browserify>readable-stream": true
       }
@@ -1241,8 +1241,8 @@
         "process.stdout": true
       },
       "packages": {
-        "@walletconnect/core>events": true,
         "buffer": true,
+        "null-loader>webpack>events": true,
         "process": true,
         "stream-browserify>inherits": true,
         "stream-http>readable-stream>string_decoder": true,

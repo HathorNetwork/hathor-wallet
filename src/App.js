@@ -21,7 +21,6 @@ import LoadingAddresses from './screens/LoadingAddresses';
 import NetworkSettings from './screens/NetworkSettings';
 import ChoosePassphrase from './screens/ChoosePassphrase';
 import CustomTokens from './screens/CustomTokens';
-import WalletConnect from './screens/wallet-connect/WalletConnect';
 import Welcome from './screens/Welcome';
 import SentryPermission from './screens/SentryPermission';
 import UnknownTokens from './screens/UnknownTokens';
@@ -202,7 +201,6 @@ function Root() {
       <Route path="/create_token" element={<StartedComponent children={ <CreateToken /> } loaded={true} />} />
       <Route path="/create_nft" element={<StartedComponent children={ <CreateNFT />} loaded={true} />} />
       <Route path="/custom_tokens" element={<StartedComponent children={ <CustomTokens /> } loaded={true} />} />
-      <Route path="/wallet_connect" element={<StartedComponent children={ <WalletConnect/> } loaded={true} />} />
       <Route path="/unknown_tokens" element={<StartedComponent children={ <UnknownTokens />} loaded={true} />} />
       <Route path="/wallet/send_tokens" element={<StartedComponent children={ <SendTokens /> } loaded={true} />} />
       <Route path="/wallet/atomic_swap" element={<StartedComponent children={ <ProposalList />} loaded={true} />} />
