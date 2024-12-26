@@ -19,7 +19,7 @@ import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../constants';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE } from '../constants';
 import { walletReset } from '../actions';
 import LOCAL_STORE from '../storage';
 
@@ -47,6 +47,8 @@ function Settings() {
     useWalletService: state.useWalletService,
     registeredTokens: state.tokens,
   }))
+
+  const reownEnabled = useSelector(state => state.featureToggles[REOWN_FEATURE_TOGGLE]);
 
   useEffect(() => {
     setIsNotificationOn(wallet.isNotificationOn());
@@ -325,6 +327,13 @@ function Settings() {
         <div><a href="true" onClick={goToPrivacyPolicy}>Privacy Policy</a></div>
       </div>
       <HathorAlert ref={alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
+      {reownEnabled && (
+        <div className="d-flex flex-column mb-3">
+          <Link to="/reown/connect" className="btn btn-secondary">
+            {t`Connect to dApp`}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

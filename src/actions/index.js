@@ -67,6 +67,30 @@ export const types = {
   NETWORKSETTINGS_UPDATE_REQUESTED: 'NETWORKSETTINGS_UPDATE_REQUESTED',
   NETWORKSETTINGS_UPDATED: 'NETWORKSETTINGS_UPDATED',
   NETWORKSETTINGS_SET_STATUS: 'NETWORKSETTINGS_SET_STATUS',
+  REOWN_SET_CLIENT: 'REOWN_SET_CLIENT',
+  REOWN_SET_MODAL: 'REOWN_SET_MODAL',
+  REOWN_SET_SESSIONS: 'REOWN_SET_SESSIONS',
+  REOWN_SET_CONNECTION_FAILED: 'REOWN_SET_CONNECTION_FAILED',
+  REOWN_NEW_NANOCONTRACT_STATUS_LOADING: 'REOWN_NEW_NANOCONTRACT_STATUS_LOADING',
+  REOWN_NEW_NANOCONTRACT_STATUS_READY: 'REOWN_NEW_NANOCONTRACT_STATUS_READY',
+  REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS: 'REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS',
+  REOWN_NEW_NANOCONTRACT_STATUS_FAILURE: 'REOWN_NEW_NANOCONTRACT_STATUS_FAILURE',
+  REOWN_CREATE_TOKEN_STATUS_LOADING: 'REOWN_CREATE_TOKEN_STATUS_LOADING',
+  REOWN_CREATE_TOKEN_STATUS_READY: 'REOWN_CREATE_TOKEN_STATUS_READY',
+  REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL: 'REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL',
+  REOWN_CREATE_TOKEN_STATUS_FAILED: 'REOWN_CREATE_TOKEN_STATUS_FAILED',
+  REOWN_ACCEPT: 'REOWN_ACCEPT',
+  REOWN_REJECT: 'REOWN_REJECT',
+  REOWN_URI_INPUTTED: 'REOWN_URI_INPUTTED',
+  EXCEPTION_CAPTURED: 'EXCEPTION_CAPTURED',
+  SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL: 'SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL',
+  SHOW_CREATE_TOKEN_REQUEST_MODAL: 'SHOW_CREATE_TOKEN_REQUEST_MODAL',
+  SHOW_SIGN_MESSAGE_REQUEST_MODAL: 'SHOW_SIGN_MESSAGE_REQUEST_MODAL',
+  SHOW_NANO_CONTRACT_SEND_TX_MODAL: 'SHOW_NANO_CONTRACT_SEND_TX_MODAL',
+  REOWN_SESSION_PROPOSAL: 'REOWN_SESSION_PROPOSAL',
+  REOWN_SESSION_DELETE: 'REOWN_SESSION_DELETE',
+  REOWN_CANCEL_SESSION: 'REOWN_CANCEL_SESSION',
+  REOWN_SHUTDOWN: 'REOWN_SHUTDOWN',
 };
 
 /**
@@ -676,4 +700,117 @@ export const networkSettingsRequestUpdate = (data, pin) => ({
 export const setNetworkSettingsStatus = ({ status, error, newNetwork }) => ({
   type: types.NETWORKSETTINGS_SET_STATUS,
   payload: { status, error, newNetwork },
+});
+
+/**
+ * Set the Reown client
+ */
+export const setReown = (payload) => ({
+  type: types.REOWN_SET_CLIENT,
+  payload,
+});
+
+/**
+ * Set the Reown modal state
+ */
+export const setReownModal = (payload) => ({
+  type: types.REOWN_SET_MODAL,
+  payload,
+});
+
+/**
+ * Set the Reown sessions
+ */
+export const setReownSessions = (payload) => ({
+  type: types.REOWN_SET_SESSIONS,
+  payload,
+});
+
+/**
+ * Set the Reown connection failed state
+ */
+export const setWCConnectionFailed = (payload) => ({
+  type: types.REOWN_SET_CONNECTION_FAILED,
+  payload,
+});
+
+/**
+ * Set nano contract status to loading
+ */
+export const setNewNanoContractStatusLoading = () => ({
+  type: types.REOWN_NEW_NANOCONTRACT_STATUS_LOADING,
+});
+
+/**
+ * Set nano contract status to ready
+ */
+export const setNewNanoContractStatusReady = () => ({
+  type: types.REOWN_NEW_NANOCONTRACT_STATUS_READY,
+});
+
+/**
+ * Set nano contract status to success
+ */
+export const setNewNanoContractStatusSuccess = () => ({
+  type: types.REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS,
+});
+
+/**
+ * Set nano contract status to failure
+ */
+export const setNewNanoContractStatusFailure = () => ({
+  type: types.REOWN_NEW_NANOCONTRACT_STATUS_FAILURE,
+});
+
+/**
+ * Set create token status to loading
+ */
+export const setCreateTokenStatusLoading = () => ({
+  type: types.REOWN_CREATE_TOKEN_STATUS_LOADING,
+});
+
+/**
+ * Set create token status to ready
+ */
+export const setCreateTokenStatusReady = () => ({
+  type: types.REOWN_CREATE_TOKEN_STATUS_READY,
+});
+
+/**
+ * Set create token status to successful
+ */
+export const setCreateTokenStatusSuccessful = () => ({
+  type: types.REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL,
+});
+
+/**
+ * Set create token status to failed
+ */
+export const setCreateTokenStatusFailed = () => ({
+  type: types.REOWN_CREATE_TOKEN_STATUS_FAILED,
+});
+
+export const onExceptionCaptured = (error) => ({
+  type: types.EXCEPTION_CAPTURED,
+  error,
+});
+
+export const showSignOracleDataModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+export const showCreateTokenModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_CREATE_TOKEN_REQUEST_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+export const showSignMessageWithAddressModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_SIGN_MESSAGE_REQUEST_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+export const showNanoContractSendTxModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
 });
