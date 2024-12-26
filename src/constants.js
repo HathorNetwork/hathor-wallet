@@ -310,3 +310,10 @@ export const NETWORK_SETTINGS_STATUS = {
   WAITING_NETWORK_CONFIRMATION: 'waitingNetworkConfirmation',
   NETWORK_CONFIRMED: 'networkConfirmed'
 }
+
+// Reown constants
+export const REOWN_PROJECT_ID = '8264fff563181da658ce64ee80e80458';
+export const REOWN_FEATURE_TOGGLE = 'wallet-desktop-reown.rollout';
+
+// Update FEATURE_TOGGLE_DEFAULTS
+FEATURE_TOGGLE_DEFAULTS[REOWN_FEATURE_TOGGLE] = false;

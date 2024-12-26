@@ -16,7 +16,9 @@ const middlewares = [sagaMiddleware, thunk];
 
 const store = configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(middlewares)
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    serializableCheck: false,
+  }).concat(middlewares)
 });
 
 sagaMiddleware.run(rootSagas);
