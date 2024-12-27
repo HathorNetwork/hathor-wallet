@@ -1,5 +1,46 @@
 {
   "resources": {
+    "@hathor/hathor-rpc-handler": {
+      "packages": {
+        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true
+      }
+    },
+    "@hathor/hathor-rpc-handler>@hathor/wallet-lib": {
+      "globals": {
+        "AbortController": true,
+        "Buffer.alloc": true,
+        "Buffer.concat": true,
+        "Buffer.from": true,
+        "Intl.NumberFormat": true,
+        "clearInterval": true,
+        "clearTimeout": true,
+        "console": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "$root$": true,
+        "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": true,
+        "@hathor/wallet-lib>bitcore-lib": true,
+        "@hathor/wallet-lib>bitcore-mnemonic": true,
+        "@hathor/wallet-lib>crypto-js": true,
+        "@hathor/wallet-lib>isomorphic-ws": true,
+        "@walletconnect/core>events": true,
+        "assert": true,
+        "axios": true,
+        "buffer": true,
+        "crypto-browserify": true,
+        "cypress>lodash": true,
+        "path-browserify": true,
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": {
+      "globals": {
+        "WebAssembly.Instance": true,
+        "WebAssembly.Module": true
+      }
+    },
     "@hathor/wallet-lib": {
       "globals": {
         "AbortController": true,
@@ -14,19 +55,21 @@
         "setTimeout": true
       },
       "packages": {
+        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic": true,
         "@hathor/wallet-lib>crypto-js": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
         "@hathor/wallet-lib>queue-microtask": true,
         "@hathor/wallet-lib>zod": true,
+        "@walletconnect/core>events": true,
+        "assert": true,
         "axios": true,
         "buffer": true,
+        "crypto-browserify": true,
         "cypress>lodash": true,
-        "node-stdlib-browser>assert": true,
-        "node-stdlib-browser>crypto-browserify": true,
-        "node-stdlib-browser>events": true,
-        "node-stdlib-browser>path-browserify": true
+        "path-browserify": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@hathor/wallet-lib>bitcore-lib": {
@@ -40,18 +83,19 @@
         "process.browser": true
       },
       "packages": {
+        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib>bech32": true,
-        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
         "@hathor/wallet-lib>bitcore-lib>bs58": true,
         "@hathor/wallet-lib>bitcore-lib>buffer-compare": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic": true,
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "@reown/walletkit>@walletconnect/utils>elliptic": true,
+        "assert": true,
         "buffer": true,
+        "crypto-browserify": true,
+        "crypto-browserify>create-ecdh>bn.js": true,
+        "crypto-browserify>inherits": true,
         "cypress>lodash": true,
-        "node-stdlib-browser>assert": true,
-        "node-stdlib-browser>crypto-browserify": true,
-        "node-stdlib-browser>url": true,
-        "process": true
+        "process": true,
+        "url": true
       }
     },
     "@hathor/wallet-lib>bitcore-lib>bs58": {
@@ -64,44 +108,6 @@
         "cypress>@cypress/request>safe-buffer": true
       }
     },
-    "@hathor/wallet-lib>bitcore-lib>elliptic": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>elliptic>bn.js": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>brorand": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>hash.js": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>hmac-drbg": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>inherits": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-assert": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-crypto-utils": true
-      }
-    },
-    "@hathor/wallet-lib>bitcore-lib>elliptic>bn.js": {
-      "globals": {
-        "console.error": true
-      },
-      "packages": {
-        "$root$": true
-      }
-    },
-    "@hathor/wallet-lib>bitcore-lib>elliptic>brorand": {
-      "globals": {
-        "crypto": true,
-        "msCrypto": true
-      }
-    },
-    "@hathor/wallet-lib>bitcore-lib>elliptic>hash.js": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>elliptic>hash.js>inherits": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-assert": true
-      }
-    },
-    "@hathor/wallet-lib>bitcore-lib>elliptic>hmac-drbg": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>elliptic>hash.js": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-assert": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-crypto-utils": true
-      }
-    },
     "@hathor/wallet-lib>bitcore-mnemonic": {
       "globals": {
         "Buffer.alloc": true,
@@ -109,10 +115,10 @@
         "Buffer.isBuffer": true
       },
       "packages": {
+        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic>unorm": true,
-        "buffer": true,
-        "node-stdlib-browser>crypto-browserify": true
+        "crypto-browserify": true
       }
     },
     "@hathor/wallet-lib>bitcore-mnemonic>unorm": {
@@ -142,6 +148,9 @@
     "@hathor/wallet-lib>zod": {
       "globals": {
         "URL": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
       }
     },
     "@reduxjs/toolkit": {
@@ -168,12 +177,18 @@
     "@reduxjs/toolkit>immer": {
       "globals": {
         "process.env.NODE_ENV": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
       }
     },
     "@reduxjs/toolkit>redux": {
       "globals": {
         "console": true,
         "process.env.NODE_ENV": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
       }
     },
     "@reduxjs/toolkit>reselect": {
@@ -184,6 +199,288 @@
       },
       "packages": {
         "react-redux>@babel/runtime": true
+      }
+    },
+    "@reown/walletkit": {
+      "globals": {
+        "console": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/core": true,
+        "@reown/walletkit>@walletconnect/sign-client": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/core": {
+      "globals": {
+        "AbortController": true,
+        "Buffer": true,
+        "TextDecoder": true,
+        "TextEncoder": true,
+        "addEventListener": true,
+        "clearInterval": true,
+        "clearTimeout": true,
+        "crypto.subtle.digest": true,
+        "downloadLogsBlobInBrowser": "write",
+        "fetch": true,
+        "location.origin": true,
+        "removeEventListener": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/core>@walletconnect/jsonrpc-ws-connection": true,
+        "@reown/walletkit>@walletconnect/jsonrpc-provider": true,
+        "@reown/walletkit>@walletconnect/jsonrpc-utils": true,
+        "@reown/walletkit>@walletconnect/logger": true,
+        "@reown/walletkit>@walletconnect/types": true,
+        "@reown/walletkit>@walletconnect/utils": true,
+        "@walletconnect/core>@walletconnect/heartbeat": true,
+        "@walletconnect/core>@walletconnect/keyvaluestorage": true,
+        "@walletconnect/core>@walletconnect/relay-auth": true,
+        "@walletconnect/core>@walletconnect/safe-json": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>@walletconnect/window-getters": true,
+        "@walletconnect/core>events": true,
+        "@walletconnect/core>lodash.isequal": true,
+        "@walletconnect/core>uint8arrays": true,
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/core>@walletconnect/jsonrpc-ws-connection": {
+      "globals": {
+        "WebSocket": true,
+        "require": true
+      },
+      "packages": {
+        "@hathor/wallet-lib>isomorphic-ws>ws": true,
+        "@reown/walletkit>@walletconnect/jsonrpc-utils": true,
+        "@walletconnect/core>@walletconnect/safe-json": true,
+        "@walletconnect/core>events": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/jsonrpc-provider": {
+      "packages": {
+        "@reown/walletkit>@walletconnect/jsonrpc-utils": true,
+        "@walletconnect/core>events": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/jsonrpc-utils": {
+      "packages": {
+        "@reown/walletkit>@walletconnect/jsonrpc-utils>@walletconnect/environment": true,
+        "@walletconnect/core>@walletconnect/jsonrpc-types": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/jsonrpc-utils>@walletconnect/environment": {
+      "globals": {
+        "crypto": true,
+        "document": true,
+        "msCrypto": true,
+        "navigator": true,
+        "process": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/jsonrpc-utils>tslib": true,
+        "process": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/jsonrpc-utils>tslib": {
+      "globals": {
+        "define": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/logger": {
+      "globals": {
+        "Blob": true,
+        "TextEncoder": true,
+        "URL.createObjectURL": true,
+        "URL.revokeObjectURL": true,
+        "console.debug": true,
+        "console.error": true,
+        "console.log": true,
+        "console.trace": true,
+        "console.warn": true,
+        "document.body.appendChild": true,
+        "document.body.removeChild": true,
+        "document.createElement": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/logger>pino": true,
+        "@walletconnect/core>@walletconnect/safe-json": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/sign-client": {
+      "globals": {
+        "Linking": true,
+        "URL": true,
+        "console.warn": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/jsonrpc-utils": true,
+        "@reown/walletkit>@walletconnect/logger": true,
+        "@reown/walletkit>@walletconnect/sign-client>@walletconnect/core": true,
+        "@reown/walletkit>@walletconnect/sign-client>@walletconnect/utils": true,
+        "@reown/walletkit>@walletconnect/types": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>events": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/sign-client>@walletconnect/core": {
+      "globals": {
+        "AbortController": true,
+        "Buffer": true,
+        "TextDecoder": true,
+        "TextEncoder": true,
+        "addEventListener": true,
+        "clearInterval": true,
+        "clearTimeout": true,
+        "crypto.subtle.digest": true,
+        "downloadLogsBlobInBrowser": "write",
+        "fetch": true,
+        "location.origin": true,
+        "removeEventListener": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/jsonrpc-provider": true,
+        "@reown/walletkit>@walletconnect/jsonrpc-utils": true,
+        "@reown/walletkit>@walletconnect/logger": true,
+        "@reown/walletkit>@walletconnect/sign-client>@walletconnect/core>@walletconnect/jsonrpc-ws-connection": true,
+        "@reown/walletkit>@walletconnect/sign-client>@walletconnect/utils": true,
+        "@reown/walletkit>@walletconnect/types": true,
+        "@walletconnect/core>@walletconnect/heartbeat": true,
+        "@walletconnect/core>@walletconnect/keyvaluestorage": true,
+        "@walletconnect/core>@walletconnect/relay-auth": true,
+        "@walletconnect/core>@walletconnect/safe-json": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>@walletconnect/window-getters": true,
+        "@walletconnect/core>events": true,
+        "@walletconnect/core>lodash.isequal": true,
+        "@walletconnect/core>uint8arrays": true,
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/sign-client>@walletconnect/core>@walletconnect/jsonrpc-ws-connection": {
+      "globals": {
+        "WebSocket": true,
+        "require": true
+      },
+      "packages": {
+        "@hathor/wallet-lib>isomorphic-ws>ws": true,
+        "@reown/walletkit>@walletconnect/jsonrpc-utils": true,
+        "@walletconnect/core>@walletconnect/safe-json": true,
+        "@walletconnect/core>events": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/sign-client>@walletconnect/utils": {
+      "globals": {
+        "Application": true,
+        "Buffer.from": true,
+        "Linking": true,
+        "NetInfo": true,
+        "Platform": true,
+        "Telegram": true,
+        "TelegramWebviewProxy": true,
+        "TelegramWebviewProxyProto": true,
+        "URL": true,
+        "addEventListener": true,
+        "clearTimeout": true,
+        "console.error": true,
+        "console.warn": true,
+        "crypto": true,
+        "fetch": true,
+        "localStorage.getItem": true,
+        "navigator": true,
+        "open": true,
+        "process": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "$root$": true,
+        "@reown/walletkit>@walletconnect/utils>elliptic": true,
+        "@walletconnect/core>@walletconnect/relay-api": true,
+        "@walletconnect/core>@walletconnect/relay-auth": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>@walletconnect/window-getters": true,
+        "@walletconnect/core>uint8arrays": true,
+        "@walletconnect/utils>@ethersproject/hash": true,
+        "@walletconnect/utils>@ethersproject/transactions": true,
+        "@walletconnect/utils>@stablelib/chacha20poly1305": true,
+        "@walletconnect/utils>@stablelib/hkdf": true,
+        "@walletconnect/utils>@stablelib/random": true,
+        "@walletconnect/utils>@stablelib/sha256": true,
+        "@walletconnect/utils>@stablelib/x25519": true,
+        "@walletconnect/utils>@walletconnect/window-metadata": true,
+        "@walletconnect/utils>detect-browser": true,
+        "@walletconnect/utils>query-string": true,
+        "process": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/types": {
+      "packages": {
+        "@reown/walletkit>@walletconnect/types>@walletconnect/events": true,
+        "@walletconnect/core>events": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/utils": {
+      "globals": {
+        "Application": true,
+        "Buffer.from": true,
+        "Linking": true,
+        "NetInfo": true,
+        "Platform": true,
+        "Telegram": true,
+        "TelegramWebviewProxy": true,
+        "TelegramWebviewProxyProto": true,
+        "URL": true,
+        "addEventListener": true,
+        "clearTimeout": true,
+        "console.error": true,
+        "console.warn": true,
+        "crypto": true,
+        "fetch": true,
+        "localStorage.getItem": true,
+        "navigator": true,
+        "open": true,
+        "process": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "$root$": true,
+        "@reown/walletkit>@walletconnect/utils>elliptic": true,
+        "@walletconnect/core>@walletconnect/relay-api": true,
+        "@walletconnect/core>@walletconnect/relay-auth": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>@walletconnect/window-getters": true,
+        "@walletconnect/core>uint8arrays": true,
+        "@walletconnect/utils>@ethersproject/hash": true,
+        "@walletconnect/utils>@ethersproject/transactions": true,
+        "@walletconnect/utils>@stablelib/chacha20poly1305": true,
+        "@walletconnect/utils>@stablelib/hkdf": true,
+        "@walletconnect/utils>@stablelib/random": true,
+        "@walletconnect/utils>@stablelib/sha256": true,
+        "@walletconnect/utils>@stablelib/x25519": true,
+        "@walletconnect/utils>@walletconnect/window-metadata": true,
+        "@walletconnect/utils>detect-browser": true,
+        "@walletconnect/utils>query-string": true,
+        "process": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/utils>elliptic": {
+      "packages": {
+        "@reown/walletkit>@walletconnect/utils>elliptic>bn.js": true,
+        "@reown/walletkit>@walletconnect/utils>elliptic>inherits": true,
+        "@walletconnect/utils>elliptic>brorand": true,
+        "@walletconnect/utils>elliptic>hash.js": true,
+        "@walletconnect/utils>elliptic>hmac-drbg": true,
+        "@walletconnect/utils>elliptic>minimalistic-assert": true,
+        "@walletconnect/utils>elliptic>minimalistic-crypto-utils": true
+      }
+    },
+    "@reown/walletkit>@walletconnect/utils>elliptic>bn.js": {
+      "packages": {
+        "$root$": true
       }
     },
     "@sentry/browser": {
@@ -203,7 +500,8 @@
         "@sentry/browser>@sentry-internal/tracing": true,
         "@sentry/browser>@sentry/core": true,
         "@sentry/browser>@sentry/replay": true,
-        "@sentry/browser>@sentry/utils": true
+        "@sentry/browser>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry-internal/feedback": {
@@ -217,7 +515,8 @@
       },
       "packages": {
         "@sentry/browser>@sentry-internal/feedback>@sentry/core": true,
-        "@sentry/browser>@sentry-internal/feedback>@sentry/utils": true
+        "@sentry/browser>@sentry-internal/feedback>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry-internal/feedback>@sentry/core": {
@@ -225,7 +524,8 @@
         "__SENTRY_DEBUG__": true
       },
       "packages": {
-        "@sentry/browser>@sentry-internal/feedback>@sentry/utils": true
+        "@sentry/browser>@sentry-internal/feedback>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry-internal/feedback>@sentry/utils": {
@@ -243,7 +543,8 @@
         "process": true
       },
       "packages": {
-        "process": true
+        "process": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry-internal/replay-canvas": {
@@ -263,7 +564,8 @@
       },
       "packages": {
         "@sentry/browser>@sentry-internal/replay-canvas>@sentry/core": true,
-        "@sentry/browser>@sentry-internal/replay-canvas>@sentry/utils": true
+        "@sentry/browser>@sentry-internal/replay-canvas>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry-internal/replay-canvas>@sentry/core": {
@@ -285,7 +587,8 @@
       },
       "packages": {
         "@sentry/browser>@sentry-internal/tracing>@sentry/core": true,
-        "@sentry/browser>@sentry-internal/tracing>@sentry/utils": true
+        "@sentry/browser>@sentry-internal/tracing>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry-internal/tracing>@sentry/core": {
@@ -296,7 +599,8 @@
         "setTimeout": true
       },
       "packages": {
-        "@sentry/browser>@sentry-internal/tracing>@sentry/utils": true
+        "@sentry/browser>@sentry-internal/tracing>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry-internal/tracing>@sentry/utils": {
@@ -314,6 +618,9 @@
         "Response": true,
         "XMLHttpRequest.prototype": true,
         "__SENTRY_DEBUG__": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry/core": {
@@ -327,7 +634,8 @@
         "setTimeout": true
       },
       "packages": {
-        "@sentry/browser>@sentry/utils": true
+        "@sentry/browser>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry/replay": {
@@ -376,7 +684,8 @@
       "packages": {
         "@sentry/browser>@sentry-internal/tracing": true,
         "@sentry/browser>@sentry/replay>@sentry/core": true,
-        "@sentry/browser>@sentry/replay>@sentry/utils": true
+        "@sentry/browser>@sentry/replay>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry/replay>@sentry/core": {
@@ -386,7 +695,8 @@
         "setInterval": true
       },
       "packages": {
-        "@sentry/browser>@sentry/replay>@sentry/utils": true
+        "@sentry/browser>@sentry/replay>@sentry/utils": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry/replay>@sentry/utils": {
@@ -413,7 +723,8 @@
         "process": true
       },
       "packages": {
-        "process": true
+        "process": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@sentry/browser>@sentry/utils": {
@@ -437,6 +748,570 @@
         "console.error": true,
         "document": true,
         "setTimeout": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@walletconnect/core": {
+      "globals": {
+        "AbortController": true,
+        "Buffer": true,
+        "TextDecoder": true,
+        "TextEncoder": true,
+        "addEventListener": true,
+        "clearInterval": true,
+        "clearTimeout": true,
+        "crypto.subtle.digest": true,
+        "downloadLogsBlobInBrowser": "write",
+        "fetch": true,
+        "location.origin": true,
+        "removeEventListener": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/jsonrpc-provider": true,
+        "@reown/walletkit>@walletconnect/jsonrpc-utils": true,
+        "@reown/walletkit>@walletconnect/logger": true,
+        "@walletconnect/core>@walletconnect/heartbeat": true,
+        "@walletconnect/core>@walletconnect/jsonrpc-ws-connection": true,
+        "@walletconnect/core>@walletconnect/keyvaluestorage": true,
+        "@walletconnect/core>@walletconnect/relay-auth": true,
+        "@walletconnect/core>@walletconnect/safe-json": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>@walletconnect/types": true,
+        "@walletconnect/core>@walletconnect/window-getters": true,
+        "@walletconnect/core>events": true,
+        "@walletconnect/core>lodash.isequal": true,
+        "@walletconnect/core>uint8arrays": true,
+        "@walletconnect/utils": true,
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/heartbeat": {
+      "globals": {
+        "clearInterval": true,
+        "setInterval": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/types>@walletconnect/events": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>events": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/jsonrpc-ws-connection": {
+      "globals": {
+        "URLSearchParams": true,
+        "WebSocket": true,
+        "require": true
+      },
+      "packages": {
+        "@hathor/wallet-lib>isomorphic-ws>ws": true,
+        "@reown/walletkit>@walletconnect/jsonrpc-utils": true,
+        "@walletconnect/core>@walletconnect/safe-json": true,
+        "@walletconnect/core>events": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/keyvaluestorage": {
+      "globals": {
+        "clearInterval": true,
+        "localStorage": true,
+        "setInterval": true
+      },
+      "packages": {
+        "@walletconnect/core>@walletconnect/keyvaluestorage>idb-keyval": true,
+        "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage": true,
+        "@walletconnect/core>@walletconnect/safe-json": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/keyvaluestorage>idb-keyval": {
+      "globals": {
+        "indexedDB.open": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage": {
+      "globals": {
+        "Buffer": true,
+        "atob": true,
+        "btoa": true,
+        "console.error": true
+      },
+      "packages": {
+        "$root$": true,
+        "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": true,
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": {
+      "globals": {
+        "console.warn": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/relay-auth": {
+      "packages": {
+        "@walletconnect/core>@walletconnect/relay-auth>@stablelib/ed25519": true,
+        "@walletconnect/core>@walletconnect/safe-json": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>uint8arrays": true,
+        "@walletconnect/utils>@stablelib/random": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/relay-auth>@stablelib/ed25519": {
+      "packages": {
+        "@walletconnect/core>@walletconnect/relay-auth>@stablelib/ed25519>@stablelib/sha512": true,
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
+        "@walletconnect/utils>@stablelib/random": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/relay-auth>@stablelib/ed25519>@stablelib/sha512": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
+        "@walletconnect/utils>@stablelib/random>@stablelib/binary": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/time": {
+      "globals": {
+        "setTimeout": true
+      },
+      "packages": {
+        "@reown/walletkit>@walletconnect/jsonrpc-utils>tslib": true
+      }
+    },
+    "@walletconnect/core>@walletconnect/types": {
+      "packages": {
+        "@reown/walletkit>@walletconnect/types>@walletconnect/events": true,
+        "@walletconnect/core>events": true
+      }
+    },
+    "@walletconnect/core>events": {
+      "globals": {
+        "console": true
+      }
+    },
+    "@walletconnect/core>uint8arrays": {
+      "globals": {
+        "Buffer": true,
+        "TextDecoder": true,
+        "TextEncoder": true
+      },
+      "packages": {
+        "@walletconnect/core>uint8arrays>multiformats": true,
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@walletconnect/core>uint8arrays>multiformats": {
+      "globals": {
+        "TextDecoder": true,
+        "TextEncoder": true,
+        "console.warn": true,
+        "crypto.subtle.digest": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@walletconnect/utils": {
+      "globals": {
+        "Application": true,
+        "Buffer.from": true,
+        "Linking": true,
+        "NetInfo": true,
+        "Platform": true,
+        "Telegram": true,
+        "TelegramWebviewProxy": true,
+        "TelegramWebviewProxyProto": true,
+        "URL": true,
+        "addEventListener": true,
+        "clearTimeout": true,
+        "console.error": true,
+        "console.warn": true,
+        "crypto": true,
+        "fetch": true,
+        "localStorage.getItem": true,
+        "navigator": true,
+        "open": true,
+        "process": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "$root$": true,
+        "@walletconnect/core>@walletconnect/relay-api": true,
+        "@walletconnect/core>@walletconnect/relay-auth": true,
+        "@walletconnect/core>@walletconnect/time": true,
+        "@walletconnect/core>@walletconnect/window-getters": true,
+        "@walletconnect/core>uint8arrays": true,
+        "@walletconnect/utils>@ethersproject/hash": true,
+        "@walletconnect/utils>@ethersproject/transactions": true,
+        "@walletconnect/utils>@stablelib/chacha20poly1305": true,
+        "@walletconnect/utils>@stablelib/hkdf": true,
+        "@walletconnect/utils>@stablelib/random": true,
+        "@walletconnect/utils>@stablelib/sha256": true,
+        "@walletconnect/utils>@stablelib/x25519": true,
+        "@walletconnect/utils>@walletconnect/window-metadata": true,
+        "@walletconnect/utils>detect-browser": true,
+        "@walletconnect/utils>elliptic": true,
+        "@walletconnect/utils>query-string": true,
+        "process": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bytes": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/keccak256": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/strings": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/address": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bignumber": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bytes": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/keccak256": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/logger": true,
+        "@walletconnect/utils>@ethersproject/transactions>@ethersproject/rlp": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/bignumber": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bignumber>bn.js": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bytes": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/logger": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/bignumber>bn.js": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/bytes": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/logger": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/keccak256": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bytes": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/keccak256>js-sha3": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/keccak256>js-sha3": {
+      "globals": {
+        "define": true,
+        "process": true
+      },
+      "packages": {
+        "process": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/logger": {
+      "globals": {
+        "console": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/properties": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/logger": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/hash>@ethersproject/strings": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bytes": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/logger": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/transactions": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/address": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bignumber": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bytes": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/keccak256": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/logger": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/properties": true,
+        "@walletconnect/utils>@ethersproject/transactions>@ethersproject/constants": true,
+        "@walletconnect/utils>@ethersproject/transactions>@ethersproject/rlp": true,
+        "@walletconnect/utils>@ethersproject/transactions>@ethersproject/signing-key": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/transactions>@ethersproject/signing-key": {
+      "packages": {
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/bytes": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/logger": true,
+        "@walletconnect/utils>@ethersproject/hash>@ethersproject/properties": true,
+        "@walletconnect/utils>@ethersproject/transactions>@ethersproject/signing-key>bn.js": true,
+        "@walletconnect/utils>elliptic>hash.js": true
+      }
+    },
+    "@walletconnect/utils>@ethersproject/transactions>@ethersproject/signing-key>bn.js": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/chacha20poly1305": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/chacha": true,
+        "@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/constant-time": true,
+        "@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/poly1305": true,
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
+        "@walletconnect/utils>@stablelib/random>@stablelib/binary": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/chacha": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
+        "@walletconnect/utils>@stablelib/random>@stablelib/binary": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/poly1305": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/constant-time": true,
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/hkdf": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/hmac": true,
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/hkdf>@stablelib/hmac": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/chacha20poly1305>@stablelib/constant-time": true,
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/hash": true,
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/random": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true
+      },
+      "packages": {
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
+        "@walletconnect/utils>@stablelib/random>@stablelib/binary": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/random>@stablelib/binary": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/random>@stablelib/binary>@stablelib/int": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/sha256": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
+        "@walletconnect/utils>@stablelib/random>@stablelib/binary": true
+      }
+    },
+    "@walletconnect/utils>@stablelib/x25519": {
+      "packages": {
+        "@walletconnect/utils>@stablelib/hkdf>@stablelib/wipe": true,
+        "@walletconnect/utils>@stablelib/random": true
+      }
+    },
+    "@walletconnect/utils>@walletconnect/window-metadata": {
+      "packages": {
+        "@walletconnect/core>@walletconnect/window-getters": true
+      }
+    },
+    "@walletconnect/utils>detect-browser": {
+      "globals": {
+        "document": true,
+        "navigator": true,
+        "process": true
+      },
+      "packages": {
+        "process": true
+      }
+    },
+    "@walletconnect/utils>elliptic": {
+      "packages": {
+        "@walletconnect/utils>elliptic>bn.js": true,
+        "@walletconnect/utils>elliptic>brorand": true,
+        "@walletconnect/utils>elliptic>hash.js": true,
+        "@walletconnect/utils>elliptic>hmac-drbg": true,
+        "@walletconnect/utils>elliptic>inherits": true,
+        "@walletconnect/utils>elliptic>minimalistic-assert": true,
+        "@walletconnect/utils>elliptic>minimalistic-crypto-utils": true
+      }
+    },
+    "@walletconnect/utils>elliptic>bn.js": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "@walletconnect/utils>elliptic>brorand": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true
+      }
+    },
+    "@walletconnect/utils>elliptic>hash.js": {
+      "packages": {
+        "@walletconnect/utils>elliptic>hash.js>inherits": true,
+        "@walletconnect/utils>elliptic>minimalistic-assert": true
+      }
+    },
+    "@walletconnect/utils>elliptic>hmac-drbg": {
+      "packages": {
+        "@walletconnect/utils>elliptic>hash.js": true,
+        "@walletconnect/utils>elliptic>minimalistic-assert": true,
+        "@walletconnect/utils>elliptic>minimalistic-crypto-utils": true
+      }
+    },
+    "@walletconnect/utils>query-string": {
+      "packages": {
+        "@walletconnect/utils>query-string>decode-uri-component": true,
+        "@walletconnect/utils>query-string>filter-obj": true,
+        "@walletconnect/utils>query-string>split-on-first": true,
+        "@walletconnect/utils>query-string>strict-uri-encode": true
+      }
+    },
+    "assert": {
+      "globals": {
+        "console": true,
+        "process.emitWarning": true,
+        "process.stderr": true
+      },
+      "packages": {
+        "assert>call-bind": true,
+        "assert>is-nan": true,
+        "assert>object-is": true,
+        "assert>object.assign": true,
+        "assert>util": true,
+        "process": true
+      }
+    },
+    "assert>call-bind": {
+      "packages": {
+        "assert>call-bind>es-define-property": true,
+        "assert>call-bind>es-errors": true,
+        "assert>call-bind>function-bind": true,
+        "assert>call-bind>get-intrinsic": true,
+        "assert>call-bind>set-function-length": true
+      }
+    },
+    "assert>call-bind>es-define-property": {
+      "packages": {
+        "assert>call-bind>get-intrinsic": true
+      }
+    },
+    "assert>call-bind>get-intrinsic": {
+      "globals": {
+        "AggregateError": true,
+        "FinalizationRegistry": true,
+        "WeakRef": true
+      },
+      "packages": {
+        "assert>call-bind>es-errors": true,
+        "assert>call-bind>function-bind": true,
+        "assert>object.assign>has-symbols": true,
+        "eslint-config-airbnb>eslint-plugin-import>hasown": true,
+        "eslint-plugin-react>es-iterator-helpers>has-proto": true
+      }
+    },
+    "assert>call-bind>set-function-length": {
+      "packages": {
+        "assert>call-bind>es-errors": true,
+        "assert>call-bind>get-intrinsic": true,
+        "assert>is-nan>define-properties>define-data-property": true,
+        "assert>util>is-typed-array>gopd": true,
+        "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": true
+      }
+    },
+    "assert>is-nan": {
+      "packages": {
+        "assert>call-bind": true,
+        "assert>is-nan>define-properties": true
+      }
+    },
+    "assert>is-nan>define-properties": {
+      "packages": {
+        "assert>is-nan>define-properties>define-data-property": true,
+        "assert>object.assign>object-keys": true,
+        "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": true
+      }
+    },
+    "assert>is-nan>define-properties>define-data-property": {
+      "packages": {
+        "assert>call-bind>es-define-property": true,
+        "assert>call-bind>es-errors": true,
+        "assert>util>is-typed-array>gopd": true
+      }
+    },
+    "assert>object-is": {
+      "packages": {
+        "assert>call-bind": true,
+        "assert>is-nan>define-properties": true
+      }
+    },
+    "assert>object.assign": {
+      "packages": {
+        "assert>call-bind": true,
+        "assert>object.assign>has-symbols": true,
+        "assert>object.assign>object-keys": true
+      }
+    },
+    "assert>util": {
+      "globals": {
+        "console.error": true,
+        "console.log": true,
+        "console.trace": true,
+        "process": true
+      },
+      "packages": {
+        "assert>util>inherits": true,
+        "assert>util>is-arguments": true,
+        "assert>util>is-generator-function": true,
+        "assert>util>is-typed-array": true,
+        "assert>util>which-typed-array": true,
+        "process": true
+      }
+    },
+    "assert>util>is-arguments": {
+      "packages": {
+        "assert>call-bind": true,
+        "assert>util>is-arguments>has-tostringtag": true
+      }
+    },
+    "assert>util>is-arguments>has-tostringtag": {
+      "packages": {
+        "assert>object.assign>has-symbols": true
+      }
+    },
+    "assert>util>is-generator-function": {
+      "packages": {
+        "assert>util>is-arguments>has-tostringtag": true
+      }
+    },
+    "assert>util>is-typed-array": {
+      "packages": {
+        "assert>call-bind": true,
+        "assert>util>is-arguments>has-tostringtag": true,
+        "assert>util>is-typed-array>available-typed-arrays": true,
+        "assert>util>is-typed-array>for-each": true,
+        "assert>util>is-typed-array>gopd": true
+      }
+    },
+    "assert>util>is-typed-array>for-each": {
+      "packages": {
+        "npm-run-all>string.prototype.padend>es-abstract>is-callable": true
+      }
+    },
+    "assert>util>is-typed-array>gopd": {
+      "packages": {
+        "assert>call-bind>get-intrinsic": true
+      }
+    },
+    "assert>util>which-typed-array": {
+      "packages": {
+        "assert>call-bind": true,
+        "assert>util>is-arguments>has-tostringtag": true,
+        "assert>util>is-typed-array": true,
+        "assert>util>is-typed-array>available-typed-arrays": true,
+        "assert>util>is-typed-array>for-each": true,
+        "assert>util>is-typed-array>gopd": true
       }
     },
     "axios": {
@@ -466,8 +1341,9 @@
         "setTimeout": true
       },
       "packages": {
-        "buffer": true,
-        "process": true
+        "$root$": true,
+        "process": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "bootstrap": {
@@ -501,9 +1377,286 @@
         "buffer>ieee754": true
       }
     },
-    "cypress>@cypress/request>qs": {
+    "crypto-browserify": {
       "packages": {
-        "eslint-plugin-react>string.prototype.matchall>side-channel": true
+        "crypto-browserify>browserify-cipher": true,
+        "crypto-browserify>browserify-sign": true,
+        "crypto-browserify>create-ecdh": true,
+        "crypto-browserify>create-hash": true,
+        "crypto-browserify>create-hmac": true,
+        "crypto-browserify>diffie-hellman": true,
+        "crypto-browserify>pbkdf2": true,
+        "crypto-browserify>public-encrypt": true,
+        "crypto-browserify>randombytes": true,
+        "crypto-browserify>randomfill": true
+      }
+    },
+    "crypto-browserify>browserify-cipher": {
+      "packages": {
+        "crypto-browserify>browserify-cipher>browserify-aes": true,
+        "crypto-browserify>browserify-cipher>browserify-des": true,
+        "crypto-browserify>browserify-cipher>evp_bytestokey": true
+      }
+    },
+    "crypto-browserify>browserify-cipher>browserify-aes": {
+      "globals": {
+        "Buffer.concat": true
+      },
+      "packages": {
+        "$root$": true,
+        "crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": true,
+        "crypto-browserify>browserify-cipher>evp_bytestokey": true,
+        "crypto-browserify>create-hash>cipher-base": true,
+        "crypto-browserify>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "$root$": true
+      }
+    },
+    "crypto-browserify>browserify-cipher>browserify-des": {
+      "packages": {
+        "crypto-browserify>browserify-cipher>browserify-des>des.js": true,
+        "crypto-browserify>create-hash>cipher-base": true,
+        "crypto-browserify>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>browserify-cipher>browserify-des>des.js": {
+      "packages": {
+        "@walletconnect/utils>elliptic>minimalistic-assert": true,
+        "crypto-browserify>inherits": true
+      }
+    },
+    "crypto-browserify>browserify-cipher>evp_bytestokey": {
+      "packages": {
+        "crypto-browserify>create-hash>md5.js": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>browserify-sign": {
+      "packages": {
+        "@reown/walletkit>@walletconnect/utils>elliptic": true,
+        "crypto-browserify>browserify-sign>bn.js": true,
+        "crypto-browserify>browserify-sign>inherits": true,
+        "crypto-browserify>browserify-sign>readable-stream": true,
+        "crypto-browserify>create-hash": true,
+        "crypto-browserify>create-hmac": true,
+        "crypto-browserify>public-encrypt>browserify-rsa": true,
+        "crypto-browserify>public-encrypt>parse-asn1": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>browserify-sign>bn.js": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "crypto-browserify>browserify-sign>hash-base": {
+      "packages": {
+        "crypto-browserify>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "stream-browserify": true
+      }
+    },
+    "crypto-browserify>browserify-sign>readable-stream": {
+      "globals": {
+        "process.browser": true,
+        "process.stderr": true,
+        "process.stdout": true,
+        "process.version.slice": true,
+        "setImmediate": true
+      },
+      "packages": {
+        "@walletconnect/core>events": true,
+        "crypto-browserify>browserify-sign>readable-stream>core-util-is": true,
+        "crypto-browserify>browserify-sign>readable-stream>inherits": true,
+        "crypto-browserify>browserify-sign>readable-stream>isarray": true,
+        "crypto-browserify>browserify-sign>readable-stream>process-nextick-args": true,
+        "crypto-browserify>browserify-sign>readable-stream>safe-buffer": true,
+        "process": true,
+        "stream-http>readable-stream>string_decoder": true,
+        "stream-http>readable-stream>util-deprecate": true
+      }
+    },
+    "crypto-browserify>browserify-sign>readable-stream>core-util-is": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "crypto-browserify>browserify-sign>readable-stream>process-nextick-args": {
+      "globals": {
+        "process": true
+      },
+      "packages": {
+        "process": true
+      }
+    },
+    "crypto-browserify>browserify-sign>readable-stream>safe-buffer": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "crypto-browserify>create-ecdh": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "$root$": true,
+        "@reown/walletkit>@walletconnect/utils>elliptic": true,
+        "crypto-browserify>create-ecdh>bn.js": true
+      }
+    },
+    "crypto-browserify>create-hash": {
+      "packages": {
+        "crypto-browserify>create-hash>cipher-base": true,
+        "crypto-browserify>create-hash>md5.js": true,
+        "crypto-browserify>inherits": true,
+        "crypto-browserify>pbkdf2>ripemd160": true,
+        "crypto-browserify>pbkdf2>sha.js": true
+      }
+    },
+    "crypto-browserify>create-hash>cipher-base": {
+      "packages": {
+        "crypto-browserify>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "stream-browserify": true,
+        "stream-http>readable-stream>string_decoder": true
+      }
+    },
+    "crypto-browserify>create-hash>md5.js": {
+      "packages": {
+        "crypto-browserify>browserify-sign>hash-base": true,
+        "crypto-browserify>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>create-hmac": {
+      "packages": {
+        "crypto-browserify>create-hash": true,
+        "crypto-browserify>create-hash>cipher-base": true,
+        "crypto-browserify>inherits": true,
+        "crypto-browserify>pbkdf2>ripemd160": true,
+        "crypto-browserify>pbkdf2>sha.js": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>diffie-hellman": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "$root$": true,
+        "crypto-browserify>create-ecdh>bn.js": true,
+        "crypto-browserify>diffie-hellman>miller-rabin": true,
+        "crypto-browserify>randombytes": true
+      }
+    },
+    "crypto-browserify>diffie-hellman>miller-rabin": {
+      "packages": {
+        "@walletconnect/utils>elliptic>brorand": true,
+        "crypto-browserify>create-ecdh>bn.js": true
+      }
+    },
+    "crypto-browserify>pbkdf2": {
+      "globals": {
+        "crypto": true,
+        "process": true,
+        "queueMicrotask": true,
+        "setImmediate": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "crypto-browserify>create-hash": true,
+        "crypto-browserify>pbkdf2>ripemd160": true,
+        "crypto-browserify>pbkdf2>sha.js": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "process": true
+      }
+    },
+    "crypto-browserify>pbkdf2>ripemd160": {
+      "packages": {
+        "buffer": true,
+        "crypto-browserify>browserify-sign>hash-base": true,
+        "crypto-browserify>inherits": true
+      }
+    },
+    "crypto-browserify>pbkdf2>sha.js": {
+      "packages": {
+        "crypto-browserify>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>public-encrypt": {
+      "packages": {
+        "crypto-browserify>create-ecdh>bn.js": true,
+        "crypto-browserify>create-hash": true,
+        "crypto-browserify>public-encrypt>browserify-rsa": true,
+        "crypto-browserify>public-encrypt>parse-asn1": true,
+        "crypto-browserify>randombytes": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>public-encrypt>browserify-rsa": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "$root$": true,
+        "crypto-browserify>public-encrypt>browserify-rsa>bn.js": true,
+        "crypto-browserify>randombytes": true
+      }
+    },
+    "crypto-browserify>public-encrypt>browserify-rsa>bn.js": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "crypto-browserify>public-encrypt>parse-asn1": {
+      "packages": {
+        "crypto-browserify>browserify-cipher>browserify-aes": true,
+        "crypto-browserify>browserify-cipher>evp_bytestokey": true,
+        "crypto-browserify>pbkdf2": true,
+        "crypto-browserify>public-encrypt>parse-asn1>asn1.js": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "crypto-browserify>public-encrypt>parse-asn1>asn1.js": {
+      "packages": {
+        "@walletconnect/utils>elliptic>minimalistic-assert": true,
+        "buffer": true,
+        "crypto-browserify>create-ecdh>bn.js": true,
+        "crypto-browserify>inherits": true,
+        "vm-browserify": true
+      }
+    },
+    "crypto-browserify>randombytes": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true,
+        "process.nextTick": true
+      },
+      "packages": {
+        "cypress>@cypress/request>safe-buffer": true,
+        "process": true
+      }
+    },
+    "crypto-browserify>randomfill": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true,
+        "process.browser": true,
+        "process.nextTick": true
+      },
+      "packages": {
+        "crypto-browserify>randombytes": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "process": true
       }
     },
     "cypress>@cypress/request>safe-buffer": {
@@ -518,51 +1671,12 @@
     },
     "eslint-config-airbnb>eslint-plugin-import>hasown": {
       "packages": {
-        "eslint-plugin-react>es-iterator-helpers>function-bind": true
-      }
-    },
-    "eslint-config-airbnb>object.assign": {
-      "packages": {
-        "@lavamoat/webpack>json-stable-stringify>object-keys": true,
-        "eslint-plugin-react>es-iterator-helpers>has-symbols": true,
-        "npm-run-all>string.prototype.padend>call-bind": true
-      }
-    },
-    "eslint-plugin-react>array-includes>get-intrinsic": {
-      "globals": {
-        "AggregateError": true,
-        "FinalizationRegistry": true,
-        "WeakRef": true
-      },
-      "packages": {
-        "eslint-config-airbnb>eslint-plugin-import>hasown": true,
-        "eslint-plugin-react>es-iterator-helpers>function-bind": true,
-        "eslint-plugin-react>es-iterator-helpers>has-proto": true,
-        "eslint-plugin-react>es-iterator-helpers>has-symbols": true,
-        "npm-run-all>string.prototype.padend>call-bind>es-errors": true
-      }
-    },
-    "eslint-plugin-react>array-includes>is-string>has-tostringtag": {
-      "packages": {
-        "eslint-plugin-react>es-iterator-helpers>has-symbols": true
+        "assert>call-bind>function-bind": true
       }
     },
     "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": {
       "packages": {
-        "npm-run-all>string.prototype.padend>call-bind>es-define-property": true
-      }
-    },
-    "eslint-plugin-react>object.hasown>es-abstract>gopd": {
-      "packages": {
-        "eslint-plugin-react>array-includes>get-intrinsic": true
-      }
-    },
-    "eslint-plugin-react>string.prototype.matchall>side-channel": {
-      "packages": {
-        "eslint-plugin-react>array-includes>get-intrinsic": true,
-        "npm-run-all>string.prototype.padend>call-bind": true,
-        "npm-run-all>string.prototype.padend>call-bind>es-errors": true,
-        "npm-run-all>string.prototype.padend>es-abstract>object-inspect": true
+        "assert>call-bind>es-define-property": true
       }
     },
     "jquery": {
@@ -570,490 +1684,17 @@
         "define": true
       }
     },
-    "node-stdlib-browser>assert": {
-      "globals": {
-        "console": true,
-        "process.emitWarning": true,
-        "process.stderr": true
-      },
-      "packages": {
-        "eslint-config-airbnb>object.assign": true,
-        "node-stdlib-browser>assert>is-nan": true,
-        "node-stdlib-browser>assert>object-is": true,
-        "node-stdlib-browser>util": true,
-        "npm-run-all>string.prototype.padend>call-bind": true,
-        "process": true
-      }
-    },
-    "node-stdlib-browser>assert>is-nan": {
-      "packages": {
-        "npm-run-all>string.prototype.padend>call-bind": true,
-        "npm-run-all>string.prototype.padend>define-properties": true
-      }
-    },
-    "node-stdlib-browser>assert>object-is": {
-      "packages": {
-        "npm-run-all>string.prototype.padend>call-bind": true,
-        "npm-run-all>string.prototype.padend>define-properties": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify": {
-      "packages": {
-        "node-stdlib-browser>crypto-browserify>browserify-cipher": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign": true,
-        "node-stdlib-browser>crypto-browserify>create-ecdh": true,
-        "node-stdlib-browser>crypto-browserify>create-hash": true,
-        "node-stdlib-browser>crypto-browserify>create-hmac": true,
-        "node-stdlib-browser>crypto-browserify>diffie-hellman": true,
-        "node-stdlib-browser>crypto-browserify>pbkdf2": true,
-        "node-stdlib-browser>crypto-browserify>public-encrypt": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true,
-        "node-stdlib-browser>crypto-browserify>randomfill": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-cipher": {
-      "packages": {
-        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes": true,
-        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des": true,
-        "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes": {
-      "globals": {
-        "Buffer.concat": true
-      },
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "buffer": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": true,
-        "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": true,
-        "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des>des.js": true,
-        "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des>des.js": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-assert": true,
-        "@hathor/wallet-lib>bitcore-lib>inherits": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": {
-      "packages": {
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>create-hash>md5.js": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign": {
-      "packages": {
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>bn.js": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>elliptic": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>inherits": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream": true,
-        "node-stdlib-browser>crypto-browserify>create-hash": true,
-        "node-stdlib-browser>crypto-browserify>create-hmac": true,
-        "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": true,
-        "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign>bn.js": {
-      "globals": {
-        "Buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign>elliptic": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>elliptic>brorand": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>hash.js": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>hmac-drbg": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-assert": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-crypto-utils": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>elliptic>bn.js": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>inherits": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign>elliptic>bn.js": {
-      "globals": {
-        "Buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign>hash-base": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>stream-browserify": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream": {
-      "globals": {
-        "process.browser": true,
-        "process.stderr": true,
-        "process.stdout": true,
-        "process.version.slice": true,
-        "setImmediate": true
-      },
-      "packages": {
-        "node-stdlib-browser>crypto-browserify>browserify-sign>inherits": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>core-util-is": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>isarray": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>process-nextick-args": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>safe-buffer": true,
-        "node-stdlib-browser>events": true,
-        "node-stdlib-browser>readable-stream>util-deprecate": true,
-        "node-stdlib-browser>string_decoder": true,
-        "process": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>core-util-is": {
-      "packages": {
-        "buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>process-nextick-args": {
-      "globals": {
-        "process": true
-      },
-      "packages": {
-        "process": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>safe-buffer": {
-      "packages": {
-        "buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>create-ecdh": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic": true,
-        "buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>create-hash": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true,
-        "node-stdlib-browser>crypto-browserify>create-hash>md5.js": true,
-        "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": true,
-        "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>stream-browserify": true,
-        "node-stdlib-browser>string_decoder": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>create-hash>md5.js": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>hash-base": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>create-hmac": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>create-hash": true,
-        "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true,
-        "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": true,
-        "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>diffie-hellman": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
-        "buffer": true,
-        "node-stdlib-browser>crypto-browserify>diffie-hellman>miller-rabin": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>diffie-hellman>miller-rabin": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>brorand": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>pbkdf2": {
-      "globals": {
-        "crypto": true,
-        "process": true,
-        "queueMicrotask": true,
-        "setImmediate": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>create-hash": true,
-        "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": true,
-        "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": true,
-        "process": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "buffer": true,
-        "node-stdlib-browser>crypto-browserify>browserify-sign>hash-base": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>public-encrypt": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>create-hash": true,
-        "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": true,
-        "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "buffer": true,
-        "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa>bn.js": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa>bn.js": {
-      "globals": {
-        "Buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": {
-      "packages": {
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes": true,
-        "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": true,
-        "node-stdlib-browser>crypto-browserify>pbkdf2": true,
-        "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1>asn1.js": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1>asn1.js": {
-      "packages": {
-        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
-        "@hathor/wallet-lib>bitcore-lib>elliptic>minimalistic-assert": true,
-        "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "buffer": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>randombytes": {
-      "globals": {
-        "crypto": true,
-        "msCrypto": true,
-        "process.nextTick": true
-      },
-      "packages": {
-        "cypress>@cypress/request>safe-buffer": true,
-        "process": true
-      }
-    },
-    "node-stdlib-browser>crypto-browserify>randomfill": {
-      "globals": {
-        "crypto": true,
-        "msCrypto": true,
-        "process.browser": true,
-        "process.nextTick": true
-      },
-      "packages": {
-        "cypress>@cypress/request>safe-buffer": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true,
-        "process": true
-      }
-    },
-    "node-stdlib-browser>events": {
-      "globals": {
-        "console": true
-      }
-    },
-    "node-stdlib-browser>path-browserify": {
-      "globals": {
-        "process.cwd": true
-      },
-      "packages": {
-        "process": true
-      }
-    },
-    "node-stdlib-browser>readable-stream>util-deprecate": {
-      "globals": {
-        "console.trace": true,
-        "console.warn": true,
-        "localStorage": true
-      }
-    },
-    "node-stdlib-browser>stream-browserify": {
-      "packages": {
-        "node-stdlib-browser>events": true,
-        "node-stdlib-browser>stream-browserify>inherits": true,
-        "node-stdlib-browser>stream-browserify>readable-stream": true
-      }
-    },
-    "node-stdlib-browser>stream-browserify>readable-stream": {
-      "globals": {
-        "process.nextTick": true,
-        "process.stderr": true,
-        "process.stdout": true
-      },
-      "packages": {
-        "buffer": true,
-        "node-stdlib-browser>events": true,
-        "node-stdlib-browser>readable-stream>util-deprecate": true,
-        "node-stdlib-browser>stream-browserify>inherits": true,
-        "node-stdlib-browser>string_decoder": true,
-        "process": true
-      }
-    },
-    "node-stdlib-browser>string_decoder": {
-      "packages": {
-        "node-stdlib-browser>string_decoder>safe-buffer": true
-      }
-    },
-    "node-stdlib-browser>string_decoder>safe-buffer": {
-      "packages": {
-        "buffer": true
-      }
-    },
-    "node-stdlib-browser>url": {
-      "packages": {
-        "cypress>@cypress/request>qs": true,
-        "node-stdlib-browser>url>punycode": true
-      }
-    },
-    "node-stdlib-browser>url>punycode": {
-      "globals": {
-        "define": true
-      }
-    },
-    "node-stdlib-browser>util": {
-      "globals": {
-        "console.error": true,
-        "console.log": true,
-        "console.trace": true,
-        "process": true
-      },
-      "packages": {
-        "node-stdlib-browser>util>inherits": true,
-        "node-stdlib-browser>util>is-arguments": true,
-        "node-stdlib-browser>util>is-generator-function": true,
-        "node-stdlib-browser>util>is-typed-array": true,
-        "node-stdlib-browser>util>which-typed-array": true,
-        "process": true
-      }
-    },
-    "node-stdlib-browser>util>is-arguments": {
-      "packages": {
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true,
-        "npm-run-all>string.prototype.padend>call-bind": true
-      }
-    },
-    "node-stdlib-browser>util>is-generator-function": {
-      "packages": {
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true
-      }
-    },
-    "node-stdlib-browser>util>is-typed-array": {
-      "packages": {
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true,
-        "eslint-plugin-react>object.hasown>es-abstract>available-typed-arrays": true,
-        "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
-        "node-stdlib-browser>util>is-typed-array>for-each": true,
-        "npm-run-all>string.prototype.padend>call-bind": true
-      }
-    },
-    "node-stdlib-browser>util>is-typed-array>for-each": {
-      "packages": {
-        "npm-run-all>string.prototype.padend>es-abstract>is-callable": true
-      }
-    },
-    "node-stdlib-browser>util>which-typed-array": {
-      "packages": {
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true,
-        "eslint-plugin-react>object.hasown>es-abstract>available-typed-arrays": true,
-        "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
-        "node-stdlib-browser>util>is-typed-array": true,
-        "node-stdlib-browser>util>is-typed-array>for-each": true,
-        "npm-run-all>string.prototype.padend>call-bind": true
-      }
-    },
-    "npm-run-all>string.prototype.padend>call-bind": {
-      "packages": {
-        "eslint-plugin-react>array-includes>get-intrinsic": true,
-        "eslint-plugin-react>es-iterator-helpers>function-bind": true,
-        "npm-run-all>string.prototype.padend>call-bind>es-define-property": true,
-        "npm-run-all>string.prototype.padend>call-bind>es-errors": true,
-        "npm-run-all>string.prototype.padend>call-bind>set-function-length": true
-      }
-    },
-    "npm-run-all>string.prototype.padend>call-bind>es-define-property": {
-      "packages": {
-        "eslint-plugin-react>array-includes>get-intrinsic": true
-      }
-    },
-    "npm-run-all>string.prototype.padend>call-bind>set-function-length": {
-      "packages": {
-        "eslint-plugin-react>array-includes>get-intrinsic": true,
-        "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": true,
-        "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
-        "npm-run-all>string.prototype.padend>call-bind>es-errors": true,
-        "npm-run-all>string.prototype.padend>define-properties>define-data-property": true
-      }
-    },
-    "npm-run-all>string.prototype.padend>define-properties": {
-      "packages": {
-        "@lavamoat/webpack>json-stable-stringify>object-keys": true,
-        "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": true,
-        "npm-run-all>string.prototype.padend>define-properties>define-data-property": true
-      }
-    },
-    "npm-run-all>string.prototype.padend>define-properties>define-data-property": {
-      "packages": {
-        "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
-        "npm-run-all>string.prototype.padend>call-bind>es-define-property": true,
-        "npm-run-all>string.prototype.padend>call-bind>es-errors": true
-      }
-    },
     "npm-run-all>string.prototype.padend>es-abstract>is-callable": {
       "globals": {
         "document": true
       }
     },
-    "npm-run-all>string.prototype.padend>es-abstract>object-inspect": {
+    "path-browserify": {
       "globals": {
-        "HTMLElement": true,
-        "WeakRef": true
+        "process.cwd": true
+      },
+      "packages": {
+        "process": true
       }
     },
     "popper.js": {
@@ -1296,6 +1937,45 @@
         "react-redux>@babel/runtime": true
       }
     },
+    "stream-browserify": {
+      "packages": {
+        "@walletconnect/core>events": true,
+        "stream-browserify>inherits": true,
+        "stream-browserify>readable-stream": true
+      }
+    },
+    "stream-browserify>readable-stream": {
+      "globals": {
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.stdout": true
+      },
+      "packages": {
+        "@walletconnect/core>events": true,
+        "buffer": true,
+        "process": true,
+        "stream-browserify>inherits": true,
+        "stream-http>readable-stream>string_decoder": true,
+        "stream-http>readable-stream>util-deprecate": true
+      }
+    },
+    "stream-http>readable-stream>string_decoder": {
+      "packages": {
+        "stream-http>readable-stream>string_decoder>safe-buffer": true
+      }
+    },
+    "stream-http>readable-stream>string_decoder>safe-buffer": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "stream-http>readable-stream>util-deprecate": {
+      "globals": {
+        "console.trace": true,
+        "console.warn": true,
+        "localStorage": true
+      }
+    },
     "ttag": {
       "globals": {
         "define": true,
@@ -1316,6 +1996,36 @@
         "localStorage.setItem": true,
         "setInterval": true,
         "setTimeout": true
+      }
+    },
+    "url": {
+      "packages": {
+        "url>punycode": true,
+        "url>qs": true
+      }
+    },
+    "url>punycode": {
+      "globals": {
+        "define": true
+      }
+    },
+    "url>qs": {
+      "packages": {
+        "url>qs>side-channel": true
+      }
+    },
+    "url>qs>side-channel": {
+      "packages": {
+        "assert>call-bind": true,
+        "assert>call-bind>es-errors": true,
+        "assert>call-bind>get-intrinsic": true,
+        "url>qs>side-channel>object-inspect": true
+      }
+    },
+    "url>qs>side-channel>object-inspect": {
+      "globals": {
+        "HTMLElement": true,
+        "WeakRef": true
       }
     },
     "viz.js": {
@@ -1368,8 +2078,15 @@
         "webkitIndexedDB": true
       },
       "packages": {
-        "buffer": true,
+        "$root$": true,
         "process": true
+      }
+    },
+    "vm-browserify": {
+      "globals": {
+        "document.body.appendChild": true,
+        "document.body.removeChild": true,
+        "document.createElement": true
       }
     }
   }
