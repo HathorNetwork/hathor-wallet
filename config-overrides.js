@@ -35,12 +35,9 @@ module.exports = function override(config, env) {
     alias: {
       'classic-level': false,
       'level': false,
-      'pino-worker': false,
-      'pino/file': false,
-      'pino-pretty': false,
       'axios': path.resolve(__dirname, 'node_modules/axios'),
-      // Add an alias for our buffer shim
-      'buffer-shim': path.resolve(__dirname, 'src/buffer-shim.js')
+      'buffer-shim': path.resolve(__dirname, 'src/buffer-shim.js'),
+      'pino': require.resolve('pino/browser.js')
     }
   };
 
@@ -66,7 +63,7 @@ module.exports = function override(config, env) {
 
   // Use null-loader for Node.js-specific packages
   config.module.rules.push({
-    test: /[\\/](classic-level|pino)[\\/]/,
+    test: /[\\/](classic-level)[\\/]/,
     use: 'null-loader'
   });
 
