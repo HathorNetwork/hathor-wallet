@@ -25,7 +25,6 @@ import {
 import { eventChannel } from 'redux-saga';
 import LOCAL_STORE from '../storage';
 import {
-  NETWORK_SETTINGS,
   WALLET_SERVICE_FEATURE_TOGGLE,
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
   IGNORE_WS_TOGGLE_FLAG,
@@ -40,7 +39,6 @@ import {
   tokenMetadataUpdated,
   setUseWalletService,
   updateLoadedData,
-  setWallet,
   tokenFetchBalanceRequested,
   tokenFetchHistoryRequested,
   setServerInfo,
