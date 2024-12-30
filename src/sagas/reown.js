@@ -12,13 +12,13 @@ import {
   take,
   all,
   put,
-  cancel,
   cancelled,
   takeLatest,
   takeEvery,
   select,
   race,
   actionChannel,
+  delay,
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { get, values } from 'lodash';
@@ -40,7 +40,6 @@ import {
 } from '../constants';
 import {
   types,
-  setReown,
   setReownModal,
   setReownSessions,
   onExceptionCaptured,
@@ -59,9 +58,10 @@ import {
   setCreateTokenStatusFailed,
 } from '../actions';
 import { checkForFeatureFlag, getNetworkSettings, retryHandler, showPinScreenForResult } from './helpers';
-import { logger } from '../utils/logger';
+// import { logger } from '../utils/logger';
+import { getGlobalReown, setGlobalReown } from '../modules/reown';
 
-const log = logger('reown');
+// const log = logger('reown');
 
 const AVAILABLE_METHODS = {
   HATHOR_SIGN_MESSAGE: 'htr_signWithAddress',
@@ -69,6 +69,7 @@ const AVAILABLE_METHODS = {
   HATHOR_SIGN_ORACLE_DATA: 'htr_signOracleData',
   HATHOR_CREATE_TOKEN: 'htr_createToken',
 };
+
 const AVAILABLE_EVENTS = [];
 
 const ERROR_CODES = {
@@ -85,14 +86,14 @@ function* isReownEnabled() {
 }
 
 function* init() {
-  log.debug('Wallet not ready yet, waiting for START_WALLET_SUCCESS.');
+  console.log('Wallet not ready yet, waiting for START_WALLET_SUCCESS.');
   yield take(types.START_WALLET_SUCCESS);
-  log.debug('Starting reown.');
+  console.log('Starting reown.');
 
   // We should check if nano contracts are enabled in this network:
   const nanoContractsEnabled = yield select((state) => get(state.serverInfo, 'nanoContractsEnabled', false));
   if (!nanoContractsEnabled) {
-    log.debug('Nano contracts are not enabled, skipping reown init.');
+    console.log('Nano contracts are not enabled, skipping reown init.');
     return;
   }
 
@@ -101,55 +102,57 @@ function* init() {
     const reownEnabled = yield call(isReownEnabled);
 
     if (walletServiceEnabled) {
-      log.debug('Wallet Service enabled, skipping reown init.');
+      console.log('Wallet Service enabled, skipping reown init.');
       return;
     }
 
     if (!reownEnabled) {
-      log.debug('Reown is not enabled.');
+      console.log('Reown is not enabled.');
       return;
     }
 
+    console.log('Creating Core instance');
     const core = new Core({
       projectId: REOWN_PROJECT_ID,
+      relayUrl: 'wss://relay.walletconnect.com',
+      logger: 'debug',
     });
 
+    // Wait a bit to ensure all core components are initialized
+    yield delay(1000);
+
+    console.log('Creating WalletKit');
     const metadata = {
       name: 'Hathor',
       description: 'Hathor Mobile Wallet',
       url: 'https://hathor.network/',
+      icons: ['https://hathor.network/favicon.ico'],
     };
+
+    console.log('Core: ', core);
 
     const walletKit = yield call(WalletKit.init, {
       core,
       metadata,
     });
 
-    yield put(setReown({
-      walletKit,
-      core,
-    }));
+    console.log('Initialized! ', walletKit);
 
+    console.log('WalletKit initialized');
+
+    console.log('Setting global instances');
+    setGlobalReown({ walletKit, core });
+
+    // Setup listeners and session management
     yield fork(setupListeners, walletKit);
 
     // Refresh redux with the active sessions, loaded from storage
     // Pass extend = true so session expiration date get renewed
     yield call(refreshActiveSessions, true);
-    yield fork(listenForAppStateChange);
     yield fork(requestsListener);
 
-    // If the wallet is reset, we should cancel all listeners
-    yield take([
-      types.RESET_WALLET,
-      // If network changed, init will be called again, so clear.
-      // types.NETWORK_CHANGED,
-    ]);
-
-    yield call(clearSessions);
-
-    yield cancel();
   } catch (error) {
-    log.error('Error loading wallet connect', error);
+    console.log('Error: ', error);
     yield put(onExceptionCaptured(error));
   }
 }
@@ -157,12 +160,12 @@ function* init() {
 /* export function* listenForNetworkChange() {
   while (true) {
     yield take(types.NETWORK_CHANGED);
-    log.debug('Network changed.');
+    console.log('Network changed.');
     yield fork(init);
   }
 } */
 
-export function* listenForAppStateChange() {
+/* export function* listenForAppStateChange() {
   while (true) {
     const { payload: { oldState, newState } } = yield take(types.APPSTATE_UPDATED);
 
@@ -174,46 +177,36 @@ export function* listenForAppStateChange() {
       yield call(checkForPendingRequests);
     }
   }
-}
-
-export function* getReownClient() {
-  const reownClient = yield select((state) => state.reown.client);
-
-  if (!reownClient) {
-    return null;
-  }
-
-  return reownClient;
-}
+}*/
 
 export function* checkForPendingRequests() {
-  const reownClient = yield call(getReownClient);
-  if (!reownClient) {
-    log.debug('Tried to get reown client in checkForPendingRequests but it is undefined.');
+  const { walletKit } = getGlobalReown();
+
+  if (!walletKit) {
+    console.log('Tried to get reown client in checkForPendingRequests but walletKit is undefined.');
     return;
   }
-  const { walletKit } = reownClient;
 
   yield call([walletKit, walletKit.getPendingSessionProposals]);
   yield call([walletKit, walletKit.getPendingSessionRequests]);
 }
 
 export function* refreshActiveSessions(extend = false) {
-  log.debug('Refreshing active sessions.');
-  const reownClient = yield call(getReownClient);
-  if (!reownClient) {
-    log.debug('Tried to get reown client in refreshActiveSessions but it is undefined.');
+  console.log('Refreshing active sessions.');
+  const { walletKit } = getGlobalReown();
+  if (!walletKit) {
+    console.log('Tried to get reown client in refreshActiveSessions but walletKit is undefined.');
     return;
   }
-  const { walletKit } = reownClient;
 
   const activeSessions = yield call(() => walletKit.getActiveSessions());
+  console.log('Active Sessions: ', activeSessions);
   yield put(setReownSessions(activeSessions));
 
   if (extend) {
     for (const key of Object.keys(activeSessions)) {
-      log.debug('Extending session ');
-      log.debug(activeSessions[key].topic);
+      console.log('Extending session ');
+      console.log(activeSessions[key].topic);
 
       try {
         yield call(() => walletKit.extendSession({
@@ -240,6 +233,7 @@ export function* refreshActiveSessions(extend = false) {
 }
 
 export function* setupListeners(walletKit) {
+  console.log('Will setup listeners: ', walletKit);
   const channel = eventChannel((emitter) => {
     const listenerMap = new Map();
     const addListener = (eventName) => {
@@ -250,6 +244,7 @@ export function* setupListeners(walletKit) {
         });
       };
 
+      console.log(`walletKit.on('${eventName}')`);
       walletKit.on(eventName, listener);
       listenerMap.set(eventName, listener);
     };
@@ -284,13 +279,11 @@ export function* setupListeners(walletKit) {
 }
 
 export function* clearSessions() {
-  const reownClient = yield call(getReownClient);
-  if (!reownClient) {
-    log.debug('Tried to get reown client in clearSessions but it is undefined.');
+  const { walletKit } = getGlobalReown();
+  if (!walletKit) {
+    console.log('Tried to get reown client in clearSessions but walletKit is undefined.');
     return;
   }
-
-  const { walletKit } = reownClient;
 
   const activeSessions = yield call(() => walletKit.getActiveSessions());
 
@@ -326,13 +319,11 @@ export function* processRequest(action) {
   const { payload } = action;
   const { params } = payload;
 
-  const reownClient = yield call(getReownClient);
-  if (!reownClient) {
-    log.debug('Tried to get reown client in processRequest but it is undefined.');
+  const { walletKit } = getGlobalReown();
+  if (!walletKit) {
+    console.log('Tried to get reown client in processRequest but walletKit is undefined.');
     return;
   }
-  const { walletKit } = reownClient;
-  const wallet = yield select((state) => state.wallet);
 
   const activeSessions = yield call(() => walletKit.getActiveSessions());
   const requestSession = activeSessions[payload.topic];
@@ -657,8 +648,9 @@ export function* onCreateTokenRequest({ payload }) {
 }
 
 export function* onWalletReset() {
-  const reown = yield select((state) => state.reown);
-  if (!reown || !reown.client) {
+  const { walletKit } = getGlobalReown();
+  if (!walletKit) {
+    console.log('Tried to get reown client in onWalletReset but walletKit is undefined.');
     return;
   }
 
@@ -666,15 +658,27 @@ export function* onWalletReset() {
 }
 
 export function* onSessionProposal(action) {
+  console.log('Session proposal: ', action);
   const { id, params } = action.payload;
-  const reownClient = yield call(getReownClient);
+  const { walletKit } = getGlobalReown();
 
-  if (!reownClient) {
-    log.debug('Tried to get reown client in onSessionProposal but it is undefined.');
+  if (!walletKit) {
+    console.log('Tried to get reown client in onSessionProposal but walletKit is undefined.');
+    // Reject the session since we're not ready
+    try {
+      yield call([walletKit, walletKit.rejectSession], {
+        id,
+        reason: {
+          code: ERROR_CODES.UNAUTHORIZED_METHODS,
+          message: 'Wallet is not ready',
+        },
+      });
+    } catch (e) {
+      console.log('Error rejecting session when wallet not ready', e);
+    }
     return;
   }
 
-  const { walletKit } = reownClient;
   const wallet = yield select((state) => state.wallet);
   const firstAddress = yield call(() => wallet.getAddressAtIndex(0));
 
@@ -712,7 +716,7 @@ export function* onSessionProposal(action) {
         },
       }));
     } catch (e) {
-      log.error('Error rejecting session on sessionProposal', e);
+      console.log('Error rejecting session on sessionProposal', e);
     }
 
     return;
@@ -735,7 +739,7 @@ export function* onSessionProposal(action) {
 
     yield call(refreshActiveSessions);
   } catch (error) {
-    log.error('Error on sessionProposal: ', error);
+    console.log('Error on sessionProposal: ', error);
     try {
       yield call(() => walletKit.rejectSession({
         id,
@@ -751,20 +755,21 @@ export function* onSessionProposal(action) {
 }
 
 export function* onUriInputted(action) {
-  const reownClient = yield call(getReownClient);
+  const { core, walletKit } = getGlobalReown();
 
-  if (!reownClient) {
-    log.debug('Tried to get reown client in onSessionProposal but it is undefined.');
+  if (!core || !walletKit) {
+    console.log('Tried to get reown client in onUriInputted but core or walletKit is undefined.');
     return;
   }
-
-  const { core } = reownClient;
 
   const { payload } = action;
 
   try {
+    console.log('Will pair with URI');
     yield call(core.pairing.pair, { uri: payload });
+    console.log('Pairing successful');
   } catch (error) {
+    console.log('Error pairing: ', error);
     yield put(setWCConnectionFailed(true));
   }
 }
@@ -782,7 +787,12 @@ export function* featureToggleUpdateListener() {
 }
 
 export function* onCancelSession(action) {
-  const { walletKit } = yield select((state) => state.reown.client);
+  const { walletKit } = getGlobalReown();
+
+  if (!walletKit) {
+    console.log('Tried to get reown client in onCancelSession but walletKit is undefined.');
+    return;
+  }
 
   const activeSessions = yield call(() => walletKit.getActiveSessions());
 
