@@ -56,10 +56,15 @@ import {
   setCreateTokenStatusReady,
   setCreateTokenStatusSuccessful,
   setCreateTokenStatusFailed,
+  showGlobalModal,
+  hideGlobalModal,
 } from '../actions';
 import { checkForFeatureFlag, getNetworkSettings, retryHandler, showPinScreenForResult } from './helpers';
 // import { logger } from '../utils/logger';
 import { getGlobalReown, setGlobalReown } from '../modules/reown';
+import { MODAL_TYPES } from '../components/GlobalModal';
+import { getGlobalWallet } from '../modules/wallet';
+import { MODAL_ID as FEEDBACK_MODAL_ID } from '../components/Reown/NanoContractFeedbackModal';
 
 // const log = logger('reown');
 
@@ -165,20 +170,6 @@ function* init() {
   }
 } */
 
-/* export function* listenForAppStateChange() {
-  while (true) {
-    const { payload: { oldState, newState } } = yield take(types.APPSTATE_UPDATED);
-
-    if (oldState === 'background'
-      && newState === 'active') {
-      // Refresh and extend sessions
-      yield call(refreshActiveSessions, true);
-      // Check for pending requests
-      yield call(checkForPendingRequests);
-    }
-  }
-}*/
-
 export function* checkForPendingRequests() {
   const { walletKit } = getGlobalReown();
 
@@ -273,6 +264,7 @@ export function* setupListeners(walletKit) {
     log.error(e);
   } finally {
     if (yield cancelled()) {
+      // When we close the channel, it will remove the event listener
       channel.close();
     }
   }
@@ -342,6 +334,7 @@ export function* processRequest(action) {
   };
 
   try {
+    const wallet = getGlobalWallet();
     let dispatch;
     yield put((_dispatch) => {
       dispatch = _dispatch;
@@ -358,6 +351,7 @@ export function* processRequest(action) {
     switch (response.type) {
       case RpcResponseTypes.SendNanoContractTxResponse:
         yield put(setNewNanoContractStatusSuccess());
+        yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: false }));
         break;
       case RpcResponseTypes.CreateTokenResponse:
         yield put(setCreateTokenStatusSuccessful());
@@ -375,10 +369,12 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
+    console.log('Got an error: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
         yield put(setNewNanoContractStatusFailure());
+        yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
           retryHandler,
@@ -433,89 +429,152 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
   new Promise(async (resolve, reject) => {
     switch (request.type) {
       case TriggerTypes.SignOracleDataConfirmationPrompt: {
-        const signOracleDataResponseTemplate = (accepted) => () => resolve({
-          type: TriggerResponseTypes.SignOracleDataConfirmationResponse,
-          data: accepted,
-        });
+        const signOracleDataResponseTemplate = (accepted) => () => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.SignOracleDataConfirmationResponse,
+            data: accepted,
+          });
+        };
 
-        dispatch(showSignOracleDataModal(
-          signOracleDataResponseTemplate(true),
-          signOracleDataResponseTemplate(false),
-          request.data,
-          requestMetadata,
-        ));
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.SIGN_ORACLE_DATA,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: signOracleDataResponseTemplate(true),
+          onRejectAction: signOracleDataResponseTemplate(false),
+        }));
       } break;
+
       case TriggerTypes.CreateTokenConfirmationPrompt: {
-        const createTokenResponseTemplate = (accepted) => (data) => resolve({
-          type: TriggerResponseTypes.CreateTokenConfirmationResponse,
-          data: {
-            accepted,
-            token: data?.payload,
-          }
-        });
-        dispatch(showCreateTokenModal(
-          createTokenResponseTemplate(true),
-          createTokenResponseTemplate(false),
-          request.data,
-          requestMetadata,
-        ))
-      } break;
-      case TriggerTypes.SignMessageWithAddressConfirmationPrompt: {
-        const signMessageResponseTemplate = (accepted) => () => resolve({
-          type: TriggerResponseTypes.SignMessageWithAddressConfirmationResponse,
-          data: accepted,
-        });
-        dispatch(showSignMessageWithAddressModal(
-          signMessageResponseTemplate(true),
-          signMessageResponseTemplate(false),
-          request.data,
-          requestMetadata,
-        ));
-      } break;
-      case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
-        const sendNanoContractTxResponseTemplate = (accepted) => (data) => resolve({
-          type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
-          data: {
-            accepted,
-            nc: data?.payload,
-          }
-        });
+        const createTokenResponseTemplate = (accepted) => (data) => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.CreateTokenConfirmationResponse,
+            data: {
+              accepted,
+              token: data?.payload,
+            }
+          });
+        };
 
-        dispatch(showNanoContractSendTxModal(
-          sendNanoContractTxResponseTemplate(true),
-          sendNanoContractTxResponseTemplate(false),
-          request.data,
-          requestMetadata,
-        ));
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.CREATE_TOKEN,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: createTokenResponseTemplate(true),
+          onRejectAction: createTokenResponseTemplate(false),
+        }));
       } break;
+
+      case TriggerTypes.SignMessageWithAddressConfirmationPrompt: {
+        const signMessageResponseTemplate = (accepted) => () => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.SignMessageWithAddressConfirmationResponse,
+            data: accepted,
+          });
+        };
+
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.SIGN_MESSAGE,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: signMessageResponseTemplate(true),
+          onRejectAction: signMessageResponseTemplate(false),
+        }));
+      } break;
+
+      case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
+        const sendNanoContractTxResponseTemplate = (accepted) => (data) => {
+          console.log('REsponse data: ', data);
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
+            data: {
+              accepted,
+              nc: data
+            }
+          });
+        };
+
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.SEND_NANO_CONTRACT_TX,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: sendNanoContractTxResponseTemplate(true),
+          onRejectAction: sendNanoContractTxResponseTemplate(false),
+        }));
+      } break;
+
       case TriggerTypes.SendNanoContractTxLoadingTrigger:
         dispatch(setNewNanoContractStatusLoading());
+        dispatch(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: true }));
         resolve();
         break;
+
       case TriggerTypes.CreateTokenLoadingTrigger:
         dispatch(setCreateTokenStatusLoading());
         resolve();
         break;
+
       case TriggerTypes.CreateTokenLoadingFinishedTrigger:
         dispatch(setCreateTokenStatusReady());
         resolve();
         break;
+
       case TriggerTypes.SendNanoContractTxLoadingFinishedTrigger:
         dispatch(setNewNanoContractStatusReady());
         resolve();
         break;
-      case TriggerTypes.PinConfirmationPrompt: {
-        const pinCode = await showPinScreenForResult(dispatch);
 
-        resolve({
-          type: TriggerResponseTypes.PinRequestResponse,
-          data: {
-            accepted: true,
-            pinCode,
-          }
+      case TriggerTypes.PinConfirmationPrompt: {
+        const pinPromise = new Promise((pinResolve, pinReject) => {
+          dispatch(showGlobalModal(MODAL_TYPES.PIN_PAD, {
+            onComplete: (pinCode) => {
+              dispatch(hideGlobalModal());
+              pinResolve(pinCode);
+            },
+            onCancel: () => {
+              dispatch(hideGlobalModal());
+              pinReject(new Error('PIN entry cancelled'));
+            }
+          }));
         });
+
+        pinPromise
+          .then((pinCode) => {
+            resolve({
+              type: TriggerResponseTypes.PinRequestResponse,
+              data: {
+                accepted: true,
+                pinCode,
+              }
+            });
+          })
+          .catch(() => {
+            resolve({
+              type: TriggerResponseTypes.PinRequestResponse,
+              data: {
+                accepted: false,
+                pinCode: null,
+              }
+            });
+          });
       } break;
-      default: reject(new Error('Invalid request'));
+
+      default: {
+        console.log('Didnt match any trigger types');
+        reject(new Error('Invalid request'));
+      }
     }
   });
 
@@ -658,99 +717,78 @@ export function* onWalletReset() {
 }
 
 export function* onSessionProposal(action) {
-  console.log('Session proposal: ', action);
+  console.log('Got session proposal', action);
   const { id, params } = action.payload;
-  const { walletKit } = getGlobalReown();
+  
+  try {
+    const data = {
+      icon: get(params, 'proposer.metadata.icons[0]', null),
+      proposer: get(params, 'proposer.metadata.name', ''),
+      url: get(params, 'proposer.metadata.url', ''),
+      description: get(params, 'proposer.metadata.description', ''),
+      requiredNamespaces: get(params, 'requiredNamespaces', []),
+    };
+    // Show the modal
+    yield put(showGlobalModal(MODAL_TYPES.REOWN, {
+      type: ReownModalTypes.CONNECT,
+      data,
+      onAcceptAction: { type: types.REOWN_ACCEPT },
+      onRejectAction: { type: types.REOWN_REJECT },
+    }));
 
-  if (!walletKit) {
-    console.log('Tried to get reown client in onSessionProposal but walletKit is undefined.');
-    // Reject the session since we're not ready
-    try {
+    const { accepted } = yield race({
+      accepted: take(types.REOWN_ACCEPT),
+      rejected: take(types.REOWN_REJECT),
+    });
+
+    // Close the modal after getting user response
+    yield put(hideGlobalModal());
+
+    console.log('Accepted: ', accepted);
+
+    const { walletKit } = getGlobalReown();
+    if (!walletKit) {
+      throw new Error('WalletKit not initialized');
+    }
+
+    const networkSettings = yield select(getNetworkSettings);
+    console.log('Network Settings: ', networkSettings);
+    if (accepted) {
+      const wallet = getGlobalWallet();
+      const firstAddress = yield call(() => wallet.getAddressAtIndex(0));
+
+      // User accepted the proposal
+      yield call([walletKit, walletKit.approveSession], {
+        id,
+        relayProtocol: params.relays[0].protocol,
+        namespaces: {
+          hathor: {
+            accounts: [`hathor:${networkSettings.network}:${firstAddress}`],
+            chains: [`hathor:${networkSettings.network}`],
+            events: AVAILABLE_EVENTS,
+            methods: values(AVAILABLE_METHODS),
+          },
+        },
+      });
+    } else {
+      // User rejected the proposal
       yield call([walletKit, walletKit.rejectSession], {
         id,
         reason: {
-          code: ERROR_CODES.UNAUTHORIZED_METHODS,
-          message: 'Wallet is not ready',
+          code: ERROR_CODES.USER_REJECTED,
+          message: 'User rejected the session',
         },
       });
-    } catch (e) {
-      console.log('Error rejecting session when wallet not ready', e);
-    }
-    return;
-  }
-
-  const wallet = yield select((state) => state.wallet);
-  const firstAddress = yield call(() => wallet.getAddressAtIndex(0));
-
-  const data = {
-    icon: get(params, 'proposer.metadata.icons[0]', null),
-    proposer: get(params, 'proposer.metadata.name', ''),
-    url: get(params, 'proposer.metadata.url', ''),
-    description: get(params, 'proposer.metadata.description', ''),
-    requiredNamespaces: get(params, 'requiredNamespaces', []),
-  };
-
-  const onAcceptAction = { type: 'REOWN_ACCEPT' };
-  const onRejectAction = { type: 'REOWN_REJECT' };
-
-  yield put(setReownModal({
-    show: true,
-    type: ReownModalTypes.CONNECT,
-    data,
-    onAcceptAction,
-    onRejectAction,
-  }));
-
-  const { reject } = yield race({
-    accept: take(onAcceptAction.type),
-    reject: take(onRejectAction.type),
-  });
-
-  if (reject) {
-    try {
-      yield call(() => walletKit.rejectSession({
-        id,
-        reason: {
-          code: ERROR_CODES.USER_REJECTED,
-          message: 'User rejected the session',
-        },
-      }));
-    } catch (e) {
-      console.log('Error rejecting session on sessionProposal', e);
     }
 
-    return;
-  }
-
-  const networkSettings = yield select(getNetworkSettings);
-  try {
-    yield call(() => walletKit.approveSession({
-      id,
-      relayProtocol: params.relays[0].protocol,
-      namespaces: {
-        hathor: {
-          accounts: [`hathor:${networkSettings.network}:${firstAddress}`],
-          chains: [`hathor:${networkSettings.network}`],
-          events: AVAILABLE_EVENTS,
-          methods: values(AVAILABLE_METHODS),
-        },
-      },
-    }));
-
+    // Refresh the sessions list
     yield call(refreshActiveSessions);
   } catch (error) {
-    console.log('Error on sessionProposal: ', error);
-    try {
-      yield call(() => walletKit.rejectSession({
-        id,
-        reason: {
-          code: ERROR_CODES.USER_REJECTED,
-          message: 'User rejected the session',
-        },
-      }));
-    } catch (e) {
-      yield put(onExceptionCaptured(e));
-    }
+    console.error('Error handling session proposal:', error);
+    yield put(onExceptionCaptured(error));
+  } finally {
+    // Make sure to close the modal even if there's an error
+    yield put(hideGlobalModal());
   }
 }
 

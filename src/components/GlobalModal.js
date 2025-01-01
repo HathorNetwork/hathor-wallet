@@ -6,7 +6,7 @@
  */
 
 import $ from 'jquery';
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, createContext, useContext, useEffect } from 'react';
 import ModalAlert from './ModalAlert';
 import ModalAddressQRCode from './ModalAddressQRCode';
 import ModalAddToken from './ModalAddToken';
@@ -31,6 +31,9 @@ import { ModalAtomicSend } from "./atomic-swap/ModalAtomicSend";
 import { ModalAtomicReceive } from "./atomic-swap/ModalAtomicReceive";
 import { ModalAtomicExternalChange } from "./atomic-swap/ExternalChangeModal";
 import { ReownModal } from './Reown/ReownModal';
+import { setModalContext } from '../sagas/modal';
+import { PinPad } from './PinPad';
+import { NanoContractFeedbackModal } from './Reown/NanoContractFeedbackModal';
 
 const initialState = {
   showModal: () => {},
@@ -63,6 +66,8 @@ export const MODAL_TYPES = {
   'NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_DATA': 'NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_DATA',
   'NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_TX': 'NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_TX',
   'REOWN': 'REOWN',
+  'PIN_PAD': 'PIN_PAD',
+  'NANO_CONTRACT_FEEDBACK': 'NANO_CONTRACT_FEEDBACK',
 };
 
 export const MODAL_COMPONENTS = {
@@ -90,6 +95,8 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_DATA]: ModalSelectAddressToSignData,
   [MODAL_TYPES.NANOCONTRACT_SELECT_ADDRESS_TO_SIGN_TX]: ModalSelectAddressToSignTx,
   [MODAL_TYPES.REOWN]: ReownModal,
+  [MODAL_TYPES.PIN_PAD]: PinPad,
+  [MODAL_TYPES.NANO_CONTRACT_FEEDBACK]: NanoContractFeedbackModal,
 };
 
 export const GlobalModalContext = createContext(initialState);
@@ -161,6 +168,13 @@ export const GlobalModal = ({ children }) => {
     // Once properly configured, show the modal
     domElement.modal('show');
   }
+
+  useEffect(() => {
+    setModalContext({
+      showModal,
+      hideModal,
+    });
+  }, []);
 
   const renderComponent = () => {
     const { modalType } = store || {};
