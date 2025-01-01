@@ -6,6 +6,7 @@ import { saga as featureToggleSagas } from './featureToggle';
 import { saga as nanoContractSagas } from './nanoContract';
 import { saga as networkSettingsSagas } from './networkSettings';
 import { saga as reownSagas } from './reown';
+import { modalSaga } from './modal';
 
 function* defaultSaga() {
   yield all([
@@ -16,6 +17,7 @@ function* defaultSaga() {
     fork(nanoContractSagas),
     fork(networkSettingsSagas),
     fork(reownSagas),
+    fork(modalSaga),
   ]);
 }
 

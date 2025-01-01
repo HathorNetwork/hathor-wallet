@@ -229,10 +229,31 @@ export function* loadNanoContractDetail({ ncId }) {
   }
 }
 
+/**
+ * Fetch blueprint information and store it in redux
+ * @param {Object} action
+ * @param {string} action.payload Blueprint ID to fetch information for
+ */
+export function* fetchBlueprintInformation({ payload: blueprintId }) {
+  const blueprintsData = yield select((state) => state.blueprintsData);
+  if (blueprintsData[blueprintId]) {
+    // If we already have it, no need to fetch again
+    return;
+  }
+
+  try {
+    const blueprintInformation = yield call(hathorLib.ncApi.getBlueprintInformation, blueprintId);
+    yield put(addBlueprintInformation(blueprintInformation));
+  } catch(e) {
+    console.error('Error while loading blueprint information.', e);
+  }
+}
+
 export function* saga() {
   yield all([
     takeEvery(types.NANOCONTRACT_REGISTER_REQUEST, registerNanoContract),
     takeEvery(types.NANOCONTRACT_EDIT_ADDRESS, updateNanoContractRegisteredAddress),
     takeEvery(types.NANOCONTRACT_LOAD_DETAILS_REQUESTED, loadNanoContractDetail),
+    takeEvery(types.BLUEPRINT_FETCH_REQUESTED, fetchBlueprintInformation),
   ]);
 }

@@ -406,6 +406,34 @@ const helpers = {
   plural(qty, singleWord, pluralWord) {
     return qty === 1 ? singleWord : pluralWord;
   },
+
+  /**
+   * It short any string content without length bound.
+   * @param {string} content Content to be sliced in two parts
+   * @param {string} length Size of the substrigs in both sides of `...`
+   *
+   * @example
+   * getShortContent('00c30fc8a1b9a326a766ab0351faf3635297d316fd039a0eda01734d9de40185', 3)
+   * // output: '00c...185'
+   */
+  getShortContent(content, length = 4) {
+    return `${content.substring(0, length)}...${content.substring(content.length - length, content.length)}`
+  },
+
+  /**
+   * Truncates a text by showing the first and last n characters with ellipsis in between
+   * @param {string} text - The text to truncate
+   * @param {number} startChars - Number of characters to show at the start
+   * @param {number} endChars - Number of characters to show at the end
+   * @returns {string} The truncated text
+   */
+  truncateText(text, startChars = 8, endChars = 4) {
+    if (!text) return '';
+    if (text.length <= startChars + endChars) return text;
+    
+    return `${text.slice(0, startChars)}...${text.slice(-endChars)}`;
+  },
 }
+
 
 export default helpers;

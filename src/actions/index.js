@@ -61,6 +61,7 @@ export const types = {
   NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
   NANOCONTRACT_UNREGISTER: 'NANOCONTRACT_UNREGISTER',
   BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
+  BLUEPRINT_FETCH_REQUESTED: 'BLUEPRINT_FETCH_REQUESTED',
   NANOCONTRACT_LOAD_DETAILS_REQUESTED: 'NANOCONTRACT_LOAD_DETAILS_REQUESTED',
   NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE: 'NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE',
   NANOCONTRACT_LOAD_DETAILS_SUCCESS: 'NANOCONTRACT_LOAD_DETAILS_SUCCESS',
@@ -88,9 +89,12 @@ export const types = {
   SHOW_SIGN_MESSAGE_REQUEST_MODAL: 'SHOW_SIGN_MESSAGE_REQUEST_MODAL',
   SHOW_NANO_CONTRACT_SEND_TX_MODAL: 'SHOW_NANO_CONTRACT_SEND_TX_MODAL',
   REOWN_SESSION_PROPOSAL: 'REOWN_SESSION_PROPOSAL',
+  REOWN_SESSION_REQUEST: 'REOWN_SESSION_REQUEST',
   REOWN_SESSION_DELETE: 'REOWN_SESSION_DELETE',
   REOWN_CANCEL_SESSION: 'REOWN_CANCEL_SESSION',
   REOWN_SHUTDOWN: 'REOWN_SHUTDOWN',
+  SHOW_GLOBAL_MODAL: 'SHOW_GLOBAL_MODAL',
+  HIDE_GLOBAL_MODAL: 'HIDE_GLOBAL_MODAL',
 };
 
 /**
@@ -813,4 +817,20 @@ export const showSignMessageWithAddressModal = (onAccept, onReject, data, metada
 export const showNanoContractSendTxModal = (onAccept, onReject, data, metadata) => ({
   type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+/**
+ * @param {string} modalType The type of the modal to show
+ * @param {Object} modalProps The props to pass to the modal
+ */
+export const showGlobalModal = (modalType, modalProps = {}) => ({
+  type: types.SHOW_GLOBAL_MODAL,
+  payload: { modalType, modalProps }
+});
+
+/**
+ * Hide the global modal
+ */
+export const hideGlobalModal = () => ({
+  type: types.HIDE_GLOBAL_MODAL
 });
