@@ -6,12 +6,20 @@ const stdLibBrowser = require('node-stdlib-browser');
 
 module.exports = function override(config, env) {
   // Enable source maps for better debugging
-  config.devtool = 'source-map';
+  config.devtool = env === 'development' ? 'eval-source-map' : 'source-map';
+
+  // Fix source map paths
+  config.output = {
+    ...config.output,
+    devtoolModuleFilenameTemplate: env === 'development'
+      ? 'webpack:///./../[resource-path]'
+      : info => path.relative('src', info.absoluteResourcePath)
+  };
 
   config.optimization = {
     ...config.optimization,
-    minimize: false,
-    concatenateModules: false
+    minimize: env === 'production',
+    concatenateModules: env === 'production'
   };
 
   // Configure module resolution
