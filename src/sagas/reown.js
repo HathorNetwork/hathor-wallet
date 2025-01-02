@@ -739,8 +739,6 @@ export function* onSessionProposal(action) {
       rejected: take(types.REOWN_REJECT),
     });
 
-    log.debug('Accepted: ', accepted);
-
     const { walletKit } = getGlobalReown();
     if (!walletKit) {
       throw new Error('WalletKit not initialized');
