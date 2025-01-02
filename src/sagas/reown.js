@@ -728,21 +728,33 @@ export function* onSessionProposal(action) {
       description: get(params, 'proposer.metadata.description', ''),
       requiredNamespaces: get(params, 'requiredNamespaces', []),
     };
+
+    let dispatch;
+    yield put((_dispatch) => {
+      dispatch = _dispatch;
+    });
+
+    const connectResponseTemplate = (accepted) => () => {
+      dispatch(hideGlobalModal());
+      if (accepted) {
+        dispatch({ type: types.REOWN_ACCEPT });
+      } else {
+        dispatch({ type: types.REOWN_REJECT });
+      }
+    };
+
     // Show the modal
     yield put(showGlobalModal(MODAL_TYPES.REOWN, {
       type: ReownModalTypes.CONNECT,
       data,
-      onAcceptAction: { type: types.REOWN_ACCEPT },
-      onRejectAction: { type: types.REOWN_REJECT },
+      onAcceptAction: connectResponseTemplate(true),
+      onRejectAction: connectResponseTemplate(false),
     }));
 
     const { accepted } = yield race({
       accepted: take(types.REOWN_ACCEPT),
       rejected: take(types.REOWN_REJECT),
     });
-
-    // Close the modal after getting user response
-    yield put(hideGlobalModal());
 
     console.log('Accepted: ', accepted);
 
