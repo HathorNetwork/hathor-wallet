@@ -835,7 +835,7 @@ export function* onUriInputted(action) {
 export function* featureToggleUpdateListener() {
   while (true) {
     const oldReownEnabled = yield call(isReownEnabled);
-    yield take(types.FEATURE_TOGGLE_UPDATED);
+    yield take('FEATURE_TOGGLE_UPDATED');
     const newReownEnabled = yield call(isReownEnabled);
 
     if (oldReownEnabled && !newReownEnabled) {
@@ -873,7 +873,7 @@ export function* onSessionDelete(action) {
 
 export function* saga() {
   yield all([
-    // fork(featureToggleUpdateListener),
+    fork(featureToggleUpdateListener),
     fork(init),
     fork(listenForNetworkChange),
     takeLatest(types.SHOW_NANO_CONTRACT_SEND_TX_MODAL, onSendNanoContractTxRequest),
