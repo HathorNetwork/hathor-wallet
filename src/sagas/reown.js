@@ -17,7 +17,6 @@ import {
   select,
   race,
   actionChannel,
-  delay,
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { get, values } from 'lodash';
@@ -113,9 +112,6 @@ function* init() {
       relayUrl: 'wss://relay.walletconnect.com',
       logger: 'debug',
     });
-
-    // Wait a bit to ensure all core components are initialized
-    yield delay(1000);
 
     const metadata = {
       name: 'Hathor',

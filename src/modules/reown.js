@@ -5,9 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { WalletKit } from '@reown/walletkit/dist/types/client';
-import { Core } from '@walletconnect/core/dist/types/core';
-
 /**
  * Application-wide Reown client object
  * @type { walletKit: WalletKit, core: Core }
