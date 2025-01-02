@@ -227,6 +227,7 @@ export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
   [ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE]: false,
   [NANO_CONTRACTS_FEATURE_TOGGLE]: false,
+  [REOWN_FEATURE_TOGGLE]: false,
 };
 
 /**
@@ -314,6 +315,3 @@ export const NETWORK_SETTINGS_STATUS = {
 // Reown constants
 export const REOWN_PROJECT_ID = '8264fff563181da658ce64ee80e80458';
 export const REOWN_FEATURE_TOGGLE = 'wallet-desktop-reown.rollout';
-
-// Update FEATURE_TOGGLE_DEFAULTS
-FEATURE_TOGGLE_DEFAULTS[REOWN_FEATURE_TOGGLE] = false;
