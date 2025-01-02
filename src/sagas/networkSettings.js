@@ -1,5 +1,5 @@
 import { NETWORK_SETTINGS_STATUS } from '../constants';
-import { types, isVersionAllowedUpdate, selectToken, setNetworkSettingsStatus } from '../actions';
+import { types, isVersionAllowedUpdate, selectToken, setNetworkSettingsStatus, serverInfoUpdated } from '../actions';
 import { all, call, put, select, take, takeEvery } from 'redux-saga/effects';
 import hathorLib from '@hathor/wallet-lib';
 import { getGlobalWallet } from '../modules/wallet';
@@ -105,6 +105,8 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
     yield put(isVersionAllowedUpdate({ allowed: undefined }));
     yield put(selectToken(hathorLib.constants.NATIVE_TOKEN_UID));
     yield call(walletUtils.changeServer, wallet, pin, true);
+    // Notify that server info was updated
+    yield put(serverInfoUpdated());
   } catch (e) {
     console.error(e);
     // Restores storage and states as it was before

@@ -60,13 +60,13 @@ import {
   hideGlobalModal,
 } from '../actions';
 import { checkForFeatureFlag, getNetworkSettings, retryHandler, showPinScreenForResult } from './helpers';
-// import { logger } from '../utils/logger';
+import { logger } from '../utils/logger';
 import { getGlobalReown, setGlobalReown } from '../modules/reown';
 import { MODAL_TYPES } from '../components/GlobalModal';
 import { getGlobalWallet } from '../modules/wallet';
 import { MODAL_ID as FEEDBACK_MODAL_ID } from '../components/Reown/NanoContractFeedbackModal';
 
-// const log = logger('reown');
+const log = logger('reown');
 
 const AVAILABLE_METHODS = {
   HATHOR_SIGN_MESSAGE: 'htr_signWithAddress',
@@ -162,13 +162,24 @@ function* init() {
   }
 }
 
-/* export function* listenForNetworkChange() {
+export function* listenForNetworkChange() {
+  let previousGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
+  
   while (true) {
-    yield take(types.NETWORK_CHANGED);
-    console.log('Network changed.');
-    yield fork(init);
+    // Wait for the server info to be updated with the new network data
+    yield take(types.SERVER_INFO_UPDATED);
+    console.log('Server info updated');
+    
+    const currentGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
+    
+    console.log(previousGenesisHash, currentGenesisHash);
+    if (previousGenesisHash !== currentGenesisHash) {
+      log.debug('Genesis hash changed, clearing reown sessions.');
+      yield call(clearSessions);
+      previousGenesisHash = currentGenesisHash;
+    }
   }
-} */
+}
 
 export function* checkForPendingRequests() {
   const { walletKit } = getGlobalReown();
@@ -867,7 +878,7 @@ export function* saga() {
   yield all([
     // fork(featureToggleUpdateListener),
     fork(init),
-    // fork(listenForNetworkChange),
+    fork(listenForNetworkChange),
     takeLatest(types.SHOW_NANO_CONTRACT_SEND_TX_MODAL, onSendNanoContractTxRequest),
     takeLatest(types.SHOW_SIGN_MESSAGE_REQUEST_MODAL, onSignMessageRequest),
     takeLatest(types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL, onSignOracleDataRequest),
