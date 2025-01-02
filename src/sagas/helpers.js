@@ -133,10 +133,13 @@ export function* dispatchLedgerTokenSignatureVerification(wallet) {
   }
 }
 
-export const retryHandler = async (retryType, dismissType) => {
-};
+export function* retryHandler(retryAction, dismissAction) {
+  const { retry } = yield race({
+    retry: take(retryAction),
+    dismiss: take(dismissAction),
+  });
 
-export const showPinScreenForResult = async (dispatch) => {
-};
+  return retry != null;
+}
 
 export const getNetworkSettings = (state) => state.networkSettings.data;
