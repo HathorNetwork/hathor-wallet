@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-// import '@walletconnect/react-native-compat';
 import {
   call,
   fork,
@@ -40,18 +39,13 @@ import {
 } from '../constants';
 import {
   types,
-  setReownModal,
   setReownSessions,
   onExceptionCaptured,
   setWCConnectionFailed,
-  showSignMessageWithAddressModal,
-  showNanoContractSendTxModal,
-  showCreateTokenModal,
   setNewNanoContractStatusLoading,
   setNewNanoContractStatusReady,
   setNewNanoContractStatusFailure,
   setNewNanoContractStatusSuccess,
-  showSignOracleDataModal,
   setCreateTokenStatusLoading,
   setCreateTokenStatusReady,
   setCreateTokenStatusSuccessful,
@@ -64,7 +58,6 @@ import { logger } from '../utils/logger';
 import { getGlobalReown, setGlobalReown } from '../modules/reown';
 import { MODAL_TYPES } from '../components/GlobalModal';
 import { getGlobalWallet } from '../modules/wallet';
-import { MODAL_ID as FEEDBACK_MODAL_ID } from '../components/Reown/NanoContractFeedbackModal';
 
 const log = logger('reown');
 
@@ -91,14 +84,13 @@ function* isReownEnabled() {
 }
 
 function* init() {
-  console.log('Wallet not ready yet, waiting for START_WALLET_SUCCESS.');
+  log.debug('Wallet not ready yet, waiting for START_WALLET_SUCCESS.');
   yield take(types.START_WALLET_SUCCESS);
-  console.log('Starting reown.');
 
   // We should check if nano contracts are enabled in this network:
   const nanoContractsEnabled = yield select((state) => get(state.serverInfo, 'nanoContractsEnabled', false));
   if (!nanoContractsEnabled) {
-    console.log('Nano contracts are not enabled, skipping reown init.');
+    log.debug('Nano contracts are not enabled, skipping reown init.');
     return;
   }
 
@@ -107,16 +99,15 @@ function* init() {
     const reownEnabled = yield call(isReownEnabled);
 
     if (walletServiceEnabled) {
-      console.log('Wallet Service enabled, skipping reown init.');
+      log.debug('Wallet Service enabled, skipping reown init.');
       return;
     }
 
     if (!reownEnabled) {
-      console.log('Reown is not enabled.');
+      log.debug('Reown is not enabled.');
       return;
     }
 
-    console.log('Creating Core instance');
     const core = new Core({
       projectId: REOWN_PROJECT_ID,
       relayUrl: 'wss://relay.walletconnect.com',
@@ -126,7 +117,6 @@ function* init() {
     // Wait a bit to ensure all core components are initialized
     yield delay(1000);
 
-    console.log('Creating WalletKit');
     const metadata = {
       name: 'Hathor',
       description: 'Hathor Mobile Wallet',
@@ -134,18 +124,11 @@ function* init() {
       icons: ['https://hathor.network/favicon.ico'],
     };
 
-    console.log('Core: ', core);
-
     const walletKit = yield call(WalletKit.init, {
       core,
       metadata,
     });
 
-    console.log('Initialized! ', walletKit);
-
-    console.log('WalletKit initialized');
-
-    console.log('Setting global instances');
     setGlobalReown({ walletKit, core });
 
     // Setup listeners and session management
@@ -157,7 +140,7 @@ function* init() {
     yield fork(requestsListener);
 
   } catch (error) {
-    console.log('Error: ', error);
+    log.debug('Error on init: ', error);
     yield put(onExceptionCaptured(error));
   }
 }
@@ -168,11 +151,9 @@ export function* listenForNetworkChange() {
   while (true) {
     // Wait for the server info to be updated with the new network data
     yield take(types.SERVER_INFO_UPDATED);
-    console.log('Server info updated');
     
     const currentGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
     
-    console.log(previousGenesisHash, currentGenesisHash);
     if (previousGenesisHash !== currentGenesisHash) {
       log.debug('Genesis hash changed, clearing reown sessions.');
       yield call(clearSessions);
@@ -185,7 +166,7 @@ export function* checkForPendingRequests() {
   const { walletKit } = getGlobalReown();
 
   if (!walletKit) {
-    console.log('Tried to get reown client in checkForPendingRequests but walletKit is undefined.');
+    log.debug('Tried to get reown client in checkForPendingRequests but walletKit is undefined.');
     return;
   }
 
@@ -194,21 +175,20 @@ export function* checkForPendingRequests() {
 }
 
 export function* refreshActiveSessions(extend = false) {
-  console.log('Refreshing active sessions.');
+  log.debug('Refreshing active sessions.');
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
-    console.log('Tried to get reown client in refreshActiveSessions but walletKit is undefined.');
+    log.debug('Tried to get reown client in refreshActiveSessions but walletKit is undefined.');
     return;
   }
 
   const activeSessions = yield call(() => walletKit.getActiveSessions());
-  console.log('Active Sessions: ', activeSessions);
   yield put(setReownSessions(activeSessions));
 
   if (extend) {
     for (const key of Object.keys(activeSessions)) {
-      console.log('Extending session ');
-      console.log(activeSessions[key].topic);
+      log.debug('Extending session ');
+      log.debug(activeSessions[key].topic);
 
       try {
         yield call(() => walletKit.extendSession({
@@ -235,7 +215,7 @@ export function* refreshActiveSessions(extend = false) {
 }
 
 export function* setupListeners(walletKit) {
-  console.log('Will setup listeners: ', walletKit);
+  log.debug('Will setup listeners: ', walletKit);
   const channel = eventChannel((emitter) => {
     const listenerMap = new Map();
     const addListener = (eventName) => {
@@ -246,7 +226,6 @@ export function* setupListeners(walletKit) {
         });
       };
 
-      console.log(`walletKit.on('${eventName}')`);
       walletKit.on(eventName, listener);
       listenerMap.set(eventName, listener);
     };
@@ -284,7 +263,7 @@ export function* setupListeners(walletKit) {
 export function* clearSessions() {
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
-    console.log('Tried to get reown client in clearSessions but walletKit is undefined.');
+    log.debug('Tried to get reown client in clearSessions but walletKit is undefined.');
     return;
   }
 
@@ -324,7 +303,7 @@ export function* processRequest(action) {
 
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
-    console.log('Tried to get reown client in processRequest but walletKit is undefined.');
+    log.debug('Tried to get reown client in processRequest but walletKit is undefined.');
     return;
   }
 
@@ -380,7 +359,7 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
-    console.log('Got an error: ', e);
+    log.debug('Got an error: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
@@ -725,7 +704,7 @@ export function* onWalletReset() {
 }
 
 export function* onSessionProposal(action) {
-  console.log('Got session proposal', action);
+  log.debug('Got session proposal', action);
   const { id, params } = action.payload;
   
   try {
@@ -764,7 +743,7 @@ export function* onSessionProposal(action) {
       rejected: take(types.REOWN_REJECT),
     });
 
-    console.log('Accepted: ', accepted);
+    log.debug('Accepted: ', accepted);
 
     const { walletKit } = getGlobalReown();
     if (!walletKit) {
@@ -772,7 +751,7 @@ export function* onSessionProposal(action) {
     }
 
     const networkSettings = yield select(getNetworkSettings);
-    console.log('Network Settings: ', networkSettings);
+    log.debug('Network Settings: ', networkSettings);
     if (accepted) {
       const wallet = getGlobalWallet();
       const firstAddress = yield call(() => wallet.getAddressAtIndex(0));
@@ -804,7 +783,7 @@ export function* onSessionProposal(action) {
     // Refresh the sessions list
     yield call(refreshActiveSessions);
   } catch (error) {
-    console.error('Error handling session proposal:', error);
+    log.error('Error handling session proposal:', error);
     yield put(onExceptionCaptured(error));
   } finally {
     // Make sure to close the modal even if there's an error
@@ -816,18 +795,16 @@ export function* onUriInputted(action) {
   const { core, walletKit } = getGlobalReown();
 
   if (!core || !walletKit) {
-    console.log('Tried to get reown client in onUriInputted but core or walletKit is undefined.');
+    log.debug('Tried to get reown client in onUriInputted but core or walletKit is undefined.');
     return;
   }
 
   const { payload } = action;
 
   try {
-    console.log('Will pair with URI');
     yield call(core.pairing.pair, { uri: payload });
-    console.log('Pairing successful');
   } catch (error) {
-    console.log('Error pairing: ', error);
+    log.debug('Error pairing: ', error);
     yield put(setWCConnectionFailed(true));
   }
 }
@@ -848,7 +825,7 @@ export function* onCancelSession(action) {
   const { walletKit } = getGlobalReown();
 
   if (!walletKit) {
-    console.log('Tried to get reown client in onCancelSession but walletKit is undefined.');
+    log.debug('Tried to get reown client in onCancelSession but walletKit is undefined.');
     return;
   }
 
