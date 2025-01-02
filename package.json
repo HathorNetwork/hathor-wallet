@@ -38,7 +38,7 @@
     "@hathor/wallet-lib": "2.0.1",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
-    "@reown/walletkit": "^1.1.2",
+    "@reown/walletkit": "1.1.2",
     "@sentry/electron": "3.0.7",
     "@walletconnect/core": "2.17.3",
     "@walletconnect/utils": "2.17.3",
