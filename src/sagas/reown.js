@@ -504,7 +504,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
 
       case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
         const sendNanoContractTxResponseTemplate = (accepted) => (data) => {
-          console.log('Response data: ', data);
           dispatch(hideGlobalModal());
           resolve({
             type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
@@ -582,20 +581,17 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           });
       } break;
 
-      default: {
-        console.log('Didnt match any trigger types');
+      default:
         reject(new Error('Invalid request'));
-      }
     }
   });
 
 export function* onSignMessageRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
-
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready, ignoring.');
+    log.error('Got a session request but wallet is not ready.');
     return;
   }
 
@@ -624,11 +620,10 @@ export function* onSignMessageRequest({ payload }) {
 
 export function* onSignOracleDataRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
-
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready, ignoring.');
+    log.error('Got a session request but wallet is not ready.');
     return;
   }
 
@@ -657,11 +652,10 @@ export function* onSignOracleDataRequest({ payload }) {
 
 export function* onSendNanoContractTxRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
-
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready, ignoring.');
+    log.error('Got a session request but wallet is not ready.');
     return;
   }
 
@@ -690,11 +684,10 @@ export function* onSendNanoContractTxRequest({ payload }) {
 
 export function* onCreateTokenRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
-
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready, ignoring.');
+    log.error('Got a session request but wallet is not ready.');
     return;
   }
 
@@ -724,7 +717,7 @@ export function* onCreateTokenRequest({ payload }) {
 export function* onWalletReset() {
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
-    console.log('Tried to get reown client in onWalletReset but walletKit is undefined.');
+    log.error('WalletKit not initialized.');
     return;
   }
 
