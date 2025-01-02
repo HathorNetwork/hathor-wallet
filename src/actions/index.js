@@ -95,6 +95,7 @@ export const types = {
   REOWN_SHUTDOWN: 'REOWN_SHUTDOWN',
   SHOW_GLOBAL_MODAL: 'SHOW_GLOBAL_MODAL',
   HIDE_GLOBAL_MODAL: 'HIDE_GLOBAL_MODAL',
+  SERVER_INFO_UPDATED: 'SERVER_INFO_UPDATED',
 };
 
 /**
@@ -492,6 +493,13 @@ export const resetNavigateTo = () => ({
 export const setServerInfo = ({ version, network, customTokens, decimalPlaces, nanoContractsEnabled }) => (
   { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces, nanoContractsEnabled } }
 );
+
+/**
+ * Action to notify that server info was updated
+ */
+export const serverInfoUpdated = () => ({
+  type: types.SERVER_INFO_UPDATED,
+});
 
 export const featureToggleInitialized = () => ({
   type: types.FEATURE_TOGGLE_INITIALIZED,
