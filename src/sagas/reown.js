@@ -448,15 +448,15 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           });
         };
 
-        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
-          type: ReownModalTypes.SIGN_ORACLE_DATA,
-          data: {
+        dispatch({
+          type: types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL,
+          payload: {
+            accept: signOracleDataResponseTemplate(true),
+            deny: signOracleDataResponseTemplate(false),
             data: request.data,
             dapp: requestMetadata,
-          },
-          onAcceptAction: signOracleDataResponseTemplate(true),
-          onRejectAction: signOracleDataResponseTemplate(false),
-        }));
+          }
+        });
       } break;
 
       case TriggerTypes.CreateTokenConfirmationPrompt: {
@@ -471,15 +471,15 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           });
         };
 
-        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
-          type: ReownModalTypes.CREATE_TOKEN,
-          data: {
+        dispatch({
+          type: types.SHOW_CREATE_TOKEN_REQUEST_MODAL,
+          payload: {
+            accept: createTokenResponseTemplate(true),
+            deny: createTokenResponseTemplate(false),
             data: request.data,
             dapp: requestMetadata,
-          },
-          onAcceptAction: createTokenResponseTemplate(true),
-          onRejectAction: createTokenResponseTemplate(false),
-        }));
+          }
+        });
       } break;
 
       case TriggerTypes.SignMessageWithAddressConfirmationPrompt: {
@@ -491,20 +491,20 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           });
         };
 
-        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
-          type: ReownModalTypes.SIGN_MESSAGE,
-          data: {
+        dispatch({
+          type: types.SHOW_SIGN_MESSAGE_REQUEST_MODAL,
+          payload: {
+            accept: signMessageResponseTemplate(true),
+            deny: signMessageResponseTemplate(false),
             data: request.data,
             dapp: requestMetadata,
-          },
-          onAcceptAction: signMessageResponseTemplate(true),
-          onRejectAction: signMessageResponseTemplate(false),
-        }));
+          }
+        });
       } break;
 
       case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
         const sendNanoContractTxResponseTemplate = (accepted) => (data) => {
-          console.log('REsponse data: ', data);
+          console.log('Response data: ', data);
           dispatch(hideGlobalModal());
           resolve({
             type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
@@ -515,15 +515,15 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           });
         };
 
-        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
-          type: ReownModalTypes.SEND_NANO_CONTRACT_TX,
-          data: {
+        dispatch({
+          type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
+          payload: {
+            accept: sendNanoContractTxResponseTemplate(true),
+            deny: sendNanoContractTxResponseTemplate(false),
             data: request.data,
             dapp: requestMetadata,
-          },
-          onAcceptAction: sendNanoContractTxResponseTemplate(true),
-          onRejectAction: sendNanoContractTxResponseTemplate(false),
-        }));
+          }
+        });
       } break;
 
       case TriggerTypes.SendNanoContractTxLoadingTrigger:
@@ -592,20 +592,21 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
 export function* onSignMessageRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
 
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     log.error('Got a session request but wallet is not ready, ignoring.');
     return;
   }
 
-  yield put(setReownModal({
-    show: true,
+  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
     type: ReownModalTypes.SIGN_MESSAGE,
     data: {
       data,
       dapp,
     },
+    onAcceptAction: accept,
+    onRejectAction: denyCb,
   }));
 
   const { deny } = yield race({
@@ -624,20 +625,21 @@ export function* onSignMessageRequest({ payload }) {
 export function* onSignOracleDataRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
 
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     log.error('Got a session request but wallet is not ready, ignoring.');
     return;
   }
 
-  yield put(setReownModal({
-    show: true,
+  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
     type: ReownModalTypes.SIGN_ORACLE_DATA,
     data: {
       data,
       dapp,
     },
+    onAcceptAction: accept,
+    onRejectAction: denyCb,
   }));
 
   const { deny } = yield race({
@@ -654,25 +656,26 @@ export function* onSignOracleDataRequest({ payload }) {
 }
 
 export function* onSendNanoContractTxRequest({ payload }) {
-  const { accept: acceptCb, deny: denyCb, nc, dapp } = payload;
+  const { accept, deny: denyCb, data, dapp } = payload;
 
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     log.error('Got a session request but wallet is not ready, ignoring.');
     return;
   }
 
-  yield put(setReownModal({
-    show: true,
+  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
     type: ReownModalTypes.SEND_NANO_CONTRACT_TX,
     data: {
+      data,
       dapp,
-      data: nc,
     },
+    onAcceptAction: accept,
+    onRejectAction: denyCb,
   }));
 
-  const { deny, accept } = yield race({
+  const { deny } = yield race({
     accept: take(types.REOWN_ACCEPT),
     deny: take(types.REOWN_REJECT),
   });
@@ -682,29 +685,30 @@ export function* onSendNanoContractTxRequest({ payload }) {
     return;
   }
 
-  acceptCb(accept);
+  accept();
 }
 
 export function* onCreateTokenRequest({ payload }) {
-  const { accept: acceptCb, deny: denyCb, data, dapp } = payload;
+  const { accept, deny: denyCb, data, dapp } = payload;
 
-  const wallet = yield select((state) => state.wallet);
+  const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
     log.error('Got a session request but wallet is not ready, ignoring.');
     return;
   }
 
-  yield put(setReownModal({
-    show: true,
+  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
     type: ReownModalTypes.CREATE_TOKEN,
     data: {
-      dapp,
       data,
+      dapp,
     },
+    onAcceptAction: accept,
+    onRejectAction: denyCb,
   }));
 
-  const { deny, accept } = yield race({
+  const { deny } = yield race({
     accept: take(types.REOWN_ACCEPT),
     deny: take(types.REOWN_REJECT),
   });
@@ -714,7 +718,7 @@ export function* onCreateTokenRequest({ payload }) {
     return;
   }
 
-  acceptCb(accept);
+  accept();
 }
 
 export function* onWalletReset() {
