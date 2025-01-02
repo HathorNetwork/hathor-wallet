@@ -49,6 +49,8 @@ function Settings() {
   }))
 
   const reownEnabled = useSelector(state => state.featureToggles[REOWN_FEATURE_TOGGLE]);
+  const reownSessions = useSelector(state => state.reown.sessions);
+  const connectedSessionsCount = Object.keys(reownSessions).length;
 
   useEffect(() => {
     setIsNotificationOn(wallet.isNotificationOn());
@@ -271,6 +273,10 @@ function Settings() {
     helpers.openExternalURL(PRIVACY_POLICY_URL);
   }
 
+  const goToReown = () => {
+    navigate('/reown/connect');
+  }
+
   const serverURL = useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
   const wsServerURL = useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
   const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
@@ -291,6 +297,18 @@ function Settings() {
         }
         <button className="btn btn-hathor" onClick={changeNetwork}>{t`Change network`}</button>
       </div>
+      <hr />
+
+      {!useWalletService && reownEnabled && (
+        <div>
+          <h4>{t`Reown`}</h4>
+          <div className="d-flex flex-row align-items-center mb-2">
+            <span>{t`Connected Sessions: ${connectedSessionsCount}`}</span>
+          </div>
+          <button className="btn btn-hathor" onClick={goToReown}>{t`Manage sessions`}</button>
+        </div>
+      )}
+
       <hr />
 
       <div>
@@ -327,13 +345,6 @@ function Settings() {
         <div><a href="true" onClick={goToPrivacyPolicy}>Privacy Policy</a></div>
       </div>
       <HathorAlert ref={alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
-      {reownEnabled && (
-        <div className="d-flex flex-column mb-3">
-          <Link to="/reown/connect" className="btn btn-secondary">
-            {t`Connect to dApp`}
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
