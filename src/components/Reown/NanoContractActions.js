@@ -116,7 +116,7 @@ export function NanoContractActions({ ncActions, tokens, error }) {
 
   return (
     <>
-      <h6 className="mb-3">{t`Action List`}</h6>
+      <h6 className="mb-3 mt-3">{t`Action List`}</h6>
       {error && (
         <div className="alert alert-danger d-flex align-items-center" role="alert">
           <i className="fa fa-exclamation-circle mr-2"></i>
