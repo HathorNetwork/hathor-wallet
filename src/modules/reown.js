@@ -5,9 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { WalletKit } from '@reown/walletkit/dist/types/client';
+import { Core } from '@walletconnect/core/dist/types/core';
+
 /**
  * Application-wide Reown client object
- * @type {Core|null}
+ * @type { walletKit: WalletKit, core: Core }
  */
 let globalReown = {
   walletKit: null,
@@ -15,8 +18,8 @@ let globalReown = {
 };
 
 /**
- * Sets the global Hathor Wallet
- * @param {hathorLib.HathorWallet} wallet
+ * Sets the global Reown object
+ * @param {{ walletKit: WalletKit, core: Core } wallet
  */
 export const setGlobalReown = ({ walletKit, core }) => {
   globalReown = {
@@ -26,7 +29,7 @@ export const setGlobalReown = ({ walletKit, core }) => {
 };
 
 /**
- * Retrieves the application-wide HathorWallet object
+ * Retrieves the application-wide Reown object
  */
 export const getGlobalReown = () => globalReown;
 
