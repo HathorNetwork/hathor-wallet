@@ -355,7 +355,7 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
-    log.debug('Got an error: ', e);
+    log.debug('Error on processRequest: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
