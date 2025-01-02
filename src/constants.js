@@ -222,6 +222,7 @@ export const IGNORE_WS_TOGGLE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 export const WALLET_SERVICE_FEATURE_TOGGLE = 'wallet-service-desktop.rollout';
 export const ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE = 'atomic-swap-service-desktop.rollout';
 export const NANO_CONTRACTS_FEATURE_TOGGLE = 'nano-contracts-desktop.rollout';
+export const REOWN_FEATURE_TOGGLE = 'wallet-desktop-reown.rollout';
 
 export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
@@ -314,4 +315,3 @@ export const NETWORK_SETTINGS_STATUS = {
 
 // Reown constants
 export const REOWN_PROJECT_ID = '8264fff563181da658ce64ee80e80458';
-export const REOWN_FEATURE_TOGGLE = 'wallet-desktop-reown.rollout';
