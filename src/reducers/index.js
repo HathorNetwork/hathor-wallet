@@ -15,6 +15,7 @@ import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
 import { constants as hathorLibConstants } from "@hathor/wallet-lib";
 import helpersUtils from '../utils/helpers';
 import LOCAL_STORE from '../storage';
+import reownReducer from './reown';
 
 const { NATIVE_TOKEN_UID, DECIMAL_PLACES } = hathorLibConstants;
 
@@ -287,6 +288,7 @@ const initialState = {
     newNetwork: null,
     error: null,
   },
+  reown: reownReducer(undefined, {}),
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -437,6 +439,22 @@ const rootReducer = (state = initialState, action) => {
       return onSetNetworkSettingsStatus(state, action);
     case types.NETWORKSETTINGS_UPDATED:
       return onUpdateNetworkSettings(state, action);
+    case types.REOWN_SET_CLIENT:
+    case types.REOWN_SET_MODAL:
+    case types.REOWN_SET_SESSIONS:
+    case types.REOWN_SET_CONNECTION_FAILED:
+    case types.REOWN_NEW_NANOCONTRACT_STATUS_LOADING:
+    case types.REOWN_NEW_NANOCONTRACT_STATUS_READY:
+    case types.REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS:
+    case types.REOWN_NEW_NANOCONTRACT_STATUS_FAILURE:
+    case types.REOWN_CREATE_TOKEN_STATUS_LOADING:
+    case types.REOWN_CREATE_TOKEN_STATUS_READY:
+    case types.REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL:
+    case types.REOWN_CREATE_TOKEN_STATUS_FAILED:
+      return {
+        ...state,
+        reown: reownReducer(state.reown, action),
+      };
     default:
       return state;
   }

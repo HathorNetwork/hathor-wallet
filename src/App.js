@@ -56,6 +56,7 @@ import NewSwap from './screens/atomic-swap/NewSwap';
 import ImportExisting from './screens/atomic-swap/ImportExisting';
 import LOCAL_STORE from './storage';
 import { getGlobalWallet } from "./modules/wallet";
+import ReownConnect from './screens/ReownConnect';
 
 function Root() {
   const {
@@ -218,6 +219,7 @@ function Root() {
       <Route path="/loading_addresses" element={<LoadingAddresses />} />
       <Route path="/permission" element={<SentryPermission />} />
       <Route path="/" element={<StartedComponent children={ <Wallet />} loaded={true} />} />
+      <Route path="/reown/connect" element={<ReownConnect />} />
       <Route path="*" element={<Page404 />} />
     </Routes>
   );
