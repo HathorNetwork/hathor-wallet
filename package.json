@@ -83,7 +83,9 @@
     "electron-dev-concurrently": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .'",
     "locale-update-pot": "ttag extract -o ./locale/texts.pot ./src/",
     "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps && patch-package",
-    "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0"
+    "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0",
+    "qa_network_up": "docker compose -f ./qa/large-values-network/docker-compose.yml up",
+    "qa_network_down": "docker compose -f ./qa/large-values-network/docker-compose.yml down"
   },
   "devDependencies": {
     "@sentry/browser": "7.99.0",
