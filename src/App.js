@@ -74,6 +74,7 @@ function Root() {
   const wallet = getGlobalWallet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const modalContext = useContext(GlobalModalContext);
 
   // Monitors when Ledger device loses connection or the app is closed
   useEffect(() => {
