@@ -82,7 +82,8 @@ module.exports = function override(config, env) {
     }),
   ];
 
-  // Only add LavaMoat in production
+  // Only add LavaMoat in production because LavaMoat does not work with the
+  // hot reloading feature in dev.
   if (env === 'production') {
     config.plugins = [
       new LavaMoatPlugin({
