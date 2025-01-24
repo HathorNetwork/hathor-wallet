@@ -26,6 +26,7 @@ export function CreateTokenModal({ data, onAccept, onReject }) {
           </div>
         </div>
         <p>{t`Token details:`}</p>
+        { /* TODO: Token details will be rendered in raw format, we should improve this UI */ }
         <pre className="bg-light p-3 rounded">{JSON.stringify(data.data, null, 2)}</pre>
       </div>
       <div className="modal-footer">
