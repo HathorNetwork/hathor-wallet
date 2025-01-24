@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import tokensUtils from '../../utils/tokens';
 import helpers from '../../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
+import { DEFAULT_NATIVE_TOKEN_CONFIG, NATIVE_TOKEN_UID } from '@hathor/wallet-lib/lib/constants';
 
 /**
  * It returns the title template for each action type,
@@ -39,8 +40,8 @@ const getActionTitle = (tokens, action) => {
   }
 
   // If it's HTR, use HTR as the symbol
-  if (action.token === '00') {
-    return actionTitleMap('HTR')[action.type];
+  if (action.token === NATIVE_TOKEN_UID) {
+    return actionTitleMap(DEFAULT_NATIVE_TOKEN_CONFIG.symbol)[action.type];
   }
 
   // If we have token metadata, use its symbol
