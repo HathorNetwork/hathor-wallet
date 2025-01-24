@@ -42,7 +42,9 @@ export class ModalPin extends React.Component {
     $('#modalPin').on('hidden.bs.modal', this.onModalHidden);
 
     // Focus the PIN field on modal load
-    this.refs.pinInput.refs.pin.focus();
+    $('#modalPin').on('shown.bs.modal', (e) => {
+      this.refs.pinInput.refs.pin.focus();
+    });
   }
 
   componentWillUnmount() {
