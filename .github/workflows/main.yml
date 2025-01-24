@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 40  # default is 360
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
     steps:
     # https://github.com/actions/checkout/releases/tag/v4.1.7
     - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332

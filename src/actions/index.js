@@ -52,8 +52,6 @@ export const types = {
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
   SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
   UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
-  UPDATE_MINING_SERVER: 'UPDATE_MINING_SERVER',
-  SET_MINING_SERVER: 'SET_MINING_SERVER',
   SET_NATIVE_TOKEN_DATA: 'SET_NATIVE_TOKEN_DATA',
   ADD_REGISTERED_TOKENS: 'ADD_REGISTERED_TOKENS',
   NANOCONTRACT_REGISTER_REQUEST: 'NANOCONTRACT_REGISTER_REQUEST',
@@ -63,6 +61,12 @@ export const types = {
   NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
   NANOCONTRACT_UNREGISTER: 'NANOCONTRACT_UNREGISTER',
   BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
+  NANOCONTRACT_LOAD_DETAILS_REQUESTED: 'NANOCONTRACT_LOAD_DETAILS_REQUESTED',
+  NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE: 'NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE',
+  NANOCONTRACT_LOAD_DETAILS_SUCCESS: 'NANOCONTRACT_LOAD_DETAILS_SUCCESS',
+  NETWORKSETTINGS_UPDATE_REQUESTED: 'NETWORKSETTINGS_UPDATE_REQUESTED',
+  NETWORKSETTINGS_UPDATED: 'NETWORKSETTINGS_UPDATED',
+  NETWORKSETTINGS_SET_STATUS: 'NETWORKSETTINGS_SET_STATUS',
 };
 
 /**
@@ -501,26 +505,6 @@ export const changeWalletState = (newState) => ({
 });
 
 /**
- * Update the tx mining service config on the lib and redux.
- *
- * @param {string|undefined} url
- * @param {boolean} reset
- */
-export const updateMiningServer = (url, reset) => ({
-  type: types.UPDATE_MINING_SERVER,
-  payload: { url, reset },
-});
-
-/**
- * Set the mining server url
- * @param {string|undefined} url
- */
-export const setMiningServer = (url) => ({
-  type: types.SET_MINING_SERVER,
-  payload: url,
-});
-
-/**
  * Register nano contract in redux
  *
  * @param {string} ncId Nano contract id
@@ -613,4 +597,83 @@ export const editAddressNC = (ncId, address) => ({
 export const nanoContractUnregister = (ncId) => ({
   type: types.NANOCONTRACT_UNREGISTER,
   payload: ncId,
+});
+
+/**
+ * Start a request to load nano contract detail
+ *
+ * @param {string} ncId ID of nano contract to load the data
+ */
+export const nanoContractDetailRequest = (ncId) => ({
+  type: types.NANOCONTRACT_LOAD_DETAILS_REQUESTED,
+  ncId,
+});
+
+/**
+ * Set status of a nano contract detail load
+ *
+ * @param {Object} payload
+ * @param {string} payload.status Status of the load to set in redux
+ * @param {string} payload.error Error when loading data
+ */
+export const nanoContractDetailSetStatus = ({ status, error }) => ({
+  type: types.NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE,
+  payload: { status, error },
+});
+
+/**
+ * Set nano contract detail state in redux
+ *
+ * @param {hathorLib.nano_contracts.types.NanoContractStateAPIResponse} ncState
+ */
+export const nanoContractDetailLoaded = (ncState) => ({
+  type: types.NANOCONTRACT_LOAD_DETAILS_SUCCESS,
+  state: ncState,
+});
+
+/**
+ * Update redux data with new network settings
+ *
+ * @param {Object} data
+ * @param {string} data.node
+ * @param {string} data.network
+ * @param {string} data.txMining
+ * @param {string} data.explorer
+ * @param {string} data.explorerService
+ * @param {string} data.walletService
+ * @param {string} data.walletServiceWS
+ */
+export const networkSettingsUpdate = (data) => ({
+  type: types.NETWORKSETTINGS_UPDATED,
+  payload: data,
+});
+
+/**
+ * Called when the user clicks to update the network settings
+ *
+ * @param {Object} data
+ * @param {string} data.node
+ * @param {string} data.txMining
+ * @param {string} data.explorer
+ * @param {string} data.explorerService
+ * @param {string} data.walletService
+ * @param {string} data.walletServiceWS
+ * @param {string} pin
+ */
+export const networkSettingsRequestUpdate = (data, pin) => ({
+  type: types.NETWORKSETTINGS_UPDATE_REQUESTED,
+  data,
+  pin,
+});
+
+/**
+ * Set the status of the network settings update
+ *
+ * @param {NETWORK_SETTINGS_STATUS} status
+ * @param {string | null | undefined} error
+ * @param {string | null | undefined} newNetwork
+ */
+export const setNetworkSettingsStatus = ({ status, error, newNetwork }) => ({
+  type: types.NETWORKSETTINGS_SET_STATUS,
+  payload: { status, error, newNetwork },
 });

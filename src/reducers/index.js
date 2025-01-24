@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { FEATURE_TOGGLE_DEFAULTS, VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
@@ -140,7 +140,6 @@ const initialState = {
   featureToggles: {
     ...FEATURE_TOGGLE_DEFAULTS,
   },
-  miningServer: null,
   // The native token data of the current network
   // @type {{symbol: string, name: string, uid: string}}
   nativeTokenData: null,
@@ -251,6 +250,43 @@ const initialState = {
    * }
   */
   blueprintsData: {},
+  /**
+   * Stores the status for requesting data for the nano contract detail screen
+   *
+   * {
+   *   state: hathorLib.nano_contracts.types.NanoContractStateAPIResponse,
+   *   status: NANO_CONTRACT_DETAIL_STATUS,
+   *   error: string | null,
+   * }
+  */
+  nanoContractDetailState: {
+    state: null,
+    status: NANO_CONTRACT_DETAIL_STATUS.READY,
+    error: null,
+  },
+  /**
+   * Stores the current network settings of the wallet and the status when changing it
+   *
+   * {
+   *   data: {
+   *     node: string,
+   *     txMining: string,
+   *     explorer: string
+   *     explorerService: string,
+   *     walletService: string,
+   *     walletServiceWS: string,
+   *   },
+   *   status: NETWORK_SETTINGS_STATUS,
+   *   newNetwork: string | null,
+   *   error: string | null,
+   * }
+  */
+  networkSettings: {
+    data: NETWORK_SETTINGS.mainnet,
+    status: NETWORK_SETTINGS_STATUS.READY,
+    newNetwork: null,
+    error: null,
+  },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -377,8 +413,6 @@ const rootReducer = (state = initialState, action) => {
       return onUpdateTxHistory(state, action);
     case types.WALLET_CHANGE_STATE:
       return onWalletStateChanged(state, action);
-    case types.SET_MINING_SERVER:
-      return onSetMiningServer(state, action);
     case types.SET_NATIVE_TOKEN_DATA:
       return onSetNativeTokenData(state, action);
     case types.NANOCONTRACT_REGISTER_REQUEST:
@@ -395,6 +429,14 @@ const rootReducer = (state = initialState, action) => {
       return onNanoContractEditAddress(state, action);
     case types.NANOCONTRACT_UNREGISTER:
       return onNanoContractUnregister(state, action);
+    case types.NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE:
+      return onSetNanoContractDetailStatus(state, action);
+    case types.NANOCONTRACT_LOAD_DETAILS_SUCCESS:
+      return onNanoContractDetailLoaded(state, action);
+    case types.NETWORKSETTINGS_SET_STATUS:
+      return onSetNetworkSettingsStatus(state, action);
+    case types.NETWORKSETTINGS_UPDATED:
+      return onUpdateNetworkSettings(state, action);
     default:
       return state;
   }
@@ -554,7 +596,7 @@ const removeTokenMetadata = (state, action) => {
   const newBalance = Object.assign({}, state.tokensBalance);
   if (uid in newBalance && (!!newBalance[uid].data)) {
     const balance = newBalance[uid].data;
-    if ((balance.unlocked + balance.locked) === 0) {
+    if ((balance.available + balance.locked) === 0n) {
       delete newBalance[uid];
     }
   }
@@ -627,8 +669,8 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   const tokensBalance = state.tokensBalance;
   const selectedToken = state.selectedToken;
 
-  const balance = tokensBalance[selectedToken] || { available: 0, locked: 0 };
-  const hasZeroBalance = (balance.available + balance.locked) === 0;
+  const balance = tokensBalance[selectedToken] || { available: 0n, locked: 0n };
+  const hasZeroBalance = (balance.available + balance.locked) === 0n;
 
   if (hasZeroBalance) {
     return {
@@ -1147,11 +1189,6 @@ export const onWalletStateChanged = (state, { payload }) => ({
   walletState: payload,
 });
 
-export const onSetMiningServer = (state, { payload }) => ({
-  ...state,
-  miningServer: payload,
-});
-
 /**
  * When starting a wallet we need to update the native token data on store.
  * This includes:
@@ -1354,5 +1391,95 @@ export const onNanoContractUnregister = (state, { payload }) => {
     nanoContracts: newNanoContracts,
   };
 };
+
+/**
+ * Set nano contract details status
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.status
+ * @param {string | null | undefined} action.payload.error
+ *
+ * @returns {Object}
+ */
+export const onSetNanoContractDetailStatus = (state, { payload }) => {
+  return {
+    ...state,
+    nanoContractDetailState: {
+      ...state.nanoContractDetailState,
+      status: payload.status,
+      error: payload.error,
+      state: null,
+    }
+  }
+}
+
+/**
+ * Set nano contract loaded state and status to success
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {hathorLib.nano_contracts.types.NanoContractStateAPIResponse} action.payload.state
+ *
+ * @returns {Object}
+ */
+export const onNanoContractDetailLoaded = (state, payload) => {
+  return {
+    ...state,
+    nanoContractDetailState: {
+      ...state.nanoContractDetailState,
+      state: payload.state,
+      status: NANO_CONTRACT_DETAIL_STATUS.SUCCESS,
+      error: null,
+    }
+  }
+}
+
+/**
+ * Set network settings status
+ * @param {string | null | undefined} action.payload.newNetwork
+ *
+ * @returns {Object}
+ */
+export const onSetNetworkSettingsStatus = (state, { payload }) => {
+  return {
+    ...state,
+    networkSettings: {
+      ...state.networkSettings,
+      status: payload.status,
+      error: payload.error,
+      newNetwork: payload.newNetwork
+    }
+  }
+}
+
+/**
+ * Update network settings data
+ *
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.node
+ * @param {string} action.payload.network
+ * @param {string} action.payload.txMining
+ * @param {string} action.payload.explorer
+ * @param {string} action.payload.explorerService
+ * @param {string} action.payload.walletService
+ * @param {string} action.payload.walletServiceWS
+ *
+ * @returns {Object}
+ */
+export const onUpdateNetworkSettings = (state, { payload }) => {
+  return {
+    ...state,
+    networkSettings: {
+      ...state.networkSettings,
+      data: payload,
+      status: NETWORK_SETTINGS_STATUS.SUCCESS,
+    }
+  }
+}
 
 export default rootReducer;

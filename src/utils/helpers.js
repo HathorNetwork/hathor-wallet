@@ -9,8 +9,8 @@ import path from 'path';
 import hathorLib from '@hathor/wallet-lib';
 import { get } from 'lodash';
 import store from '../store/index';
-import { networkUpdate, setMiningServer } from '../actions/index';
-import { EXPLORER_BASE_URL, TESTNET_EXPLORER_BASE_URL } from '../constants';
+import { networkUpdate, networkSettingsUpdate } from '../actions/index';
+import { NETWORK_SETTINGS } from '../constants';
 import LOCAL_STORE from '../storage';
 
 let shell = null;
@@ -41,40 +41,88 @@ const helpers = {
   },
 
   /**
+   * Get the network settings from LOCAL_STORE
+   * but it gets the default using the lib default network,
+   * if it doesn't exist in the LOCAL_STORE
+   *
+   * @return {Object} networkSettings with the data
+   * {string} networkSettings.node
+   * {string} networkSettings.network
+   * {string} networkSettings.txMining
+   * {string} networkSettings.explorer
+   * {string} networkSettings.explorerService
+   * {string} networkSettings.walletService
+   * {string} networkSettings.walletServiceWS
+   *
+   * @memberof helpers
+   * @inner
+   */
+  getSafeNetworkSettings() {
+    let networkSettings = LOCAL_STORE.getNetworkSettings();
+    if (!networkSettings) {
+      // If it doesn't exist in the store, it's a fresh install
+      // or a migration from older versions, so we just use the
+      // default network from the lib
+      const libDefaultNetwork = hathorLib.config.getNetwork().name;
+      networkSettings = NETWORK_SETTINGS[libDefaultNetwork];
+    }
+    return networkSettings;
+  },
+
+  /**
    * Load the network and server url from localstorage into hathorlib and redux.
    * If not configured, get the default from hathorlib.
+   *
+   * @memberof helpers
+   * @inner
    */
   loadStorageState() {
-    let network = LOCAL_STORE.getNetwork();
-    if (!network) {
-      network = hathorLib.config.getNetwork().name;
-    }
+    const networkSettings = this.getSafeNetworkSettings();
+    this.updateNetworkSettings(networkSettings);
+  },
 
+  /**
+   * Update network settings in the redux, storage and lib config
+   *
+   * @param {Object} networkSettings with the data
+   * @param {string} networkSettings.node
+   * @param {string} networkSettings.network
+   * @param {string} networkSettings.txMining
+   * @param {string} networkSettings.explorer
+   * @param {string} networkSettings.explorerService
+   * @param {string} networkSettings.walletService
+   * @param {string} networkSettings.walletServiceWS
+   *
+   * @memberof helpers
+   * @inner
+   */
+  updateNetworkSettings(networkSettings) {
     // Update the network in redux and lib
-    this.updateNetwork(network);
+    this.updateNetwork(networkSettings.network);
+    hathorLib.config.setServerUrl(networkSettings.node);
+    hathorLib.config.setTxMiningUrl(networkSettings.txMining);
+    hathorLib.config.setExplorerServiceBaseUrl(networkSettings.explorerService);
 
-    let server = LOCAL_STORE.getServer();
-    if (!server) {
-      server = hathorLib.config.getServerUrl();
+    if (networkSettings.walletService) {
+      hathorLib.config.setWalletServiceBaseUrl(networkSettings.walletService);
     }
-    hathorLib.config.setServerUrl(server);
 
-    let wsServer = LOCAL_STORE.getWsServer();
-    if (wsServer) {
-      hathorLib.config.setWalletServiceBaseWsUrl(wsServer);
+    const walletServiceWS = networkSettings.walletServiceWS;
+
+    if (walletServiceWS) {
+      hathorLib.config.setWalletServiceBaseWsUrl(walletServiceWS);
       const storage = LOCAL_STORE.getStorage();
       if (storage) {
         // This is a promise but we should not await it since this method has to be sync
         // There is no issue not awaiting this since we already have this configured on the config
-        storage.store.setItem('wallet:wallet_service:ws_server', wsServer);
+        storage.store.setItem('wallet:wallet_service:ws_server', walletServiceWS);
       }
     }
 
-    const miningServer = LOCAL_STORE.getMiningServer();
-    if (miningServer) {
-      hathorLib.config.setTxMiningUrl(miningServer);
-      store.dispatch(setMiningServer(miningServer));
-    }
+    // Update network settings in redux
+    store.dispatch(networkSettingsUpdate(networkSettings));
+
+    LOCAL_STORE.setNetworkSettings(networkSettings);
   },
 
   /**
@@ -89,12 +137,10 @@ const helpers = {
     // Update network in redux
     store.dispatch(networkUpdate({network}));
     hathorLib.network.setNetwork(network);
-    LOCAL_STORE.setNetwork(network);
   },
 
   /**
-   * Return the URL for the testnet or mainnet
-   * depending on the one from the full node connected
+   * Return the URL for the connected network from network settings
    *
    * @return {String} Explorer URL
    *
@@ -102,12 +148,8 @@ const helpers = {
    * @inner
    */
   getExplorerURL() {
-    const currentNetwork = LOCAL_STORE.getNetwork() || 'mainnet';
-    if (currentNetwork === 'mainnet') {
-      return EXPLORER_BASE_URL;
-    } else {
-      return TESTNET_EXPLORER_BASE_URL;
-    }
+    const networkSettings = this.getSafeNetworkSettings();
+    return networkSettings.explorer;
   },
 
   /**

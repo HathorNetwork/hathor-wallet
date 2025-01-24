@@ -5,11 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { t } from 'ttag'
 import BackButton from '../../components/BackButton';
 import InputNumber from '../../components/InputNumber';
-import colors from '../../index.module.scss';
 import hathorLib from '@hathor/wallet-lib';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { get, pullAt } from 'lodash';
@@ -88,6 +87,10 @@ function NanoContractExecuteMethod() {
   // This will store each action in an array of objects
   // { type, token, amount, address }
   const [actions, setActions] = useState([]);
+
+  // Store values for Amount fields based on arg names
+  const [amountValues, setAmountValues] = useState({});
+
   const globalModalContext = useContext(GlobalModalContext);
 
   // We must store the ref of action addresses because we use for the validation
@@ -141,8 +144,8 @@ function NanoContractExecuteMethod() {
       if (typeToCheck !== 'Address') {
         continue;
       }
-      const addressInputValue = formRefs[i].current.value;
-      validateAddress(addressInputValue, formRefs[i].current);
+      const addressInputValue = formRefs[i].getValue();
+      validateAddress(addressInputValue, formRefs[i].ref.current);
     }
 
     for (let i=0; i<actions.length; i++) {
@@ -236,7 +239,7 @@ function NanoContractExecuteMethod() {
     const argValues = [];
     const args = get(data.blueprintInformation.public_methods, `${data.method}.args`, []);
     for (let i=0; i<args.length; i++) {
-      let value = formRefs[i].current.value;
+      let value = formRefs[i].getValue();
       // Check optional type
       // Optional fields end with ?
       const splittedType = args[i].type.split('?');
@@ -264,8 +267,7 @@ function NanoContractExecuteMethod() {
       }
 
       if (typeToCheck === 'Amount') {
-        const amountValue = walletUtils.decimalToInteger(value, decimalPlaces);
-        argValues.push(amountValue);
+        argValues.push(value);
         continue;
       }
 
@@ -282,10 +284,6 @@ function NanoContractExecuteMethod() {
         // We will skip if the user has just added an empty action
         continue;
       }
-
-      const amountValue = isNFT(action.token) ? action.amount : walletUtils.decimalToInteger(action.amount, decimalPlaces);
-      action.amount = amountValue;
-
       actionsData.push(action);
     }
 
@@ -368,18 +366,18 @@ function NanoContractExecuteMethod() {
    * Timestamp will have a datetime-local
    * The rest will be a text input
    *
+   * @param {string} name Argument name of the input
    * @param {string} type Argument type to render the input
    * @param {boolean} isOptional If this argument is optional
    * @param {Object} ref React reference object
    */
-  const renderInput = (type, isOptional, ref) => {
+  const renderInput = (name, type, isOptional, ref) => {
     if (type === 'Amount') {
       return <InputNumber
               required={!isOptional}
               requirePositive={true}
-              ref={ref}
+              onValueChange={(value) => setAmountValues({...amountValues, [name]: value})}
               className="form-control output-value"
-              placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
             />
     }
 
@@ -439,14 +437,23 @@ function NanoContractExecuteMethod() {
     }
 
     // Create a new ref for this argument to be used in the input and adds it to the array of refs
-    const ref = useRef(null);
-    formRefs.push(ref);
+    let ref;
+    let getValue;
+    if (type.startsWith('Amount')) {
+      // Amount fields don't use refs, so we store and retrieve values manually
+      ref = null;
+      getValue = () => amountValues[name];
+    } else {
+      ref = useRef(null);
+      getValue = () => ref.current.value;
+    }
+    formRefs.push({ ref, getValue});
 
     return (
       <div className="row" key={name}>
         <div className="form-group col-6">
           <label>{name} {!isOptional && '*'}</label>
-          {renderInput(typeToRender, isOptional, ref)}
+          {renderInput(name, typeToRender, isOptional, ref)}
           { isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSignData(ref, e)}>{t`Select address to sign`}</a></div> }
         </div>
       </div>
@@ -520,21 +527,6 @@ function NanoContractExecuteMethod() {
     // I start the ref as null, then I set it in the input if it's a withdrawal
     actionAddressesRef.current[index] = null;
 
-    const token = actions[index].token;
-    // Depending on the token, the input for the amount changes because it might be an NFT
-    const nft = isNFT(token);
-    let inputNumberProps;
-    if (nft) {
-      inputNumberProps = {
-        placeholder: '0',
-        precision: 0,
-      };
-    } else {
-      inputNumberProps = {
-        placeholder: hathorLib.numberUtils.prettyValue(0, decimalPlaces)
-      };
-    }
-
     const renderCommon = () => {
       return (
         <div className="d-flex flex-grow-1">
@@ -549,7 +541,7 @@ function NanoContractExecuteMethod() {
               requirePositive={true}
               onValueChange={amount => onActionValueChange(index, 'amount', amount)}
               className="form-control output-value"
-              {...inputNumberProps}
+              isNFT={isNFT(actions[index].token)}
             />
           </div>
         </div>

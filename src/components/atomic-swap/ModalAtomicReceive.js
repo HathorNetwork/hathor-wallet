@@ -8,7 +8,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { t } from "ttag";
 import InputNumber from "../InputNumber";
-import hathorLib, { Address } from "@hathor/wallet-lib";
+import { Address } from "@hathor/wallet-lib";
 import walletUtils from '../../utils/wallet';
 import { getGlobalWallet } from "../../modules/wallet";
 import { useSelector } from 'react-redux';
@@ -18,8 +18,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
     const wallet = getGlobalWallet();
     const [selectedToken, setSelectedToken] = useState(receivableTokens[0]);
     const [address, setAddress] = useState('');
-    let amountRef = useRef();
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState(0n);
     const [errMessage, setErrMessage] = useState('');
     const modalDomId = 'atomicReceiveModal';
     const decimalPlaces = useSelector(state => state.serverInfo.decimalPlaces);
@@ -46,7 +45,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
             return false;
         }
 
-        if (amount === 0 || !amount) {
+        if (amount === 0n || !amount) {
             setErrMessage(t`Must receive a positive amount of tokens`);
             return false;
         }
@@ -69,7 +68,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
 
         // On success, clean error message and return user input
         setErrMessage('');
-        sendClickHandler({ selectedToken, address, amount: walletUtils.decimalToInteger(amount, decimalPlaces) });
+        sendClickHandler({ selectedToken, address, amount });
         onClose(`#${modalDomId}`);
     }
 
@@ -116,9 +115,7 @@ export function ModalAtomicReceive ({ sendClickHandler, receivableTokens, manage
                                 <label htmlFor="amount" className="col-3 my-auto">{t`Amount`}: </label>
                                 <InputNumber key="value"
                                              name="amount"
-                                             ref={amountRef}
-                                             defaultValue={hathorLib.numberUtils.prettyValue(amount, decimalPlaces)}
-                                             placeholder={hathorLib.numberUtils.prettyValue(0, decimalPlaces)}
+                                             defaultValue={amount}
                                              onValueChange={value => setAmount(value)}
                                              className="form-control output-value col-3"/>
                             </div>
