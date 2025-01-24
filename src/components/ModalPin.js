@@ -117,7 +117,7 @@ export class ModalPin extends React.Component {
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title" id="pinModal">{t`Write your PIN`}</h5>
+                <h5 className="modal-title" id="pinModalInputTitle">{t`Write your PIN`}</h5>
                 <button type="button" className="close" data-dismiss="modal" onClick={this.onCancel.bind(this)} aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
