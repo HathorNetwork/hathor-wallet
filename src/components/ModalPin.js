@@ -79,7 +79,7 @@ export class ModalPin extends React.Component {
 
     // Set the PIN on the instance variable and close the modal.
     this.pin = pin;
-    this.onSuccess();
+    this.onModalHidden();
   }
 
   onSuccess() {
@@ -90,7 +90,7 @@ export class ModalPin extends React.Component {
   onCancel(e) {
     e.preventDefault();
 
-    this.props.onClose();
+    this.onModalHidden();
   }
 
   render() {
