@@ -35,15 +35,21 @@ export const setModalContext = (context) => {
  * @param {Object} action.payload.modalProps - The props to pass to the modal
  */
 function* showModal({ payload: { modalType, modalProps } }) {
-  if (modalContext) {
-    yield call([modalContext, modalContext.showModal], modalType, modalProps);
+  if (!modalContext) {
+    console.error('Modal context not found while trying to show modal. Ignoring.');
+    return;
   }
+
+  yield call([modalContext, modalContext.showModal], modalType, modalProps);
 }
 
 function* hideModal() {
-  if (modalContext) {
-    yield call([modalContext, modalContext.hideModal]);
+  if (!modalContext) {
+    console.error('Modal context not found while trying to hide modal. Ignoring.');
+    return;
   }
+
+  yield call([modalContext, modalContext.hideModal]);
 }
 
 export function* modalSaga() {
