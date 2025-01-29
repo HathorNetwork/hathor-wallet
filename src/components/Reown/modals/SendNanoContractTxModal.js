@@ -17,6 +17,13 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
   const blueprintInfo = useSelector((state) => state.blueprintsData[data?.data?.blueprintId]);
   const nanoContracts = useSelector((state) => state.nanoContracts);
 
+  const formatValue = (value) => {
+    if (typeof value === 'string') {
+      return value.length > 20 ? helpers.truncateText(value, 8, 4) : value;
+    }
+    return value.toString();
+  };
+
   const renderArgumentsSection = () => {
     if (!data?.data?.args || !blueprintInfo) {
       return null;
@@ -46,11 +53,7 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
                         {argType && <small className="text-muted d-block">{argType}</small>}
                       </td>
                       <td className="border-top-0 text-monospace">
-                        {typeof value === 'string' && value.length > 20 
-                          ? helpers.truncateText(value, 8, 4)
-                          : typeof value === 'bigint'
-                            ? value.toString()
-                            : value.toString()}
+                        {formatValue(value)}
                         {typeof value === 'string' && value.length > 20 && (
                           <button 
                             className="btn btn-link btn-sm p-0 ml-2" 
