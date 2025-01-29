@@ -10,14 +10,15 @@ import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 import { types } from '../actions';
 import BackButton from '../components/BackButton';
-import { get } from 'lodash';
 
 function ReownConnect() {
   const [uri, setUri] = useState('');
   const [showNewConnectionForm, setShowNewConnectionForm] = useState(false);
   const dispatch = useDispatch();
-  const connectionFailed = useSelector(state => state.reown.connectionFailed);
-  const sessions = useSelector(state => state.reown.sessions || {});
+  const { connectionFailed, sessions } = useSelector(state => ({
+    connectionFailed: state.reown.connectionFailed,
+    sessions: state.reown.sessions || {},
+  }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
