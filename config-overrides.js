@@ -1,6 +1,12 @@
+/**
+ * Copyright (c) Hathor Labs and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const webpack = require('webpack');
 const LavaMoatPlugin = require('@lavamoat/webpack')
-const fs = require('fs');
 const path = require('path');
 const stdLibBrowser = require('node-stdlib-browser');
 
@@ -34,6 +40,8 @@ module.exports = function override(config, env) {
       stream: stdLibBrowser.stream,
       os: stdLibBrowser.os,
       vm: false,
+      events: stdLibBrowser.events,
+      util: stdLibBrowser.util
     },
     mainFields: ['browser', 'module', 'main'],
     conditionNames: ['import', 'require', 'node', 'default'],
