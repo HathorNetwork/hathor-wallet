@@ -562,7 +562,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
   });
 
 export function* onSignMessageRequest({ payload }) {
-  const { accept, deny: denyCb, data, dapp } = payload;
+  const { accept: acceptCb, deny: denyCb, data, dapp } = payload;
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
@@ -576,7 +576,7 @@ export function* onSignMessageRequest({ payload }) {
       data,
       dapp,
     },
-    onAcceptAction: accept,
+    onAcceptAction: acceptCb,
     onRejectAction: denyCb,
   }));
 
@@ -590,7 +590,7 @@ export function* onSignMessageRequest({ payload }) {
     return;
   }
 
-  accept();
+  acceptCb();
 }
 
 export function* onSignOracleDataRequest({ payload }) {
