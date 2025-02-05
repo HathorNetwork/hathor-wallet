@@ -1,36 +1,38 @@
 diff --git a/node_modules/elliptic/node_modules/bn.js/lib/bn.js b/node_modules/elliptic/node_modules/bn.js/lib/bn.js
-index 3a4371e..629ed9c 100644
 --- a/node_modules/elliptic/node_modules/bn.js/lib/bn.js
 +++ b/node_modules/elliptic/node_modules/bn.js/lib/bn.js
-@@ -48,12 +48,16 @@
+@@ -48,14 +48,17 @@
    BN.BN = BN;
    BN.wordSize = 26;
- 
+
 -  var Buffer;
 +  var BNBuffer;
    try {
 -    if (typeof window !== 'undefined' && typeof window.Buffer !== 'undefined') {
 -      Buffer = window.Buffer;
-+    if (typeof Buffer !== 'undefined') {
-+      BNBuffer = Buffer;
-     } else {
+-    } else {
 -      Buffer = require('buffer').Buffer;
-+      if (typeof window !== 'undefined' && typeof window.Buffer !== 'undefined') {
-+        BNBuffer = window.Buffer;
-+      } else {
-+        BNBuffer = require('buffer');
-+      }
-     }
+-    }
++    var customBuffer = require('../../../../../src/buffer-shim');
++    BNBuffer = customBuffer.Buffer || customBuffer.default;
    } catch (e) {
++    try {
++      BNBuffer = require('buffer/').Buffer;
++    } catch (e2) {
++      console.error('Buffer is not available. Some functionality may not work as expected.');
++      BNBuffer = null;
++    }
    }
-@@ -526,8 +530,8 @@
+
+   BN.isBN = function isBN (num) {
+@@ -526,8 +529,8 @@
    };
- 
+
    BN.prototype.toBuffer = function toBuffer (endian, length) {
 -    assert(typeof Buffer !== 'undefined');
 -    return this.toArrayLike(Buffer, endian, length);
 +    assert(typeof BNBuffer !== 'undefined');
 +    return this.toArrayLike(BNBuffer, endian, length);
    };
- 
+
    BN.prototype.toArray = function toArray (endian, length) {
