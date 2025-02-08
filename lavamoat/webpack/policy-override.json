@@ -1,0 +1,332 @@
+{
+  "resources": {
+    "bootstrap": {
+      "globals": {
+        "document": true,
+        "window": true,
+        "Element": true,
+        "HTMLElement": true,
+        "Node": true,
+        "Event": true,
+        "CustomEvent": true,
+        "document.body": true,
+        "document.documentElement": true,
+        "document.createElement": true,
+        "document.createEvent": true,
+        "document.querySelector": true,
+        "document.querySelectorAll": true,
+        "document.addEventListener": true,
+        "document.removeEventListener": true,
+        "window.addEventListener": true,
+        "window.removeEventListener": true,
+        "window.setTimeout": true,
+        "window.clearTimeout": true,
+        "window.setInterval": true,
+        "window.clearInterval": true,
+        "window.requestAnimationFrame": true,
+        "window.cancelAnimationFrame": true,
+        "window.getComputedStyle": true,
+        "window.Event": true,
+        "window.CustomEvent": true,
+        "window.MutationObserver": true,
+        "MutationObserver": true,
+        "performance": true
+      },
+      "packages": {
+        "jquery": true,
+        "popper.js": true
+      }
+    },
+    "popper.js": {
+      "globals": {
+        "document": true,
+        "window": true,
+        "Element": true,
+        "HTMLElement": true,
+        "getComputedStyle": true,
+        "window.getComputedStyle": true,
+        "performance": true,
+        "requestAnimationFrame": true,
+        "cancelAnimationFrame": true
+      }
+    },
+    "jquery": {
+      "globals": {
+        "document": true,
+        "window": true,
+        "Element": true,
+        "HTMLElement": true,
+        "Node": true,
+        "Event": true,
+        "CustomEvent": true,
+        "MutationObserver": true,
+        "performance": true,
+        "getComputedStyle": true,
+        "requestAnimationFrame": true,
+        "cancelAnimationFrame": true,
+        "setTimeout": true,
+        "clearTimeout": true,
+        "setInterval": true,
+        "clearInterval": true,
+        "document.body": true,
+        "document.documentElement": true,
+        "document.createElement": true,
+        "document.createEvent": true,
+        "document.querySelector": true,
+        "document.querySelectorAll": true,
+        "document.addEventListener": true,
+        "document.removeEventListener": true,
+        "window.addEventListener": true,
+        "window.removeEventListener": true,
+        "window.setTimeout": true,
+        "window.clearTimeout": true,
+        "window.setInterval": true,
+        "window.clearInterval": true,
+        "window.requestAnimationFrame": true,
+        "window.cancelAnimationFrame": true,
+        "window.getComputedStyle": true,
+        "window.Event": true,
+        "window.CustomEvent": true,
+        "window.MutationObserver": true,
+        "navigator": true,
+        "location": true
+      }
+    },
+    "viz.js": {
+      "globals": {
+        "document.title": true
+      }
+    },
+    "unleash-proxy-client": {
+      "globals": {
+        "fetch": true,
+        "window": true,
+        "window.fetch": true
+      }
+    },
+    "react": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Symbol": true,
+        "Map": true,
+        "Set": true,
+        "WeakMap": true,
+        "WeakSet": true,
+        "Proxy": true,
+        "Reflect": true,
+        "process.env.NODE_ENV": true,
+        "Function.prototype": true,
+        "Object.prototype": true
+      }
+    },
+    "react-dom": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Symbol": true,
+        "Map": true,
+        "Set": true,
+        "WeakMap": true,
+        "WeakSet": true,
+        "window": true,
+        "document": true,
+        "MessageChannel": true,
+        "MutationObserver": true,
+        "requestAnimationFrame": true,
+        "cancelAnimationFrame": true,
+        "performance": true,
+        "Event": true,
+        "Node": true,
+        "Element": true,
+        "HTMLElement": true,
+        "HTMLIFrameElement": true,
+        "DocumentFragment": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Error.prototype": true
+      }
+    },
+    "scheduler": {
+      "globals": {
+        "MessageChannel": true,
+        "clearTimeout": true,
+        "setTimeout": true,
+        "window": true,
+        "Error": true,
+        "Object": true,
+        "Function.prototype": true,
+        "Object.prototype": true
+      }
+    },
+    "bitcore-lib": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Math": true,
+        "Buffer": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Error.prototype": true,
+        "Math.prototype": true,
+        "console": true,
+        "Function": true,
+        "Array": true,
+        "Number": true,
+        "BigInt": true
+      },
+      "packages": {
+        "bn.js": true,
+        "elliptic": true,
+        "buffer": true
+      }
+    },
+    "bn.js": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Math": true,
+        "Buffer": true,
+        "Number": true,
+        "Array": true,
+        "Function": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Array.prototype": true
+      }
+    },
+    "elliptic": {
+      "globals": {
+        "Error": true,
+        "Object": true,
+        "Math": true,
+        "Buffer": true,
+        "Function": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Error.prototype": true,
+        "Math.prototype": true,
+        "Array": true,
+        "Number": true
+      },
+      "packages": {
+        "bn.js": true
+      }
+    },
+    "axios": {
+      "globals": {
+        "process": true,
+        "console": true,
+        "Error": true,
+        "Object": true,
+        "XMLHttpRequest": true,
+        "FormData": true,
+        "Blob": true,
+        "window": true,
+        "Object.prototype": true,
+        "Function.prototype": true,
+        "Object.defineProperty": true,
+        "Object.getOwnPropertyDescriptor": true,
+        "Symbol": true,
+        "Symbol.toStringTag": true,
+        "__esModule": true,
+        "require": true,
+        "module": true,
+        "exports": true,
+        "Function": true,
+        "Array": true,
+        "String": true,
+        "Promise": true,
+        "Array.prototype": true,
+        "String.prototype": true
+      },
+      "packages": {
+        "follow-redirects": true,
+        "form-data": true,
+        "proxy-from-env": true,
+        "url": true,
+        "http": true,
+        "https": true,
+        "assert": true,
+        "stream": true,
+        "util": true
+      }
+    },
+    "@hathor/wallet-lib": {
+      "globals": {
+        "process": true,
+        "console": true,
+        "Error": true,
+        "Object": true,
+        "XMLHttpRequest": true,
+        "FormData": true,
+        "Blob": true,
+        "window": true,
+        "document": true,
+        "navigator": true,
+        "location": true,
+        "setTimeout": true,
+        "clearTimeout": true,
+        "Function": true,
+        "Array": true,
+        "String": true,
+        "Promise": true,
+        "Object.prototype": true,
+        "Function.prototype": true,
+        "Array.prototype": true,
+        "String.prototype": true,
+        "URL": true,
+        "URLSearchParams": true,
+        "Object.defineProperty": true,
+        "Object.getOwnPropertyDescriptor": true,
+        "Symbol": true,
+        "Symbol.toStringTag": true,
+        "__esModule": true,
+        "require": true,
+        "module": true,
+        "exports": true
+      },
+      "packages": {
+        "axios": true,
+        "follow-redirects": true,
+        "form-data": true,
+        "proxy-from-env": true,
+        "url": true,
+        "http": true,
+        "https": true,
+        "assert": true,
+        "stream": true,
+        "tty": true,
+        "util": true,
+        "zlib": true
+      }
+    },
+    "elliptic>bn.js": {
+      "globals": {
+        "Buffer": true,
+        "Error": true,
+        "Object": true,
+        "Math": true,
+        "Number": true,
+        "Array": true,
+        "Function": true,
+        "Function.prototype": true,
+        "Object.prototype": true,
+        "Array.prototype": true
+      },
+      "packages": {
+        "buffer": true
+      }
+    },
+    "buffer": {
+      "globals": {
+        "Buffer": true,
+        "process": true,
+        "global": true,
+        "globalThis": true,
+        "window": true,
+        "self": true
+      }
+    }
+  }
+}

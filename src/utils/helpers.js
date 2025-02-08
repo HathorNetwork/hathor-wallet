@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import path from 'path';
+import path from 'path-browserify';
 import hathorLib from '@hathor/wallet-lib';
 import { get } from 'lodash';
 import store from '../store/index';
@@ -194,7 +194,7 @@ const helpers = {
    * @inner
    */
   getFullExplorerURL(urlPath) {
-    return path.join(this.getExplorerURL(), urlPath);
+    path.join(this.getExplorerURL(), urlPath);
   },
 
   /**

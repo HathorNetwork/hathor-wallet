@@ -124,7 +124,12 @@ export const GlobalModal = ({ children }) => {
     }
   };
 
-  const showModal = (modalType, modalProps = {}) => {
+  /* Without this setTimeout, calling showModal right after hiding an existing
+   * modal will not display the backdrop due to a race condition. setTimeout
+   * sends this method to the end of the event loop, making sure that it is
+   * executed after the previous jquery calls
+   */
+  const showModal = (modalType, modalProps = {}) => setTimeout(() => {
     setStore({
       ...store,
       modalType,
@@ -135,7 +140,7 @@ export const GlobalModal = ({ children }) => {
     // removed forcefully by the hideModal, so we should just show it
     // again.
     $('.modal-backdrop').fadeIn(150);
-  };
+  }, 0);
 
   /**
    * Helper method to handle the modal's DOM lifecycle: showing the modal and

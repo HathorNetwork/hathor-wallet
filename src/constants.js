@@ -12,7 +12,7 @@
 
 import { t } from 'ttag';
 import scssColors from './index.module.scss';
-import { version } from '../package.json';
+import packageInfo from '../package.json';
 
 /**
  * Quantity of elements to show in the wallet history
@@ -22,7 +22,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = version;
+export const VERSION = packageInfo.version;
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible
@@ -310,3 +310,5 @@ export const NETWORK_SETTINGS_STATUS = {
   WAITING_NETWORK_CONFIRMATION: 'waitingNetworkConfirmation',
   NETWORK_CONFIRMED: 'networkConfirmed'
 }
+// Project id configured in https://walletconnect.com
+export const WALLET_CONNECT_PROJECT_ID = '8264fff563181da658ce64ee80e80458';
