@@ -49,6 +49,10 @@ import {
   setCreateTokenStatusReady,
   setCreateTokenStatusSuccessful,
   setCreateTokenStatusFailed,
+  setSendTxStatusLoading,
+  setSendTxStatusReady,
+  setSendTxStatusSuccess,
+  setSendTxStatusFailure,
   showGlobalModal,
   hideGlobalModal,
 } from '../actions';
@@ -342,6 +346,10 @@ export function* processRequest(action) {
       case RpcResponseTypes.CreateTokenResponse:
         yield put(setCreateTokenStatusSuccessful());
         break;
+      case RpcResponseTypes.SendTransactionResponse:
+        yield put(setSendTxStatusSuccess());
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: false, isError: false }));
+        break;
       default:
         break;
     }
@@ -387,8 +395,21 @@ export function* processRequest(action) {
           yield* processRequest(action);
         }
       } break;
-      default:
-        break;
+      default: {
+        yield put(setSendTxStatusFailure());
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: false, isError: true }));
+
+        const retry = yield call(
+          retryHandler,
+          types.REOWN_SEND_TX_RETRY,
+          types.REOWN_SEND_TX_RETRY_DISMISS,
+        );
+
+        if (retry) {
+          shouldAnswer = false;
+          yield* processRequest(action);
+        }
+      } break;
     }
 
     if (shouldAnswer) {

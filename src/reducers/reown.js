@@ -20,6 +20,7 @@ const initialState = {
   connectionFailed: false,
   nanoContractStatus: 'ready', // 'ready' | 'loading' | 'success' | 'failure'
   createTokenStatus: 'ready', // 'ready' | 'loading' | 'success' | 'failure'
+  sendTxStatus: 'ready', // 'ready' | 'loading' | 'success' | 'failure'
 };
 
 export default function reownReducer(state = initialState, action) {
@@ -97,6 +98,30 @@ export default function reownReducer(state = initialState, action) {
       return {
         ...state,
         createTokenStatus: 'failure',
+      };
+
+    case types.REOWN_SEND_TX_STATUS_LOADING:
+      return {
+        ...state,
+        sendTxStatus: 'loading',
+      };
+
+    case types.REOWN_SEND_TX_STATUS_READY:
+      return {
+        ...state,
+        sendTxStatus: 'ready',
+      };
+
+    case types.REOWN_SEND_TX_STATUS_SUCCESS:
+      return {
+        ...state,
+        sendTxStatus: 'success',
+      };
+
+    case types.REOWN_SEND_TX_STATUS_FAILURE:
+      return {
+        ...state,
+        sendTxStatus: 'failure',
       };
 
     default:

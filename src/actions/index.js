@@ -84,6 +84,8 @@ export const types = {
   REOWN_CREATE_TOKEN_STATUS_FAILED: 'REOWN_CREATE_TOKEN_STATUS_FAILED',
   REOWN_CREATE_TOKEN_RETRY: 'REOWN_CREATE_TOKEN_RETRY',
   REOWN_CREATE_TOKEN_RETRY_DISMISS: 'REOWN_CREATE_TOKEN_RETRY_DISMISS',
+  REOWN_SEND_TX_RETRY: 'REOWN_SEND_TX_RETRY',
+  REOWN_SEND_TX_RETRY_DISMISS: 'REOWN_SEND_TX_RETRY_DISMISS',
   REOWN_ACCEPT: 'REOWN_ACCEPT',
   REOWN_REJECT: 'REOWN_REJECT',
   REOWN_URI_INPUTTED: 'REOWN_URI_INPUTTED',
@@ -101,6 +103,10 @@ export const types = {
   SHOW_GLOBAL_MODAL: 'SHOW_GLOBAL_MODAL',
   HIDE_GLOBAL_MODAL: 'HIDE_GLOBAL_MODAL',
   SERVER_INFO_UPDATED: 'SERVER_INFO_UPDATED',
+  REOWN_SEND_TX_STATUS_LOADING: 'REOWN_SEND_TX_STATUS_LOADING',
+  REOWN_SEND_TX_STATUS_READY: 'REOWN_SEND_TX_STATUS_READY',
+  REOWN_SEND_TX_STATUS_SUCCESS: 'REOWN_SEND_TX_STATUS_SUCCESS',
+  REOWN_SEND_TX_STATUS_FAILURE: 'REOWN_SEND_TX_STATUS_FAILURE',
 };
 
 /**
@@ -846,4 +852,32 @@ export const showGlobalModal = (modalType, modalProps = {}) => ({
  */
 export const hideGlobalModal = () => ({
   type: types.HIDE_GLOBAL_MODAL
+});
+
+/**
+ * Set send transaction status to loading
+ */
+export const setSendTxStatusLoading = () => ({
+  type: types.REOWN_SEND_TX_STATUS_LOADING,
+});
+
+/**
+ * Set send transaction status to ready
+ */
+export const setSendTxStatusReady = () => ({
+  type: types.REOWN_SEND_TX_STATUS_READY,
+});
+
+/**
+ * Set send transaction status to success
+ */
+export const setSendTxStatusSuccess = () => ({
+  type: types.REOWN_SEND_TX_STATUS_SUCCESS,
+});
+
+/**
+ * Set send transaction status to failure
+ */
+export const setSendTxStatusFailure = () => ({
+  type: types.REOWN_SEND_TX_STATUS_FAILURE,
 });
