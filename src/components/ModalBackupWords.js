@@ -283,6 +283,7 @@ class ModalBackupWords extends React.Component {
                     this.handleValidationStepOption(option, this.state.validationSteps.indexOf(validationStep))
                   }
                   disabled={this.state.errorMessage}
+                  data-happo-hide=""
                 >
                   {option}
                 </button>
