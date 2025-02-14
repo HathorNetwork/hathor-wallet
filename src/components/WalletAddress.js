@@ -170,7 +170,7 @@ export class WalletAddress extends React.Component {
       if (!LOCAL_STORE.isHardwareWallet()) {
         return (
           <span ref="address" className="mt-1 mb-2">
-            {this.props.lastSharedAddress}
+            <span className="currentAddressExhibitionSpan">{this.props.lastSharedAddress}</span>
             <CopyToClipboard text={this.props.lastSharedAddress} onCopy={this.copied}>
               <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i>
             </CopyToClipboard>

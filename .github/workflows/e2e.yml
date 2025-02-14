@@ -15,6 +15,7 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-22.04
+    environment: Happo CI Env
     strategy:
       matrix:
         node-version: [22.x]
@@ -29,7 +30,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
-      - name: Cypress run
+      - name: Cypress with Happo
         # https://github.com/cypress-io/github-action/releases/tag/v6.7.7
         uses: cypress-io/github-action@f1f0912d392f0d06bdd01fb9ebe3b3299e5806fb
         with:
@@ -37,3 +38,7 @@ jobs:
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
           browser: chrome
+          command-prefix: npx happo-e2e -- npx
+        env:
+          HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
+          HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}

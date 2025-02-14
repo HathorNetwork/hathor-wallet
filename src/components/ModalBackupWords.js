@@ -239,7 +239,7 @@ class ModalBackupWords extends React.Component {
       return (
         <div>
           <p>{t`Save the words and never share them. Anyone who has access to them will control your tokens.`}</p>
-          <table className="w-100">
+          <table id="seedWordsExhibitionTable" className="w-100">
             <tbody>
               {renderWords(6)}
             </tbody>
@@ -263,7 +263,7 @@ class ModalBackupWords extends React.Component {
     const renderValidationStep = (validationStep) => {
       return (
         <article className='w-100'>
-          <h2 className='validation-step-index d-flex flex-row justify-content-center btn-block mb-16'>
+          <h2 id="validationStepIndex" className='validation-step-index d-flex flex-row justify-content-center btn-block mb-16'>
             {validationStep.backupIndex}
           </h2>
           <section
@@ -283,6 +283,7 @@ class ModalBackupWords extends React.Component {
                     this.handleValidationStepOption(option, this.state.validationSteps.indexOf(validationStep))
                   }
                   disabled={this.state.errorMessage}
+                  data-happo-hide=""
                 >
                   {option}
                 </button>

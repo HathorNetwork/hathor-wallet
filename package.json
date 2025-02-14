@@ -85,7 +85,9 @@
     "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps && patch-package",
     "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0",
     "qa_network_up": "docker compose -f ./qa/large-values-network/docker-compose.yml up",
-    "qa_network_down": "docker compose -f ./qa/large-values-network/docker-compose.yml down"
+    "qa_network_down": "docker compose -f ./qa/large-values-network/docker-compose.yml down",
+    "happo": "NODE_OPTIONS=--openssl-legacy-provider happo",
+    "happo-ci-github-actions": "NODE_OPTIONS=--openssl-legacy-provider happo-ci-github-actions"
   },
   "devDependencies": {
     "@sentry/browser": "7.99.0",
@@ -98,6 +100,9 @@
     "electron-builder": "24.6.4",
     "electron-devtools-installer": "3.2.0",
     "eslint-plugin-cypress": "2.12.1",
+    "happo-cypress": "4.3.0",
+    "happo-e2e": "3.3.3",
+    "happo.io": "11.0.1",
     "jsdoc": "4.0.2",
     "nodemon": "3.0.3",
     "sass": "1.70.0",

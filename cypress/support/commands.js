@@ -1,4 +1,5 @@
 import "@testing-library/cypress/add-commands";
+import 'happo-cypress';
 
 /// <reference types="cypress" />
 // ***********************************************

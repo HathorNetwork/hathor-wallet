@@ -40,7 +40,7 @@ function Version() {
       <span className={LOCAL_STORE.isHardwareWallet() ? 'hardware' : 'software'} onClick={walletTypeClicked}>
         {LOCAL_STORE.isHardwareWallet() ? t`Hardware Wallet` : t`Software Wallet`}
       </span>
-      <span>{VERSION}</span>
+      <span data-happo-hide="">{VERSION}</span>
     </div>
   );
 }
