@@ -177,7 +177,18 @@ describe('create a new wallet and back it up', () => {
     // After a possibly large amount of time, the fullnode will have answered the empty tx history for the new wallet
     cy.contains('Total: 0.00 HTR', { timeout: 20000 });
     cy.contains(`You haven't done the backup`);
-    cy.get('body').happoScreenshot({ component: 'DashboardEmptyNoBackup' });
+    cy.get('body').happoScreenshot({
+      component: 'DashboardEmptyNoBackup',
+      transformDOM: {
+        selector: '.currentAddressExhibitionSpan',
+        transform: (element, doc) => {
+          const newElement = doc.createElement('span');
+          newElement.appendChild(element.cloneNode(true));
+          newElement.querySelector('span').textContent = 'placeholder-address';
+          return newElement;
+        }
+      },
+    });
   })
 
   it('should backup words and handle fullnode failure', () => {
