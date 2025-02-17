@@ -92,9 +92,9 @@ export const types = {
   EXCEPTION_CAPTURED: 'EXCEPTION_CAPTURED',
   SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL: 'SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL',
   SHOW_CREATE_TOKEN_REQUEST_MODAL: 'SHOW_CREATE_TOKEN_REQUEST_MODAL',
-
   SHOW_SIGN_MESSAGE_REQUEST_MODAL: 'SHOW_SIGN_MESSAGE_REQUEST_MODAL',
   SHOW_NANO_CONTRACT_SEND_TX_MODAL: 'SHOW_NANO_CONTRACT_SEND_TX_MODAL',
+  SHOW_SEND_TRANSACTION_REQUEST_MODAL: 'SHOW_SEND_TRANSACTION_REQUEST_MODAL',
   REOWN_SESSION_PROPOSAL: 'REOWN_SESSION_PROPOSAL',
   REOWN_SESSION_REQUEST: 'REOWN_SESSION_REQUEST',
   REOWN_SESSION_DELETE: 'REOWN_SESSION_DELETE',
@@ -835,6 +835,11 @@ export const showSignMessageWithAddressModal = (onAccept, onReject, data, metada
 
 export const showNanoContractSendTxModal = (onAccept, onReject, data, metadata) => ({
   type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+export const showSendTransactionModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_SEND_TRANSACTION_REQUEST_MODAL,
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
 });
 

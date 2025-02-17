@@ -1,8 +1,12 @@
 {
   "resources": {
     "@hathor/hathor-rpc-handler": {
+      "globals": {
+        "console.log": true
+      },
       "packages": {
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true
+        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true,
+        "@hathor/wallet-lib>zod": true
       }
     },
     "@hathor/hathor-rpc-handler>@hathor/wallet-lib": {

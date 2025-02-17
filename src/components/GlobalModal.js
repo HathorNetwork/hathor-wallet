@@ -34,6 +34,7 @@ import { ReownModal } from './Reown/ReownModal';
 import { setModalContext } from '../sagas/modal';
 import { PinPad } from './PinPad';
 import { NanoContractFeedbackModal } from './Reown/NanoContractFeedbackModal';
+import { TransactionFeedbackModal } from './Reown/TransactionFeedbackModal';
 
 const initialState = {
   showModal: () => {},
@@ -68,6 +69,7 @@ export const MODAL_TYPES = {
   'REOWN': 'REOWN',
   'PIN_PAD': 'PIN_PAD',
   'NANO_CONTRACT_FEEDBACK': 'NANO_CONTRACT_FEEDBACK',
+  'TRANSACTION_FEEDBACK': 'TRANSACTION_FEEDBACK',
 };
 
 export const MODAL_COMPONENTS = {
@@ -97,6 +99,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.REOWN]: ReownModal,
   [MODAL_TYPES.PIN_PAD]: PinPad,
   [MODAL_TYPES.NANO_CONTRACT_FEEDBACK]: NanoContractFeedbackModal,
+  [MODAL_TYPES.TRANSACTION_FEEDBACK]: TransactionFeedbackModal,
 };
 
 export const GlobalModalContext = createContext(initialState);
