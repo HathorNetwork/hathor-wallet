@@ -8,12 +8,25 @@
 import React from 'react';
 import { t } from 'ttag';
 import { useSelector } from 'react-redux';
+import { numberUtils } from '@hathor/wallet-lib';
 
 export function SendTransactionModal({ data, firstAddress, onAccept, onReject }) {
-  console.log('DATA: ', data);
+  console.log('ON ACCEPT: ', onAccept);
+  console.log('ON REJECT: ', onReject);
   const { tokenMetadata } = useSelector((state) => ({
     tokenMetadata: state.tokenMetadata,
   }));
+
+  const formatValue = (value) => {
+    if (!value) return '0';
+    return numberUtils.prettyValue(value);
+  };
+
+  const truncateTxId = (txId) => {
+    if (!txId) return '';
+    if (txId.length <= 16) return txId;
+    return `${txId.slice(0, 8)}....${txId.slice(-8)}`;
+  };
 
   const renderInputs = () => {
     if (!data?.data?.inputs || data.data.inputs.length === 0) {
@@ -25,28 +38,35 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
         <h6 className="mb-3">{t`Inputs`}</h6>
         {data.data.inputs.map((input, index) => (
           <div key={index} className="p-3 bg-light rounded mb-2">
-            <div>
-              <div className="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                  <strong>{t`Input ${index + 1}`}</strong>
-                </div>
-                <div>
-                  {input.value.toString()} {input.token || 'HTR'}
-                </div>
+            <div className="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <strong>{t`Input ${index + 1}`}</strong>
               </div>
-              <div className="mb-2">
-                <code style={{ color: '#8C48F6' }}>{input.tx_id}</code>
-                <code className="text-muted"> ({input.index})</code>
+              <div>
+                {formatValue(input?.value)} HTR
               </div>
-              <div className="d-flex align-items-center">
-                <code className="text-muted flex-grow-1">{input.address}</code>
+            </div>
+            <div className="text-monospace">
+              {truncateTxId(input?.txId)} ({input?.index})
+              {input?.txId && (
+                <button 
+                  className="btn btn-link btn-sm p-0 ml-2" 
+                  onClick={() => navigator.clipboard.writeText(input.txId)}
+                >
+                  <i className="fa fa-copy"></i>
+                </button>
+              )}
+            </div>
+            <div className="text-monospace mt-2">
+              {input?.address}
+              {input?.address && (
                 <button 
                   className="btn btn-link btn-sm p-0 ml-2" 
                   onClick={() => navigator.clipboard.writeText(input.address)}
                 >
                   <i className="fa fa-copy"></i>
                 </button>
-              </div>
+              )}
             </div>
           </div>
         ))}
@@ -64,27 +84,48 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
         <h6 className="mb-3">{t`Outputs`}</h6>
         {data.data.outputs.map((output, index) => (
           <div key={index} className="p-3 bg-light rounded mb-2">
-            <div className="d-flex justify-content-between align-items-start">
+            <div className="d-flex justify-content-between align-items-start mb-2">
               <div>
                 <strong>{t`Output ${index + 1}`}</strong>
               </div>
               <div>
-                {output.value} {output.token || 'HTR'}
+                {formatValue(output?.value)} HTR
               </div>
             </div>
-            <div className="d-flex align-items-center mt-2">
-              <code className="text-muted flex-grow-1">{output.address}</code>
-              <button 
-                className="btn btn-link btn-sm p-0 ml-2" 
-                onClick={() => navigator.clipboard.writeText(output.address)}
-              >
-                <i className="fa fa-copy"></i>
-              </button>
+            <div className="text-monospace">
+              {output?.address}
+              {output?.address && (
+                <button 
+                  className="btn btn-link btn-sm p-0 ml-2" 
+                  onClick={() => navigator.clipboard.writeText(output.address)}
+                >
+                  <i className="fa fa-copy"></i>
+                </button>
+              )}
             </div>
+            {output?.data && (
+              <div className="text-monospace mt-2">
+                {output.data}
+                <button 
+                  className="btn btn-link btn-sm p-0 ml-2" 
+                  onClick={() => navigator.clipboard.writeText(output.data)}
+                >
+                  <i className="fa fa-copy"></i>
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
     );
+  };
+
+  const handleAccept = () => {
+    onAccept(data?.data);
+  };
+
+  const handleReject = () => {
+    onReject();
   };
 
   return (
@@ -97,33 +138,35 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
       </div>
       <div className="modal-body">
         <div className="mb-4">
-          <h6 className="mb-1">{data.dapp.proposer}</h6>
-          <small className="text-muted">{data.dapp.url}</small>
+          <h6 className="mb-1">{data?.dapp?.proposer}</h6>
+          <small className="text-muted">{data?.dapp?.url}</small>
         </div>
 
         {renderInputs()}
         {renderOutputs()}
 
-        {data.data.changeAddress && (
+        {data?.data?.changeAddress && (
           <div>
             <h6 className="mb-3">{t`Change Address`}</h6>
             <div className="p-3 bg-light rounded">
-              <div className="d-flex align-items-center">
-                <code className="text-muted flex-grow-1">{data.data.changeAddress}</code>
-                <button 
-                  className="btn btn-link btn-sm p-0 ml-2" 
-                  onClick={() => navigator.clipboard.writeText(data.data.changeAddress)}
-                >
-                  <i className="fa fa-copy"></i>
-                </button>
+              <div className="text-monospace">
+                {data.data.changeAddress}
+                {data.data.changeAddress && (
+                  <button 
+                    className="btn btn-link btn-sm p-0 ml-2" 
+                    onClick={() => navigator.clipboard.writeText(data.data.changeAddress)}
+                  >
+                    <i className="fa fa-copy"></i>
+                  </button>
+                )}
               </div>
             </div>
           </div>
         )}
       </div>
       <div className="modal-footer border-0">
-        <button type="button" className="btn btn-lg btn-secondary" onClick={onReject} data-dismiss="modal">{t`Reject`}</button>
-        <button type="button" className="btn btn-lg btn-hathor" onClick={onAccept}>{t`Accept Transaction`}</button>
+        <button type="button" className="btn btn-lg btn-secondary" onClick={handleReject} data-dismiss="modal">{t`Reject`}</button>
+        <button type="button" className="btn btn-lg btn-hathor" onClick={handleAccept}>{t`Accept Transaction`}</button>
       </div>
     </>
   );

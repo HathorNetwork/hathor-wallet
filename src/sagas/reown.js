@@ -467,12 +467,11 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           dispatch(hideGlobalModal());
           resolve({
             type: TriggerResponseTypes.SendTransactionConfirmationResponse,
-            data: accepted,
+            data: {
+              accepted,
+            }
           });
         };
-
-        console.log('SEND TRANSACTION DATA: ', request.data);
-        console.log('Entire request: ', request);
 
         dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
           type: ReownModalTypes.SEND_TRANSACTION,
