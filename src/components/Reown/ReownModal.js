@@ -13,6 +13,7 @@ import { ConnectModal } from './modals/ConnectModal';
 import { SignMessageModal } from './modals/SignMessageModal';
 import { SignOracleDataModal } from './modals/SignOracleDataModal';
 import { SendNanoContractTxModal } from './modals/SendNanoContractTxModal';
+import { SendTransactionModal } from './modals/SendTransactionModal';
 import { CreateTokenModal } from './modals/CreateTokenModal';
 
 export const ReownModalTypes = {
@@ -20,6 +21,7 @@ export const ReownModalTypes = {
   SIGN_MESSAGE: 'SIGN_MESSAGE',
   SIGN_ORACLE_DATA: 'SIGN_ORACLE_DATA',
   SEND_NANO_CONTRACT_TX: 'SEND_NANO_CONTRACT_TX',
+  SEND_TRANSACTION: 'SEND_TRANSACTION',
   CREATE_TOKEN: 'CREATE_TOKEN',
 };
 
@@ -99,6 +101,16 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
             firstAddress={firstAddress}
             onAccept={handleAccept} 
             onReject={handleReject} 
+          />
+        );
+
+      case ReownModalTypes.SEND_TRANSACTION:
+        return (
+          <SendTransactionModal
+            data={data}
+            firstAddress={firstAddress}
+            onAccept={handleAccept}
+            onReject={handleReject}
           />
         );
 
