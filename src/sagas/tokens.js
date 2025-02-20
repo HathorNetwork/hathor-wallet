@@ -414,10 +414,7 @@ export function* getTokenDetails(wallet, uid) {
 export function* requestUnregisteredTokensDownload({ payload }) {
   const { uids } = payload;
 
-  console.log('Will register tokens with uids', uids);
-
   if (uids.length === 0) {
-    console.log('No uids to request token details.');
     yield put(unregisteredTokensDownloadEnd());
     return;
   }
@@ -434,9 +431,7 @@ export function* requestUnregisteredTokensDownload({ payload }) {
   const uidGroups = splitInGroups(uids, perBurst);
 
   for (const group of uidGroups) {
-    console.log('Group: ', group);
     const tasks = yield all(group.map((uid) => fork(getTokenDetails, wallet, uid)));
-    console.log('Tasks: ', tasks);
     yield join(tasks);
     
     if (uidGroups.length === 1 || group === uidGroups[uidGroups.length - 1]) {
@@ -445,9 +440,6 @@ export function* requestUnregisteredTokensDownload({ payload }) {
     yield delay(burstDelay * 1000);
   }
 
-  console.log('out of the group')
-
-  console.log('Success getting tokens data to feed unregisteredTokens.');
   yield put(unregisteredTokensDownloadEnd());
 }
 

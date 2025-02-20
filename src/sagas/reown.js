@@ -396,7 +396,6 @@ export function* processRequest(action) {
         }
       } break;
       case SendTransactionError: {
-        console.log(e);
         yield put(setSendTxStatusFailure());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: false, isError: true }));
 
@@ -439,7 +438,6 @@ export function* processRequest(action) {
 
 const promptHandler = (dispatch) => (request, requestMetadata) =>
   new Promise(async (resolve, reject) => {
-    console.log(request.type, TriggerTypes);
     switch (request.type) {
       case TriggerTypes.ConnectConfirmationPrompt: {
         const connectResponseTemplate = (accepted) => () => {
@@ -771,8 +769,6 @@ export function* onCreateTokenRequest({ payload }) {
 export function* onSendTransactionRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
   const wallet = getGlobalWallet();
-
-  console.log('DATA: ', data);
 
   if (!wallet.isReady()) {
     log.error('Got a session request but wallet is not ready.');
