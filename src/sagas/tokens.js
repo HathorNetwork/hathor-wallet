@@ -7,6 +7,8 @@ import {
   take,
   all,
   put,
+  join,
+  takeLatest,
 } from 'redux-saga/effects';
 import { metadataApi } from '@hathor/wallet-lib';
 import { channel } from 'redux-saga';
@@ -24,12 +26,19 @@ import {
   tokenFetchHistoryFailed,
   proposalTokenFetchSuccess,
   proposalTokenFetchFailed,
+  unregisteredTokensDownloadSuccess,
+  unregisteredTokensDownloadFailure,
+  unregisteredTokensDownloadEnd,
+  onExceptionCaptured,
 } from '../actions';
 import { t } from "ttag";
 import { getGlobalWallet } from "../modules/wallet";
+import { logger } from '../utils/logger';
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 const METADATA_MAX_RETRIES = 3;
+
+const log = logger('tokens');
 
 export const TOKEN_DOWNLOAD_STATUS = {
   READY: 'ready',
@@ -363,6 +372,85 @@ function* fetchProposalTokenData(action) {
   }
 }
 
+const NODE_RATE_LIMIT_CONF = {
+  thin_wallet_token: {
+    burst: 10,
+    delay: 3,
+  }
+};
+
+const splitInGroups = (array, size) => {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+};
+
+/**
+ * Get token details from wallet.
+ *
+ * @param {Object} wallet The application wallet.
+ * @param {string} uid Token UID.
+ */
+export function* getTokenDetails(wallet, uid) {
+  try {
+    const { tokenInfo: { symbol, name } } = yield call([wallet, wallet.getTokenDetails], uid);
+    
+    // Register the token in the wallet storage
+    yield call([wallet.storage, wallet.storage.registerToken], { uid, name, symbol });
+    
+    yield put(unregisteredTokensDownloadSuccess({ [uid]: { uid, symbol, name } }));
+  } catch (e) {
+    log.error(`Fail getting token data for token ${uid}.`, e);
+    yield put(unregisteredTokensDownloadFailure('Some tokens could not be loaded'));
+  }
+}
+
+/**
+ * Request token details of unregistered tokens to feed new
+ * nano contract request actions.
+ */
+export function* requestUnregisteredTokensDownload({ payload }) {
+  const { uids } = payload;
+
+  console.log('Will register tokens with uids', uids);
+
+  if (uids.length === 0) {
+    console.log('No uids to request token details.');
+    yield put(unregisteredTokensDownloadEnd());
+    return;
+  }
+
+  const wallet = getGlobalWallet();
+  if (!wallet.isReady()) {
+    log.error('Fail updating loading tokens data because wallet is not ready yet.');
+    yield put(onExceptionCaptured(new Error('Wallet is not ready'), true));
+    return;
+  }
+
+  const perBurst = NODE_RATE_LIMIT_CONF.thin_wallet_token.burst;
+  const burstDelay = NODE_RATE_LIMIT_CONF.thin_wallet_token.delay;
+  const uidGroups = splitInGroups(uids, perBurst);
+
+  for (const group of uidGroups) {
+    console.log('Group: ', group);
+    const tasks = yield all(group.map((uid) => fork(getTokenDetails, wallet, uid)));
+    console.log('Tasks: ', tasks);
+    yield join(tasks);
+    
+    if (uidGroups.length === 1 || group === uidGroups[uidGroups.length - 1]) {
+      continue;
+    }
+    yield delay(burstDelay * 1000);
+  }
+
+  console.log('out of the group')
+
+  console.log('Success getting tokens data to feed unregisteredTokens.');
+  yield put(unregisteredTokensDownloadEnd());
+}
+
 export function* saga() {
   yield all([
     fork(fetchTokenMetadataQueue),
@@ -371,5 +459,6 @@ export function* saga() {
     fork(fetchProposalTokenDataQueue),
     takeEvery(types.TOKEN_FETCH_HISTORY_REQUESTED, fetchTokenHistory),
     takeEvery('new_tokens', routeTokenChange),
+    takeLatest(types.UNREGISTERED_TOKENS_DOWNLOAD_REQUESTED, requestUnregisteredTokensDownload),
   ]);
 }

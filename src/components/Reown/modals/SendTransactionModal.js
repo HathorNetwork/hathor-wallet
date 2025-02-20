@@ -5,17 +5,57 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { t } from 'ttag';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { numberUtils } from '@hathor/wallet-lib';
+import { unregisteredTokensDownloadRequested } from '../../../actions';
 
 export function SendTransactionModal({ data, firstAddress, onAccept, onReject }) {
-  console.log('ON ACCEPT: ', onAccept);
-  console.log('ON REJECT: ', onReject);
-  const { tokenMetadata } = useSelector((state) => ({
+  const dispatch = useDispatch();
+  const { tokenMetadata, tokens: registeredTokens } = useSelector((state) => ({
     tokenMetadata: state.tokenMetadata,
+    tokens: state.tokens,
   }));
+
+  useEffect(() => {
+    // Collect all unregistered token UIDs
+    const unregisteredTokens = new Set();
+    
+    data?.data?.inputs?.forEach(input => {
+      const token = registeredTokens.find(t => t.uid === input.token);
+      if (!token && input.token) {
+        unregisteredTokens.add(input.token);
+      }
+    });
+
+    data?.data?.outputs?.forEach(output => {
+      const token = registeredTokens.find(t => t.uid === output.token);
+      if (!token && output.token) {
+        unregisteredTokens.add(output.token);
+      }
+    });
+
+    console.log('unregistered tokens: ', unregisteredTokens);
+    if (unregisteredTokens.size > 0) {
+      dispatch(unregisteredTokensDownloadRequested(Array.from(unregisteredTokens)));
+    }
+  }, [data, registeredTokens, dispatch]);
+
+  const getTokenSymbol = (tokenId) => {
+    // First check in registered tokens
+    const token = registeredTokens.find(t => t.uid === tokenId);
+    if (token) {
+      return token.symbol;
+    }
+    // If not found, check in metadata
+    const metadata = tokenMetadata[tokenId];
+    if (metadata) {
+      return metadata.symbol;
+    }
+    // If not found anywhere, return first 4 chars of token ID
+    return tokenId ? tokenId.slice(0, 4) : 'HTR';
+  };
 
   const formatValue = (value) => {
     if (!value) return '0';
@@ -43,7 +83,7 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
                 <strong>{t`Input ${index + 1}`}</strong>
               </div>
               <div>
-                {formatValue(input?.value)} HTR
+                {formatValue(input?.value)} {getTokenSymbol(input?.token)}
               </div>
             </div>
             <div className="text-monospace">
@@ -89,7 +129,7 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
                 <strong>{t`Output ${index + 1}`}</strong>
               </div>
               <div>
-                {formatValue(output?.value)} HTR
+                {formatValue(output?.value)} {getTokenSymbol(output?.token)}
               </div>
             </div>
             <div className="text-monospace">
