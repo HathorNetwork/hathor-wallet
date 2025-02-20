@@ -330,7 +330,6 @@ export function* processRequest(action) {
       dispatch = _dispatch;
     });
 
-    console.log('; Got request: ', params.request);
     const response = yield call(
       handleRpcRequest,
       params.request,

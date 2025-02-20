@@ -40,7 +40,6 @@
     "../hathor-rpc-lib/packages/hathor-rpc-handler/node_modules/bitcore-lib": "8.25.10"
   },
   "dependencies": {
-    "@hathor/hathor-rpc-handler": "file:../hathor-rpc-lib/packages/hathor-rpc-handler",
     "@hathor/wallet-lib": "2.0.1",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",

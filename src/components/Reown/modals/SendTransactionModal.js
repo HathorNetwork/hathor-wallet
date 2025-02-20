@@ -36,7 +36,6 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
       }
     });
 
-    console.log('unregistered tokens: ', unregisteredTokens);
     if (unregisteredTokens.size > 0) {
       dispatch(unregisteredTokensDownloadRequested(Array.from(unregisteredTokens)));
     }
@@ -48,24 +47,28 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
     if (token) {
       return token.symbol;
     }
+
     // If not found, check in metadata
     const metadata = tokenMetadata[tokenId];
     if (metadata) {
       return metadata.symbol;
     }
+
     // If not found anywhere, return first 4 chars of token ID
-    return tokenId ? tokenId.slice(0, 4) : 'HTR';
+    return tokenId.slice(0, 4);
   };
 
   const formatValue = (value) => {
-    if (!value) return '0';
+    if (value == null) {
+      return '-';
+    }
+
     return numberUtils.prettyValue(value);
   };
 
   const truncateTxId = (txId) => {
-    if (!txId) return '';
-    if (txId.length <= 16) return txId;
-    return `${txId.slice(0, 8)}....${txId.slice(-8)}`;
+    if (!txId) return '-';
+    return `${txId.slice(0, 8)}...${txId.slice(-8)}`;
   };
 
   const renderInputs = () => {
