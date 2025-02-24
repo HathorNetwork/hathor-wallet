@@ -46,11 +46,6 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
             <ReactLoading type="spin" color={colors.purpleHathor} height={32} width={32} className="d-inline-block" />
             <p className="mt-3">{t`Processing nano contract transaction...`}</p>
           </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={handleDismiss}>
-              {t`Cancel`}
-            </button>
-          </div>
         </>
       );
     }
@@ -101,9 +96,11 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
             <h5 className="modal-title">
               {isLoading ? t`Processing Transaction` : (isError ? t`Transaction Failed` : t`Transaction Successful`)}
             </h5>
-            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleDismiss}>
-              <span aria-hidden="true">&times;</span>
-            </button>
+            {!isLoading && (
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleDismiss}>
+                <span aria-hidden="true">&times;</span>
+              </button>
+            )}
           </div>
           {renderContent()}
         </div>
