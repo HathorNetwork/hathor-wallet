@@ -202,10 +202,13 @@ export function* refreshActiveSessions(extend = false) {
   }
 
   const activeSessions = yield call(() => walletKit.getActiveSessions());
-  yield put(setReownSessions(activeSessions));
+  
+  yield put(setReownSessions(activeSessions || {}));
 
   if (extend) {
-    for (const key of Object.keys(activeSessions)) {
+    const sessionKeys = Object.keys(activeSessions || {});
+    
+    for (const key of sessionKeys) {
       log.debug('Extending session ');
       log.debug(activeSessions[key].topic);
 
