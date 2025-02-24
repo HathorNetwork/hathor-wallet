@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const LavaMoatPlugin = require('@lavamoat/webpack')
 const fs = require('fs');
 const path = require('path');
+const stdLibBrowser = require('node-stdlib-browser');
 
 module.exports = function override(config, env) {
   // Enable source maps for better debugging
@@ -17,21 +18,13 @@ module.exports = function override(config, env) {
   config.resolve = {
     ...config.resolve,
     fallback: {
-      url: require.resolve('url'),
-      fs: false,
-      assert: require.resolve('assert'),
-      crypto: require.resolve('crypto-browserify'),
-      http: require.resolve('stream-http'),
-      https: require.resolve('https-browserify'),
-      os: require.resolve('os-browserify/browser'),
-      buffer: require.resolve('buffer'),
-      stream: require.resolve('stream-browserify'),
-      vm: require.resolve('vm-browserify'),
-      path: require.resolve("path-browserify"),
-      worker_threads: false,
-      perf_hooks: false,
-      tls: false,
-      net: false
+      buffer: require.resolve('buffer/'),
+      assert: stdLibBrowser.assert,
+      crypto: stdLibBrowser.crypto,
+      path: stdLibBrowser.path,
+      process: stdLibBrowser.process,
+      stream: stdLibBrowser.stream,
+      os: stdLibBrowser.os
     },
     mainFields: ['browser', 'module', 'main'],
     conditionNames: ['import', 'require', 'node', 'default'],
@@ -77,9 +70,9 @@ module.exports = function override(config, env) {
   const basePlugins = [
     ...config.plugins.filter(p => !(p instanceof webpack.ProvidePlugin)),
     new webpack.ProvidePlugin({
-      process: 'process/browser',
-      Buffer: ['buffer-shim', 'default']
-    }),
+      Buffer: ['buffer', 'Buffer'],
+      process: stdLibBrowser.process
+    })
   ];
 
   // Only add LavaMoat in production because LavaMoat does not work with the
