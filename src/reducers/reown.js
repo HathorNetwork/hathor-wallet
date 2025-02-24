@@ -69,7 +69,7 @@ export default function reownReducer(state = initialState, action) {
         nanoContractStatus: 'success',
       };
 
-    case types.REOWN_NEW_NANOCONTRACT_STATUS_FAILURE:
+    case types.REOWN_NEW_NANOCONTRACT_STATUS_FAILED:
       return {
         ...state,
         nanoContractStatus: 'failure',
