@@ -6,6 +6,7 @@
  */
 
 import { types } from '../actions';
+import { BASE_STATUS } from '../constants';
 
 const initialState = {
   client: null,
@@ -18,8 +19,8 @@ const initialState = {
   },
   sessions: {},
   connectionFailed: false,
-  nanoContractStatus: 'ready', // 'ready' | 'loading' | 'success' | 'failure'
-  createTokenStatus: 'ready', // 'ready' | 'loading' | 'success' | 'failure'
+  nanoContractStatus: BASE_STATUS.READY,
+  createTokenStatus: BASE_STATUS.READY,
 };
 
 export default function reownReducer(state = initialState, action) {
@@ -54,49 +55,49 @@ export default function reownReducer(state = initialState, action) {
     case types.REOWN_NEW_NANOCONTRACT_STATUS_LOADING:
       return {
         ...state,
-        nanoContractStatus: 'loading',
+        nanoContractStatus: BASE_STATUS.LOADING,
       };
 
     case types.REOWN_NEW_NANOCONTRACT_STATUS_READY:
       return {
         ...state,
-        nanoContractStatus: 'ready',
+        nanoContractStatus: BASE_STATUS.READY,
       };
 
     case types.REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS:
       return {
         ...state,
-        nanoContractStatus: 'success',
+        nanoContractStatus: BASE_STATUS.SUCCESS,
       };
 
     case types.REOWN_NEW_NANOCONTRACT_STATUS_FAILED:
       return {
         ...state,
-        nanoContractStatus: 'failure',
+        nanoContractStatus: BASE_STATUS.ERROR,
       };
 
     case types.REOWN_CREATE_TOKEN_STATUS_LOADING:
       return {
         ...state,
-        createTokenStatus: 'loading',
+        createTokenStatus: BASE_STATUS.LOADING,
       };
 
     case types.REOWN_CREATE_TOKEN_STATUS_READY:
       return {
         ...state,
-        createTokenStatus: 'ready',
+        createTokenStatus: BASE_STATUS.READY,
       };
 
     case types.REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL:
       return {
         ...state,
-        createTokenStatus: 'success',
+        createTokenStatus: BASE_STATUS.SUCCESS,
       };
 
     case types.REOWN_CREATE_TOKEN_STATUS_FAILED:
       return {
         ...state,
-        createTokenStatus: 'failure',
+        createTokenStatus: BASE_STATUS.ERROR,
       };
 
     default:

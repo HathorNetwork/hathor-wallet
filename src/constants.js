@@ -289,7 +289,7 @@ export const NETWORK_SETTINGS = {
  * Base statuses for saga reducer handlers
  * Used by all other statuses objects
  */
-const BASE_STATUS = {
+export const BASE_STATUS = {
   READY: 'ready',
   ERROR: 'error',
   LOADING: 'loading',

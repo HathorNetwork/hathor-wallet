@@ -199,23 +199,21 @@ export function* loadNanoContractDetail({ ncId }) {
   }
 
   const nanoContracts = yield select((state) => state.nanoContracts);
-  const blueprintsData = yield select((state) => state.blueprintsData);
   const nc = nanoContracts[ncId];
-  let blueprintInformation = blueprintsData[nc.blueprintId];
-
+  
+  yield call(fetchBlueprintInformation, { payload: nc.blueprintId });
+  
+  // Get the updated blueprints data after the fetch
+  const blueprintsData = yield select((state) => state.blueprintsData);
+  const blueprintInformation = blueprintsData[nc.blueprintId];
+  
   if (!blueprintInformation) {
-    // If it hasn't been loaded, we load and store in redux
-    try {
-      blueprintInformation = yield call(hathorLib.ncApi.getBlueprintInformation, nc.blueprintId);
-      // We need this blueprint information response to call the following get state
-      // Store in redux, so it can be reused by other nano contracts
-      yield put(addBlueprintInformation(blueprintInformation));
-    } catch(e) {
-      // Error in request
-      console.error('Error while loading blueprint information.', e);
-      yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Error getting blueprint details.` }));
-      return;
-    }
+    // If we still don't have the blueprint information, there was an error
+    yield put(nanoContractDetailSetStatus({ 
+      status: NANO_CONTRACT_DETAIL_STATUS.ERROR, 
+      error: t`Error getting blueprint details.` 
+    }));
+    return;
   }
 
   try {
