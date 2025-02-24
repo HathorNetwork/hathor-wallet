@@ -627,13 +627,18 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
   });
 
 /**
- * Handles a sign message request from a dApp
- * Shows a modal to the user for confirmation
+ * Generic handler for dApp requests that require user confirmation
+ * Shows a modal to the user and manages the accept/reject flow
  * 
- * @param {Object} payload - The request payload containing message data
+ * @param {Object} payload - The request payload
+ * @param {Function} payload.accept - Callback for when user accepts
+ * @param {Function} payload.deny - Callback for when user rejects
+ * @param {Object} payload.data - The request data
+ * @param {Object} payload.dapp - Metadata about the requesting dApp
+ * @param {string} modalType - The type of modal to show from ReownModalTypes
  */
-export function* onSignMessageRequest({ payload }) {
-  const { accept: acceptCb, deny: denyCb, data, dapp } = payload;
+export function* handleDAppRequest({ payload }, modalType) {
+  const { accept, deny: denyCb, data, dapp } = payload;
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
@@ -642,12 +647,12 @@ export function* onSignMessageRequest({ payload }) {
   }
 
   yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.SIGN_MESSAGE,
+    type: modalType,
     data: {
       data,
       dapp,
     },
-    onAcceptAction: acceptCb,
+    onAcceptAction: accept,
     onRejectAction: denyCb,
   }));
 
@@ -661,121 +666,47 @@ export function* onSignMessageRequest({ payload }) {
     return;
   }
 
-  acceptCb();
+  accept();
+}
+
+/**
+ * Handles a sign message request from a dApp
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
+export function* onSignMessageRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.SIGN_MESSAGE);
 }
 
 /**
  * Handles a sign oracle data request from a dApp
  * Shows a modal to the user for confirmation
  * 
- * @param {Object} payload - The request payload containing oracle data
+ * @param {Object} action - The action containing the request payload
  */
-export function* onSignOracleDataRequest({ payload }) {
-  const { accept, deny: denyCb, data, dapp } = payload;
-  const wallet = getGlobalWallet();
-
-  if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
-    return;
-  }
-
-  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.SIGN_ORACLE_DATA,
-    data: {
-      data,
-      dapp,
-    },
-    onAcceptAction: accept,
-    onRejectAction: denyCb,
-  }));
-
-  const { deny } = yield race({
-    accept: take(types.REOWN_ACCEPT),
-    deny: take(types.REOWN_REJECT),
-  });
-
-  if (deny) {
-    denyCb();
-    return;
-  }
-
-  accept();
+export function* onSignOracleDataRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.SIGN_ORACLE_DATA);
 }
 
 /**
  * Handles a request to send a nano contract transaction
  * Shows a modal to the user for confirmation
  * 
- * @param {Object} payload - The request payload containing transaction data
+ * @param {Object} action - The action containing the request payload
  */
-export function* onSendNanoContractTxRequest({ payload }) {
-  const { accept, deny: denyCb, data, dapp } = payload;
-  const wallet = getGlobalWallet();
-
-  if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
-    return;
-  }
-
-  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.SEND_NANO_CONTRACT_TX,
-    data: {
-      data,
-      dapp,
-    },
-    onAcceptAction: accept,
-    onRejectAction: denyCb,
-  }));
-
-  const { deny } = yield race({
-    accept: take(types.REOWN_ACCEPT),
-    deny: take(types.REOWN_REJECT),
-  });
-
-  if (deny) {
-    denyCb();
-    return;
-  }
-
-  accept();
+export function* onSendNanoContractTxRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.SEND_NANO_CONTRACT_TX);
 }
 
 /**
  * Handles a request to create a token
  * Shows a modal to the user for confirmation
  * 
- * @param {Object} payload - The request payload containing token data
+ * @param {Object} action - The action containing the request payload
  */
-export function* onCreateTokenRequest({ payload }) {
-  const { accept, deny: denyCb, data, dapp } = payload;
-  const wallet = getGlobalWallet();
-
-  if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
-    return;
-  }
-
-  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.CREATE_TOKEN,
-    data: {
-      data,
-      dapp,
-    },
-    onAcceptAction: accept,
-    onRejectAction: denyCb,
-  }));
-
-  const { deny } = yield race({
-    accept: take(types.REOWN_ACCEPT),
-    deny: take(types.REOWN_REJECT),
-  });
-
-  if (deny) {
-    denyCb();
-    return;
-  }
-
-  accept();
+export function* onCreateTokenRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.CREATE_TOKEN);
 }
 
 /**
