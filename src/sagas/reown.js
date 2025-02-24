@@ -124,7 +124,7 @@ function* init() {
 
     const metadata = {
       name: 'Hathor',
-      description: 'Hathor Mobile Wallet',
+      description: 'Hathor Desktop Wallet',
       url: 'https://hathor.network/',
       icons: ['https://hathor.network/favicon.ico'],
     };
