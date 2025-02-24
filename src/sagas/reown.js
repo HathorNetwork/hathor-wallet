@@ -29,6 +29,7 @@ import {
   handleRpcRequest,
   CreateTokenError,
   SendNanoContractTxError,
+  SignMessageWithAddressError,
 } from '@hathor/hathor-rpc-handler';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
@@ -387,6 +388,10 @@ export function* processRequest(action) {
         break;
       case RpcResponseTypes.CreateTokenResponse:
         yield put(setCreateTokenStatusSuccessful());
+        yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: false }));
+        break;
+      case RpcResponseTypes.SignMessageWithAddressResponse:
+        yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: false }));
         break;
       default:
         break;
@@ -426,6 +431,20 @@ export function* processRequest(action) {
           retryHandler,
           types.REOWN_CREATE_TOKEN_RETRY,
           types.REOWN_CREATE_TOKEN_RETRY_DISMISS,
+        );
+
+        if (retry) {
+          shouldAnswer = false;
+          yield* processRequest(action);
+        }
+      } break;
+      case SignMessageWithAddressError: {
+        yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: true }));
+
+        const retry = yield call(
+          retryHandler,
+          types.REOWN_SIGN_MESSAGE_RETRY,
+          types.REOWN_SIGN_MESSAGE_RETRY_DISMISS,
         );
 
         if (retry) {
@@ -480,6 +499,29 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         });
       } break;
 
+      case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
+        const sendNanoContractTxResponseTemplate = (accepted) => (data) => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
+            data: {
+              accepted,
+              nc: data
+            }
+          });
+        };
+
+        dispatch({
+          type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
+          payload: {
+            accept: sendNanoContractTxResponseTemplate(true),
+            deny: sendNanoContractTxResponseTemplate(false),
+            data: request.data,
+            dapp: requestMetadata,
+          }
+        });
+      } break;
+
       case TriggerTypes.CreateTokenConfirmationPrompt: {
         const createTokenResponseTemplate = (accepted) => (data) => {
           dispatch(hideGlobalModal());
@@ -517,29 +559,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           payload: {
             accept: signMessageResponseTemplate(true),
             deny: signMessageResponseTemplate(false),
-            data: request.data,
-            dapp: requestMetadata,
-          }
-        });
-      } break;
-
-      case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
-        const sendNanoContractTxResponseTemplate = (accepted) => (data) => {
-          dispatch(hideGlobalModal());
-          resolve({
-            type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
-            data: {
-              accepted,
-              nc: data
-            }
-          });
-        };
-
-        dispatch({
-          type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
-          payload: {
-            accept: sendNanoContractTxResponseTemplate(true),
-            deny: sendNanoContractTxResponseTemplate(false),
             data: request.data,
             dapp: requestMetadata,
           }
