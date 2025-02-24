@@ -806,26 +806,63 @@ export const setCreateTokenStatusFailed = () => ({
   type: types.REOWN_CREATE_TOKEN_STATUS_FAILED,
 });
 
+/**
+ * Action to capture exceptions in the application
+ * 
+ * @param {Error} error The error that was captured
+ */
 export const onExceptionCaptured = (error) => ({
   type: types.EXCEPTION_CAPTURED,
   error,
 });
 
+/**
+ * Show modal for signing oracle data
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The oracle data to be signed
+ * @param {Object} metadata Metadata about the dapp requesting the signature
+ */
 export const showSignOracleDataModal = (onAccept, onReject, data, metadata) => ({
   type: types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL,
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
 });
 
+/**
+ * Show modal for creating a token
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The token creation data
+ * @param {Object} metadata Metadata about the dapp requesting the token creation
+ */
 export const showCreateTokenModal = (onAccept, onReject, data, metadata) => ({
   type: types.SHOW_CREATE_TOKEN_REQUEST_MODAL,
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
 });
 
+/**
+ * Show modal for signing a message with an address
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The message data to be signed
+ * @param {Object} metadata Metadata about the dapp requesting the signature
+ */
 export const showSignMessageWithAddressModal = (onAccept, onReject, data, metadata) => ({
   type: types.SHOW_SIGN_MESSAGE_REQUEST_MODAL,
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
 });
 
+/**
+ * Show modal for sending a nano contract transaction
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The transaction data
+ * @param {Object} metadata Metadata about the dapp requesting the transaction
+ */
 export const showNanoContractSendTxModal = (onAccept, onReject, data, metadata) => ({
   type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
