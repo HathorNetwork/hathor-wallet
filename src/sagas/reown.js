@@ -77,11 +77,20 @@ const ERROR_CODES = {
   INVALID_PAYLOAD: 5003,
 };
 
+/**
+ * Checks if the Reown feature is enabled via feature flags
+ * 
+ * @returns {boolean} True if the Reown feature is enabled, false otherwise
+ */
 function* isReownEnabled() {
   const reownEnabled = yield call(checkForFeatureFlag, REOWN_FEATURE_TOGGLE);
   return reownEnabled;
 }
 
+/**
+ * Initializes the Reown client and sets up the necessary configurations
+ * This is the main entry point for the Reown functionality
+ */
 function* init() {
   log.debug('Wallet not ready yet, waiting for START_WALLET_SUCCESS.');
   yield take(types.START_WALLET_SUCCESS);
@@ -141,6 +150,10 @@ function* init() {
   }
 }
 
+/**
+ * Monitors for network changes and clears Reown sessions when the genesis hash changes
+ * This ensures sessions are reset when switching between networks
+ */
 export function* listenForNetworkChange() {
   let previousGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
   
@@ -158,6 +171,10 @@ export function* listenForNetworkChange() {
   }
 }
 
+/**
+ * Checks for any pending session proposals or requests
+ * Retrieves pending requests from the WalletKit
+ */
 export function* checkForPendingRequests() {
   const { walletKit } = getGlobalReown();
 
@@ -170,6 +187,12 @@ export function* checkForPendingRequests() {
   yield call([walletKit, walletKit.getPendingSessionRequests]);
 }
 
+/**
+ * Refreshes the list of active Reown sessions in the Redux store
+ * Optionally extends the expiration time of existing sessions
+ * 
+ * @param {boolean} extend - Whether to extend the expiration time of sessions
+ */
 export function* refreshActiveSessions(extend = false) {
   log.debug('Refreshing active sessions.');
   const { walletKit } = getGlobalReown();
@@ -210,6 +233,12 @@ export function* refreshActiveSessions(extend = false) {
   }
 }
 
+/**
+ * Sets up event listeners for the Reown WalletKit
+ * Creates an event channel to handle various Reown events
+ * 
+ * @param {Object} walletKit - The WalletKit instance to attach listeners to
+ */
 export function* setupListeners(walletKit) {
   log.debug('Will setup listeners: ', walletKit);
   const channel = eventChannel((emitter) => {
@@ -256,6 +285,10 @@ export function* setupListeners(walletKit) {
   }
 }
 
+/**
+ * Clears all active Reown sessions
+ * Disconnects all sessions and refreshes the session list
+ */
 export function* clearSessions() {
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
@@ -278,6 +311,10 @@ export function* clearSessions() {
   yield call(refreshActiveSessions);
 }
 
+/**
+ * Listens for incoming session requests and processes them
+ * Creates an action channel to handle REOWN_SESSION_REQUEST actions
+ */
 function* requestsListener() {
   const requestsChannel = yield actionChannel('REOWN_SESSION_REQUEST');
 
@@ -293,6 +330,12 @@ function* requestsListener() {
   }
 }
 
+/**
+ * Processes a Reown session request
+ * Handles RPC requests from dApps and responds appropriately
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
 export function* processRequest(action) {
   const { payload } = action;
   const { params } = payload;
@@ -561,6 +604,12 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
     }
   });
 
+/**
+ * Handles a sign message request from a dApp
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} payload - The request payload containing message data
+ */
 export function* onSignMessageRequest({ payload }) {
   const { accept: acceptCb, deny: denyCb, data, dapp } = payload;
   const wallet = getGlobalWallet();
@@ -593,6 +642,12 @@ export function* onSignMessageRequest({ payload }) {
   acceptCb();
 }
 
+/**
+ * Handles a sign oracle data request from a dApp
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} payload - The request payload containing oracle data
+ */
 export function* onSignOracleDataRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
   const wallet = getGlobalWallet();
@@ -625,6 +680,12 @@ export function* onSignOracleDataRequest({ payload }) {
   accept();
 }
 
+/**
+ * Handles a request to send a nano contract transaction
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} payload - The request payload containing transaction data
+ */
 export function* onSendNanoContractTxRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
   const wallet = getGlobalWallet();
@@ -657,6 +718,12 @@ export function* onSendNanoContractTxRequest({ payload }) {
   accept();
 }
 
+/**
+ * Handles a request to create a token
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} payload - The request payload containing token data
+ */
 export function* onCreateTokenRequest({ payload }) {
   const { accept, deny: denyCb, data, dapp } = payload;
   const wallet = getGlobalWallet();
@@ -689,6 +756,10 @@ export function* onCreateTokenRequest({ payload }) {
   accept();
 }
 
+/**
+ * Handles wallet reset events
+ * Clears all Reown sessions when the wallet is reset
+ */
 export function* onWalletReset() {
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
@@ -699,6 +770,12 @@ export function* onWalletReset() {
   yield call(clearSessions);
 }
 
+/**
+ * Handles a session proposal from a dApp
+ * Shows a modal to the user for confirmation and manages the session approval/rejection
+ * 
+ * @param {Object} action - The action containing the session proposal
+ */
 export function* onSessionProposal(action) {
   log.debug('Got session proposal', action);
   const { id, params } = action.payload;
@@ -785,6 +862,12 @@ export function* onSessionProposal(action) {
   }
 }
 
+/**
+ * Handles a WalletConnect URI input
+ * Attempts to pair with the provided URI
+ * 
+ * @param {Object} action - The action containing the URI payload
+ */
 export function* onUriInputted(action) {
   const { core, walletKit } = getGlobalReown();
 
@@ -803,6 +886,10 @@ export function* onUriInputted(action) {
   }
 }
 
+/**
+ * Listens for feature toggle updates and shuts down Reown if disabled
+ * Monitors changes to the Reown feature flag
+ */
 export function* featureToggleUpdateListener() {
   while (true) {
     const oldReownEnabled = yield call(isReownEnabled);
@@ -815,6 +902,12 @@ export function* featureToggleUpdateListener() {
   }
 }
 
+/**
+ * Handles a request to cancel a session
+ * Disconnects the specified session and refreshes the session list
+ * 
+ * @param {Object} action - The action containing the session ID
+ */
 export function* onCancelSession(action) {
   const { walletKit } = getGlobalReown();
 
@@ -838,6 +931,12 @@ export function* onCancelSession(action) {
   yield call(refreshActiveSessions);
 }
 
+/**
+ * Handles a session delete event
+ * Delegates to onCancelSession to handle the session deletion
+ * 
+ * @param {Object} action - The action containing the session data
+ */
 export function* onSessionDelete(action) {
   yield call(onCancelSession, action);
 }
