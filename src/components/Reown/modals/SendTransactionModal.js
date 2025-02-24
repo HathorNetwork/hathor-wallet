@@ -8,8 +8,9 @@
 import React, { useEffect } from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
-import { numberUtils } from '@hathor/wallet-lib';
+import { constants, numberUtils } from '@hathor/wallet-lib';
 import { unregisteredTokensDownloadRequested } from '../../../actions';
+import { CopyButton } from '../../CopyButton';
 
 export function SendTransactionModal({ data, firstAddress, onAccept, onReject }) {
   const dispatch = useDispatch();
@@ -42,6 +43,10 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
   }, [data, registeredTokens, dispatch]);
 
   const getTokenSymbol = (tokenId) => {
+    if (!tokenId) {
+      return constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
+    }
+
     // First check in registered tokens
     const token = registeredTokens.find(t => t.uid === tokenId);
     if (token) {
@@ -54,8 +59,7 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
       return metadata.symbol;
     }
 
-    // If not found anywhere, return first 4 chars of token ID
-    return tokenId.slice(0, 4);
+    return '?';
   };
 
   const formatValue = (value) => {
@@ -103,12 +107,7 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
             <div className="text-monospace mt-2">
               {input?.address}
               {input?.address && (
-                <button 
-                  className="btn btn-link btn-sm p-0 ml-2" 
-                  onClick={() => navigator.clipboard.writeText(input.address)}
-                >
-                  <i className="fa fa-copy"></i>
-                </button>
+                <CopyButton text={input.address} />
               )}
             </div>
           </div>
@@ -137,25 +136,15 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
             </div>
             <div className="text-monospace">
               {output?.address}
-              {output?.address && (
-                <button 
-                  className="btn btn-link btn-sm p-0 ml-2" 
-                  onClick={() => navigator.clipboard.writeText(output.address)}
-                >
-                  <i className="fa fa-copy"></i>
-                </button>
-              )}
+              <CopyButton text={output?.address} />
             </div>
             {output?.data && (
-              <div className="text-monospace mt-2">
-                {output.data}
-                <button 
-                  className="btn btn-link btn-sm p-0 ml-2" 
-                  onClick={() => navigator.clipboard.writeText(output.data)}
-                >
-                  <i className="fa fa-copy"></i>
-                </button>
-              </div>
+              <>
+                <div className="mt-2 mb-1"><small>{t`Data field:`}</small></div>
+                <div className="text-monospace">
+                  {output.data.join(',')}
+                </div>
+              </>
             )}
           </div>
         ))}

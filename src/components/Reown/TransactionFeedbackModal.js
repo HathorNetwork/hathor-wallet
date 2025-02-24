@@ -19,7 +19,7 @@ export const MODAL_ID = 'transactionFeedbackModal';
  * Component that shows a modal with feedback for transactions
  * Shows loading, success or error message and provides retry option on failure
  */
-export function TransactionFeedbackModal({ isError, isLoading = true, onClose, manageDomLifecycle }) {
+export function TransactionFeedbackModal({ isError, isLoading = true, errorMessage, onClose, manageDomLifecycle }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export function TransactionFeedbackModal({ isError, isLoading = true, onClose, m
       <>
         <div className="modal-body">
           {isError ? (
-            <p>{t`There was an error sending the transaction. Would you like to try again?`}</p>
+            <p>{errorMessage || t`There was an error sending the transaction. Would you like to try again?`}</p>
           ) : (
             <p>{t`The transaction was sent successfully.`}</p>
           )}

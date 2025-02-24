@@ -30,6 +30,7 @@ import {
   CreateTokenError,
   SendNanoContractTxError,
   SendTransactionError,
+  InsufficientFundsError,
 } from 'hathor-rpc-handler-test';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
@@ -363,7 +364,7 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
-    log.debug('Error on processRequest: ', e);
+    console.log('Error on processRequest: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
@@ -395,9 +396,31 @@ export function* processRequest(action) {
           yield* processRequest(action);
         }
       } break;
+      case InsufficientFundsError: {
+        yield put(setSendTxStatusFailure());
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
+          isLoading: false, 
+          isError: true,
+          errorMessage: t`Insufficient funds to complete the transaction.`
+        }));
+
+        const retry = yield call(
+          retryHandler,
+          types.REOWN_SEND_TX_RETRY,
+          types.REOWN_SEND_TX_RETRY_DISMISS,
+        );
+
+        if (retry) {
+          shouldAnswer = false;
+          yield* processRequest(action);
+        }
+      } break;
       case SendTransactionError: {
         yield put(setSendTxStatusFailure());
-        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: false, isError: true }));
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
+          isLoading: false, 
+          isError: true 
+        }));
 
         const retry = yield call(
           retryHandler,
