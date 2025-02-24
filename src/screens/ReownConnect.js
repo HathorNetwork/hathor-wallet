@@ -10,10 +10,13 @@ import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 import { types } from '../actions';
 import BackButton from '../components/BackButton';
+import ReactLoading from 'react-loading';
+import { colors } from '../constants';
 
 function ReownConnect() {
   const [uri, setUri] = useState('');
   const [showNewConnectionForm, setShowNewConnectionForm] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const dispatch = useDispatch();
   const { connectionFailed, sessions } = useSelector(state => ({
     connectionFailed: state.reown.connectionFailed,
@@ -22,6 +25,7 @@ function ReownConnect() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsConnecting(true);
     dispatch({ type: types.REOWN_SET_CONNECTION_FAILED, payload: false });
     dispatch({ type: types.REOWN_URI_INPUTTED, payload: uri });
   };
@@ -29,6 +33,18 @@ function ReownConnect() {
   const handleDisconnect = (sessionId) => {
     dispatch({ type: types.REOWN_CANCEL_SESSION, payload: { id: sessionId } });
   };
+
+  // Reset connecting state when connection fails or succeeds
+  React.useEffect(() => {
+    if (connectionFailed) {
+      setIsConnecting(false);
+    }
+  }, [connectionFailed]);
+
+  // Also reset connecting state when sessions change (successful connection)
+  React.useEffect(() => {
+    setIsConnecting(false);
+  }, [sessions]);
 
   const renderSession = (session, sessionId) => {
     const metadata = session.peer.metadata;
@@ -89,8 +105,15 @@ function ReownConnect() {
                       value={uri}
                       onChange={(e) => setUri(e.target.value)}
                       placeholder={t`wc:...`}
+                      disabled={isConnecting}
                     />
                   </div>
+                  {isConnecting && (
+                    <div className="text-center my-3">
+                      <ReactLoading type="spin" color={colors.purpleHathor} height={32} width={32} className="d-inline-block" />
+                      <p className="mt-2 mb-0">{t`Connecting to dApp...`}</p>
+                    </div>
+                  )}
                   {connectionFailed && (
                     <div className="alert alert-danger" role="alert">
                       {t`Failed to connect. Please check the URI and try again.`}
@@ -103,12 +126,14 @@ function ReownConnect() {
                       onClick={() => {
                         setShowNewConnectionForm(false);
                         setUri('');
+                        setIsConnecting(false);
                         dispatch({ type: types.REOWN_SET_CONNECTION_FAILED, payload: false });
                       }}
+                      disabled={isConnecting}
                     >
                       {t`Cancel`}
                     </button>
-                    <button type="submit" className="btn btn-hathor">
+                    <button type="submit" className="btn btn-hathor" disabled={isConnecting || !uri.trim()}>
                       {t`Connect`}
                     </button>
                   </div>
