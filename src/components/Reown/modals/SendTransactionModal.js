@@ -47,16 +47,9 @@ export function SendTransactionModal({ data, firstAddress, onAccept, onReject })
       return constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
     }
 
-    // First check in registered tokens
     const token = registeredTokens.find(t => t.uid === tokenId);
     if (token) {
       return token.symbol;
-    }
-
-    // If not found, check in metadata
-    const metadata = tokenMetadata[tokenId];
-    if (metadata) {
-      return metadata.symbol;
     }
 
     return '?';

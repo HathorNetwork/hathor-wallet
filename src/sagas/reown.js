@@ -61,6 +61,7 @@ import { logger } from '../utils/logger';
 import { getGlobalReown, setGlobalReown } from '../modules/reown';
 import { MODAL_TYPES } from '../components/GlobalModal';
 import { getGlobalWallet } from '../modules/wallet';
+import { t } from 'ttag';
 
 const log = logger('reown');
 
