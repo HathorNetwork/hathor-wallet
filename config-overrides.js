@@ -53,6 +53,9 @@ module.exports = function override(config, env) {
     }
   });
 
+  // Allow importing of .mjs files without specifying the extension
+  // This is needed because Node.js requires the .mjs extension for ES modules,
+  // but webpack can handle them automatically
   config.module.rules.push({
     test: /\.m?js/,
     resolve: {
