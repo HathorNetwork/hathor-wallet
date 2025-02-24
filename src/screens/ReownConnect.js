@@ -22,6 +22,7 @@ function ReownConnect() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    dispatch({ type: types.REOWN_SET_CONNECTION_FAILED, payload: false });
     dispatch({ type: types.REOWN_URI_INPUTTED, payload: uri });
   };
 
@@ -102,6 +103,7 @@ function ReownConnect() {
                       onClick={() => {
                         setShowNewConnectionForm(false);
                         setUri('');
+                        dispatch({ type: types.REOWN_SET_CONNECTION_FAILED, payload: false });
                       }}
                     >
                       {t`Cancel`}

@@ -833,6 +833,8 @@ export function* onUriInputted(action) {
 
   try {
     yield call(core.pairing.pair, { uri: payload });
+    // Reset connection failed state on successful pairing
+    yield put(setWCConnectionFailed(false));
   } catch (error) {
     log.debug('Error pairing: ', error);
     yield put(setWCConnectionFailed(true));
