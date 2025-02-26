@@ -22,7 +22,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.30.1",
+  "version": "0.31.0",
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
@@ -90,7 +90,9 @@
     "electron-dev-concurrently": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .'",
     "locale-update-pot": "bash -c 'if command -v ttag &> /dev/null; then ttag extract -o ./locale/texts.pot ./src/; else ./node_modules/.bin/ttag extract -o ./locale/texts.pot ./src/; fi'",
     "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps && patch-package",
-    "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0"
+    "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0",
+    "qa_network_up": "docker compose -f ./qa/large-values-network/docker-compose.yml up",
+    "qa_network_down": "docker compose -f ./qa/large-values-network/docker-compose.yml down"
   },
   "devDependencies": {
     "@lavamoat/webpack": "0.7.0-beta.0",
