@@ -898,7 +898,7 @@ class TxData extends React.Component {
             <label>Type:</label> {upperFirst(action.type)}
           </div>
           <div>
-            <label>Amount:</label> {numberUtils.prettyValue(action.amount, this.props.decimalPlaces)} {this.getSymbol(action.token_uid)}
+            <label>Amount:</label> {numberUtils.prettyValue(typeof action.amount === 'bigint' ? action.amount : BigInt(action.amount), this.props.decimalPlaces)} {this.getSymbol(action.token_uid)}
           </div>
         </div>
       ));
