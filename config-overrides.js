@@ -24,7 +24,8 @@ module.exports = function override(config, env) {
       path: stdLibBrowser.path,
       process: stdLibBrowser.process,
       stream: stdLibBrowser.stream,
-      os: stdLibBrowser.os
+      os: stdLibBrowser.os,
+      vm: false,
     },
     mainFields: ['browser', 'module', 'main'],
     conditionNames: ['import', 'require', 'node', 'default'],
