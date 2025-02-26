@@ -17,7 +17,7 @@
         pkgs.devshell.mkShell {
           packages = with pkgs; [
             nixpkgs-fmt
-            nodejs_20
+            nodejs_22
             libusb1
           ];
         };

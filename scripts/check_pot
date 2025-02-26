@@ -27,7 +27,8 @@ echo "check_pot: Checking pot file..."
 MYTMPDIR=$(mktemp -d)
 trap 'rm -rf "$MYTMPDIR"' EXIT
 
-npx ttag extract -o "$MYTMPDIR/pot" "$SRCDIR"
+ttag extract -o "$MYTMPDIR/pot" "$SRCDIR"
+
 msgen -o "$MYTMPDIR/po" "$MYTMPDIR/pot"
 msgcmp "$MYTMPDIR/po" "$LOCALE/texts.pot"
 exit $?

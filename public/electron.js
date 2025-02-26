@@ -26,7 +26,6 @@ let msgCheck = false;
 // We need to save the event that brought the check message from the renderer process, in order to send back to it
 let msgCheckEvent = null;
 
-
 if (process.platform === 'darwin') {
   iconOS = 'icon.icns';
   trayIcon = 'icon_tray.png';
