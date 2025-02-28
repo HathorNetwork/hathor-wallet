@@ -36,6 +36,7 @@ import { PinPad } from './PinPad';
 import { NanoContractFeedbackModal } from './Reown/NanoContractFeedbackModal';
 import { TokenCreationFeedbackModal } from './Reown/TokenCreationFeedbackModal';
 import { MessageSigningFeedbackModal } from './Reown/MessageSigningFeedbackModal';
+import ModalError from './ModalError';
 
 const initialState = {
   showModal: () => {},
@@ -72,6 +73,7 @@ export const MODAL_TYPES = {
   'NANO_CONTRACT_FEEDBACK': 'NANO_CONTRACT_FEEDBACK',
   'TOKEN_CREATION_FEEDBACK': 'TOKEN_CREATION_FEEDBACK',
   'MESSAGE_SIGNING_FEEDBACK': 'MESSAGE_SIGNING_FEEDBACK',
+  'ERROR_MODAL': 'ERROR_MODAL',
 };
 
 export const MODAL_COMPONENTS = {
@@ -103,6 +105,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.NANO_CONTRACT_FEEDBACK]: NanoContractFeedbackModal,
   [MODAL_TYPES.TOKEN_CREATION_FEEDBACK]: TokenCreationFeedbackModal,
   [MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK]: MessageSigningFeedbackModal,
+  [MODAL_TYPES.ERROR_MODAL]: ModalError,
 };
 
 export const GlobalModalContext = createContext(initialState);

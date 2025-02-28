@@ -8,7 +8,31 @@
 import React from 'react';
 import { t } from 'ttag';
 
+/**
+ * Custom replacer function for JSON.stringify to handle BigInt values
+ * @param {string} key - The key of the value being stringified
+ * @param {any} value - The value being stringified
+ * @returns {any} - The processed value
+ */
+const bigIntReplacer = (key, value) => {
+  // Convert BigInt to string with 'n' suffix to indicate it's a BigInt
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+  return value;
+};
+
 export function CreateTokenModal({ data, onAccept, onReject }) {
+  // Process the data to handle BigInt values
+  const processedData = React.useMemo(() => {
+    try {
+      return JSON.stringify(data.data, bigIntReplacer, 2);
+    } catch (error) {
+      console.error('Error stringifying token data:', error);
+      return 'Error displaying token data. Please check console for details.';
+    }
+  }, [data.data]);
+
   return (
     <>
       <div className="modal-header">
@@ -27,7 +51,7 @@ export function CreateTokenModal({ data, onAccept, onReject }) {
         </div>
         <p>{t`Token details:`}</p>
         { /* TODO: Token details will be rendered in raw format, we should improve this UI */ }
-        <pre className="bg-light p-3 rounded">{JSON.stringify(data.data, null, 2)}</pre>
+        <pre className="bg-light p-3 rounded">{processedData}</pre>
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" onClick={onReject} data-dismiss="modal">{t`Reject`}</button>

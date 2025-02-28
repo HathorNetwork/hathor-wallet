@@ -30,7 +30,7 @@ import {
   CreateTokenError,
   SendNanoContractTxError,
   SignMessageWithAddressError,
-} from '@hathor/hathor-rpc-handler';
+} from 'hathor-rpc-handler-test';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
 import {
@@ -344,6 +344,8 @@ export function* processRequest(action) {
   const { payload } = action;
   const { params } = payload;
 
+  console.log('Processing RPC request:', params.request.method);
+
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
     log.debug('Tried to get reown client in processRequest but walletKit is undefined.');
@@ -381,19 +383,26 @@ export function* processRequest(action) {
       promptHandler(dispatch),
     );
 
+    console.log('RPC response received:', response.type);
+
     switch (response.type) {
       case RpcResponseTypes.SendNanoContractTxResponse:
+        console.log('SendNanoContractTxResponse: Setting success state');
         yield put(setNewNanoContractStatusSuccess());
         yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: false }));
         break;
       case RpcResponseTypes.CreateTokenResponse:
+        console.log('CreateTokenResponse: Setting success state');
         yield put(setCreateTokenStatusSuccessful());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: false }));
         break;
-      case RpcResponseTypes.SignMessageWithAddressResponse:
+      case RpcResponseTypes.SendWithAddressResponse:
+        console.log('SignMessageWithAddressResponse: Setting success state');
+        // Show success feedback for message signing
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: false }));
         break;
       default:
+        console.log('Unknown response type:', response.type);
         break;
     }
 
@@ -407,6 +416,7 @@ export function* processRequest(action) {
     }));
   } catch (e) {
     log.debug('Error on processRequest: ', e);
+    console.error('Error in processRequest:', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
@@ -425,7 +435,10 @@ export function* processRequest(action) {
         }
       } break;
       case CreateTokenError: {
+        log.error('CreateTokenError occurred:', e.message, e.stack);
+        console.error('CreateTokenError details:', e);
         yield put(setCreateTokenStatusFailed());
+        yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
           retryHandler,
@@ -434,11 +447,17 @@ export function* processRequest(action) {
         );
 
         if (retry) {
+          yield put(setCreateTokenStatusReady()); // Reset status before retrying
           shouldAnswer = false;
           yield* processRequest(action);
+        } else {
+          yield put(setCreateTokenStatusReady()); // Reset status if not retrying
         }
       } break;
       case SignMessageWithAddressError: {
+        log.error('SignMessageWithAddressError occurred:', e.message, e.stack);
+        console.error('SignMessageWithAddressError details:', e);
+        
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
@@ -478,6 +497,7 @@ export function* processRequest(action) {
 
 const promptHandler = (dispatch) => (request, requestMetadata) =>
   new Promise(async (resolve, reject) => {
+    console.log('Request: ', request);
     switch (request.type) {
       case TriggerTypes.SignOracleDataConfirmationPrompt: {
         const signOracleDataResponseTemplate = (accepted) => () => {
@@ -572,12 +592,18 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.CreateTokenLoadingTrigger:
+        console.log('CreateTokenLoadingTrigger: Starting token creation process');
+        log.debug('CreateTokenLoadingTrigger: Starting token creation process');
         dispatch(setCreateTokenStatusLoading());
+        dispatch(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: true }));
         resolve();
         break;
 
       case TriggerTypes.CreateTokenLoadingFinishedTrigger:
+        console.log('CreateTokenLoadingFinishedTrigger: Token creation process completed');
+        log.debug('CreateTokenLoadingFinishedTrigger: Token creation process completed');
         dispatch(setCreateTokenStatusReady());
+        dispatch(hideGlobalModal());
         resolve();
         break;
 
@@ -587,38 +613,39 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.PinConfirmationPrompt: {
+        console.log('PinConfirmationPrompt triggered');
         const pinPromise = new Promise((pinResolve, pinReject) => {
           dispatch(showGlobalModal(MODAL_TYPES.PIN_PAD, {
             onComplete: (pinCode) => {
+              console.log('PIN entered successfully');
               dispatch(hideGlobalModal());
               pinResolve(pinCode);
             },
             onCancel: () => {
+              console.log('PIN entry cancelled by user');
               dispatch(hideGlobalModal());
+              dispatch(setCreateTokenStatusReady()); // Reset loading state if PIN entry is cancelled
               pinReject(new Error('PIN entry cancelled'));
             }
           }));
         });
 
-        pinPromise
-          .then((pinCode) => {
-            resolve({
-              type: TriggerResponseTypes.PinRequestResponse,
-              data: {
-                accepted: true,
-                pinCode,
-              }
-            });
-          })
-          .catch(() => {
-            resolve({
-              type: TriggerResponseTypes.PinRequestResponse,
-              data: {
-                accepted: false,
-                pinCode: null,
-              }
-            });
+        try {
+          console.log('Waiting for PIN entry...');
+          const pin = await pinPromise;
+          console.log('PIN received, resolving PinConfirmationPrompt');
+          resolve({
+            type: TriggerResponseTypes.PinConfirmationResponse,
+            data: {
+              accepted: true,
+              pinCode: pin,
+            }
           });
+        } catch (error) {
+          console.error('Error in PIN confirmation:', error);
+          log.error('PIN confirmation error:', error);
+          reject(error);
+        }
       } break;
 
       default:
@@ -742,6 +769,36 @@ export function* onSessionProposal(action) {
       requiredNamespaces: get(params, 'requiredNamespaces', []),
     };
 
+    // Check if the required methods are supported
+    const requiredMethods = get(params, 'requiredNamespaces.hathor.methods', []);
+    const availableMethods = values(AVAILABLE_METHODS);
+    const unsupportedMethods = requiredMethods.filter(method => !availableMethods.includes(method));
+    
+    if (unsupportedMethods.length > 0) {
+      log.error('Unsupported methods requested:', unsupportedMethods);
+      // Set connection failed state to stop the loading spinner
+      yield put(setWCConnectionFailed(true));
+      
+      // Show error modal to user
+      yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+        title: 'Connection Error',
+        message: `The dApp is requesting methods that are not supported: ${unsupportedMethods.join(', ')}`,
+      }));
+      
+      // Reject the session
+      const { walletKit } = getGlobalReown();
+      if (walletKit) {
+        yield call([walletKit, walletKit.rejectSession], {
+          id,
+          reason: {
+            code: ERROR_CODES.UNAUTHORIZED_METHODS,
+            message: 'Requested methods are not supported',
+          },
+        });
+      }
+      return;
+    }
+
     let dispatch;
     yield put((_dispatch) => {
       dispatch = _dispatch;
@@ -789,7 +846,7 @@ export function* onSessionProposal(action) {
             accounts: [`hathor:${networkSettings.network}:${firstAddress}`],
             chains: [`hathor:${networkSettings.network}`],
             events: AVAILABLE_EVENTS,
-            methods: values(AVAILABLE_METHODS),
+            methods: requiredMethods, // Use the methods requested by the dApp instead of all available methods
           },
         },
       });
@@ -809,6 +866,31 @@ export function* onSessionProposal(action) {
   } catch (error) {
     log.error('Error handling session proposal:', error);
     yield put(onExceptionCaptured(error));
+    
+    // Set connection failed state to stop the loading spinner
+    yield put(setWCConnectionFailed(true));
+    
+    // Show error modal to user
+    yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+      title: 'Connection Error',
+      message: `Failed to connect to dApp: ${error.message}`,
+    }));
+    
+    // Try to reject the session if possible
+    try {
+      const { walletKit } = getGlobalReown();
+      if (walletKit) {
+        yield call([walletKit, walletKit.rejectSession], {
+          id,
+          reason: {
+            code: ERROR_CODES.USER_REJECTED,
+            message: 'Connection failed',
+          },
+        });
+      }
+    } catch (rejectError) {
+      log.error('Error rejecting session after failure:', rejectError);
+    }
   } finally {
     // Make sure to close the modal even if there's an error
     yield put(hideGlobalModal());
@@ -826,6 +908,11 @@ export function* onUriInputted(action) {
 
   if (!core || !walletKit) {
     log.debug('Tried to get reown client in onUriInputted but core or walletKit is undefined.');
+    yield put(setWCConnectionFailed(true));
+    yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+      title: 'Connection Error',
+      message: 'Wallet connection service is not initialized. Please try again later.',
+    }));
     return;
   }
 
@@ -838,6 +925,12 @@ export function* onUriInputted(action) {
   } catch (error) {
     log.debug('Error pairing: ', error);
     yield put(setWCConnectionFailed(true));
+    
+    // Show error modal to user
+    yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+      title: 'Connection Error',
+      message: `Failed to connect to dApp: ${error.message || 'Invalid URI or connection timeout'}`,
+    }));
   }
 }
 
