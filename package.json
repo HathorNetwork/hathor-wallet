@@ -88,7 +88,7 @@
     "qa_network_down": "docker compose -f ./qa/large-values-network/docker-compose.yml down"
   },
   "devDependencies": {
-    "@sentry/browser": "7.99.0",
+    "@sentry/browser": "9.3.0",
     "@sentry/cli": "2.27.0",
     "@testing-library/cypress": "10.0.2",
     "@testing-library/react": "14.1.2",
