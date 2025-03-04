@@ -344,8 +344,6 @@ export function* processRequest(action) {
   const { payload } = action;
   const { params } = payload;
 
-  console.log('Processing RPC request:', params.request.method);
-
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
     log.debug('Tried to get reown client in processRequest but walletKit is undefined.');
@@ -383,26 +381,21 @@ export function* processRequest(action) {
       promptHandler(dispatch),
     );
 
-    console.log('RPC response received:', response.type);
-
     switch (response.type) {
       case RpcResponseTypes.SendNanoContractTxResponse:
-        console.log('SendNanoContractTxResponse: Setting success state');
         yield put(setNewNanoContractStatusSuccess());
         yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: false }));
         break;
       case RpcResponseTypes.CreateTokenResponse:
-        console.log('CreateTokenResponse: Setting success state');
         yield put(setCreateTokenStatusSuccessful());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: false }));
         break;
       case RpcResponseTypes.SignWithAddressResponse:
-        console.log('SignMessageWithAddressResponse: Setting success state');
         // Show success feedback for message signing
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: false }));
         break;
       default:
-        console.log('Unknown response type:', response.type);
+        console.debug('Unknown response type:', response.type);
         break;
     }
 
@@ -497,7 +490,6 @@ export function* processRequest(action) {
 
 const promptHandler = (dispatch) => (request, requestMetadata) =>
   new Promise(async (resolve, reject) => {
-    console.log('Request: ', request);
     switch (request.type) {
       case TriggerTypes.SignOracleDataConfirmationPrompt: {
         const signOracleDataResponseTemplate = (accepted) => () => {
@@ -592,7 +584,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.CreateTokenLoadingTrigger:
-        console.log('CreateTokenLoadingTrigger: Starting token creation process');
         log.debug('CreateTokenLoadingTrigger: Starting token creation process');
         dispatch(setCreateTokenStatusLoading());
         dispatch(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: true }));
@@ -600,7 +591,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.CreateTokenLoadingFinishedTrigger:
-        console.log('CreateTokenLoadingFinishedTrigger: Token creation process completed');
         log.debug('CreateTokenLoadingFinishedTrigger: Token creation process completed');
         dispatch(setCreateTokenStatusReady());
         dispatch(hideGlobalModal());
@@ -613,16 +603,13 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.PinConfirmationPrompt: {
-        console.log('PinConfirmationPrompt triggered');
         const pinPromise = new Promise((pinResolve, pinReject) => {
           dispatch(showGlobalModal(MODAL_TYPES.PIN_PAD, {
             onComplete: (pinCode) => {
-              console.log('PIN entered successfully');
               dispatch(hideGlobalModal());
               pinResolve(pinCode);
             },
             onCancel: () => {
-              console.log('PIN entry cancelled by user');
               dispatch(hideGlobalModal());
               dispatch(setCreateTokenStatusReady()); // Reset loading state if PIN entry is cancelled
               pinReject(new Error('PIN entry cancelled'));
@@ -631,9 +618,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         });
 
         try {
-          console.log('Waiting for PIN entry...');
           const pin = await pinPromise;
-          console.log('PIN received, resolving PinConfirmationPrompt');
           resolve({
             type: TriggerResponseTypes.PinConfirmationResponse,
             data: {
