@@ -396,7 +396,7 @@ export function* processRequest(action) {
         yield put(setCreateTokenStatusSuccessful());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: false }));
         break;
-      case RpcResponseTypes.SendWithAddressResponse:
+      case RpcResponseTypes.SignWithAddressResponse:
         console.log('SignMessageWithAddressResponse: Setting success state');
         // Show success feedback for message signing
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: false }));
