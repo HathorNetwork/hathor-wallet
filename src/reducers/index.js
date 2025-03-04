@@ -442,7 +442,7 @@ const rootReducer = (state = initialState, action) => {
     case types.REOWN_SET_CLIENT:
     case types.REOWN_SET_MODAL:
     case types.REOWN_SET_SESSIONS:
-    case types.REOWN_SET_CONNECTION_FAILED:
+    case types.REOWN_SET_CONNECTION_STATE:
     case types.REOWN_NEW_NANOCONTRACT_STATUS_LOADING:
     case types.REOWN_NEW_NANOCONTRACT_STATUS_READY:
     case types.REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS:

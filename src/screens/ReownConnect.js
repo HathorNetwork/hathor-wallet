@@ -5,46 +5,47 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
-import { types } from '../actions';
+import { setWCConnectionState, types } from '../actions';
 import BackButton from '../components/BackButton';
 import ReactLoading from 'react-loading';
 import { colors } from '../constants';
+import { REOWN_CONNECTION_STATE } from '../constants';
 
 function ReownConnect() {
   const [uri, setUri] = useState('');
   const [showNewConnectionForm, setShowNewConnectionForm] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
   const dispatch = useDispatch();
-  const { connectionFailed, sessions } = useSelector(state => ({
-    connectionFailed: state.reown.connectionFailed,
+  const { connectionState, sessions } = useSelector(state => ({
+    connectionState: state.reown.connectionState,
     sessions: state.reown.sessions || {},
   }));
 
+  useEffect(() => {
+    return () => {
+      // Reset connection state when user on unmount
+      dispatch(setWCConnectionState(REOWN_CONNECTION_STATE.IDLE));
+    };
+  }, []);
+
+  // Check if we're currently connecting
+  const isConnecting = connectionState === REOWN_CONNECTION_STATE.CONNECTING;
+  // Check if connection failed
+  const connectionFailed = connectionState === REOWN_CONNECTION_STATE.FAILED;
+
+  console.log('isConnecting:', isConnecting);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsConnecting(true);
-    dispatch({ type: types.REOWN_SET_CONNECTION_FAILED, payload: false });
+    // Then dispatch the URI inputted action
     dispatch({ type: types.REOWN_URI_INPUTTED, payload: uri });
   };
 
   const handleDisconnect = (sessionId) => {
     dispatch({ type: types.REOWN_CANCEL_SESSION, payload: { id: sessionId } });
   };
-
-  // Reset connecting state when connection fails or succeeds
-  React.useEffect(() => {
-    if (connectionFailed) {
-      setIsConnecting(false);
-    }
-  }, [connectionFailed]);
-
-  // Also reset connecting state when sessions change (successful connection)
-  React.useEffect(() => {
-    setIsConnecting(false);
-  }, [sessions]);
 
   const renderSession = (session, sessionId) => {
     const metadata = session.peer.metadata;
@@ -126,8 +127,7 @@ function ReownConnect() {
                       onClick={() => {
                         setShowNewConnectionForm(false);
                         setUri('');
-                        setIsConnecting(false);
-                        dispatch({ type: types.REOWN_SET_CONNECTION_FAILED, payload: false });
+                        dispatch({ type: types.REOWN_SET_CONNECTION_STATE, payload: REOWN_CONNECTION_STATE.IDLE });
                       }}
                       disabled={isConnecting}
                     >

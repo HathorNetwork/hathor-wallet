@@ -41,11 +41,11 @@ import {
   types,
   setReownSessions,
   onExceptionCaptured,
-  setWCConnectionFailed,
+  setWCConnectionState,
   setNewNanoContractStatusLoading,
   setNewNanoContractStatusReady,
-  setNewNanoContractStatusFailure,
   setNewNanoContractStatusSuccess,
+  setNewNanoContractStatusFailure,
   setCreateTokenStatusLoading,
   setCreateTokenStatusReady,
   setCreateTokenStatusSuccessful,
@@ -58,6 +58,7 @@ import { logger } from '../utils/logger';
 import { getGlobalReown, setGlobalReown } from '../modules/reown';
 import { MODAL_TYPES } from '../components/GlobalModal';
 import { getGlobalWallet } from '../modules/wallet';
+import { REOWN_CONNECTION_STATE } from '../constants';
 
 const log = logger('reown');
 
@@ -409,7 +410,6 @@ export function* processRequest(action) {
     }));
   } catch (e) {
     log.debug('Error on processRequest: ', e);
-    console.error('Error in processRequest:', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
@@ -429,7 +429,6 @@ export function* processRequest(action) {
       } break;
       case CreateTokenError: {
         log.error('CreateTokenError occurred:', e.message, e.stack);
-        console.error('CreateTokenError details:', e);
         yield put(setCreateTokenStatusFailed());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: true }));
 
@@ -449,7 +448,6 @@ export function* processRequest(action) {
       } break;
       case SignMessageWithAddressError: {
         log.error('SignMessageWithAddressError occurred:', e.message, e.stack);
-        console.error('SignMessageWithAddressError details:', e);
         
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: true }));
 
@@ -627,7 +625,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
             }
           });
         } catch (error) {
-          console.error('Error in PIN confirmation:', error);
           log.error('PIN confirmation error:', error);
           reject(error);
         }
@@ -761,8 +758,8 @@ export function* onSessionProposal(action) {
     
     if (unsupportedMethods.length > 0) {
       log.error('Unsupported methods requested:', unsupportedMethods);
-      // Set connection failed state to stop the loading spinner
-      yield put(setWCConnectionFailed(true));
+      // Set connection state to FAILED
+      yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
       
       // Show error modal to user
       yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
@@ -835,6 +832,9 @@ export function* onSessionProposal(action) {
           },
         },
       });
+
+      // Didn't throw, show success.
+      yield put(setWCConnectionState(REOWN_CONNECTION_STATE.SUCCESS));
     } else {
       // User rejected the proposal
       yield call([walletKit, walletKit.rejectSession], {
@@ -852,8 +852,8 @@ export function* onSessionProposal(action) {
     log.error('Error handling session proposal:', error);
     yield put(onExceptionCaptured(error));
     
-    // Set connection failed state to stop the loading spinner
-    yield put(setWCConnectionFailed(true));
+    // Set connection state to FAILED
+    yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
     
     // Show error modal to user
     yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
@@ -889,11 +889,15 @@ export function* onSessionProposal(action) {
  * @param {Object} action - The action containing the URI payload
  */
 export function* onUriInputted(action) {
+  // Ensure connection state is set to CONNECTING at the beginning of the saga
+  yield put(setWCConnectionState(REOWN_CONNECTION_STATE.CONNECTING));
+
   const { core, walletKit } = getGlobalReown();
 
   if (!core || !walletKit) {
     log.debug('Tried to get reown client in onUriInputted but core or walletKit is undefined.');
-    yield put(setWCConnectionFailed(true));
+    // Set connection state to FAILED
+    yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
     yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
       title: 'Connection Error',
       message: 'Wallet connection service is not initialized. Please try again later.',
@@ -905,11 +909,10 @@ export function* onUriInputted(action) {
 
   try {
     yield call(core.pairing.pair, { uri: payload });
-    // Reset connection failed state on successful pairing
-    yield put(setWCConnectionFailed(false));
   } catch (error) {
     log.debug('Error pairing: ', error);
-    yield put(setWCConnectionFailed(true));
+    // Connection failed
+    yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
     
     // Show error modal to user
     yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {

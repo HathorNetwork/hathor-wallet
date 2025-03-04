@@ -6,7 +6,7 @@
  */
 
 import { types } from '../actions';
-import { BASE_STATUS } from '../constants';
+import { BASE_STATUS, REOWN_CONNECTION_STATE } from '../constants';
 
 const initialState = {
   client: null,
@@ -18,7 +18,7 @@ const initialState = {
     onRejectAction: null,
   },
   sessions: {},
-  connectionFailed: false,
+  connectionState: REOWN_CONNECTION_STATE.IDLE,
   nanoContractStatus: BASE_STATUS.READY,
   createTokenStatus: BASE_STATUS.READY,
 };
@@ -46,10 +46,10 @@ export default function reownReducer(state = initialState, action) {
         sessions: action.payload,
       };
 
-    case types.REOWN_SET_CONNECTION_FAILED:
+    case types.REOWN_SET_CONNECTION_STATE:
       return {
         ...state,
-        connectionFailed: action.payload,
+        connectionState: action.payload,
       };
 
     case types.REOWN_NEW_NANOCONTRACT_STATUS_LOADING:

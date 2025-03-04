@@ -315,3 +315,13 @@ export const NETWORK_SETTINGS_STATUS = {
 
 // Reown constants
 export const REOWN_PROJECT_ID = '8264fff563181da658ce64ee80e80458';
+
+/**
+ * Reown connection states
+ */
+export const REOWN_CONNECTION_STATE = {
+  IDLE: 'idle',             // Initial state, no connection attempt in progress
+  CONNECTING: 'connecting', // Connection attempt in progress
+  SUCCESS: 'success',       // Connection successful
+  FAILED: 'failed',         // Connection failed
+};

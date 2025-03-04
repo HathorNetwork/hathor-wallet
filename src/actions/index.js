@@ -71,7 +71,7 @@ export const types = {
   REOWN_SET_CLIENT: 'REOWN_SET_CLIENT',
   REOWN_SET_MODAL: 'REOWN_SET_MODAL',
   REOWN_SET_SESSIONS: 'REOWN_SET_SESSIONS',
-  REOWN_SET_CONNECTION_FAILED: 'REOWN_SET_CONNECTION_FAILED',
+  REOWN_SET_CONNECTION_STATE: 'REOWN_SET_CONNECTION_STATE',
   REOWN_NEW_NANOCONTRACT_STATUS_LOADING: 'REOWN_NEW_NANOCONTRACT_STATUS_LOADING',
   REOWN_NEW_NANOCONTRACT_STATUS_READY: 'REOWN_NEW_NANOCONTRACT_STATUS_READY',
   REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS: 'REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS',
@@ -745,11 +745,12 @@ export const setReownSessions = (payload) => ({
 });
 
 /**
- * Set the Reown connection failed state
+ * Set the Reown connection state
+ * @param {string} state - One of the REOWN_CONNECTION_STATE values
  */
-export const setWCConnectionFailed = (payload) => ({
-  type: types.REOWN_SET_CONNECTION_FAILED,
-  payload,
+export const setWCConnectionState = (state) => ({
+  type: types.REOWN_SET_CONNECTION_STATE,
+  payload: state,
 });
 
 /**
