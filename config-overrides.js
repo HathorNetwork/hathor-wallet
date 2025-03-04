@@ -83,6 +83,52 @@ module.exports = function override(config, env) {
     use: 'null-loader'
   });
 
+  // Ignore specific webpack warnings that don't affect functionality
+  config.ignoreWarnings = [
+    // Ignore source map warnings from WalletConnect dependencies
+    // These warnings occur because WalletConnect distributes compiled JavaScript files
+    // with references to TypeScript source maps that aren't included in the npm package.
+    // This is a common issue with TypeScript libraries and doesn't affect functionality.
+    // The warnings are purely development-time noise and can be safely ignored.
+    /Failed to parse source map/,
+    
+    // Ignore color-adjust deprecation warning
+    // Bootstrap 4.x uses the 'color-adjust' CSS property which is now deprecated
+    // in favor of 'print-color-adjust'. This warning doesn't affect functionality
+    // and will be fixed when we update Bootstrap to a newer version.
+    /autoprefixer: Replace color-adjust to print-color-adjust/
+  ];
+
+  // Update PostCSS options to handle the color-adjust deprecation warning
+  // Bootstrap 4.x uses the 'color-adjust' property in its CSS, which is now deprecated
+  // in favor of 'print-color-adjust' in newer browser versions
+  const cssRules = config.module.rules.find(rule => rule.oneOf).oneOf;
+  const cssLoaders = cssRules.filter(rule => 
+    rule.use && Array.isArray(rule.use) && 
+    rule.use.find(loader => loader.loader && loader.loader.includes('postcss-loader'))
+  );
+  
+  cssLoaders.forEach(rule => {
+    const postcssLoader = rule.use.find(loader => loader.loader && loader.loader.includes('postcss-loader'));
+    if (postcssLoader && postcssLoader.options && postcssLoader.options.postcssOptions) {
+      postcssLoader.options.postcssOptions.plugins = [
+        require('postcss-flexbugs-fixes'),
+        [
+          require('postcss-preset-env'),
+          {
+            autoprefixer: {
+              // These browser targets ensure we're generating CSS compatible with
+              // recent browsers while avoiding generating code for obsolete ones
+              overrideBrowserslist: ['last 2 versions', 'not dead']
+            },
+            stage: 3
+          }
+        ],
+        ...(postcssLoader.options.postcssOptions.plugins || [])
+      ];
+    }
+  });
+
   // Base plugins that we always want
   const basePlugins = [
     ...config.plugins.filter(p => !(p instanceof webpack.ProvidePlugin)),
