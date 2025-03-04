@@ -5,21 +5,47 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 import { types } from '../../../actions';
 import helpers from '../../../utils/helpers';
 import { NanoContractActions } from '../NanoContractActions';
+import { getGlobalWallet } from '../../../modules/wallet';
 
 export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject }) {
   const dispatch = useDispatch();
   const blueprintInfo = useSelector((state) => state.blueprintsData[data?.data?.blueprintId]);
   const nanoContracts = useSelector((state) => state.nanoContracts);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(firstAddress);
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      const wallet = getGlobalWallet();
+      const fetchedAddresses = [];
+      const iterator = wallet.getAllAddresses();
+      
+      for (;;) {
+        const addressObj = await iterator.next();
+        const { value, done } = addressObj;
+
+        if (done) {
+          break;
+        }
+
+        fetchedAddresses.push(value);
+      }
+
+      setAddresses(fetchedAddresses);
+    };
+
+    fetchAddresses();
+  }, []);
 
   const formatValue = (value) => {
     if (typeof value === 'string') {
-      return value.length > 20 ? helpers.truncateText(value, 8, 4) : value;
+      return value;
     }
     return value.toString();
   };
@@ -43,35 +69,34 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
         <h6 className="mb-3">{t`Arguments`}</h6>
         <div className="card">
           <div className="card-body p-0">
-            <div className="table-responsive">
-              <table className="table table-sm mb-0">
-                <tbody>
-                  {argEntries.map(([argName, value, argType]) => (
-                    <tr key={argName}>
-                      <td className="border-top-0 pl-3" style={{width: '30%'}}>
-                        <strong>{argName}</strong>
-                        {argType && <small className="text-muted d-block">{argType}</small>}
-                      </td>
-                      <td className="border-top-0 text-monospace">
-                        {formatValue(value)}
-                        {typeof value === 'string' && value.length > 20 && (
-                          <button 
-                            className="btn btn-link btn-sm p-0 ml-2" 
-                            onClick={() => navigator.clipboard.writeText(value)}
-                          >
-                            <i className="fa fa-copy"></i>
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <table className="table table-sm mb-0">
+              <tbody>
+                {argEntries.map(([argName, value, argType]) => (
+                  <tr key={argName}>
+                    <td className="border-top-0 pl-3" style={{width: '30%'}}>
+                      <strong>{argName}</strong>
+                      {argType && <small className="text-muted d-block">{argType}</small>}
+                    </td>
+                    <td className="border-top-0 text-monospace" style={{wordBreak: 'break-all'}}>
+                      {formatValue(value)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </>
     );
+  };
+
+  const handleAddressChange = (e) => {
+    setSelectedAddress(e.target.value);
+  };
+
+  const handleAccept = () => {
+    // Pass the selected address to the onAccept callback
+    onAccept(selectedAddress);
   };
 
   return (
@@ -112,7 +137,7 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
             <div className="mb-3">
               <strong>{t`Blueprint ID`}</strong>
               <div className="text-monospace">
-                {helpers.truncateText(data.data.blueprintId, 8, 4)}
+                {data.data.blueprintId}
                 <button 
                   className="btn btn-link btn-sm p-0 ml-2" 
                   onClick={() => navigator.clipboard.writeText(data.data.blueprintId)}
@@ -134,14 +159,18 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
 
             <div className="mb-3">
               <strong>{t`Caller`}</strong>
-              <div className="text-monospace">
-                {helpers.truncateText(firstAddress, 8, 4)}
-                <button 
-                  className="btn btn-link btn-sm p-0 ml-2" 
-                  onClick={() => navigator.clipboard.writeText(firstAddress)}
+              <div className="d-flex flex-column">
+                <select 
+                  className="form-control mb-2" 
+                  value={selectedAddress} 
+                  onChange={handleAddressChange}
                 >
-                  <i className="fa fa-copy"></i>
-                </button>
+                  {addresses.map((addr) => (
+                    <option key={addr.address} value={addr.address}>
+                      {addr.address} ({addr.index})
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -156,7 +185,7 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
                       type: types.NANOCONTRACT_REGISTER_REQUEST, 
                       payload: { 
                         ncId: data.data.ncId, 
-                        address: firstAddress 
+                        address: selectedAddress 
                       }
                     })}
                   >
@@ -180,7 +209,7 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" onClick={onReject} data-dismiss="modal">{t`Reject`}</button>
-        <button type="button" className="btn btn-hathor" onClick={onAccept}>{t`Accept Transaction`}</button>
+        <button type="button" className="btn btn-hathor" onClick={handleAccept}>{t`Accept Transaction`}</button>
       </div>
     </>
   );
