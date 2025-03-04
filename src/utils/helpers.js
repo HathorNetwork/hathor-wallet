@@ -194,7 +194,7 @@ const helpers = {
    * @inner
    */
   getFullExplorerURL(urlPath) {
-    path.join(this.getExplorerURL(), urlPath);
+    return path.join(this.getExplorerURL(), urlPath);
   },
 
   /**

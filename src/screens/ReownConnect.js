@@ -5,23 +5,41 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
-import { types } from '../actions';
+import { setWCConnectionState, types } from '../actions';
 import BackButton from '../components/BackButton';
+import ReactLoading from 'react-loading';
+import { colors } from '../constants';
+import { REOWN_CONNECTION_STATE } from '../constants';
 
 function ReownConnect() {
   const [uri, setUri] = useState('');
   const [showNewConnectionForm, setShowNewConnectionForm] = useState(false);
   const dispatch = useDispatch();
-  const { connectionFailed, sessions } = useSelector(state => ({
-    connectionFailed: state.reown.connectionFailed,
+  const { connectionState, sessions } = useSelector(state => ({
+    connectionState: state.reown.connectionState,
     sessions: state.reown.sessions || {},
   }));
 
+  useEffect(() => {
+    return () => {
+      // Reset connection state when user on unmount
+      dispatch(setWCConnectionState(REOWN_CONNECTION_STATE.IDLE));
+    };
+  }, []);
+
+  // Check if we're currently connecting
+  const isConnecting = connectionState === REOWN_CONNECTION_STATE.CONNECTING;
+  // Check if connection failed
+  const connectionFailed = connectionState === REOWN_CONNECTION_STATE.FAILED;
+
+  console.log('isConnecting:', isConnecting);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Then dispatch the URI inputted action
     dispatch({ type: types.REOWN_URI_INPUTTED, payload: uri });
   };
 
@@ -88,8 +106,15 @@ function ReownConnect() {
                       value={uri}
                       onChange={(e) => setUri(e.target.value)}
                       placeholder={t`wc:...`}
+                      disabled={isConnecting}
                     />
                   </div>
+                  {isConnecting && (
+                    <div className="text-center my-3">
+                      <ReactLoading type="spin" color={colors.purpleHathor} height={32} width={32} className="d-inline-block" />
+                      <p className="mt-2 mb-0">{t`Connecting to dApp...`}</p>
+                    </div>
+                  )}
                   {connectionFailed && (
                     <div className="alert alert-danger" role="alert">
                       {t`Failed to connect. Please check the URI and try again.`}
@@ -102,11 +127,13 @@ function ReownConnect() {
                       onClick={() => {
                         setShowNewConnectionForm(false);
                         setUri('');
+                        dispatch({ type: types.REOWN_SET_CONNECTION_STATE, payload: REOWN_CONNECTION_STATE.IDLE });
                       }}
+                      disabled={isConnecting}
                     >
                       {t`Cancel`}
                     </button>
-                    <button type="submit" className="btn btn-hathor">
+                    <button type="submit" className="btn btn-hathor" disabled={isConnecting || !uri.trim()}>
                       {t`Connect`}
                     </button>
                   </div>

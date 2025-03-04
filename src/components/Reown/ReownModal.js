@@ -57,9 +57,8 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
 
   const handleAccept = () => {
     if (type === ReownModalTypes.SEND_NANO_CONTRACT_TX) {
-      console.log('Type is send nano contract.');
-      console.log('Original args:', data.data.args);
       // For nano contract transactions, we need to include the caller address
+      // Process the nano contract transaction
       // Create a new object with the same properties, preserving BigInt values
       const ncData = {
         blueprintId: data.data.blueprintId,
@@ -72,7 +71,6 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
         })),
         caller: firstAddress
       };
-      console.log('Nc data: ', ncData);
       onAcceptAction(ncData);
     } else {
       onAcceptAction(data);

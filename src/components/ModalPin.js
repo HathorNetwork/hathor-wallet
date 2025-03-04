@@ -42,7 +42,9 @@ export class ModalPin extends React.Component {
     $('#modalPin').on('hidden.bs.modal', this.onModalHidden);
 
     // Focus the PIN field on modal load
-    this.refs.pinInput.refs.pin.focus();
+    $('#modalPin').on('shown.bs.modal', (e) => {
+      this.refs.pinInput.refs.pin.focus();
+    });
   }
 
   componentWillUnmount() {
@@ -77,7 +79,7 @@ export class ModalPin extends React.Component {
 
     // Set the PIN on the instance variable and close the modal.
     this.pin = pin;
-    this.onSuccess();
+    this.onModalHidden();
   }
 
   onSuccess() {
@@ -88,7 +90,7 @@ export class ModalPin extends React.Component {
   onCancel(e) {
     e.preventDefault();
 
-    this.props.onClose();
+    this.onModalHidden();
   }
 
   render() {
@@ -115,7 +117,7 @@ export class ModalPin extends React.Component {
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title" id="pinModal">{t`Write your PIN`}</h5>
+                <h5 className="modal-title" id="pinModalInputTitle">{t`Write your PIN`}</h5>
                 <button type="button" className="close" data-dismiss="modal" onClick={this.onCancel.bind(this)} aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>

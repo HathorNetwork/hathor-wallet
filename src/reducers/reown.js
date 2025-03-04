@@ -6,6 +6,7 @@
  */
 
 import { types } from '../actions';
+import { BASE_STATUS, REOWN_CONNECTION_STATE } from '../constants';
 
 const initialState = {
   client: null,
@@ -17,10 +18,10 @@ const initialState = {
     onRejectAction: null,
   },
   sessions: {},
-  connectionFailed: false,
-  nanoContractStatus: 'ready', // 'ready' | 'loading' | 'success' | 'failure'
-  createTokenStatus: 'ready', // 'ready' | 'loading' | 'success' | 'failure'
-  sendTxStatus: 'ready', // 'ready' | 'loading' | 'success' | 'failure'
+  sendTxStatus: BASE_STATUS.READY,
+  connectionState: REOWN_CONNECTION_STATE.IDLE,
+  nanoContractStatus: BASE_STATUS.READY,
+  createTokenStatus: BASE_STATUS.READY,
 };
 
 export default function reownReducer(state = initialState, action) {
@@ -46,82 +47,82 @@ export default function reownReducer(state = initialState, action) {
         sessions: action.payload,
       };
 
-    case types.REOWN_SET_CONNECTION_FAILED:
+    case types.REOWN_SET_CONNECTION_STATE:
       return {
         ...state,
-        connectionFailed: action.payload,
+        connectionState: action.payload,
       };
 
     case types.REOWN_NEW_NANOCONTRACT_STATUS_LOADING:
       return {
         ...state,
-        nanoContractStatus: 'loading',
+        nanoContractStatus: BASE_STATUS.LOADING,
       };
 
     case types.REOWN_NEW_NANOCONTRACT_STATUS_READY:
       return {
         ...state,
-        nanoContractStatus: 'ready',
+        nanoContractStatus: BASE_STATUS.READY,
       };
 
     case types.REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS:
       return {
         ...state,
-        nanoContractStatus: 'success',
+        nanoContractStatus: BASE_STATUS.SUCCESS,
       };
 
-    case types.REOWN_NEW_NANOCONTRACT_STATUS_FAILURE:
+    case types.REOWN_NEW_NANOCONTRACT_STATUS_FAILED:
       return {
         ...state,
-        nanoContractStatus: 'failure',
+        nanoContractStatus: BASE_STATUS.ERROR,
       };
 
     case types.REOWN_CREATE_TOKEN_STATUS_LOADING:
       return {
         ...state,
-        createTokenStatus: 'loading',
+        createTokenStatus: BASE_STATUS.LOADING,
       };
 
     case types.REOWN_CREATE_TOKEN_STATUS_READY:
       return {
         ...state,
-        createTokenStatus: 'ready',
+        createTokenStatus: BASE_STATUS.READY,
       };
 
     case types.REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL:
       return {
         ...state,
-        createTokenStatus: 'success',
+        createTokenStatus: BASE_STATUS.SUCCESS,
       };
 
     case types.REOWN_CREATE_TOKEN_STATUS_FAILED:
       return {
         ...state,
-        createTokenStatus: 'failure',
+        createTokenStatus: BASE_STATUS.ERROR,
       };
 
     case types.REOWN_SEND_TX_STATUS_LOADING:
       return {
         ...state,
-        sendTxStatus: 'loading',
+        sendTxStatus: BASE_STATUS.LOADING,
       };
 
     case types.REOWN_SEND_TX_STATUS_READY:
       return {
         ...state,
-        sendTxStatus: 'ready',
+        sendTxStatus: BASE_STATUS.READY,
       };
 
     case types.REOWN_SEND_TX_STATUS_SUCCESS:
       return {
         ...state,
-        sendTxStatus: 'success',
+        sendTxStatus: BASE_STATUS.SUCCESS
       };
 
     case types.REOWN_SEND_TX_STATUS_FAILURE:
       return {
         ...state,
-        sendTxStatus: 'failure',
+        sendTxStatus: BASE_STATUS.ERROR
       };
 
     default:

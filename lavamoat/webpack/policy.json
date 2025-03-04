@@ -1,12 +1,8 @@
 {
   "resources": {
     "@hathor/hathor-rpc-handler": {
-      "globals": {
-        "console.log": true
-      },
       "packages": {
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true,
-        "@hathor/wallet-lib>zod": true
+        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true
       }
     },
     "@hathor/hathor-rpc-handler>@hathor/wallet-lib": {
@@ -23,19 +19,18 @@
         "setTimeout": true
       },
       "packages": {
-        "$root$": true,
         "@hathor/hathor-rpc-handler>@hathor/wallet-lib>long": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic": true,
         "@hathor/wallet-lib>crypto-js": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
         "@walletconnect/core>events": true,
-        "assert": true,
         "axios": true,
         "buffer": true,
-        "crypto-browserify": true,
         "cypress>lodash": true,
-        "path-browserify": true,
+        "node-stdlib-browser>assert": true,
+        "node-stdlib-browser>crypto-browserify": true,
+        "node-stdlib-browser>path-browserify": true,
         "react-redux>@babel/runtime": true
       }
     },
@@ -59,7 +54,6 @@
         "setTimeout": true
       },
       "packages": {
-        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic": true,
         "@hathor/wallet-lib>crypto-js": true,
@@ -67,12 +61,12 @@
         "@hathor/wallet-lib>queue-microtask": true,
         "@hathor/wallet-lib>zod": true,
         "@walletconnect/core>events": true,
-        "assert": true,
         "axios": true,
         "buffer": true,
-        "crypto-browserify": true,
         "cypress>lodash": true,
-        "path-browserify": true,
+        "node-stdlib-browser>assert": true,
+        "node-stdlib-browser>crypto-browserify": true,
+        "node-stdlib-browser>path-browserify": true,
         "react-redux>@babel/runtime": true
       }
     },
@@ -87,19 +81,18 @@
         "process.browser": true
       },
       "packages": {
-        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib>bech32": true,
+        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
         "@hathor/wallet-lib>bitcore-lib>bs58": true,
         "@hathor/wallet-lib>bitcore-lib>buffer-compare": true,
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
         "@walletconnect/utils>elliptic": true,
-        "assert": true,
         "buffer": true,
-        "crypto-browserify": true,
-        "crypto-browserify>create-ecdh>bn.js": true,
-        "crypto-browserify>inherits": true,
         "cypress>lodash": true,
-        "process": true,
-        "url": true
+        "node-stdlib-browser>assert": true,
+        "node-stdlib-browser>crypto-browserify": true,
+        "node-stdlib-browser>url": true,
+        "process": true
       }
     },
     "@hathor/wallet-lib>bitcore-lib>bs58": {
@@ -119,10 +112,10 @@
         "Buffer.isBuffer": true
       },
       "packages": {
-        "$root$": true,
         "@hathor/wallet-lib>bitcore-lib": true,
         "@hathor/wallet-lib>bitcore-mnemonic>unorm": true,
-        "crypto-browserify": true
+        "buffer": true,
+        "node-stdlib-browser>crypto-browserify": true
       }
     },
     "@hathor/wallet-lib>bitcore-mnemonic>unorm": {
@@ -646,8 +639,8 @@
         "console.error": true
       },
       "packages": {
-        "$root$": true,
         "@walletconnect/core>@walletconnect/keyvaluestorage>unstorage>destr": true,
+        "buffer": true,
         "react-redux>@babel/runtime": true
       }
     },
@@ -751,7 +744,6 @@
         "setTimeout": true
       },
       "packages": {
-        "$root$": true,
         "@walletconnect/core>@walletconnect/relay-api": true,
         "@walletconnect/core>@walletconnect/relay-auth": true,
         "@walletconnect/core>@walletconnect/time": true,
@@ -768,6 +760,7 @@
         "@walletconnect/utils>elliptic": true,
         "@walletconnect/utils>query-string": true,
         "@walletconnect/utils>uint8arrays": true,
+        "buffer": true,
         "process": true
       }
     },
@@ -950,6 +943,9 @@
       }
     },
     "@walletconnect/utils>elliptic>bn.js": {
+      "globals": {
+        "console.error": true
+      },
       "packages": {
         "$root$": true
       }
@@ -992,152 +988,6 @@
         "react-redux>@babel/runtime": true
       }
     },
-    "assert": {
-      "globals": {
-        "console": true,
-        "process.emitWarning": true,
-        "process.stderr": true
-      },
-      "packages": {
-        "assert>call-bind": true,
-        "assert>is-nan": true,
-        "assert>object-is": true,
-        "assert>object.assign": true,
-        "assert>util": true,
-        "process": true
-      }
-    },
-    "assert>call-bind": {
-      "packages": {
-        "assert>call-bind>es-define-property": true,
-        "assert>call-bind>es-errors": true,
-        "assert>call-bind>function-bind": true,
-        "assert>call-bind>get-intrinsic": true,
-        "assert>call-bind>set-function-length": true
-      }
-    },
-    "assert>call-bind>es-define-property": {
-      "packages": {
-        "assert>call-bind>get-intrinsic": true
-      }
-    },
-    "assert>call-bind>get-intrinsic": {
-      "globals": {
-        "AggregateError": true,
-        "FinalizationRegistry": true,
-        "WeakRef": true
-      },
-      "packages": {
-        "assert>call-bind>es-errors": true,
-        "assert>call-bind>function-bind": true,
-        "assert>object.assign>has-symbols": true,
-        "eslint-config-airbnb>eslint-plugin-import>hasown": true,
-        "eslint-plugin-react>es-iterator-helpers>has-proto": true
-      }
-    },
-    "assert>call-bind>set-function-length": {
-      "packages": {
-        "assert>call-bind>es-errors": true,
-        "assert>call-bind>get-intrinsic": true,
-        "assert>is-nan>define-properties>define-data-property": true,
-        "assert>util>is-typed-array>gopd": true,
-        "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": true
-      }
-    },
-    "assert>is-nan": {
-      "packages": {
-        "assert>call-bind": true,
-        "assert>is-nan>define-properties": true
-      }
-    },
-    "assert>is-nan>define-properties": {
-      "packages": {
-        "assert>is-nan>define-properties>define-data-property": true,
-        "assert>object.assign>object-keys": true,
-        "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": true
-      }
-    },
-    "assert>is-nan>define-properties>define-data-property": {
-      "packages": {
-        "assert>call-bind>es-define-property": true,
-        "assert>call-bind>es-errors": true,
-        "assert>util>is-typed-array>gopd": true
-      }
-    },
-    "assert>object-is": {
-      "packages": {
-        "assert>call-bind": true,
-        "assert>is-nan>define-properties": true
-      }
-    },
-    "assert>object.assign": {
-      "packages": {
-        "assert>call-bind": true,
-        "assert>object.assign>has-symbols": true,
-        "assert>object.assign>object-keys": true
-      }
-    },
-    "assert>util": {
-      "globals": {
-        "console.error": true,
-        "console.log": true,
-        "console.trace": true,
-        "process": true
-      },
-      "packages": {
-        "assert>util>inherits": true,
-        "assert>util>is-arguments": true,
-        "assert>util>is-generator-function": true,
-        "assert>util>is-typed-array": true,
-        "assert>util>which-typed-array": true,
-        "process": true
-      }
-    },
-    "assert>util>is-arguments": {
-      "packages": {
-        "assert>call-bind": true,
-        "assert>util>is-arguments>has-tostringtag": true
-      }
-    },
-    "assert>util>is-arguments>has-tostringtag": {
-      "packages": {
-        "assert>object.assign>has-symbols": true
-      }
-    },
-    "assert>util>is-generator-function": {
-      "packages": {
-        "assert>util>is-arguments>has-tostringtag": true
-      }
-    },
-    "assert>util>is-typed-array": {
-      "packages": {
-        "assert>call-bind": true,
-        "assert>util>is-arguments>has-tostringtag": true,
-        "assert>util>is-typed-array>available-typed-arrays": true,
-        "assert>util>is-typed-array>for-each": true,
-        "assert>util>is-typed-array>gopd": true
-      }
-    },
-    "assert>util>is-typed-array>for-each": {
-      "packages": {
-        "npm-run-all>string.prototype.padend>es-abstract>is-callable": true
-      }
-    },
-    "assert>util>is-typed-array>gopd": {
-      "packages": {
-        "assert>call-bind>get-intrinsic": true
-      }
-    },
-    "assert>util>which-typed-array": {
-      "packages": {
-        "assert>call-bind": true,
-        "assert>util>is-arguments>has-tostringtag": true,
-        "assert>util>is-typed-array": true,
-        "assert>util>is-typed-array>available-typed-arrays": true,
-        "assert>util>is-typed-array>for-each": true,
-        "assert>util>is-typed-array>gopd": true
-      }
-    },
     "axios": {
       "globals": {
         "AbortController": true,
@@ -1165,7 +1015,7 @@
         "setTimeout": true
       },
       "packages": {
-        "$root$": true,
+        "buffer": true,
         "process": true,
         "react-redux>@babel/runtime": true
       }
@@ -1201,286 +1051,9 @@
         "buffer>ieee754": true
       }
     },
-    "crypto-browserify": {
+    "cypress>@cypress/request>qs": {
       "packages": {
-        "crypto-browserify>browserify-cipher": true,
-        "crypto-browserify>browserify-sign": true,
-        "crypto-browserify>create-ecdh": true,
-        "crypto-browserify>create-hash": true,
-        "crypto-browserify>create-hmac": true,
-        "crypto-browserify>diffie-hellman": true,
-        "crypto-browserify>pbkdf2": true,
-        "crypto-browserify>public-encrypt": true,
-        "crypto-browserify>randombytes": true,
-        "crypto-browserify>randomfill": true
-      }
-    },
-    "crypto-browserify>browserify-cipher": {
-      "packages": {
-        "crypto-browserify>browserify-cipher>browserify-aes": true,
-        "crypto-browserify>browserify-cipher>browserify-des": true,
-        "crypto-browserify>browserify-cipher>evp_bytestokey": true
-      }
-    },
-    "crypto-browserify>browserify-cipher>browserify-aes": {
-      "globals": {
-        "Buffer.concat": true
-      },
-      "packages": {
-        "$root$": true,
-        "crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": true,
-        "crypto-browserify>browserify-cipher>evp_bytestokey": true,
-        "crypto-browserify>create-hash>cipher-base": true,
-        "crypto-browserify>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "$root$": true
-      }
-    },
-    "crypto-browserify>browserify-cipher>browserify-des": {
-      "packages": {
-        "crypto-browserify>browserify-cipher>browserify-des>des.js": true,
-        "crypto-browserify>create-hash>cipher-base": true,
-        "crypto-browserify>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>browserify-cipher>browserify-des>des.js": {
-      "packages": {
-        "@walletconnect/utils>elliptic>minimalistic-assert": true,
-        "crypto-browserify>inherits": true
-      }
-    },
-    "crypto-browserify>browserify-cipher>evp_bytestokey": {
-      "packages": {
-        "crypto-browserify>create-hash>md5.js": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>browserify-sign": {
-      "packages": {
-        "@walletconnect/utils>elliptic": true,
-        "crypto-browserify>browserify-sign>bn.js": true,
-        "crypto-browserify>browserify-sign>inherits": true,
-        "crypto-browserify>browserify-sign>readable-stream": true,
-        "crypto-browserify>create-hash": true,
-        "crypto-browserify>create-hmac": true,
-        "crypto-browserify>public-encrypt>browserify-rsa": true,
-        "crypto-browserify>public-encrypt>parse-asn1": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>browserify-sign>bn.js": {
-      "globals": {
-        "Buffer": true
-      }
-    },
-    "crypto-browserify>browserify-sign>hash-base": {
-      "packages": {
-        "crypto-browserify>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "stream-browserify": true
-      }
-    },
-    "crypto-browserify>browserify-sign>readable-stream": {
-      "globals": {
-        "process.browser": true,
-        "process.stderr": true,
-        "process.stdout": true,
-        "process.version.slice": true,
-        "setImmediate": true
-      },
-      "packages": {
-        "@walletconnect/core>events": true,
-        "crypto-browserify>browserify-sign>readable-stream>core-util-is": true,
-        "crypto-browserify>browserify-sign>readable-stream>inherits": true,
-        "crypto-browserify>browserify-sign>readable-stream>isarray": true,
-        "crypto-browserify>browserify-sign>readable-stream>process-nextick-args": true,
-        "crypto-browserify>browserify-sign>readable-stream>safe-buffer": true,
-        "process": true,
-        "stream-http>readable-stream>string_decoder": true,
-        "stream-http>readable-stream>util-deprecate": true
-      }
-    },
-    "crypto-browserify>browserify-sign>readable-stream>core-util-is": {
-      "packages": {
-        "buffer": true
-      }
-    },
-    "crypto-browserify>browserify-sign>readable-stream>process-nextick-args": {
-      "globals": {
-        "process": true
-      },
-      "packages": {
-        "process": true
-      }
-    },
-    "crypto-browserify>browserify-sign>readable-stream>safe-buffer": {
-      "packages": {
-        "buffer": true
-      }
-    },
-    "crypto-browserify>create-ecdh": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "$root$": true,
-        "@walletconnect/utils>elliptic": true,
-        "crypto-browserify>create-ecdh>bn.js": true
-      }
-    },
-    "crypto-browserify>create-hash": {
-      "packages": {
-        "crypto-browserify>create-hash>cipher-base": true,
-        "crypto-browserify>create-hash>md5.js": true,
-        "crypto-browserify>inherits": true,
-        "crypto-browserify>pbkdf2>ripemd160": true,
-        "crypto-browserify>pbkdf2>sha.js": true
-      }
-    },
-    "crypto-browserify>create-hash>cipher-base": {
-      "packages": {
-        "crypto-browserify>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "stream-browserify": true,
-        "stream-http>readable-stream>string_decoder": true
-      }
-    },
-    "crypto-browserify>create-hash>md5.js": {
-      "packages": {
-        "crypto-browserify>browserify-sign>hash-base": true,
-        "crypto-browserify>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>create-hmac": {
-      "packages": {
-        "crypto-browserify>create-hash": true,
-        "crypto-browserify>create-hash>cipher-base": true,
-        "crypto-browserify>inherits": true,
-        "crypto-browserify>pbkdf2>ripemd160": true,
-        "crypto-browserify>pbkdf2>sha.js": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>diffie-hellman": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "$root$": true,
-        "crypto-browserify>create-ecdh>bn.js": true,
-        "crypto-browserify>diffie-hellman>miller-rabin": true,
-        "crypto-browserify>randombytes": true
-      }
-    },
-    "crypto-browserify>diffie-hellman>miller-rabin": {
-      "packages": {
-        "@walletconnect/utils>elliptic>brorand": true,
-        "crypto-browserify>create-ecdh>bn.js": true
-      }
-    },
-    "crypto-browserify>pbkdf2": {
-      "globals": {
-        "crypto": true,
-        "process": true,
-        "queueMicrotask": true,
-        "setImmediate": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "crypto-browserify>create-hash": true,
-        "crypto-browserify>pbkdf2>ripemd160": true,
-        "crypto-browserify>pbkdf2>sha.js": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "process": true
-      }
-    },
-    "crypto-browserify>pbkdf2>ripemd160": {
-      "packages": {
-        "buffer": true,
-        "crypto-browserify>browserify-sign>hash-base": true,
-        "crypto-browserify>inherits": true
-      }
-    },
-    "crypto-browserify>pbkdf2>sha.js": {
-      "packages": {
-        "crypto-browserify>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>public-encrypt": {
-      "packages": {
-        "crypto-browserify>create-ecdh>bn.js": true,
-        "crypto-browserify>create-hash": true,
-        "crypto-browserify>public-encrypt>browserify-rsa": true,
-        "crypto-browserify>public-encrypt>parse-asn1": true,
-        "crypto-browserify>randombytes": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>public-encrypt>browserify-rsa": {
-      "globals": {
-        "Buffer": true
-      },
-      "packages": {
-        "$root$": true,
-        "crypto-browserify>public-encrypt>browserify-rsa>bn.js": true,
-        "crypto-browserify>randombytes": true
-      }
-    },
-    "crypto-browserify>public-encrypt>browserify-rsa>bn.js": {
-      "globals": {
-        "Buffer": true
-      }
-    },
-    "crypto-browserify>public-encrypt>parse-asn1": {
-      "packages": {
-        "crypto-browserify>browserify-cipher>browserify-aes": true,
-        "crypto-browserify>browserify-cipher>evp_bytestokey": true,
-        "crypto-browserify>pbkdf2": true,
-        "crypto-browserify>public-encrypt>parse-asn1>asn1.js": true,
-        "cypress>@cypress/request>safe-buffer": true
-      }
-    },
-    "crypto-browserify>public-encrypt>parse-asn1>asn1.js": {
-      "packages": {
-        "@walletconnect/utils>elliptic>minimalistic-assert": true,
-        "buffer": true,
-        "crypto-browserify>create-ecdh>bn.js": true,
-        "crypto-browserify>inherits": true,
-        "vm-browserify": true
-      }
-    },
-    "crypto-browserify>randombytes": {
-      "globals": {
-        "crypto": true,
-        "msCrypto": true,
-        "process.nextTick": true
-      },
-      "packages": {
-        "cypress>@cypress/request>safe-buffer": true,
-        "process": true
-      }
-    },
-    "crypto-browserify>randomfill": {
-      "globals": {
-        "crypto": true,
-        "msCrypto": true,
-        "process.browser": true,
-        "process.nextTick": true
-      },
-      "packages": {
-        "crypto-browserify>randombytes": true,
-        "cypress>@cypress/request>safe-buffer": true,
-        "process": true
+        "eslint-plugin-react>string.prototype.matchall>side-channel": true
       }
     },
     "cypress>@cypress/request>safe-buffer": {
@@ -1495,12 +1068,51 @@
     },
     "eslint-config-airbnb>eslint-plugin-import>hasown": {
       "packages": {
-        "assert>call-bind>function-bind": true
+        "eslint-plugin-react>es-iterator-helpers>function-bind": true
+      }
+    },
+    "eslint-config-airbnb>object.assign": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>object-keys": true,
+        "eslint-plugin-react>es-iterator-helpers>has-symbols": true,
+        "npm-run-all>string.prototype.padend>call-bind": true
+      }
+    },
+    "eslint-plugin-react>array-includes>get-intrinsic": {
+      "globals": {
+        "AggregateError": true,
+        "FinalizationRegistry": true,
+        "WeakRef": true
+      },
+      "packages": {
+        "eslint-config-airbnb>eslint-plugin-import>hasown": true,
+        "eslint-plugin-react>es-iterator-helpers>function-bind": true,
+        "eslint-plugin-react>es-iterator-helpers>has-proto": true,
+        "eslint-plugin-react>es-iterator-helpers>has-symbols": true,
+        "npm-run-all>string.prototype.padend>call-bind>es-errors": true
+      }
+    },
+    "eslint-plugin-react>array-includes>is-string>has-tostringtag": {
+      "packages": {
+        "eslint-plugin-react>es-iterator-helpers>has-symbols": true
       }
     },
     "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": {
       "packages": {
-        "assert>call-bind>es-define-property": true
+        "npm-run-all>string.prototype.padend>call-bind>es-define-property": true
+      }
+    },
+    "eslint-plugin-react>object.hasown>es-abstract>gopd": {
+      "packages": {
+        "eslint-plugin-react>array-includes>get-intrinsic": true
+      }
+    },
+    "eslint-plugin-react>string.prototype.matchall>side-channel": {
+      "packages": {
+        "eslint-plugin-react>array-includes>get-intrinsic": true,
+        "npm-run-all>string.prototype.padend>call-bind": true,
+        "npm-run-all>string.prototype.padend>call-bind>es-errors": true,
+        "npm-run-all>string.prototype.padend>es-abstract>object-inspect": true
       }
     },
     "jquery": {
@@ -1508,17 +1120,469 @@
         "define": true
       }
     },
-    "npm-run-all>string.prototype.padend>es-abstract>is-callable": {
+    "node-stdlib-browser>assert": {
       "globals": {
-        "document": true
+        "console": true,
+        "process.emitWarning": true,
+        "process.stderr": true
+      },
+      "packages": {
+        "eslint-config-airbnb>object.assign": true,
+        "node-stdlib-browser>assert>is-nan": true,
+        "node-stdlib-browser>assert>object-is": true,
+        "node-stdlib-browser>util": true,
+        "npm-run-all>string.prototype.padend>call-bind": true,
+        "process": true
       }
     },
-    "path-browserify": {
+    "node-stdlib-browser>assert>is-nan": {
+      "packages": {
+        "npm-run-all>string.prototype.padend>call-bind": true,
+        "npm-run-all>string.prototype.padend>define-properties": true
+      }
+    },
+    "node-stdlib-browser>assert>object-is": {
+      "packages": {
+        "npm-run-all>string.prototype.padend>call-bind": true,
+        "npm-run-all>string.prototype.padend>define-properties": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify": {
+      "packages": {
+        "node-stdlib-browser>crypto-browserify>browserify-cipher": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign": true,
+        "node-stdlib-browser>crypto-browserify>create-ecdh": true,
+        "node-stdlib-browser>crypto-browserify>create-hash": true,
+        "node-stdlib-browser>crypto-browserify>create-hmac": true,
+        "node-stdlib-browser>crypto-browserify>diffie-hellman": true,
+        "node-stdlib-browser>crypto-browserify>pbkdf2": true,
+        "node-stdlib-browser>crypto-browserify>public-encrypt": true,
+        "node-stdlib-browser>crypto-browserify>randombytes": true,
+        "node-stdlib-browser>crypto-browserify>randomfill": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-cipher": {
+      "packages": {
+        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes": true,
+        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des": true,
+        "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes": {
+      "globals": {
+        "Buffer.concat": true
+      },
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "buffer": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": true,
+        "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": true,
+        "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes>buffer-xor": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "buffer": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des>des.js": true,
+        "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des>des.js": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "@walletconnect/utils>elliptic>minimalistic-assert": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": {
+      "packages": {
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>create-hash>md5.js": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-sign": {
+      "packages": {
+        "@walletconnect/utils>elliptic": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>bn.js": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>inherits": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream": true,
+        "node-stdlib-browser>crypto-browserify>create-hash": true,
+        "node-stdlib-browser>crypto-browserify>create-hmac": true,
+        "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": true,
+        "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-sign>bn.js": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-sign>hash-base": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>stream-browserify": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream": {
+      "globals": {
+        "process.browser": true,
+        "process.stderr": true,
+        "process.stdout": true,
+        "process.version.slice": true,
+        "setImmediate": true
+      },
+      "packages": {
+        "@walletconnect/core>events": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>core-util-is": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>inherits": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>isarray": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>process-nextick-args": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>safe-buffer": true,
+        "node-stdlib-browser>readable-stream>util-deprecate": true,
+        "node-stdlib-browser>string_decoder": true,
+        "process": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>core-util-is": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>process-nextick-args": {
+      "globals": {
+        "process": true
+      },
+      "packages": {
+        "process": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream>safe-buffer": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>create-ecdh": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
+        "@walletconnect/utils>elliptic": true,
+        "buffer": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>create-hash": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true,
+        "node-stdlib-browser>crypto-browserify>create-hash>md5.js": true,
+        "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": true,
+        "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>stream-browserify": true,
+        "node-stdlib-browser>string_decoder": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>create-hash>md5.js": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>hash-base": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>create-hmac": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>create-hash": true,
+        "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true,
+        "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": true,
+        "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>diffie-hellman": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
+        "buffer": true,
+        "node-stdlib-browser>crypto-browserify>diffie-hellman>miller-rabin": true,
+        "node-stdlib-browser>crypto-browserify>randombytes": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>diffie-hellman>miller-rabin": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
+        "@walletconnect/utils>elliptic>brorand": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>pbkdf2": {
+      "globals": {
+        "crypto": true,
+        "process": true,
+        "queueMicrotask": true,
+        "setImmediate": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>create-hash": true,
+        "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": true,
+        "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": true,
+        "process": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "buffer": true,
+        "node-stdlib-browser>crypto-browserify>browserify-sign>hash-base": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "cypress>@cypress/request>safe-buffer": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>public-encrypt": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>create-hash": true,
+        "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": true,
+        "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": true,
+        "node-stdlib-browser>crypto-browserify>randombytes": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": {
+      "globals": {
+        "Buffer": true
+      },
+      "packages": {
+        "buffer": true,
+        "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa>bn.js": true,
+        "node-stdlib-browser>crypto-browserify>randombytes": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa>bn.js": {
+      "globals": {
+        "Buffer": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": {
+      "packages": {
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes": true,
+        "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": true,
+        "node-stdlib-browser>crypto-browserify>pbkdf2": true,
+        "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1>asn1.js": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1>asn1.js": {
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib>bn.js": true,
+        "@hathor/wallet-lib>bitcore-lib>inherits": true,
+        "@walletconnect/utils>elliptic>minimalistic-assert": true,
+        "buffer": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>randombytes": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true,
+        "process.nextTick": true
+      },
+      "packages": {
+        "cypress>@cypress/request>safe-buffer": true,
+        "process": true
+      }
+    },
+    "node-stdlib-browser>crypto-browserify>randomfill": {
+      "globals": {
+        "crypto": true,
+        "msCrypto": true,
+        "process.browser": true,
+        "process.nextTick": true
+      },
+      "packages": {
+        "cypress>@cypress/request>safe-buffer": true,
+        "node-stdlib-browser>crypto-browserify>randombytes": true,
+        "process": true
+      }
+    },
+    "node-stdlib-browser>path-browserify": {
       "globals": {
         "process.cwd": true
       },
       "packages": {
         "process": true
+      }
+    },
+    "node-stdlib-browser>readable-stream>util-deprecate": {
+      "globals": {
+        "console.trace": true,
+        "console.warn": true,
+        "localStorage": true
+      }
+    },
+    "node-stdlib-browser>stream-browserify": {
+      "packages": {
+        "@walletconnect/core>events": true,
+        "node-stdlib-browser>stream-browserify>inherits": true,
+        "node-stdlib-browser>stream-browserify>readable-stream": true
+      }
+    },
+    "node-stdlib-browser>stream-browserify>readable-stream": {
+      "globals": {
+        "process.nextTick": true,
+        "process.stderr": true,
+        "process.stdout": true
+      },
+      "packages": {
+        "@walletconnect/core>events": true,
+        "buffer": true,
+        "node-stdlib-browser>readable-stream>util-deprecate": true,
+        "node-stdlib-browser>stream-browserify>inherits": true,
+        "node-stdlib-browser>string_decoder": true,
+        "process": true
+      }
+    },
+    "node-stdlib-browser>string_decoder": {
+      "packages": {
+        "node-stdlib-browser>string_decoder>safe-buffer": true
+      }
+    },
+    "node-stdlib-browser>string_decoder>safe-buffer": {
+      "packages": {
+        "buffer": true
+      }
+    },
+    "node-stdlib-browser>url": {
+      "packages": {
+        "cypress>@cypress/request>qs": true,
+        "node-stdlib-browser>url>punycode": true
+      }
+    },
+    "node-stdlib-browser>url>punycode": {
+      "globals": {
+        "define": true
+      }
+    },
+    "node-stdlib-browser>util": {
+      "globals": {
+        "console.error": true,
+        "console.log": true,
+        "console.trace": true,
+        "process": true
+      },
+      "packages": {
+        "node-stdlib-browser>util>inherits": true,
+        "node-stdlib-browser>util>is-arguments": true,
+        "node-stdlib-browser>util>is-generator-function": true,
+        "node-stdlib-browser>util>is-typed-array": true,
+        "node-stdlib-browser>util>which-typed-array": true,
+        "process": true
+      }
+    },
+    "node-stdlib-browser>util>is-arguments": {
+      "packages": {
+        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true,
+        "npm-run-all>string.prototype.padend>call-bind": true
+      }
+    },
+    "node-stdlib-browser>util>is-generator-function": {
+      "packages": {
+        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true
+      }
+    },
+    "node-stdlib-browser>util>is-typed-array": {
+      "packages": {
+        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true,
+        "eslint-plugin-react>object.hasown>es-abstract>available-typed-arrays": true,
+        "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
+        "node-stdlib-browser>util>is-typed-array>for-each": true,
+        "npm-run-all>string.prototype.padend>call-bind": true
+      }
+    },
+    "node-stdlib-browser>util>is-typed-array>for-each": {
+      "packages": {
+        "npm-run-all>string.prototype.padend>es-abstract>is-callable": true
+      }
+    },
+    "node-stdlib-browser>util>which-typed-array": {
+      "packages": {
+        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true,
+        "eslint-plugin-react>object.hasown>es-abstract>available-typed-arrays": true,
+        "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
+        "node-stdlib-browser>util>is-typed-array": true,
+        "node-stdlib-browser>util>is-typed-array>for-each": true,
+        "npm-run-all>string.prototype.padend>call-bind": true
+      }
+    },
+    "npm-run-all>string.prototype.padend>call-bind": {
+      "packages": {
+        "eslint-plugin-react>array-includes>get-intrinsic": true,
+        "eslint-plugin-react>es-iterator-helpers>function-bind": true,
+        "npm-run-all>string.prototype.padend>call-bind>es-define-property": true,
+        "npm-run-all>string.prototype.padend>call-bind>es-errors": true,
+        "npm-run-all>string.prototype.padend>call-bind>set-function-length": true
+      }
+    },
+    "npm-run-all>string.prototype.padend>call-bind>es-define-property": {
+      "packages": {
+        "eslint-plugin-react>array-includes>get-intrinsic": true
+      }
+    },
+    "npm-run-all>string.prototype.padend>call-bind>set-function-length": {
+      "packages": {
+        "eslint-plugin-react>array-includes>get-intrinsic": true,
+        "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": true,
+        "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
+        "npm-run-all>string.prototype.padend>call-bind>es-errors": true,
+        "npm-run-all>string.prototype.padend>define-properties>define-data-property": true
+      }
+    },
+    "npm-run-all>string.prototype.padend>define-properties": {
+      "packages": {
+        "@lavamoat/webpack>json-stable-stringify>object-keys": true,
+        "eslint-plugin-react>es-iterator-helpers>has-property-descriptors": true,
+        "npm-run-all>string.prototype.padend>define-properties>define-data-property": true
+      }
+    },
+    "npm-run-all>string.prototype.padend>define-properties>define-data-property": {
+      "packages": {
+        "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
+        "npm-run-all>string.prototype.padend>call-bind>es-define-property": true,
+        "npm-run-all>string.prototype.padend>call-bind>es-errors": true
+      }
+    },
+    "npm-run-all>string.prototype.padend>es-abstract>is-callable": {
+      "globals": {
+        "document": true
+      }
+    },
+    "npm-run-all>string.prototype.padend>es-abstract>object-inspect": {
+      "globals": {
+        "HTMLElement": true,
+        "WeakRef": true
       }
     },
     "popper.js": {
@@ -1761,45 +1825,6 @@
         "react-redux>@babel/runtime": true
       }
     },
-    "stream-browserify": {
-      "packages": {
-        "@walletconnect/core>events": true,
-        "stream-browserify>inherits": true,
-        "stream-browserify>readable-stream": true
-      }
-    },
-    "stream-browserify>readable-stream": {
-      "globals": {
-        "process.nextTick": true,
-        "process.stderr": true,
-        "process.stdout": true
-      },
-      "packages": {
-        "@walletconnect/core>events": true,
-        "buffer": true,
-        "process": true,
-        "stream-browserify>inherits": true,
-        "stream-http>readable-stream>string_decoder": true,
-        "stream-http>readable-stream>util-deprecate": true
-      }
-    },
-    "stream-http>readable-stream>string_decoder": {
-      "packages": {
-        "stream-http>readable-stream>string_decoder>safe-buffer": true
-      }
-    },
-    "stream-http>readable-stream>string_decoder>safe-buffer": {
-      "packages": {
-        "buffer": true
-      }
-    },
-    "stream-http>readable-stream>util-deprecate": {
-      "globals": {
-        "console.trace": true,
-        "console.warn": true,
-        "localStorage": true
-      }
-    },
     "ttag": {
       "globals": {
         "define": true,
@@ -1820,36 +1845,6 @@
         "localStorage.setItem": true,
         "setInterval": true,
         "setTimeout": true
-      }
-    },
-    "url": {
-      "packages": {
-        "url>punycode": true,
-        "url>qs": true
-      }
-    },
-    "url>punycode": {
-      "globals": {
-        "define": true
-      }
-    },
-    "url>qs": {
-      "packages": {
-        "url>qs>side-channel": true
-      }
-    },
-    "url>qs>side-channel": {
-      "packages": {
-        "assert>call-bind": true,
-        "assert>call-bind>es-errors": true,
-        "assert>call-bind>get-intrinsic": true,
-        "url>qs>side-channel>object-inspect": true
-      }
-    },
-    "url>qs>side-channel>object-inspect": {
-      "globals": {
-        "HTMLElement": true,
-        "WeakRef": true
       }
     },
     "viz.js": {
@@ -1902,15 +1897,8 @@
         "webkitIndexedDB": true
       },
       "packages": {
-        "$root$": true,
+        "buffer": true,
         "process": true
-      }
-    },
-    "vm-browserify": {
-      "globals": {
-        "document.body.appendChild": true,
-        "document.body.removeChild": true,
-        "document.createElement": true
       }
     }
   }

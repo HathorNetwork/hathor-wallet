@@ -6,20 +6,19 @@
  */
 
 import React, { useEffect } from 'react';
-import $ from 'jquery';
 import { t } from 'ttag';
 import { useDispatch } from 'react-redux';
 import { types } from '../../actions';
 import ReactLoading from 'react-loading';
 import { colors } from '../../constants';
 
-export const MODAL_ID = 'nanoContractFeedbackModal';
+export const MODAL_ID = 'messageSigningFeedbackModal';
 
 /**
- * Component that shows a modal with feedback for nano contract transactions
+ * Component that shows a modal with feedback for message signing operations
  * Shows loading, success or error message and provides retry option on failure
  */
-export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, manageDomLifecycle }) {
+export function MessageSigningFeedbackModal({ isError, isLoading = true, onClose, manageDomLifecycle }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -27,13 +26,13 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
   }, []);
 
   const handleRetry = () => {
-    dispatch({ type: types.REOWN_NEW_NANOCONTRACT_RETRY });
+    dispatch({ type: types.REOWN_SIGN_MESSAGE_RETRY });
     onClose();
   };
 
   const handleDismiss = () => {
     if (isError) {
-      dispatch({ type: types.REOWN_NEW_NANOCONTRACT_RETRY_DISMISS });
+      dispatch({ type: types.REOWN_SIGN_MESSAGE_RETRY_DISMISS });
     }
     onClose();
   };
@@ -42,7 +41,7 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
     <>
       <div className="modal-body text-center">
         <ReactLoading type="spin" color={colors.purpleHathor} height={32} width={32} className="d-inline-block" />
-        <p className="mt-3">{t`Processing nano contract transaction...`}</p>
+        <p className="mt-3">{t`Signing message...`}</p>
       </div>
     </>
   );
@@ -50,7 +49,7 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
   const renderError = () => (
     <>
       <div className="modal-body">
-        <p>{t`There was an error sending the nano contract transaction. Would you like to try again?`}</p>
+        <p>{t`There was an error signing the message. Would you like to try again?`}</p>
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" onClick={handleDismiss}>
@@ -66,7 +65,7 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
   const renderSuccess = () => (
     <>
       <div className="modal-body">
-        <p>{t`The nano contract transaction was sent successfully.`}</p>
+        <p>{t`The message was signed successfully.`}</p>
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-hathor" onClick={handleDismiss}>
@@ -99,7 +98,7 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">
-              {isLoading ? t`Processing Transaction` : (isError ? t`Transaction Failed` : t`Transaction Successful`)}
+              {isLoading ? t`Signing Message` : (isError ? t`Message Signing Failed` : t`Message Signing Successful`)}
             </h5>
             {!isLoading && (
               <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleDismiss}>

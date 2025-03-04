@@ -31,6 +31,7 @@ import {
   SendNanoContractTxError,
   SendTransactionError,
   InsufficientFundsError,
+  SignMessageWithAddressError,
 } from 'hathor-rpc-handler-test';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
@@ -42,11 +43,11 @@ import {
   types,
   setReownSessions,
   onExceptionCaptured,
-  setWCConnectionFailed,
+  setWCConnectionState,
   setNewNanoContractStatusLoading,
   setNewNanoContractStatusReady,
-  setNewNanoContractStatusFailure,
   setNewNanoContractStatusSuccess,
+  setNewNanoContractStatusFailure,
   setCreateTokenStatusLoading,
   setCreateTokenStatusReady,
   setCreateTokenStatusSuccessful,
@@ -56,12 +57,13 @@ import {
   showGlobalModal,
   hideGlobalModal,
 } from '../actions';
-import { checkForFeatureFlag, getNetworkSettings, retryHandler, showPinScreenForResult } from './helpers';
+import { checkForFeatureFlag, getNetworkSettings, retryHandler } from './helpers';
 import { logger } from '../utils/logger';
 import { getGlobalReown, setGlobalReown } from '../modules/reown';
 import { MODAL_TYPES } from '../components/GlobalModal';
 import { getGlobalWallet } from '../modules/wallet';
 import { t } from 'ttag';
+import { REOWN_CONNECTION_STATE } from '../constants';
 
 const log = logger('reown');
 
@@ -83,11 +85,20 @@ const ERROR_CODES = {
   INVALID_PAYLOAD: 5003,
 };
 
+/**
+ * Checks if the Reown feature is enabled via feature flags
+ * 
+ * @returns {boolean} True if the Reown feature is enabled, false otherwise
+ */
 function* isReownEnabled() {
   const reownEnabled = yield call(checkForFeatureFlag, REOWN_FEATURE_TOGGLE);
   return reownEnabled;
 }
 
+/**
+ * Initializes the Reown client and sets up the necessary configurations
+ * This is the main entry point for the Reown functionality
+ */
 function* init() {
   log.debug('Wallet not ready yet, waiting for START_WALLET_SUCCESS.');
   yield take(types.START_WALLET_SUCCESS);
@@ -121,7 +132,7 @@ function* init() {
 
     const metadata = {
       name: 'Hathor',
-      description: 'Hathor Mobile Wallet',
+      description: 'Hathor Desktop Wallet',
       url: 'https://hathor.network/',
       icons: ['https://hathor.network/favicon.ico'],
     };
@@ -147,6 +158,10 @@ function* init() {
   }
 }
 
+/**
+ * Monitors for network changes and clears Reown sessions when the genesis hash changes
+ * This ensures sessions are reset when switching between networks
+ */
 export function* listenForNetworkChange() {
   let previousGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
   
@@ -164,6 +179,10 @@ export function* listenForNetworkChange() {
   }
 }
 
+/**
+ * Checks for any pending session proposals or requests
+ * Retrieves pending requests from the WalletKit
+ */
 export function* checkForPendingRequests() {
   const { walletKit } = getGlobalReown();
 
@@ -176,6 +195,12 @@ export function* checkForPendingRequests() {
   yield call([walletKit, walletKit.getPendingSessionRequests]);
 }
 
+/**
+ * Refreshes the list of active Reown sessions in the Redux store
+ * Optionally extends the expiration time of existing sessions
+ * 
+ * @param {boolean} extend - Whether to extend the expiration time of sessions
+ */
 export function* refreshActiveSessions(extend = false) {
   log.debug('Refreshing active sessions.');
   const { walletKit } = getGlobalReown();
@@ -185,10 +210,13 @@ export function* refreshActiveSessions(extend = false) {
   }
 
   const activeSessions = yield call(() => walletKit.getActiveSessions());
-  yield put(setReownSessions(activeSessions));
+  
+  yield put(setReownSessions(activeSessions || {}));
 
   if (extend) {
-    for (const key of Object.keys(activeSessions)) {
+    const sessionKeys = Object.keys(activeSessions || {});
+    
+    for (const key of sessionKeys) {
       log.debug('Extending session ');
       log.debug(activeSessions[key].topic);
 
@@ -216,6 +244,12 @@ export function* refreshActiveSessions(extend = false) {
   }
 }
 
+/**
+ * Sets up event listeners for the Reown WalletKit
+ * Creates an event channel to handle various Reown events
+ * 
+ * @param {Object} walletKit - The WalletKit instance to attach listeners to
+ */
 export function* setupListeners(walletKit) {
   log.debug('Will setup listeners: ', walletKit);
   const channel = eventChannel((emitter) => {
@@ -262,6 +296,10 @@ export function* setupListeners(walletKit) {
   }
 }
 
+/**
+ * Clears all active Reown sessions
+ * Disconnects all sessions and refreshes the session list
+ */
 export function* clearSessions() {
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
@@ -284,6 +322,10 @@ export function* clearSessions() {
   yield call(refreshActiveSessions);
 }
 
+/**
+ * Listens for incoming session requests and processes them
+ * Creates an action channel to handle REOWN_SESSION_REQUEST actions
+ */
 function* requestsListener() {
   const requestsChannel = yield actionChannel('REOWN_SESSION_REQUEST');
 
@@ -299,6 +341,12 @@ function* requestsListener() {
   }
 }
 
+/**
+ * Processes a Reown session request
+ * Handles RPC requests from dApps and responds appropriately
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
 export function* processRequest(action) {
   const { payload } = action;
   const { params } = payload;
@@ -347,12 +395,18 @@ export function* processRequest(action) {
         break;
       case RpcResponseTypes.CreateTokenResponse:
         yield put(setCreateTokenStatusSuccessful());
+        yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: false }));
         break;
       case RpcResponseTypes.SendTransactionResponse:
         yield put(setSendTxStatusSuccess());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: false, isError: false }));
         break;
+      case RpcResponseTypes.SignWithAddressResponse:
+        // Show success feedback for message signing
+        yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: false }));
+        break;
       default:
+        console.debug('Unknown response type:', response.type);
         break;
     }
 
@@ -365,7 +419,7 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
-    console.log('Error on processRequest: ', e);
+    log.debug('Error on processRequest: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
@@ -384,7 +438,9 @@ export function* processRequest(action) {
         }
       } break;
       case CreateTokenError: {
+        log.error('CreateTokenError occurred:', e.message, e.stack);
         yield put(setCreateTokenStatusFailed());
+        yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
           retryHandler,
@@ -393,8 +449,11 @@ export function* processRequest(action) {
         );
 
         if (retry) {
+          yield put(setCreateTokenStatusReady()); // Reset status before retrying
           shouldAnswer = false;
           yield* processRequest(action);
+        } else {
+          yield put(setCreateTokenStatusReady()); // Reset status if not retrying
         }
       } break;
       case InsufficientFundsError: {
@@ -434,9 +493,24 @@ export function* processRequest(action) {
           yield* processRequest(action);
         }
       } break;
+      case SignMessageWithAddressError: {
+        log.error('SignMessageWithAddressError occurred:', e.message, e.stack);
+        
+        yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: true }));
+
+        const retry = yield call(
+          retryHandler,
+          types.REOWN_SIGN_MESSAGE_RETRY,
+          types.REOWN_SIGN_MESSAGE_RETRY_DISMISS,
+        );
+
+        if (retry) {
+          shouldAnswer = false;
+          yield* processRequest(action);
+        }
+      } break;
       default:
         log.error('Unknown error type:', e);
-        yield put(onExceptionCaptured(e));
         break;
     }
 
@@ -463,26 +537,6 @@ export function* processRequest(action) {
 const promptHandler = (dispatch) => (request, requestMetadata) =>
   new Promise(async (resolve, reject) => {
     switch (request.type) {
-      case TriggerTypes.ConnectConfirmationPrompt: {
-        const connectResponseTemplate = (accepted) => () => {
-          dispatch(hideGlobalModal());
-          resolve({
-            type: TriggerResponseTypes.ConnectConfirmationResponse,
-            data: accepted,
-          });
-        };
-
-        dispatch({
-          type: types.SHOW_CONNECT_REQUEST_MODAL,
-          payload: {
-            accept: connectResponseTemplate(true),
-            deny: connectResponseTemplate(false),
-            data: request.data,
-            dapp: requestMetadata,
-          }
-        });
-      } break;
-
       case TriggerTypes.SendTransactionConfirmationPrompt: {
         const sendTransactionResponseTemplate = (accepted) => () => {
           dispatch(hideGlobalModal());
@@ -519,6 +573,29 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           payload: {
             accept: signOracleDataResponseTemplate(true),
             deny: signOracleDataResponseTemplate(false),
+            data: request.data,
+            dapp: requestMetadata,
+          }
+        });
+      } break;
+
+      case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
+        const sendNanoContractTxResponseTemplate = (accepted) => (data) => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
+            data: {
+              accepted,
+              nc: data
+            }
+          });
+        };
+
+        dispatch({
+          type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
+          payload: {
+            accept: sendNanoContractTxResponseTemplate(true),
+            deny: sendNanoContractTxResponseTemplate(false),
             data: request.data,
             dapp: requestMetadata,
           }
@@ -568,29 +645,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         });
       } break;
 
-      case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
-        const sendNanoContractTxResponseTemplate = (accepted) => (data) => {
-          dispatch(hideGlobalModal());
-          resolve({
-            type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
-            data: {
-              accepted,
-              nc: data
-            }
-          });
-        };
-
-        dispatch({
-          type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
-          payload: {
-            accept: sendNanoContractTxResponseTemplate(true),
-            deny: sendNanoContractTxResponseTemplate(false),
-            data: request.data,
-            dapp: requestMetadata,
-          }
-        });
-      } break;
-
       case TriggerTypes.SendNanoContractTxLoadingTrigger:
         dispatch(setNewNanoContractStatusLoading());
         dispatch(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: true }));
@@ -598,12 +652,16 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.CreateTokenLoadingTrigger:
+        log.debug('CreateTokenLoadingTrigger: Starting token creation process');
         dispatch(setCreateTokenStatusLoading());
+        dispatch(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: true }));
         resolve();
         break;
 
       case TriggerTypes.CreateTokenLoadingFinishedTrigger:
+        log.debug('CreateTokenLoadingFinishedTrigger: Token creation process completed');
         dispatch(setCreateTokenStatusReady());
+        dispatch(hideGlobalModal());
         resolve();
         break;
 
@@ -631,30 +689,25 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
             },
             onCancel: () => {
               dispatch(hideGlobalModal());
+              dispatch(setCreateTokenStatusReady()); // Reset loading state if PIN entry is cancelled
               pinReject(new Error('PIN entry cancelled'));
             }
           }));
         });
 
-        pinPromise
-          .then((pinCode) => {
-            resolve({
-              type: TriggerResponseTypes.PinRequestResponse,
-              data: {
-                accepted: true,
-                pinCode,
-              }
-            });
-          })
-          .catch(() => {
-            resolve({
-              type: TriggerResponseTypes.PinRequestResponse,
-              data: {
-                accepted: false,
-                pinCode: null,
-              }
-            });
+        try {
+          const pin = await pinPromise;
+          resolve({
+            type: TriggerResponseTypes.PinConfirmationResponse,
+            data: {
+              accepted: true,
+              pinCode: pin,
+            }
           });
+        } catch (error) {
+          log.error('PIN confirmation error:', error);
+          reject(error);
+        }
       } break;
 
       default:
@@ -662,39 +715,18 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
     }
   });
 
-export function* onSignMessageRequest({ payload }) {
-  const { accept: acceptCb, deny: denyCb, data, dapp } = payload;
-  const wallet = getGlobalWallet();
-
-  if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
-    return;
-  }
-
-  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.SIGN_MESSAGE,
-    data: {
-      data,
-      dapp,
-    },
-    onAcceptAction: acceptCb,
-    onRejectAction: denyCb,
-  }));
-
-  const { deny } = yield race({
-    accept: take(types.REOWN_ACCEPT),
-    deny: take(types.REOWN_REJECT),
-  });
-
-  if (deny) {
-    denyCb();
-    return;
-  }
-
-  acceptCb();
-}
-
-export function* onSignOracleDataRequest({ payload }) {
+/**
+ * Generic handler for dApp requests that require user confirmation
+ * Shows a modal to the user and manages the accept/reject flow
+ * 
+ * @param {Object} payload - The request payload
+ * @param {Function} payload.accept - Callback for when user accepts
+ * @param {Function} payload.deny - Callback for when user rejects
+ * @param {Object} payload.data - The request data
+ * @param {Object} payload.dapp - Metadata about the requesting dApp
+ * @param {string} modalType - The type of modal to show from ReownModalTypes
+ */
+export function* handleDAppRequest({ payload }, modalType) {
   const { accept, deny: denyCb, data, dapp } = payload;
   const wallet = getGlobalWallet();
 
@@ -704,7 +736,7 @@ export function* onSignOracleDataRequest({ payload }) {
   }
 
   yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.SIGN_ORACLE_DATA,
+    type: modalType,
     data: {
       data,
       dapp,
@@ -726,102 +758,54 @@ export function* onSignOracleDataRequest({ payload }) {
   accept();
 }
 
-export function* onSendNanoContractTxRequest({ payload }) {
-  const { accept, deny: denyCb, data, dapp } = payload;
-  const wallet = getGlobalWallet();
-
-  if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
-    return;
-  }
-
-  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.SEND_NANO_CONTRACT_TX,
-    data: {
-      data,
-      dapp,
-    },
-    onAcceptAction: accept,
-    onRejectAction: denyCb,
-  }));
-
-  const { deny } = yield race({
-    accept: take(types.REOWN_ACCEPT),
-    deny: take(types.REOWN_REJECT),
-  });
-
-  if (deny) {
-    denyCb();
-    return;
-  }
-
-  accept();
+/**
+ * Handles a sign message request from a dApp
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
+export function* onSignMessageRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.SIGN_MESSAGE);
 }
 
-export function* onCreateTokenRequest({ payload }) {
-  const { accept, deny: denyCb, data, dapp } = payload;
-  const wallet = getGlobalWallet();
-
-  if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
-    return;
-  }
-
-  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.CREATE_TOKEN,
-    data: {
-      data,
-      dapp,
-    },
-    onAcceptAction: accept,
-    onRejectAction: denyCb,
-  }));
-
-  const { deny } = yield race({
-    accept: take(types.REOWN_ACCEPT),
-    deny: take(types.REOWN_REJECT),
-  });
-
-  if (deny) {
-    denyCb();
-    return;
-  }
-
-  accept();
+/**
+ * Handles a sign oracle data request from a dApp
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
+export function* onSignOracleDataRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.SIGN_ORACLE_DATA);
 }
 
-export function* onSendTransactionRequest({ payload }) {
-  const { accept, deny: denyCb, data, dapp } = payload;
-  const wallet = getGlobalWallet();
-
-  if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
-    return;
-  }
-
-  yield put(showGlobalModal(MODAL_TYPES.REOWN, {
-    type: ReownModalTypes.SEND_TRANSACTION,
-    data: {
-      data,
-      dapp,
-    },
-    onAcceptAction: accept,
-    onRejectAction: denyCb,
-  }));
-
-  const { deny } = yield race({
-    accept: take(types.REOWN_ACCEPT),
-    deny: take(types.REOWN_REJECT),
-  });
-
-  if (deny) {
-    denyCb();
-    return;
-  }
-
-  accept();
+/**
+ * Handles a request to send a nano contract transaction
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
+export function* onSendNanoContractTxRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.SEND_NANO_CONTRACT_TX);
 }
 
+export function* onSendTransactionRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.SEND_TRANSACTION);
+}
+
+/**
+ * Handles a request to create a token
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
+export function* onCreateTokenRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.CREATE_TOKEN);
+}
+
+/**
+ * Handles wallet reset events
+ * Clears all Reown sessions when the wallet is reset
+ */
 export function* onWalletReset() {
   const { walletKit } = getGlobalReown();
   if (!walletKit) {
@@ -832,6 +816,12 @@ export function* onWalletReset() {
   yield call(clearSessions);
 }
 
+/**
+ * Handles a session proposal from a dApp
+ * Shows a modal to the user for confirmation and manages the session approval/rejection
+ * 
+ * @param {Object} action - The action containing the session proposal
+ */
 export function* onSessionProposal(action) {
   log.debug('Got session proposal', action);
   const { id, params } = action.payload;
@@ -844,6 +834,36 @@ export function* onSessionProposal(action) {
       description: get(params, 'proposer.metadata.description', ''),
       requiredNamespaces: get(params, 'requiredNamespaces', []),
     };
+
+    // Check if the required methods are supported
+    const requiredMethods = get(params, 'requiredNamespaces.hathor.methods', []);
+    const availableMethods = values(AVAILABLE_METHODS);
+    const unsupportedMethods = requiredMethods.filter(method => !availableMethods.includes(method));
+    
+    if (unsupportedMethods.length > 0) {
+      log.error('Unsupported methods requested:', unsupportedMethods);
+      // Set connection state to FAILED
+      yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
+      
+      // Show error modal to user
+      yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+        title: 'Connection Error',
+        message: `The dApp is requesting methods that are not supported: ${unsupportedMethods.join(', ')}`,
+      }));
+      
+      // Reject the session
+      const { walletKit } = getGlobalReown();
+      if (walletKit) {
+        yield call([walletKit, walletKit.rejectSession], {
+          id,
+          reason: {
+            code: ERROR_CODES.UNAUTHORIZED_METHODS,
+            message: 'Requested methods are not supported',
+          },
+        });
+      }
+      return;
+    }
 
     let dispatch;
     yield put((_dispatch) => {
@@ -892,10 +912,13 @@ export function* onSessionProposal(action) {
             accounts: [`hathor:${networkSettings.network}:${firstAddress}`],
             chains: [`hathor:${networkSettings.network}`],
             events: AVAILABLE_EVENTS,
-            methods: values(AVAILABLE_METHODS),
+            methods: requiredMethods, // Use the methods requested by the dApp instead of all available methods
           },
         },
       });
+
+      // Didn't throw, show success.
+      yield put(setWCConnectionState(REOWN_CONNECTION_STATE.SUCCESS));
     } else {
       // User rejected the proposal
       yield call([walletKit, walletKit.rejectSession], {
@@ -912,17 +935,57 @@ export function* onSessionProposal(action) {
   } catch (error) {
     log.error('Error handling session proposal:', error);
     yield put(onExceptionCaptured(error));
+    
+    // Set connection state to FAILED
+    yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
+    
+    // Show error modal to user
+    yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+      title: 'Connection Error',
+      message: `Failed to connect to dApp: ${error.message}`,
+    }));
+    
+    // Try to reject the session if possible
+    try {
+      const { walletKit } = getGlobalReown();
+      if (walletKit) {
+        yield call([walletKit, walletKit.rejectSession], {
+          id,
+          reason: {
+            code: ERROR_CODES.USER_REJECTED,
+            message: 'Connection failed',
+          },
+        });
+      }
+    } catch (rejectError) {
+      log.error('Error rejecting session after failure:', rejectError);
+    }
   } finally {
     // Make sure to close the modal even if there's an error
     yield put(hideGlobalModal());
   }
 }
 
+/**
+ * Handles a WalletConnect URI input
+ * Attempts to pair with the provided URI
+ * 
+ * @param {Object} action - The action containing the URI payload
+ */
 export function* onUriInputted(action) {
+  // Ensure connection state is set to CONNECTING at the beginning of the saga
+  yield put(setWCConnectionState(REOWN_CONNECTION_STATE.CONNECTING));
+
   const { core, walletKit } = getGlobalReown();
 
   if (!core || !walletKit) {
     log.debug('Tried to get reown client in onUriInputted but core or walletKit is undefined.');
+    // Set connection state to FAILED
+    yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
+    yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+      title: 'Connection Error',
+      message: 'Wallet connection service is not initialized. Please try again later.',
+    }));
     return;
   }
 
@@ -932,10 +995,21 @@ export function* onUriInputted(action) {
     yield call(core.pairing.pair, { uri: payload });
   } catch (error) {
     log.debug('Error pairing: ', error);
-    yield put(setWCConnectionFailed(true));
+    // Connection failed
+    yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
+    
+    // Show error modal to user
+    yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+      title: 'Connection Error',
+      message: `Failed to connect to dApp: ${error.message || 'Invalid URI or connection timeout'}`,
+    }));
   }
 }
 
+/**
+ * Listens for feature toggle updates and shuts down Reown if disabled
+ * Monitors changes to the Reown feature flag
+ */
 export function* featureToggleUpdateListener() {
   while (true) {
     const oldReownEnabled = yield call(isReownEnabled);
@@ -948,6 +1022,12 @@ export function* featureToggleUpdateListener() {
   }
 }
 
+/**
+ * Handles a request to cancel a session
+ * Disconnects the specified session and refreshes the session list
+ * 
+ * @param {Object} action - The action containing the session ID
+ */
 export function* onCancelSession(action) {
   const { walletKit } = getGlobalReown();
 
@@ -971,6 +1051,12 @@ export function* onCancelSession(action) {
   yield call(refreshActiveSessions);
 }
 
+/**
+ * Handles a session delete event
+ * Delegates to onCancelSession to handle the session deletion
+ * 
+ * @param {Object} action - The action containing the session data
+ */
 export function* onSessionDelete(action) {
   yield call(onCancelSession, action);
 }

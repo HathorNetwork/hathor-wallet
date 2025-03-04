@@ -29,8 +29,7 @@
         "window.Event": true,
         "window.CustomEvent": true,
         "window.MutationObserver": true,
-        "MutationObserver": true,
-        "performance": true
+        "MutationObserver": true
       },
       "packages": {
         "jquery": true,
@@ -45,7 +44,6 @@
         "HTMLElement": true,
         "getComputedStyle": true,
         "window.getComputedStyle": true,
-        "performance": true,
         "requestAnimationFrame": true,
         "cancelAnimationFrame": true
       }
@@ -60,7 +58,6 @@
         "Event": true,
         "CustomEvent": true,
         "MutationObserver": true,
-        "performance": true,
         "getComputedStyle": true,
         "requestAnimationFrame": true,
         "cancelAnimationFrame": true,
@@ -135,7 +132,6 @@
         "MutationObserver": true,
         "requestAnimationFrame": true,
         "cancelAnimationFrame": true,
-        "performance": true,
         "Event": true,
         "Node": true,
         "Element": true,
@@ -258,9 +254,6 @@
         "console": true,
         "Error": true,
         "Object": true,
-        "XMLHttpRequest": true,
-        "FormData": true,
-        "Blob": true,
         "window": true,
         "document": true,
         "navigator": true,

@@ -34,7 +34,10 @@ import { ReownModal } from './Reown/ReownModal';
 import { setModalContext } from '../sagas/modal';
 import { PinPad } from './PinPad';
 import { NanoContractFeedbackModal } from './Reown/NanoContractFeedbackModal';
+import { TokenCreationFeedbackModal } from './Reown/TokenCreationFeedbackModal';
+import { MessageSigningFeedbackModal } from './Reown/MessageSigningFeedbackModal';
 import { TransactionFeedbackModal } from './Reown/TransactionFeedbackModal';
+import ModalError from './ModalError';
 
 const initialState = {
   showModal: () => {},
@@ -70,6 +73,9 @@ export const MODAL_TYPES = {
   'PIN_PAD': 'PIN_PAD',
   'NANO_CONTRACT_FEEDBACK': 'NANO_CONTRACT_FEEDBACK',
   'TRANSACTION_FEEDBACK': 'TRANSACTION_FEEDBACK',
+  'TOKEN_CREATION_FEEDBACK': 'TOKEN_CREATION_FEEDBACK',
+  'MESSAGE_SIGNING_FEEDBACK': 'MESSAGE_SIGNING_FEEDBACK',
+  'ERROR_MODAL': 'ERROR_MODAL',
 };
 
 export const MODAL_COMPONENTS = {
@@ -100,6 +106,9 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.PIN_PAD]: PinPad,
   [MODAL_TYPES.NANO_CONTRACT_FEEDBACK]: NanoContractFeedbackModal,
   [MODAL_TYPES.TRANSACTION_FEEDBACK]: TransactionFeedbackModal,
+  [MODAL_TYPES.TOKEN_CREATION_FEEDBACK]: TokenCreationFeedbackModal,
+  [MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK]: MessageSigningFeedbackModal,
+  [MODAL_TYPES.ERROR_MODAL]: ModalError,
 };
 
 export const GlobalModalContext = createContext(initialState);
