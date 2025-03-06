@@ -196,7 +196,7 @@ export function ModalAtomicSend ({ sendClickHandler, sendableTokens, tokenBalanc
         }
 
         // Validating mandatory amount
-        if (amount === 0 || !amount) {
+        if (amount === 0n || !amount) {
             setErrMessage(t`Must send a positive amount of tokens`);
             return false;
         }
