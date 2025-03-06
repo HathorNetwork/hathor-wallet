@@ -14,7 +14,7 @@ import { t } from 'ttag';
  * @param {any} value - The value being stringified
  * @returns {any} - The processed value
  */
-const bigIntReplacer = (key, value) => {
+const bigIntReplacer = (_key, value) => {
   // Convert BigInt to string with 'n' suffix to indicate it's a BigInt
   if (typeof value === 'bigint') {
     return value.toString();

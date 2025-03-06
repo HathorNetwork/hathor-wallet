@@ -29,8 +29,10 @@ import {
   handleRpcRequest,
   CreateTokenError,
   SendNanoContractTxError,
+  SendTransactionError,
+  InsufficientFundsError,
   SignMessageWithAddressError,
-} from 'hathor-rpc-handler-test';
+} from '@hathor/hathor-rpc-handler';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
 import {
@@ -50,14 +52,17 @@ import {
   setCreateTokenStatusReady,
   setCreateTokenStatusSuccessful,
   setCreateTokenStatusFailed,
+  setSendTxStatusSuccess,
+  setSendTxStatusFailure,
   showGlobalModal,
   hideGlobalModal,
 } from '../actions';
-import { checkForFeatureFlag, getNetworkSettings, retryHandler, showPinScreenForResult } from './helpers';
+import { checkForFeatureFlag, getNetworkSettings, retryHandler } from './helpers';
 import { logger } from '../utils/logger';
 import { getGlobalReown, setGlobalReown } from '../modules/reown';
 import { MODAL_TYPES } from '../components/GlobalModal';
 import { getGlobalWallet } from '../modules/wallet';
+import { t } from 'ttag';
 import { REOWN_CONNECTION_STATE } from '../constants';
 
 const log = logger('reown');
@@ -67,6 +72,7 @@ const AVAILABLE_METHODS = {
   HATHOR_SEND_NANO_TX: 'htr_sendNanoContractTx',
   HATHOR_SIGN_ORACLE_DATA: 'htr_signOracleData',
   HATHOR_CREATE_TOKEN: 'htr_createToken',
+  HATHOR_SEND_TRANSACTION: 'htr_sendTransaction',
 };
 
 const AVAILABLE_EVENTS = [];
@@ -391,6 +397,10 @@ export function* processRequest(action) {
         yield put(setCreateTokenStatusSuccessful());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: false }));
         break;
+      case RpcResponseTypes.SendTransactionResponse:
+        yield put(setSendTxStatusSuccess());
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: false, isError: false }));
+        break;
       case RpcResponseTypes.SignWithAddressResponse:
         // Show success feedback for message signing
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: false }));
@@ -446,6 +456,43 @@ export function* processRequest(action) {
           yield put(setCreateTokenStatusReady()); // Reset status if not retrying
         }
       } break;
+      case InsufficientFundsError: {
+        yield put(setSendTxStatusFailure());
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
+          isLoading: false, 
+          isError: true,
+          errorMessage: t`Insufficient funds to complete the transaction.`
+        }));
+
+        const retry = yield call(
+          retryHandler,
+          types.REOWN_SEND_TX_RETRY,
+          types.REOWN_SEND_TX_RETRY_DISMISS,
+        );
+
+        if (retry) {
+          shouldAnswer = false;
+          yield* processRequest(action);
+        }
+      } break;
+      case SendTransactionError: {
+        yield put(setSendTxStatusFailure());
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
+          isLoading: false, 
+          isError: true 
+        }));
+
+        const retry = yield call(
+          retryHandler,
+          types.REOWN_SEND_TX_RETRY,
+          types.REOWN_SEND_TX_RETRY_DISMISS,
+        );
+
+        if (retry) {
+          shouldAnswer = false;
+          yield* processRequest(action);
+        }
+      } break;
       case SignMessageWithAddressError: {
         log.error('SignMessageWithAddressError occurred:', e.message, e.stack);
         
@@ -463,6 +510,7 @@ export function* processRequest(action) {
         }
       } break;
       default:
+        log.error('Unknown error type:', e);
         break;
     }
 
@@ -489,6 +537,28 @@ export function* processRequest(action) {
 const promptHandler = (dispatch) => (request, requestMetadata) =>
   new Promise(async (resolve, reject) => {
     switch (request.type) {
+      case TriggerTypes.SendTransactionConfirmationPrompt: {
+        const sendTransactionResponseTemplate = (accepted) => () => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.SendTransactionConfirmationResponse,
+            data: {
+              accepted,
+            }
+          });
+        };
+
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.SEND_TRANSACTION,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: sendTransactionResponseTemplate(true),
+          onRejectAction: sendTransactionResponseTemplate(false),
+        }));
+      } break;
+
       case TriggerTypes.SignOracleDataConfirmationPrompt: {
         const signOracleDataResponseTemplate = (accepted) => () => {
           dispatch(hideGlobalModal());
@@ -600,6 +670,16 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         resolve();
         break;
 
+      case TriggerTypes.SendTransactionLoadingTrigger:
+        dispatch(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: true }));
+        resolve();
+        break;
+
+      case TriggerTypes.SendTransactionLoadingFinishedTrigger:
+        dispatch(hideGlobalModal());
+        resolve();
+        break;
+
       case TriggerTypes.PinConfirmationPrompt: {
         const pinPromise = new Promise((pinResolve, pinReject) => {
           dispatch(showGlobalModal(MODAL_TYPES.PIN_PAD, {
@@ -706,6 +786,10 @@ export function* onSignOracleDataRequest(action) {
  */
 export function* onSendNanoContractTxRequest(action) {
   yield* handleDAppRequest(action, ReownModalTypes.SEND_NANO_CONTRACT_TX);
+}
+
+export function* onSendTransactionRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.SEND_TRANSACTION);
 }
 
 /**
@@ -986,6 +1070,7 @@ export function* saga() {
     takeLatest(types.SHOW_SIGN_MESSAGE_REQUEST_MODAL, onSignMessageRequest),
     takeLatest(types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL, onSignOracleDataRequest),
     takeLatest(types.SHOW_CREATE_TOKEN_REQUEST_MODAL, onCreateTokenRequest),
+    takeLatest(types.SHOW_SEND_TRANSACTION_REQUEST_MODAL, onSendTransactionRequest),
     takeEvery(types.REOWN_SESSION_PROPOSAL, onSessionProposal),
     takeEvery(types.REOWN_SESSION_DELETE, onSessionDelete),
     takeEvery(types.REOWN_CANCEL_SESSION, onCancelSession),

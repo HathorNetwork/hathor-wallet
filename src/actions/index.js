@@ -84,6 +84,8 @@ export const types = {
   REOWN_CREATE_TOKEN_STATUS_FAILED: 'REOWN_CREATE_TOKEN_STATUS_FAILED',
   REOWN_CREATE_TOKEN_RETRY: 'REOWN_CREATE_TOKEN_RETRY',
   REOWN_CREATE_TOKEN_RETRY_DISMISS: 'REOWN_CREATE_TOKEN_RETRY_DISMISS',
+  REOWN_SEND_TX_RETRY: 'REOWN_SEND_TX_RETRY',
+  REOWN_SEND_TX_RETRY_DISMISS: 'REOWN_SEND_TX_RETRY_DISMISS',
   REOWN_SIGN_MESSAGE_RETRY: 'REOWN_SIGN_MESSAGE_RETRY',
   REOWN_SIGN_MESSAGE_RETRY_DISMISS: 'REOWN_SIGN_MESSAGE_RETRY_DISMISS',
   REOWN_ACCEPT: 'REOWN_ACCEPT',
@@ -94,6 +96,7 @@ export const types = {
   SHOW_CREATE_TOKEN_REQUEST_MODAL: 'SHOW_CREATE_TOKEN_REQUEST_MODAL',
   SHOW_SIGN_MESSAGE_REQUEST_MODAL: 'SHOW_SIGN_MESSAGE_REQUEST_MODAL',
   SHOW_NANO_CONTRACT_SEND_TX_MODAL: 'SHOW_NANO_CONTRACT_SEND_TX_MODAL',
+  SHOW_SEND_TRANSACTION_REQUEST_MODAL: 'SHOW_SEND_TRANSACTION_REQUEST_MODAL',
   REOWN_SESSION_PROPOSAL: 'REOWN_SESSION_PROPOSAL',
   REOWN_SESSION_REQUEST: 'REOWN_SESSION_REQUEST',
   REOWN_SESSION_DELETE: 'REOWN_SESSION_DELETE',
@@ -102,6 +105,14 @@ export const types = {
   SHOW_GLOBAL_MODAL: 'SHOW_GLOBAL_MODAL',
   HIDE_GLOBAL_MODAL: 'HIDE_GLOBAL_MODAL',
   SERVER_INFO_UPDATED: 'SERVER_INFO_UPDATED',
+  REOWN_SEND_TX_STATUS_LOADING: 'REOWN_SEND_TX_STATUS_LOADING',
+  REOWN_SEND_TX_STATUS_READY: 'REOWN_SEND_TX_STATUS_READY',
+  REOWN_SEND_TX_STATUS_SUCCESS: 'REOWN_SEND_TX_STATUS_SUCCESS',
+  REOWN_SEND_TX_STATUS_FAILURE: 'REOWN_SEND_TX_STATUS_FAILURE',
+  UNREGISTERED_TOKENS_DOWNLOAD_REQUESTED: 'UNREGISTERED_TOKENS_DOWNLOAD_REQUESTED',
+  UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS: 'UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS',
+  UNREGISTERED_TOKENS_DOWNLOAD_FAILURE: 'UNREGISTERED_TOKENS_DOWNLOAD_FAILURE',
+  UNREGISTERED_TOKENS_DOWNLOAD_END: 'UNREGISTERED_TOKENS_DOWNLOAD_END',
 };
 
 /**
@@ -775,7 +786,7 @@ export const setNewNanoContractStatusSuccess = () => ({
 });
 
 /**
- * Set nano contract status to failed
+ * Set nano contract status to failure
  */
 export const setNewNanoContractStatusFailure = () => ({
   type: types.REOWN_NEW_NANOCONTRACT_STATUS_FAILED,
@@ -871,6 +882,11 @@ export const showNanoContractSendTxModal = (onAccept, onReject, data, metadata) 
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
 });
 
+export const showSendTransactionModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_SEND_TRANSACTION_REQUEST_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
 /**
  * @param {string} modalType The type of the modal to show
  * @param {Object} modalProps The props to pass to the modal
@@ -885,4 +901,66 @@ export const showGlobalModal = (modalType, modalProps = {}) => ({
  */
 export const hideGlobalModal = () => ({
   type: types.HIDE_GLOBAL_MODAL
+});
+
+/**
+ * Set send transaction status to loading
+ */
+export const setSendTxStatusLoading = () => ({
+  type: types.REOWN_SEND_TX_STATUS_LOADING,
+});
+
+/**
+ * Set send transaction status to ready
+ */
+export const setSendTxStatusReady = () => ({
+  type: types.REOWN_SEND_TX_STATUS_READY,
+});
+
+/**
+ * Set send transaction status to success
+ */
+export const setSendTxStatusSuccess = () => ({
+  type: types.REOWN_SEND_TX_STATUS_SUCCESS,
+});
+
+/**
+ * Set send transaction status to failure
+ */
+export const setSendTxStatusFailure = () => ({
+  type: types.REOWN_SEND_TX_STATUS_FAILURE,
+});
+
+/**
+ * Request download of unregistered tokens details
+ * @param {string[]} uids Array of token UIDs to fetch details for
+ */
+export const unregisteredTokensDownloadRequested = (uids) => ({
+  type: types.UNREGISTERED_TOKENS_DOWNLOAD_REQUESTED,
+  payload: { uids },
+});
+
+/**
+ * Success downloading unregistered tokens details
+ * @param {Object} tokens Object with token details
+ */
+export const unregisteredTokensDownloadSuccess = (tokens) => ({
+  type: types.UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS,
+  payload: { tokens },
+});
+
+/**
+ * Failure downloading unregistered tokens details
+ * @param {string} error Error message
+ */
+export const unregisteredTokensDownloadFailure = (error) => ({
+  type: types.UNREGISTERED_TOKENS_DOWNLOAD_FAILURE,
+  payload: { error },
+});
+
+/**
+ * End of unregistered tokens download process
+ */
+export const unregisteredTokensDownloadEnd = () => ({
+  type: types.UNREGISTERED_TOKENS_DOWNLOAD_END,
 });

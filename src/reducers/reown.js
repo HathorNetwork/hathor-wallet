@@ -18,6 +18,7 @@ const initialState = {
     onRejectAction: null,
   },
   sessions: {},
+  sendTxStatus: BASE_STATUS.READY,
   connectionState: REOWN_CONNECTION_STATE.IDLE,
   nanoContractStatus: BASE_STATUS.READY,
   createTokenStatus: BASE_STATUS.READY,
@@ -98,6 +99,30 @@ export default function reownReducer(state = initialState, action) {
       return {
         ...state,
         createTokenStatus: BASE_STATUS.ERROR,
+      };
+
+    case types.REOWN_SEND_TX_STATUS_LOADING:
+      return {
+        ...state,
+        sendTxStatus: BASE_STATUS.LOADING,
+      };
+
+    case types.REOWN_SEND_TX_STATUS_READY:
+      return {
+        ...state,
+        sendTxStatus: BASE_STATUS.READY,
+      };
+
+    case types.REOWN_SEND_TX_STATUS_SUCCESS:
+      return {
+        ...state,
+        sendTxStatus: BASE_STATUS.SUCCESS
+      };
+
+    case types.REOWN_SEND_TX_STATUS_FAILURE:
+      return {
+        ...state,
+        sendTxStatus: BASE_STATUS.ERROR
       };
 
     default:
