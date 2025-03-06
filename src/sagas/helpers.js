@@ -132,3 +132,14 @@ export function* dispatchLedgerTokenSignatureVerification(wallet) {
     ledger.verifyManyTokenSignatures(tokensToVerify);
   }
 }
+
+export function* retryHandler(retryAction, dismissAction) {
+  const { retry } = yield race({
+    retry: take(retryAction),
+    dismiss: take(dismissAction),
+  });
+
+  return retry != null;
+}
+
+export const getNetworkSettings = (state) => state.networkSettings.data;

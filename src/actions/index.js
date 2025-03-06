@@ -61,12 +61,47 @@ export const types = {
   NANOCONTRACT_EDIT_ADDRESS: 'NANOCONTRACT_EDIT_ADDRESS',
   NANOCONTRACT_UNREGISTER: 'NANOCONTRACT_UNREGISTER',
   BLUEPRINT_ADD_INFORMATION: 'BLUEPRINT_ADD_INFORMATION',
+  BLUEPRINT_FETCH_REQUESTED: 'BLUEPRINT_FETCH_REQUESTED',
   NANOCONTRACT_LOAD_DETAILS_REQUESTED: 'NANOCONTRACT_LOAD_DETAILS_REQUESTED',
   NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE: 'NANOCONTRACT_LOAD_DETAILS_STATUS_UPDATE',
   NANOCONTRACT_LOAD_DETAILS_SUCCESS: 'NANOCONTRACT_LOAD_DETAILS_SUCCESS',
   NETWORKSETTINGS_UPDATE_REQUESTED: 'NETWORKSETTINGS_UPDATE_REQUESTED',
   NETWORKSETTINGS_UPDATED: 'NETWORKSETTINGS_UPDATED',
   NETWORKSETTINGS_SET_STATUS: 'NETWORKSETTINGS_SET_STATUS',
+  REOWN_SET_CLIENT: 'REOWN_SET_CLIENT',
+  REOWN_SET_MODAL: 'REOWN_SET_MODAL',
+  REOWN_SET_SESSIONS: 'REOWN_SET_SESSIONS',
+  REOWN_SET_CONNECTION_STATE: 'REOWN_SET_CONNECTION_STATE',
+  REOWN_NEW_NANOCONTRACT_STATUS_LOADING: 'REOWN_NEW_NANOCONTRACT_STATUS_LOADING',
+  REOWN_NEW_NANOCONTRACT_STATUS_READY: 'REOWN_NEW_NANOCONTRACT_STATUS_READY',
+  REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS: 'REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS',
+  REOWN_NEW_NANOCONTRACT_STATUS_FAILED: 'REOWN_NEW_NANOCONTRACT_STATUS_FAILED',
+  REOWN_NEW_NANOCONTRACT_RETRY: 'REOWN_NEW_NANOCONTRACT_RETRY',
+  REOWN_NEW_NANOCONTRACT_RETRY_DISMISS: 'REOWN_NEW_NANOCONTRACT_RETRY_DISMISS',
+  REOWN_CREATE_TOKEN_STATUS_LOADING: 'REOWN_CREATE_TOKEN_STATUS_LOADING',
+  REOWN_CREATE_TOKEN_STATUS_READY: 'REOWN_CREATE_TOKEN_STATUS_READY',
+  REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL: 'REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL',
+  REOWN_CREATE_TOKEN_STATUS_FAILED: 'REOWN_CREATE_TOKEN_STATUS_FAILED',
+  REOWN_CREATE_TOKEN_RETRY: 'REOWN_CREATE_TOKEN_RETRY',
+  REOWN_CREATE_TOKEN_RETRY_DISMISS: 'REOWN_CREATE_TOKEN_RETRY_DISMISS',
+  REOWN_SIGN_MESSAGE_RETRY: 'REOWN_SIGN_MESSAGE_RETRY',
+  REOWN_SIGN_MESSAGE_RETRY_DISMISS: 'REOWN_SIGN_MESSAGE_RETRY_DISMISS',
+  REOWN_ACCEPT: 'REOWN_ACCEPT',
+  REOWN_REJECT: 'REOWN_REJECT',
+  REOWN_URI_INPUTTED: 'REOWN_URI_INPUTTED',
+  EXCEPTION_CAPTURED: 'EXCEPTION_CAPTURED',
+  SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL: 'SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL',
+  SHOW_CREATE_TOKEN_REQUEST_MODAL: 'SHOW_CREATE_TOKEN_REQUEST_MODAL',
+  SHOW_SIGN_MESSAGE_REQUEST_MODAL: 'SHOW_SIGN_MESSAGE_REQUEST_MODAL',
+  SHOW_NANO_CONTRACT_SEND_TX_MODAL: 'SHOW_NANO_CONTRACT_SEND_TX_MODAL',
+  REOWN_SESSION_PROPOSAL: 'REOWN_SESSION_PROPOSAL',
+  REOWN_SESSION_REQUEST: 'REOWN_SESSION_REQUEST',
+  REOWN_SESSION_DELETE: 'REOWN_SESSION_DELETE',
+  REOWN_CANCEL_SESSION: 'REOWN_CANCEL_SESSION',
+  REOWN_SHUTDOWN: 'REOWN_SHUTDOWN',
+  SHOW_GLOBAL_MODAL: 'SHOW_GLOBAL_MODAL',
+  HIDE_GLOBAL_MODAL: 'HIDE_GLOBAL_MODAL',
+  SERVER_INFO_UPDATED: 'SERVER_INFO_UPDATED',
 };
 
 /**
@@ -465,6 +500,13 @@ export const setServerInfo = ({ version, network, customTokens, decimalPlaces, n
   { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces, nanoContractsEnabled } }
 );
 
+/**
+ * Action to notify that server info was updated
+ */
+export const serverInfoUpdated = () => ({
+  type: types.SERVER_INFO_UPDATED,
+});
+
 export const featureToggleInitialized = () => ({
   type: types.FEATURE_TOGGLE_INITIALIZED,
 });
@@ -676,4 +718,171 @@ export const networkSettingsRequestUpdate = (data, pin) => ({
 export const setNetworkSettingsStatus = ({ status, error, newNetwork }) => ({
   type: types.NETWORKSETTINGS_SET_STATUS,
   payload: { status, error, newNetwork },
+});
+
+/**
+ * Set the Reown client
+ */
+export const setReown = (payload) => ({
+  type: types.REOWN_SET_CLIENT,
+  payload,
+});
+
+/**
+ * Set the Reown modal state
+ */
+export const setReownModal = (payload) => ({
+  type: types.REOWN_SET_MODAL,
+  payload,
+});
+
+/**
+ * Set the Reown sessions
+ */
+export const setReownSessions = (payload) => ({
+  type: types.REOWN_SET_SESSIONS,
+  payload,
+});
+
+/**
+ * Set the Reown connection state
+ * @param {string} state - One of the REOWN_CONNECTION_STATE values
+ */
+export const setWCConnectionState = (state) => ({
+  type: types.REOWN_SET_CONNECTION_STATE,
+  payload: state,
+});
+
+/**
+ * Set nano contract status to loading
+ */
+export const setNewNanoContractStatusLoading = () => ({
+  type: types.REOWN_NEW_NANOCONTRACT_STATUS_LOADING,
+});
+
+/**
+ * Set nano contract status to ready
+ */
+export const setNewNanoContractStatusReady = () => ({
+  type: types.REOWN_NEW_NANOCONTRACT_STATUS_READY,
+});
+
+/**
+ * Set nano contract status to success
+ */
+export const setNewNanoContractStatusSuccess = () => ({
+  type: types.REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS,
+});
+
+/**
+ * Set nano contract status to failed
+ */
+export const setNewNanoContractStatusFailure = () => ({
+  type: types.REOWN_NEW_NANOCONTRACT_STATUS_FAILED,
+});
+
+/**
+ * Set create token status to loading
+ */
+export const setCreateTokenStatusLoading = () => ({
+  type: types.REOWN_CREATE_TOKEN_STATUS_LOADING,
+});
+
+/**
+ * Set create token status to ready
+ */
+export const setCreateTokenStatusReady = () => ({
+  type: types.REOWN_CREATE_TOKEN_STATUS_READY,
+});
+
+/**
+ * Set create token status to successful
+ */
+export const setCreateTokenStatusSuccessful = () => ({
+  type: types.REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL,
+});
+
+/**
+ * Set create token status to failed
+ */
+export const setCreateTokenStatusFailed = () => ({
+  type: types.REOWN_CREATE_TOKEN_STATUS_FAILED,
+});
+
+/**
+ * Action to capture exceptions in the application
+ * 
+ * @param {Error} error The error that was captured
+ */
+export const onExceptionCaptured = (error) => ({
+  type: types.EXCEPTION_CAPTURED,
+  error,
+});
+
+/**
+ * Show modal for signing oracle data
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The oracle data to be signed
+ * @param {Object} metadata Metadata about the dapp requesting the signature
+ */
+export const showSignOracleDataModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+/**
+ * Show modal for creating a token
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The token creation data
+ * @param {Object} metadata Metadata about the dapp requesting the token creation
+ */
+export const showCreateTokenModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_CREATE_TOKEN_REQUEST_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+/**
+ * Show modal for signing a message with an address
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The message data to be signed
+ * @param {Object} metadata Metadata about the dapp requesting the signature
+ */
+export const showSignMessageWithAddressModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_SIGN_MESSAGE_REQUEST_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+/**
+ * Show modal for sending a nano contract transaction
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The transaction data
+ * @param {Object} metadata Metadata about the dapp requesting the transaction
+ */
+export const showNanoContractSendTxModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_NANO_CONTRACT_SEND_TX_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+/**
+ * @param {string} modalType The type of the modal to show
+ * @param {Object} modalProps The props to pass to the modal
+ */
+export const showGlobalModal = (modalType, modalProps = {}) => ({
+  type: types.SHOW_GLOBAL_MODAL,
+  payload: { modalType, modalProps }
+});
+
+/**
+ * Hide the global modal
+ */
+export const hideGlobalModal = () => ({
+  type: types.HIDE_GLOBAL_MODAL
 });
