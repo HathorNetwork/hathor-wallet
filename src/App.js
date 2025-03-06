@@ -74,7 +74,7 @@ function Root() {
   const wallet = getGlobalWallet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const context = useContext(GlobalModalContext);
+  const modalContext = useContext(GlobalModalContext);
 
   // Monitors when Ledger device loses connection or the app is closed
   useEffect(() => {
@@ -109,13 +109,12 @@ function Root() {
     if (IPC_RENDERER) {
       // Event called when the user wants to reset all data
       IPC_RENDERER.on('app:clear_storage', async () => {
-        context.showModal(MODAL_TYPES.CONFIRM_CLEAR_STORAGE, {
+        modalContext.showModal(MODAL_TYPES.CONFIRM_CLEAR_STORAGE, {
           success: () => {
             localStorage.clear();
             IPC_RENDERER.send('app:clear_storage_success');
           },
         });
-
       });
 
       // Registers the event handlers for the ledger
