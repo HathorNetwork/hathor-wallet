@@ -37,7 +37,7 @@
     "@hathor/wallet-lib": "2.0.1",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
-    "@sentry/electron": "3.0.7",
+    "@sentry/electron": "6.1.0",
     "axios": "1.7.7",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.6.1",
