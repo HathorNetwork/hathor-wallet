@@ -57,10 +57,6 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
   }, [data, registeredTokens, dispatch]);
 
   const getTokenSymbol = (tokenId) => {
-    if (!tokenId) {
-      return constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
-    }
-
     // Check if it's explicitly the native token UID
     if (tokenId === constants.NATIVE_TOKEN_UID) {
       return constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
