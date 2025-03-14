@@ -428,7 +428,6 @@ export function* processRequest(action) {
         }
       } break;
       case CreateTokenError: {
-        log.error('CreateTokenError occurred:', e.message, e.stack);
         yield put(setCreateTokenStatusFailed());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: true }));
 
@@ -447,8 +446,6 @@ export function* processRequest(action) {
         }
       } break;
       case SignMessageWithAddressError: {
-        log.error('SignMessageWithAddressError occurred:', e.message, e.stack);
-        
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
@@ -649,7 +646,8 @@ export function* handleDAppRequest({ payload }, modalType) {
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
+    // Wait until wallet is ready before continuing.
+    yield take(types.WALLET_STATE_READY);
     return;
   }
 
