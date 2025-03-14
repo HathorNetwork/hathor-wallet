@@ -174,8 +174,12 @@ export const GlobalModal = ({ children }) => {
       hideModal(domSelector);
     });
 
-    // Once properly configured, show the modal
-    domElement.modal('show');
+    // Once properly configured, show the modal with static backdrop and no keyboard dismiss
+    domElement.modal({
+      show: true,
+      backdrop: 'static', // Prevents closing when clicking outside the modal
+      keyboard: false // Prevents closing with the escape key
+    });
   }
 
   useEffect(() => {
