@@ -455,30 +455,13 @@ export function* processRequest(action) {
           yield put(setCreateTokenStatusReady()); // Reset status if not retrying
         }
       } break;
-      case InsufficientFundsError: {
-        yield put(setSendTxStatusFailed());
-        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
-          isLoading: false, 
-          isError: true,
-          errorMessage: t`Insufficient funds to complete the transaction.`
-        }));
-
-        const retry = yield call(
-          retryHandler,
-          types.REOWN_SEND_TX_RETRY,
-          types.REOWN_SEND_TX_RETRY_DISMISS,
-        );
-
-        if (retry) {
-          shouldAnswer = false;
-          yield* processRequest(action);
-        }
-      } break;
+      case InsufficientFundsError:
       case SendTransactionError: {
         yield put(setSendTxStatusFailed());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
           isLoading: false, 
-          isError: true 
+          isError: true,
+          errorMessage: e instanceof InsufficientFundsError ? t`Insufficient funds to complete the transaction.` : null
         }));
 
         const retry = yield call(

@@ -882,6 +882,14 @@ export const showNanoContractSendTxModal = (onAccept, onReject, data, metadata) 
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
 });
 
+/**
+ * Show modal for sending a transaction
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The transaction data
+ * @param {Object} metadata Metadata about the dapp requesting the transaction
+ */
 export const showSendTransactionModal = (onAccept, onReject, data, metadata) => ({
   type: types.SHOW_SEND_TRANSACTION_REQUEST_MODAL,
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
