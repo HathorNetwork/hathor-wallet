@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { t } from 'ttag';
 import LOCAL_STORE from '../storage';
 
@@ -20,7 +20,20 @@ export function PinPad({ manageDomLifecycle, onComplete, onCancel }) {
 
   useEffect(() => {
     manageDomLifecycle(`#${modalId}`);
-  }, []);
+    
+    // Set a short timeout to ensure the modal is fully rendered before trying to focus
+    const focusTimer = setTimeout(() => {
+      const modalElement = document.getElementById(modalId);
+      if (modalElement) {
+        modalElement.setAttribute('tabindex', '-1');
+        modalElement.focus();
+      }
+    }, 100);
+    
+    return () => {
+      clearTimeout(focusTimer);
+    };
+  }, [modalId, manageDomLifecycle]);
 
   const animateErase = (currentPin) => {
     if (currentPin.length === 0) {
@@ -76,6 +89,56 @@ export function PinPad({ manageDomLifecycle, onComplete, onCancel }) {
     }
   };
 
+  // Handle keyboard input
+  const handleKeyDown = useCallback((e) => {
+    if (isErasing) return;
+
+    // Handle number keys (both top row and numpad)
+    if ((/^[0-9]$/.test(e.key) || (e.keyCode >= 96 && e.keyCode <= 105)) && pin.length < PIN_LENGTH) {
+      // Get the actual number regardless of numpad or top row
+      const number = e.keyCode >= 96 && e.keyCode <= 105 
+        ? String(e.keyCode - 96) // Convert numpad keyCode to string
+        : e.key;
+      
+      handleNumberClick(number);
+      e.preventDefault(); // Prevent default behavior
+    } 
+    // Handle Backspace key
+    else if (e.key === 'Backspace') {
+      handleDelete();
+      e.preventDefault(); // Prevent default behavior
+    } 
+    // Handle Escape key
+    else if (e.key === 'Escape') {
+      onCancel();
+      e.preventDefault(); // Prevent default behavior
+    } 
+    // Handle Enter key - submit if PIN is complete
+    else if (e.key === 'Enter' && pin.length === PIN_LENGTH) {
+      validateAndSubmitPin(pin);
+      e.preventDefault(); // Prevent default behavior
+    }
+  }, [pin, isErasing, onCancel, handleNumberClick, handleDelete, validateAndSubmitPin]);
+
+  // Accept keyboard input
+  useEffect(() => {
+    const modalElement = document.getElementById(modalId);
+    if (!modalElement) {
+      return;
+    }
+    
+    // Add event listener directly to the modal element
+    modalElement.addEventListener('keydown', handleKeyDown);
+    
+    // Set focus to the modal to capture keyboard events
+    modalElement.setAttribute('tabindex', '-1');
+    modalElement.focus();
+    
+    return () => {
+      modalElement.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown, modalId]);
+
   const renderPinDisplay = () => (
     <div className="d-flex flex-column align-items-center mb-4">
       <div className="d-flex justify-content-center">
@@ -96,6 +159,10 @@ export function PinPad({ manageDomLifecycle, onComplete, onCancel }) {
           {errorMessage}
         </div>
       )}
+      <div className="text-muted mt-2 small">
+        <i className="fa fa-keyboard-o mr-1"></i>
+        {t`You can use your keyboard to enter PIN`}
+      </div>
     </div>
   );
 
@@ -112,9 +179,20 @@ export function PinPad({ manageDomLifecycle, onComplete, onCancel }) {
   );
 
   return (
-    <div className="modal fade" id={modalId} tabIndex="-1" role="dialog" aria-labelledby={modalId} aria-hidden="true">
+    <div 
+      className="modal fade" 
+      id={modalId} 
+      tabIndex="-1" 
+      role="dialog" 
+      aria-labelledby={modalId} 
+      aria-hidden="true"
+    >
       <div className="modal-dialog" role="document">
-        <div className="modal-content">
+        <div 
+          className="modal-content" 
+          tabIndex="0" 
+          onKeyDown={handleKeyDown}
+        >
           <div className="modal-header">
             <h5 className="modal-title">{t`Enter your PIN`}</h5>
             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onCancel}>
