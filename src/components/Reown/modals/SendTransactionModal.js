@@ -22,21 +22,34 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
   useEffect(() => {
     // Collect all unregistered token UIDs
     const unregisteredTokens = new Set();
-    
+
     data?.data?.inputs?.forEach(input => {
+      // Skip if it's the native token
+      if (input.token === constants.NATIVE_TOKEN_UID || !input.token) {
+        return;
+      }
+      
       const token = registeredTokens.find(t => t.uid === input.token);
-      if (!token && input.token) {
+      if (!token) {
+        // If we can't find this token in our registered tokens list, we need to fetch its details
         unregisteredTokens.add(input.token);
       }
     });
 
     data?.data?.outputs?.forEach(output => {
+      // Skip if it's the native token or if token is not specified
+      if (output.token === constants.NATIVE_TOKEN_UID || !output.token) {
+        return;
+      }
+
       const token = registeredTokens.find(t => t.uid === output.token);
-      if (!token && output.token) {
+      if (!token) {
+        // If we can't find this token in our registered tokens list, we need to fetch its details
         unregisteredTokens.add(output.token);
       }
     });
 
+    // Only dispatch if we actually have unregistered tokens to fetch
     if (unregisteredTokens.size > 0) {
       dispatch(unregisteredTokensDownloadRequested(Array.from(unregisteredTokens)));
     }
@@ -47,11 +60,19 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
       return constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
     }
 
+    // Check if it's explicitly the native token UID
+    if (tokenId === constants.NATIVE_TOKEN_UID) {
+      return constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
+    }
+
     const token = registeredTokens.find(t => t.uid === tokenId);
     if (token) {
       return token.symbol;
     }
 
+    // We return '?' as a fallback for tokens that are not yet loaded or recognized
+    // This should be temporary until the token details are fetched
+    // The unregisteredTokensDownloadRequested action should be loading these details
     return '?';
   };
 
