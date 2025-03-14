@@ -27,7 +27,6 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
   const modalDomId = 'reownModal';
   const dispatch = useDispatch();
   const [firstAddress, setFirstAddress] = useState('');
-  const blueprintInfo = useSelector((state) => state.blueprintsData[data?.data?.blueprintId]);
 
   useEffect(() => {
     manageDomLifecycle(`#${modalDomId}`);
