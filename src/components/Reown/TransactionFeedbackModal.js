@@ -45,10 +45,11 @@ export function TransactionFeedbackModal({ isError, isLoading = true, errorMessa
           <div className="modal-body text-center">
             <ReactLoading type="spin" color={colors.purpleHathor} height={32} width={32} className="d-inline-block" />
             <p className="mt-3">{t`Processing transaction...`}</p>
+            <p className="text-muted small">{t`Note: Once submitted, transactions will be sent to the network and cannot be cancelled, dismissing the modal will only close the modal.`}</p>
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={handleDismiss}>
-              {t`Cancel`}
+              {t`Dismiss`}
             </button>
           </div>
         </>

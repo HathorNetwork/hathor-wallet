@@ -53,7 +53,7 @@ import {
   setCreateTokenStatusSuccessful,
   setCreateTokenStatusFailed,
   setSendTxStatusSuccess,
-  setSendTxStatusFailure,
+  setSendTxStatusFailed,
   showGlobalModal,
   hideGlobalModal,
 } from '../actions';
@@ -456,7 +456,7 @@ export function* processRequest(action) {
         }
       } break;
       case InsufficientFundsError: {
-        yield put(setSendTxStatusFailure());
+        yield put(setSendTxStatusFailed());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
           isLoading: false, 
           isError: true,
@@ -475,7 +475,7 @@ export function* processRequest(action) {
         }
       } break;
       case SendTransactionError: {
-        yield put(setSendTxStatusFailure());
+        yield put(setSendTxStatusFailed());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
           isLoading: false, 
           isError: true 

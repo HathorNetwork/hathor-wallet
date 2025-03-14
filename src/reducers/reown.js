@@ -119,7 +119,7 @@ export default function reownReducer(state = initialState, action) {
         sendTxStatus: BASE_STATUS.SUCCESS
       };
 
-    case types.REOWN_SEND_TX_STATUS_FAILURE:
+    case types.REOWN_SEND_TX_STATUS_FAILED:
       return {
         ...state,
         sendTxStatus: BASE_STATUS.ERROR

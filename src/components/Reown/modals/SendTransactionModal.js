@@ -12,7 +12,7 @@ import { constants, numberUtils } from '@hathor/wallet-lib';
 import { unregisteredTokensDownloadRequested } from '../../../actions';
 import { CopyButton } from '../../CopyButton';
 
-export function SendTransactionModal({ data, firstAddress, onAccept, onReject }) {
+export function SendTransactionModal({ data, onAccept, onReject }) {
   const dispatch = useDispatch();
   const { tokenMetadata, tokens: registeredTokens } = useSelector((state) => ({
     tokenMetadata: state.tokenMetadata,
