@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
-import { types } from '../../../actions';
+import { types, setNewNanoContractStatusReady } from '../../../actions';
 import helpers from '../../../utils/helpers';
 import nanoUtils from '../../../utils/nanoContracts';
 import { NanoContractActions } from '../NanoContractActions';
@@ -38,6 +38,14 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
     
     ensureValidAddress();
   }, [selectedAddress]);
+
+  // Reset state when component unmounts
+  useEffect(() => {
+    return () => {
+      // Reset nano contract state to ready when the modal is closed
+      dispatch(setNewNanoContractStatusReady());
+    };
+  }, [dispatch]);
 
   const renderArgumentsSection = () => {
     if (!data?.data?.args || !blueprintInfo) {

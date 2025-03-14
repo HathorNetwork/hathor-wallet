@@ -5,8 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { t } from 'ttag';
+import { useDispatch } from 'react-redux';
+import { setCreateTokenStatusReady } from '../../../actions';
 
 /**
  * Custom replacer function for JSON.stringify to handle BigInt values
@@ -21,7 +23,24 @@ const bigIntReplacer = (_key, value) => {
   return value;
 };
 
+/**
+ * Modal for handling token creation requests from dApps
+ * 
+ * @param {Object} data Data about the session and token to be created
+ * @param {Function} onAccept Function to call when the user accepts the request
+ * @param {Function} onReject Function to call when the user rejects the request
+ */
 export function CreateTokenModal({ data, onAccept, onReject }) {
+  const dispatch = useDispatch();
+
+  // Reset state when component unmounts
+  useEffect(() => {
+    return () => {
+      // Reset token creation state to ready when the modal is closed
+      dispatch(setCreateTokenStatusReady());
+    };
+  }, [dispatch]);
+
   // Process the data to handle BigInt values
   const processedData = React.useMemo(() => {
     try {

@@ -582,14 +582,12 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.CreateTokenLoadingTrigger:
-        log.debug('CreateTokenLoadingTrigger: Starting token creation process');
         dispatch(setCreateTokenStatusLoading());
         dispatch(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: true }));
         resolve();
         break;
 
       case TriggerTypes.CreateTokenLoadingFinishedTrigger:
-        log.debug('CreateTokenLoadingFinishedTrigger: Token creation process completed');
         dispatch(setCreateTokenStatusReady());
         dispatch(hideGlobalModal());
         resolve();
@@ -610,7 +608,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
             },
             onCancel: () => {
               dispatch(hideGlobalModal());
-              dispatch(setCreateTokenStatusReady()); // Reset loading state if PIN entry is cancelled
               pinReject(new Error('PIN entry cancelled'));
             }
           }));
