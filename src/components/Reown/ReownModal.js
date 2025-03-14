@@ -56,16 +56,12 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
   const handleAccept = () => {
     if (type === ReownModalTypes.SEND_NANO_CONTRACT_TX) {
       // Process the nano contract transaction
-      // Create a new object with the same properties, preserving BigInt values
+      // Create a new object with the same properties
       const ncData = {
         blueprintId: data.data.blueprintId,
         method: data.data.method,
         args: data.data.args,
-        actions: data.data.actions.map(action => ({
-          ...action,
-          // Convert amount to BigInt if it's not already
-          amount: typeof action.amount === 'bigint' ? action.amount : BigInt(action.amount)
-        })),
+        actions: data.data.actions,
         caller: firstAddress
       };
       onAcceptAction(ncData);
