@@ -11,6 +11,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { constants, numberUtils } from '@hathor/wallet-lib';
 import { unregisteredTokensDownloadRequested } from '../../../actions';
 import { CopyButton } from '../../CopyButton';
+import helpers from '../../../utils/helpers';
 
 export function SendTransactionModal({ data, onAccept, onReject }) {
   const dispatch = useDispatch();
@@ -76,12 +77,15 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
     return '?';
   };
 
-  const formatValue = (value) => {
+  const formatValue = (value, tokenId) => {
     if (value == null) {
       return '-';
     }
 
-    return numberUtils.prettyValue(value);
+    // Check if the token is an NFT using the helpers utility
+    const isNFT = tokenId && helpers.isTokenNFT(tokenId, tokenMetadata);
+    
+    return numberUtils.prettyValue(value, isNFT ? 0 : undefined);
   };
 
   const truncateTxId = (txId) => {
@@ -104,7 +108,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
                 <strong>{t`Input ${index + 1}`}</strong>
               </div>
               <div>
-                {formatValue(input?.value)} {getTokenSymbol(input?.token)}
+                {formatValue(input?.value, input?.token)} {getTokenSymbol(input?.token)}
               </div>
             </div>
             <div className="text-monospace">
@@ -140,7 +144,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
                 <strong>{t`Output ${index + 1}`}</strong>
               </div>
               <div>
-                {formatValue(output?.value)} {getTokenSymbol(output?.token)}
+                {formatValue(output?.value, output?.token)} {getTokenSymbol(output?.token)}
               </div>
             </div>
             <div className="text-monospace">
