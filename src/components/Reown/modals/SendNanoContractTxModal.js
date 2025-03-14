@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 import { types } from '../../../actions';
 import helpers from '../../../utils/helpers';
+import nanoUtils from '../../../utils/nanoContracts';
 import { NanoContractActions } from '../NanoContractActions';
 import { getGlobalWallet } from '../../../modules/wallet';
 
@@ -17,6 +18,7 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
   const dispatch = useDispatch();
   const blueprintInfo = useSelector((state) => state.blueprintsData[data?.data?.blueprintId]);
   const nanoContracts = useSelector((state) => state.nanoContracts);
+  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(firstAddress);
 
@@ -42,13 +44,6 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
 
     fetchAddresses();
   }, []);
-
-  const formatValue = (value) => {
-    if (typeof value === 'string') {
-      return value;
-    }
-    return value.toString();
-  };
 
   const renderArgumentsSection = () => {
     if (!data?.data?.args || !blueprintInfo) {
@@ -78,7 +73,7 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
                       {argType && <small className="text-muted d-block">{argType}</small>}
                     </td>
                     <td className="border-top-0 text-monospace" style={{wordBreak: 'break-all'}}>
-                      {formatValue(value)}
+                      {nanoUtils.formatNCArgValue(value, argType, decimalPlaces)}
                     </td>
                   </tr>
                 ))}

@@ -409,7 +409,7 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
-    log.debug('Error on processRequest: ', e);
+    console.log('Error on processRequest: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
