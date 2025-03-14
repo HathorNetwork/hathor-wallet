@@ -110,12 +110,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
             <div className="text-monospace">
               {truncateTxId(input?.txId)} ({input?.index})
               {input?.txId && (
-                <button 
-                  className="btn btn-link btn-sm p-0 ml-2" 
-                  onClick={() => navigator.clipboard.writeText(input.txId)}
-                >
-                  <i className="fa fa-copy"></i>
-                </button>
+                <CopyButton text={input.txId} />
               )}
             </div>
             <div className="text-monospace mt-2">
@@ -198,12 +193,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
               <div className="text-monospace">
                 {data.data.changeAddress}
                 {data.data.changeAddress && (
-                  <button 
-                    className="btn btn-link btn-sm p-0 ml-2" 
-                    onClick={() => navigator.clipboard.writeText(data.data.changeAddress)}
-                  >
-                    <i className="fa fa-copy"></i>
-                  </button>
+                  <CopyButton text={data.data.changeAddress} />
                 )}
               </div>
             </div>
