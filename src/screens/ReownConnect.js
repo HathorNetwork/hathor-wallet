@@ -35,8 +35,6 @@ function ReownConnect() {
   // Check if connection failed
   const connectionFailed = connectionState === REOWN_CONNECTION_STATE.FAILED;
 
-  console.log('isConnecting:', isConnecting);
-
   const handleSubmit = (e) => {
     e.preventDefault();
     // Then dispatch the URI inputted action

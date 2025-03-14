@@ -8,47 +8,44 @@
 import React, { useState, useEffect } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
-import { types } from '../../../actions';
+import { types, setNewNanoContractStatusReady } from '../../../actions';
 import helpers from '../../../utils/helpers';
+import nanoUtils from '../../../utils/nanoContracts';
 import { NanoContractActions } from '../NanoContractActions';
 import { getGlobalWallet } from '../../../modules/wallet';
+import AddressList from '../../AddressList';
+import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
 
 export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject }) {
   const dispatch = useDispatch();
   const blueprintInfo = useSelector((state) => state.blueprintsData[data?.data?.blueprintId]);
   const nanoContracts = useSelector((state) => state.nanoContracts);
-  const [addresses, setAddresses] = useState([]);
+  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const [selectedAddress, setSelectedAddress] = useState(firstAddress);
+  const [isSelectingAddress, setIsSelectingAddress] = useState(false);
 
+  // Ensure we have a valid address by loading the first one if needed
   useEffect(() => {
-    const fetchAddresses = async () => {
-      const wallet = getGlobalWallet();
-      const fetchedAddresses = [];
-      const iterator = wallet.getAllAddresses();
-      
-      for (;;) {
-        const addressObj = await iterator.next();
-        const { value, done } = addressObj;
-
-        if (done) {
-          break;
+    const ensureValidAddress = async () => {
+      if (!selectedAddress) {
+        const wallet = getGlobalWallet();
+        if (wallet.isReady()) {
+          const address = await wallet.getAddressAtIndex(0);
+          setSelectedAddress(address);
         }
-
-        fetchedAddresses.push(value);
       }
-
-      setAddresses(fetchedAddresses);
     };
+    
+    ensureValidAddress();
+  }, [selectedAddress]);
 
-    fetchAddresses();
-  }, []);
-
-  const formatValue = (value) => {
-    if (typeof value === 'string') {
-      return value;
-    }
-    return value.toString();
-  };
+  // Reset state when component unmounts
+  useEffect(() => {
+    return () => {
+      // Reset nano contract state to ready when the modal is closed
+      dispatch(setNewNanoContractStatusReady());
+    };
+  }, [dispatch]);
 
   const renderArgumentsSection = () => {
     if (!data?.data?.args || !blueprintInfo) {
@@ -78,7 +75,7 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
                       {argType && <small className="text-muted d-block">{argType}</small>}
                     </td>
                     <td className="border-top-0 text-monospace" style={{wordBreak: 'break-all'}}>
-                      {formatValue(value)}
+                      {nanoUtils.formatNCArgValue(value, argType, decimalPlaces)}
                     </td>
                   </tr>
                 ))}
@@ -90,8 +87,17 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
     );
   };
 
-  const handleAddressChange = (e) => {
-    setSelectedAddress(e.target.value);
+  const handleAddressSelect = (address) => {
+    setSelectedAddress(address);
+    setIsSelectingAddress(false);
+  };
+
+  const openAddressSelector = () => {
+    setIsSelectingAddress(true);
+  };
+
+  const handleAddressSelectionCancel = () => {
+    setIsSelectingAddress(false);
   };
 
   const handleAccept = () => {
@@ -99,11 +105,40 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
     onAccept(selectedAddress);
   };
 
+  // Address selection mode content
+  if (isSelectingAddress) {
+    return (
+      <>
+        <div className="modal-header">
+          <h5 className="modal-title">{t`Select Address`}</h5>
+          <button type="button" className="close" onClick={handleAddressSelectionCancel}>
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div className="modal-body">
+          <p>{t`Select the address that will be used to sign the transaction`}</p>
+          <AddressList
+            showNumberOfTransaction={false}
+            onAddressClick={handleAddressSelect}
+            count={NANO_UPDATE_ADDRESS_LIST_COUNT}
+            isModal={true}
+          />
+        </div>
+        <div className="modal-footer">
+          <button type="button" className="btn btn-secondary" onClick={handleAddressSelectionCancel}>
+            {t`Cancel`}
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  // Normal mode content
   return (
     <>
       <div className="modal-header">
         <h5 className="modal-title">{t`NEW NANO CONTRACT TRANSACTION`}</h5>
-        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onReject}>
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -159,18 +194,15 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
 
             <div className="mb-3">
               <strong>{t`Caller`}</strong>
-              <div className="d-flex flex-column">
-                <select 
-                  className="form-control mb-2" 
-                  value={selectedAddress} 
-                  onChange={handleAddressChange}
+              <div className="d-flex align-items-center">
+                <div className="text-monospace flex-grow-1">{selectedAddress || '-'}</div>
+                <button 
+                  className="btn btn-link btn-sm p-0 ml-2" 
+                  onClick={openAddressSelector}
+                  title={t`Select Address`}
                 >
-                  {addresses.map((addr) => (
-                    <option key={addr.address} value={addr.address}>
-                      {addr.address} ({addr.index})
-                    </option>
-                  ))}
-                </select>
+                  <i className="fa fa-pencil" style={{ fontSize: '1.2rem' }}></i>
+                </button>
               </div>
             </div>
 
@@ -188,6 +220,7 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
                         address: selectedAddress 
                       }
                     })}
+                    disabled={!selectedAddress}
                   >
                     {t`Register Nano Contract`}
                   </button>
@@ -209,7 +242,13 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" onClick={onReject} data-dismiss="modal">{t`Reject`}</button>
-        <button type="button" className="btn btn-hathor" onClick={handleAccept}>{t`Accept Transaction`}</button>
+        <button 
+          type="button" 
+          className="btn btn-hathor" 
+          onClick={handleAccept}
+        >
+          {t`Accept Transaction`}
+        </button>
       </div>
     </>
   );

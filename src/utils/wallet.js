@@ -252,7 +252,7 @@ const wallet = {
         const totalBalance = balance.available + balance.locked;
 
         // This token has zero balance: skip it.
-        if (hideZeroBalance && totalBalance === 0) {
+        if (hideZeroBalance && totalBalance === 0n) {
           continue;
         }
       }
@@ -302,7 +302,7 @@ const wallet = {
         const totalBalance = balance.available + balance.locked;
 
         // This token has zero balance: skip it.
-        if (totalBalance === 0) {
+        if (totalBalance === 0n) {
           continue;
         }
       }

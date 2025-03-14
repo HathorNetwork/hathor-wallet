@@ -419,7 +419,7 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
-    log.debug('Error on processRequest: ', e);
+    console.log('Error on processRequest: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
@@ -438,7 +438,6 @@ export function* processRequest(action) {
         }
       } break;
       case CreateTokenError: {
-        log.error('CreateTokenError occurred:', e.message, e.stack);
         yield put(setCreateTokenStatusFailed());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: true }));
 
@@ -494,8 +493,6 @@ export function* processRequest(action) {
         }
       } break;
       case SignMessageWithAddressError: {
-        log.error('SignMessageWithAddressError occurred:', e.message, e.stack);
-        
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
@@ -652,14 +649,12 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.CreateTokenLoadingTrigger:
-        log.debug('CreateTokenLoadingTrigger: Starting token creation process');
         dispatch(setCreateTokenStatusLoading());
         dispatch(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: true }));
         resolve();
         break;
 
       case TriggerTypes.CreateTokenLoadingFinishedTrigger:
-        log.debug('CreateTokenLoadingFinishedTrigger: Token creation process completed');
         dispatch(setCreateTokenStatusReady());
         dispatch(hideGlobalModal());
         resolve();
@@ -667,6 +662,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
 
       case TriggerTypes.SendNanoContractTxLoadingFinishedTrigger:
         dispatch(setNewNanoContractStatusReady());
+        dispatch(hideGlobalModal());
         resolve();
         break;
 
@@ -689,7 +685,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
             },
             onCancel: () => {
               dispatch(hideGlobalModal());
-              dispatch(setCreateTokenStatusReady()); // Reset loading state if PIN entry is cancelled
               pinReject(new Error('PIN entry cancelled'));
             }
           }));
@@ -731,7 +726,8 @@ export function* handleDAppRequest({ payload }, modalType) {
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
-    log.error('Got a session request but wallet is not ready.');
+    // Wait until wallet is ready before continuing.
+    yield take(types.WALLET_STATE_READY);
     return;
   }
 
