@@ -30,6 +30,7 @@ import {
   unregisteredTokensDownloadFailure,
   unregisteredTokensDownloadEnd,
   onExceptionCaptured,
+  tokenFetchMetadataRequested,
 } from '../actions';
 import { t } from "ttag";
 import { getGlobalWallet } from "../modules/wallet";
@@ -438,6 +439,10 @@ export function* requestUnregisteredTokensDownload({ payload }) {
       continue;
     }
     yield delay(burstDelay * 1000);
+  }
+
+  for (const uid of uids) {
+    yield put(tokenFetchMetadataRequested(uid));
   }
 
   yield put(unregisteredTokensDownloadEnd());

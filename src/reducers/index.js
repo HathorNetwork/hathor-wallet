@@ -1519,10 +1519,6 @@ export const onUnregisteredTokensDownloadSuccess = (state, action) => {
   return {
     ...state,
     tokens: [...state.tokens, ...newTokens],
-    tokenMetadata: {
-      ...state.tokenMetadata,
-      ...tokens
-    }
   };
 };
 

@@ -320,6 +320,14 @@ export const tokenFetchBalanceFailed = (tokenId) => ({
 });
 
 /**
+ * tokenId: The tokenId to request metadata from
+ */
+export const tokenFetchMetadataRequested = (tokenId) => ({
+  type: types.TOKEN_FETCH_METADATA_REQUESTED,
+  tokenId,
+});
+
+/**
  * Flag indicating if we are using the atomic swap feature
  */
 export const setEnableAtomicSwap = (useAtomicSwap) => ({ type: types.SET_ENABLE_ATOMIC_SWAP, payload: useAtomicSwap });
