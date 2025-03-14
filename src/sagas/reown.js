@@ -597,6 +597,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
 
       case TriggerTypes.SendNanoContractTxLoadingFinishedTrigger:
         dispatch(setNewNanoContractStatusReady());
+        dispatch(hideGlobalModal());
         resolve();
         break;
 
