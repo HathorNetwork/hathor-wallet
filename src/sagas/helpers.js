@@ -133,6 +133,14 @@ export function* dispatchLedgerTokenSignatureVerification(wallet) {
   }
 }
 
+/**
+ * Helper method that waits for either a retry action or dismiss action to be dispatched
+ * and returns whether the retry action was dispatched
+ *
+ * @param {String | String[]} retryAction - The action type(s) that indicates a retry should occur
+ * @param {String | String[]} dismissAction - The action type(s) that indicates the operation should be dismissed
+ * @return {Boolean} True if the retry action was dispatched, false otherwise
+ */
 export function* retryHandler(retryAction, dismissAction) {
   const { retry } = yield race({
     retry: take(retryAction),
