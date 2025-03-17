@@ -27,7 +27,7 @@ import {
   proposalTokenFetchSuccess,
   proposalTokenFetchFailed,
   unregisteredTokensDownloadSuccess,
-  unregisteredTokensDownloadFailure,
+  unregisteredTokensDownloadFailed,
   unregisteredTokensDownloadEnd,
   onExceptionCaptured,
   tokenFetchMetadataRequested,
@@ -404,7 +404,7 @@ export function* getTokenDetails(wallet, uid) {
     yield put(unregisteredTokensDownloadSuccess({ [uid]: { uid, symbol, name } }));
   } catch (e) {
     log.error(`Fail getting token data for token ${uid}.`, e);
-    yield put(unregisteredTokensDownloadFailure('Some tokens could not be loaded'));
+    yield put(unregisteredTokensDownloadFailed('Some tokens could not be loaded'));
   }
 }
 

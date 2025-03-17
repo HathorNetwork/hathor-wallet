@@ -457,6 +457,7 @@ const rootReducer = (state = initialState, action) => {
       };
     case types.UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS:
       return onUnregisteredTokensDownloadSuccess(state, action);
+    case types.UNREGISTERED_TOKENS_DOWNLOAD_FAILED:
     default:
       return state;
   }

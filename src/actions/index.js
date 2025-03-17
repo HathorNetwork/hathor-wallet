@@ -111,7 +111,7 @@ export const types = {
   REOWN_SEND_TX_STATUS_FAILED: 'REOWN_SEND_TX_STATUS_FAILED',
   UNREGISTERED_TOKENS_DOWNLOAD_REQUESTED: 'UNREGISTERED_TOKENS_DOWNLOAD_REQUESTED',
   UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS: 'UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS',
-  UNREGISTERED_TOKENS_DOWNLOAD_FAILURE: 'UNREGISTERED_TOKENS_DOWNLOAD_FAILURE',
+  UNREGISTERED_TOKENS_DOWNLOAD_FAILED: 'UNREGISTERED_TOKENS_DOWNLOAD_FAILED',
   UNREGISTERED_TOKENS_DOWNLOAD_END: 'UNREGISTERED_TOKENS_DOWNLOAD_END',
 };
 
@@ -969,8 +969,8 @@ export const unregisteredTokensDownloadSuccess = (tokens) => ({
  * Failure downloading unregistered tokens details
  * @param {string} error Error message
  */
-export const unregisteredTokensDownloadFailure = (error) => ({
-  type: types.UNREGISTERED_TOKENS_DOWNLOAD_FAILURE,
+export const unregisteredTokensDownloadFailed = (error) => ({
+  type: types.UNREGISTERED_TOKENS_DOWNLOAD_FAILED,
   payload: { error },
 });
 
