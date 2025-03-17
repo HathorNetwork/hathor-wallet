@@ -60,9 +60,7 @@ const ActionItem = ({ action, isNft, title }) => {
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
 
   const formatAmount = (amount) => {
-    // Convert to BigInt if it's not already
-    const bigIntAmount = typeof amount === 'bigint' ? amount : BigInt(amount);
-    return hathorLib.numberUtils.prettyValue(bigIntAmount, isNft ? 0 : decimalPlaces);
+    return hathorLib.numberUtils.prettyValue(amount, isNft ? 0 : decimalPlaces);
   };
 
   return (
