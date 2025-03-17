@@ -97,24 +97,18 @@ export function PinPad({ manageDomLifecycle, onComplete, onCancel }) {
     if ((/^[0-9]$/.test(e.key) || (e.keyCode >= 96 && e.keyCode <= 105)) && pin.length < PIN_LENGTH) {
       // Get the actual number regardless of numpad or top row
       const number = e.keyCode >= 96 && e.keyCode <= 105 
-        ? String(e.keyCode - 96) // Convert numpad keyCode to string
+        ? String(e.keyCode - 96)
         : e.key;
       
       handleNumberClick(number);
-      e.preventDefault(); // Prevent default behavior
-    } 
-    // Handle Backspace key
-    else if (e.key === 'Backspace') {
+      e.preventDefault();
+    } else if (e.key === 'Backspace') {
       handleDelete();
-      e.preventDefault(); // Prevent default behavior
-    } 
-    // Handle Escape key
-    else if (e.key === 'Escape') {
+      e.preventDefault();
+    } else if (e.key === 'Escape') {
       onCancel();
-      e.preventDefault(); // Prevent default behavior
-    } 
-    // Handle Enter key - submit if PIN is complete
-    else if (e.key === 'Enter' && pin.length === PIN_LENGTH) {
+      e.preventDefault();
+    } else if (e.key === 'Enter' && pin.length === PIN_LENGTH) {
       validateAndSubmitPin(pin);
       e.preventDefault(); // Prevent default behavior
     }
