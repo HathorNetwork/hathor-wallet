@@ -8,10 +8,11 @@
 import React, { useCallback } from 'react';
 import { t } from 'ttag';
 import { useSelector } from 'react-redux';
-import tokensUtils from '../../utils/tokens';
 import helpers from '../../utils/helpers';
 import hathorLib from '@hathor/wallet-lib';
-import { DEFAULT_NATIVE_TOKEN_CONFIG, NATIVE_TOKEN_UID } from '@hathor/wallet-lib/lib/constants';
+import { constants } from '@hathor/wallet-lib';
+
+const { DEFAULT_NATIVE_TOKEN_CONFIG, NATIVE_TOKEN_UID } = constants;
 
 /**
  * It returns the title template for each action type,
