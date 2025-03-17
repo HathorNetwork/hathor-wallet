@@ -711,7 +711,6 @@ export function* handleDAppRequest({ payload }, modalType) {
   if (!wallet.isReady()) {
     // Wait until wallet is ready before continuing.
     yield take(types.WALLET_STATE_READY);
-    return;
   }
 
   yield put(showGlobalModal(MODAL_TYPES.REOWN, {
