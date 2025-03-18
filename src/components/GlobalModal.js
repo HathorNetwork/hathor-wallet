@@ -149,10 +149,15 @@ export const GlobalModal = ({ children }) => {
    * executed after the previous jquery calls
    */
   const showModal = (modalType, modalProps = {}) => setTimeout(() => {
+    const { preventClose = true, ...otherProps } = modalProps;
+
     setStore({
       ...store,
       modalType,
-      modalProps,
+      modalProps: {
+        ...otherProps,
+        preventClose,
+      },
     });
 
     // Sometimes the modal backdrop won't show up again after being
@@ -174,11 +179,10 @@ export const GlobalModal = ({ children }) => {
       hideModal(domSelector);
     });
 
-    // Once properly configured, show the modal with static backdrop and no keyboard dismiss
     domElement.modal({
       show: true,
-      backdrop: 'static', // Prevents closing when clicking outside the modal
-      keyboard: false // Prevents closing with the escape key
+      backdrop: store.modalProps.preventClose ? 'static' : true, // 'static' prevents closing when clicking outside
+      keyboard: !store.modalProps.preventClose // false prevents closing with escape key
     });
   }
 
