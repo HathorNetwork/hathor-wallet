@@ -72,6 +72,7 @@ export const types = {
   REOWN_SET_MODAL: 'REOWN_SET_MODAL',
   REOWN_SET_SESSIONS: 'REOWN_SET_SESSIONS',
   REOWN_SET_CONNECTION_STATE: 'REOWN_SET_CONNECTION_STATE',
+  REOWN_SET_FIRST_ADDRESS: 'REOWN_SET_FIRST_ADDRESS',
   REOWN_NEW_NANOCONTRACT_STATUS_LOADING: 'REOWN_NEW_NANOCONTRACT_STATUS_LOADING',
   REOWN_NEW_NANOCONTRACT_STATUS_READY: 'REOWN_NEW_NANOCONTRACT_STATUS_READY',
   REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS: 'REOWN_NEW_NANOCONTRACT_STATUS_SUCCESS',
@@ -741,6 +742,14 @@ export const setReownModal = (payload) => ({
  */
 export const setReownSessions = (payload) => ({
   type: types.REOWN_SET_SESSIONS,
+  payload,
+});
+
+/**
+ * Set the Reown first address
+ */
+export const setReownFirstAddress = (payload) => ({
+  type: types.REOWN_SET_FIRST_ADDRESS,
   payload,
 });
 

@@ -5,10 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { types } from '../../actions';
-import { getGlobalWallet } from '../../modules/wallet';
+import React, { useEffect } from 'react';
 import { ConnectModal } from './modals/ConnectModal';
 import { SignMessageModal } from './modals/SignMessageModal';
 import { SignOracleDataModal } from './modals/SignOracleDataModal';
@@ -25,48 +22,20 @@ export const ReownModalTypes = {
 
 export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onRejectAction }) {
   const modalDomId = 'reownModal';
-  const dispatch = useDispatch();
-  const [firstAddress, setFirstAddress] = useState('');
 
   useEffect(() => {
     manageDomLifecycle(`#${modalDomId}`);
   }, []);
 
-  useEffect(() => {
-    if (data?.data?.blueprintId) {
-      dispatch({ 
-        type: types.BLUEPRINT_FETCH_REQUESTED, 
-        payload: data.data.blueprintId
-      });
-    }
-  }, [data?.data?.blueprintId]);
-
-  useEffect(() => {
-    const loadFirstAddress = async () => {
-      const wallet = getGlobalWallet();
-      if (wallet.isReady()) {
-        const address = await wallet.getAddressAtIndex(0);
-        setFirstAddress(address);
-      }
+  const handleAccept = (acceptedData) => {
+    const ncData = {
+      blueprintId: acceptedData.blueprintId,
+      method: acceptedData.method,
+      args: acceptedData.args,
+      actions: acceptedData.actions,
+      caller: acceptedData.caller,
     };
-    loadFirstAddress();
-  }, []);
-
-  const handleAccept = () => {
-    if (type === ReownModalTypes.SEND_NANO_CONTRACT_TX) {
-      // Process the nano contract transaction
-      // Create a new object with the same properties
-      const ncData = {
-        blueprintId: data.data.blueprintId,
-        method: data.data.method,
-        args: data.data.args,
-        actions: data.data.actions,
-        caller: firstAddress
-      };
-      onAcceptAction(ncData);
-    } else {
-      onAcceptAction(data);
-    }
+    onAcceptAction(ncData);
   };
 
   const handleReject = () => {
@@ -87,8 +56,7 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
       case ReownModalTypes.SEND_NANO_CONTRACT_TX:
         return (
           <SendNanoContractTxModal 
-            data={data} 
-            firstAddress={firstAddress}
+            data={data}
             onAccept={handleAccept} 
             onReject={handleReject} 
           />

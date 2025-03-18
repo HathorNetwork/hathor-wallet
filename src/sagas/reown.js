@@ -52,6 +52,7 @@ import {
   setCreateTokenStatusFailed,
   showGlobalModal,
   hideGlobalModal,
+  setReownFirstAddress,
 } from '../actions';
 import { checkForFeatureFlag, getNetworkSettings, retryHandler, showPinScreenForResult } from './helpers';
 import { logger } from '../utils/logger';
@@ -146,6 +147,9 @@ function* init() {
     yield call(refreshActiveSessions, true);
     yield fork(requestsListener);
 
+    const wallet = getGlobalWallet();
+    const firstAddress = yield call(() => wallet.getAddressAtIndex(0));
+    yield put(setReownFirstAddress(firstAddress));
   } catch (error) {
     log.debug('Error on init: ', error);
     yield put(onExceptionCaptured(error));
@@ -409,7 +413,6 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
-    console.log('Error on processRequest: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
@@ -652,10 +655,7 @@ export function* handleDAppRequest({ payload }, modalType) {
 
   yield put(showGlobalModal(MODAL_TYPES.REOWN, {
     type: modalType,
-    data: {
-      data,
-      dapp,
-    },
+    data: { data, dapp },
     onAcceptAction: accept,
     onRejectAction: denyCb,
   }));
@@ -700,6 +700,12 @@ export function* onSignOracleDataRequest(action) {
  * @param {Object} action - The action containing the request payload
  */
 export function* onSendNanoContractTxRequest(action) {
+  const wallet = getGlobalWallet();
+
+  if (!wallet.isReady()) {
+    yield take(types.WALLET_STATE_READY);
+  }
+
   yield* handleDAppRequest(action, ReownModalTypes.SEND_NANO_CONTRACT_TX);
 }
 
@@ -734,7 +740,6 @@ export function* onWalletReset() {
  * @param {Object} action - The action containing the session proposal
  */
 export function* onSessionProposal(action) {
-  log.debug('Got session proposal', action);
   const { id, params } = action.payload;
   
   try {
@@ -750,7 +755,7 @@ export function* onSessionProposal(action) {
     const requiredMethods = get(params, 'requiredNamespaces.hathor.methods', []);
     const availableMethods = values(AVAILABLE_METHODS);
     const unsupportedMethods = requiredMethods.filter(method => !availableMethods.includes(method));
-    
+
     if (unsupportedMethods.length > 0) {
       log.error('Unsupported methods requested:', unsupportedMethods);
       // Set connection state to FAILED
