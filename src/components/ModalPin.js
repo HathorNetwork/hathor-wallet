@@ -38,11 +38,7 @@ export class ModalPin extends React.Component {
   }
 
   componentDidMount = () => {
-    $('#modalPin').modal({
-      show: true,
-      backdrop: 'static',
-      keyboard: false
-    });
+    $('#modalPin').modal({ show: true });
     $('#modalPin').on('hidden.bs.modal', this.onModalHidden);
 
     // Focus the PIN field on modal load
