@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 import { setWCConnectionState, types } from '../actions';
@@ -22,6 +22,23 @@ function ReownConnect() {
     connectionState: state.reown.connectionState,
     sessions: state.reown.sessions || {},
   }));
+  const prevConnectionStateRef = useRef();
+
+  useEffect(() => {
+    if (prevConnectionStateRef.current === REOWN_CONNECTION_STATE.CONNECTING && 
+        (connectionState === REOWN_CONNECTION_STATE.FAILED
+          || connectionState === REOWN_CONNECTION_STATE.SUCCESS)
+        ) {
+      // Clear input text when connection succeeds
+      if (connectionState === REOWN_CONNECTION_STATE.SUCCESS) {
+        setUri('');
+        setShowNewConnectionForm(false);
+      }
+    }
+    
+    // Update the ref after checking
+    prevConnectionStateRef.current = connectionState;
+  }, [connectionState]);
 
   useEffect(() => {
     return () => {
@@ -42,7 +59,10 @@ function ReownConnect() {
   };
 
   const handleDisconnect = (sessionId) => {
-    dispatch({ type: types.REOWN_CANCEL_SESSION, payload: { id: sessionId } });
+    dispatch({
+      type: types.REOWN_CANCEL_SESSION,
+      payload: { id: sessionId },
+    });
   };
 
   const renderSession = (session, sessionId) => {

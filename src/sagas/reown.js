@@ -742,6 +742,9 @@ export function* onWalletReset() {
 export function* onSessionProposal(action) {
   const { id, params } = action.payload;
   
+  // Ensure connection state is set to CONNECTING at the beginning of the saga
+  yield put(setWCConnectionState(REOWN_CONNECTION_STATE.CONNECTING));
+
   try {
     const data = {
       icon: get(params, 'proposer.metadata.icons[0]', null),
@@ -836,6 +839,7 @@ export function* onSessionProposal(action) {
       // Didn't throw, show success.
       yield put(setWCConnectionState(REOWN_CONNECTION_STATE.SUCCESS));
     } else {
+      yield put(setWCConnectionState(REOWN_CONNECTION_STATE.IDLE));
       // User rejected the proposal
       yield call([walletKit, walletKit.rejectSession], {
         id,
@@ -889,9 +893,6 @@ export function* onSessionProposal(action) {
  * @param {Object} action - The action containing the URI payload
  */
 export function* onUriInputted(action) {
-  // Ensure connection state is set to CONNECTING at the beginning of the saga
-  yield put(setWCConnectionState(REOWN_CONNECTION_STATE.CONNECTING));
-
   const { core, walletKit } = getGlobalReown();
 
   if (!core || !walletKit) {
