@@ -12,32 +12,17 @@ import { types, setNewNanoContractStatusReady } from '../../../actions';
 import helpers from '../../../utils/helpers';
 import nanoUtils from '../../../utils/nanoContracts';
 import { NanoContractActions } from '../NanoContractActions';
-import { getGlobalWallet } from '../../../modules/wallet';
 import AddressList from '../../AddressList';
 import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
 
-export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject }) {
+export function SendNanoContractTxModal({ data, onAccept, onReject }) {
   const dispatch = useDispatch();
   const blueprintInfo = useSelector((state) => state.blueprintsData[data?.data?.blueprintId]);
   const nanoContracts = useSelector((state) => state.nanoContracts);
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
+  const firstAddress = useSelector((state) => state.reown.firstAddress);
   const [selectedAddress, setSelectedAddress] = useState(firstAddress);
   const [isSelectingAddress, setIsSelectingAddress] = useState(false);
-
-  // Ensure we have a valid address by loading the first one if needed
-  useEffect(() => {
-    const ensureValidAddress = async () => {
-      if (!selectedAddress) {
-        const wallet = getGlobalWallet();
-        if (wallet.isReady()) {
-          const address = await wallet.getAddressAtIndex(0);
-          setSelectedAddress(address);
-        }
-      }
-    };
-    
-    ensureValidAddress();
-  }, [selectedAddress]);
 
   // Reset state when component unmounts
   useEffect(() => {
@@ -46,6 +31,15 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
       dispatch(setNewNanoContractStatusReady());
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (data?.data?.blueprintId) {
+      dispatch({ 
+        type: types.BLUEPRINT_FETCH_REQUESTED, 
+        payload: data.data.blueprintId
+      });
+    }
+  }, [data?.data?.blueprintId]);
 
   const renderArgumentsSection = () => {
     if (!data?.data?.args || !blueprintInfo) {
@@ -101,8 +95,12 @@ export function SendNanoContractTxModal({ data, firstAddress, onAccept, onReject
   };
 
   const handleAccept = () => {
-    // Pass the selected address to the onAccept callback
-    onAccept(selectedAddress);
+    // Create a new object with all the data and the selected address
+    const ncData = {
+      ...data.data,
+      caller: selectedAddress,
+    };
+    onAccept(ncData);
   };
 
   // Address selection mode content

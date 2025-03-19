@@ -17,6 +17,7 @@ const initialState = {
     onAcceptAction: null,
     onRejectAction: null,
   },
+  firstAddress: null,
   sessions: {},
   sendTxStatus: BASE_STATUS.READY,
   connectionState: REOWN_CONNECTION_STATE.IDLE,
@@ -26,6 +27,11 @@ const initialState = {
 
 export default function reownReducer(state = initialState, action) {
   switch (action.type) {
+    case types.REOWN_SET_FIRST_ADDRESS:
+      return {
+        ...state,
+        firstAddress: action.payload,
+      };
     case types.REOWN_SET_CLIENT:
       return {
         ...state,

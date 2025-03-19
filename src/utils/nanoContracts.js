@@ -72,16 +72,7 @@ const nanoContracts = {
     // Get type of value but removing possible optional mark (?) to format the value correctly
     const fieldType = blueprintInformation.attributes[field]?.replace('?', '');
 
-    // Format based on field type
-    if (fieldType === 'Timestamp') {
-      return hathorLib.dateUtils.parseTimestamp(value);
-    }
-
-    if (fieldType === 'Amount') {
-      return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
-    }
-
-    return value;
+    return this.formatNCArgValue(value, fieldType, decimalPlaces);
   },
 
   /**
@@ -109,7 +100,7 @@ const nanoContracts = {
     if (typeWithoutOptional === 'Amount') {
       return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
     }
-    
+
     // Default string representation
     return typeof value === 'string' ? value : value.toString();
   }

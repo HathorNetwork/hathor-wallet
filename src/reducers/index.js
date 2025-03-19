@@ -451,6 +451,7 @@ const rootReducer = (state = initialState, action) => {
     case types.REOWN_CREATE_TOKEN_STATUS_READY:
     case types.REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL:
     case types.REOWN_CREATE_TOKEN_STATUS_FAILED:
+    case types.REOWN_SET_FIRST_ADDRESS:
       return {
         ...state,
         reown: reownReducer(state.reown, action),

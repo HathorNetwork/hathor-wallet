@@ -5,10 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { types } from '../../actions';
-import { getGlobalWallet } from '../../modules/wallet';
+import React, { useEffect } from 'react';
 import { ConnectModal } from './modals/ConnectModal';
 import { SignMessageModal } from './modals/SignMessageModal';
 import { SignOracleDataModal } from './modals/SignOracleDataModal';
@@ -27,73 +24,28 @@ export const ReownModalTypes = {
 
 export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onRejectAction }) {
   const modalDomId = 'reownModal';
-  const dispatch = useDispatch();
-  const [firstAddress, setFirstAddress] = useState('');
 
   useEffect(() => {
     manageDomLifecycle(`#${modalDomId}`);
   }, []);
 
-  useEffect(() => {
-    if (data?.data?.blueprintId) {
-      dispatch({ 
-        type: types.BLUEPRINT_FETCH_REQUESTED, 
-        payload: data.data.blueprintId
-      });
-    }
-  }, [data?.data?.blueprintId]);
-
-  useEffect(() => {
-    const loadFirstAddress = async () => {
-      const wallet = getGlobalWallet();
-      if (wallet.isReady()) {
-        const address = await wallet.getAddressAtIndex(0);
-        setFirstAddress(address);
-      }
-    };
-    loadFirstAddress();
-  }, []);
-
-  const handleAccept = () => {
-    if (type === ReownModalTypes.SEND_NANO_CONTRACT_TX) {
-      // For nano contract transactions, we need to include the caller address
-      // Process the nano contract transaction
-      // Create a new object with the same properties
-      const ncData = {
-        blueprintId: data.data.blueprintId,
-        method: data.data.method,
-        args: data.data.args,
-        actions: data.data.actions,
-        caller: firstAddress
-      };
-      onAcceptAction(ncData);
-    } else {
-      onAcceptAction(data);
-    }
-  };
-
-  const handleReject = () => {
-    onRejectAction();
-  };
-
   const renderModalContent = () => {
     switch (type) {
       case ReownModalTypes.CONNECT:
-        return <ConnectModal data={data} onAccept={handleAccept} onReject={handleReject} />;
+        return <ConnectModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.SIGN_MESSAGE:
-        return <SignMessageModal data={data} onAccept={handleAccept} onReject={handleReject} />;
+        return <SignMessageModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.SIGN_ORACLE_DATA:
-        return <SignOracleDataModal data={data} onAccept={handleAccept} onReject={handleReject} />;
+        return <SignOracleDataModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.SEND_NANO_CONTRACT_TX:
         return (
           <SendNanoContractTxModal 
-            data={data} 
-            firstAddress={firstAddress}
-            onAccept={handleAccept} 
-            onReject={handleReject} 
+            data={data}
+            onAccept={onAcceptAction} 
+            onReject={onRejectAction} 
           />
         );
 
@@ -108,7 +60,7 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
         );
 
       case ReownModalTypes.CREATE_TOKEN:
-        return <CreateTokenModal data={data} onAccept={handleAccept} onReject={handleReject} />;
+        return <CreateTokenModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       default:
         return null;
