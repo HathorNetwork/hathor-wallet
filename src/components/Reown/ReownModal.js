@@ -27,43 +27,28 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
     manageDomLifecycle(`#${modalDomId}`);
   }, []);
 
-  const handleAccept = (acceptedData) => {
-    const ncData = {
-      blueprintId: acceptedData.blueprintId,
-      method: acceptedData.method,
-      args: acceptedData.args,
-      actions: acceptedData.actions,
-      caller: acceptedData.caller,
-    };
-    onAcceptAction(ncData);
-  };
-
-  const handleReject = () => {
-    onRejectAction();
-  };
-
   const renderModalContent = () => {
     switch (type) {
       case ReownModalTypes.CONNECT:
-        return <ConnectModal data={data} onAccept={handleAccept} onReject={handleReject} />;
+        return <ConnectModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.SIGN_MESSAGE:
-        return <SignMessageModal data={data} onAccept={handleAccept} onReject={handleReject} />;
+        return <SignMessageModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.SIGN_ORACLE_DATA:
-        return <SignOracleDataModal data={data} onAccept={handleAccept} onReject={handleReject} />;
+        return <SignOracleDataModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.SEND_NANO_CONTRACT_TX:
         return (
           <SendNanoContractTxModal 
             data={data}
-            onAccept={handleAccept} 
-            onReject={handleReject} 
+            onAccept={onAcceptAction} 
+            onReject={onRejectAction} 
           />
         );
 
       case ReownModalTypes.CREATE_TOKEN:
-        return <CreateTokenModal data={data} onAccept={handleAccept} onReject={handleReject} />;
+        return <CreateTokenModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       default:
         return null;
