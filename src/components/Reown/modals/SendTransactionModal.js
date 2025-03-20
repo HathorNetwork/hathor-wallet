@@ -67,10 +67,12 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
       return token.symbol;
     }
 
-    // We return '?' as a fallback for tokens that are not yet loaded or recognized
+    // We return an empty string as a fallback for tokens that are not yet
+    // loaded or recognized
     // This should be temporary until the token details are fetched
-    // The unregisteredTokensDownloadRequested action should be loading these details
-    return '?';
+    // The unregisteredTokensDownloadRequested action should be loading these
+    // details
+    return '';
   };
 
   const formatValue = (value, tokenId) => {
