@@ -26,14 +26,10 @@ function ReownConnect() {
 
   useEffect(() => {
     if (prevConnectionStateRef.current === REOWN_CONNECTION_STATE.CONNECTING && 
-        (connectionState === REOWN_CONNECTION_STATE.FAILED
-          || connectionState === REOWN_CONNECTION_STATE.SUCCESS)
-        ) {
+          connectionState === REOWN_CONNECTION_STATE.SUCCESS) {
       // Clear input text when connection succeeds
-      if (connectionState === REOWN_CONNECTION_STATE.SUCCESS) {
-        setUri('');
-        setShowNewConnectionForm(false);
-      }
+      setUri('');
+      setShowNewConnectionForm(false);
     }
     
     // Update the ref after checking
