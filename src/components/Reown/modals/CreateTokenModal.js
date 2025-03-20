@@ -9,19 +9,8 @@ import React, { useEffect } from 'react';
 import { t } from 'ttag';
 import { useDispatch } from 'react-redux';
 import { setCreateTokenStatusReady } from '../../../actions';
+import { JSONBigInt } from '@hathor/wallet-lib/lib/utils/bigint';
 
-/**
- * Custom replacer function for JSON.stringify to handle BigInt values
- * @param {string} key - The key of the value being stringified
- * @param {any} value - The value being stringified
- * @returns {any} - The processed value
- */
-const bigIntReplacer = (_key, value) => {
-  if (typeof value === 'bigint') {
-    return value.toString();
-  }
-  return value;
-};
 
 /**
  * Modal for handling token creation requests from dApps
@@ -44,7 +33,7 @@ export function CreateTokenModal({ data, onAccept, onReject }) {
   // Process the data to handle BigInt values
   const processedData = React.useMemo(() => {
     try {
-      return JSON.stringify(data.data, bigIntReplacer, 2);
+      return JSONBigInt.stringify(data.data, 2);
     } catch (error) {
       console.error('Error stringifying token data:', error);
       return 'Error displaying token data. Please check console for details.';
