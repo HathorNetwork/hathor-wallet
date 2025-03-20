@@ -41,23 +41,10 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
         return <SignOracleDataModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.SEND_NANO_CONTRACT_TX:
-        return (
-          <SendNanoContractTxModal 
-            data={data}
-            onAccept={onAcceptAction} 
-            onReject={onRejectAction} 
-          />
-        );
+        return <SendNanoContractTxModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.SEND_TRANSACTION:
-        return (
-          <SendTransactionModal
-            data={data}
-            firstAddress={firstAddress}
-            onAccept={handleAccept}
-            onReject={handleReject}
-          />
-        );
+        return <SendTransactionModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />
 
       case ReownModalTypes.CREATE_TOKEN:
         return <CreateTokenModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
