@@ -15,9 +15,10 @@ import helpers from '../../../utils/helpers';
 
 export function SendTransactionModal({ data, onAccept, onReject }) {
   const dispatch = useDispatch();
-  const { tokenMetadata, tokens: registeredTokens } = useSelector((state) => ({
+  const { tokenMetadata, tokens: registeredTokens, decimalPlaces } = useSelector((state) => ({
     tokenMetadata: state.tokenMetadata,
     tokens: state.tokens,
+    decimalPlaces: state.serverInfo.decimalPlaces
   }));
 
   useEffect(() => {
@@ -83,7 +84,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
     // Check if the token is an NFT using the helpers utility
     const isNFT = tokenId && helpers.isTokenNFT(tokenId, tokenMetadata);
     
-    return numberUtils.prettyValue(value, isNFT ? 0 : undefined);
+    return numberUtils.prettyValue(value, isNFT ? 0 : decimalPlaces);
   };
 
   const truncateTxId = (txId) => {

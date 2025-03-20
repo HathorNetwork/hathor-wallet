@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { t } from 'ttag';
 import { useDispatch } from 'react-redux';
 import { setCreateTokenStatusReady } from '../../../actions';
