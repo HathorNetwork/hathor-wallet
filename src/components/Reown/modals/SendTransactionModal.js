@@ -151,7 +151,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
               <>
                 <div className="mt-2 mb-1"><small>{t`Data field:`}</small></div>
                 <div className="text-monospace">
-                  {output.data.join(',')}
+                  {output.data}
                 </div>
               </>
             )}
@@ -201,8 +201,8 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
         )}
       </div>
       <div className="modal-footer border-0">
-        <button type="button" className="btn btn-lg btn-secondary" onClick={handleReject} data-dismiss="modal">{t`Reject`}</button>
-        <button type="button" className="btn btn-lg btn-hathor" onClick={handleAccept}>{t`Accept Transaction`}</button>
+        <button type="button" className="btn btn-secondary" onClick={handleReject} data-dismiss="modal">{t`Reject`}</button>
+        <button type="button" className="btn btn-hathor" onClick={handleAccept}>{t`Accept Transaction`}</button>
       </div>
     </>
   );
