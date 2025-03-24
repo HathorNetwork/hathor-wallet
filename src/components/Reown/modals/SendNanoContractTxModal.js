@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { t } from 'ttag';
+import { get } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import { types, setNewNanoContractStatusReady } from '../../../actions';
 import helpers from '../../../utils/helpers';
@@ -47,13 +48,13 @@ export function SendNanoContractTxModal({ data, onAccept, onReject }) {
     }
 
     const methodInfo = blueprintInfo.public_methods?.[data.data.method];
-    const argEntries = methodInfo
-      ? data.data.args.map((arg, idx) => [
-          methodInfo.args[idx].name,
-          arg,
-          methodInfo.args[idx].type
-        ])
-      : data.data.args.map((arg, idx) => [t`Position ${idx}`, arg]);
+    const methodInfoArgs = get(methodInfo, 'args', []);
+    const dataArgs = get(data.data, 'args', []);
+    const argEntries = dataArgs.map((arg, idx) => [
+      methodInfoArgs[idx]?.name || t`Position ${idx}`,
+      arg,
+      methodInfoArgs[idx]?.type
+    ]);
 
     return (
       <>
