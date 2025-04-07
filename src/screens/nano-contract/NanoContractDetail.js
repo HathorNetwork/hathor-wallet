@@ -159,7 +159,7 @@ function NanoContractDetail() {
     }
 
     if (type === 'Amount') {
-      return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
+      return hathorLib.numberUtils.prettyValue(typeof value === 'bigint' ? value : BigInt(value), decimalPlaces);
     }
 
     return value;
