@@ -7,11 +7,9 @@
 
 import React, { useContext, useEffect } from 'react';
 import { t } from 'ttag'
-import $ from 'jquery';
 import ResetNavigationLink from '../../components/ResetNavigationLink';
 import ReactLoading from 'react-loading';
 import colors from '../../index.module.scss';
-import ModalChangeAddress from '../../components/nano-contract/ModalChangeAddress';
 import NanoContractHistory from '../../components/nano-contract/NanoContractHistory';
 import helpers from '../../utils/helpers';
 import nanoUtils from '../../utils/nanoContracts';
