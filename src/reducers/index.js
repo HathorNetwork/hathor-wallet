@@ -456,6 +456,9 @@ const rootReducer = (state = initialState, action) => {
         ...state,
         reown: reownReducer(state.reown, action),
       };
+    case types.UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS:
+      return onUnregisteredTokensDownloadSuccess(state, action);
+    case types.UNREGISTERED_TOKENS_DOWNLOAD_FAILED:
     default:
       return state;
   }
@@ -1500,5 +1503,25 @@ export const onUpdateNetworkSettings = (state, { payload }) => {
     }
   }
 }
+
+/**
+ * Handle successful download of unregistered token details
+ * @param {Object} state Current state
+ * @param {Object} action Action with token details
+ * @param {Object} action.payload.tokens Object with token details
+ */
+export const onUnregisteredTokensDownloadSuccess = (state, action) => {
+  const { tokens } = action.payload;
+  const newTokens = Object.values(tokens).map(token => ({
+    uid: token.uid,
+    name: token.name,
+    symbol: token.symbol
+  }));
+
+  return {
+    ...state,
+    tokens: [...state.tokens, ...newTokens],
+  };
+};
 
 export default rootReducer;
