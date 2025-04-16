@@ -30,7 +30,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
       if (input.token === constants.NATIVE_TOKEN_UID || !input.token) {
         return;
       }
-      
+
       const token = registeredTokens.find(t => t.uid === input.token);
       if (!token) {
         // If we can't find this token in our registered tokens list, we need to fetch its details
@@ -83,7 +83,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
 
     // Check if the token is an NFT using the helpers utility
     const isNFT = tokenId && helpers.isTokenNFT(tokenId, tokenMetadata);
-    
+
     return numberUtils.prettyValue(value, isNFT ? 0 : decimalPlaces);
   };
 
@@ -104,7 +104,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
           <div key={index} className="p-3 bg-light rounded mb-2">
             <div className="d-flex justify-content-between align-items-start mb-2">
               <div>
-                <strong>{t`Input ${index + 1}`}</strong>
+                <strong>{t`Input`}  {index + 1}</strong>
               </div>
               <div>
                 {formatValue(input?.value, input?.token)} {getTokenSymbol(input?.token)}
@@ -140,7 +140,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
           <div key={index} className="p-3 bg-light rounded mb-2">
             <div className="d-flex justify-content-between align-items-start mb-2">
               <div>
-                <strong>{t`Output ${index + 1}`}</strong>
+                <strong>{t`Output`} {index + 1}</strong>
               </div>
               <div>
                 {formatValue(output?.value, output?.token)} {getTokenSymbol(output?.token)}
