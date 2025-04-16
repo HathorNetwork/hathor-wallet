@@ -168,13 +168,13 @@ function* init() {
  */
 export function* listenForNetworkChange() {
   let previousGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
-  
+
   while (true) {
     // Wait for the server info to be updated with the new network data
     yield take(types.SERVER_INFO_UPDATED);
-    
+
     const currentGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
-    
+
     if (previousGenesisHash !== currentGenesisHash) {
       log.debug('Genesis hash changed, clearing reown sessions.');
       yield call(clearSessions);
@@ -214,12 +214,12 @@ export function* refreshActiveSessions(extend = false) {
   }
 
   const activeSessions = yield call(() => walletKit.getActiveSessions());
-  
+
   yield put(setReownSessions(activeSessions || {}));
 
   if (extend) {
     const sessionKeys = Object.keys(activeSessions || {});
-    
+
     for (const key of sessionKeys) {
       log.debug('Extending session ');
       log.debug(activeSessions[key].topic);
@@ -808,7 +808,7 @@ export function* onWalletReset() {
  */
 export function* onSessionProposal(action) {
   const { id, params } = action.payload;
-  
+
   // Ensure connection state is set to CONNECTING at the beginning of the saga
   yield put(setWCConnectionState(REOWN_CONNECTION_STATE.CONNECTING));
 
@@ -830,13 +830,13 @@ export function* onSessionProposal(action) {
       log.error('Unsupported methods requested:', unsupportedMethods);
       // Set connection state to FAILED
       yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
-      
+
       // Show error modal to user
       yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
         title: 'Connection Error',
         message: `The dApp is requesting methods that are not supported: ${unsupportedMethods.join(', ')}`,
       }));
-      
+
       // Reject the session
       const { walletKit } = getGlobalReown();
       if (walletKit) {
@@ -922,16 +922,16 @@ export function* onSessionProposal(action) {
   } catch (error) {
     log.error('Error handling session proposal:', error);
     yield put(onExceptionCaptured(error));
-    
+
     // Set connection state to FAILED
     yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
-    
+
     // Show error modal to user
     yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
       title: 'Connection Error',
       message: `Failed to connect to dApp: ${error.message}`,
     }));
-    
+
     // Try to reject the session if possible
     try {
       const { walletKit } = getGlobalReown();
@@ -981,7 +981,7 @@ export function* onUriInputted(action) {
     log.debug('Error pairing: ', error);
     // Connection failed
     yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
-    
+
     // Show error modal to user
     yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
       title: 'Connection Error',
