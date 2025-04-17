@@ -41,6 +41,7 @@ module.exports = function override(config, env) {
       os: stdLibBrowser.os,
       events: stdLibBrowser.events,
       util: stdLibBrowser.util,
+      zlib: stdLibBrowser.zlib,
       vm: false,
     },
     mainFields: ['browser', 'module', 'main'],
@@ -91,7 +92,7 @@ module.exports = function override(config, env) {
     // This is a common issue with TypeScript libraries and doesn't affect functionality.
     // The warnings are purely development-time noise and can be safely ignored.
     /Failed to parse source map/,
-    
+
     // Ignore color-adjust deprecation warning
     // Bootstrap 4.x uses the 'color-adjust' CSS property which is now deprecated
     // in favor of 'print-color-adjust'. This warning doesn't affect functionality
@@ -103,11 +104,11 @@ module.exports = function override(config, env) {
   // Bootstrap 4.x uses the 'color-adjust' property in its CSS, which is now deprecated
   // in favor of 'print-color-adjust' in newer browser versions
   const cssRules = config.module.rules.find(rule => rule.oneOf).oneOf;
-  const cssLoaders = cssRules.filter(rule => 
-    rule.use && Array.isArray(rule.use) && 
+  const cssLoaders = cssRules.filter(rule =>
+    rule.use && Array.isArray(rule.use) &&
     rule.use.find(loader => loader.loader && loader.loader.includes('postcss-loader'))
   );
-  
+
   cssLoaders.forEach(rule => {
     const postcssLoader = rule.use.find(loader => loader.loader && loader.loader.includes('postcss-loader'));
     if (postcssLoader && postcssLoader.options && postcssLoader.options.postcssOptions) {
