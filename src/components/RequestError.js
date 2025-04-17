@@ -5,14 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
 import SpanFmt from './SpanFmt';
 import { useDispatch, useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
-import { useNavigate } from 'react-router-dom';
 
 /**
  * DOM Identifier for the modal
@@ -25,24 +24,27 @@ const MODAL_DOM_ID = '#requestErrorModal';
  *
  * @memberof Components
  */
-function RequestErrorModal() {
-  const navigate = useNavigate();
+function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose, onChangeServer }) {
   const dispatch = useDispatch();
-  const { lastFailedRequest, requestErrorStatusCode } = useSelector(state => ({
-    lastFailedRequest: state.lastFailedRequest,
-    requestErrorStatusCode: state.requestErrorStatusCode,
-  }));
-
   const advancedDataRef = useRef();
   const showAdvancedLinkRef = useRef();
   const hideAdvancedLinkRef = useRef();
+
+  useEffect(() => {
+    $(MODAL_DOM_ID).modal('show');
+  }, []);
 
   /**
    * User clicked to change server, then push to choose server screen
    */
   const handleChangeServer = () => {
     $(MODAL_DOM_ID).modal('hide');
-    navigate('/server/');
+    if (onClose) onClose();
+    if (onChangeServer) {
+      onChangeServer();
+    } else {
+      window.location.hash = '#/network_settings_recovery';
+    }
   }
 
   /**
@@ -50,6 +52,7 @@ function RequestErrorModal() {
    */
   const handleRetryRequest = () => {
     $(MODAL_DOM_ID).modal('hide');
+    if (onClose) onClose();
     modalHiddenRetry();
   }
 
@@ -149,7 +152,7 @@ function RequestErrorModal() {
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title" id="exampleModalLabel">{t`Request failed`}</h5>
-            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onClose}>
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -157,8 +160,8 @@ function RequestErrorModal() {
             <p className="white-space-pre-wrap">{getErrorMessage()}</p>
             <p><SpanFmt>{t`You are connected to **${serverURL}**`}</SpanFmt></p>
             <a onClick={showAdvanced} ref={showAdvancedLinkRef} href="true">{t`Show advanced data`}</a>
-            <a onClick={hideAdvanced} ref={hideAdvancedLinkRef} href="true" style={{display: 'none'}}>{t`Hide advanced data`}</a>
-            <div ref={advancedDataRef} className="mt-3" style={{display: 'none'}}>{getAdvancedMessage()}</div>
+            <a onClick={hideAdvanced} ref={hideAdvancedLinkRef} href="true" style={{ display: 'none' }}>{t`Hide advanced data`}</a>
+            <div ref={advancedDataRef} className="mt-3" style={{ display: 'none' }}>{getAdvancedMessage()}</div>
           </div>
           <div className="modal-footer">
             <button onClick={handleChangeServer} type="button" className="btn btn-secondary">{t`Change server`}</button>

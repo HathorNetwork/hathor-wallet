@@ -6,13 +6,12 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Navigate, Redirect, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import ReactLoading from 'react-loading';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 
 import SpanFmt from '../components/SpanFmt';
-import RequestErrorModal from '../components/RequestError';
 import logo from '../assets/images/hathor-logo.png';
 import { updateLoadedData } from "../actions/index";
 import { colors } from '../constants';
@@ -55,7 +54,7 @@ function LoadingAddresses() {
     // If this flag is true, then we don't need to reset the progress because it was already done
     // and the wallet is just waiting, so should continue showing the latest progress
     if (location.waitVersionCheck !== true) {
-      dispatch(updateLoadedData({addresses: 0, transactions: 0}));
+      dispatch(updateLoadedData({ addresses: 0, transactions: 0 }));
     }
     // To prevent only a blink in this screen when user loads the addresses really fast
     // I set that the user will see this screen at least for 2 seconds
@@ -74,9 +73,9 @@ function LoadingAddresses() {
     // was reloaded on the loading_addresses screen. This may happen during development
     // because of the auto reload
     if (!location.state) {
-      return <Navigate to={ '/wallet/' } />;
+      return <Navigate to={'/wallet/'} />;
     }
-    return <Navigate to={ location.state.path } />;
+    return <Navigate to={location.state.path} />;
   }
 
   return (
@@ -97,7 +96,6 @@ function LoadingAddresses() {
         </div>
         <InitialImages />
       </div>
-      <RequestErrorModal />
     </div>
   )
 }

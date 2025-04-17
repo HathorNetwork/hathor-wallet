@@ -7,7 +7,8 @@
 
 import store from '../store/index';
 import { lastFailedRequest, updateRequestErrorStatusCode } from '../actions/index';
-import $ from 'jquery';
+import { showGlobalModal, hideGlobalModal } from '../actions';
+import { MODAL_TYPES } from '../components/GlobalModal';
 import hathorLib from '@hathor/wallet-lib';
 import url from 'url';
 
@@ -58,7 +59,16 @@ const createRequestInstance = (resolve, timeout) => {
     let config = error.config;
     config.resolve = resolve;
     store.dispatch(lastFailedRequest(error.config));
-    $('#requestErrorModal').modal('show');
+    // Use global modal system
+    store.dispatch(showGlobalModal(MODAL_TYPES.REQUEST_ERROR, {
+      lastFailedRequest: error.config,
+      requestErrorStatusCode: statusCode,
+      onClose: () => {
+        store.dispatch(lastFailedRequest(undefined));
+        store.dispatch(updateRequestErrorStatusCode(undefined));
+        store.dispatch(hideGlobalModal());
+      }
+    }));
     return Promise.reject(error);
   });
   return instance;

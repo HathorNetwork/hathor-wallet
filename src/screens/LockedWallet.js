@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from "react-redux";
 import wallet from '../utils/wallet';
-import RequestErrorModal from '../components/RequestError';
 import ReactLoading from 'react-loading';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { resolveLockWalletPromise, startWalletRequested, walletReset } from '../actions';
@@ -134,7 +133,6 @@ function LockedWallet() {
           </div>
         </div>
       </div>
-      <RequestErrorModal />
     </div>
   );
 }

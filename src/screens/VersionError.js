@@ -34,7 +34,7 @@ function VersionError() {
    * Called when user clicks to Change Server, then redirects to change server screen
    */
   const changeServer = () => {
-    navigate('/server/');
+    navigate('/network_settings/');
   };
   const min_api_version = hathorLib.constants.MIN_API_VERSION;
 
