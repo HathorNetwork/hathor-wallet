@@ -19,7 +19,7 @@ import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '../constants';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE } from '../constants';
 import { walletReset } from '../actions';
 import LOCAL_STORE from '../storage';
 
@@ -47,6 +47,10 @@ function Settings() {
     useWalletService: state.useWalletService,
     registeredTokens: state.tokens,
   }))
+
+  const reownEnabled = useSelector(state => state.featureToggles[REOWN_FEATURE_TOGGLE]);
+  const reownSessions = useSelector(state => state.reown.sessions);
+  const connectedSessionsCount = Object.keys(reownSessions).length;
 
   useEffect(() => {
     setIsNotificationOn(wallet.isNotificationOn());
@@ -269,6 +273,10 @@ function Settings() {
     helpers.openExternalURL(PRIVACY_POLICY_URL);
   }
 
+  const goToReown = () => {
+    navigate('/reown/connect');
+  }
+
   const serverURL = useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
   const wsServerURL = useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
   const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
@@ -289,6 +297,18 @@ function Settings() {
         }
         <button className="btn btn-hathor" onClick={changeNetwork}>{t`Change network`}</button>
       </div>
+      <hr />
+
+      {!useWalletService && reownEnabled && (
+        <div>
+          <h4>{t`Reown`}</h4>
+          <div className="d-flex flex-row align-items-center mb-2">
+            <span>{t`Connected Sessions: ${connectedSessionsCount}`}</span>
+          </div>
+          <button className="btn btn-hathor" onClick={goToReown}>{t`Manage sessions`}</button>
+        </div>
+      )}
+
       <hr />
 
       <div>
