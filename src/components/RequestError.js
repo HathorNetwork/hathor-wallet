@@ -25,7 +25,6 @@ const MODAL_DOM_ID = '#requestErrorModal';
  * @memberof Components
  */
 function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose, onChangeServer }) {
-  console.log('[RequestErrorModal] Rendered');
   const dispatch = useDispatch();
   const advancedDataRef = useRef();
   const showAdvancedLinkRef = useRef();
@@ -39,13 +38,12 @@ function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose,
    * User clicked to change server, then push to choose server screen
    */
   const handleChangeServer = () => {
-    console.log('[RequestErrorModal] handleChangeServer called');
     $(MODAL_DOM_ID).modal('hide');
     if (onClose) onClose();
     if (onChangeServer) {
       onChangeServer();
     } else {
-      window.location.hash = '#/network_settings';
+      window.location.hash = '#/network_settings_recovery';
     }
   }
 
@@ -150,7 +148,6 @@ function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose,
 
   return (
     <div className="modal fade" id="requestErrorModal" tabIndex="-1" role="dialog" aria-labelledby="requestErrorModal" aria-hidden="true">
-      {console.log('[RequestErrorModal] JSX Rendered')}
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
@@ -163,8 +160,8 @@ function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose,
             <p className="white-space-pre-wrap">{getErrorMessage()}</p>
             <p><SpanFmt>{t`You are connected to **${serverURL}**`}</SpanFmt></p>
             <a onClick={showAdvanced} ref={showAdvancedLinkRef} href="true">{t`Show advanced data`}</a>
-            <a onClick={hideAdvanced} ref={hideAdvancedLinkRef} href="true" style={{display: 'none'}}>{t`Hide advanced data`}</a>
-            <div ref={advancedDataRef} className="mt-3" style={{display: 'none'}}>{getAdvancedMessage()}</div>
+            <a onClick={hideAdvanced} ref={hideAdvancedLinkRef} href="true" style={{ display: 'none' }}>{t`Hide advanced data`}</a>
+            <div ref={advancedDataRef} className="mt-3" style={{ display: 'none' }}>{getAdvancedMessage()}</div>
           </div>
           <div className="modal-footer">
             <button onClick={handleChangeServer} type="button" className="btn btn-secondary">{t`Change server`}</button>

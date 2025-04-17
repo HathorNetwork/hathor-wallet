@@ -41,8 +41,8 @@ import ModalError from './ModalError';
 import RequestErrorModal from './RequestError';
 
 const initialState = {
-  showModal: () => {},
-  hideModal: () => {},
+  showModal: () => { },
+  hideModal: () => { },
   store: {},
 };
 
@@ -201,7 +201,6 @@ export const GlobalModal = ({ children }) => {
 
   const renderComponent = () => {
     const { modalType, modalProps } = store || {};
-    console.log('[GlobalModal] renderComponent', { modalType, modalProps });
     const ModalComponent = MODAL_COMPONENTS[modalType];
 
     if (!modalType || !ModalComponent) {
@@ -226,7 +225,7 @@ export const GlobalModal = ({ children }) => {
       hideModal,
     }}>
       {renderComponent()}
-      { children }
+      {children}
     </GlobalModalContext.Provider>
   );
 };
