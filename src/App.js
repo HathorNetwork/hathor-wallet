@@ -41,7 +41,6 @@ import helpersUtils from './utils/helpers';
 import tokensUtils from './utils/tokens';
 import storageUtils from './utils/storage';
 import { useDispatch, useSelector } from 'react-redux';
-import RequestErrorModal from './components/RequestError';
 import { GlobalModalContext, MODAL_TYPES } from './components/GlobalModal';
 import createRequestInstance from './api/axiosInstance';
 import hathorLib from '@hathor/wallet-lib';
@@ -59,6 +58,8 @@ import { getGlobalWallet } from "./modules/wallet";
 import ReownConnect from './screens/ReownConnect';
 
 function Root() {
+  const location = useLocation();
+  console.log('[App] Current path:', location.pathname);
   const {
     ledgerClosed,
     walletStartState,
@@ -206,7 +207,7 @@ function Root() {
       <Route path="/wallet" element={<StartedComponent children={ <Wallet />} loaded={true} />} />
       <Route path="/settings" element={<StartedComponent children={ <Settings /> } loaded={true} />} />
       <Route path="/wallet/passphrase" element={<StartedComponent children={ <ChoosePassphrase />} loaded={true} />} />
-      <Route path="/network_settings" element={<StartedComponent children={ <NetworkSettings /> } loaded={true} />} />
+      <Route path="/network_settings" element={<NetworkSettings />} />
       <Route path="/transaction/:id" element={<StartedComponent children={ <TransactionDetail />} loaded={true} />} />
       <Route path="/addresses" element={<StartedComponent children={ <AllAddresses /> } loaded={true} /> } />
       <Route path="/new_wallet" element={<StartedComponent children={ <NewWallet />} loaded={false} />} />
@@ -231,17 +232,16 @@ function LoadedWalletComponent({ children }) {
   // For server screen we don't need to check version
   // We also allow the server screen to be reached from the locked screen
   // In the case of an unresponsive fullnode, which would block the wallet start
-  const isServerScreen = location.pathname === '/server';
+  const isServerScreen = location.pathname === '/network_settings';
 
-  // If was closed and is loaded we need to redirect to locked screen
-  if ((!isServerScreen) && (LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) && (!LOCAL_STORE.isHardwareWallet())) {
-    return <Navigate to={ '/locked/' } />;
-  }
-
-  // We allow server screen to be shown from locked screen to allow the user to
-  // change the server before from a locked wallet.
+  // Always allow /network_settings to be shown, even if locked
   if (isServerScreen) {
     return <DefaultComponent children={children} />;
+  }
+
+  // If was closed and is loaded we need to redirect to locked screen
+  if ((LOCAL_STORE.wasClosed() || LOCAL_STORE.isLocked()) && (!LOCAL_STORE.isHardwareWallet())) {
+    return <Navigate to={ '/locked/' } />;
   }
 
   const { isVersionAllowed, loadingAddresses } = useSelector(state => ({
@@ -299,12 +299,13 @@ function StartedComponent({children, loaded: routeRequiresWalletToBeLoaded}) {
 
   // The wallet is already loaded
   if (LOCAL_STORE.isLoadedSync()) {
-    // The server screen is a special case since we allow the user to change the
-    // connected server in case of unresponsiveness, this should be allowed from
-    // the locked screen since the wallet would not be able to be started otherwise
-    const isServerScreen = location.pathname === '/server';
+    const isServerScreen = location.pathname === '/network_settings';
+    // Always allow /network_settings to be shown, even if locked
+    if (isServerScreen) {
+      return <LoadedWalletComponent children={children} />;
+    }
     // Wallet is locked, go to locked screen
-    if (LOCAL_STORE.isLocked() && !isServerScreen && !LOCAL_STORE.isHardwareWallet()) {
+    if (LOCAL_STORE.isLocked() && !LOCAL_STORE.isHardwareWallet()) {
       return <Navigate to={ '/locked/' } replace />;
     }
 
@@ -388,7 +389,6 @@ function DefaultComponent({ children }) {
     <div className='component-div h-100'>
       <Navigation />
       { children }
-      <RequestErrorModal />
     </div>
   );
 }

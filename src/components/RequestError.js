@@ -5,14 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import createRequestInstance from '../api/axiosInstance';
 import SpanFmt from './SpanFmt';
 import { useDispatch, useSelector } from 'react-redux';
 import hathorLib from '@hathor/wallet-lib';
-import { useNavigate } from 'react-router-dom';
 
 /**
  * DOM Identifier for the modal
@@ -25,24 +24,29 @@ const MODAL_DOM_ID = '#requestErrorModal';
  *
  * @memberof Components
  */
-function RequestErrorModal() {
-  const navigate = useNavigate();
+function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose, onChangeServer }) {
+  console.log('[RequestErrorModal] Rendered');
   const dispatch = useDispatch();
-  const { lastFailedRequest, requestErrorStatusCode } = useSelector(state => ({
-    lastFailedRequest: state.lastFailedRequest,
-    requestErrorStatusCode: state.requestErrorStatusCode,
-  }));
-
   const advancedDataRef = useRef();
   const showAdvancedLinkRef = useRef();
   const hideAdvancedLinkRef = useRef();
+
+  useEffect(() => {
+    $(MODAL_DOM_ID).modal('show');
+  }, []);
 
   /**
    * User clicked to change server, then push to choose server screen
    */
   const handleChangeServer = () => {
+    console.log('[RequestErrorModal] handleChangeServer called');
     $(MODAL_DOM_ID).modal('hide');
-    navigate('/server/');
+    if (onClose) onClose();
+    if (onChangeServer) {
+      onChangeServer();
+    } else {
+      window.location.hash = '#/network_settings';
+    }
   }
 
   /**
@@ -50,6 +54,7 @@ function RequestErrorModal() {
    */
   const handleRetryRequest = () => {
     $(MODAL_DOM_ID).modal('hide');
+    if (onClose) onClose();
     modalHiddenRetry();
   }
 
@@ -145,11 +150,12 @@ function RequestErrorModal() {
 
   return (
     <div className="modal fade" id="requestErrorModal" tabIndex="-1" role="dialog" aria-labelledby="requestErrorModal" aria-hidden="true">
+      {console.log('[RequestErrorModal] JSX Rendered')}
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title" id="exampleModalLabel">{t`Request failed`}</h5>
-            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={onClose}>
               <span aria-hidden="true">&times;</span>
             </button>
           </div>

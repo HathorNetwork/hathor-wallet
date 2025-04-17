@@ -58,6 +58,8 @@ function NetworkSettings() {
     networkSettings: state.networkSettings
   }));
 
+  console.log('[NetworkSettings] networkSettings:', networkSettings);
+
   /* networkSelected {string} Network that the user wants to connect */
   const [networkSelected, setNetworkSelected] = useState('');
 
@@ -81,6 +83,13 @@ function NetworkSettings() {
       dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.READY }));
     };
   }, []);
+
+  if (!networkSettings || !networkSettings.data) {
+    console.log('[NetworkSettings] Missing networkSettings or networkSettings.data');
+    return <div>Loading network settings...</div>;
+  }
+
+  console.log('[NetworkSettings] Rendering with data:', networkSettings.data);
 
   /**
    * Called when user confirms that wants to connect
