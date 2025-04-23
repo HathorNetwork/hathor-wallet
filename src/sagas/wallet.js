@@ -25,7 +25,6 @@ import {
 import { eventChannel } from 'redux-saga';
 import LOCAL_STORE from '../storage';
 import {
-  NETWORK_SETTINGS,
   WALLET_SERVICE_FEATURE_TOGGLE,
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
   IGNORE_WS_TOGGLE_FLAG,
@@ -40,7 +39,6 @@ import {
   tokenMetadataUpdated,
   setUseWalletService,
   updateLoadedData,
-  setWallet,
   tokenFetchBalanceRequested,
   tokenFetchHistoryRequested,
   setServerInfo,
@@ -60,6 +58,7 @@ import {
   updateTxHistory,
   setNativeTokenData,
   addRegisteredTokens,
+  startWalletSuccess,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -350,8 +349,8 @@ export function* startWallet(action) {
   LOCAL_STORE.unlock();
 
   yield put(setNavigateTo('/wallet/', true));
-
   yield put(loadingAddresses(false));
+  yield put(startWalletSuccess());
 
   // The way the redux-saga fork model works is that if a saga has `forked`
   // another saga (using the `fork` effect), it will remain active until all
