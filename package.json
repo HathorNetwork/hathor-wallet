@@ -29,7 +29,7 @@
   },
   "private": true,
   "resolutions": {
-    "axios": "1.7.7",
+    "axios": "1.8.2",
     "@hathor/wallet-lib/axios": "1.7.7",
     "@hathor/hathor-rpc-handler/@hathor/wallet-lib/axios": "1.7.7",
     "bitcore-lib": "8.25.10",
@@ -45,7 +45,7 @@
     "@sentry/electron": "3.0.7",
     "@walletconnect/core": "2.17.3",
     "@walletconnect/utils": "2.17.3",
-    "axios": "1.7.7",
+    "axios": "1.8.2",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.6.1",
     "eslint-config-airbnb": "19.0.4",
