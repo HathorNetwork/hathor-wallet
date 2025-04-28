@@ -300,18 +300,13 @@ function StartedComponent({ children, loaded: routeRequiresWalletToBeLoaded }) {
 
   // The wallet is already loaded
   if (LOCAL_STORE.isLoadedSync()) {
-    const isNetworkSettingsScreen = location.pathname === '/network_settings';
-    // Always allow /network_settings to be shown, even if locked
-    if (isNetworkSettingsScreen) {
-      return <LoadedWalletComponent children={children} />;
-    }
     // Wallet is locked, go to locked screen
     if (LOCAL_STORE.isLocked() && !LOCAL_STORE.isHardwareWallet()) {
       return <Navigate to={'/locked/'} replace />;
     }
 
     // Route requires the wallet to be loaded, render it
-    if (routeRequiresWalletToBeLoaded || isNetworkSettingsScreen) {
+    if (routeRequiresWalletToBeLoaded) {
       return <LoadedWalletComponent children={children} />;
     }
 
