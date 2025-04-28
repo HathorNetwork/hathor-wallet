@@ -235,7 +235,7 @@ function LoadedWalletComponent({ children }) {
   // In the case of an unresponsive fullnode, which would block the wallet start
   const isRecoveryNetworkSettingsScreen = location.pathname === '/network_settings_recovery';
 
-  // Always allow /network_settings to be shown, even if locked
+  // Always allow /network_settings_recovery to be shown, even if locked
   if (isRecoveryNetworkSettingsScreen) {
     return <DefaultComponent children={children} />;
   }
