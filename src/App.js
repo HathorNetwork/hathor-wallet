@@ -233,10 +233,10 @@ function LoadedWalletComponent({ children }) {
   // For server screen we don't need to check version
   // We also allow the server screen to be reached from the locked screen
   // In the case of an unresponsive fullnode, which would block the wallet start
-  const isServerScreen = location.pathname === '/network_settings_recovery';
+  const isRecoveryNetworkSettingsScreen = location.pathname === '/network_settings_recovery';
 
   // Always allow /network_settings to be shown, even if locked
-  if (isServerScreen) {
+  if (isRecoveryNetworkSettingsScreen) {
     return <DefaultComponent children={children} />;
   }
 
@@ -300,9 +300,9 @@ function StartedComponent({ children, loaded: routeRequiresWalletToBeLoaded }) {
 
   // The wallet is already loaded
   if (LOCAL_STORE.isLoadedSync()) {
-    const isServerScreen = location.pathname === '/network_settings';
+    const isNetworkSettingsScreen = location.pathname === '/network_settings';
     // Always allow /network_settings to be shown, even if locked
-    if (isServerScreen) {
+    if (isNetworkSettingsScreen) {
       return <LoadedWalletComponent children={children} />;
     }
     // Wallet is locked, go to locked screen
@@ -311,7 +311,7 @@ function StartedComponent({ children, loaded: routeRequiresWalletToBeLoaded }) {
     }
 
     // Route requires the wallet to be loaded, render it
-    if (routeRequiresWalletToBeLoaded || isServerScreen) {
+    if (routeRequiresWalletToBeLoaded || isNetworkSettingsScreen) {
       return <LoadedWalletComponent children={children} />;
     }
 
