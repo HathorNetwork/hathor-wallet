@@ -38,10 +38,11 @@ import { TokenCreationFeedbackModal } from './Reown/TokenCreationFeedbackModal';
 import { MessageSigningFeedbackModal } from './Reown/MessageSigningFeedbackModal';
 import { TransactionFeedbackModal } from './Reown/TransactionFeedbackModal';
 import ModalError from './ModalError';
+import RequestErrorModal from './RequestError';
 
 const initialState = {
-  showModal: () => {},
-  hideModal: () => {},
+  showModal: () => { },
+  hideModal: () => { },
   store: {},
 };
 
@@ -76,6 +77,7 @@ export const MODAL_TYPES = {
   'TOKEN_CREATION_FEEDBACK': 'TOKEN_CREATION_FEEDBACK',
   'MESSAGE_SIGNING_FEEDBACK': 'MESSAGE_SIGNING_FEEDBACK',
   'ERROR_MODAL': 'ERROR_MODAL',
+  'REQUEST_ERROR': 'REQUEST_ERROR',
 };
 
 export const MODAL_COMPONENTS = {
@@ -109,6 +111,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.TOKEN_CREATION_FEEDBACK]: TokenCreationFeedbackModal,
   [MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK]: MessageSigningFeedbackModal,
   [MODAL_TYPES.ERROR_MODAL]: ModalError,
+  [MODAL_TYPES.REQUEST_ERROR]: RequestErrorModal,
 };
 
 export const GlobalModalContext = createContext(initialState);
@@ -197,7 +200,7 @@ export const GlobalModal = ({ children }) => {
   }, []);
 
   const renderComponent = () => {
-    const { modalType } = store || {};
+    const { modalType, modalProps } = store || {};
     const ModalComponent = MODAL_COMPONENTS[modalType];
 
     if (!modalType || !ModalComponent) {
@@ -207,7 +210,7 @@ export const GlobalModal = ({ children }) => {
     const componentProps = {
       onClose: hideModal,
       manageDomLifecycle,
-      ...store.modalProps,
+      ...modalProps,
     };
 
     return (
@@ -222,7 +225,7 @@ export const GlobalModal = ({ children }) => {
       hideModal,
     }}>
       {renderComponent()}
-      { children }
+      {children}
     </GlobalModalContext.Provider>
   );
 };
