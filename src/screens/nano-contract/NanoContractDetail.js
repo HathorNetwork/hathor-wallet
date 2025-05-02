@@ -7,16 +7,14 @@
 
 import React, { useContext, useEffect } from 'react';
 import { t } from 'ttag'
-import $ from 'jquery';
 import ResetNavigationLink from '../../components/ResetNavigationLink';
 import ReactLoading from 'react-loading';
 import colors from '../../index.module.scss';
-import ModalChangeAddress from '../../components/nano-contract/ModalChangeAddress';
 import NanoContractHistory from '../../components/nano-contract/NanoContractHistory';
 import helpers from '../../utils/helpers';
 import nanoUtils from '../../utils/nanoContracts';
 import hathorLib from '@hathor/wallet-lib';
-import path from 'path';
+import path from 'path-browserify';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { nanoContractDetailRequest, nanoContractDetailSetStatus, nanoContractUnregister } from '../../actions';
@@ -136,35 +134,6 @@ function NanoContractDetail() {
     return renderNCData();
   }
 
-  const formatNCField = (field, value) => {
-    const blueprintInformation = blueprintsData[nc.blueprintId];
-    if (value === undefined) {
-      // Error getting field
-      // Since we are using the attributes from the blueprint information API to
-      // get the state, we know that the fields exist. If value is undefined, it
-      // means they are dict fields, which we should just show the types of them for now
-      return get(blueprintInformation.attributes, field);
-    }
-
-    if (value == null) {
-      // If value is null or undefined, we show empty string
-      return null;
-    }
-
-    // Get type of value but removing possible optional mark (?) to format the value correctly
-    const type = blueprintInformation.attributes[field].replace('?', '');
-
-    if (type === 'Timestamp') {
-      return hathorLib.dateUtils.parseTimestamp(value);
-    }
-
-    if (type === 'Amount') {
-      return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
-    }
-
-    return value;
-  }
-
   /**
    * Method called when user clicked on the token in the balance list
    *
@@ -198,9 +167,10 @@ function NanoContractDetail() {
 
   const renderNanoAttributes = () => {
     const data = nanoContractDetailState.state;
+    const blueprintInformation = blueprintsData[nc.blueprintId];
     return Object.keys(data.fields).map((field) => {
       const value = get(data.fields[field], 'value', undefined);
-      return <p key={field}><strong>{field}: </strong>{formatNCField(field, value)}</p>;
+      return <p key={field}><strong>{field}: </strong>{nanoUtils.formatNCField(field, value, blueprintInformation, decimalPlaces)}</p>;
     });
   }
 

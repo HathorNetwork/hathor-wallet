@@ -1,10 +1,11 @@
 import { NETWORK_SETTINGS_STATUS } from '../constants';
-import { types, isVersionAllowedUpdate, selectToken, setNetworkSettingsStatus } from '../actions';
+import { types, isVersionAllowedUpdate, selectToken, setNetworkSettingsStatus, serverInfoUpdated } from '../actions';
 import { all, call, put, select, take, takeEvery } from 'redux-saga/effects';
 import hathorLib from '@hathor/wallet-lib';
 import { getGlobalWallet } from '../modules/wallet';
 import helpers from '../utils/helpers';
 import walletUtils from '../utils/wallet'
+import { t } from 'ttag';
 
 /**
  * Change network settings with new data
@@ -29,8 +30,6 @@ export function* changeNetworkSettings({ data, pin }) {
     hathorLib.config.getWalletServiceBaseWsUrl() :
     '';
 
-  const currentNetwork = wallet.getNetwork();
-
   // Update new server in storage and in the config singleton
   wallet.changeServer(data.node);
 
@@ -41,7 +40,17 @@ export function* changeNetworkSettings({ data, pin }) {
 
   let versionData;
   try {
-    versionData = yield call([wallet, wallet.getVersionData]);
+    const versionUrl = new URL('version', data.node).toString();
+    /*
+     * Using fetch instead of the wallet-lib axios instance to bypass
+     * the axios interceptor that is used to check for network errors.
+     * If this request fails, we don't want the network error modal to be shown.
+     */
+    const response = yield call(fetch, versionUrl);
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.status}`);
+    }
+    versionData = yield call([response, response.json]);
   } catch (e) {
     // Invalid node, so go back to the previous server and return
     wallet.changeServer(currentServer);
@@ -105,6 +114,8 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
     yield put(isVersionAllowedUpdate({ allowed: undefined }));
     yield put(selectToken(hathorLib.constants.NATIVE_TOKEN_UID));
     yield call(walletUtils.changeServer, wallet, pin, true);
+    // Notify that server info was updated
+    yield put(serverInfoUpdated());
   } catch (e) {
     console.error(e);
     // Restores storage and states as it was before

@@ -11,15 +11,18 @@ import createSagaMiddleware from 'redux-saga';
 import rootReducer from '../reducers/index';
 import rootSagas from '../sagas';
 
-
-const saga = createSagaMiddleware();
-const middlewares = [saga, thunk];
+export const sagaMiddleware = createSagaMiddleware();
+const middlewares = [sagaMiddleware, thunk];
 
 const store = configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(middlewares)
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    // BigInt is currently not serializable, so we get serialization warnings
+    // for BigInt values stored in redux. This flag silences them.
+    serializableCheck: false,
+  }).concat(middlewares)
 });
 
-saga.run(rootSagas);
+sagaMiddleware.run(rootSagas);
 
 export default store;

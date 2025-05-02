@@ -60,7 +60,7 @@ If you get some error like this `error while loading shared libraries: libxshmfe
 
 To use the Chrome Dev Tools associated with Electron for debugging purposes, the unsafe mode may be enabled through CLI arguments:
 ```sh
-npm run electron-dev -- --unsafe-mode --hathor-debug
+npm run electron-debug
 ```
 
 ### Debug mode on installed app
