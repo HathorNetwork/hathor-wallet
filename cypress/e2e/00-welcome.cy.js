@@ -258,6 +258,6 @@ describe('create a new wallet and back it up', () => {
     cy.contains('Loading transactions'); // For a few seconds this screen will be shown
 
     // There is a timeout in place that needs to be waited. The error should be handled gracefully
-    cy.contains('Request failed', { timeout: 15000 });
+    cy.contains('There has been a problem loading your wallet', { timeout: 15000 });
   })
 })

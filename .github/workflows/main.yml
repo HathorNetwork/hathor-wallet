@@ -27,8 +27,14 @@ jobs:
       uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b
       with:
         node-version: ${{ matrix.node-version }}
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libusb-1.0-0-dev libudev-dev
     - name: Install dependencies
       run: npm install
+    - name: Install ttag-cli globally
+      run: npm install -g ttag-cli
     - name: Install gettext
       run: sudo apt-get install gettext
     - name: Check version

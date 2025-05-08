@@ -12,7 +12,7 @@
 
 import { t } from 'ttag';
 import scssColors from './index.module.scss';
-import { version } from '../package.json';
+import packageInfo from '../package.json';
 
 /**
  * Quantity of elements to show in the wallet history
@@ -22,7 +22,7 @@ export const WALLET_HISTORY_COUNT = 10;
 /**
  * Wallet version
  */
-export const VERSION = version;
+export const VERSION = packageInfo.version;
 
 /**
  * Before this version the data in localStorage from the wallet is not compatible
@@ -222,11 +222,13 @@ export const IGNORE_WS_TOGGLE_FLAG = 'featureFlags:ignoreWalletServiceFlag';
 export const WALLET_SERVICE_FEATURE_TOGGLE = 'wallet-service-desktop.rollout';
 export const ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE = 'atomic-swap-service-desktop.rollout';
 export const NANO_CONTRACTS_FEATURE_TOGGLE = 'nano-contracts-desktop.rollout';
+export const REOWN_FEATURE_TOGGLE = 'wallet-desktop-reown.rollout';
 
 export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
   [ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE]: false,
   [NANO_CONTRACTS_FEATURE_TOGGLE]: false,
+  [REOWN_FEATURE_TOGGLE]: false,
 };
 
 /**
@@ -287,7 +289,7 @@ export const NETWORK_SETTINGS = {
  * Base statuses for saga reducer handlers
  * Used by all other statuses objects
  */
-const BASE_STATUS = {
+export const BASE_STATUS = {
   READY: 'ready',
   ERROR: 'error',
   LOADING: 'loading',
@@ -310,3 +312,16 @@ export const NETWORK_SETTINGS_STATUS = {
   WAITING_NETWORK_CONFIRMATION: 'waitingNetworkConfirmation',
   NETWORK_CONFIRMED: 'networkConfirmed'
 }
+
+// Reown constants
+export const REOWN_PROJECT_ID = '8264fff563181da658ce64ee80e80458';
+
+/**
+ * Reown connection states
+ */
+export const REOWN_CONNECTION_STATE = {
+  IDLE: 'idle',             // Initial state, no connection attempt in progress
+  CONNECTING: 'connecting', // Connection attempt in progress
+  SUCCESS: 'success',       // Connection successful
+  FAILED: 'failed',         // Connection failed
+};

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import path from 'path';
+import path from 'path-browserify';
 import hathorLib from '@hathor/wallet-lib';
 import { get } from 'lodash';
 import store from '../store/index';
@@ -406,6 +406,21 @@ const helpers = {
   plural(qty, singleWord, pluralWord) {
     return qty === 1 ? singleWord : pluralWord;
   },
+
+  /**
+   * Truncates a text by showing the first and last n characters with ellipsis in between
+   * @param {string} text - The text to truncate
+   * @param {number} startChars - Number of characters to show at the start
+   * @param {number} endChars - Number of characters to show at the end
+   * @returns {string} The truncated text
+   */
+  truncateText(text, startChars = 8, endChars = 4) {
+    if (!text) return '';
+    if (text.length <= startChars + endChars) return text;
+    
+    return `${text.slice(0, startChars)}...${text.slice(-endChars)}`;
+  },
 }
+
 
 export default helpers;
