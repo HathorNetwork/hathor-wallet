@@ -32,7 +32,7 @@ import {
   SendTransactionError,
   InsufficientFundsError,
   SignMessageWithAddressError,
-} from '@hathor/hathor-rpc-handler';
+} from 'hathor-rpc-handler-test';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
 import {
@@ -74,6 +74,7 @@ const AVAILABLE_METHODS = {
   HATHOR_SIGN_ORACLE_DATA: 'htr_signOracleData',
   HATHOR_CREATE_TOKEN: 'htr_createToken',
   HATHOR_SEND_TRANSACTION: 'htr_sendTransaction',
+  HATHOR_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX: 'htr_createNanoContractCreateTokenTx',
 };
 
 const AVAILABLE_EVENTS = [];
@@ -461,8 +462,8 @@ export function* processRequest(action) {
       case InsufficientFundsError:
       case SendTransactionError: {
         yield put(setSendTxStatusFailed());
-        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
-          isLoading: false, 
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, {
+          isLoading: false,
           isError: true,
           errorMessage: e instanceof InsufficientFundsError ? t`Insufficient funds to complete the transaction.` : null
         }));
@@ -602,6 +603,30 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           payload: {
             accept: createTokenResponseTemplate(true),
             deny: createTokenResponseTemplate(false),
+            data: request.data,
+            dapp: requestMetadata,
+          }
+        });
+      } break;
+
+      case TriggerTypes.CreateNanoContractCreateTokenTxConfirmationPrompt: {
+        const createNanoContractCreateTokenTxResponseTemplate = (accepted) => (data) => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.CreateNanoContractCreateTokenTxConfirmationResponse,
+            data: {
+              accepted,
+              nanoContract: data?.nanoContract,
+              token: data?.token,
+            }
+          });
+        };
+
+        dispatch({
+          type: types.SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL,
+          payload: {
+            accept: createNanoContractCreateTokenTxResponseTemplate(true),
+            deny: createNanoContractCreateTokenTxResponseTemplate(false),
             data: request.data,
             dapp: requestMetadata,
           }
@@ -1045,6 +1070,16 @@ export function* onSessionDelete(action) {
   yield call(onCancelSession, action);
 }
 
+/**
+ * Handles a request to create a nano contract and token in a single transaction
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
+export function* onCreateNanoContractCreateTokenTxRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.CREATE_NANO_CONTRACT_CREATE_TOKEN_TX);
+}
+
 export function* saga() {
   yield all([
     fork(featureToggleUpdateListener),
@@ -1055,6 +1090,7 @@ export function* saga() {
     takeLatest(types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL, onSignOracleDataRequest),
     takeLatest(types.SHOW_CREATE_TOKEN_REQUEST_MODAL, onCreateTokenRequest),
     takeLatest(types.SHOW_SEND_TRANSACTION_REQUEST_MODAL, onSendTransactionRequest),
+    takeLatest(types.SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL, onCreateNanoContractCreateTokenTxRequest),
     takeEvery(types.REOWN_SESSION_PROPOSAL, onSessionProposal),
     takeEvery(types.REOWN_SESSION_DELETE, onSessionDelete),
     takeEvery(types.REOWN_CANCEL_SESSION, onCancelSession),

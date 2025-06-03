@@ -9,6 +9,7 @@ const webpack = require('webpack');
 const LavaMoatPlugin = require('@lavamoat/webpack')
 const path = require('path');
 const stdLibBrowser = require('node-stdlib-browser');
+const { StatsWriterPlugin } = require('webpack-stats-plugin');
 
 module.exports = function override(config, env) {
   // Enable source maps for better debugging
@@ -143,11 +144,21 @@ module.exports = function override(config, env) {
   // hot reloading feature in dev.
   if (env === 'production') {
     config.plugins = [
+      new StatsWriterPlugin({
+        filename: 'stats.json',
+        fields: ['modules', 'chunks'],
+        stats: {
+          modules: true,
+          moduleTrace: true,
+          source: false, // Reduce file size
+        },
+      }),
+      ...basePlugins,
       new LavaMoatPlugin({
         generatePolicy: true,
         HtmlWebpackPluginInterop: true,
         readableResourceIds: true,
-        diagnosticsVerbosity: 1,
+        diagnosticsVerbosity: 3,
         lockdown: {
           consoleTaming: 'unsafe',
           errorTrapping: 'none',
@@ -155,7 +166,6 @@ module.exports = function override(config, env) {
           overrideTaming: 'severe',
         }
       }),
-      ...basePlugins
     ];
   } else {
     config.plugins = basePlugins;
