@@ -109,46 +109,54 @@ const ArgumentsTable = ({ args, methodInfo, decimalPlaces }) => {
 /**
  * Component for Caller Address Section (only shown for SendNanoContractTxModal)
  */
-const CallerAddressSection = ({ selectedAddress, onSelectAddress, nanoContracts, nanoContract, dispatch }) => (
-  <div className="mb-3">
-    <strong>{t`Caller`}</strong>
-    <div className="d-flex align-items-center">
-      <div className="text-monospace flex-grow-1">{selectedAddress || '-'}</div>
-      <button 
-        className="btn btn-link btn-sm p-0 ml-2" 
-        onClick={onSelectAddress}
-        title={t`Select Address`}
-      >
-        <i className="fa fa-pencil" style={{ fontSize: '1.2rem' }}></i>
-      </button>
-    </div>
-    
-    {nanoContract.ncId && !nanoContracts[nanoContract.ncId] && (
-      <div className="alert alert-info mt-3 mb-0">
-        <i className="fa fa-info-circle mr-2"></i>
-        {t`This nano contract is not registered in your wallet. Would you like to register it?`}
-        <div className="mt-2">
-                      <button 
-              className="btn btn-sm btn-outline-primary" 
-              onClick={() => {
-                console.log('Button clicked!', { ncId: nanoContract.ncId, address: selectedAddress });
-                dispatch({ 
-                  type: types.NANOCONTRACT_REGISTER_REQUEST, 
-                  payload: { 
-                    ncId: nanoContract.ncId, 
-                    address: selectedAddress 
-                  }
-                });
-              }}
-              disabled={!selectedAddress}
-            >
-              {t`Register Nano Contract`}
-            </button>
-        </div>
+const CallerAddressSection = ({ selectedAddress, onSelectAddress, nanoContracts, nanoContract, dispatch }) => {
+  const nanoContractsRegisterMetadata = useSelector((state) => state.nanoContractsRegisterMetadata);
+  const isRegistering = nanoContractsRegisterMetadata?.status === 'loading' && nanoContractsRegisterMetadata?.ncId === nanoContract.ncId;
+  const registrationError = nanoContractsRegisterMetadata?.status === 'error' && nanoContractsRegisterMetadata?.ncId === nanoContract.ncId;
+
+  return (
+    <div className="mb-3">
+      <strong>{t`Caller`}</strong>
+      <div className="d-flex align-items-center">
+        <div className="text-monospace flex-grow-1">{selectedAddress || '-'}</div>
+        <button 
+          className="btn btn-link btn-sm p-0 ml-2" 
+          onClick={onSelectAddress}
+          title={t`Select Address`}
+        >
+          <i className="fa fa-pencil" style={{ fontSize: '1.2rem' }}></i>
+        </button>
       </div>
-    )}
-  </div>
-);
+      
+      {nanoContract.ncId && !nanoContracts[nanoContract.ncId] && (
+        <div className="alert alert-info mt-3 mb-0">
+          <i className="fa fa-info-circle mr-2"></i>
+          {t`This nano contract is not registered in your wallet. Would you like to register it?`}
+          <div className="mt-2">
+            <button 
+              className="btn btn-sm btn-outline-primary" 
+              onClick={() => dispatch({ 
+                type: types.NANOCONTRACT_REGISTER_REQUEST, 
+                payload: { 
+                  ncId: nanoContract.ncId, 
+                  address: selectedAddress 
+                }
+              })}
+              disabled={!selectedAddress || isRegistering}
+            >
+              {isRegistering ? t`Registering...` : t`Register Nano Contract`}
+            </button>
+          </div>
+          {registrationError && (
+            <div className="text-danger mt-2">
+              <small>{nanoContractsRegisterMetadata.error}</small>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 /**
  * Component for dApp Info

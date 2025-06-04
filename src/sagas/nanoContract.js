@@ -41,7 +41,6 @@ const NANOCONTRACT_WAIT_TX_CONFIRMED_DELAY = 5000;
  */
 export function* registerNanoContract({ payload }) {
   const { address, ncId } = payload;
-  console.log('Saga received registration request:', { address, ncId });
 
   const blueprintsData = yield select((state) => state.blueprintsData);
 
