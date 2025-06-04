@@ -7,8 +7,54 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { JSONBigInt } from '@hathor/wallet-lib/lib/utils/bigint';
 import hathorLib from '@hathor/wallet-lib';
+
+/**
+ * Component for displaying a single token parameter
+ */
+const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) => {
+  if (value === undefined || value === null) return null;
+
+  const renderValue = () => {
+    if (isBoolean) {
+      return (
+        <span className={`badge ${value ? 'badge-success' : 'badge-secondary'}`}>
+          {value ? t`Yes` : t`No`}
+        </span>
+      );
+    }
+    
+    if (isAddress && value) {
+      return (
+        <div className="d-flex align-items-center">
+          <code className="text-monospace small flex-grow-1" style={{ wordBreak: 'break-all' }}>
+            {value}
+          </code>
+          <button 
+            className="btn btn-link btn-sm p-0 ml-2" 
+            onClick={() => navigator.clipboard.writeText(value)}
+            title={t`Copy to clipboard`}
+          >
+            <i className="fa fa-copy"></i>
+          </button>
+        </div>
+      );
+    }
+    
+    return <span>{value}</span>;
+  };
+
+  return (
+    <div className="mb-3">
+      <div className="d-flex justify-content-between align-items-start">
+        <strong className="text-muted small text-uppercase">{label}</strong>
+      </div>
+      <div className="mt-1">
+        {renderValue()}
+      </div>
+    </div>
+  );
+};
 
 /**
  * Component for displaying Token creation data
@@ -16,22 +62,12 @@ import hathorLib from '@hathor/wallet-lib';
  * @param {Object} data The token data to be displayed
  */
 export default function CreateTokenRequestData({ data }) {
-  // Process the data to handle BigInt values
-  const processedData = React.useMemo(() => {
-    try {
-      return JSONBigInt.stringify(data, 2);
-    } catch (error) {
-      console.error('Error stringifying token data:', error);
-      return 'Error displaying token data. Please check console for details.';
-    }
-  }, [data]);
-
   /**
    * Format token amount with proper decimal places
    */
   const formatAmount = (amount) => {
     try {
-      if (amount === undefined || amount === null) return 'N/A';
+      if (amount === undefined || amount === null) return null;
       return hathorLib.numberUtils.prettyValue(amount);
     } catch (error) {
       console.error('Error formatting amount:', error);
@@ -39,83 +75,116 @@ export default function CreateTokenRequestData({ data }) {
     }
   };
 
-  return (
-    <div style={{ width: '100%' }}>
-      {Object.keys(data).length > 0 ? (
-        <div>
-          {data.name && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Name`}</p>
-              <p style={{ margin: 0 }}>{data.name}</p>
-            </div>
-          )}
-          
-          {data.symbol && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Symbol`}</p>
-              <p style={{ margin: 0 }}>{data.symbol}</p>
-            </div>
-          )}
-          
-          {data.amount !== undefined && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Amount`}</p>
-              <p style={{ margin: 0 }}>{formatAmount(data.amount)}</p>
-            </div>
-          )}
-          
-          {data.address && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Address`}</p>
-              <p style={{ margin: 0, wordBreak: 'break-all' }}>{data.address}</p>
-            </div>
-          )}
-          
-          {data.mintAuthorityAddress && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Mint Authority Address`}</p>
-              <p style={{ margin: 0, wordBreak: 'break-all' }}>{data.mintAuthorityAddress}</p>
-            </div>
-          )}
-          
-          {data.mintAuthorityIndex !== undefined && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Mint Authority Index`}</p>
-              <p style={{ margin: 0 }}>{data.mintAuthorityIndex}</p>
-            </div>
-          )}
-          
-          {data.meltAuthorityAddress && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Melt Authority Address`}</p>
-              <p style={{ margin: 0, wordBreak: 'break-all' }}>{data.meltAuthorityAddress}</p>
-            </div>
-          )}
-          
-          {data.meltAuthorityIndex !== undefined && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Melt Authority Index`}</p>
-              <p style={{ margin: 0 }}>{data.meltAuthorityIndex}</p>
-            </div>
-          )}
-          
-          <div style={{ marginTop: '12px' }}>
-            <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Full Data`}</p>
-            <pre style={{ 
-              backgroundColor: '#f8f9fa', 
-              padding: '8px', 
-              borderRadius: '4px',
-              margin: 0,
-              maxHeight: '300px',
-              overflow: 'auto',
-              fontSize: '14px'
-            }}>
-              {processedData}
-            </pre>
-          </div>
-        </div>
-      ) : (
+  /**
+   * Check if token has mint authority
+   */
+  const hasMintAuthority = () => {
+    return data.createMint === true || data.mintAuthorityAddress || data.mintAuthorityIndex !== undefined;
+  };
+
+  /**
+   * Check if token has melt authority
+   */
+  const hasMeltAuthority = () => {
+    return data.createMelt === true || data.meltAuthorityAddress || data.meltAuthorityIndex !== undefined;
+  };
+
+  /**
+   * Check if there are additional settings to show
+   */
+  const hasAdditionalSettings = () => {
+    return data.address || 
+           data.changeAddress !== undefined || 
+           data.allowExternalMintAuthorityAddress !== undefined || 
+           data.allowExternalMeltAuthorityAddress !== undefined ||
+           data.mintAuthorityIndex !== undefined ||
+           data.meltAuthorityIndex !== undefined ||
+           data.data !== undefined;
+  };
+
+  if (!data || Object.keys(data).length === 0) {
+    return (
+      <div className="text-center text-muted py-3">
+        <i className="fa fa-info-circle mb-2" style={{ fontSize: '2rem' }}></i>
         <p>{t`No token data available.`}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="token-creation-data">
+      {/* Basic Token Information */}
+      <div className="mb-4">
+        <TokenParameter label={t`Name`} value={data.name} />
+        <TokenParameter label={t`Symbol`} value={data.symbol} />
+        <TokenParameter label={t`Amount`} value={formatAmount(data.amount)} />
+      </div>
+
+      {/* Authority Settings */}
+      {(hasMintAuthority() || hasMeltAuthority()) && (
+        <div className="mb-4">
+          {hasMintAuthority() && (
+            <div className="mb-3">
+              <TokenParameter label={t`Create mint authority?`} value={data.createMint} isBoolean />
+              {data.mintAuthorityAddress && (
+                <TokenParameter 
+                  label={t`Mint Authority Address`} 
+                  value={data.mintAuthorityAddress} 
+                  isAddress 
+                />
+              )}
+              {data.mintAuthorityIndex !== undefined && (
+                <TokenParameter 
+                  label={t`Mint Authority Index`} 
+                  value={data.mintAuthorityIndex} 
+                />
+              )}
+            </div>
+          )}
+
+          {hasMeltAuthority() && (
+            <div className="mb-3">
+              <TokenParameter label={t`Create melt authority?`} value={data.createMelt} isBoolean />
+              {data.meltAuthorityAddress && (
+                <TokenParameter 
+                  label={t`Melt Authority Address`} 
+                  value={data.meltAuthorityAddress} 
+                  isAddress 
+                />
+              )}
+              {data.meltAuthorityIndex !== undefined && (
+                <TokenParameter 
+                  label={t`Melt Authority Index`} 
+                  value={data.meltAuthorityIndex} 
+                />
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Additional Settings */}
+      {hasAdditionalSettings() && (
+        <div className="mb-4">
+          <TokenParameter label={t`Address`} value={data.address} isAddress />
+          <TokenParameter label={t`Change Address`} value={data.changeAddress} isAddress />
+          <TokenParameter 
+            label={t`Allow External Mint Authority Address`} 
+            value={data.allowExternalMintAuthorityAddress} 
+            isBoolean 
+          />
+          <TokenParameter 
+            label={t`Allow External Melt Authority Address`} 
+            value={data.allowExternalMeltAuthorityAddress} 
+            isBoolean 
+          />
+          {data.data && (
+            <TokenParameter 
+              label={t`Data`} 
+              value={typeof data.data === 'string' ? data.data : JSON.stringify(data.data)} 
+            />
+          )}
+        </div>
       )}
     </div>
   );

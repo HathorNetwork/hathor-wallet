@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import hathorLib from '@hathor/wallet-lib';
 import { BaseNanoContractModal } from './BaseNanoContractModal';
 import { setNewNanoContractStatusReady } from '../../../actions';
 import CreateTokenRequestData from '../CreateTokenRequestData';
@@ -56,10 +57,16 @@ export function CreateNanoContractCreateTokenTxModal({ data, onAccept, onReject 
   );
 
   // Function to prepare the accept data with both nano and token data
-  const prepareAcceptData = (nanoWithCaller) => ({
-    nanoContract: nanoWithCaller,
-    token: token
-  });
+  const prepareAcceptData = (nanoWithCaller) => {
+    // The saga expects 'nanoContract' and 'token' properties
+    // But the underlying function might expect the original structure
+    const result = requestData;
+    
+    // Update the nano contract with the caller information
+    result.nano = nanoWithCaller;
+    
+    return result;
+  };
 
   return (
     <BaseNanoContractModal
