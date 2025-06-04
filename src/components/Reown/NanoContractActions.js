@@ -31,7 +31,7 @@ const actionTitleMap = (tokenSymbol) => ({
 
 /**
  * Get action title depending on the action type.
- * @param {Object} tokens A map of token metadata by token uid
+ * @param {Array} tokens Array of registered tokens with {uid, name, symbol}
  * @param {Object} action An action object
  *
  * @returns {string} A formatted title to be used in the action card
@@ -41,16 +41,21 @@ const getActionTitle = (tokens, action) => {
     return '';
   }
 
-  // Handle case where tokens is undefined or null
-  const tokenMetadata = tokens && tokens[action.token];
+  // Find the token in the registered tokens array
+  const registeredToken = tokens.find(t => t.uid === action.token);
   let tokenSymbol;
 
-  if (tokenMetadata) {
-    tokenSymbol = tokenMetadata.symbol;
+  if (registeredToken) {
+    tokenSymbol = registeredToken.symbol;
   } else if (action.token === NATIVE_TOKEN_UID) {
     tokenSymbol = DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
   } else {
-    tokenSymbol = helpers.truncateText(action.token, 8, 4);
+    // Check if it's the native token with different format
+    if (action.token === '00') {
+      tokenSymbol = DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
+    } else {
+      tokenSymbol = helpers.truncateText(action.token, 8, 4);
+    }
   }
 
   // For authority actions, include the authority type in the title
@@ -103,9 +108,9 @@ const ActionItem = ({ action, isNft, title }) => {
         ) : action.type === NanoContractActionType.WITHDRAWAL ? (
           <i className="fa fa-arrow-down text-primary"></i>
         ) : action.type === NanoContractActionType.GRANT_AUTHORITY ? (
-          <i className="fa fa-key text-warning"></i>
+          <i className="fa fa-arrow-up text-success"></i>
         ) : action.type === NanoContractActionType.INVOKE_AUTHORITY ? (
-          <i className="fa fa-unlock text-info"></i>
+          <i className="fa fa-arrow-down text-primary"></i>
         ) : (
           <i className="fa fa-question-circle text-muted"></i>
         )}
@@ -197,6 +202,7 @@ export function NanoContractActions({ ncActions, tokens, error }) {
   }
 
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
+  const registeredTokens = useSelector((state) => state.tokens);
   
   // A callback to check if the action token is an NFT
   const isNft = useCallback(
@@ -206,8 +212,8 @@ export function NanoContractActions({ ncActions, tokens, error }) {
   
   // A callback to retrieve the action title by its token symbol or hash
   const getTitle = useCallback(
-    (action) => getActionTitle(tokens || {}, action),
-    [tokens]
+    (action) => getActionTitle(registeredTokens || [], action),
+    [registeredTokens]
   );
 
   return (

@@ -41,6 +41,7 @@ const NANOCONTRACT_WAIT_TX_CONFIRMED_DELAY = 5000;
  */
 export function* registerNanoContract({ payload }) {
   const { address, ncId } = payload;
+  console.log('Saga received registration request:', { address, ncId });
 
   const blueprintsData = yield select((state) => state.blueprintsData);
 
@@ -240,10 +241,17 @@ export function* fetchBlueprintInformation({ payload: blueprintId }) {
   }
 
   try {
-    const blueprintInformation = yield call(hathorLib.ncApi.getBlueprintInformation, blueprintId);
+    const blueprintInformation = yield call([ncApi, ncApi.getBlueprintInformation], blueprintId);
     yield put(addBlueprintInformation(blueprintInformation));
-  } catch(e) {
-    console.error('Error while loading blueprint information.', e);
+    console.debug(`Success fetching blueprint info. id = ${blueprintId}`);
+  } catch (error) {
+    if (error instanceof hathorLibErrors.NanoRequest404Error) {
+      console.debug(`Blueprint not found. id = ${blueprintId}`);
+      // For now, we'll just log the 404 - the UI can handle missing blueprint info gracefully
+    } else {
+      console.error('Error while loading blueprint information.', error);
+    }
+    // Note: We don't throw the error here so the modal can still function without blueprint info
   }
 }
 
