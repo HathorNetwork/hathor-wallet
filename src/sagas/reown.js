@@ -32,6 +32,7 @@ import {
   SendTransactionError,
   InsufficientFundsError,
   SignMessageWithAddressError,
+  CreateNanoContractCreateTokenTxError,
 } from 'hathor-rpc-handler-test';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
@@ -406,6 +407,10 @@ export function* processRequest(action) {
         yield put(setSendTxStatusSuccess());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: false, isError: false }));
         break;
+      case RpcResponseTypes.CreateNanoContractCreateTokenTxResponse:
+        yield put(setNewNanoContractStatusSuccess());
+        yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: false }));
+        break;
       case RpcResponseTypes.SignWithAddressResponse:
         // Show success feedback for message signing
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: false }));
@@ -424,6 +429,7 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
+    console.log('ERROED: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {
@@ -486,6 +492,21 @@ export function* processRequest(action) {
           retryHandler,
           types.REOWN_SIGN_MESSAGE_RETRY,
           types.REOWN_SIGN_MESSAGE_RETRY_DISMISS,
+        );
+
+        if (retry) {
+          shouldAnswer = false;
+          yield* processRequest(action);
+        }
+      } break;
+      case CreateNanoContractCreateTokenTxError: {
+        yield put(setNewNanoContractStatusFailure());
+        yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
+
+        const retry = yield call(
+          retryHandler,
+          types.REOWN_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_RETRY,
+          types.REOWN_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_RETRY_DISMISS,
         );
 
         if (retry) {
@@ -616,7 +637,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
             type: TriggerResponseTypes.CreateNanoContractCreateTokenTxConfirmationResponse,
             data: {
               accepted,
-              nanoContract: data?.nanoContract,
+              nano: data?.nano,
               token: data?.token,
             }
           });
@@ -683,6 +704,18 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.SendTransactionLoadingFinishedTrigger:
+        dispatch(hideGlobalModal());
+        resolve();
+        break;
+
+      case TriggerTypes.CreateNanoContractCreateTokenTxLoadingTrigger:
+        dispatch(setNewNanoContractStatusLoading());
+        dispatch(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: true }));
+        resolve();
+        break;
+
+      case TriggerTypes.CreateNanoContractCreateTokenTxLoadingFinishedTrigger:
+        dispatch(setNewNanoContractStatusReady());
         dispatch(hideGlobalModal());
         resolve();
         break;
