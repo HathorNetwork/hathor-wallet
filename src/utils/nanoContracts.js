@@ -37,16 +37,6 @@ const nanoContracts = {
   },
 
   /**
-   * Check if transaction is a nano contract create tx
-   *
-   * @param {Transaction} tx
-   * @returns {boolean}
-   */
-  isNanoContractCreate(tx) {
-    return tx.version === hathorLib.constants.NANO_CONTRACTS_VERSION && tx.nc_method === hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD;
-  },
-
-  /**
    * Format a nano contract field value based on its type
    * 
    * @param {string} field Field name
@@ -91,12 +81,12 @@ const nanoContracts = {
 
     // Handle optional types
     const typeWithoutOptional = argType.replace('?', '');
-    
+
     // Format based on argument type
     if (typeWithoutOptional === 'Timestamp') {
       return hathorLib.dateUtils.parseTimestamp(value);
     }
-    
+
     if (typeWithoutOptional === 'Amount') {
       return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
     }

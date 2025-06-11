@@ -1,6 +1,7 @@
 import {
   ncApi,
-  errors as hathorLibErrors
+  errors as hathorLibErrors,
+  nanoUtils,
 } from '@hathor/wallet-lib';
 
 import { t } from 'ttag';
@@ -75,7 +76,7 @@ export function* registerNanoContract({ payload }) {
     return;
   }
 
-  if (!nanoUtils.isNanoContractCreate(tx)) {
+  if (!nanoUtils.isNanoContractCreateTx(tx)) {
     console.debug('Transaction is not a nano contract creation transaction.');
     yield put(nanoContractRegisterError(t`Invalid nano contract creation transaction.`));
     return;
@@ -184,7 +185,7 @@ export function* loadNanoContractDetail({ ncId }) {
       }
 
       try {
-        const responseFullTx  = yield call([wallet, wallet.getFullTxById], ncId);
+        const responseFullTx = yield call([wallet, wallet.getFullTxById], ncId);
         const isConfirmed = responseFullTx.meta.first_block !== null;
         if (isConfirmed) {
           break;
@@ -200,18 +201,18 @@ export function* loadNanoContractDetail({ ncId }) {
 
   const nanoContracts = yield select((state) => state.nanoContracts);
   const nc = nanoContracts[ncId];
-  
+
   yield call(fetchBlueprintInformation, { payload: nc.blueprintId });
-  
+
   // Get the updated blueprints data after the fetch
   const blueprintsData = yield select((state) => state.blueprintsData);
   const blueprintInformation = blueprintsData[nc.blueprintId];
-  
+
   if (!blueprintInformation) {
     // If we still don't have the blueprint information, there was an error
-    yield put(nanoContractDetailSetStatus({ 
-      status: NANO_CONTRACT_DETAIL_STATUS.ERROR, 
-      error: t`Error getting blueprint details.` 
+    yield put(nanoContractDetailSetStatus({
+      status: NANO_CONTRACT_DETAIL_STATUS.ERROR,
+      error: t`Error getting blueprint details.`
     }));
     return;
   }
@@ -219,7 +220,7 @@ export function* loadNanoContractDetail({ ncId }) {
   try {
     const state = yield call(hathorLib.ncApi.getNanoContractState, ncId, Object.keys(blueprintInformation.attributes), ['__all__'], []);
     yield put(nanoContractDetailLoaded(state));
-  } catch(e) {
+  } catch (e) {
     // Error in request
     console.error('Error while loading nano contract state.', e);
     yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Error getting nano contract state.` }));
