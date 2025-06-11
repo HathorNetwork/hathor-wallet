@@ -429,7 +429,6 @@ export function* processRequest(action) {
       }
     }));
   } catch (e) {
-    console.log('ERROED: ', e);
     let shouldAnswer = true;
     switch (e.constructor) {
       case SendNanoContractTxError: {

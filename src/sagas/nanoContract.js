@@ -18,7 +18,6 @@ import {
   types,
 } from '../actions';
 
-import nanoUtils from '../utils/nanoContracts';
 import { NANO_CONTRACT_DETAIL_STATUS } from '../constants';
 
 import { all, call, delay, put, select, takeEvery } from 'redux-saga/effects';
