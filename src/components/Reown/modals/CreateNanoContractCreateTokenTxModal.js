@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import hathorLib from '@hathor/wallet-lib';
 import { BaseNanoContractModal } from './BaseNanoContractModal';
 import { setNewNanoContractStatusReady } from '../../../actions';
 import CreateTokenRequestData from '../CreateTokenRequestData';
@@ -34,38 +33,30 @@ const TokenDataCard = ({ token }) => (
  * @param {Function} onReject Function to call when the user rejects the request
  */
 export function CreateNanoContractCreateTokenTxModal({ data, onAccept, onReject }) {
-  // Extract data from the request payload
   const requestData = data?.data || {};
-  // The field is actually "nano", not "nanoContract"
   const nanoContract = requestData.nano || {};
   const token = requestData.token || {};
 
-  // Restructure data for base component
+  // Restructure data for BaseNanoContractModal
   const restructuredData = {
     ...data,
     data: nanoContract
   };
 
-  // Status configuration for the base component
   const statusConfig = {
     setReadyAction: setNewNanoContractStatusReady,
   };
 
-  // Function to render the additional token creation content
   const renderAdditionalContent = () => (
     <TokenDataCard token={token} />
   );
 
-  // Function to prepare the accept data with both nano and token data
+  // Prepare the final payload with caller information
   const prepareAcceptData = (nanoWithCaller) => {
-    // The saga expects 'nanoContract' and 'token' properties
-    // But the underlying function might expect the original structure
-    const result = requestData;
-    
-    // Update the nano contract with the caller information
-    result.nano = nanoWithCaller;
-    
-    return result;
+    return {
+      ...requestData,
+      nano: nanoWithCaller
+    };
   };
 
   return (
