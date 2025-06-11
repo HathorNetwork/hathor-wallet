@@ -155,7 +155,7 @@ module.exports = function override(config, env) {
           overrideTaming: 'severe',
         }
       }),
-      ...basePlugins
+      ...basePlugins,
     ];
   } else {
     config.plugins = basePlugins;
