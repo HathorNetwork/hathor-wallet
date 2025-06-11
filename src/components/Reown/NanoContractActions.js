@@ -49,13 +49,6 @@ const getActionTitle = (tokens, action) => {
     tokenSymbol = registeredToken.symbol;
   } else if (action.token === NATIVE_TOKEN_UID) {
     tokenSymbol = DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
-  } else {
-    // Check if it's the native token with different format
-    if (action.token === '00') {
-      tokenSymbol = DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
-    } else {
-      tokenSymbol = helpers.truncateText(action.token, 8, 4);
-    }
   }
 
   // For authority actions, include the authority type in the title
@@ -75,16 +68,6 @@ const ActionItem = ({ action, isNft, title }) => {
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
 
   const formatAmount = (amount) => {
-    // Handle undefined, null, or empty amounts
-    if (amount === undefined || amount === null || amount === '') {
-      return '0';
-    }
-    
-    // Handle string amounts that might be empty or invalid
-    if (typeof amount === 'string' && amount.trim() === '') {
-      return '0';
-    }
-    
     try {
       return hathorLib.numberUtils.prettyValue(amount, isNft ? 0 : decimalPlaces);
     } catch (error) {
@@ -93,8 +76,20 @@ const ActionItem = ({ action, isNft, title }) => {
     }
   };
 
+  // Get the appropriate icon for the action type
+  const getActionIcon = (actionType) => {
+    const iconMap = {
+      [NanoContractActionType.DEPOSIT]: 'fa fa-arrow-up text-success',
+      [NanoContractActionType.WITHDRAWAL]: 'fa fa-arrow-down text-primary',
+      [NanoContractActionType.GRANT_AUTHORITY]: 'fa fa-arrow-up text-success',
+      [NanoContractActionType.INVOKE_AUTHORITY]: 'fa fa-arrow-down text-primary',
+    };
+
+    return iconMap[actionType] || 'fa fa-question-circle text-muted';
+  };
+
   // Check if this is an authority action
-  const isAuthorityAction = action.type === NanoContractActionType.GRANT_AUTHORITY 
+  const isAuthorityAction = action.type === NanoContractActionType.GRANT_AUTHORITY
     || action.type === NanoContractActionType.INVOKE_AUTHORITY;
 
   // For authority actions, split the title to show authority type
@@ -103,17 +98,7 @@ const ActionItem = ({ action, isNft, title }) => {
   return (
     <div className="d-flex align-items-center p-3 border-bottom">
       <div className="mr-3">
-        {action.type === NanoContractActionType.DEPOSIT ? (
-          <i className="fa fa-arrow-up text-success"></i>
-        ) : action.type === NanoContractActionType.WITHDRAWAL ? (
-          <i className="fa fa-arrow-down text-primary"></i>
-        ) : action.type === NanoContractActionType.GRANT_AUTHORITY ? (
-          <i className="fa fa-arrow-up text-success"></i>
-        ) : action.type === NanoContractActionType.INVOKE_AUTHORITY ? (
-          <i className="fa fa-arrow-down text-primary"></i>
-        ) : (
-          <i className="fa fa-question-circle text-muted"></i>
-        )}
+        <i className={getActionIcon(action.type)}></i>
       </div>
       <div className="flex-grow-1">
         {/* Title with authority type handling */}
@@ -125,70 +110,70 @@ const ActionItem = ({ action, isNft, title }) => {
         ) : (
           <div className="font-weight-bold">{title}</div>
         )}
-        
+
         {/* Grant Authority Address */}
-        {action.type === NanoContractActionType.GRANT_AUTHORITY 
+        {action.type === NanoContractActionType.GRANT_AUTHORITY
           && (action.authorityAddress || action.address) && (
-          <div className="mt-2">
-            <small className="text-muted d-block">{t`Address to send a new Authority:`}</small>
-            <div className="text-monospace">
-              {action.authorityAddress || action.address}
-              <button 
-                className="btn btn-link btn-sm p-0 ml-2" 
-                onClick={() => navigator.clipboard.writeText(action.authorityAddress || action.address)}
-              >
-                <i className="fa fa-copy"></i>
-              </button>
+            <div className="mt-2">
+              <small className="text-muted d-block">{t`Address to send a new Authority:`}</small>
+              <div className="text-monospace">
+                {action.authorityAddress || action.address}
+                <button
+                  className="btn btn-link btn-sm p-0 ml-2"
+                  onClick={() => navigator.clipboard.writeText(action.authorityAddress || action.address)}
+                >
+                  <i className="fa fa-copy"></i>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-        
+          )}
+
         {/* Invoke Authority Address */}
-        {action.type === NanoContractActionType.INVOKE_AUTHORITY 
+        {action.type === NanoContractActionType.INVOKE_AUTHORITY
           && (action.authorityAddress || action.address) && (
-          <div className="mt-2">
-            <small className="text-muted d-block">{t`To Address:`}</small>
-            <div className="text-monospace">
-              {action.authorityAddress || action.address}
-              <button 
-                className="btn btn-link btn-sm p-0 ml-2" 
-                onClick={() => navigator.clipboard.writeText(action.authorityAddress || action.address)}
-              >
-                <i className="fa fa-copy"></i>
-              </button>
+            <div className="mt-2">
+              <small className="text-muted d-block">{t`To Address:`}</small>
+              <div className="text-monospace">
+                {action.authorityAddress || action.address}
+                <button
+                  className="btn btn-link btn-sm p-0 ml-2"
+                  onClick={() => navigator.clipboard.writeText(action.authorityAddress || action.address)}
+                >
+                  <i className="fa fa-copy"></i>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-        
+          )}
+
         {/* Regular address for other actions */}
         {action.type !== NanoContractActionType.GRANT_AUTHORITY
           && action.type !== NanoContractActionType.INVOKE_AUTHORITY
           && action.address && (
-          <div className="mt-2">
-            <small className="text-muted d-block">{t`To Address:`}</small>
-            <div className="text-monospace">
-              {action.address}
-              <button 
-                className="btn btn-link btn-sm p-0 ml-2" 
-                onClick={() => navigator.clipboard.writeText(action.address)}
-              >
-                <i className="fa fa-copy"></i>
-              </button>
+            <div className="mt-2">
+              <small className="text-muted d-block">{t`To Address:`}</small>
+              <div className="text-monospace">
+                {action.address}
+                <button
+                  className="btn btn-link btn-sm p-0 ml-2"
+                  onClick={() => navigator.clipboard.writeText(action.address)}
+                >
+                  <i className="fa fa-copy"></i>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
-      
+
       {/* Only show amount for deposit/withdrawal actions */}
       {action.type !== NanoContractActionType.GRANT_AUTHORITY
         && action.type !== NanoContractActionType.INVOKE_AUTHORITY
         && action.amount != null && (
-        <div className="text-right">
-          <span className="font-weight-bold">
-            {formatAmount(action.amount)}
-          </span>
-        </div>
-      )}
+          <div className="text-right">
+            <span className="font-weight-bold">
+              {formatAmount(action.amount)}
+            </span>
+          </div>
+        )}
     </div>
   );
 };
@@ -203,13 +188,13 @@ export function NanoContractActions({ ncActions, tokens, error }) {
 
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
   const registeredTokens = useSelector((state) => state.tokens);
-  
+
   // A callback to check if the action token is an NFT
   const isNft = useCallback(
     (token) => helpers.isTokenNFT(token, tokenMetadata || {}),
     [tokenMetadata]
   );
-  
+
   // A callback to retrieve the action title by its token symbol or hash
   const getTitle = useCallback(
     (action) => getActionTitle(registeredTokens || [], action),
