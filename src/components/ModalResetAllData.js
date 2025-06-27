@@ -80,8 +80,6 @@ class ModalResetAllData extends React.Component {
         correctPassword = await wallet.checkPassword(password);
       }
 
-      console.log('Correct password?', correctPassword);
-
       if (password && !correctPassword) {
         this.setState({ errorMessage: t`Invalid password` })
         return
