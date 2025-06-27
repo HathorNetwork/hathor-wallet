@@ -57,22 +57,31 @@ class ModalResetAllData extends React.Component {
 
     // Confirmation message was incorrect
     if (this.refs.confirmMessage.value.toLowerCase() !== CONFIRM_RESET_MESSAGE.toLowerCase()) {
-      this.setState({errorMessage: t`Confirmation message does not match`})
+      this.setState({ errorMessage: t`Confirmation message does not match` })
       return
     }
 
     // Password was not informed nor did the user forget it
     if (!password && !forgotPassword) {
-      this.setState({errorMessage: t`You must write your password or check that you have forgotten it`})
+      this.setState({ errorMessage: t`You must write your password or check that you have forgotten it` })
       return
     }
 
     if (!forgotPassword) {
-      // Password was informed and it is incorr
       const wallet = getGlobalWallet();
-      const correctPassword = await wallet.checkPassword(password);
+      let correctPassword;
+      if (!wallet) {
+        // If this modal is displayed from the locked wallet screen, `wallet`
+        // will be null since it's only initialized in the wallet saga.
+        // In this case, we can use the storage directly:
+        const storage = LOCAL_STORE.getStorage();
+        correctPassword = await storage.checkPassword(password);
+      } else {
+        correctPassword = await wallet.checkPassword(password);
+      }
+
       if (password && !correctPassword) {
-        this.setState({errorMessage: t`Invalid password`})
+        this.setState({ errorMessage: t`Invalid password` })
         return
       }
     }
@@ -87,7 +96,7 @@ class ModalResetAllData extends React.Component {
    * @param {Object} e Event emitted when checkbox is clicked
    */
   setForgotPassword = (e) => {
-    this.setState(state => ({forgotPassword: !state.forgotPassword}))
+    this.setState(state => ({ forgotPassword: !state.forgotPassword }))
 
     // Clearing password field if the user did forget it
     if (!this.state.forgotPassword) {
@@ -139,7 +148,7 @@ class ModalResetAllData extends React.Component {
                 <div className="form-group">
                   <label htmlFor="password">{t`Password*`}</label>
                   <input type="password" ref="password" autoComplete="off" className="pin-input form-control"
-                         disabled={this.state.forgotPassword} required={!this.state.forgotPassword} />
+                    disabled={this.state.forgotPassword} required={!this.state.forgotPassword} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="confirmMessage">{t`Confirm message*`}</label>
@@ -147,15 +156,15 @@ class ModalResetAllData extends React.Component {
                 </div>
                 <div className="form-check">
                   <input ref="forgotPassword" type="checkbox" className="form-check-input" id="forgotPassword"
-                         checked={this.state.forgotPassword} onChange={this.setForgotPassword}/>
+                    checked={this.state.forgotPassword} onChange={this.setForgotPassword} />
                   <label className="form-check-label" htmlFor="forgotPassword">{t`I forgot my password`}</label>
                 </div>
               </form>
               <div className="row mt-3">
                 <div className="col-12 col-sm-10">
-                    <p className="error-message text-danger">
-                      {this.state.errorMessage}
-                    </p>
+                  <p className="error-message text-danger">
+                    {this.state.errorMessage}
+                  </p>
                 </div>
               </div>
             </div>

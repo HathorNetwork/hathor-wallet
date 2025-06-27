@@ -213,6 +213,13 @@ You can connect your wallet to the testnet (https://node1.foxtrot.testnet.hathor
     1. Open the wallet again, it should open the Welcome screen. Do NOT click on "Get started".
     1. Close the wallet.
 
+1. **Reset from the locked screen**
+    1. Load your wallet again.
+    1. Close the wallet and re-open it.
+    1. Click the "Reset all data" button and proceed with the reset.
+    1. The wallet should validate the correct password and reset correctly.
+    1. Close the wallet.
+
 1. **Hardware wallet migration**
     1. Uninstall the wallet and install the previous version.
     1. Connect your Ledger device to the computer. The Ledger should be initialized already.
