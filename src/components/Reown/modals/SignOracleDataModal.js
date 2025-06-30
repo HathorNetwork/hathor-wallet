@@ -8,26 +8,7 @@
 import React from 'react';
 import { t } from 'ttag';
 import { OracleDataDisplay } from '../OracleDataDisplay';
-
-/**
- * Component for dApp Info
- */
-const DAppInfo = ({ dapp }) => (
-  <div className="d-flex align-items-center mb-4">
-    {dapp?.icon && (
-      <img
-        src={dapp.icon}
-        alt="dApp icon"
-        className="mr-3"
-        style={{ width: 48, height: 48 }}
-      />
-    )}
-    <div>
-      <h6 className="mb-1">{dapp?.proposer || "Unknown"}</h6>
-      <small className="text-muted">{dapp?.url || dapp?.chain || ""}</small>
-    </div>
-  </div>
-);
+import { DAppInfo } from '../DAppInfo';
 
 export function SignOracleDataModal({ data, onAccept, onReject }) {
   return (

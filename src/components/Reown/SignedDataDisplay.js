@@ -29,21 +29,19 @@ export const SignedDataDisplay = ({ value }) => {
             )}
           </div>
         </div>
-        
+
         <div className="mb-0">
           <strong className="d-block mb-2">{t`Signature`}</strong>
           <div className="d-flex align-items-start">
-            <div 
-              className="text-monospace flex-grow-1 p-2 bg-light rounded" 
-              style={{ wordBreak: 'break-all', fontSize: '0.875rem' }}
-            >
+            <div
+              className="text-monospace flex-grow-1 p-2 bg-light rounded"
+              style={{ wordBreak: 'break-all', fontSize: '0.875rem' }}>
               {value.signature}
             </div>
             <button
               className="btn btn-link btn-sm p-1 ml-2"
               onClick={() => navigator.clipboard.writeText(value.signature)}
-              title={t`Copy signature`}
-            >
+              title={t`Copy signature`}>
               <i className="fa fa-copy"></i>
             </button>
           </div>
