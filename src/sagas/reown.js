@@ -33,7 +33,7 @@ import {
   InsufficientFundsError,
   SignMessageWithAddressError,
   CreateNanoContractCreateTokenTxError,
-} from 'hathor-rpc-handler-test';
+} from '@hathor/hathor-rpc-handler';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
 import {
