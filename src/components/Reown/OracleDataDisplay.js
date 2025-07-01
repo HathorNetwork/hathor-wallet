@@ -26,17 +26,14 @@ export const OracleDataDisplay = ({ oracleData }) => {
       const oracleBuffer = Buffer.from(oracleData.oracle, 'hex');
       const network = wallet.getNetworkObject();
 
-      // Try to parse using available script parsing methods
-      if (hathorLib.scriptsUtils && hathorLib.scriptsUtils.parseScript) {
-        const parsedScript = hathorLib.scriptsUtils.parseScript(oracleBuffer, network);
-        if (parsedScript && parsedScript.address) {
-          return {
-            raw: oracleData.oracle,
-            address: parsedScript.address.base58 || parsedScript.address,
-            isAddress: true,
-            scriptType: parsedScript.type
-          };
-        }
+      const parsedScript = hathorLib.scriptsUtils.parseScript(oracleBuffer, network);
+      if (parsedScript && parsedScript.address) {
+        return {
+          raw: oracleData.oracle,
+          address: parsedScript.address.base58,
+          isAddress: true,
+          scriptType: parsedScript.type
+        };
       }
 
       return { raw: oracleData.oracle, isAddress: false };
