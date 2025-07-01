@@ -32,6 +32,7 @@ import {
   SendTransactionError,
   InsufficientFundsError,
   SignMessageWithAddressError,
+  CreateNanoContractCreateTokenTxError,
 } from '@hathor/hathor-rpc-handler';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
@@ -74,6 +75,7 @@ const AVAILABLE_METHODS = {
   HATHOR_SIGN_ORACLE_DATA: 'htr_signOracleData',
   HATHOR_CREATE_TOKEN: 'htr_createToken',
   HATHOR_SEND_TRANSACTION: 'htr_sendTransaction',
+  HATHOR_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX: 'htr_createNanoContractCreateTokenTx',
 };
 
 const AVAILABLE_EVENTS = [];
@@ -405,6 +407,10 @@ export function* processRequest(action) {
         yield put(setSendTxStatusSuccess());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { isLoading: false, isError: false }));
         break;
+      case RpcResponseTypes.CreateNanoContractCreateTokenTxResponse:
+        yield put(setNewNanoContractStatusSuccess());
+        yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: false }));
+        break;
       case RpcResponseTypes.SignWithAddressResponse:
         // Show success feedback for message signing
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: false }));
@@ -461,8 +467,8 @@ export function* processRequest(action) {
       case InsufficientFundsError:
       case SendTransactionError: {
         yield put(setSendTxStatusFailed());
-        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, { 
-          isLoading: false, 
+        yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, {
+          isLoading: false,
           isError: true,
           errorMessage: e instanceof InsufficientFundsError ? t`Insufficient funds to complete the transaction.` : null
         }));
@@ -485,6 +491,21 @@ export function* processRequest(action) {
           retryHandler,
           types.REOWN_SIGN_MESSAGE_RETRY,
           types.REOWN_SIGN_MESSAGE_RETRY_DISMISS,
+        );
+
+        if (retry) {
+          shouldAnswer = false;
+          yield* processRequest(action);
+        }
+      } break;
+      case CreateNanoContractCreateTokenTxError: {
+        yield put(setNewNanoContractStatusFailure());
+        yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
+
+        const retry = yield call(
+          retryHandler,
+          types.REOWN_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_RETRY,
+          types.REOWN_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_RETRY_DISMISS,
         );
 
         if (retry) {
@@ -608,6 +629,30 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         });
       } break;
 
+      case TriggerTypes.CreateNanoContractCreateTokenTxConfirmationPrompt: {
+        const createNanoContractCreateTokenTxResponseTemplate = (accepted) => (data) => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.CreateNanoContractCreateTokenTxConfirmationResponse,
+            data: {
+              accepted,
+              nano: data?.nano,
+              token: data?.token,
+            }
+          });
+        };
+
+        dispatch({
+          type: types.SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL,
+          payload: {
+            accept: createNanoContractCreateTokenTxResponseTemplate(true),
+            deny: createNanoContractCreateTokenTxResponseTemplate(false),
+            data: request.data,
+            dapp: requestMetadata,
+          }
+        });
+      } break;
+
       case TriggerTypes.SignMessageWithAddressConfirmationPrompt: {
         const signMessageResponseTemplate = (accepted) => () => {
           dispatch(hideGlobalModal());
@@ -658,6 +703,18 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         break;
 
       case TriggerTypes.SendTransactionLoadingFinishedTrigger:
+        dispatch(hideGlobalModal());
+        resolve();
+        break;
+
+      case TriggerTypes.CreateNanoContractCreateTokenTxLoadingTrigger:
+        dispatch(setNewNanoContractStatusLoading());
+        dispatch(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: true }));
+        resolve();
+        break;
+
+      case TriggerTypes.CreateNanoContractCreateTokenTxLoadingFinishedTrigger:
+        dispatch(setNewNanoContractStatusReady());
         dispatch(hideGlobalModal());
         resolve();
         break;
@@ -1045,6 +1102,16 @@ export function* onSessionDelete(action) {
   yield call(onCancelSession, action);
 }
 
+/**
+ * Handles a request to create a nano contract and token in a single transaction
+ * Shows a modal to the user for confirmation
+ * 
+ * @param {Object} action - The action containing the request payload
+ */
+export function* onCreateNanoContractCreateTokenTxRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.CREATE_NANO_CONTRACT_CREATE_TOKEN_TX);
+}
+
 export function* saga() {
   yield all([
     fork(featureToggleUpdateListener),
@@ -1055,6 +1122,7 @@ export function* saga() {
     takeLatest(types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL, onSignOracleDataRequest),
     takeLatest(types.SHOW_CREATE_TOKEN_REQUEST_MODAL, onCreateTokenRequest),
     takeLatest(types.SHOW_SEND_TRANSACTION_REQUEST_MODAL, onSendTransactionRequest),
+    takeLatest(types.SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL, onCreateNanoContractCreateTokenTxRequest),
     takeEvery(types.REOWN_SESSION_PROPOSAL, onSessionProposal),
     takeEvery(types.REOWN_SESSION_DELETE, onSessionDelete),
     takeEvery(types.REOWN_CANCEL_SESSION, onCancelSession),
