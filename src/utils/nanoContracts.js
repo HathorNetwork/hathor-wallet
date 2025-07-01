@@ -6,6 +6,7 @@
  */
 
 import hathorLib from '@hathor/wallet-lib';
+import { SignedDataDisplay } from '../components/Reown/SignedDataDisplay';
 import { get } from 'lodash';
 
 /**
@@ -89,6 +90,10 @@ const nanoContracts = {
 
     if (typeWithoutOptional === 'Amount') {
       return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
+    }
+
+    if (typeWithoutOptional.startsWith('SignedData')) {
+      return <SignedDataDisplay value={value} />;
     }
 
     // Default string representation
