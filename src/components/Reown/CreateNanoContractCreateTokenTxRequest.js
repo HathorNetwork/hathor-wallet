@@ -96,26 +96,19 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
       return;
     }
 
-    try {
-      setError(null);
-      dispatch(setNewNanoContractStatusLoading());
+    setError(null);
 
-      // Prepare data for the combined transaction
-      const txData = {
-        nanoContract: {
-          ...nanoContract,
-          address: ncAddress
-        },
-        token
-      };
+    // Prepare data for the combined transaction
+    const txData = {
+      nanoContract: {
+        ...nanoContract,
+        address: ncAddress
+      },
+      token
+    };
 
-      // Accept the request with the transaction data
-      await onAccept(txData);
-    } catch (e) {
-      console.error('Error creating nano contract and token:', e);
-      setError(t`Error creating nano contract and token: ${e.message}`);
-      dispatch(setNewNanoContractStatusFailure());
-    }
+    // Accept the request with the transaction data
+    onAccept(txData);
   };
 
   /**
