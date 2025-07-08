@@ -23,15 +23,15 @@ const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) 
         </span>
       );
     }
-    
+
     if (isAddress && value) {
       return (
         <div className="d-flex align-items-center">
           <code className="text-monospace small flex-grow-1" style={{ wordBreak: 'break-all' }}>
             {value}
           </code>
-          <button 
-            className="btn btn-link btn-sm p-0 ml-2" 
+          <button
+            className="btn btn-link btn-sm p-0 ml-2"
             onClick={() => navigator.clipboard.writeText(value)}
             title={t`Copy to clipboard`}
           >
@@ -40,7 +40,7 @@ const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) 
         </div>
       );
     }
-    
+
     return <span>{value}</span>;
   };
 
@@ -79,27 +79,25 @@ export default function CreateTokenRequestData({ data }) {
    * Check if token has mint authority
    */
   const hasMintAuthority = () => {
-    return data.createMint === true || data.mintAuthorityAddress || data.mintAuthorityIndex !== undefined;
+    return data.createMint === true || data.mintAuthorityAddress;
   };
 
   /**
    * Check if token has melt authority
    */
   const hasMeltAuthority = () => {
-    return data.createMelt === true || data.meltAuthorityAddress || data.meltAuthorityIndex !== undefined;
+    return data.createMelt === true || data.meltAuthorityAddress;
   };
 
   /**
    * Check if there are additional settings to show
    */
   const hasAdditionalSettings = () => {
-    return data.address || 
-           data.changeAddress !== undefined || 
-           data.allowExternalMintAuthorityAddress !== undefined || 
-           data.allowExternalMeltAuthorityAddress !== undefined ||
-           data.mintAuthorityIndex !== undefined ||
-           data.meltAuthorityIndex !== undefined ||
-           data.data !== undefined;
+    return data.address ||
+      data.changeAddress !== undefined ||
+      data.allowExternalMintAuthorityAddress !== undefined ||
+      data.allowExternalMeltAuthorityAddress !== undefined ||
+      data.data !== undefined;
   };
 
   if (!data || Object.keys(data).length === 0) {
@@ -127,16 +125,10 @@ export default function CreateTokenRequestData({ data }) {
             <div className="mb-3">
               <TokenParameter label={t`Create mint authority?`} value={data.createMint} isBoolean />
               {data.mintAuthorityAddress && (
-                <TokenParameter 
-                  label={t`Mint Authority Address`} 
-                  value={data.mintAuthorityAddress} 
-                  isAddress 
-                />
-              )}
-              {data.mintAuthorityIndex !== undefined && (
-                <TokenParameter 
-                  label={t`Mint Authority Index`} 
-                  value={data.mintAuthorityIndex} 
+                <TokenParameter
+                  label={t`Mint Authority Address`}
+                  value={data.mintAuthorityAddress}
+                  isAddress
                 />
               )}
             </div>
@@ -146,16 +138,10 @@ export default function CreateTokenRequestData({ data }) {
             <div className="mb-3">
               <TokenParameter label={t`Create melt authority?`} value={data.createMelt} isBoolean />
               {data.meltAuthorityAddress && (
-                <TokenParameter 
-                  label={t`Melt Authority Address`} 
-                  value={data.meltAuthorityAddress} 
-                  isAddress 
-                />
-              )}
-              {data.meltAuthorityIndex !== undefined && (
-                <TokenParameter 
-                  label={t`Melt Authority Index`} 
-                  value={data.meltAuthorityIndex} 
+                <TokenParameter
+                  label={t`Melt Authority Address`}
+                  value={data.meltAuthorityAddress}
+                  isAddress
                 />
               )}
             </div>
@@ -168,20 +154,20 @@ export default function CreateTokenRequestData({ data }) {
         <div className="mb-4">
           <TokenParameter label={t`Address`} value={data.address} isAddress />
           <TokenParameter label={t`Change Address`} value={data.changeAddress} isAddress />
-          <TokenParameter 
-            label={t`Allow External Mint Authority Address`} 
-            value={data.allowExternalMintAuthorityAddress} 
-            isBoolean 
+          <TokenParameter
+            label={t`Allow External Mint Authority Address`}
+            value={data.allowExternalMintAuthorityAddress}
+            isBoolean
           />
-          <TokenParameter 
-            label={t`Allow External Melt Authority Address`} 
-            value={data.allowExternalMeltAuthorityAddress} 
-            isBoolean 
+          <TokenParameter
+            label={t`Allow External Melt Authority Address`}
+            value={data.allowExternalMeltAuthorityAddress}
+            isBoolean
           />
           {data.data && (
-            <TokenParameter 
-              label={t`Data`} 
-              value={typeof data.data === 'string' ? data.data : JSON.stringify(data.data)} 
+            <TokenParameter
+              label={t`Data`}
+              value={typeof data.data === 'string' ? data.data : JSON.stringify(data.data)}
             />
           )}
         </div>
