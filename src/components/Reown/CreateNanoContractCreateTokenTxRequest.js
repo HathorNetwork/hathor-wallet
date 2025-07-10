@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
+import {
   setNewNanoContractStatusReady,
   setNewNanoContractStatusLoading,
   setNewNanoContractStatusSuccess,
@@ -19,6 +19,7 @@ import { BASE_STATUS } from '../../constants';
 import CreateTokenRequestData from './CreateTokenRequestData';
 import NanoContractRequestData from './NanoContractRequestData';
 import { getGlobalWallet } from '../../modules/wallet';
+import { DAppInfo } from './DAppInfo';
 
 /**
  * Component for displaying and processing Nano Contract and Token creation requests
@@ -26,12 +27,12 @@ import { getGlobalWallet } from '../../modules/wallet';
 export function CreateNanoContractCreateTokenTxRequest({ route }) {
   const { createNanoContractCreateTokenTxRequest, onAccept, onReject } = route.params;
   const dispatch = useDispatch();
-  
+
   // Get Redux state
-  const { 
-    nanoContractStatus, 
-    firstAddress, 
-    retrying 
+  const {
+    nanoContractStatus,
+    firstAddress,
+    retrying
   } = useSelector((state) => ({
     nanoContractStatus: state.reown.nanoContractStatus,
     firstAddress: state.reown.firstAddress,
@@ -45,7 +46,7 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
   // Extract nano contract and token data from the request
   const nanoContract = createNanoContractCreateTokenTxRequest?.data?.nanoContract || {};
   const token = createNanoContractCreateTokenTxRequest?.data?.token || {};
-  
+
   // Get wallet instance
   const wallet = getGlobalWallet();
 
@@ -69,7 +70,7 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
           setError(t`Could not fetch wallet address.`);
         }
       };
-      
+
       getFirstAddress();
     }
   }, [firstAddress, wallet, dispatch]);
@@ -96,27 +97,19 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
       return;
     }
 
-    try {
-      setError(null);
-      dispatch(setNewNanoContractStatusLoading());
+    setError(null);
 
-      // Prepare data for the combined transaction
-      const txData = {
-        nanoContract: {
-          ...nanoContract,
-          address: ncAddress
-        },
-        token
-      };
+    // Prepare data for the combined transaction
+    const txData = {
+      nanoContract: {
+        ...nanoContract,
+        address: ncAddress
+      },
+      token
+    };
 
-      // Accept the request with the transaction data
-      await onAccept(txData);
-      dispatch(setNewNanoContractStatusSuccess());
-    } catch (e) {
-      console.error('Error creating nano contract and token:', e);
-      setError(t`Error creating nano contract and token: ${e.message}`);
-      dispatch(setNewNanoContractStatusFailure());
-    }
+    // Accept the request with the transaction data
+    onAccept(txData);
   };
 
   /**
@@ -175,27 +168,14 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
   return (
     <div style={{ padding: '16px' }}>
       <h2 style={{ marginBottom: '16px' }}>{t`Create Nano Contract & Token`}</h2>
-      
+
       {/* dApp info */}
       <div style={commonStyles.card}>
         <h3 style={commonStyles.sectionTitle}>{t`dApp Information`}</h3>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-          {createNanoContractCreateTokenTxRequest?.dapp?.icon && (
-            <img 
-              src={createNanoContractCreateTokenTxRequest.dapp.icon} 
-              alt="dApp icon" 
-              style={{ width: '40px', height: '40px', marginRight: '12px' }} 
-            />
-          )}
-          <div>
-            <p style={{ fontWeight: '600', margin: 0 }}>
-              {createNanoContractCreateTokenTxRequest?.dapp?.proposer || t`Unknown dApp`}
-            </p>
-            <p style={{ margin: 0, color: '#6c757d' }}>
-              {createNanoContractCreateTokenTxRequest?.dapp?.url || t`Unknown URL`}
-            </p>
-          </div>
-        </div>
+        <DAppInfo 
+          dapp={createNanoContractCreateTokenTxRequest?.dapp} 
+          className="" 
+        />
       </div>
 
       {/* Transaction Status */}
@@ -220,7 +200,7 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
       {/* Nano Contract Data */}
       <div style={commonStyles.card}>
         <h3 style={commonStyles.sectionTitle}>{t`Nano Contract Data`}</h3>
-        
+
         {/* Address selection */}
         {isTxReady() && (
           <div style={{ marginBottom: '16px' }}>
@@ -228,9 +208,9 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
             <select
               value={ncAddress || ''}
               onChange={(e) => setNcAddress(e.target.value)}
-              style={{ 
-                width: '100%', 
-                padding: '8px', 
+              style={{
+                width: '100%',
+                padding: '8px',
                 borderRadius: '4px',
                 border: '1px solid #ced4da'
               }}
@@ -243,7 +223,7 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
             </select>
           </div>
         )}
-        
+
         <NanoContractRequestData data={nanoContract} />
       </div>
 
@@ -256,15 +236,15 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
       {/* Buttons */}
       {isTxReady() && (
         <div style={{ marginTop: '16px', display: 'flex' }}>
-          <button 
-            style={commonStyles.button} 
+          <button
+            style={commonStyles.button}
             onClick={handleAccept}
             disabled={!isTxReady() || !ncAddress}
           >
             {t`Accept`}
           </button>
-          <button 
-            style={commonStyles.secondaryButton} 
+          <button
+            style={commonStyles.secondaryButton}
             onClick={handleReject}
             disabled={!isTxReady()}
           >

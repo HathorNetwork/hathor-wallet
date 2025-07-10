@@ -10,26 +10,21 @@ import { t } from 'ttag';
 
 /**
  * Reusable component for displaying dApp information
- * 
- * @param {Object} dapp - The dApp metadata object
- * @param {string} dapp.icon - Icon URL for the dApp
- * @param {string} dapp.proposer - Name of the dApp
- * @param {string} dapp.url - URL of the dApp
- * @param {string} dapp.chain - Chain information (fallback for URL)
+ * Shows dApp icon, proposer name, and URL/chain info
  */
-export const DAppInfo = ({ dapp }) => (
-  <div className="d-flex align-items-center mb-4">
+export const DAppInfo = ({ dapp, className = "d-flex align-items-center mb-4" }) => (
+  <div className={className}>
     {dapp?.icon && (
       <img
         src={dapp.icon}
-        alt={t`dApp icon`}
+        alt="dApp icon"
         className="mr-3"
         style={{ width: 48, height: 48 }}
       />
     )}
     <div>
-      <h6 className="mb-1">{dapp?.proposer || t`Unknown`}</h6>
+      <h6 className="mb-1">{dapp?.proposer || t`Unknown dApp proposer`}</h6>
       <small className="text-muted">{dapp?.url || dapp?.chain || ""}</small>
     </div>
   </div>
-); 
+);

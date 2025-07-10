@@ -37,7 +37,6 @@ export function SendNanoContractTxModal({ data, onAccept, onReject }) {
       acceptButtonText={t`Accept Transaction`}
       rejectButtonText={t`Reject`}
       showCallerSection={true}
-      showDAppWarning={false}
     />
   );
 } 

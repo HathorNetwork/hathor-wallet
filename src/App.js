@@ -224,7 +224,6 @@ function Root() {
       <Route path="/" element={<StartedComponent children={<Wallet />} loaded={true} />} />
       <Route path="/reown/connect" element={<ReownConnect />} />
       <Route path="/network_settings_recovery" element={<NetworkSettingsRecovery />} />
-      <Route path="/create_nano_contract_create_token_tx_request" element={<StartedComponent children={<CreateNanoContractCreateTokenTxScreen />} loaded={true} />} />
       <Route path="*" element={<Page404 />} />
     </Routes>
   );

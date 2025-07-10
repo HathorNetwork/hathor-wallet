@@ -2,17 +2,8 @@
   "resources": {
     "@hathor/hathor-rpc-handler": {
       "packages": {
-        "@hathor/hathor-rpc-handler>zod": true,
         "@hathor/wallet-lib": true,
-        "react-redux>@babel/runtime": true
-      }
-    },
-    "@hathor/hathor-rpc-handler>zod": {
-      "globals": {
-        "URL": true,
-        "atob": true
-      },
-      "packages": {
+        "@hathor/wallet-lib>zod": true,
         "react-redux>@babel/runtime": true
       }
     },

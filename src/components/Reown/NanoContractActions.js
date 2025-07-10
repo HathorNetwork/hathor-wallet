@@ -15,7 +15,8 @@ const { DEFAULT_NATIVE_TOKEN_CONFIG, NATIVE_TOKEN_UID } = constants;
 
 /**
  * It returns the title template for each action type,
- * which includes 'deposit', 'withdrawal', 'grant_authority', and 'invoke_authority'.
+ * which includes 'deposit', 'withdrawal', 'grant_authority', and
+ * 'acquire_authority'.
  *
  * @param {string} tokenSymbol The token symbol fetched from metadata,
  * or a shortened token hash.
@@ -26,12 +27,13 @@ const actionTitleMap = (tokenSymbol) => ({
   [NanoContractActionType.DEPOSIT]: t`${tokenSymbol} Deposit`,
   [NanoContractActionType.WITHDRAWAL]: t`${tokenSymbol} Withdrawal`,
   [NanoContractActionType.GRANT_AUTHORITY]: t`${tokenSymbol} Grant Authority`,
-  [NanoContractActionType.INVOKE_AUTHORITY]: t`${tokenSymbol} Invoke Authority`,
+  [NanoContractActionType.ACQUIRE_AUTHORITY]: t`${tokenSymbol} Acquire Authority`,
 });
 
 /**
  * Get action title depending on the action type.
- * @param {Array} tokens Array of registered tokens with {uid, name, symbol}
+ * @param {Array<{ uid: string, symbol: string, name: string }>} tokens Array of
+ * registered tokens with {uid, name, symbol}
  * @param {Object} action An action object
  *
  * @returns {string} A formatted title to be used in the action card
@@ -53,7 +55,7 @@ const getActionTitle = (tokens, action) => {
 
   // For authority actions, include the authority type in the title
   if (action.type === NanoContractActionType.GRANT_AUTHORITY
-    || action.type === NanoContractActionType.INVOKE_AUTHORITY) {
+    || action.type === NanoContractActionType.ACQUIRE_AUTHORITY) {
     const baseTitle = actionTitleMap(tokenSymbol)[action.type];
     return action.authority ? `${baseTitle}: ${action.authority}` : baseTitle;
   }
@@ -82,7 +84,7 @@ const ActionItem = ({ action, isNft, title }) => {
       [NanoContractActionType.DEPOSIT]: 'fa fa-arrow-up text-success',
       [NanoContractActionType.WITHDRAWAL]: 'fa fa-arrow-down text-primary',
       [NanoContractActionType.GRANT_AUTHORITY]: 'fa fa-arrow-up text-success',
-      [NanoContractActionType.INVOKE_AUTHORITY]: 'fa fa-arrow-down text-primary',
+      [NanoContractActionType.ACQUIRE_AUTHORITY]: 'fa fa-arrow-down text-primary',
     };
 
     return iconMap[actionType] || 'fa fa-question-circle text-muted';
@@ -90,7 +92,7 @@ const ActionItem = ({ action, isNft, title }) => {
 
   // Check if this is an authority action
   const isAuthorityAction = action.type === NanoContractActionType.GRANT_AUTHORITY
-    || action.type === NanoContractActionType.INVOKE_AUTHORITY;
+    || action.type === NanoContractActionType.ACQUIRE_AUTHORITY;
 
   // For authority actions, split the title to show authority type
   const titleParts = isAuthorityAction && title.includes(':') ? title.split(':') : null;
@@ -111,46 +113,11 @@ const ActionItem = ({ action, isNft, title }) => {
           <div className="font-weight-bold">{title}</div>
         )}
 
-        {/* Grant Authority Address */}
-        {action.type === NanoContractActionType.GRANT_AUTHORITY
-          && (action.authorityAddress || action.address) && (
-            <div className="mt-2">
-              <small className="text-muted d-block">{t`Address to send a new Authority:`}</small>
-              <div className="text-monospace">
-                {action.authorityAddress || action.address}
-                <button
-                  className="btn btn-link btn-sm p-0 ml-2"
-                  onClick={() => navigator.clipboard.writeText(action.authorityAddress || action.address)}
-                >
-                  <i className="fa fa-copy"></i>
-                </button>
-              </div>
-            </div>
-          )}
-
-        {/* Invoke Authority Address */}
-        {action.type === NanoContractActionType.INVOKE_AUTHORITY
-          && (action.authorityAddress || action.address) && (
-            <div className="mt-2">
-              <small className="text-muted d-block">{t`To Address:`}</small>
-              <div className="text-monospace">
-                {action.authorityAddress || action.address}
-                <button
-                  className="btn btn-link btn-sm p-0 ml-2"
-                  onClick={() => navigator.clipboard.writeText(action.authorityAddress || action.address)}
-                >
-                  <i className="fa fa-copy"></i>
-                </button>
-              </div>
-            </div>
-          )}
-
-        {/* Regular address for other actions */}
-        {action.type !== NanoContractActionType.GRANT_AUTHORITY
-          && action.type !== NanoContractActionType.INVOKE_AUTHORITY
+        {/* WITHDRAWAL: Show only address (address to send the amount and create the output) */}
+        {action.type === NanoContractActionType.WITHDRAWAL
           && action.address && (
             <div className="mt-2">
-              <small className="text-muted d-block">{t`To Address:`}</small>
+              <small className="text-muted d-block">{t`Address to send amount:`}</small>
               <div className="text-monospace">
                 {action.address}
                 <button
@@ -162,11 +129,95 @@ const ActionItem = ({ action, isNft, title }) => {
               </div>
             </div>
           )}
+
+        {/* DEPOSIT: Show address (to filter UTXOs) and changeAddress (change address) */}
+        {action.type === NanoContractActionType.DEPOSIT && (
+          <div className={`${(action.address || action.changeAddress) ? 'mt-2' : ''}`}>
+            {action.address && (
+              <div className="mb-2">
+                <small className="text-muted d-block">{t`Address to filter UTXOs:`}</small>
+                <div className="text-monospace">
+                  {action.address}
+                  <button
+                    className="btn btn-link btn-sm p-0 ml-2"
+                    onClick={() => navigator.clipboard.writeText(action.address)}
+                  >
+                    <i className="fa fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            )}
+            {action.changeAddress && (
+              <div>
+                <small className="text-muted d-block">{t`Change address:`}</small>
+                <div className="text-monospace">
+                  {action.changeAddress}
+                  <button
+                    className="btn btn-link btn-sm p-0 ml-2"
+                    onClick={() => navigator.clipboard.writeText(action.changeAddress)}
+                  >
+                    <i className="fa fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* GRANT_AUTHORITY: Show address (filter UTXOs) and authorityAddress (send authority) */}
+        {action.type === NanoContractActionType.GRANT_AUTHORITY && (
+          <div className={`${(action.address || action.authorityAddress) ? 'mt-2' : ''}`}>
+            {action.address && (
+              <div className="mb-2">
+                <small className="text-muted d-block">{t`Address to filter UTXOs:`}</small>
+                <div className="text-monospace">
+                  {action.address}
+                  <button
+                    className="btn btn-link btn-sm p-0 ml-2"
+                    onClick={() => navigator.clipboard.writeText(action.address)}
+                  >
+                    <i className="fa fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            )}
+            {action.authorityAddress && (
+              <div>
+                <small className="text-muted d-block">{t`Address to send new authority:`}</small>
+                <div className="text-monospace">
+                  {action.authorityAddress}
+                  <button
+                    className="btn btn-link btn-sm p-0 ml-2"
+                    onClick={() => navigator.clipboard.writeText(action.authorityAddress)}
+                  >
+                    <i className="fa fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ACQUIRE_AUTHORITY: Show only address (send the authority and create the output) */}
+        {action.type === NanoContractActionType.ACQUIRE_AUTHORITY && action.address && (
+          <div className="mt-2">
+            <small className="text-muted d-block">{t`Address to send authority:`}</small>
+            <div className="text-monospace">
+              {action.address}
+              <button
+                className="btn btn-link btn-sm p-0 ml-2"
+                onClick={() => navigator.clipboard.writeText(action.address)}
+              >
+                <i className="fa fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Only show amount for deposit/withdrawal actions */}
       {action.type !== NanoContractActionType.GRANT_AUTHORITY
-        && action.type !== NanoContractActionType.INVOKE_AUTHORITY
+        && action.type !== NanoContractActionType.ACQUIRE_AUTHORITY
         && action.amount != null && (
           <div className="text-right">
             <span className="font-weight-bold">
