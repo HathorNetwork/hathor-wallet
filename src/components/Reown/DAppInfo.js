@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { t } from 'ttag';
 
 /**
  * Reusable component for displaying dApp information
@@ -22,7 +23,7 @@ export const DAppInfo = ({ dapp, className = "d-flex align-items-center mb-4" })
       />
     )}
     <div>
-      <h6 className="mb-1">{dapp?.proposer || "Unknown"}</h6>
+      <h6 className="mb-1">{dapp?.proposer || t`Unknown dApp proposer`}</h6>
       <small className="text-muted">{dapp?.url || dapp?.chain || ""}</small>
     </div>
   </div>
