@@ -19,6 +19,7 @@ import { BASE_STATUS } from '../../constants';
 import CreateTokenRequestData from './CreateTokenRequestData';
 import NanoContractRequestData from './NanoContractRequestData';
 import { getGlobalWallet } from '../../modules/wallet';
+import { DAppInfo } from './DAppInfo';
 
 /**
  * Component for displaying and processing Nano Contract and Token creation requests
@@ -171,23 +172,10 @@ export function CreateNanoContractCreateTokenTxRequest({ route }) {
       {/* dApp info */}
       <div style={commonStyles.card}>
         <h3 style={commonStyles.sectionTitle}>{t`dApp Information`}</h3>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-          {createNanoContractCreateTokenTxRequest?.dapp?.icon && (
-            <img
-              src={createNanoContractCreateTokenTxRequest.dapp.icon}
-              alt="dApp icon"
-              style={{ width: '40px', height: '40px', marginRight: '12px' }}
-            />
-          )}
-          <div>
-            <p style={{ fontWeight: '600', margin: 0 }}>
-              {createNanoContractCreateTokenTxRequest?.dapp?.proposer || t`Unknown dApp`}
-            </p>
-            <p style={{ margin: 0, color: '#6c757d' }}>
-              {createNanoContractCreateTokenTxRequest?.dapp?.url || t`Unknown URL`}
-            </p>
-          </div>
-        </div>
+        <DAppInfo 
+          dapp={createNanoContractCreateTokenTxRequest?.dapp} 
+          className="" 
+        />
       </div>
 
       {/* Transaction Status */}

@@ -32,7 +32,8 @@ const actionTitleMap = (tokenSymbol) => ({
 
 /**
  * Get action title depending on the action type.
- * @param {Array} tokens Array of registered tokens with {uid, name, symbol}
+ * @param {Array<{ uid: string, symbol: string, name: string }>} tokens Array of
+ * registered tokens with {uid, name, symbol}
  * @param {Object} action An action object
  *
  * @returns {string} A formatted title to be used in the action card

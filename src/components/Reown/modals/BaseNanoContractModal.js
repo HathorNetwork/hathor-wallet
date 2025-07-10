@@ -15,6 +15,7 @@ import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
 import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
 import { constants } from '@hathor/wallet-lib';
+import { DAppInfo } from '../DAppInfo';
 
 /**
  * Component for Blueprint Information Card
@@ -157,25 +158,6 @@ const CallerAddressSection = ({ selectedAddress, onSelectAddress, nanoContracts,
   );
 };
 
-/**
- * Component for dApp Info
- */
-const DAppInfo = ({ dapp }) => (
-  <div className="d-flex align-items-center mb-4">
-    {dapp?.icon && (
-      <img
-        src={dapp.icon}
-        alt="dApp icon"
-        className="mr-3"
-        style={{ width: 48, height: 48 }}
-      />
-    )}
-    <div>
-      <h6 className="mb-1">{dapp?.proposer || "Unknown"}</h6>
-      <small className="text-muted">{dapp?.url || dapp?.chain || ""}</small>
-    </div>
-  </div>
-);
 
 /**
  * Base component for nano contract modal transactions

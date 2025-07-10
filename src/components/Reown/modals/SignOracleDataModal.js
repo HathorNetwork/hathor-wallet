@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { DAppInfo } from '../DAppInfo';
 
 export function SignOracleDataModal({ data, onAccept, onReject }) {
   return (
@@ -18,13 +19,7 @@ export function SignOracleDataModal({ data, onAccept, onReject }) {
         </button>
       </div>
       <div className="modal-body">
-        <div className="d-flex align-items-center mb-3">
-          {data.dapp.icon && <img src={data.dapp.icon} alt="dApp icon" className="mr-3" style={{ width: 48, height: 48 }} />}
-          <div>
-            <h6 className="mb-1">{data.dapp.proposer}</h6>
-            <small className="text-muted">{data.dapp.url}</small>
-          </div>
-        </div>
+        <DAppInfo dapp={data.dapp} className="d-flex align-items-center mb-3" />
         <p>{t`Oracle data to sign:`}</p>
         <pre className="bg-light p-3 rounded">{JSON.stringify(data.data, null, 2)}</pre>
       </div>
