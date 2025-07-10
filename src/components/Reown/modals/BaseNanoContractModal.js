@@ -172,8 +172,7 @@ export function BaseNanoContractModal({
   modalTitle,
   acceptButtonText = t`Accept Transaction`,
   rejectButtonText = t`Reject`,
-  showCallerSection = false,
-  showDAppWarning = false
+  showCallerSection = false
 }) {
   const dispatch = useDispatch();
   const nanoContract = data?.data || {};
@@ -292,12 +291,8 @@ export function BaseNanoContractModal({
       <div className="modal-body p-3" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
         <DAppInfo dapp={data.dapp} />
 
-        {showDAppWarning && (
-          <>
-            <p className="font-weight-bold mb-3">{t`Review your transaction from this dApp`}</p>
-            <p className="text-muted small mb-4">{t`Stay vigilant and protect your data from potential phishing attempts.`}</p>
-          </>
-        )}
+        <p className="font-weight-bold mb-3">{t`Review your transaction from this dApp`}</p>
+        <p className="text-muted small mb-4">{t`Stay vigilant and protect your data from potential phishing attempts.`}</p>
 
         <BlueprintInfoCard nanoContract={nanoContract} blueprintInfo={blueprintInfo} />
 
