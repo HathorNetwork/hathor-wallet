@@ -9,6 +9,48 @@ import React from 'react';
 import { t } from 'ttag';
 import { JSONBigInt } from '@hathor/wallet-lib/lib/utils/bigint';
 
+// Styles object to avoid inline style repetition
+const styles = {
+  container: {
+    width: '100%'
+  },
+  fieldContainer: {
+    marginBottom: '8px'
+  },
+  fieldLabel: {
+    fontWeight: '600',
+    marginBottom: '4px'
+  },
+  fieldValue: {
+    margin: 0,
+    wordBreak: 'break-all'
+  },
+  fieldValueNormal: {
+    margin: 0
+  },
+  fullDataContainer: {
+    marginTop: '12px'
+  },
+  codeBlock: {
+    backgroundColor: '#f8f9fa',
+    padding: '8px',
+    borderRadius: '4px',
+    margin: 0,
+    maxHeight: '200px',
+    overflow: 'auto',
+    fontSize: '14px'
+  },
+  fullDataCodeBlock: {
+    backgroundColor: '#f8f9fa',
+    padding: '8px',
+    borderRadius: '4px',
+    margin: 0,
+    maxHeight: '300px',
+    overflow: 'auto',
+    fontSize: '14px'
+  }
+};
+
 /**
  * Component for displaying Nano Contract data
  * 
@@ -26,51 +68,35 @@ export default function NanoContractRequestData({ data }) {
   }, [data]);
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={styles.container}>
       {Object.keys(data).length > 0 ? (
         <div>
           {data.blueprintId && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Blueprint ID`}</p>
-              <p style={{ margin: 0, wordBreak: 'break-all' }}>{data.blueprintId}</p>
+            <div style={styles.fieldContainer}>
+              <p style={styles.fieldLabel}>{t`Blueprint ID`}</p>
+              <p style={styles.fieldValue}>{data.blueprintId}</p>
             </div>
           )}
-          
+
           {data.method && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Method`}</p>
-              <p style={{ margin: 0 }}>{data.method}</p>
+            <div style={styles.fieldContainer}>
+              <p style={styles.fieldLabel}>{t`Method`}</p>
+              <p style={styles.fieldValueNormal}>{data.method}</p>
             </div>
           )}
-          
+
           {data.args && data.args.length > 0 && (
-            <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Arguments`}</p>
-              <pre style={{ 
-                backgroundColor: '#f8f9fa', 
-                padding: '8px', 
-                borderRadius: '4px',
-                margin: 0,
-                maxHeight: '200px',
-                overflow: 'auto',
-                fontSize: '14px'
-              }}>
+            <div style={styles.fieldContainer}>
+              <p style={styles.fieldLabel}>{t`Arguments`}</p>
+              <pre style={styles.codeBlock}>
                 {JSON.stringify(data.args, null, 2)}
               </pre>
             </div>
           )}
-          
-          <div style={{ marginTop: '12px' }}>
-            <p style={{ fontWeight: '600', marginBottom: '4px' }}>{t`Full Data`}</p>
-            <pre style={{ 
-              backgroundColor: '#f8f9fa', 
-              padding: '8px', 
-              borderRadius: '4px',
-              margin: 0,
-              maxHeight: '300px',
-              overflow: 'auto',
-              fontSize: '14px'
-            }}>
+
+          <div style={styles.fullDataContainer}>
+            <p style={styles.fieldLabel}>{t`Full Data`}</p>
+            <pre style={styles.fullDataCodeBlock}>
               {processedData}
             </pre>
           </div>
