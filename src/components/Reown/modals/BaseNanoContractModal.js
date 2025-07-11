@@ -158,7 +158,6 @@ const CallerAddressSection = ({ selectedAddress, onSelectAddress, nanoContracts,
   );
 };
 
-
 /**
  * Base component for nano contract modal transactions
  */
