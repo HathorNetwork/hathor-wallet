@@ -2,8 +2,39 @@
   "resources": {
     "@hathor/hathor-rpc-handler": {
       "packages": {
-        "@hathor/wallet-lib": true,
+        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true,
         "@hathor/wallet-lib>zod": true,
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "@hathor/hathor-rpc-handler>@hathor/wallet-lib": {
+      "globals": {
+        "AbortController": true,
+        "Buffer.alloc": true,
+        "Buffer.concat": true,
+        "Buffer.from": true,
+        "Intl.NumberFormat": true,
+        "clearInterval": true,
+        "clearTimeout": true,
+        "console": true,
+        "setInterval": true,
+        "setTimeout": true
+      },
+      "packages": {
+        "@hathor/wallet-lib>bitcore-lib": true,
+        "@hathor/wallet-lib>bitcore-mnemonic": true,
+        "@hathor/wallet-lib>crypto-js": true,
+        "@hathor/wallet-lib>isomorphic-ws": true,
+        "@hathor/wallet-lib>queue-microtask": true,
+        "@hathor/wallet-lib>zod": true,
+        "@walletconnect/core>events": true,
+        "axios": true,
+        "buffer": true,
+        "cypress>lodash": true,
+        "node-stdlib-browser>assert": true,
+        "node-stdlib-browser>browserify-zlib": true,
+        "node-stdlib-browser>crypto-browserify": true,
+        "node-stdlib-browser>path-browserify": true,
         "react-redux>@babel/runtime": true
       }
     },
