@@ -12,7 +12,7 @@ import { t } from 'ttag';
  * Reusable component for displaying dApp information
  * Shows dApp icon, proposer name, and URL/chain info
  */
-export const DAppInfo = ({ dapp, className = "d-flex align-items-center mb-4" }) => (
+export const DAppInfo = ({ dapp, className = "d-flex align-items-center mb-3" }) => (
   <div className={className}>
     {dapp?.icon && (
       <img

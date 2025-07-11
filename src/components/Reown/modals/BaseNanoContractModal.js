@@ -289,7 +289,7 @@ export function BaseNanoContractModal({
         </button>
       </div>
       <div className="modal-body p-3" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-        <DAppInfo dapp={data.dapp} />
+        <DAppInfo dapp={data.dapp} className="d-flex align-items-center mb-4" />
 
         <p className="font-weight-bold mb-3">{t`Review your transaction from this dApp`}</p>
         <p className="text-muted small mb-4">{t`Stay vigilant and protect your data from potential phishing attempts.`}</p>

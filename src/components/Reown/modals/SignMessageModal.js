@@ -19,7 +19,7 @@ export function SignMessageModal({ data, onAccept, onReject }) {
         </button>
       </div>
       <div className="modal-body">
-        <DAppInfo dapp={data.dapp} className="d-flex align-items-center mb-3" />
+        <DAppInfo dapp={data.dapp} />
         <p>{t`Message to sign:`}</p>
         <pre className="bg-light p-3 rounded">{data.data.message}</pre>
       </div>

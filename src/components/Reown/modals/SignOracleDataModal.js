@@ -19,7 +19,7 @@ export function SignOracleDataModal({ data, onAccept, onReject }) {
         </button>
       </div>
       <div className="modal-body">
-        <DAppInfo dapp={data.dapp} className="d-flex align-items-center mb-3" />
+        <DAppInfo dapp={data.dapp} />
         <p>{t`Oracle data to sign:`}</p>
         <pre className="bg-light p-3 rounded">{JSON.stringify(data.data, null, 2)}</pre>
       </div>
