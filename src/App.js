@@ -36,7 +36,6 @@ import Page404 from './screens/Page404';
 import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
 import LoadWalletFailed from './screens/LoadWalletFailed';
-import CreateNanoContractCreateTokenTxScreen from './screens/CreateNanoContractCreateTokenTxScreen';
 import versionUtils from './utils/version';
 import helpersUtils from './utils/helpers';
 import tokensUtils from './utils/tokens';
@@ -60,7 +59,6 @@ import ReownConnect from './screens/ReownConnect';
 import NetworkSettingsRecovery from './screens/NetworkSettingsRecovery';
 
 function Root() {
-  const location = useLocation();
   const {
     ledgerClosed,
     walletStartState,
