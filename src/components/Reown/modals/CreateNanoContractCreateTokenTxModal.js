@@ -70,7 +70,7 @@ export function CreateNanoContractCreateTokenTxModal({ data, onAccept, onReject 
       modalTitle={t`CREATE NANO CONTRACT & TOKEN`}
       acceptButtonText={t`Accept Transaction`}
       rejectButtonText={t`Reject`}
-      showCallerSection={false}
+      showCallerSection={true}
     />
   );
 } 
