@@ -74,7 +74,7 @@ const ActionItem = ({ action, isNft, title }) => {
       return hathorLib.numberUtils.prettyValue(amount, isNft ? 0 : decimalPlaces);
     } catch (error) {
       console.warn('Error formatting amount:', amount, error);
-      return '0';
+      return '';
     }
   };
 

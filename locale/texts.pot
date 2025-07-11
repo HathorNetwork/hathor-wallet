@@ -244,11 +244,6 @@ msgstr ""
 msgid "Create a melt authority"
 msgstr ""
 
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:170
-#: src/screens/CreateNanoContractCreateTokenTxScreen.js:27
-msgid "Create Nano Contract & Token"
-msgstr ""
-
 #: src/screens/CreateToken.js:73
 #, javascript-format
 msgid "Maximum value to mint token is ${ max_output_value_str }"
@@ -1282,7 +1277,6 @@ msgstr ""
 msgid "Select Blueprint"
 msgstr ""
 
-#: src/components/Reown/NanoContractRequestData.js:34
 #: src/components/Reown/modals/BaseNanoContractModal.js:42
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:170
 msgid "Blueprint ID"
@@ -2892,7 +2886,6 @@ msgstr ""
 msgid "Error getting nano contract history."
 msgstr ""
 
-#: src/components/Reown/NanoContractRequestData.js:41
 #: src/components/nano-contract/NanoContractHistory.js:150
 msgid "Method"
 msgstr ""
@@ -2985,71 +2978,6 @@ msgstr ""
 
 #: src/components/atomic-swap/ProposalBalanceTable.js:62
 msgid "Receiving"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:70
-msgid "Could not fetch wallet address."
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:96
-msgid "Please select an address for the nano contract."
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:174
-msgid "dApp Information"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:184
-msgid "Transaction Status"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:186
-msgid "Processing your transaction..."
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:189
-msgid "Transaction completed successfully!"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:193
-msgid "Transaction failed. Please try again."
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:194
-msgid " Retrying..."
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:202
-msgid "Nano Contract Data"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:207
-msgid "Nano Contract Address"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:219
-msgid "Select an address"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:232
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:19
-msgid "Create Token Data"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:244
-msgid "Accept"
-msgstr ""
-
-#: src/components/Reown/CreateNanoContractCreateTokenTxRequest.js:251
-#: src/components/Reown/modals/BaseNanoContractModal.js:174
-#: src/components/Reown/modals/ConnectModal.js:37
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
-#: src/components/Reown/modals/CreateTokenModal.js:59
-#: src/components/Reown/modals/SendNanoContractTxModal.js:38
-#: src/components/Reown/modals/SendTransactionModal.js:207
-#: src/components/Reown/modals/SignMessageModal.js:27
-#: src/components/Reown/modals/SignOracleDataModal.js:27
-msgid "Reject"
 msgstr ""
 
 #: src/components/Reown/CreateTokenRequestData.js:107
@@ -3250,19 +3178,6 @@ msgstr ""
 msgid "The nano contract transaction was sent successfully."
 msgstr ""
 
-#: src/components/Reown/NanoContractRequestData.js:48
-#: src/components/Reown/modals/BaseNanoContractModal.js:81
-msgid "Arguments"
-msgstr ""
-
-#: src/components/Reown/NanoContractRequestData.js:64
-msgid "Full Data"
-msgstr ""
-
-#: src/components/Reown/NanoContractRequestData.js:79
-msgid "No nano contract data available."
-msgstr ""
-
 #: src/components/Reown/TokenCreationFeedbackModal.js:28
 msgid "Processing Token Creation"
 msgstr ""
@@ -3313,6 +3228,10 @@ msgstr ""
 msgid "Blueprint Method"
 msgstr ""
 
+#: src/components/Reown/modals/BaseNanoContractModal.js:81
+msgid "Arguments"
+msgstr ""
+
 #: src/components/Reown/modals/BaseNanoContractModal.js:87
 #, javascript-format
 msgid "Position ${ index }"
@@ -3348,6 +3267,17 @@ msgstr ""
 msgid "Accept Transaction"
 msgstr ""
 
+#: src/components/Reown/modals/BaseNanoContractModal.js:174
+#: src/components/Reown/modals/ConnectModal.js:37
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
+#: src/components/Reown/modals/CreateTokenModal.js:59
+#: src/components/Reown/modals/SendNanoContractTxModal.js:38
+#: src/components/Reown/modals/SendTransactionModal.js:207
+#: src/components/Reown/modals/SignMessageModal.js:27
+#: src/components/Reown/modals/SignOracleDataModal.js:27
+msgid "Reject"
+msgstr ""
+
 #: src/components/Reown/modals/BaseNanoContractModal.js:294
 msgid "Review your transaction from this dApp"
 msgstr ""
@@ -3366,6 +3296,13 @@ msgstr ""
 
 #: src/components/Reown/modals/ConnectModal.js:29
 msgid "This dApp would like to:"
+msgstr ""
+
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:19
+#. *
+#.  * Component for Token Data Card
+#.  
+msgid "Create Token Data"
 msgstr ""
 
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:70

@@ -50,7 +50,7 @@ export function CreateTokenModal({ data, onAccept, onReject }) {
         </button>
       </div>
       <div className="modal-body">
-        <DAppInfo dapp={data.dapp} className="d-flex align-items-center mb-3" />
+        <DAppInfo dapp={data.dapp} />
         <p>{t`Token details:`}</p>
         { /* TODO: Token details will be rendered in raw format, we should improve this UI */ }
         <pre className="bg-light p-3 rounded">{processedData}</pre>
