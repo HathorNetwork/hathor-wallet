@@ -59,7 +59,6 @@ import ReownConnect from './screens/ReownConnect';
 import NetworkSettingsRecovery from './screens/NetworkSettingsRecovery';
 
 function Root() {
-  const location = useLocation();
   const {
     ledgerClosed,
     walletStartState,

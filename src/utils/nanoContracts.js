@@ -6,6 +6,7 @@
  */
 
 import hathorLib from '@hathor/wallet-lib';
+import { SignedDataDisplay } from '../components/Reown/SignedDataDisplay';
 import { get } from 'lodash';
 
 /**
@@ -34,16 +35,6 @@ const nanoContracts = {
     }
 
     return nanoContracts;
-  },
-
-  /**
-   * Check if transaction is a nano contract create tx
-   *
-   * @param {Transaction} tx
-   * @returns {boolean}
-   */
-  isNanoContractCreate(tx) {
-    return tx.version === hathorLib.constants.NANO_CONTRACTS_VERSION && tx.nc_method === hathorLib.constants.NANO_CONTRACTS_INITIALIZE_METHOD;
   },
 
   /**
@@ -91,14 +82,18 @@ const nanoContracts = {
 
     // Handle optional types
     const typeWithoutOptional = argType.replace('?', '');
-    
+
     // Format based on argument type
     if (typeWithoutOptional === 'Timestamp') {
       return hathorLib.dateUtils.parseTimestamp(value);
     }
-    
+
     if (typeWithoutOptional === 'Amount') {
       return hathorLib.numberUtils.prettyValue(value, decimalPlaces);
+    }
+
+    if (typeWithoutOptional.startsWith('SignedData')) {
+      return <SignedDataDisplay value={value} />;
     }
 
     // Default string representation

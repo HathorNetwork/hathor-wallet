@@ -2,7 +2,9 @@
   "resources": {
     "@hathor/hathor-rpc-handler": {
       "packages": {
-        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true
+        "@hathor/hathor-rpc-handler>@hathor/wallet-lib": true,
+        "@hathor/wallet-lib>zod": true,
+        "react-redux>@babel/runtime": true
       }
     },
     "@hathor/hathor-rpc-handler>@hathor/wallet-lib": {
@@ -23,12 +25,14 @@
         "@hathor/wallet-lib>bitcore-mnemonic": true,
         "@hathor/wallet-lib>crypto-js": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
+        "@hathor/wallet-lib>queue-microtask": true,
+        "@hathor/wallet-lib>zod": true,
         "@walletconnect/core>events": true,
         "axios": true,
         "buffer": true,
         "cypress>lodash": true,
-        "hathor-rpc-handler-test>@hathor/wallet-lib>long": true,
         "node-stdlib-browser>assert": true,
+        "node-stdlib-browser>browserify-zlib": true,
         "node-stdlib-browser>crypto-browserify": true,
         "node-stdlib-browser>path-browserify": true,
         "react-redux>@babel/runtime": true
@@ -59,6 +63,7 @@
         "buffer": true,
         "cypress>lodash": true,
         "node-stdlib-browser>assert": true,
+        "node-stdlib-browser>browserify-zlib": true,
         "node-stdlib-browser>crypto-browserify": true,
         "node-stdlib-browser>path-browserify": true,
         "react-redux>@babel/runtime": true
@@ -1109,12 +1114,6 @@
         "npm-run-all>string.prototype.padend>es-abstract>object-inspect": true
       }
     },
-    "hathor-rpc-handler-test>@hathor/wallet-lib>long": {
-      "globals": {
-        "WebAssembly.Instance": true,
-        "WebAssembly.Module": true
-      }
-    },
     "jquery": {
       "globals": {
         "define": true
@@ -1145,6 +1144,20 @@
       "packages": {
         "npm-run-all>string.prototype.padend>call-bind": true,
         "npm-run-all>string.prototype.padend>define-properties": true
+      }
+    },
+    "node-stdlib-browser>browserify-zlib": {
+      "globals": {
+        "Buffer.alloc": true,
+        "process.nextTick": true
+      },
+      "packages": {
+        "buffer": true,
+        "node-stdlib-browser>assert": true,
+        "node-stdlib-browser>browserify-zlib>pako": true,
+        "node-stdlib-browser>stream-browserify": true,
+        "node-stdlib-browser>util": true,
+        "process": true
       }
     },
     "node-stdlib-browser>crypto-browserify": {

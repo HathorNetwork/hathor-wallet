@@ -89,6 +89,8 @@ export const types = {
   REOWN_SEND_TX_RETRY_DISMISS: 'REOWN_SEND_TX_RETRY_DISMISS',
   REOWN_SIGN_MESSAGE_RETRY: 'REOWN_SIGN_MESSAGE_RETRY',
   REOWN_SIGN_MESSAGE_RETRY_DISMISS: 'REOWN_SIGN_MESSAGE_RETRY_DISMISS',
+  REOWN_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_RETRY: 'REOWN_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_RETRY',
+  REOWN_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_RETRY_DISMISS: 'REOWN_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_RETRY_DISMISS',
   REOWN_ACCEPT: 'REOWN_ACCEPT',
   REOWN_REJECT: 'REOWN_REJECT',
   REOWN_URI_INPUTTED: 'REOWN_URI_INPUTTED',
@@ -98,6 +100,7 @@ export const types = {
   SHOW_SIGN_MESSAGE_REQUEST_MODAL: 'SHOW_SIGN_MESSAGE_REQUEST_MODAL',
   SHOW_NANO_CONTRACT_SEND_TX_MODAL: 'SHOW_NANO_CONTRACT_SEND_TX_MODAL',
   SHOW_SEND_TRANSACTION_REQUEST_MODAL: 'SHOW_SEND_TRANSACTION_REQUEST_MODAL',
+  SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL: 'SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL',
   REOWN_SESSION_PROPOSAL: 'REOWN_SESSION_PROPOSAL',
   REOWN_SESSION_REQUEST: 'REOWN_SESSION_REQUEST',
   REOWN_SESSION_DELETE: 'REOWN_SESSION_DELETE',
@@ -909,6 +912,19 @@ export const showNanoContractSendTxModal = (onAccept, onReject, data, metadata) 
  */
 export const showSendTransactionModal = (onAccept, onReject, data, metadata) => ({
   type: types.SHOW_SEND_TRANSACTION_REQUEST_MODAL,
+  payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
+});
+
+/**
+ * Show modal for creating a nano contract and token in a single transaction
+ * 
+ * @param {Function} onAccept Callback function when user accepts the request
+ * @param {Function} onReject Callback function when user rejects the request
+ * @param {Object} data The nano contract and token creation data
+ * @param {Object} metadata Metadata about the dapp requesting the creation
+ */
+export const showCreateNanoContractCreateTokenTxModal = (onAccept, onReject, data, metadata) => ({
+  type: types.SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL,
   payload: { accept: onAccept, deny: onReject, data, dapp: metadata },
 });
 
