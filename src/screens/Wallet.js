@@ -64,6 +64,7 @@ function Wallet() {
     tokensHistory,
     tokensBalance,
     tokenMetadata,
+    tokenVersion,
     tokens,
     walletState,
   } = useSelector((state) => {
@@ -72,6 +73,7 @@ function Wallet() {
       tokensHistory: state.tokensHistory,
       tokensBalance: state.tokensBalance,
       tokenMetadata: state.tokenMetadata || {},
+      tokenVersion: state.tokenVersion || 1, // TODO: import this from wallet-lib TokenInfoVersion.DEPOSIT
       tokens: state.tokens,
       walletState: state.walletState,
     };
@@ -397,6 +399,7 @@ function Wallet() {
               canMelt={canMelt}
               transactionsCount={transactionsCount}
               tokenMetadata={tokenMetadata}
+              tokenVersion={tokenVersion}
             />
           </div>
           {
