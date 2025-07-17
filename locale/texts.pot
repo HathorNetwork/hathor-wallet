@@ -20,7 +20,7 @@ msgid "Passphrase and confirm passphrase must be equal"
 msgstr ""
 
 #: src/components/ModalBackupWords.js:105
-#: src/components/ModalResetAllData.js:75
+#: src/components/ModalResetAllData.js:84
 #: src/screens/ChoosePassphrase.js:71
 msgid "Invalid password"
 msgstr ""
@@ -29,7 +29,7 @@ msgstr ""
 #: src/components/PinPad.js:65
 #: src/components/nano-contract/ModalSelectAddressToSignData.js:83
 #: src/screens/ChoosePassphrase.js:76
-#: src/screens/LockedWallet.js:67
+#: src/screens/LockedWallet.js:66
 msgid "Invalid PIN"
 msgstr ""
 
@@ -61,9 +61,9 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
+#: src/components/NetworkSettingsForm.js:167
 #: src/screens/ChoosePassphrase.js:157
-#: src/screens/LockedWallet.js:117
-#: src/screens/NetworkSettings.js:183
+#: src/screens/LockedWallet.js:116
 msgid "PIN"
 msgstr ""
 
@@ -192,6 +192,7 @@ msgstr ""
 msgid "MyCoin"
 msgstr ""
 
+#: src/components/Reown/CreateTokenRequestData.js:117
 #: src/screens/CreateNFT.js:310
 #: src/screens/CreateToken.js:267
 msgid "Symbol"
@@ -202,6 +203,7 @@ msgstr ""
 msgid "MYC (2-5 characters)"
 msgstr ""
 
+#: src/components/Reown/CreateTokenRequestData.js:118
 #: src/components/atomic-swap/ModalAtomicReceive.js:115
 #: src/components/atomic-swap/ModalAtomicSend.js:323
 #: src/screens/CreateNFT.js:316
@@ -222,6 +224,8 @@ msgstr ""
 
 #: src/components/AddressList.js:194
 #: src/components/OutputsWrapper.js:62
+#: src/components/Reown/CreateTokenRequestData.js:155
+#: src/components/Reown/OracleDataDisplay.js:55
 #: src/components/atomic-swap/ModalAtomicReceive.js:105
 #: src/components/atomic-swap/ModalAtomicReceive.js:107
 #: src/components/atomic-swap/ModalAtomicSend.js:331
@@ -366,42 +370,42 @@ msgstr ""
 msgid "There has been a problem loading your wallet, click |fn:here| to retry."
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:89
+#: src/screens/LoadingAddresses.js:88
 msgid "Loading transactions..."
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:93
+#: src/screens/LoadingAddresses.js:92
 msgid "Please wait while we load the transactions of all your addresses."
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:94
+#: src/screens/LoadingAddresses.js:93
 msgid ""
 "You will be automatically redirected to the wallet when we finish loading "
 "them."
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:95
+#: src/screens/LoadingAddresses.js:94
 #, javascript-format
 msgid "**Addresses found:** ${ addressesFound }"
 msgstr ""
 
-#: src/screens/LoadingAddresses.js:96
+#: src/screens/LoadingAddresses.js:95
 #, javascript-format
 msgid "**Transactions found:** ${ transactionsFound }"
 msgstr ""
 
-#: src/screens/LockedWallet.js:115
+#: src/screens/LockedWallet.js:114
 msgid "Your wallet is locked. Please write down your PIN to unlock it."
 msgstr ""
 
 #: src/components/ModalConfirmClearStorage.js:58
-#: src/components/ModalResetAllData.js:128
-#: src/screens/LockedWallet.js:121
+#: src/components/ModalResetAllData.js:137
+#: src/screens/LockedWallet.js:120
 #: src/screens/Settings.js:338
 msgid "Reset all data"
 msgstr ""
 
-#: src/screens/LockedWallet.js:131
+#: src/screens/LockedWallet.js:130
 msgid "Unlock"
 msgstr ""
 
@@ -415,64 +419,9 @@ msgid ""
 "have a digital asset being shown in our explorer."
 msgstr ""
 
-#: src/screens/NetworkSettings.js:121
-msgid "Invalid PIN."
-msgstr ""
-
-#: src/screens/NetworkSettings.js:147
-msgid "Full node URL *"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:148
-msgid "Transaction Mining Service URL *"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:149
-msgid "Explorer URL *"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:150
-msgid "Explorer Service URL *"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:151
-#: src/screens/NetworkSettings.js:165
-msgid "Wallet Service URL"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:152
-#: src/screens/NetworkSettings.js:166
-msgid "Wallet Service Websocket URL"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:160
+#: src/screens/NetworkSettings.js:23
+#.  Only render the form with navigation/header
 msgid "Network Settings"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:161
-msgid "Full node URL"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:162
-msgid "Transaction Mining Service URL"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:163
-msgid "Explorer URL"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:164
-msgid "Explorer Service URL"
-msgstr ""
-
-#: src/screens/NetworkSettings.js:168
-msgid "Select the network if you want to change"
-msgstr ""
-
-#: src/components/Reown/modals/ConnectModal.js:38
-#: src/screens/NetworkSettings.js:187
-#: src/screens/ReownConnect.js:151
-msgid "Connect"
 msgstr ""
 
 #: src/screens/NewWallet.js:139
@@ -571,7 +520,7 @@ msgstr ""
 #: src/components/ModalPin.js:134
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/PinPad.js:235
-#: src/components/Reown/modals/SendNanoContractTxModal.js:128
+#: src/components/Reown/modals/BaseNanoContractModal.js:275
 #: src/components/atomic-swap/ModalAtomicReceive.js:129
 #: src/components/atomic-swap/ModalAtomicSend.js:365
 #: src/components/nano-contract/ModalChangeAddress.js:153
@@ -582,6 +531,12 @@ msgstr ""
 #: src/components/tokens/TokenAction.js:155
 #: src/screens/ReownConnect.js:148
 msgid "Cancel"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:171
+#: src/components/Reown/modals/ConnectModal.js:38
+#: src/screens/ReownConnect.js:151
+msgid "Connect"
 msgstr ""
 
 #: src/screens/ReownConnect.js:162
@@ -796,7 +751,8 @@ msgstr ""
 msgid "Allow notifications:"
 msgstr ""
 
-#: src/components/ModalResetAllData.js:164
+#: src/components/ModalResetAllData.js:173
+#: src/components/Reown/CreateTokenRequestData.js:22
 #: src/components/TokenGeneralInfo.js:147
 #: src/screens/Settings.js:317
 #: src/screens/Settings.js:321
@@ -804,7 +760,8 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: src/components/ModalResetAllData.js:163
+#: src/components/ModalResetAllData.js:172
+#: src/components/Reown/CreateTokenRequestData.js:22
 #: src/components/TokenGeneralInfo.js:148
 #: src/screens/Settings.js:317
 #: src/screens/Settings.js:322
@@ -839,6 +796,7 @@ msgid "Unique identifier"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:101
+#: src/components/Reown/CreateTokenRequestData.js:36
 #: src/components/TokenGeneralInfo.js:173
 #: src/components/WalletAddress.js:175
 #: src/screens/Settings.js:332
@@ -1258,7 +1216,7 @@ msgstr ""
 msgid "Add action"
 msgstr ""
 
-#: src/components/Reown/modals/CreateTokenModal.js:65
+#: src/components/Reown/modals/CreateTokenModal.js:60
 #: src/screens/atomic-swap/NewSwap.js:92
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:664
 msgid "Create"
@@ -1291,6 +1249,7 @@ msgstr ""
 msgid "Select New Blueprint"
 msgstr ""
 
+#: src/components/Reown/CreateTokenRequestData.js:116
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:91
 msgid "Name"
 msgstr ""
@@ -1319,7 +1278,7 @@ msgstr ""
 msgid "Select Blueprint"
 msgstr ""
 
-#: src/components/Reown/modals/SendNanoContractTxModal.js:172
+#: src/components/Reown/modals/BaseNanoContractModal.js:42
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:170
 msgid "Blueprint ID"
 msgstr ""
@@ -1521,7 +1480,15 @@ msgstr ""
 msgid "Error getting nano contract state."
 msgstr ""
 
-#: src/sagas/reown.js:467
+#: src/sagas/networkSettings.js:60
+msgid "Invalid node."
+msgstr ""
+
+#: src/sagas/networkSettings.js:123
+msgid "Error updating network settings."
+msgstr ""
+
+#: src/sagas/reown.js:473
 msgid "Insufficient funds to complete the transaction."
 msgstr ""
 
@@ -1710,7 +1677,7 @@ msgid "We need your password to show the words"
 msgstr ""
 
 #: src/components/ModalBackupWords.js:191
-#: src/components/ModalResetAllData.js:140
+#: src/components/ModalResetAllData.js:149
 msgid "Password*"
 msgstr ""
 
@@ -1780,7 +1747,7 @@ msgid ""
 msgstr ""
 
 #: src/components/ModalConfirmClearStorage.js:49
-#: src/components/ModalResetAllData.js:146
+#: src/components/ModalResetAllData.js:155
 #, javascript-format
 msgid "Write '${ CONFIRM_RESET_MESSAGE }'"
 msgstr ""
@@ -1895,19 +1862,19 @@ msgstr ""
 msgid "You must write your password or check that you have forgotten it"
 msgstr ""
 
-#: src/components/ModalResetAllData.js:116
+#: src/components/ModalResetAllData.js:125
 msgid ""
 "If you reset your wallet, all data will be deleted, and you will lose "
 "access to your tokens. To recover access to your tokens, you will need to "
 "import your words again."
 msgstr ""
 
-#: src/components/ModalResetAllData.js:118
+#: src/components/ModalResetAllData.js:127
 #, javascript-format
 msgid "${ firstMessage } You still haven't done the backup of your words."
 msgstr ""
 
-#: src/components/ModalResetAllData.js:136
+#: src/components/ModalResetAllData.js:145
 msgid ""
 "You will need to register all your tokens again when your import your "
 "words. If you prefer, you can go to Settings > Export Registered Tokens, in "
@@ -1915,18 +1882,18 @@ msgid ""
 "by one after you start your wallet again."
 msgstr ""
 
-#: src/components/ModalResetAllData.js:137
+#: src/components/ModalResetAllData.js:146
 #, javascript-format
 msgid ""
 "If you still wanna do it, we need your password and for you to write down "
 "**'${ CONFIRM_RESET_MESSAGE }'** to confirm the operation."
 msgstr ""
 
-#: src/components/ModalResetAllData.js:145
+#: src/components/ModalResetAllData.js:154
 msgid "Confirm message*"
 msgstr ""
 
-#: src/components/ModalResetAllData.js:151
+#: src/components/ModalResetAllData.js:160
 msgid "I forgot my password"
 msgstr ""
 
@@ -2046,6 +2013,56 @@ msgstr ""
 msgid "Nano Contract"
 msgstr ""
 
+#: src/components/NetworkSettingsForm.js:107
+msgid "Invalid PIN."
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:133
+msgid "Full node URL *"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:134
+msgid "Transaction Mining Service URL *"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:135
+msgid "Explorer URL *"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:136
+msgid "Explorer Service URL *"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:137
+#: src/components/NetworkSettingsForm.js:149
+msgid "Wallet Service URL"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:138
+#: src/components/NetworkSettingsForm.js:150
+msgid "Wallet Service Websocket URL"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:145
+msgid "Full node URL"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:146
+msgid "Transaction Mining Service URL"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:147
+msgid "Explorer URL"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:148
+msgid "Explorer Service URL"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:152
+msgid "Select the network if you want to change"
+msgstr ""
+
 #: src/components/OutputsWrapper.js:67
 msgid "This feature is disabled for hardware wallet"
 msgstr ""
@@ -2078,7 +2095,7 @@ msgstr ""
 msgid "Both fields must be equal"
 msgstr ""
 
-#: src/components/RequestError.js:96
+#: src/components/RequestError.js:99
 msgid ""
 "There was an error fetching your transactions from the server.\n"
 "This might be caused by some reasons: (i) the server may be fully loaded, "
@@ -2087,50 +2104,50 @@ msgid ""
 "We advise you to wait a few seconds and retry your request."
 msgstr ""
 
-#: src/components/RequestError.js:99
+#: src/components/RequestError.js:102
 msgid ""
 "Rate limit exceeded. Sorry about that. You should wait a few seconds and "
 "try again. What do you want to do?"
 msgstr ""
 
-#: src/components/RequestError.js:101
+#: src/components/RequestError.js:104
 msgid "Your request failed to reach the server. What do you want to do?"
 msgstr ""
 
-#: src/components/RequestError.js:113
+#: src/components/RequestError.js:116
 msgid "URL:"
 msgstr ""
 
-#: src/components/RequestError.js:114
+#: src/components/RequestError.js:117
 msgid "Method:"
 msgstr ""
 
-#: src/components/RequestError.js:115
+#: src/components/RequestError.js:118
 msgid "Response status code:"
 msgstr ""
 
-#: src/components/RequestError.js:151
+#: src/components/RequestError.js:154
 msgid "Request failed"
 msgstr ""
 
-#: src/components/RequestError.js:158
+#: src/components/RequestError.js:161
 #, javascript-format
 msgid "You are connected to **${ serverURL }**"
 msgstr ""
 
-#: src/components/RequestError.js:159
+#: src/components/RequestError.js:162
 msgid "Show advanced data"
 msgstr ""
 
-#: src/components/RequestError.js:160
+#: src/components/RequestError.js:163
 msgid "Hide advanced data"
 msgstr ""
 
-#: src/components/RequestError.js:164
+#: src/components/RequestError.js:167
 msgid "Change server"
 msgstr ""
 
-#: src/components/RequestError.js:165
+#: src/components/RequestError.js:168
 msgid "Retry request"
 msgstr ""
 
@@ -2328,6 +2345,7 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
+#: src/components/Reown/SignedDataDisplay.js:19
 #: src/components/TokenHistory.js:230
 msgid "Value"
 msgstr ""
@@ -2835,7 +2853,7 @@ msgstr ""
 msgid "To register your nano contract, just write down the ID of the contract."
 msgstr ""
 
-#: src/components/Reown/modals/SendNanoContractTxModal.js:158
+#: src/components/Reown/modals/BaseNanoContractModal.js:28
 #: src/components/nano-contract/ModalRegisterNanoContract.js:97
 msgid "Nano Contract ID"
 msgstr ""
@@ -2856,7 +2874,7 @@ msgstr ""
 msgid "Sign Data"
 msgstr ""
 
-#: src/components/Reown/modals/SendNanoContractTxModal.js:118
+#: src/components/Reown/modals/BaseNanoContractModal.js:265
 #: src/components/nano-contract/ModalSelectAddressToSignTx.js:49
 msgid "Select the address that will be used to sign the transaction"
 msgstr ""
@@ -2946,6 +2964,7 @@ msgstr ""
 msgid "available"
 msgstr ""
 
+#: src/components/Reown/CreateTokenRequestData.js:156
 #: src/components/Reown/modals/SendTransactionModal.js:194
 #: src/components/atomic-swap/ModalAtomicSend.js:333
 msgid "Change Address"
@@ -2961,6 +2980,43 @@ msgstr ""
 
 #: src/components/atomic-swap/ProposalBalanceTable.js:62
 msgid "Receiving"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:107
+msgid "No token data available."
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:126
+msgid "Create mint authority?"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:129
+msgid "Mint Authority Address"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:139
+msgid "Create melt authority?"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:142
+msgid "Melt Authority Address"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:158
+msgid "Allow External Mint Authority Address"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:163
+msgid "Allow External Melt Authority Address"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:169
+#: src/components/Reown/OracleDataDisplay.js:107
+msgid "Data"
+msgstr ""
+
+#: src/components/Reown/DAppInfo.js:26
+msgid "Unknown dApp proposer"
 msgstr ""
 
 #: src/components/Reown/FeedbackModal.js:25
@@ -3018,7 +3074,8 @@ msgstr ""
 #: src/components/Reown/NanoContractActions.js:27
 #. *
 #.  * It returns the title template for each action type,
-#.  * which is either 'deposit' or 'withdrawal'.
+#.  * which includes 'deposit', 'withdrawal', 'grant_authority', and
+#.  * 'acquire_authority'.
 #.  *
 #.  * @param {string} tokenSymbol The token symbol fetched from metadata,
 #.  * or a shortened token hash.
@@ -3032,7 +3089,8 @@ msgstr ""
 #: src/components/Reown/NanoContractActions.js:28
 #. *
 #.  * It returns the title template for each action type,
-#.  * which is either 'deposit' or 'withdrawal'.
+#.  * which includes 'deposit', 'withdrawal', 'grant_authority', and
+#.  * 'acquire_authority'.
 #.  *
 #.  * @param {string} tokenSymbol The token symbol fetched from metadata,
 #.  * or a shortened token hash.
@@ -3043,12 +3101,55 @@ msgstr ""
 msgid "${ tokenSymbol } Withdrawal"
 msgstr ""
 
-#: src/components/Reown/NanoContractActions.js:80
-msgid "To Address:"
+#: src/components/Reown/NanoContractActions.js:29
+#. *
+#.  * It returns the title template for each action type,
+#.  * which includes 'deposit', 'withdrawal', 'grant_authority', and
+#.  * 'acquire_authority'.
+#.  *
+#.  * @param {string} tokenSymbol The token symbol fetched from metadata,
+#.  * or a shortened token hash.
+#.  *
+#.  * @returns {string} A title template by action type.
+#.  
+#, javascript-format
+msgid "${ tokenSymbol } Grant Authority"
 msgstr ""
 
-#: src/components/Reown/NanoContractActions.js:119
-msgid "Action List"
+#: src/components/Reown/NanoContractActions.js:30
+#. *
+#.  * It returns the title template for each action type,
+#.  * which includes 'deposit', 'withdrawal', 'grant_authority', and
+#.  * 'acquire_authority'.
+#.  *
+#.  * @param {string} tokenSymbol The token symbol fetched from metadata,
+#.  * or a shortened token hash.
+#.  *
+#.  * @returns {string} A title template by action type.
+#.  
+#, javascript-format
+msgid "${ tokenSymbol } Acquire Authority"
+msgstr ""
+
+#: src/components/Reown/NanoContractActions.js:120
+msgid "Address to send amount:"
+msgstr ""
+
+#: src/components/Reown/NanoContractActions.js:138
+#: src/components/Reown/NanoContractActions.js:172
+msgid "Address to filter UTXOs:"
+msgstr ""
+
+#: src/components/Reown/NanoContractActions.js:152
+msgid "Change address:"
+msgstr ""
+
+#: src/components/Reown/NanoContractActions.js:186
+msgid "Address to send new authority:"
+msgstr ""
+
+#: src/components/Reown/NanoContractActions.js:204
+msgid "Address to send authority:"
 msgstr ""
 
 #: src/components/Reown/NanoContractFeedbackModal.js:28
@@ -3078,6 +3179,34 @@ msgstr ""
 
 #: src/components/Reown/NanoContractFeedbackModal.js:35
 msgid "The nano contract transaction was sent successfully."
+msgstr ""
+
+#: src/components/Reown/OracleDataDisplay.js:50
+msgid "Oracle"
+msgstr ""
+
+#: src/components/Reown/OracleDataDisplay.js:66
+msgid "Copy address"
+msgstr ""
+
+#: src/components/Reown/OracleDataDisplay.js:72
+msgid "Show raw oracle data"
+msgstr ""
+
+#: src/components/Reown/OracleDataDisplay.js:83
+msgid "Copy raw oracle"
+msgstr ""
+
+#: src/components/Reown/OracleDataDisplay.js:99
+msgid "Copy oracle"
+msgstr ""
+
+#: src/components/Reown/SignedDataDisplay.js:34
+msgid "Signature"
+msgstr ""
+
+#: src/components/Reown/SignedDataDisplay.js:44
+msgid "Copy signature"
 msgstr ""
 
 #: src/components/Reown/TokenCreationFeedbackModal.js:28
@@ -3116,6 +3245,83 @@ msgstr ""
 msgid "The transaction was sent successfully."
 msgstr ""
 
+#: src/components/Reown/modals/BaseNanoContractModal.js:57
+#. *
+#.  * Component for Blueprint Information Card
+#.  
+msgid "Blueprint Name"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:63
+#. *
+#.  * Component for Blueprint Information Card
+#.  
+msgid "Blueprint Method"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:81
+msgid "Arguments"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:87
+#, javascript-format
+msgid "Position ${ index }"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:119
+msgid "Caller"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:125
+#: src/components/Reown/modals/BaseNanoContractModal.js:259
+msgid "Select Address"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:134
+msgid ""
+"This nano contract is not registered in your wallet. Would you like to "
+"register it?"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:147
+msgid "Registering..."
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:147
+msgid "Register Nano Contract"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:172
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:71
+#: src/components/Reown/modals/SendNanoContractTxModal.js:37
+#: src/components/Reown/modals/SendTransactionModal.js:208
+msgid "Accept Transaction"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:173
+#: src/components/Reown/modals/ConnectModal.js:37
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
+#: src/components/Reown/modals/CreateTokenModal.js:59
+#: src/components/Reown/modals/SendNanoContractTxModal.js:38
+#: src/components/Reown/modals/SendTransactionModal.js:207
+#: src/components/Reown/modals/SignMessageModal.js:27
+#: src/components/Reown/modals/SignOracleDataModal.js:40
+msgid "Reject"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:293
+msgid "Review your transaction from this dApp"
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:294
+#: src/components/Reown/modals/SignOracleDataModal.js:26
+msgid "Stay vigilant and protect your data from potential phishing attempts."
+msgstr ""
+
+#: src/components/Reown/modals/BaseNanoContractModal.js:320
+msgid "Action List"
+msgstr ""
+
 #: src/components/Reown/modals/ConnectModal.js:15
 msgid "Connect to dApp"
 msgstr ""
@@ -3124,77 +3330,39 @@ msgstr ""
 msgid "This dApp would like to:"
 msgstr ""
 
-#: src/components/Reown/modals/ConnectModal.js:37
-#: src/components/Reown/modals/CreateTokenModal.js:64
-#: src/components/Reown/modals/SendNanoContractTxModal.js:243
-#: src/components/Reown/modals/SendTransactionModal.js:207
-#: src/components/Reown/modals/SignMessageModal.js:32
-#: src/components/Reown/modals/SignOracleDataModal.js:32
-msgid "Reject"
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:19
+#. *
+#.  * Component for Token Data Card
+#.  
+msgid "Create Token Data"
 msgstr ""
 
-#: src/components/Reown/modals/CreateTokenModal.js:46
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:70
+msgid "CREATE NANO CONTRACT & TOKEN"
+msgstr ""
+
+#: src/components/Reown/modals/CreateTokenModal.js:47
 msgid "Create Token"
 msgstr ""
 
-#: src/components/Reown/modals/CreateTokenModal.js:59
+#: src/components/Reown/modals/CreateTokenModal.js:54
 msgid "Token details:"
 msgstr ""
 
-#: src/components/Reown/modals/SendNanoContractTxModal.js:54
-#, javascript-format
-msgid "Position ${ idx }"
-msgstr ""
-
-#: src/components/Reown/modals/SendNanoContractTxModal.js:61
-msgid "Arguments"
-msgstr ""
-
-#: src/components/Reown/modals/SendNanoContractTxModal.js:112
-#: src/components/Reown/modals/SendNanoContractTxModal.js:201
-msgid "Select Address"
-msgstr ""
-
-#: src/components/Reown/modals/SendNanoContractTxModal.js:139
-#.  Normal mode content
+#: src/components/Reown/modals/SendNanoContractTxModal.js:36
 msgid "NEW NANO CONTRACT TRANSACTION"
 msgstr ""
 
-#: src/components/Reown/modals/SendNanoContractTxModal.js:185
-#.  Normal mode content
-msgid "Blueprint Name"
-msgstr ""
-
-#: src/components/Reown/modals/SendNanoContractTxModal.js:190
-#.  Normal mode content
-msgid "Blueprint Method"
-msgstr ""
-
-#: src/components/Reown/modals/SendNanoContractTxModal.js:195
-#.  Normal mode content
-msgid "Caller"
-msgstr ""
-
-#: src/components/Reown/modals/SendNanoContractTxModal.js:211
-#.  Normal mode content
-msgid ""
-"This nano contract is not registered in your wallet. Would you like to "
-"register it?"
-msgstr ""
-
-#: src/components/Reown/modals/SendNanoContractTxModal.js:224
-#.  Normal mode content
-msgid "Register Nano Contract"
-msgstr ""
-
-#: src/components/Reown/modals/SendNanoContractTxModal.js:249
-#: src/components/Reown/modals/SendTransactionModal.js:208
-#.  Normal mode content
-msgid "Accept Transaction"
+#: src/components/Reown/modals/SendTransactionModal.js:107
+msgid "Input"
 msgstr ""
 
 #: src/components/Reown/modals/SendTransactionModal.js:138
 msgid "Outputs"
+msgstr ""
+
+#: src/components/Reown/modals/SendTransactionModal.js:143
+msgid "Output"
 msgstr ""
 
 #: src/components/Reown/modals/SendTransactionModal.js:155
@@ -3205,23 +3373,27 @@ msgstr ""
 msgid "NEW TRANSACTION"
 msgstr ""
 
-#: src/components/Reown/modals/SignMessageModal.js:15
+#: src/components/Reown/modals/SignMessageModal.js:16
 msgid "Sign Message"
 msgstr ""
 
-#: src/components/Reown/modals/SignMessageModal.js:28
+#: src/components/Reown/modals/SignMessageModal.js:23
 msgid "Message to sign:"
 msgstr ""
 
-#: src/components/Reown/modals/SignMessageModal.js:33
-#: src/components/Reown/modals/SignOracleDataModal.js:33
+#: src/components/Reown/modals/SignMessageModal.js:28
+#: src/components/Reown/modals/SignOracleDataModal.js:47
 msgid "Sign"
 msgstr ""
 
-#: src/components/Reown/modals/SignOracleDataModal.js:15
+#: src/components/Reown/modals/SignOracleDataModal.js:17
 msgid "Sign Oracle Data"
 msgstr ""
 
-#: src/components/Reown/modals/SignOracleDataModal.js:28
-msgid "Oracle data to sign:"
+#: src/components/Reown/modals/SignOracleDataModal.js:25
+msgid "Review the oracle data from this dApp"
+msgstr ""
+
+#: src/components/Reown/modals/SignOracleDataModal.js:29
+msgid "Oracle Data to Sign"
 msgstr ""

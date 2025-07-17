@@ -276,12 +276,12 @@ export const NETWORK_SETTINGS = {
   },
   nanoTestnet: {
     network: 'testnet',
-    node: 'https://node1.nano-testnet.hathor.network/v1a/',
-    txMining: 'https://txmining.nano-testnet.hathor.network/',
-    explorer: 'https://explorer.alpha.nano-testnet.hathor.network/',
-    explorerService: 'https://explorer-service.nano-testnet.hathor.network/',
-    walletService: 'https://wallet-service.nano-testnet.hathor.network/',
-    walletServiceWS: 'wss://ws.wallet-service.nano-testnet.hathor.network/',
+    node: 'https://node1.bravo.nano-testnet.hathor.network/v1a/',
+    txMining: 'https://txmining.bravo.nano-testnet.hathor.network/',
+    explorer: 'https://explorer.bravo.alpha.nano-testnet.hathor.network/',
+    explorerService: 'https://explorer-service.bravo.nano-testnet.hathor.network/',
+    walletService: 'https://wallet-service.bravo.nano-testnet.hathor.network/',
+    walletServiceWS: 'wss://ws.wallet-service.bravo.nano-testnet.hathor.network/',
   }
 }
 
