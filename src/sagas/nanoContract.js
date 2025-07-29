@@ -159,7 +159,7 @@ export function* loadNanoContractDetail({ ncId }) {
     return;
   }
 
-  const isNanoContractCreate = nanoUtils.isNanoContractCreate(response.tx);
+  const isNanoContractCreate = nanoUtils.isNanoContractCreateTx(response.tx);
   if (!isNanoContractCreate) {
     console.debug(`Fail loading Nano Contract detail because [ncId=${ncId}] is not a nano contract creation tx.`);
     yield put(nanoContractDetailSetStatus({ status: NANO_CONTRACT_DETAIL_STATUS.ERROR, error: t`Transaction must be a nano contract creation.` }));

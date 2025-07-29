@@ -208,7 +208,7 @@ msgstr ""
 #: src/components/atomic-swap/ModalAtomicSend.js:323
 #: src/screens/CreateNFT.js:316
 #: src/screens/CreateToken.js:273
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:538
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:537
 msgid "Amount"
 msgstr ""
 
@@ -232,8 +232,8 @@ msgstr ""
 #: src/components/tokens/TokenMint.js:147
 #: src/screens/CreateNFT.js:329
 #: src/screens/CreateToken.js:290
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:574
-#: src/screens/nano-contract/NanoContractList.js:62
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:573
+#: src/screens/nano-contract/NanoContractList.js:63
 msgid "Address"
 msgstr ""
 
@@ -773,7 +773,7 @@ msgstr ""
 #: src/screens/Settings.js:317
 #: src/screens/Settings.js:324
 #: src/screens/Settings.js:329
-#: src/screens/nano-contract/NanoContractDetail.js:196
+#: src/screens/nano-contract/NanoContractDetail.js:198
 msgid "Change"
 msgstr ""
 
@@ -1145,99 +1145,95 @@ msgstr ""
 msgid "Loading data..."
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractDetail.js:220
+#: src/screens/nano-contract/NanoContractDetail.js:222
 msgid "Go to list"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractDetail.js:221
+#: src/screens/nano-contract/NanoContractDetail.js:223
 msgid "Nano Contract Detail"
 msgstr ""
 
 #: src/components/nano-contract/ModalConfirmUnregister.js:47
-#: src/screens/nano-contract/NanoContractDetail.js:223
+#: src/screens/nano-contract/NanoContractDetail.js:225
 msgid "Unregister"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:116
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:115
 msgid "Address is required."
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicReceive.js:44
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:126
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:125
 msgid "Invalid address."
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:187
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:186
 msgid "Creating Nano Contract"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:187
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:186
 msgid "Executing Nano Contract Method"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:457
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:456
 msgid "Select address to sign"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:485
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:484
 msgid "Select from a list"
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicReceive.js:96
 #: src/components/atomic-swap/ModalAtomicSend.js:304
 #: src/screens/atomic-swap/EditSwap.js:190
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:534
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:533
 msgid "Token"
 msgstr ""
 
 #: src/components/SendDataOutputOne.js:29
 #: src/components/SendTokensOne.js:244
 #: src/screens/atomic-swap/ProposalList.js:107
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:559
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:558
 msgid "Remove"
 msgstr ""
 
 #: src/components/TokenHistory.js:228
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:634
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:633
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:92
 msgid "Type"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:650
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:649
 msgid "Create Nano Contract"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:650
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:664
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:649
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:663
 msgid "Execute Method"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:659
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:658
 msgid "Add action"
 msgstr ""
 
 #: src/components/Reown/modals/CreateTokenModal.js:60
 #: src/screens/atomic-swap/NewSwap.js:92
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:664
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:663
 msgid "Create"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractList.js:53
-msgid "Create a nano contract"
-msgstr ""
-
 #: src/components/nano-contract/ModalRegisterNanoContract.js:88
-#: src/screens/nano-contract/NanoContractList.js:54
+#: src/screens/nano-contract/NanoContractList.js:55
 msgid "Register a nano contract"
 msgstr ""
 
 #: src/components/TokenHistory.js:227
 #: src/components/nano-contract/NanoContractHistory.js:149
-#: src/screens/nano-contract/NanoContractList.js:60
+#: src/screens/nano-contract/NanoContractList.js:61
 msgid "ID"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractList.js:61
+#: src/screens/nano-contract/NanoContractList.js:62
 msgid "Blueprint"
 msgstr ""
 

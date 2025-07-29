@@ -182,7 +182,9 @@ function NanoContractDetail() {
     ).map((method) => {
       return (
         <li key={method}>
-          <a href="true" onClick={(e) => executeMethod(e, method)}>{method}</a>
+          {/* TODO: Re-enable when we update the wallet-lib methods calls */}
+          {/* <a href="true" onClick={(e) => executeMethod(e, method)}>{method}</a> */}
+          <span className="text-muted">{method}</span>
         </li>
       );
     });
