@@ -54,7 +54,6 @@ function NanoContractExecuteMethod() {
     nanoContracts,
     blueprintsData,
     tokenMetadata,
-    decimalPlaces,
     registeredTokens,
   } = useSelector((state) => {
     return {
@@ -132,7 +131,7 @@ function NanoContractExecuteMethod() {
     // First I validate the Address inputs in the arguments list, then I validate the addresses
     // in the withdrawal actions
     const args = get(data.blueprintInformation.public_methods, `${data.method}.args`, []);
-    for (let i=0; i<args.length; i++) {
+    for (let i = 0; i < args.length; i++) {
       const splittedType = args[i].type.split('?');
       const isOptional = splittedType.length === 2;
       // Skip optional arguments that are null
@@ -148,7 +147,7 @@ function NanoContractExecuteMethod() {
       validateAddress(addressInputValue, formRefs[i].ref.current);
     }
 
-    for (let i=0; i<actions.length; i++) {
+    for (let i = 0; i < actions.length; i++) {
       const action = actions[i];
       // Only withdrawal actions have address
       if (action.type !== NanoContractActionType.WITHDRAWAL) {
@@ -178,7 +177,7 @@ function NanoContractExecuteMethod() {
 
     // Here the form is valid, so we show the PIN modal to send the tx
     globalModalContext.showModal(MODAL_TYPES.PIN, {
-      onSuccess: ({pin}) => {
+      onSuccess: ({ pin }) => {
         globalModalContext.showModal(MODAL_TYPES.SEND_TX, {
           pin,
           prepareSendTransaction,
@@ -238,7 +237,7 @@ function NanoContractExecuteMethod() {
     // First we get all the argument values and parse the input values to the expected type
     const argValues = [];
     const args = get(data.blueprintInformation.public_methods, `${data.method}.args`, []);
-    for (let i=0; i<args.length; i++) {
+    for (let i = 0; i < args.length; i++) {
       let value = formRefs[i].getValue();
       // Check optional type
       // Optional fields end with ?
@@ -374,11 +373,11 @@ function NanoContractExecuteMethod() {
   const renderInput = (name, type, isOptional, ref) => {
     if (type === 'Amount') {
       return <InputNumber
-              required={!isOptional}
-              requirePositive={true}
-              onValueChange={(value) => setAmountValues({...amountValues, [name]: value})}
-              className="form-control output-value"
-            />
+        required={!isOptional}
+        requirePositive={true}
+        onValueChange={(value) => setAmountValues({ ...amountValues, [name]: value })}
+        className="form-control output-value"
+      />
     }
 
     if (type === 'TokenUid') {
@@ -386,7 +385,7 @@ function NanoContractExecuteMethod() {
     }
 
     let inputType;
-    switch(type) {
+    switch (type) {
       case 'int':
       case 'float':
         inputType = 'number';
@@ -447,14 +446,14 @@ function NanoContractExecuteMethod() {
       ref = useRef(null);
       getValue = () => ref.current.value;
     }
-    formRefs.push({ ref, getValue});
+    formRefs.push({ ref, getValue });
 
     return (
       <div className="row" key={name}>
         <div className="form-group col-6">
           <label>{name} {!isOptional && '*'}</label>
           {renderInput(name, typeToRender, isOptional, ref)}
-          { isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSignData(ref, e)}>{t`Select address to sign`}</a></div> }
+          {isSignedData && <div className="mt-2"><a href="true" onClick={e => onSelectAddressToSignData(ref, e)}>{t`Select address to sign`}</a></div>}
         </div>
       </div>
     );
@@ -662,7 +661,7 @@ function NanoContractExecuteMethod() {
             {renderActions()}
           </div>
           <button type="button" className="mt-3 btn btn-hathor" onClick={executeMethod}>{isCreateNanoContract ? t`Create` : t`Execute Method`}</button>
-          { errorMessage && <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p> }
+          {errorMessage && <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p>}
         </form>
       </div>
     </div>

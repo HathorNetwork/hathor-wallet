@@ -154,7 +154,7 @@ const InputNumber = React.forwardRef(
       }
     }, [value]);
 
-    return <input ref={innerRef} value={format(value)} {...otherProps} type="text" />;
+    return <input ref={innerRef} value={format(value)} onChange={() => {}} {...otherProps} type="text" />;
   }
 );
 
