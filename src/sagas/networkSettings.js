@@ -1,10 +1,11 @@
 import { NETWORK_SETTINGS_STATUS } from '../constants';
 import { types, isVersionAllowedUpdate, selectToken, setNetworkSettingsStatus, serverInfoUpdated } from '../actions';
-import { all, call, put, select, take, takeEvery } from 'redux-saga/effects';
+import { all, call, fork, join, put, select, take, takeEvery } from 'redux-saga/effects';
 import hathorLib from '@hathor/wallet-lib';
 import { getGlobalWallet } from '../modules/wallet';
 import helpers from '../utils/helpers';
-import walletUtils from '../utils/wallet'
+import walletUtils from '../utils/wallet';
+import { updateUnleashClientContext } from './featureToggle';
 import { t } from 'ttag';
 
 /**
@@ -62,7 +63,7 @@ export function* changeNetworkSettings({ data, pin }) {
   }
 
   if (versionData.network === 'mainnet') {
-    yield executeNetworkSettingsUpdate({ ...data, network: versionData.network }, pin);
+    yield executeNetworkSettingsUpdate({ ...data, network: versionData.network, fullNetwork: versionData.network }, pin);
     return;
   }
 
@@ -86,7 +87,11 @@ export function* changeNetworkSettings({ data, pin }) {
     return;
   }
 
-  yield executeNetworkSettingsUpdate({ ...data, network: newNetwork }, pin);
+  yield executeNetworkSettingsUpdate({ ...data, network: newNetwork, fullNetwork: versionData.network }, pin);
+}
+
+function* waitForUpdateSuccess() {
+  yield take('NETWORKSETTINGS_UPDATE_SUCCESS');
 }
 
 /**
@@ -97,6 +102,7 @@ export function* changeNetworkSettings({ data, pin }) {
  * @param {Object} networkSettings with the data
  * @param {string} networkSettings.node
  * @param {string} networkSettings.network
+ * @param {string} networkSettings.fullNetwork
  * @param {string} networkSettings.txMining
  * @param {string} networkSettings.explorer
  * @param {string} networkSettings.explorerService
@@ -109,7 +115,13 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
   const networkSettingsRedux = yield select((state) => state.networkSettings);
   const networkSettingsBackup = { ...networkSettingsRedux };
   try {
+    // Start waiting for the success in parallel
+    const waitTask = yield fork(waitForUpdateSuccess);
+    // Call the function that dispatches the action (e.g., makes API call)
     helpers.updateNetworkSettings(networkSettings);
+    // Wait for the success to actually happen
+    yield join(waitTask);
+    yield call(updateUnleashClientContext, networkSettings);
     // Forces the re-validation of the allowed version after server change
     yield put(isVersionAllowedUpdate({ allowed: undefined }));
     yield put(selectToken(hathorLib.constants.NATIVE_TOKEN_UID));
@@ -120,6 +132,7 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
     console.error(e);
     // Restores storage and states as it was before
     helpers.updateNetworkSettings(networkSettingsBackup);
+    yield call(updateUnleashClientContext, networkSettingsBackup);
     yield put(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.ERROR, error: t`Error updating network settings.` }));
   }
   yield put(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.SUCCESS }));
