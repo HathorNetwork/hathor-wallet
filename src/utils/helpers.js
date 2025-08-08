@@ -9,7 +9,7 @@ import path from 'path-browserify';
 import hathorLib from '@hathor/wallet-lib';
 import { get } from 'lodash';
 import store from '../store/index';
-import { networkUpdate, networkSettingsUpdate } from '../actions/index';
+import { networkUpdate, networkSettingsUpdate, networkSettingsUpdateSuccess } from '../actions/index';
 import { NETWORK_SETTINGS } from '../constants';
 import LOCAL_STORE from '../storage';
 
@@ -48,6 +48,7 @@ const helpers = {
    * @return {Object} networkSettings with the data
    * {string} networkSettings.node
    * {string} networkSettings.network
+   * {string} networkSettings.fullNetwork
    * {string} networkSettings.txMining
    * {string} networkSettings.explorer
    * {string} networkSettings.explorerService
@@ -87,6 +88,7 @@ const helpers = {
    * @param {Object} networkSettings with the data
    * @param {string} networkSettings.node
    * @param {string} networkSettings.network
+   * @param {string} networkSettings.fullNetwork
    * @param {string} networkSettings.txMining
    * @param {string} networkSettings.explorer
    * @param {string} networkSettings.explorerService
@@ -123,6 +125,9 @@ const helpers = {
     store.dispatch(networkSettingsUpdate(networkSettings));
 
     LOCAL_STORE.setNetworkSettings(networkSettings);
+
+    // Call update success, so we can update the unleash client in the saga
+    store.dispatch(networkSettingsUpdateSuccess());
   },
 
   /**

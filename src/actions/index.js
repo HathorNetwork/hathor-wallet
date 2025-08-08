@@ -67,6 +67,7 @@ export const types = {
   NANOCONTRACT_LOAD_DETAILS_SUCCESS: 'NANOCONTRACT_LOAD_DETAILS_SUCCESS',
   NETWORKSETTINGS_UPDATE_REQUESTED: 'NETWORKSETTINGS_UPDATE_REQUESTED',
   NETWORKSETTINGS_UPDATED: 'NETWORKSETTINGS_UPDATED',
+  NETWORKSETTINGS_UPDATE_SUCCESS: 'NETWORKSETTINGS_UPDATE_SUCCESS',
   NETWORKSETTINGS_SET_STATUS: 'NETWORKSETTINGS_SET_STATUS',
   REOWN_SET_CLIENT: 'REOWN_SET_CLIENT',
   REOWN_SET_MODAL: 'REOWN_SET_MODAL',
@@ -702,6 +703,7 @@ export const nanoContractDetailLoaded = (ncState) => ({
  * @param {Object} data
  * @param {string} data.node
  * @param {string} data.network
+ * @param {string} data.fullNetwork
  * @param {string} data.txMining
  * @param {string} data.explorer
  * @param {string} data.explorerService
@@ -729,6 +731,13 @@ export const networkSettingsRequestUpdate = (data, pin) => ({
   type: types.NETWORKSETTINGS_UPDATE_REQUESTED,
   data,
   pin,
+});
+
+/**
+ * Call network settings update success action
+ */
+export const networkSettingsUpdateSuccess = () => ({
+  type: types.NETWORKSETTINGS_UPDATE_SUCCESS,
 });
 
 /**
