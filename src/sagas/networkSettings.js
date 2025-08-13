@@ -90,6 +90,9 @@ export function* changeNetworkSettings({ data, pin }) {
   yield executeNetworkSettingsUpdate({ ...data, network: newNetwork, fullNetwork: versionData.network }, pin);
 }
 
+/**
+ * This method returns when a NETWORKSETTINGS_UPDATE_SUCCESS event arrives
+ */
 function* waitForUpdateSuccess() {
   yield take('NETWORKSETTINGS_UPDATE_SUCCESS');
 }
@@ -121,6 +124,7 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
     helpers.updateNetworkSettings(networkSettings);
     // Wait for the success to actually happen
     yield join(waitTask);
+    // Update unleash client context
     yield call(updateUnleashClientContext, networkSettings);
     // Forces the re-validation of the allowed version after server change
     yield put(isVersionAllowedUpdate({ allowed: undefined }));

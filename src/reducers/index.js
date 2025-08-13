@@ -1502,7 +1502,6 @@ export const onUpdateNetworkSettings = (state, { payload }) => {
     networkSettings: {
       ...state.networkSettings,
       data: payload,
-      status: NETWORK_SETTINGS_STATUS.SUCCESS,
     }
   }
 }
