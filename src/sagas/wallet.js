@@ -757,7 +757,7 @@ export function* onWalletReset() {
   // This will update the lib config and redux state with the default network settings
   helpersUtils.loadStorageState();
   if (wallet) {
-    yield call([wallet.storage, wallet.storage.cleanStorage], true, true);
+    yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
   }
 
   yield put(setNavigateTo('/welcome'));
