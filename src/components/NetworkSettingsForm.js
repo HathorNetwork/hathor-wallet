@@ -140,6 +140,7 @@ function NetworkSettingsForm(props) {
     );
   }
 
+  const isLoading = networkSettings.status === NETWORK_SETTINGS_STATUS.LOADING || networkSettings.status === NETWORK_SETTINGS_STATUS.NETWORK_CONFIRMED;
   return (
     <>
       <p><strong>{t`Full node URL`}:</strong> {networkSettings.data.node}</p>
@@ -168,10 +169,9 @@ function NetworkSettingsForm(props) {
         </div>
       </form>
       <div className="d-flex flex-row align-items-center mt-3">
-        <button onClick={onNetworkConnect} type="button" className="btn btn-hathor mr-3">{t`Connect`}</button>
+        <button onClick={onNetworkConnect} disabled={isLoading} type="button" className="btn btn-hathor mr-3">{t`Connect`}</button>
         {
-          (networkSettings.status === NETWORK_SETTINGS_STATUS.LOADING || networkSettings.status === NETWORK_SETTINGS_STATUS.NETWORK_CONFIRMED)
-          && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
+          isLoading && <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={200} />
         }
       </div>
       <p className="text-danger mt-3">{networkSettings.status === NETWORK_SETTINGS_STATUS.ERROR && networkSettings.error}</p>

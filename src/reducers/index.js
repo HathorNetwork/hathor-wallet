@@ -271,6 +271,8 @@ const initialState = {
    * {
    *   data: {
    *     node: string,
+   *     network: string,
+   *     fullNetwork: string,
    *     txMining: string,
    *     explorer: string
    *     explorerService: string,
@@ -1485,6 +1487,7 @@ export const onSetNetworkSettingsStatus = (state, { payload }) => {
  * @param {Object} action.payload
  * @param {string} action.payload.node
  * @param {string} action.payload.network
+ * @param {string} action.payload.fullNetwork
  * @param {string} action.payload.txMining
  * @param {string} action.payload.explorer
  * @param {string} action.payload.explorerService
@@ -1499,7 +1502,6 @@ export const onUpdateNetworkSettings = (state, { payload }) => {
     networkSettings: {
       ...state.networkSettings,
       data: payload,
-      status: NETWORK_SETTINGS_STATUS.SUCCESS,
     }
   }
 }
