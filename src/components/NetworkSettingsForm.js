@@ -158,7 +158,6 @@ function NetworkSettingsForm(props) {
               <option value=""> -- </option>
               <option value="mainnet">Mainnet</option>
               <option value="testnet">Testnet</option>
-              <option value="nanoTestnet">Nano testnet</option>
               <option value="custom">Custom network</option>
             </select>
           </div>
