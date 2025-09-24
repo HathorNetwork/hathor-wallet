@@ -39,6 +39,7 @@ export const types = {
   START_WALLET_REQUESTED: 'START_WALLET_REQUESTED',
   START_WALLET_SUCCESS: 'START_WALLET_SUCCESS',
   START_WALLET_FAILED: 'START_WALLET_FAILED',
+  START_WALLET_RESET: 'START_WALLET_RESET',
   WALLET_STATE_READY: 'WALLET_STATE_READY',
   WALLET_STATE_ERROR: 'WALLET_STATE_ERROR',
   WALLET_RELOAD_DATA: 'WALLET_RELOAD_DATA',
@@ -468,6 +469,10 @@ export const startWalletSuccess = () => ({
 
 export const onStartWalletLock = () => ({
   type: types.ON_START_WALLET_LOCK,
+});
+
+export const startWalletReset = () => ({
+  type: types.START_WALLET_RESET,
 });
 
 export const walletStateError = () => ({

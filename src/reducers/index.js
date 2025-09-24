@@ -403,6 +403,8 @@ const rootReducer = (state = initialState, action) => {
       return onStartWalletSuccess(state);
     case types.START_WALLET_FAILED:
       return onStartWalletFailed(state);
+    case types.START_WALLET_RESET:
+      return onStartWalletReset(state);
     case types.WALLET_BEST_BLOCK_UPDATE:
       return onWalletBestBlockUpdate(state, action);
     case types.SET_NAVIGATE_TO:
@@ -1092,6 +1094,12 @@ export const onStartWalletSuccess = (state) => ({
 export const onStartWalletFailed = (state) => ({
   ...state,
   walletStartState: WALLET_STATUS.FAILED,
+});
+
+export const onStartWalletReset = (state) => ({
+  ...state,
+  walletStartState: null,
+  loadingAddresses: false,
 });
 
 /**
