@@ -195,7 +195,6 @@ function NanoContractDetail() {
     return (
       <div className="nc-detail-wrapper">
         <p><strong>Blueprint: </strong>{blueprintInformation.name}</p>
-        <p><strong>Address: </strong>{nc.address} (<a href="true" onClick={changeAddress}>{t`Change`}</a>)</p>
         {renderNanoAttributes()}
         <hr />
         <div>

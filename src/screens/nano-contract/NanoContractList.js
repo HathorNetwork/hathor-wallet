@@ -40,7 +40,6 @@ function NanoContractList() {
             <Link to={`/nano_contract/detail/${nc.ncId}`}>{hathorLib.helpersUtils.getShortHash(nc.ncId)}</Link>
           </td>
           <td>{nc.blueprintName}</td>
-          <td>{nc.address}</td>
         </tr>
       );
     });
@@ -60,7 +59,6 @@ function NanoContractList() {
               <tr>
                 <th>{t`ID`}</th>
                 <th>{t`Blueprint`}</th>
-                <th>{t`Address`}</th>
               </tr>
             </thead>
             <tbody>
