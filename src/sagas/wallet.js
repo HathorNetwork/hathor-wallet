@@ -59,6 +59,7 @@ import {
   setNativeTokenData,
   addRegisteredTokens,
   startWalletSuccess,
+  startWalletReset,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -759,6 +760,8 @@ export function* onWalletReset() {
   if (wallet) {
     yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
   }
+
+  yield put(startWalletReset());
 
   yield put(setNavigateTo('/welcome'));
 }
