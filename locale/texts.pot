@@ -34,7 +34,7 @@ msgid "Invalid PIN"
 msgstr ""
 
 #: src/screens/ChoosePassphrase.js:83
-#: src/screens/Settings.js:336
+#: src/screens/Settings.js:335
 #.  Everything is fine, so show confirm modal
 msgid "Set a passphrase"
 msgstr ""
@@ -233,7 +233,6 @@ msgstr ""
 #: src/screens/CreateNFT.js:329
 #: src/screens/CreateToken.js:290
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:573
-#: src/screens/nano-contract/NanoContractList.js:63
 msgid "Address"
 msgstr ""
 
@@ -366,8 +365,17 @@ msgstr ""
 msgid "Import data"
 msgstr ""
 
-#: src/screens/LoadWalletFailed.js:32
+#: src/screens/LoadWalletFailed.js:65
 msgid "There has been a problem loading your wallet, click |fn:here| to retry."
+msgstr ""
+
+#: src/components/ModalUnhandledError.js:99
+#: src/screens/LoadWalletFailed.js:72
+msgid "Reset wallet"
+msgstr ""
+
+#: src/screens/LoadWalletFailed.js:73
+msgid "Connect to mainnet"
 msgstr ""
 
 #: src/screens/LoadingAddresses.js:88
@@ -401,7 +409,7 @@ msgstr ""
 #: src/components/ModalConfirmClearStorage.js:58
 #: src/components/ModalResetAllData.js:137
 #: src/screens/LockedWallet.js:120
-#: src/screens/Settings.js:338
+#: src/screens/Settings.js:337
 msgid "Reset all data"
 msgstr ""
 
@@ -743,55 +751,54 @@ msgstr ""
 msgid "Manage sessions"
 msgstr ""
 
-#: src/screens/Settings.js:315
+#: src/screens/Settings.js:314
 msgid "Advanced Settings"
 msgstr ""
 
-#: src/screens/Settings.js:317
+#: src/screens/Settings.js:316
 msgid "Allow notifications:"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:173
 #: src/components/Reown/CreateTokenRequestData.js:22
 #: src/components/TokenGeneralInfo.js:147
-#: src/screens/Settings.js:317
-#: src/screens/Settings.js:321
-#: src/screens/Settings.js:329
+#: src/screens/Settings.js:316
+#: src/screens/Settings.js:320
+#: src/screens/Settings.js:328
 msgid "Yes"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:172
 #: src/components/Reown/CreateTokenRequestData.js:22
 #: src/components/TokenGeneralInfo.js:148
-#: src/screens/Settings.js:317
-#: src/screens/Settings.js:322
-#: src/screens/Settings.js:329
+#: src/screens/Settings.js:316
+#: src/screens/Settings.js:321
+#: src/screens/Settings.js:328
 msgid "No"
 msgstr ""
 
 #: src/components/TokenGeneralInfo.js:150
-#: src/screens/Settings.js:317
-#: src/screens/Settings.js:324
-#: src/screens/Settings.js:329
-#: src/screens/nano-contract/NanoContractDetail.js:198
+#: src/screens/Settings.js:316
+#: src/screens/Settings.js:323
+#: src/screens/Settings.js:328
 msgid "Change"
 msgstr ""
 
-#: src/screens/Settings.js:319
+#: src/screens/Settings.js:318
 msgid "Hide zero-balance tokens:"
 msgstr ""
 
-#: src/screens/Settings.js:326
+#: src/screens/Settings.js:325
 msgid ""
 "When selected, any tokens with a balance of zero will not be displayed "
 "anywhere in the wallet."
 msgstr ""
 
-#: src/screens/Settings.js:329
+#: src/screens/Settings.js:328
 msgid "Automatically report bugs to Hathor:"
 msgstr ""
 
-#: src/screens/Settings.js:332
+#: src/screens/Settings.js:331
 msgid "Unique identifier"
 msgstr ""
 
@@ -799,23 +806,23 @@ msgstr ""
 #: src/components/Reown/CreateTokenRequestData.js:36
 #: src/components/TokenGeneralInfo.js:173
 #: src/components/WalletAddress.js:175
-#: src/screens/Settings.js:332
+#: src/screens/Settings.js:331
 #: src/screens/atomic-swap/EditSwap.js:97
 #: src/screens/atomic-swap/EditSwap.js:111
 msgid "Copy to clipboard"
 msgstr ""
 
-#: src/screens/Settings.js:335
+#: src/screens/Settings.js:334
 msgid "Export Registered Tokens"
 msgstr ""
 
-#: src/screens/Settings.js:337
+#: src/screens/Settings.js:336
 msgid "Untrust all tokens on Ledger"
 msgstr ""
 
 #: src/components/TxData.js:1061
 #: src/components/WalletAddress.js:195
-#: src/screens/Settings.js:347
+#: src/screens/Settings.js:346
 #: src/screens/atomic-swap/EditSwap.js:596
 msgid "Copied to clipboard!"
 msgstr ""
@@ -1145,16 +1152,16 @@ msgstr ""
 msgid "Loading data..."
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractDetail.js:222
+#: src/screens/nano-contract/NanoContractDetail.js:221
 msgid "Go to list"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractDetail.js:223
+#: src/screens/nano-contract/NanoContractDetail.js:222
 msgid "Nano Contract Detail"
 msgstr ""
 
 #: src/components/nano-contract/ModalConfirmUnregister.js:47
-#: src/screens/nano-contract/NanoContractDetail.js:225
+#: src/screens/nano-contract/NanoContractDetail.js:224
 msgid "Unregister"
 msgstr ""
 
@@ -1223,17 +1230,17 @@ msgid "Create"
 msgstr ""
 
 #: src/components/nano-contract/ModalRegisterNanoContract.js:88
-#: src/screens/nano-contract/NanoContractList.js:55
+#: src/screens/nano-contract/NanoContractList.js:54
 msgid "Register a nano contract"
 msgstr ""
 
 #: src/components/TokenHistory.js:227
 #: src/components/nano-contract/NanoContractHistory.js:149
-#: src/screens/nano-contract/NanoContractList.js:61
+#: src/screens/nano-contract/NanoContractList.js:60
 msgid "ID"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractList.js:62
+#: src/screens/nano-contract/NanoContractList.js:61
 msgid "Blueprint"
 msgstr ""
 
@@ -1438,49 +1445,45 @@ msgid "Address does not belong to the wallet."
 msgstr ""
 
 #: src/sagas/nanoContract.js:74
-#: src/sagas/nanoContract.js:95
-#: src/sagas/nanoContract.js:114
+#: src/sagas/nanoContract.js:89
+#: src/sagas/nanoContract.js:108
 msgid "Error while registering the nano contract."
 msgstr ""
 
-#: src/sagas/nanoContract.js:80
-msgid "Invalid nano contract creation transaction."
-msgstr ""
-
-#: src/sagas/nanoContract.js:92
+#: src/sagas/nanoContract.js:86
 msgid "Blueprint not found."
 msgstr ""
 
-#: src/sagas/nanoContract.js:151
+#: src/sagas/nanoContract.js:154
 msgid "Transaction is invalid."
 msgstr ""
 
-#: src/sagas/nanoContract.js:158
+#: src/sagas/nanoContract.js:161
 msgid "Transaction is voided."
 msgstr ""
 
-#: src/sagas/nanoContract.js:165
+#: src/sagas/nanoContract.js:168
 msgid "Transaction must be a nano contract creation."
 msgstr ""
 
-#: src/sagas/nanoContract.js:195
+#: src/sagas/nanoContract.js:198
 msgid "Error loading transaction data."
 msgstr ""
 
-#: src/sagas/nanoContract.js:214
+#: src/sagas/nanoContract.js:238
 #.  If we still don't have the blueprint information, there was an error
 msgid "Error getting blueprint details."
 msgstr ""
 
-#: src/sagas/nanoContract.js:225
+#: src/sagas/nanoContract.js:249
 msgid "Error getting nano contract state."
 msgstr ""
 
-#: src/sagas/networkSettings.js:60
+#: src/sagas/networkSettings.js:61
 msgid "Invalid node."
 msgstr ""
 
-#: src/sagas/networkSettings.js:123
+#: src/sagas/networkSettings.js:140
 msgid "Error updating network settings."
 msgstr ""
 
@@ -1955,10 +1958,6 @@ msgstr ""
 msgid "Dismiss"
 msgstr ""
 
-#: src/components/ModalUnhandledError.js:99
-msgid "Reset wallet"
-msgstr ""
-
 #: src/components/ModalUnregisteredTokenInfo.js:97
 msgid "Unregistered token"
 msgstr ""
@@ -2030,32 +2029,32 @@ msgid "Explorer Service URL *"
 msgstr ""
 
 #: src/components/NetworkSettingsForm.js:137
-#: src/components/NetworkSettingsForm.js:149
+#: src/components/NetworkSettingsForm.js:150
 msgid "Wallet Service URL"
 msgstr ""
 
 #: src/components/NetworkSettingsForm.js:138
-#: src/components/NetworkSettingsForm.js:150
+#: src/components/NetworkSettingsForm.js:151
 msgid "Wallet Service Websocket URL"
 msgstr ""
 
-#: src/components/NetworkSettingsForm.js:145
+#: src/components/NetworkSettingsForm.js:146
 msgid "Full node URL"
 msgstr ""
 
-#: src/components/NetworkSettingsForm.js:146
+#: src/components/NetworkSettingsForm.js:147
 msgid "Transaction Mining Service URL"
 msgstr ""
 
-#: src/components/NetworkSettingsForm.js:147
+#: src/components/NetworkSettingsForm.js:148
 msgid "Explorer URL"
 msgstr ""
 
-#: src/components/NetworkSettingsForm.js:148
+#: src/components/NetworkSettingsForm.js:149
 msgid "Explorer Service URL"
 msgstr ""
 
-#: src/components/NetworkSettingsForm.js:152
+#: src/components/NetworkSettingsForm.js:153
 msgid "Select the network if you want to change"
 msgstr ""
 
