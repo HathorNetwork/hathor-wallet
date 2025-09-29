@@ -44,11 +44,11 @@ const getActionTitle = (tokens, action) => {
   }
 
   // Find the token in the registered tokens array
-  const registeredToken = tokens.find(t => t.uid === action.token);
+  const token = tokens[action.token];
   let tokenSymbol;
 
-  if (registeredToken) {
-    tokenSymbol = registeredToken.symbol;
+  if (token) {
+    tokenSymbol = token.symbol;
   } else if (action.token === NATIVE_TOKEN_UID) {
     tokenSymbol = DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
   }
@@ -232,13 +232,19 @@ const ActionItem = ({ action, isNft, title }) => {
 /**
  * Component that shows the list of nano contract actions
  */
-export function NanoContractActions({ ncActions, tokens, error }) {
+export function NanoContractActions({ ncActions }) {
   if (!ncActions || ncActions.length < 1) {
     return null;
   }
 
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
   const registeredTokens = useSelector((state) => state.tokens);
+  const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
+
+  // Create a map to use because the registeredTokens is an array
+  const registeredMap = Object.fromEntries(
+    registeredTokens.map((t) => [t.uid, t])
+  );
 
   // A callback to check if the action token is an NFT
   const isNft = useCallback(
@@ -248,18 +254,29 @@ export function NanoContractActions({ ncActions, tokens, error }) {
 
   // A callback to retrieve the action title by its token symbol or hash
   const getTitle = useCallback(
-    (action) => getActionTitle(registeredTokens || [], action),
-    [registeredTokens]
+    (action) => getActionTitle({...unregisteredTokens, ...registeredMap}, action),
+    [registeredTokens, unregisteredTokens]
   );
+
+  if (unregisteredTokens.isLoading) {
+    return (
+      <div className="card">
+        <span>{t`Loading token actions data...`}</span>
+      </div>
+    );
+  }
+
+  if (unregisteredTokens.error) {
+    return (
+      <div className="alert alert-danger d-flex align-items-center" role="alert">
+        <i className="fa fa-exclamation-circle mr-2"></i>
+        <span>{unregisteredTokens.error}</span>
+      </div>
+    );
+  }
 
   return (
     <>
-      {error && (
-        <div className="alert alert-danger d-flex align-items-center" role="alert">
-          <i className="fa fa-exclamation-circle mr-2"></i>
-          <span>{error}</span>
-        </div>
-      )}
       <div className="card">
         <div className="card-body p-0">
           {ncActions.map((action, index) => (

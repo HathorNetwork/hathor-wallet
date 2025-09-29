@@ -398,13 +398,10 @@ export function* getTokenDetails(wallet, uid) {
   try {
     const { tokenInfo: { symbol, name } } = yield call([wallet, wallet.getTokenDetails], uid);
     
-    // Register the token in the wallet storage
-    yield call([wallet.storage, wallet.storage.registerToken], { uid, name, symbol });
-    
     yield put(unregisteredTokensDownloadSuccess({ [uid]: { uid, symbol, name } }));
   } catch (e) {
     log.error(`Fail getting token data for token ${uid}.`, e);
-    yield put(unregisteredTokensDownloadFailed('Some tokens could not be loaded'));
+    yield put(unregisteredTokensDownloadFailed(t`Fail to download unregistered tokens data.`));
   }
 }
 

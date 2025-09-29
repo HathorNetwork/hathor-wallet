@@ -182,6 +182,7 @@ export function BaseNanoContractModal({
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const firstAddress = useSelector((state) => state.reown.firstAddress);
   const registeredTokens = useSelector((state) => state.tokens);
+  const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
 
   // Local state
   const [selectedAddress, setSelectedAddress] = useState(firstAddress);
@@ -320,8 +321,6 @@ export function BaseNanoContractModal({
             <h6 className="font-weight-bold mb-3">{t`Action List`}</h6>
             <NanoContractActions
               ncActions={nanoContract.actions}
-              tokens={nanoContract.tokens}
-              error={nanoContract.tokens?.error}
             />
           </div>
         )}
@@ -339,6 +338,7 @@ export function BaseNanoContractModal({
         </button>
         <button
           type="button"
+          disabled={unregisteredTokens.isLoading || unregisteredTokens.error}
           className="btn btn-hathor"
           onClick={handleAccept}
         >

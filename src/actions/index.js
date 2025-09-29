@@ -119,6 +119,7 @@ export const types = {
   UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS: 'UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS',
   UNREGISTERED_TOKENS_DOWNLOAD_FAILED: 'UNREGISTERED_TOKENS_DOWNLOAD_FAILED',
   UNREGISTERED_TOKENS_DOWNLOAD_END: 'UNREGISTERED_TOKENS_DOWNLOAD_END',
+  UNREGISTERED_TOKENS_CLEAN: 'UNREGISTERED_TOKENS_CLEAN',
 };
 
 /**
@@ -1018,4 +1019,11 @@ export const unregisteredTokensDownloadFailed = (error) => ({
  */
 export const unregisteredTokensDownloadEnd = () => ({
   type: types.UNREGISTERED_TOKENS_DOWNLOAD_END,
+});
+
+/**
+ * Clean unregistered tokens state to its default value
+ */
+export const unregisteredTokensClean = () => ({
+  type: types.UNREGISTERED_TOKENS_CLEAN,
 });
