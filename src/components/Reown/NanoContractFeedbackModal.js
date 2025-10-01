@@ -49,11 +49,14 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
     if (!hasUnregisteredTokens) return null;
 
     const many = unregisteredTokensList.length > 1;
+    const message = many
+      ? t`There are ${unregisteredTokensList.length} unregistered tokens in this transaction. Do you want to register them?`
+      : t`There is 1 unregistered token in this transaction. Do you want to register it?`;
 
     return (
       <div className="mt-3 p-3 border rounded bg-light">
         <p className="text-muted small mb-3">
-          {t`There ${many ? `are ${unregisteredTokensList.length}` : 'is 1'} unregistered token${many ? 's' : ''} in this transaction. Do you want to register ${many ? 'them' : 'it'}?`}
+          {message}
         </p>
         {unregisteredTokensList.map(token => (
           <div key={token.uid} className="mb-2 p-2 border rounded bg-white">
