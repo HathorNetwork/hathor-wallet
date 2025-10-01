@@ -58,6 +58,7 @@ import {
   showGlobalModal,
   hideGlobalModal,
   setReownFirstAddress,
+  unregisteredTokensClean,
 } from '../actions';
 import { checkForFeatureFlag, getNetworkSettings, retryHandler } from './helpers';
 import { logger } from '../utils/logger';
@@ -433,6 +434,7 @@ export function* processRequest(action) {
     switch (e.constructor) {
       case SendNanoContractTxError: {
         yield put(setNewNanoContractStatusFailure());
+        yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
@@ -500,6 +502,7 @@ export function* processRequest(action) {
       } break;
       case CreateNanoContractCreateTokenTxError: {
         yield put(setNewNanoContractStatusFailure());
+        yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
