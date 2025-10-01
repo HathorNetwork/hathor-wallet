@@ -254,7 +254,7 @@ export function NanoContractActions({ ncActions }) {
 
   // A callback to retrieve the action title by its token symbol or hash
   const getTitle = useCallback(
-    (action) => getActionTitle({...unregisteredTokens, ...registeredMap}, action),
+    (action) => getActionTitle({...unregisteredTokens.tokensMap, ...registeredMap}, action),
     [registeredTokens, unregisteredTokens]
   );
 

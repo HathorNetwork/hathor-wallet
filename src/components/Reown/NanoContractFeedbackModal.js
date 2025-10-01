@@ -23,10 +23,8 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
   const dispatch = useDispatch();
   const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
 
-  // Get unregistered tokens excluding metadata fields
-  const unregisteredTokensList = Object.keys(unregisteredTokens)
-    .filter(key => key !== 'isLoading' && key !== 'error')
-    .map(uid => unregisteredTokens[uid]);
+  // Get unregistered tokens from tokensMap
+  const unregisteredTokensList = Object.values(unregisteredTokens.tokensMap || {});
 
   const hasUnregisteredTokens = !isLoading && !isError && unregisteredTokensList.length > 0;
 

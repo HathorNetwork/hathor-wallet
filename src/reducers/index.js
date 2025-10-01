@@ -94,18 +94,21 @@ const initialState = {
    *
    * @example
    * {
-   *   '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824': {
-   *     name: 'YanCoin',
-   *     symbol: 'YAN',
-   *     uid: '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824',
-   *   },
    *   isLoading: false,
    *   error: null,
+   *   tokensMap: {
+   *     '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824': {
+   *       name: 'YanCoin',
+   *       symbol: 'YAN',
+   *       uid: '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824',
+   *     },
+   *   }
    * }
    */
   unregisteredTokens: {
     isLoading: false,
     error: null,
+    tokensMap: {},
   },
   // If is in the proccess of loading addresses transactions from the full node
   // When the request to load addresses fails this variable can continue true
@@ -1554,7 +1557,10 @@ export const onUnregisteredTokensDownloadSuccess = (state, action) => {
     ...state,
     unregisteredTokens: {
       ...state.unregisteredTokens,
-      ...tokens
+      tokensMap: {
+        ...state.unregisteredTokens.tokensMap,
+        ...tokens
+      }
     },
   };
 };
@@ -1614,6 +1620,7 @@ export const onUnregisteredTokensClean = (state) => {
     unregisteredTokens: {
       isLoading: false,
       error: null,
+      tokensMap: {},
     },
   };
 };
