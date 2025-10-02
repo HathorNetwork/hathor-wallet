@@ -588,6 +588,10 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
 
       case TriggerTypes.SendNanoContractTxConfirmationPrompt: {
         const sendNanoContractTxResponseTemplate = (accepted) => (data) => {
+          if (!accepted) {
+            // We must clean the unregistered tokens if the user rejected the prompt
+            dispatch(unregisteredTokensClean());
+          }
           dispatch(hideGlobalModal());
           resolve({
             type: TriggerResponseTypes.SendNanoContractTxConfirmationResponse,
@@ -634,6 +638,10 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
 
       case TriggerTypes.CreateNanoContractCreateTokenTxConfirmationPrompt: {
         const createNanoContractCreateTokenTxResponseTemplate = (accepted) => (data) => {
+          if (!accepted) {
+            // We must clean the unregistered tokens if the user rejected the prompt
+            dispatch(unregisteredTokensClean());
+          }
           dispatch(hideGlobalModal());
           resolve({
             type: TriggerResponseTypes.CreateNanoContractCreateTokenTxConfirmationResponse,
@@ -1112,7 +1120,13 @@ export function* onSessionDelete(action) {
  * @param {Object} action - The action containing the request payload
  */
 export function* onCreateNanoContractCreateTokenTxRequest(action) {
+  /* TODO: Restore this when we add back support for create nano contract create token tx
   yield* handleDAppRequest(action, ReownModalTypes.CREATE_NANO_CONTRACT_CREATE_TOKEN_TX);
+  */
+
+  // Reject all create nano contract create token tx requests for now
+  const { deny } = action.payload;
+  deny();
 }
 
 export function* saga() {
