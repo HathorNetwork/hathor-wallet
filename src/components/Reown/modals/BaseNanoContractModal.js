@@ -10,11 +10,10 @@ import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 import { types, unregisteredTokensDownloadRequested } from '../../../actions';
 import helpers from '../../../utils/helpers';
-import nanoUtils from '../../../utils/nanoContracts';
 import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
 import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
-import { constants } from '@hathor/wallet-lib';
+import { constants, nanoUtils } from '@hathor/wallet-lib';
 import { DAppInfo } from '../DAppInfo';
 
 /**
@@ -27,7 +26,7 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
         <div className="mb-3">
           <strong>{t`Nano Contract ID`}</strong>
           <div className="text-monospace">
-            {helpers.truncateText(nanoContract.ncId, 8, 4)}
+            {nanoContract.ncId}
             <button
               className="btn btn-link btn-sm p-0 ml-2"
               onClick={() => navigator.clipboard.writeText(nanoContract.ncId)}
@@ -41,11 +40,11 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
       <div className="mb-3">
         <strong>{t`Blueprint ID`}</strong>
         <div className="text-monospace">
-          {nanoContract.blueprintId || 'N/A'}
-          {nanoContract.blueprintId && (
+          {blueprintInfo?.id || ''}
+          {blueprintInfo?.id && (
             <button
               className="btn btn-link btn-sm p-0 ml-2"
-              onClick={() => navigator.clipboard.writeText(nanoContract.blueprintId)}
+              onClick={() => navigator.clipboard.writeText(blueprintInfo.id)}
             >
               <i className="fa fa-copy"></i>
             </button>
@@ -71,10 +70,8 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
 /**
  * Component for Arguments Table
  */
-const ArgumentsTable = ({ args, methodInfo, decimalPlaces }) => {
+const ArgumentsTable = ({ args, decimalPlaces }) => {
   if (!args || !args.length) return null;
-
-  const methodInfoArgs = methodInfo?.args || [];
 
   return (
     <div className="mb-4">
@@ -84,16 +81,14 @@ const ArgumentsTable = ({ args, methodInfo, decimalPlaces }) => {
           <table className="table table-sm mb-0">
             <tbody>
               {args.map((arg, index) => {
-                const argName = methodInfoArgs[index]?.name || t`Position ${index}`;
-                const argType = methodInfoArgs[index]?.type;
                 return (
                   <tr key={index}>
                     <td className="border-top-0 pl-3" style={{ width: '30%' }}>
-                      <strong>{argName}</strong>
-                      {argType && <small className="text-muted d-block">{argType}</small>}
+                      <strong>{arg.name}</strong>
+                      <small className="text-muted d-block">{arg.type}</small>
                     </td>
                     <td className="border-top-0 text-monospace" style={{ wordBreak: 'break-all' }}>
-                      {nanoUtils.formatNCArgValue(arg, argType, decimalPlaces)}
+                      {arg.parsed}
                     </td>
                   </tr>
                 );
@@ -199,13 +194,13 @@ export function BaseNanoContractModal({
 
   // Fetch blueprint information
   useEffect(() => {
-    if (nanoContract.blueprintId) {
+    if (!blueprintInfo) {
       dispatch({
         type: types.BLUEPRINT_FETCH_REQUESTED,
         payload: nanoContract.blueprintId
       });
     }
-  }, [nanoContract.blueprintId, dispatch]);
+  }, [blueprintInfo, nanoContract, dispatch]);
 
   // Request token data for unknown tokens in actions
   useEffect(() => {
@@ -311,8 +306,7 @@ export function BaseNanoContractModal({
         )}
 
         <ArgumentsTable
-          args={nanoContract.args}
-          methodInfo={blueprintInfo?.public_methods?.[nanoContract.method]}
+          args={nanoContract.parsedArgs}
           decimalPlaces={decimalPlaces}
         />
 
