@@ -488,36 +488,36 @@ msgstr ""
 msgid "You tried to access a page that does not exist in Hathor Wallet"
 msgstr ""
 
-#: src/screens/ReownConnect.js:85
+#: src/screens/ReownConnect.js:90
 msgid "Disconnect"
 msgstr ""
 
-#: src/screens/ReownConnect.js:96
+#: src/screens/ReownConnect.js:101
 msgid "Connected dApps"
 msgstr ""
 
-#: src/screens/ReownConnect.js:102
-#: src/screens/ReownConnect.js:112
+#: src/screens/ReownConnect.js:107
+#: src/screens/ReownConnect.js:117
 msgid "New Connection"
 msgstr ""
 
-#: src/screens/ReownConnect.js:107
+#: src/screens/ReownConnect.js:112
 msgid "Add New Connection"
 msgstr ""
 
-#: src/screens/ReownConnect.js:115
+#: src/screens/ReownConnect.js:120
 msgid "Enter dApp URI"
 msgstr ""
 
-#: src/screens/ReownConnect.js:122
+#: src/screens/ReownConnect.js:127
 msgid "wc:..."
 msgstr ""
 
-#: src/screens/ReownConnect.js:129
+#: src/screens/ReownConnect.js:134
 msgid "Connecting to dApp..."
 msgstr ""
 
-#: src/screens/ReownConnect.js:134
+#: src/screens/ReownConnect.js:139
 msgid "Failed to connect. Please check the URI and try again."
 msgstr ""
 
@@ -528,7 +528,7 @@ msgstr ""
 #: src/components/ModalPin.js:134
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/PinPad.js:235
-#: src/components/Reown/modals/BaseNanoContractModal.js:276
+#: src/components/Reown/modals/BaseNanoContractModal.js:271
 #: src/components/atomic-swap/ModalAtomicReceive.js:129
 #: src/components/atomic-swap/ModalAtomicSend.js:365
 #: src/components/nano-contract/ModalChangeAddress.js:153
@@ -537,17 +537,17 @@ msgstr ""
 #: src/components/nano-contract/ModalSelectAddressToSignData.js:163
 #: src/components/nano-contract/ModalSelectAddressToSignTx.js:74
 #: src/components/tokens/TokenAction.js:155
-#: src/screens/ReownConnect.js:148
+#: src/screens/ReownConnect.js:153
 msgid "Cancel"
 msgstr ""
 
 #: src/components/NetworkSettingsForm.js:171
 #: src/components/Reown/modals/ConnectModal.js:38
-#: src/screens/ReownConnect.js:151
+#: src/screens/ReownConnect.js:156
 msgid "Connect"
 msgstr ""
 
-#: src/screens/ReownConnect.js:162
+#: src/screens/ReownConnect.js:167
 msgid "No dApps connected. Click \"Add New Connection\" to connect to a dApp."
 msgstr ""
 
@@ -1283,7 +1283,7 @@ msgstr ""
 msgid "Select Blueprint"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:42
+#: src/components/Reown/modals/BaseNanoContractModal.js:41
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:170
 msgid "Blueprint ID"
 msgstr ""
@@ -2854,7 +2854,7 @@ msgstr ""
 msgid "To register your nano contract, just write down the ID of the contract."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:28
+#: src/components/Reown/modals/BaseNanoContractModal.js:27
 #: src/components/nano-contract/ModalRegisterNanoContract.js:97
 msgid "Nano Contract ID"
 msgstr ""
@@ -2875,7 +2875,7 @@ msgstr ""
 msgid "Sign Data"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:266
+#: src/components/Reown/modals/BaseNanoContractModal.js:261
 #: src/components/nano-contract/ModalSelectAddressToSignTx.js:49
 msgid "Select the address that will be used to sign the transaction"
 msgstr ""
@@ -3263,60 +3263,55 @@ msgstr ""
 msgid "The transaction was sent successfully."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:57
+#: src/components/Reown/modals/BaseNanoContractModal.js:56
 #. *
 #.  * Component for Blueprint Information Card
 #.  
 msgid "Blueprint Name"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:63
+#: src/components/Reown/modals/BaseNanoContractModal.js:62
 #. *
 #.  * Component for Blueprint Information Card
 #.  
 msgid "Blueprint Method"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:81
+#: src/components/Reown/modals/BaseNanoContractModal.js:78
 msgid "Arguments"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:87
-#, javascript-format
-msgid "Position ${ index }"
-msgstr ""
-
-#: src/components/Reown/modals/BaseNanoContractModal.js:119
+#: src/components/Reown/modals/BaseNanoContractModal.js:114
 msgid "Caller"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:125
-#: src/components/Reown/modals/BaseNanoContractModal.js:260
+#: src/components/Reown/modals/BaseNanoContractModal.js:120
+#: src/components/Reown/modals/BaseNanoContractModal.js:255
 msgid "Select Address"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:134
+#: src/components/Reown/modals/BaseNanoContractModal.js:129
 msgid ""
 "This nano contract is not registered in your wallet. Would you like to "
 "register it?"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:147
+#: src/components/Reown/modals/BaseNanoContractModal.js:142
 msgid "Registering..."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:147
+#: src/components/Reown/modals/BaseNanoContractModal.js:142
 msgid "Register Nano Contract"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:172
+#: src/components/Reown/modals/BaseNanoContractModal.js:167
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:71
 #: src/components/Reown/modals/SendNanoContractTxModal.js:37
 #: src/components/Reown/modals/SendTransactionModal.js:208
 msgid "Accept Transaction"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:173
+#: src/components/Reown/modals/BaseNanoContractModal.js:168
 #: src/components/Reown/modals/ConnectModal.js:37
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
 #: src/components/Reown/modals/CreateTokenModal.js:59
@@ -3327,16 +3322,16 @@ msgstr ""
 msgid "Reject"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:294
+#: src/components/Reown/modals/BaseNanoContractModal.js:289
 msgid "Review your transaction from this dApp"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:295
+#: src/components/Reown/modals/BaseNanoContractModal.js:290
 #: src/components/Reown/modals/SignOracleDataModal.js:26
 msgid "Stay vigilant and protect your data from potential phishing attempts."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:321
+#: src/components/Reown/modals/BaseNanoContractModal.js:315
 msgid "Action List"
 msgstr ""
 
