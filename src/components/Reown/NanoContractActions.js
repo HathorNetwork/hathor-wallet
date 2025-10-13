@@ -258,23 +258,6 @@ export function NanoContractActions({ ncActions }) {
     [registeredTokens, unregisteredTokens]
   );
 
-  if (unregisteredTokens.isLoading) {
-    return (
-      <div className="card">
-        <span>{t`Loading token actions data...`}</span>
-      </div>
-    );
-  }
-
-  if (unregisteredTokens.error) {
-    return (
-      <div className="alert alert-danger d-flex align-items-center" role="alert">
-        <i className="fa fa-exclamation-circle mr-2"></i>
-        <span>{unregisteredTokens.error}</span>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="card">

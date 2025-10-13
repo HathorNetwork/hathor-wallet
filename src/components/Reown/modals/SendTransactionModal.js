@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
 import { constants, numberUtils } from '@hathor/wallet-lib';
-import { unregisteredTokensDownloadSuccess } from '../../../actions';
+import { unregisteredTokensStoreSuccess } from '../../../actions';
 import { CopyButton } from '../../CopyButton';
 import helpers from '../../../utils/helpers';
 
@@ -26,12 +26,18 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
     const unregisteredTokensMap = {};
 
     if (data?.data?.tokenDetails) {
-      Object.values(data.data.tokenDetails).forEach(tokenDetail => {
+      const tokenDetails = data.data.tokenDetails;
+      // Iterate through the Map
+      tokenDetails.forEach((tokenDetail, uid) => {
         const tokenInfo = tokenDetail.tokenInfo;
         if (tokenInfo) {
-          const isRegistered = registeredTokens.find(t => t.uid === tokenInfo.uid);
+          const isRegistered = registeredTokens.find(t => t.uid === uid);
           if (!isRegistered) {
-            unregisteredTokensMap[tokenInfo.uid] = tokenInfo;
+            // Store with uid included in the object
+            unregisteredTokensMap[uid] = {
+              ...tokenInfo,
+              uid
+            };
           }
         }
       });
@@ -39,7 +45,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
 
     // Dispatch success action with the unregistered tokens
     if (Object.keys(unregisteredTokensMap).length > 0) {
-      dispatch(unregisteredTokensDownloadSuccess(unregisteredTokensMap));
+      dispatch(unregisteredTokensStoreSuccess(unregisteredTokensMap));
     }
   }, [data, registeredTokens, dispatch]);
 

@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
-import { types, unregisteredTokensDownloadRequested } from '../../../actions';
+import { types, unregisteredTokensStoreSuccess } from '../../../actions';
 import helpers from '../../../utils/helpers';
 import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
@@ -202,21 +202,33 @@ export function BaseNanoContractModal({
     }
   }, [blueprintInfo, nanoContract, dispatch]);
 
-  // Request token data for unknown tokens in actions
+  // Collect unregistered tokens from tokenDetails Map
   useEffect(() => {
-    const unknownTokensUid = [];
-    const actionTokensUid = nanoContract.actions?.map((action) => action.token) || [];
+    const unregisteredTokensMap = {};
 
-    actionTokensUid.forEach((uid) => {
-      if (uid && uid !== constants.NATIVE_TOKEN_UID && !registeredTokens.find(t => t.uid === uid)) {
-        unknownTokensUid.push(uid);
-      }
-    });
-
-    if (unknownTokensUid.length > 0) {
-      dispatch(unregisteredTokensDownloadRequested(unknownTokensUid));
+    if (data?.data?.tokenDetails) {
+      const tokenDetails = data.data.tokenDetails;
+      // Iterate through the Map
+      tokenDetails.forEach((tokenDetail, uid) => {
+        const tokenInfo = tokenDetail.tokenInfo;
+        if (tokenInfo) {
+          const isRegistered = registeredTokens.find(t => t.uid === uid);
+          if (!isRegistered) {
+            // Store with uid included in the object
+            unregisteredTokensMap[uid] = {
+              ...tokenInfo,
+              uid
+            };
+          }
+        }
+      });
     }
-  }, [nanoContract.actions, registeredTokens, dispatch]);
+
+    // Dispatch success action with the unregistered tokens
+    if (Object.keys(unregisteredTokensMap).length > 0) {
+      dispatch(unregisteredTokensStoreSuccess(unregisteredTokensMap));
+    }
+  }, [data, registeredTokens, dispatch]);
 
   // Create nano contract with caller
   const nanoWithCaller = useMemo(() => ({
@@ -332,7 +344,6 @@ export function BaseNanoContractModal({
         </button>
         <button
           type="button"
-          disabled={unregisteredTokens.isLoading || unregisteredTokens.error}
           className="btn btn-hathor"
           onClick={handleAccept}
         >
