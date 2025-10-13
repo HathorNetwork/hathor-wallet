@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
-import { types, unregisteredTokensDownloadRequested } from '../../../actions';
+import { types, unregisteredTokensStoreSuccess } from '../../../actions';
 import helpers from '../../../utils/helpers';
 import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
@@ -202,21 +202,25 @@ export function BaseNanoContractModal({
     }
   }, [blueprintInfo, nanoContract, dispatch]);
 
-  // Request token data for unknown tokens in actions
+  // Collect unregistered tokens from tokenDetails Map
   useEffect(() => {
-    const unknownTokensUid = [];
-    const actionTokensUid = nanoContract.actions?.map((action) => action.token) || [];
-
-    actionTokensUid.forEach((uid) => {
-      if (uid && uid !== constants.NATIVE_TOKEN_UID && !registeredTokens.find(t => t.uid === uid)) {
-        unknownTokensUid.push(uid);
-      }
-    });
-
-    if (unknownTokensUid.length > 0) {
-      dispatch(unregisteredTokensDownloadRequested(unknownTokensUid));
+    let unregisteredTokensMap = {};
+    const tokenDetails = data?.data?.tokenDetails;
+    if (tokenDetails) {
+      unregisteredTokensMap = [...tokenDetails].reduce((acc, [uid, tokenDetail]) => {
+        const tokenInfo = tokenDetail.tokenInfo;
+        if (tokenInfo && !registeredTokens.find(t => t.uid === uid)) {
+          acc[uid] = { ...tokenInfo, uid };
+        }
+        return acc;
+      }, {});
     }
-  }, [nanoContract.actions, registeredTokens, dispatch]);
+
+    // Dispatch success action with the unregistered tokens
+    if (Object.keys(unregisteredTokensMap).length > 0) {
+      dispatch(unregisteredTokensStoreSuccess(unregisteredTokensMap));
+    }
+  }, [data, registeredTokens, dispatch]);
 
   // Create nano contract with caller
   const nanoWithCaller = useMemo(() => ({
@@ -332,7 +336,6 @@ export function BaseNanoContractModal({
         </button>
         <button
           type="button"
-          disabled={unregisteredTokens.isLoading || unregisteredTokens.error}
           className="btn btn-hathor"
           onClick={handleAccept}
         >

@@ -91,7 +91,7 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
       modalId={MODAL_ID}
       isError={isError}
       isLoading={isLoading}
-      onClose={hasUnregisteredTokens ? handleClose : onClose}
+      onClose={handleClose}
       manageDomLifecycle={manageDomLifecycle}
       titles={{
         loading: t`Processing Transaction`,

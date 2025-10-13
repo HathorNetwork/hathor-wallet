@@ -469,6 +469,7 @@ export function* processRequest(action) {
       case InsufficientFundsError:
       case SendTransactionError: {
         yield put(setSendTxStatusFailed());
+        yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, {
           isLoading: false,
           isError: true,
@@ -546,6 +547,10 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
     switch (request.type) {
       case TriggerTypes.SendTransactionConfirmationPrompt: {
         const sendTransactionResponseTemplate = (accepted) => () => {
+          if (!accepted) {
+            // We must clean the unregistered tokens if the user rejected the prompt
+            dispatch(unregisteredTokensClean());
+          }
           dispatch(hideGlobalModal());
           resolve({
             type: TriggerResponseTypes.SendTransactionConfirmationResponse,

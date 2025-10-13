@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
 import { constants, numberUtils } from '@hathor/wallet-lib';
-import { unregisteredTokensDownloadRequested } from '../../../actions';
+import { unregisteredTokensStoreSuccess } from '../../../actions';
 import { CopyButton } from '../../CopyButton';
 import helpers from '../../../utils/helpers';
 
@@ -22,40 +22,31 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
   }));
 
   useEffect(() => {
-    // Collect all unregistered token UIDs
-    const unregisteredTokens = new Set();
+    // Collect unregistered tokens from tokenDetails Map
+    let unregisteredTokensMap = {};
+    const tokenDetails = data?.data?.tokenDetails;
+    if (tokenDetails) {
+      unregisteredTokensMap = [...tokenDetails].reduce((acc, [uid, tokenDetail]) => {
+        const tokenInfo = tokenDetail.tokenInfo;
+        if (tokenInfo && !registeredTokens.find(t => t.uid === uid)) {
+          acc[uid] = { ...tokenInfo, uid };
+        }
+        return acc;
+      }, {});
+    }
 
-    data?.data?.inputs?.forEach(input => {
-      // Skip if it's the native token
-      if (input.token === constants.NATIVE_TOKEN_UID || !input.token) {
-        return;
-      }
-
-      const token = registeredTokens.find(t => t.uid === input.token);
-      if (!token) {
-        // If we can't find this token in our registered tokens list, we need to fetch its details
-        unregisteredTokens.add(input.token);
-      }
-    });
-
-    data?.data?.outputs?.forEach(output => {
-      // Skip if it's the native token or if token is not specified
-      if (output.token === constants.NATIVE_TOKEN_UID || !output.token) {
-        return;
-      }
-
-      const token = registeredTokens.find(t => t.uid === output.token);
-      if (!token) {
-        // If we can't find this token in our registered tokens list, we need to fetch its details
-        unregisteredTokens.add(output.token);
-      }
-    });
-
-    // Only dispatch if we actually have unregistered tokens to fetch
-    if (unregisteredTokens.size > 0) {
-      dispatch(unregisteredTokensDownloadRequested(Array.from(unregisteredTokens)));
+    // Dispatch success action with the unregistered tokens
+    if (Object.keys(unregisteredTokensMap).length > 0) {
+      dispatch(unregisteredTokensStoreSuccess(unregisteredTokensMap));
     }
   }, [data, registeredTokens, dispatch]);
+
+  const isTokenRegistered = (tokenId) => {
+    if (tokenId === constants.NATIVE_TOKEN_UID) {
+      return true;
+    }
+    return !!registeredTokens.find(t => t.uid === tokenId);
+  };
 
   const getTokenSymbol = (tokenId) => {
     // Check if it's explicitly the native token UID
@@ -68,12 +59,48 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
       return token.symbol;
     }
 
-    // We return an empty string as a fallback for tokens that are not yet
-    // loaded or recognized
-    // This should be temporary until the token details are fetched
-    // The unregisteredTokensDownloadRequested action should be loading these
-    // details
+    const tokenInfo = getTokenInfo(tokenId);
+    if (tokenInfo) {
+      return tokenInfo.symbol;
+    }
+
+    // It should never get here but we return empty string as a fallback
     return '';
+  };
+
+  const getTokenInfo = (tokenId) => {
+    const tokenDetails = data?.data?.tokenDetails;
+    if (tokenDetails && tokenDetails.has(tokenId)) {
+      return tokenDetails.get(tokenId).tokenInfo;
+    }
+    return null;
+  };
+
+  const renderTokenSymbol = (tokenId) => {
+    const symbol = getTokenSymbol(tokenId);
+    const isRegistered = isTokenRegistered(tokenId);
+
+    if (isRegistered) {
+      return symbol;
+    }
+
+    const tokenInfo = getTokenInfo(tokenId);
+    if (!tokenInfo) {
+      return symbol;
+    }
+
+    const tooltipText = `Unregistered token\n${tokenInfo.name} (${tokenInfo.symbol})\n${tokenId}`;
+
+    return (
+      <span>
+        {symbol}
+        <i
+          className="fa fa-info-circle ml-1"
+          style={{ cursor: 'pointer', color: 'black' }}
+          title={tooltipText}
+        />
+      </span>
+    );
   };
 
   const formatValue = (value, tokenId) => {
@@ -107,7 +134,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
                 <strong>{t`Input`}  {index + 1}</strong>
               </div>
               <div>
-                {formatValue(input?.value, input?.token)} {getTokenSymbol(input?.token)}
+                {formatValue(input?.value, input?.token)} {renderTokenSymbol(input?.token)}
               </div>
             </div>
             <div className="text-monospace">
@@ -143,7 +170,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
                 <strong>{t`Output`} {index + 1}</strong>
               </div>
               <div>
-                {formatValue(output?.value, output?.token)} {getTokenSymbol(output?.token)}
+                {formatValue(output?.value, output?.token)} {renderTokenSymbol(output?.token)}
               </div>
             </div>
             <div className="text-monospace">

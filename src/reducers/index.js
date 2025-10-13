@@ -94,8 +94,6 @@ const initialState = {
    *
    * @example
    * {
-   *   isLoading: false,
-   *   error: null,
    *   tokensMap: {
    *     '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824': {
    *       name: 'YanCoin',
@@ -106,8 +104,6 @@ const initialState = {
    * }
    */
   unregisteredTokens: {
-    isLoading: false,
-    error: null,
     tokensMap: {},
   },
   // If is in the proccess of loading addresses transactions from the full node
@@ -483,14 +479,8 @@ const rootReducer = (state = initialState, action) => {
         ...state,
         reown: reownReducer(state.reown, action),
       };
-    case types.UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS:
-      return onUnregisteredTokensDownloadSuccess(state, action);
-    case types.UNREGISTERED_TOKENS_DOWNLOAD_FAILED:
-      return onUnregisteredTokensDownloadFailed(state, action);
-    case types.UNREGISTERED_TOKENS_DOWNLOAD_REQUESTED:
-      return onUnregisteredTokensDownloadRequested(state);
-    case types.UNREGISTERED_TOKENS_DOWNLOAD_END:
-      return onUnregisteredTokensDownloadEnd(state);
+    case types.UNREGISTERED_TOKENS_STORE_SUCCESS:
+      return onUnregisteredTokensStoreSuccess(state, action);
     case types.UNREGISTERED_TOKENS_CLEAN:
       return onUnregisteredTokensClean(state);
     default:
@@ -1545,68 +1535,21 @@ export const onUpdateNetworkSettings = (state, { payload }) => {
 }
 
 /**
- * Handle successful download of unregistered token details
+ * Handle successful storage of unregistered token details
  * @param {Object} state Current state
  * @param {Object} action Action with token details
  * @param {Object} action.payload.tokens Object with token details
  */
-export const onUnregisteredTokensDownloadSuccess = (state, action) => {
+export const onUnregisteredTokensStoreSuccess = (state, action) => {
   const { tokens } = action.payload;
 
   return {
     ...state,
     unregisteredTokens: {
-      ...state.unregisteredTokens,
       tokensMap: {
         ...state.unregisteredTokens.tokensMap,
         ...tokens
       }
-    },
-  };
-};
-
-/**
- * Handle error when downloading unregistered token details
- * @param {Object} state Current state
- * @param {Object} action Action with token details
- * @param {string} action.payload.error Error message
- */
-export const onUnregisteredTokensDownloadFailed = (state, action) => {
-  const { error } = action.payload;
-
-  return {
-    ...state,
-    unregisteredTokens: {
-      ...state.unregisteredTokens,
-      isLoading: false,
-      error,
-    },
-  };
-};
-
-/**
- * Handle begin of unregistered tokens downloads
- */
-export const onUnregisteredTokensDownloadRequested = (state) => {
-  return {
-    ...state,
-    unregisteredTokens: {
-      ...state.unregisteredTokens,
-      isLoading: true,
-      error: null,
-    },
-  };
-};
-
-/**
- * Handle end of unregistered tokens downloads
- */
-export const onUnregisteredTokensDownloadEnd = (state) => {
-  return {
-    ...state,
-    unregisteredTokens: {
-      ...state.unregisteredTokens,
-      isLoading: false,
     },
   };
 };
@@ -1618,8 +1561,6 @@ export const onUnregisteredTokensClean = (state) => {
   return {
     ...state,
     unregisteredTokens: {
-      isLoading: false,
-      error: null,
       tokensMap: {},
     },
   };
