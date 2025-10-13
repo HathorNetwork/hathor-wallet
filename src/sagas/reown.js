@@ -468,7 +468,6 @@ export function* processRequest(action) {
       } break;
       case InsufficientFundsError:
       case SendTransactionError: {
-				console.log('ERRORRRRRR', e)
         yield put(setSendTxStatusFailed());
         yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, {

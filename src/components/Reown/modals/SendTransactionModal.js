@@ -67,19 +67,19 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
       return token.symbol;
     }
 
-		const tokenInfo = getTokenInfo(tokenId);
-		if (tokenInfo) {
-			return tokenInfo.symbol;
-		}
+    const tokenInfo = getTokenInfo(tokenId);
+    if (tokenInfo) {
+      return tokenInfo.symbol;
+    }
 
-		// It should never get here but we return empty string as a fallback
+    // It should never get here but we return empty string as a fallback
     return '';
   };
 
   const getTokenInfo = (tokenId) => {
     const tokenDetails = data?.data?.tokenDetails;
     if (tokenDetails && tokenDetails.has(tokenId)) {
-			return tokenDetails.get(tokenId).tokenInfo;
+      return tokenDetails.get(tokenId).tokenInfo;
     }
     return null;
   };
