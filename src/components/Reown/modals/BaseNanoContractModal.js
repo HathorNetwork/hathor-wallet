@@ -204,24 +204,16 @@ export function BaseNanoContractModal({
 
   // Collect unregistered tokens from tokenDetails Map
   useEffect(() => {
-    const unregisteredTokensMap = {};
-
-    if (data?.data?.tokenDetails) {
-      const tokenDetails = data.data.tokenDetails;
-      // Iterate through the Map
-      tokenDetails.forEach((tokenDetail, uid) => {
+    let unregisteredTokensMap = {};
+    const tokenDetails = data?.data?.tokenDetails;
+    if (tokenDetails) {
+      unregisteredTokensMap = [...tokenDetails].reduce((acc, [uid, tokenDetail]) => {
         const tokenInfo = tokenDetail.tokenInfo;
-        if (tokenInfo) {
-          const isRegistered = registeredTokens.find(t => t.uid === uid);
-          if (!isRegistered) {
-            // Store with uid included in the object
-            unregisteredTokensMap[uid] = {
-              ...tokenInfo,
-              uid
-            };
-          }
+        if (tokenInfo && !registeredTokens.find(t => t.uid === uid)) {
+          acc[uid] = { ...tokenInfo, uid };
         }
-      });
+        return acc;
+      }, {});
     }
 
     // Dispatch success action with the unregistered tokens
