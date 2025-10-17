@@ -87,7 +87,7 @@ Testing the previous version of the wallet and then updating to the new version,
 
 ### Token details screen
 1. Click on 'About Test Token' tab.
-1. Validate that all informations are correct (name, symbol, supply)
+1. Validate that all information is correct (name, symbol, supply)
 1. Copy the configuration string to use in later tests.
 
 ### Register / Unregister Custom Token
@@ -127,7 +127,7 @@ Testing the previous version of the wallet and then updating to the new version,
 1. Type your address and delegate. Now you must have 2 mint outputs.
 1. Click to delegate melt and deselect the option to 'Create another melt output for you?'. Delegate the authority to the address `WZ7pDnkPnxbs14GHdUFivFzPbzitwNtvZo` (or to your other test wallet) and now you must have no melt outputs.
 1. Go back to the 'Administrative Tools', click to destroy mint and select 3. You must see an error message that you don't have 3 mint authority outputs.
-1. Select 2 and complete the destroy. You must see a message saying 'You have no more authority outputs for this token'.
+1. Select 2 and complete the destruction. You must see a message saying 'You have no more authority outputs for this token'.
 1. Go to 'About TST' tab and must see 'Can mint new tokens: No'.
 
 ### Hide Zero-balance tokens
@@ -137,7 +137,7 @@ The token uids used in this test are only available on the testnet network. For 
 2. Go to 'Custom Tokens', then 'Register token'
 1. Enter the following string: (or any other token from the Explorer for your network)<br/>
     `[Hiding Token Test:HIDET:009f4365268aa3083c3bbdabae377fbbf720604e132b58602f6572cf45af8bd5:43f57655]`
-1. Go back to the Main screen and check the the token `HIDET` is now available on the token bar to the left.
+1. Go back to the Main screen and check that the token `HIDET` is now available on the token bar to the left.
 1. Navigate to 'Settings', on the option `Hide zero-balance tokens`, and select `Change`.
 1. Confirm that you want to hide zero-balance tokens.
 1. Navigate back to the tokens screen and check that the token `HIDET` is no longer on the token bar to the left.
@@ -177,7 +177,7 @@ The token uids used in this test are only available on the testnet network. For 
 1. Click on the settings icon and then 'Set a passphrase'.
 1. Do not fill all fields and try to confirm. It must show an error.
 1. Choose any passphrase and confirm it. It must show an empty list again.
-1. Go back to the passprase screen and now select 'I want to set a blank passphrase.' and confirm it.
+1. Go back to the passphrase screen and now select 'I want to set a blank passphrase.' and confirm it.
 1. All transactions must appear again.
 
 ### Notifications and bug report
@@ -185,8 +185,8 @@ The token uids used in this test are only available on the testnet network. For 
 1. Do the same with the bug report to validate it's changing.
 
 ### Reload wallet
-1. Turn wifi off until the status change to 'Offline'.
-1. Turn on wifi and check if status change to 'Online' again and the wallet reload the transactions.
+1. Turn Wi-Fi off until the status change to 'Offline'.
+1. Turn on Wi-Fi and check if status change to 'Online' again and the wallet reload the transactions.
 1. Click on 'Reset all data' and confirm it.
 1. Now load the wallet with the saved words. All transactions must appear normally.
 
@@ -208,7 +208,7 @@ The token uids used in this test are only available on the testnet network. For 
 ### Create NFT
 1. Click on `Custom tokens`, then `Create an NFT`.
 1. Fill NFT data as `ipfs://test`, name and symbol as `NFT Test` and `NFTT`, and amount as `100`. Check only the melt authority checkbox.
-1. Double check the Fee is `0.01` HTR, the deposit is `0.01` HTR and the Total is `0.02` HTR.
+1. Double-check the Fee is `0.01` HTR, the deposit is `0.01` HTR and the Total is `0.02` HTR.
 1. Create the NFT and open the transaction on the list.
 1. Validate that the first output is the data output showing `ipfs://test [Data]` with `0.01` HTR and there is one output with `100` of tokens, one output with the melt authority and possibly one change output of HTR.
 
@@ -228,7 +228,7 @@ The token uids used in this test are only available on the testnet network. For 
 1. Click on "Cancel", the modal should close.
 1. Click on the application menu Debug > Reset all data. Then fill the form with "I want to reset my wallet" and click on the "Reset all data" button. The wallet should close.
 1. Open the wallet again, it should open the Welcome screen. Do NOT click on "Get started".
-1. This is to simulate a fresh install of the app. Close the wallet.
+1. This is to simulate a fresh installation of the app. Close the wallet.
 
 ### Late backup
 1. Open the app again and start a new wallet one without doing backup.
