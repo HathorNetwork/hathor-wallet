@@ -113,8 +113,7 @@ const ArgumentsTable = ({ args, decimalPlaces, tokens, network }) => {
         displayValue = `${parsedScript.address.base58} (${value})`;
       }
     } else if (type === 'TokenUid') {
-      const HTR_UID = constants.NATIVE_TOKEN_UID;
-      if (value === HTR_UID) {
+      if (value === constants.NATIVE_TOKEN_UID) {
         displayValue = `${constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol} (${value})`;
       } else if (tokens && value in tokens) {
         displayValue = `${tokens[value].symbol} (${value})`;
