@@ -964,7 +964,7 @@ export function* onSessionProposal(action) {
     // Show the modal
     yield put(showGlobalModal(MODAL_TYPES.REOWN, {
       type: ReownModalTypes.CONNECT,
-      data,
+      data: { ...data, acceptedMethods },
       onAcceptAction: connectResponseTemplate(true),
       onRejectAction: connectResponseTemplate(false),
     }));
