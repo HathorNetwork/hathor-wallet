@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import { useDispatch } from 'react-redux';
 import { setCreateTokenStatusReady } from '../../../actions';
 import { JSONBigInt } from '@hathor/wallet-lib/lib/utils/bigint';
+import { DAppInfo } from '../DAppInfo';
 
 
 /**
@@ -49,13 +50,7 @@ export function CreateTokenModal({ data, onAccept, onReject }) {
         </button>
       </div>
       <div className="modal-body">
-        <div className="d-flex align-items-center mb-3">
-          {data.dapp.icon && <img src={data.dapp.icon} alt="dApp icon" className="mr-3" style={{ width: 48, height: 48 }} />}
-          <div>
-            <h6 className="mb-1">{data.dapp.proposer}</h6>
-            <small className="text-muted">{data.dapp.url}</small>
-          </div>
-        </div>
+        <DAppInfo dapp={data.dapp} />
         <p>{t`Token details:`}</p>
         { /* TODO: Token details will be rendered in raw format, we should improve this UI */ }
         <pre className="bg-light p-3 rounded">{processedData}</pre>

@@ -87,6 +87,25 @@ const initialState = {
    * @example { 00: "00", abc123: "abc123" }
    */
   allTokens: {},
+  /**
+   * Remarks
+   * We use the map of tokens to collect token details for tokens
+   * used in nano contract actions but not registered by the user.
+   *
+   * @example
+   * {
+   *   tokensMap: {
+   *     '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824': {
+   *       name: 'YanCoin',
+   *       symbol: 'YAN',
+   *       uid: '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824',
+   *     },
+   *   }
+   * }
+   */
+  unregisteredTokens: {
+    tokensMap: {},
+  },
   // If is in the proccess of loading addresses transactions from the full node
   // When the request to load addresses fails this variable can continue true
   loadingAddresses: false,
@@ -271,6 +290,8 @@ const initialState = {
    * {
    *   data: {
    *     node: string,
+   *     network: string,
+   *     fullNetwork: string,
    *     txMining: string,
    *     explorer: string
    *     explorerService: string,
@@ -401,6 +422,8 @@ const rootReducer = (state = initialState, action) => {
       return onStartWalletSuccess(state);
     case types.START_WALLET_FAILED:
       return onStartWalletFailed(state);
+    case types.START_WALLET_RESET:
+      return onStartWalletReset(state);
     case types.WALLET_BEST_BLOCK_UPDATE:
       return onWalletBestBlockUpdate(state, action);
     case types.SET_NAVIGATE_TO:
@@ -456,9 +479,10 @@ const rootReducer = (state = initialState, action) => {
         ...state,
         reown: reownReducer(state.reown, action),
       };
-    case types.UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS:
-      return onUnregisteredTokensDownloadSuccess(state, action);
-    case types.UNREGISTERED_TOKENS_DOWNLOAD_FAILED:
+    case types.UNREGISTERED_TOKENS_STORE_SUCCESS:
+      return onUnregisteredTokensStoreSuccess(state, action);
+    case types.UNREGISTERED_TOKENS_CLEAN:
+      return onUnregisteredTokensClean(state);
     default:
       return state;
   }
@@ -1092,6 +1116,12 @@ export const onStartWalletFailed = (state) => ({
   walletStartState: WALLET_STATUS.FAILED,
 });
 
+export const onStartWalletReset = (state) => ({
+  ...state,
+  walletStartState: null,
+  loadingAddresses: false,
+});
+
 /**
  * @param {String} action.tokenId - The tokenId to invalidate
  */
@@ -1485,6 +1515,7 @@ export const onSetNetworkSettingsStatus = (state, { payload }) => {
  * @param {Object} action.payload
  * @param {string} action.payload.node
  * @param {string} action.payload.network
+ * @param {string} action.payload.fullNetwork
  * @param {string} action.payload.txMining
  * @param {string} action.payload.explorer
  * @param {string} action.payload.explorerService
@@ -1499,28 +1530,39 @@ export const onUpdateNetworkSettings = (state, { payload }) => {
     networkSettings: {
       ...state.networkSettings,
       data: payload,
-      status: NETWORK_SETTINGS_STATUS.SUCCESS,
     }
   }
 }
 
 /**
- * Handle successful download of unregistered token details
+ * Handle successful storage of unregistered token details
  * @param {Object} state Current state
  * @param {Object} action Action with token details
  * @param {Object} action.payload.tokens Object with token details
  */
-export const onUnregisteredTokensDownloadSuccess = (state, action) => {
+export const onUnregisteredTokensStoreSuccess = (state, action) => {
   const { tokens } = action.payload;
-  const newTokens = Object.values(tokens).map(token => ({
-    uid: token.uid,
-    name: token.name,
-    symbol: token.symbol
-  }));
 
   return {
     ...state,
-    tokens: [...state.tokens, ...newTokens],
+    unregisteredTokens: {
+      tokensMap: {
+        ...state.unregisteredTokens.tokensMap,
+        ...tokens
+      }
+    },
+  };
+};
+
+/**
+ * Clean unregistered tokens state to its default value
+ */
+export const onUnregisteredTokensClean = (state) => {
+  return {
+    ...state,
+    unregisteredTokens: {
+      tokensMap: {},
+    },
   };
 };
 

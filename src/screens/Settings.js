@@ -306,10 +306,9 @@ function Settings() {
             <span>{t`Connected Sessions: ${connectedSessionsCount}`}</span>
           </div>
           <button className="btn btn-hathor" onClick={goToReown}>{t`Manage sessions`}</button>
+          <hr />
         </div>
       )}
-
-      <hr />
 
       <div>
         <h4>{t`Advanced Settings`}</h4>
