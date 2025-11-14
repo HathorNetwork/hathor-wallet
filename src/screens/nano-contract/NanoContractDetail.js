@@ -182,7 +182,9 @@ function NanoContractDetail() {
     ).map((method) => {
       return (
         <li key={method}>
-          <a href="true" onClick={(e) => executeMethod(e, method)}>{method}</a>
+          {/* TODO: Re-enable when we update the wallet-lib methods calls */}
+          {/* <a href="true" onClick={(e) => executeMethod(e, method)}>{method}</a> */}
+          <span className="text-muted">{method}</span>
         </li>
       );
     });
@@ -193,7 +195,6 @@ function NanoContractDetail() {
     return (
       <div className="nc-detail-wrapper">
         <p><strong>Blueprint: </strong>{blueprintInformation.name}</p>
-        <p><strong>Address: </strong>{nc.address} (<a href="true" onClick={changeAddress}>{t`Change`}</a>)</p>
         {renderNanoAttributes()}
         <hr />
         <div>

@@ -40,7 +40,6 @@ function NanoContractList() {
             <Link to={`/nano_contract/detail/${nc.ncId}`}>{hathorLib.helpersUtils.getShortHash(nc.ncId)}</Link>
           </td>
           <td>{nc.blueprintName}</td>
-          <td>{nc.address}</td>
         </tr>
       );
     });
@@ -50,7 +49,8 @@ function NanoContractList() {
     <div className="content-wrapper">
       <div>
         <div className="d-flex flex-row justify-content-between mt-5 mb-4">
-          <button className="btn btn-hathor" onClick={createNC}>{t`Create a nano contract`}</button>
+          {/* TODO: Re-enable when we update the method calls to wallet-lib */}
+          {/* <button className="btn btn-hathor" onClick={createNC}>{t`Create a nano contract`}</button> */}
           <button className="btn btn-hathor" onClick={registerNC}>{t`Register a nano contract`}</button>
         </div>
         <div className="table-responsive">
@@ -59,7 +59,6 @@ function NanoContractList() {
               <tr>
                 <th>{t`ID`}</th>
                 <th>{t`Blueprint`}</th>
-                <th>{t`Address`}</th>
               </tr>
             </thead>
             <tbody>
