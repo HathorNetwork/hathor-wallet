@@ -891,32 +891,28 @@ export function* onSessionProposal(action) {
   yield put(setWCConnectionState(REOWN_CONNECTION_STATE.CONNECTING));
 
   try {
+    /*
+     * "requiredNamespaces" has been deprecated in WalletConnect v2 in favor of "optionalNamespaces",
+     * but some of our RPC handlers still use it, so we will support both for now.
+     * @see https://github.com/WalletConnect/walletconnect-monorepo/pull/6667
+     */
     const data = {
       icon: get(params, 'proposer.metadata.icons[0]', null),
       proposer: get(params, 'proposer.metadata.name', ''),
       url: get(params, 'proposer.metadata.url', ''),
       description: get(params, 'proposer.metadata.description', ''),
-      requiredNamespaces: get(params, 'requiredNamespaces', []),
-      optionalNamespaces: get(params, 'optionalNamespaces', []),
+      requiredNamespaces: get(params, 'requiredNamespaces', {}),
+      optionalNamespaces: get(params, 'optionalNamespaces', {}),
     };
 
-    // Check if the required methods are supported
-    const requiredMethods = get(data.requiredNamespaces, 'hathor.methods', []);
+    // Validating method support
+    const mandatoryMethods = get(data.requiredNamespaces, 'hathor.methods', []);
     const optionalMethods = get(data.optionalNamespaces, 'hathor.methods', []);
-    const requestedMethods = [...requiredMethods, ...optionalMethods];
+    const allRequestedMethods = [...mandatoryMethods, ...optionalMethods];
     const availableMethods = values(AVAILABLE_METHODS);
-    const unsupportedMandatoryMethods = requiredMethods.filter(method => !availableMethods.includes(method));
-    const unsupportedMethods = requestedMethods.filter(method => !availableMethods.includes(method));
-    let acceptedMethods = requestedMethods.filter(method => availableMethods.includes(method));
-    console.log(`Method summary`, {
-      requiredMethods,
-      optionalMethods,
-      requestedMethods,
-      availableMethods,
-      unsupportedMandatoryMethods,
-      unsupportedMethods,
-      acceptedMethods
-    });
+    const unsupportedMandatoryMethods = mandatoryMethods.filter(method => !availableMethods.includes(method));
+    const unsupportedMethods = optionalMethods.filter(method => !availableMethods.includes(method));
+    const acceptedMethods = allRequestedMethods.filter(method => availableMethods.includes(method));
 
     if (unsupportedMandatoryMethods.length > 0) {
       log.error('Unsupported methods requested:', unsupportedMandatoryMethods);
@@ -964,7 +960,7 @@ export function* onSessionProposal(action) {
     // Show the modal
     yield put(showGlobalModal(MODAL_TYPES.REOWN, {
       type: ReownModalTypes.CONNECT,
-      data: { ...data, acceptedMethods },
+      data: { ...data, acceptedMethods }, // Passing accepted methods to the modal for display
       onAcceptAction: connectResponseTemplate(true),
       onRejectAction: connectResponseTemplate(false),
     }));
