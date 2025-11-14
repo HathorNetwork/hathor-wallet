@@ -22,7 +22,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.33.0-rc.7",
+  "version": "0.33.0",
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
