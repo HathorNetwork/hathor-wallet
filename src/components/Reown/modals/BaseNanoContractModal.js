@@ -8,14 +8,27 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
-import { types, unregisteredTokensDownloadRequested } from '../../../actions';
+import { types, unregisteredTokensStoreSuccess } from '../../../actions';
 import helpers from '../../../utils/helpers';
-import nanoUtils from '../../../utils/nanoContracts';
 import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
 import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
-import { constants } from '@hathor/wallet-lib';
+import { constants, nanoUtils, numberUtils, dateUtils, scriptsUtils, bufferUtils } from '@hathor/wallet-lib';
 import { DAppInfo } from '../DAppInfo';
+import { SignedDataDisplay } from '../SignedDataDisplay';
+
+/**
+ * Parse script data from hex string
+ */
+const parseScriptData = (scriptData, network) => {
+  try {
+    const script = bufferUtils.hexToBuffer(scriptData);
+    return scriptsUtils.parseScript(script, network);
+  } catch (error) {
+    // Avoid throwing exception when we can't parse the script no matter the reason
+    return null;
+  }
+};
 
 /**
  * Component for Blueprint Information Card
@@ -27,7 +40,7 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
         <div className="mb-3">
           <strong>{t`Nano Contract ID`}</strong>
           <div className="text-monospace">
-            {helpers.truncateText(nanoContract.ncId, 8, 4)}
+            {nanoContract.ncId}
             <button
               className="btn btn-link btn-sm p-0 ml-2"
               onClick={() => navigator.clipboard.writeText(nanoContract.ncId)}
@@ -41,11 +54,11 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
       <div className="mb-3">
         <strong>{t`Blueprint ID`}</strong>
         <div className="text-monospace">
-          {nanoContract.blueprintId || 'N/A'}
-          {nanoContract.blueprintId && (
+          {blueprintInfo?.id || ''}
+          {blueprintInfo?.id && (
             <button
               className="btn btn-link btn-sm p-0 ml-2"
-              onClick={() => navigator.clipboard.writeText(nanoContract.blueprintId)}
+              onClick={() => navigator.clipboard.writeText(blueprintInfo.id)}
             >
               <i className="fa fa-copy"></i>
             </button>
@@ -71,10 +84,48 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
 /**
  * Component for Arguments Table
  */
-const ArgumentsTable = ({ args, methodInfo, decimalPlaces }) => {
+const ArgumentsTable = ({ args, decimalPlaces, tokens, network }) => {
   if (!args || !args.length) return null;
 
-  const methodInfoArgs = methodInfo?.args || [];
+  /**
+   * Render argument value based on its type
+   */
+  const renderArgumentValue = (arg) => {
+    const { type, parsed: value } = arg;
+
+    // Handle SignedData types with custom component
+    if (type && type.startsWith('SignedData')) {
+      return <SignedDataDisplay value={value} />;
+    }
+
+    // For all other types, render as text with proper styling
+    let displayValue = value;
+
+    if (type === 'Amount') {
+      displayValue = numberUtils.prettyValue(value, decimalPlaces);
+    } else if (type === 'Timestamp') {
+      displayValue = dateUtils.parseTimestamp(value);
+    } else if (type === 'TxOutputScript') {
+      const parsedScript = parseScriptData(value, network);
+      if (parsedScript && parsedScript.getType() === 'data') {
+        displayValue = `${parsedScript.data} (${value})`;
+      } else if (parsedScript) {
+        displayValue = `${parsedScript.address.base58} (${value})`;
+      }
+    } else if (type === 'TokenUid') {
+      if (value === constants.NATIVE_TOKEN_UID) {
+        displayValue = `${constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol} (${value})`;
+      } else if (tokens && value in tokens) {
+        displayValue = `${tokens[value].symbol} (${value})`;
+      }
+    }
+
+    return (
+      <span className="text-monospace" style={{ wordBreak: 'break-all' }}>
+        {displayValue}
+      </span>
+    );
+  };
 
   return (
     <div className="mb-4">
@@ -84,16 +135,14 @@ const ArgumentsTable = ({ args, methodInfo, decimalPlaces }) => {
           <table className="table table-sm mb-0">
             <tbody>
               {args.map((arg, index) => {
-                const argName = methodInfoArgs[index]?.name || t`Position ${index}`;
-                const argType = methodInfoArgs[index]?.type;
                 return (
                   <tr key={index}>
                     <td className="border-top-0 pl-3" style={{ width: '30%' }}>
-                      <strong>{argName}</strong>
-                      {argType && <small className="text-muted d-block">{argType}</small>}
+                      <strong>{arg.name}</strong>
+                      <small className="text-muted d-block">{arg.type}</small>
                     </td>
-                    <td className="border-top-0 text-monospace" style={{ wordBreak: 'break-all' }}>
-                      {nanoUtils.formatNCArgValue(arg, argType, decimalPlaces)}
+                    <td className="border-top-0">
+                      {renderArgumentValue(arg)}
                     </td>
                   </tr>
                 );
@@ -182,6 +231,8 @@ export function BaseNanoContractModal({
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const firstAddress = useSelector((state) => state.reown.firstAddress);
   const registeredTokens = useSelector((state) => state.tokens);
+  const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
+  const network = useSelector((state) => state.serverInfo.network);
 
   // Local state
   const [selectedAddress, setSelectedAddress] = useState(firstAddress);
@@ -198,29 +249,33 @@ export function BaseNanoContractModal({
 
   // Fetch blueprint information
   useEffect(() => {
-    if (nanoContract.blueprintId) {
+    if (!blueprintInfo) {
       dispatch({
         type: types.BLUEPRINT_FETCH_REQUESTED,
         payload: nanoContract.blueprintId
       });
     }
-  }, [nanoContract.blueprintId, dispatch]);
+  }, [blueprintInfo, nanoContract, dispatch]);
 
-  // Request token data for unknown tokens in actions
+  // Collect unregistered tokens from tokenDetails Map
   useEffect(() => {
-    const unknownTokensUid = [];
-    const actionTokensUid = nanoContract.actions?.map((action) => action.token) || [];
-
-    actionTokensUid.forEach((uid) => {
-      if (uid && uid !== constants.NATIVE_TOKEN_UID && !registeredTokens.find(t => t.uid === uid)) {
-        unknownTokensUid.push(uid);
-      }
-    });
-
-    if (unknownTokensUid.length > 0) {
-      dispatch(unregisteredTokensDownloadRequested(unknownTokensUid));
+    let unregisteredTokensMap = {};
+    const tokenDetails = data?.data?.tokenDetails;
+    if (tokenDetails) {
+      unregisteredTokensMap = [...tokenDetails].reduce((acc, [uid, tokenDetail]) => {
+        const tokenInfo = tokenDetail.tokenInfo;
+        if (tokenInfo && !registeredTokens.find(t => t.uid === uid)) {
+          acc[uid] = { ...tokenInfo, uid };
+        }
+        return acc;
+      }, {});
     }
-  }, [nanoContract.actions, registeredTokens, dispatch]);
+
+    // Dispatch success action with the unregistered tokens
+    if (Object.keys(unregisteredTokensMap).length > 0) {
+      dispatch(unregisteredTokensStoreSuccess(unregisteredTokensMap));
+    }
+  }, [data, registeredTokens, dispatch]);
 
   // Create nano contract with caller
   const nanoWithCaller = useMemo(() => ({
@@ -310,9 +365,13 @@ export function BaseNanoContractModal({
         )}
 
         <ArgumentsTable
-          args={nanoContract.args}
-          methodInfo={blueprintInfo?.public_methods?.[nanoContract.method]}
+          args={nanoContract.parsedArgs}
           decimalPlaces={decimalPlaces}
+          tokens={registeredTokens.reduce((acc, token) => {
+            acc[token.uid] = token;
+            return acc;
+          }, {})}
+          network={network}
         />
 
         {nanoContract.actions && nanoContract.actions.length > 0 && (
@@ -320,8 +379,6 @@ export function BaseNanoContractModal({
             <h6 className="font-weight-bold mb-3">{t`Action List`}</h6>
             <NanoContractActions
               ncActions={nanoContract.actions}
-              tokens={nanoContract.tokens}
-              error={nanoContract.tokens?.error}
             />
           </div>
         )}

@@ -22,7 +22,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.32.0",
+  "version": "0.33.0",
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
@@ -37,8 +37,8 @@
     "@hathor/hathor-rpc-handler/@hathor/wallet-lib/bitcore-lib": "8.25.10"
   },
   "dependencies": {
-    "@hathor/hathor-rpc-handler": "2.2.0",
-    "@hathor/wallet-lib": "2.6.0",
+    "@hathor/hathor-rpc-handler": "3.4.2",
+    "@hathor/wallet-lib": "2.9.1",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
     "@reown/walletkit": "1.1.2",

@@ -80,7 +80,54 @@ export function* fetchTogglesRoutine() {
   }
 }
 
+export function* updateUnleashClientContext(networkSettings = null) {
+  const unleashClient = getUnleashClient();
+  if (!unleashClient) {
+    // We can't update the context if we don't have an unleash client
+    return;
+  }
+
+  const userId = helpers.getUniqueId();
+  const platform = helpers.getCurrentOS();
+  let network, fullNetwork;
+
+  if (networkSettings) {
+    network = networkSettings.network;
+    fullNetwork = networkSettings.fullNetwork;
+  } else {
+    const safeNetworkSettings = helpers.getSafeNetworkSettings();
+    network = safeNetworkSettings.network;
+    fullNetwork = safeNetworkSettings.fullNetwork;
+  }
+
+  const options = {
+    userId,
+    properties: {
+      network,
+      fullNetwork,
+      platform,
+      appVersion: VERSION,
+    },
+  };
+
+  yield call(() => unleashClient.updateContext(options));
+}
+
 export function* monitorFeatureFlags(currentRetry = 0) {
+  const userId = helpers.getUniqueId();
+  const platform = helpers.getCurrentOS();
+  const networkSettings = helpers.getSafeNetworkSettings();
+
+  const options = {
+    userId,
+    properties: {
+      network: networkSettings.network,
+      fullNetwork: networkSettings.fullNetwork,
+      platform,
+      appVersion: VERSION,
+    },
+  };
+
   const unleashClient = new UnleashClient({
     url: UNLEASH_URL,
     clientKey: UNLEASH_CLIENT_KEY,
@@ -88,19 +135,6 @@ export function* monitorFeatureFlags(currentRetry = 0) {
     disableRefresh: true, // Disable it, we will handle it ourselves
     appName: 'wallet-desktop',
   });
-
-  const userId = helpers.getUniqueId();
-  const platform = helpers.getCurrentOS();
-  const network = config.getNetwork().name;
-
-  const options = {
-    userId,
-    properties: {
-      network,
-      platform,
-      appVersion: VERSION,
-    },
-  };
 
   try {
     console.log('starting unleash with', options);

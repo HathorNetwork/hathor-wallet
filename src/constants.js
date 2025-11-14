@@ -252,12 +252,13 @@ export const NANO_UPDATE_ADDRESS_LIST_COUNT = 5;
 export const NANO_CONTRACT_HISTORY_COUNT = 5;
 
 /**
- * Pre settings for mainnet, testnet, and nano testnet
+ * Pre settings for mainnet and testnet
  * We define the values for network, node, txMining, explorer, explorer service, wallet service and its ws
  */
 export const NETWORK_SETTINGS = {
   mainnet: {
     network: 'mainnet',
+    fullNetwork: 'mainnet',
     node: 'https://node1.mainnet.hathor.network/v1a/',
     txMining: 'https://txmining.mainnet.hathor.network/',
     explorer: 'https://explorer.hathor.network',
@@ -267,21 +268,13 @@ export const NETWORK_SETTINGS = {
   },
   testnet: {
     network: 'testnet',
+    fullNetwork: 'testnet',
     node: 'https://node1.testnet.hathor.network/v1a/',
     txMining: 'https://txmining.testnet.hathor.network/',
     explorer: 'https://explorer.testnet.hathor.network',
     explorerService: 'https://explorer-service.testnet.hathor.network/',
     walletService: 'https://wallet-service.testnet.hathor.network/',
     walletServiceWS: 'wss://ws.wallet-service.testnet.hathor.network/',
-  },
-  nanoTestnet: {
-    network: 'testnet',
-    node: 'https://node1.bravo.nano-testnet.hathor.network/v1a/',
-    txMining: 'https://txmining.bravo.nano-testnet.hathor.network/',
-    explorer: 'https://explorer.bravo.alpha.nano-testnet.hathor.network/',
-    explorerService: 'https://explorer-service.bravo.nano-testnet.hathor.network/',
-    walletService: 'https://wallet-service.bravo.nano-testnet.hathor.network/',
-    walletServiceWS: 'wss://ws.wallet-service.bravo.nano-testnet.hathor.network/',
   }
 }
 
