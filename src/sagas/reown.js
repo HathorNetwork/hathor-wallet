@@ -92,7 +92,7 @@ const ERROR_CODES = {
 
 /**
  * Checks if the Reown feature is enabled via feature flags
- * 
+ *
  * @returns {boolean} True if the Reown feature is enabled, false otherwise
  */
 function* isReownEnabled() {
@@ -210,7 +210,7 @@ export function* checkForPendingRequests() {
 /**
  * Refreshes the list of active Reown sessions in the Redux store
  * Optionally extends the expiration time of existing sessions
- * 
+ *
  * @param {boolean} extend - Whether to extend the expiration time of sessions
  */
 export function* refreshActiveSessions(extend = false) {
@@ -259,7 +259,7 @@ export function* refreshActiveSessions(extend = false) {
 /**
  * Sets up event listeners for the Reown WalletKit
  * Creates an event channel to handle various Reown events
- * 
+ *
  * @param {Object} walletKit - The WalletKit instance to attach listeners to
  */
 export function* setupListeners(walletKit) {
@@ -356,7 +356,7 @@ function* requestsListener() {
 /**
  * Processes a Reown session request
  * Handles RPC requests from dApps and responds appropriately
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* processRequest(action) {
@@ -777,7 +777,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
 /**
  * Generic handler for dApp requests that require user confirmation
  * Shows a modal to the user and manages the accept/reject flow
- * 
+ *
  * @param {Object} payload - The request payload
  * @param {Function} payload.accept - Callback for when user accepts
  * @param {Function} payload.deny - Callback for when user rejects
@@ -817,7 +817,7 @@ export function* handleDAppRequest({ payload }, modalType) {
 /**
  * Handles a sign message request from a dApp
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onSignMessageRequest(action) {
@@ -827,7 +827,7 @@ export function* onSignMessageRequest(action) {
 /**
  * Handles a sign oracle data request from a dApp
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onSignOracleDataRequest(action) {
@@ -837,7 +837,7 @@ export function* onSignOracleDataRequest(action) {
 /**
  * Handles a request to send a nano contract transaction
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onSendNanoContractTxRequest(action) {
@@ -857,7 +857,7 @@ export function* onSendTransactionRequest(action) {
 /**
  * Handles a request to create a token
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onCreateTokenRequest(action) {
@@ -881,7 +881,7 @@ export function* onWalletReset() {
 /**
  * Handles a session proposal from a dApp
  * Shows a modal to the user for confirmation and manages the session approval/rejection
- * 
+ *
  * @param {Object} action - The action containing the session proposal
  */
 export function* onSessionProposal(action) {
@@ -891,28 +891,38 @@ export function* onSessionProposal(action) {
   yield put(setWCConnectionState(REOWN_CONNECTION_STATE.CONNECTING));
 
   try {
+    /*
+     * "requiredNamespaces" has been deprecated in WalletConnect v2 in favor of "optionalNamespaces",
+     * but some of our RPC handlers still use it, so we will support both for now.
+     * @see https://github.com/WalletConnect/walletconnect-monorepo/pull/6667
+     */
     const data = {
       icon: get(params, 'proposer.metadata.icons[0]', null),
       proposer: get(params, 'proposer.metadata.name', ''),
       url: get(params, 'proposer.metadata.url', ''),
       description: get(params, 'proposer.metadata.description', ''),
-      requiredNamespaces: get(params, 'requiredNamespaces', []),
+      requiredNamespaces: get(params, 'requiredNamespaces', {}),
+      optionalNamespaces: get(params, 'optionalNamespaces', {}),
     };
 
-    // Check if the required methods are supported
-    const requiredMethods = get(params, 'requiredNamespaces.hathor.methods', []);
+    // Validating method support
+    const mandatoryMethods = get(data.requiredNamespaces, 'hathor.methods', []);
+    const optionalMethods = get(data.optionalNamespaces, 'hathor.methods', []);
+    const allRequestedMethods = [...mandatoryMethods, ...optionalMethods];
     const availableMethods = values(AVAILABLE_METHODS);
-    const unsupportedMethods = requiredMethods.filter(method => !availableMethods.includes(method));
+    const unsupportedMandatoryMethods = mandatoryMethods.filter(method => !availableMethods.includes(method));
+    const unsupportedMethods = optionalMethods.filter(method => !availableMethods.includes(method));
+    const acceptedMethods = allRequestedMethods.filter(method => availableMethods.includes(method));
 
-    if (unsupportedMethods.length > 0) {
-      log.error('Unsupported methods requested:', unsupportedMethods);
+    if (unsupportedMandatoryMethods.length > 0) {
+      log.error('Unsupported methods requested:', unsupportedMandatoryMethods);
       // Set connection state to FAILED
       yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
 
       // Show error modal to user
       yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
         title: 'Connection Error',
-        message: `The dApp is requesting methods that are not supported: ${unsupportedMethods.join(', ')}`,
+        message: `The dApp is requesting methods that are not supported: ${unsupportedMandatoryMethods.join(', ')}`,
       }));
 
       // Reject the session
@@ -922,11 +932,15 @@ export function* onSessionProposal(action) {
           id,
           reason: {
             code: ERROR_CODES.UNAUTHORIZED_METHODS,
-            message: 'Requested methods are not supported',
+            message: 'Required methods are not supported',
           },
         });
       }
       return;
+    }
+
+    if (unsupportedMethods.length > 0) {
+      log.debug('Some unsupported methods were requested, but they are optional:', unsupportedMethods);
     }
 
     let dispatch;
@@ -946,7 +960,7 @@ export function* onSessionProposal(action) {
     // Show the modal
     yield put(showGlobalModal(MODAL_TYPES.REOWN, {
       type: ReownModalTypes.CONNECT,
-      data,
+      data: { ...data, acceptedMethods }, // Passing accepted methods to the modal for display
       onAcceptAction: connectResponseTemplate(true),
       onRejectAction: connectResponseTemplate(false),
     }));
@@ -976,7 +990,7 @@ export function* onSessionProposal(action) {
             accounts: [`hathor:${networkSettings.network}:${firstAddress}`],
             chains: [`hathor:${networkSettings.network}`],
             events: AVAILABLE_EVENTS,
-            methods: requiredMethods, // Use the methods requested by the dApp instead of all available methods
+            methods: acceptedMethods, // Use the methods requested by the dApp instead of all available methods
           },
         },
       });
@@ -1034,7 +1048,7 @@ export function* onSessionProposal(action) {
 /**
  * Handles a WalletConnect URI input
  * Attempts to pair with the provided URI
- * 
+ *
  * @param {Object} action - The action containing the URI payload
  */
 export function* onUriInputted(action) {
@@ -1087,7 +1101,7 @@ export function* featureToggleUpdateListener() {
 /**
  * Handles a request to cancel a session
  * Disconnects the specified session and refreshes the session list
- * 
+ *
  * @param {Object} action - The action containing the session ID
  */
 export function* onCancelSession(action) {
@@ -1116,7 +1130,7 @@ export function* onCancelSession(action) {
 /**
  * Handles a session delete event
  * Delegates to onCancelSession to handle the session deletion
- * 
+ *
  * @param {Object} action - The action containing the session data
  */
 export function* onSessionDelete(action) {
@@ -1126,7 +1140,7 @@ export function* onSessionDelete(action) {
 /**
  * Handles a request to create a nano contract and token in a single transaction
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onCreateNanoContractCreateTokenTxRequest(action) {
@@ -1156,4 +1170,4 @@ export function* saga() {
     takeEvery(types.WALLET_RESET, onWalletReset),
     takeLatest(types.REOWN_URI_INPUTTED, onUriInputted),
   ]);
-} 
+}
