@@ -17,7 +17,7 @@ import { connect } from "react-redux";
 import { get, upperFirst } from 'lodash';
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
-import hathorLib, { numberUtils } from '@hathor/wallet-lib';
+import hathorLib, { numberUtils, bigIntUtils } from '@hathor/wallet-lib';
 import { MAX_GRAPH_LEVEL } from '../constants';
 import helpers from '../utils/helpers';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
@@ -963,6 +963,11 @@ class TxData extends React.Component {
 
       if (arg.type === 'Amount') {
         return numberUtils.prettyValue(arg.parsed, this.props.decimalPlaces);
+      }
+
+      // Handle objects and arrays by converting to JSON string with BigInt support
+      if (typeof arg.parsed === 'object' && arg.parsed !== null) {
+        return bigIntUtils.JSONBigInt.stringify(arg.parsed, null, 2);
       }
 
       return arg.parsed;
