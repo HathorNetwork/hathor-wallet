@@ -33,22 +33,26 @@ export function GetBalanceModal({ data, onAccept, onReject }) {
         <p>{t`The dApp is requesting access to the balance of the following tokens:`}</p>
         <div className="bg-light p-3 rounded">
           {data.data && data.data.length > 0 ? (
-            data.data.map((balanceObj, index) => (
-              <div key={index} className="mb-3 pb-3 border-bottom">
-                <div className="font-weight-bold mb-2">
-                  {balanceObj.token?.name || t`Token ${index + 1}`} ({balanceObj.token?.symbol || ''})
-                </div>
-                <div className="small text-muted mb-2">
-                  {t`Token ID:`} {balanceObj.token?.id || ''}
-                </div>
-                {balanceObj.balance && (
-                  <div className="pl-3">
-                    <div>{t`Available:`} {formatBalance(balanceObj.balance.unlocked)}</div>
-                    <div>{t`Locked:`} {formatBalance(balanceObj.balance.locked)}</div>
+            data.data.map((balanceObj, index) => {
+              const tokenNumber = index + 1;
+              const tokenName = balanceObj.token?.name || `Token ${tokenNumber}`;
+              return (
+                <div key={index} className="mb-3 pb-3 border-bottom">
+                  <div className="font-weight-bold mb-2">
+                    {tokenName} ({balanceObj.token?.symbol || ''})
                   </div>
-                )}
-              </div>
-            ))
+                  <div className="small text-muted mb-2">
+                    {t`Token ID:`} {balanceObj.token?.id || ''}
+                  </div>
+                  {balanceObj.balance && (
+                    <div className="pl-3">
+                      <div>{t`Available:`} {formatBalance(balanceObj.balance.unlocked)}</div>
+                      <div>{t`Locked:`} {formatBalance(balanceObj.balance.locked)}</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
           ) : (
             <p className="text-muted">{t`No balance data available`}</p>
           )}
