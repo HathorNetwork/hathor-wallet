@@ -49,9 +49,9 @@ export function GetBalanceModal({ data, onAccept, onReject }) {
                     {t`Token ID:`} {balanceObj.token?.id || ''}
                   </div>
                   {balanceObj.balance && (
-                    <div className="pl-3">
-                      <div>{t`Available:`} {formatBalance(balanceObj.balance.unlocked, balanceObj.token?.id)}</div>
-                      <div>{t`Locked:`} {formatBalance(balanceObj.balance.locked, balanceObj.token?.id)}</div>
+                    <div className="mt-2">
+                      <div className="small"><strong>{t`Available:`}</strong> {formatBalance(balanceObj.balance.unlocked, balanceObj.token?.id)}</div>
+                      <div className="small"><strong>{t`Locked:`}</strong> {formatBalance(balanceObj.balance.locked, balanceObj.token?.id)}</div>
                     </div>
                   )}
                 </div>
