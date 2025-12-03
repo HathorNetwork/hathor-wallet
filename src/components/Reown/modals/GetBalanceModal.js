@@ -7,17 +7,22 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { useSelector } from 'react-redux';
 import { DAppInfo } from '../DAppInfo';
 import hathorLib from '@hathor/wallet-lib';
+import helpers from '../../../utils/helpers';
 
 export function GetBalanceModal({ data, onAccept, onReject }) {
-  const formatBalance = (balance) => {
-    // Use 2 decimal places as default for formatting
-    // HTR token uses 2 decimal places
-    if (typeof balance === 'bigint') {
-      return hathorLib.numberUtils.prettyValue(balance, 2);
-    }
-    return hathorLib.numberUtils.prettyValue(balance, 2);
+  const { tokenMetadata, decimalPlaces } = useSelector((state) => ({
+    tokenMetadata: state.tokenMetadata,
+    decimalPlaces: state.serverInfo.decimalPlaces
+  }));
+
+  const formatBalance = (balance, tokenId) => {
+    // Check if the token is an NFT using the helpers utility
+    const isNFT = tokenId && helpers.isTokenNFT(tokenId, tokenMetadata);
+
+    return hathorLib.numberUtils.prettyValue(balance, isNFT ? 0 : decimalPlaces);
   };
 
   return (
@@ -34,8 +39,7 @@ export function GetBalanceModal({ data, onAccept, onReject }) {
         <div className="bg-light p-3 rounded">
           {data.data && data.data.length > 0 ? (
             data.data.map((balanceObj, index) => {
-              const tokenNumber = index + 1;
-              const tokenName = balanceObj.token?.name || `Token ${tokenNumber}`;
+              const tokenName = balanceObj.token?.name;
               return (
                 <div key={index} className="mb-3 pb-3 border-bottom">
                   <div className="font-weight-bold mb-2">
@@ -46,8 +50,8 @@ export function GetBalanceModal({ data, onAccept, onReject }) {
                   </div>
                   {balanceObj.balance && (
                     <div className="pl-3">
-                      <div>{t`Available:`} {formatBalance(balanceObj.balance.unlocked)}</div>
-                      <div>{t`Locked:`} {formatBalance(balanceObj.balance.locked)}</div>
+                      <div>{t`Available:`} {formatBalance(balanceObj.balance.unlocked, balanceObj.token?.id)}</div>
+                      <div>{t`Locked:`} {formatBalance(balanceObj.balance.locked, balanceObj.token?.id)}</div>
                     </div>
                   )}
                 </div>
