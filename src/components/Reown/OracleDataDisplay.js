@@ -22,17 +22,16 @@ export const OracleDataDisplay = ({ oracleData }) => {
         return { raw: oracleData.oracle, isAddress: false };
       }
 
-      // Convert hex string to Buffer
-      const oracleBuffer = Buffer.from(oracleData.oracle, 'hex');
       const network = wallet.getNetworkObject();
+      const address = new hathorLib.Address(oracleData.oracle, { network });
 
-      const parsedScript = hathorLib.scriptsUtils.parseScript(oracleBuffer, network);
-      if (parsedScript && parsedScript.address) {
+      if (address.isValid()) {
+        const outputScriptType = address.getType();
         return {
           raw: oracleData.oracle,
-          address: parsedScript.address.base58,
+          address: oracleData.oracle,
           isAddress: true,
-          scriptType: parsedScript.type
+          scriptType: outputScriptType
         };
       }
 
@@ -67,24 +66,6 @@ export const OracleDataDisplay = ({ oracleData }) => {
                   <i className="fa fa-copy"></i>
                 </button>
               </div>
-              <details className="mt-2">
-                <summary className="text-muted small" style={{ cursor: 'pointer' }}>
-                  {t`Show raw oracle data`}
-                </summary>
-                <div className="mt-2 d-flex align-items-start">
-                  <div
-                    className="text-monospace flex-grow-1 p-2 bg-light rounded small"
-                    style={{ wordBreak: 'break-all' }}>
-                    {parsedOracleInfo.raw}
-                  </div>
-                  <button
-                    className="btn btn-link btn-sm p-1 ml-2"
-                    onClick={() => navigator.clipboard.writeText(parsedOracleInfo.raw)}
-                    title={t`Copy raw oracle`}>
-                    <i className="fa fa-copy"></i>
-                  </button>
-                </div>
-              </details>
             </div>
           ) : (
             <div className="d-flex align-items-start">

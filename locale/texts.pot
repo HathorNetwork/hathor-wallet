@@ -225,7 +225,7 @@ msgstr ""
 #: src/components/AddressList.js:194
 #: src/components/OutputsWrapper.js:62
 #: src/components/Reown/CreateTokenRequestData.js:155
-#: src/components/Reown/OracleDataDisplay.js:55
+#: src/components/Reown/OracleDataDisplay.js:54
 #: src/components/atomic-swap/ModalAtomicReceive.js:105
 #: src/components/atomic-swap/ModalAtomicReceive.js:107
 #: src/components/atomic-swap/ModalAtomicSend.js:331
@@ -528,7 +528,7 @@ msgstr ""
 #: src/components/ModalPin.js:134
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/PinPad.js:235
-#: src/components/Reown/modals/BaseNanoContractModal.js:283
+#: src/components/Reown/modals/BaseNanoContractModal.js:275
 #: src/components/atomic-swap/ModalAtomicReceive.js:129
 #: src/components/atomic-swap/ModalAtomicSend.js:365
 #: src/components/nano-contract/ModalChangeAddress.js:153
@@ -2179,7 +2179,7 @@ msgstr ""
 msgid "Choose inputs automatically"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:137
+#: src/components/Reown/modals/SendTransactionModal.js:129
 #: src/components/SendTokensOne.js:258
 msgid "Inputs"
 msgstr ""
@@ -2873,7 +2873,7 @@ msgstr ""
 msgid "Sign Data"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:273
+#: src/components/Reown/modals/BaseNanoContractModal.js:265
 #: src/components/nano-contract/ModalSelectAddressToSignTx.js:49
 msgid "Select the address that will be used to sign the transaction"
 msgstr ""
@@ -2964,7 +2964,7 @@ msgid "available"
 msgstr ""
 
 #: src/components/Reown/CreateTokenRequestData.js:156
-#: src/components/Reown/modals/SendTransactionModal.js:229
+#: src/components/Reown/modals/SendTransactionModal.js:221
 #: src/components/atomic-swap/ModalAtomicSend.js:333
 msgid "Change Address"
 msgstr ""
@@ -3010,7 +3010,7 @@ msgid "Allow External Melt Authority Address"
 msgstr ""
 
 #: src/components/Reown/CreateTokenRequestData.js:169
-#: src/components/Reown/OracleDataDisplay.js:107
+#: src/components/Reown/OracleDataDisplay.js:88
 msgid "Data"
 msgstr ""
 
@@ -3130,24 +3130,24 @@ msgstr ""
 msgid "${ tokenSymbol } Acquire Authority"
 msgstr ""
 
-#: src/components/Reown/NanoContractActions.js:120
+#: src/components/Reown/NanoContractActions.js:132
 msgid "Address to send amount:"
 msgstr ""
 
-#: src/components/Reown/NanoContractActions.js:138
-#: src/components/Reown/NanoContractActions.js:172
+#: src/components/Reown/NanoContractActions.js:151
+#: src/components/Reown/NanoContractActions.js:185
 msgid "Address to filter UTXOs:"
 msgstr ""
 
-#: src/components/Reown/NanoContractActions.js:152
+#: src/components/Reown/NanoContractActions.js:165
 msgid "Change address:"
 msgstr ""
 
-#: src/components/Reown/NanoContractActions.js:186
+#: src/components/Reown/NanoContractActions.js:199
 msgid "Address to send new authority:"
 msgstr ""
 
-#: src/components/Reown/NanoContractActions.js:204
+#: src/components/Reown/NanoContractActions.js:217
 msgid "Address to send authority:"
 msgstr ""
 
@@ -3195,23 +3195,15 @@ msgstr ""
 msgid "The nano contract transaction was sent successfully."
 msgstr ""
 
-#: src/components/Reown/OracleDataDisplay.js:50
+#: src/components/Reown/OracleDataDisplay.js:49
 msgid "Oracle"
 msgstr ""
 
-#: src/components/Reown/OracleDataDisplay.js:66
+#: src/components/Reown/OracleDataDisplay.js:65
 msgid "Copy address"
 msgstr ""
 
-#: src/components/Reown/OracleDataDisplay.js:72
-msgid "Show raw oracle data"
-msgstr ""
-
-#: src/components/Reown/OracleDataDisplay.js:83
-msgid "Copy raw oracle"
-msgstr ""
-
-#: src/components/Reown/OracleDataDisplay.js:99
+#: src/components/Reown/OracleDataDisplay.js:80
 msgid "Copy oracle"
 msgstr ""
 
@@ -3282,7 +3274,7 @@ msgid "Caller"
 msgstr ""
 
 #: src/components/Reown/modals/BaseNanoContractModal.js:120
-#: src/components/Reown/modals/BaseNanoContractModal.js:267
+#: src/components/Reown/modals/BaseNanoContractModal.js:259
 msgid "Select Address"
 msgstr ""
 
@@ -3303,7 +3295,7 @@ msgstr ""
 #: src/components/Reown/modals/BaseNanoContractModal.js:167
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:71
 #: src/components/Reown/modals/SendNanoContractTxModal.js:37
-#: src/components/Reown/modals/SendTransactionModal.js:243
+#: src/components/Reown/modals/SendTransactionModal.js:235
 msgid "Accept Transaction"
 msgstr ""
 
@@ -3312,22 +3304,22 @@ msgstr ""
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
 #: src/components/Reown/modals/CreateTokenModal.js:59
 #: src/components/Reown/modals/SendNanoContractTxModal.js:38
-#: src/components/Reown/modals/SendTransactionModal.js:242
+#: src/components/Reown/modals/SendTransactionModal.js:234
 #: src/components/Reown/modals/SignMessageModal.js:27
 #: src/components/Reown/modals/SignOracleDataModal.js:40
 msgid "Reject"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:301
+#: src/components/Reown/modals/BaseNanoContractModal.js:293
 msgid "Review your transaction from this dApp"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:302
+#: src/components/Reown/modals/BaseNanoContractModal.js:294
 #: src/components/Reown/modals/SignOracleDataModal.js:26
 msgid "Stay vigilant and protect your data from potential phishing attempts."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:327
+#: src/components/Reown/modals/BaseNanoContractModal.js:319
 msgid "Action List"
 msgstr ""
 
@@ -3362,23 +3354,23 @@ msgstr ""
 msgid "NEW NANO CONTRACT TRANSACTION"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:142
+#: src/components/Reown/modals/SendTransactionModal.js:134
 msgid "Input"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:173
+#: src/components/Reown/modals/SendTransactionModal.js:165
 msgid "Outputs"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:178
+#: src/components/Reown/modals/SendTransactionModal.js:170
 msgid "Output"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:190
+#: src/components/Reown/modals/SendTransactionModal.js:182
 msgid "Data field:"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:213
+#: src/components/Reown/modals/SendTransactionModal.js:205
 msgid "NEW TRANSACTION"
 msgstr ""
 

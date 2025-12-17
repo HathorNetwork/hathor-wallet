@@ -17,6 +17,7 @@ import {
   select,
   race,
   actionChannel,
+  cancel,
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { get, values } from 'lodash';
@@ -166,23 +167,27 @@ function* init() {
 }
 
 /**
- * Monitors for network changes and clears Reown sessions when the genesis hash changes
- * This ensures sessions are reset when switching between networks
+ * Monitors for network changes and manages the Reown initialization lifecycle
+ * Cancels and restarts init when the network changes
  */
 export function* listenForNetworkChange() {
-  let previousGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
+  // Start the initial init task
+  let initTask = yield fork(init);
 
   while (true) {
     // Wait for the server info to be updated with the new network data
     yield take(types.SERVER_INFO_UPDATED);
+    log.debug('Network changed, clearing reown sessions.');
 
-    const currentGenesisHash = yield select((state) => get(state.serverInfo, 'genesisHash'));
-
-    if (previousGenesisHash !== currentGenesisHash) {
-      log.debug('Genesis hash changed, clearing reown sessions.');
-      yield call(clearSessions);
-      previousGenesisHash = currentGenesisHash;
+    // Cancel the previous init task
+    if (initTask) {
+      yield cancel(initTask);
     }
+
+    yield call(clearSessions);
+
+    // Fork a new init task and keep track of it
+    initTask = yield fork(init);
   }
 }
 
@@ -1137,7 +1142,6 @@ export function* onCreateNanoContractCreateTokenTxRequest(action) {
 export function* saga() {
   yield all([
     fork(featureToggleUpdateListener),
-    fork(init),
     fork(listenForNetworkChange),
     takeLatest(types.SHOW_NANO_CONTRACT_SEND_TX_MODAL, onSendNanoContractTxRequest),
     takeLatest(types.SHOW_SIGN_MESSAGE_REQUEST_MODAL, onSignMessageRequest),

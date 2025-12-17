@@ -13,8 +13,22 @@ import helpers from '../../../utils/helpers';
 import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
 import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
-import { constants, nanoUtils } from '@hathor/wallet-lib';
+import { constants, nanoUtils, numberUtils, dateUtils, scriptsUtils, bufferUtils } from '@hathor/wallet-lib';
 import { DAppInfo } from '../DAppInfo';
+import { SignedDataDisplay } from '../SignedDataDisplay';
+
+/**
+ * Parse script data from hex string
+ */
+const parseScriptData = (scriptData, network) => {
+  try {
+    const script = bufferUtils.hexToBuffer(scriptData);
+    return scriptsUtils.parseScript(script, network);
+  } catch (error) {
+    // Avoid throwing exception when we can't parse the script no matter the reason
+    return null;
+  }
+};
 
 /**
  * Component for Blueprint Information Card
@@ -70,8 +84,48 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
 /**
  * Component for Arguments Table
  */
-const ArgumentsTable = ({ args, decimalPlaces }) => {
+const ArgumentsTable = ({ args, decimalPlaces, tokens, network }) => {
   if (!args || !args.length) return null;
+
+  /**
+   * Render argument value based on its type
+   */
+  const renderArgumentValue = (arg) => {
+    const { type, parsed: value } = arg;
+
+    // Handle SignedData types with custom component
+    if (type && type.startsWith('SignedData')) {
+      return <SignedDataDisplay value={value} />;
+    }
+
+    // For all other types, render as text with proper styling
+    let displayValue = value;
+
+    if (type === 'Amount') {
+      displayValue = numberUtils.prettyValue(value, decimalPlaces);
+    } else if (type === 'Timestamp') {
+      displayValue = dateUtils.parseTimestamp(value);
+    } else if (type === 'TxOutputScript') {
+      const parsedScript = parseScriptData(value, network);
+      if (parsedScript && parsedScript.getType() === 'data') {
+        displayValue = `${parsedScript.data} (${value})`;
+      } else if (parsedScript) {
+        displayValue = `${parsedScript.address.base58} (${value})`;
+      }
+    } else if (type === 'TokenUid') {
+      if (value === constants.NATIVE_TOKEN_UID) {
+        displayValue = `${constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol} (${value})`;
+      } else if (tokens && value in tokens) {
+        displayValue = `${tokens[value].symbol} (${value})`;
+      }
+    }
+
+    return (
+      <span className="text-monospace" style={{ wordBreak: 'break-all' }}>
+        {displayValue}
+      </span>
+    );
+  };
 
   return (
     <div className="mb-4">
@@ -87,8 +141,8 @@ const ArgumentsTable = ({ args, decimalPlaces }) => {
                       <strong>{arg.name}</strong>
                       <small className="text-muted d-block">{arg.type}</small>
                     </td>
-                    <td className="border-top-0 text-monospace" style={{ wordBreak: 'break-all' }}>
-                      {arg.parsed}
+                    <td className="border-top-0">
+                      {renderArgumentValue(arg)}
                     </td>
                   </tr>
                 );
@@ -178,6 +232,7 @@ export function BaseNanoContractModal({
   const firstAddress = useSelector((state) => state.reown.firstAddress);
   const registeredTokens = useSelector((state) => state.tokens);
   const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
+  const network = useSelector((state) => state.serverInfo.network);
 
   // Local state
   const [selectedAddress, setSelectedAddress] = useState(firstAddress);
@@ -312,6 +367,11 @@ export function BaseNanoContractModal({
         <ArgumentsTable
           args={nanoContract.parsedArgs}
           decimalPlaces={decimalPlaces}
+          tokens={registeredTokens.reduce((acc, token) => {
+            acc[token.uid] = token;
+            return acc;
+          }, {})}
+          network={network}
         />
 
         {nanoContract.actions && nanoContract.actions.length > 0 && (
