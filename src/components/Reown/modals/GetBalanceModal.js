@@ -37,7 +37,7 @@ export function GetBalanceModal({ data, onAccept, onReject }) {
         <DAppInfo dapp={data.dapp} />
         <p>{t`The dApp is requesting access to the balance of the following tokens:`}</p>
         <div className="bg-light p-3 rounded">
-          {data.data && data.data.length > 0 ? (
+          {data.data?.length > 0 ? (
             data.data.map((balanceObj, index) => {
               const tokenName = balanceObj.token?.name;
               return (
