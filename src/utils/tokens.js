@@ -182,6 +182,24 @@ const tokens = {
     delete tokenSignatures[uid];
     LOCAL_STORE.setTokenSignatures(tokenSignatures);
   },
+  // TODO: use TokenInfoVersion.DEPOSIT and TokenInfoVersion.FEE
+  /**
+   * Returns a human-readable label for the token fee model based on its version.
+   *
+   * @param {number} version - The token version number.
+   * @returns {string} The label for the fee model.
+   * @memberof Tokens
+   * @inner
+   */
+  getFeeModelLabel(version) {
+    if (version === 1) {
+      return 'Deposit based';
+    }
+    if (version === 2) {
+      return 'Fee based';
+    }
+    return 'Unknown';
+  },
 }
 
 export default tokens;
