@@ -8,7 +8,7 @@
 import React from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
-import { types, unregisteredTokensClean } from '../../actions';
+import { types, unregisteredTokensClean, setReownError } from '../../actions';
 import { FeedbackModal } from './FeedbackModal';
 import { constants } from '@hathor/wallet-lib';
 import tokens from '../../utils/tokens';
@@ -22,6 +22,12 @@ export const MODAL_ID = 'nanoContractFeedbackModal';
 export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, manageDomLifecycle }) {
   const dispatch = useDispatch();
   const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
+  const errorDetails = useSelector((state) => state.reown.error);
+
+  // Debug logging
+  console.log('NanoContractFeedbackModal - isError:', isError);
+  console.log('NanoContractFeedbackModal - isLoading:', isLoading);
+  console.log('NanoContractFeedbackModal - errorDetails:', errorDetails);
 
   // Get unregistered tokens from tokensMap
   const unregisteredTokensList = Object.values(unregisteredTokens.tokensMap || {});
@@ -42,6 +48,8 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
   const handleClose = () => {
     // Clean unregistered tokens state
     dispatch(unregisteredTokensClean());
+    // Clear error state
+    dispatch(setReownError(null));
     onClose();
   };
 
@@ -107,6 +115,7 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
       retryDismissAction={types.REOWN_NEW_NANOCONTRACT_RETRY_DISMISS}
       extraComponent={renderUnregisteredTokensComponent()}
       customButtons={renderCustomButtons()}
+      errorDetails={errorDetails}
     />
   );
 } 

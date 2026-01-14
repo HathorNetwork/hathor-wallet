@@ -23,6 +23,9 @@ const initialState = {
   connectionState: REOWN_CONNECTION_STATE.IDLE,
   nanoContractStatus: BASE_STATUS.READY,
   createTokenStatus: BASE_STATUS.READY,
+  // Centralized error storage for the current Reown operation.
+  // Only one RPC is processed at a time, so a single error key suffices.
+  error: null,
 };
 
 export default function reownReducer(state = initialState, action) {
@@ -129,6 +132,13 @@ export default function reownReducer(state = initialState, action) {
       return {
         ...state,
         sendTxStatus: BASE_STATUS.ERROR
+      };
+
+    case types.REOWN_SET_ERROR:
+      console.log('REDUCER: REOWN_SET_ERROR received', action.payload);
+      return {
+        ...state,
+        error: action.payload,
       };
 
     default:

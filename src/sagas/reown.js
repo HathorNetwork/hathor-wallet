@@ -60,6 +60,7 @@ import {
   hideGlobalModal,
   setReownFirstAddress,
   unregisteredTokensClean,
+  setReownError,
 } from '../actions';
 import { checkForFeatureFlag, getNetworkSettings, retryHandler } from './helpers';
 import { logger } from '../utils/logger';
@@ -90,6 +91,28 @@ const ERROR_CODES = {
   USER_REJECTED_METHOD: 5002,
   INVALID_PAYLOAD: 5003,
 };
+
+/**
+ * Extracts and normalizes error details from an error object
+ * @param {Error} error - The error object to extract details from
+ * @returns {Object} Normalized error details with message, stack, type, and timestamp
+ */
+function extractErrorDetails(error) {
+  if (!error) {
+    return {
+      message: 'Unknown error',
+      stack: 'No stack trace available',
+      type: 'Error',
+      timestamp: Date.now(),
+    };
+  }
+  return {
+    message: error.message || 'Unknown error',
+    stack: error.stack || 'No stack trace available',
+    type: error?.constructor?.name || 'Error',
+    timestamp: Date.now(),
+  };
+}
 
 /**
  * Checks if the Reown feature is enabled via feature flags
@@ -437,8 +460,11 @@ export function* processRequest(action) {
     }));
   } catch (e) {
     let shouldAnswer = true;
+
     switch (e.constructor) {
       case SendNanoContractTxError: {
+        const errorDetails = extractErrorDetails(e);
+        yield put(setReownError(errorDetails));
         yield put(setNewNanoContractStatusFailure());
         yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
@@ -451,10 +477,13 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
       case CreateTokenError: {
+        const errorDetails = extractErrorDetails(e);
+        yield put(setReownError(errorDetails));
         yield put(setCreateTokenStatusFailed());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: true }));
 
@@ -466,6 +495,7 @@ export function* processRequest(action) {
 
         if (retry) {
           yield put(setCreateTokenStatusReady()); // Reset status before retrying
+          yield put(setReownError(null));
           shouldAnswer = false;
           yield* processRequest(action);
         } else {
@@ -474,6 +504,8 @@ export function* processRequest(action) {
       } break;
       case InsufficientFundsError:
       case SendTransactionError: {
+        const errorDetails = extractErrorDetails(e);
+        yield put(setReownError(errorDetails));
         yield put(setSendTxStatusFailed());
         yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, {
@@ -490,10 +522,13 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
       case SignMessageWithAddressError: {
+        const errorDetails = extractErrorDetails(e);
+        yield put(setReownError(errorDetails));
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
@@ -504,10 +539,13 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
       case CreateNanoContractCreateTokenTxError: {
+        const errorDetails = extractErrorDetails(e);
+        yield put(setReownError(errorDetails));
         yield put(setNewNanoContractStatusFailure());
         yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
@@ -520,6 +558,7 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
