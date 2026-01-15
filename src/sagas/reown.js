@@ -99,17 +99,9 @@ const ERROR_CODES = {
  * @returns {Object} Normalized error details with message, stack, type, and timestamp
  */
 function extractErrorDetails(error) {
-  if (!error) {
-    return {
-      message: 'Unknown error',
-      stack: 'No stack trace available',
-      type: 'Error',
-      timestamp: Date.now(),
-    };
-  }
   return {
-    message: error.message || 'Unknown error',
-    stack: error.stack || 'No stack trace available',
+    message: error?.message || 'Unknown error',
+    stack: error?.stack || 'No stack trace available',
     type: error?.constructor?.name || 'Error',
     timestamp: Date.now(),
   };
@@ -462,10 +454,11 @@ export function* processRequest(action) {
   } catch (e) {
     let shouldAnswer = true;
 
+    const errorDetails = extractErrorDetails(e);
+    yield put(setReownError(errorDetails));
+
     switch (e.constructor) {
       case SendNanoContractTxError: {
-        const errorDetails = extractErrorDetails(e);
-        yield put(setReownError(errorDetails));
         yield put(setNewNanoContractStatusFailure());
         yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
@@ -483,8 +476,6 @@ export function* processRequest(action) {
         }
       } break;
       case CreateTokenError: {
-        const errorDetails = extractErrorDetails(e);
-        yield put(setReownError(errorDetails));
         yield put(setCreateTokenStatusFailed());
         yield put(showGlobalModal(MODAL_TYPES.TOKEN_CREATION_FEEDBACK, { isLoading: false, isError: true }));
 
@@ -505,8 +496,6 @@ export function* processRequest(action) {
       } break;
       case InsufficientFundsError:
       case SendTransactionError: {
-        const errorDetails = extractErrorDetails(e);
-        yield put(setReownError(errorDetails));
         yield put(setSendTxStatusFailed());
         yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.TRANSACTION_FEEDBACK, {
@@ -528,8 +517,6 @@ export function* processRequest(action) {
         }
       } break;
       case SignMessageWithAddressError: {
-        const errorDetails = extractErrorDetails(e);
-        yield put(setReownError(errorDetails));
         yield put(showGlobalModal(MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK, { isLoading: false, isError: true }));
 
         const retry = yield call(
@@ -545,8 +532,6 @@ export function* processRequest(action) {
         }
       } break;
       case CreateNanoContractCreateTokenTxError: {
-        const errorDetails = extractErrorDetails(e);
-        yield put(setReownError(errorDetails));
         yield put(setNewNanoContractStatusFailure());
         yield put(unregisteredTokensClean());
         yield put(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: false, isError: true }));
@@ -565,10 +550,8 @@ export function* processRequest(action) {
       } break;
       default: {
         // Handle generic errors (e.g., from getBalance, signMessage, etc.)
-        const errorDetails = extractErrorDetails(e);
         const errorMessage = e.message || 'An error occurred processing the request';
 
-        yield put(setReownError(errorDetails));
         yield put(showGlobalModal(MODAL_TYPES.GENERIC_ERROR_FEEDBACK, { errorMessage }));
 
         yield call(() => walletKit.respondSessionRequest({
