@@ -90,6 +90,7 @@ const ERROR_CODES = {
   USER_REJECTED: 5000,
   USER_REJECTED_METHOD: 5002,
   INVALID_PAYLOAD: 5003,
+  INTERNAL_ERROR: 5004,
 };
 
 /**
@@ -562,9 +563,28 @@ export function* processRequest(action) {
           yield* processRequest(action);
         }
       } break;
-      default:
-        log.error('Unknown error type:', e);
-        break;
+      default: {
+        // Handle generic errors (e.g., from getBalance, signMessage, etc.)
+        const errorDetails = extractErrorDetails(e);
+        const errorMessage = e.message || 'An error occurred processing the request';
+
+        yield put(setReownError(errorDetails));
+        yield put(showGlobalModal(MODAL_TYPES.GENERIC_ERROR_FEEDBACK, { errorMessage }));
+
+        yield call(() => walletKit.respondSessionRequest({
+          topic: payload.topic,
+          response: {
+            id: payload.id,
+            jsonrpc: '2.0',
+            error: {
+              code: ERROR_CODES.INTERNAL_ERROR,
+              message: errorMessage,
+            },
+          },
+        }));
+
+        shouldAnswer = false;
+      } break;
     }
 
     if (shouldAnswer) {

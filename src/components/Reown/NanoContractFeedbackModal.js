@@ -24,11 +24,6 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
   const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
   const errorDetails = useSelector((state) => state.reown.error);
 
-  // Debug logging
-  console.log('NanoContractFeedbackModal - isError:', isError);
-  console.log('NanoContractFeedbackModal - isLoading:', isLoading);
-  console.log('NanoContractFeedbackModal - errorDetails:', errorDetails);
-
   // Get unregistered tokens from tokensMap
   const unregisteredTokensList = Object.values(unregisteredTokens.tokensMap || {});
 

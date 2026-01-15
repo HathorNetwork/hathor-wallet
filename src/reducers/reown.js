@@ -135,7 +135,6 @@ export default function reownReducer(state = initialState, action) {
       };
 
     case types.REOWN_SET_ERROR:
-      console.log('REDUCER: REOWN_SET_ERROR received', action.payload);
       return {
         ...state,
         error: action.payload,
