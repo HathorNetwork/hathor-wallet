@@ -60,6 +60,7 @@ import {
   hideGlobalModal,
   setReownFirstAddress,
   unregisteredTokensClean,
+  setReownError,
 } from '../actions';
 import { checkForFeatureFlag, getNetworkSettings, retryHandler } from './helpers';
 import { logger } from '../utils/logger';
@@ -89,7 +90,22 @@ const ERROR_CODES = {
   USER_REJECTED: 5000,
   USER_REJECTED_METHOD: 5002,
   INVALID_PAYLOAD: 5003,
+  INTERNAL_ERROR: 5004,
 };
+
+/**
+ * Extracts and normalizes error details from an error object
+ * @param {Error} error - The error object to extract details from
+ * @returns {Object} Normalized error details with message, stack, type, and timestamp
+ */
+function extractErrorDetails(error) {
+  return {
+    message: error?.message || 'Unknown error',
+    stack: error?.stack || 'No stack trace available',
+    type: error?.constructor?.name || 'Error',
+    timestamp: Date.now(),
+  };
+}
 
 /**
  * Checks if the Reown feature is enabled via feature flags
@@ -437,6 +453,10 @@ export function* processRequest(action) {
     }));
   } catch (e) {
     let shouldAnswer = true;
+
+    const errorDetails = extractErrorDetails(e);
+    yield put(setReownError(errorDetails));
+
     switch (e.constructor) {
       case SendNanoContractTxError: {
         yield put(setNewNanoContractStatusFailure());
@@ -451,6 +471,7 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
@@ -466,6 +487,7 @@ export function* processRequest(action) {
 
         if (retry) {
           yield put(setCreateTokenStatusReady()); // Reset status before retrying
+          yield put(setReownError(null));
           shouldAnswer = false;
           yield* processRequest(action);
         } else {
@@ -490,6 +512,7 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
@@ -504,6 +527,7 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
@@ -520,12 +544,30 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
-      default:
-        log.error('Unknown error type:', e);
-        break;
+      default: {
+        // Handle generic errors (e.g., from getBalance, signMessage, etc.)
+        const errorMessage = e.message || 'An error occurred processing the request';
+
+        yield put(showGlobalModal(MODAL_TYPES.GENERIC_ERROR_FEEDBACK, { errorMessage }));
+
+        yield call(() => walletKit.respondSessionRequest({
+          topic: payload.topic,
+          response: {
+            id: payload.id,
+            jsonrpc: '2.0',
+            error: {
+              code: ERROR_CODES.INTERNAL_ERROR,
+              message: errorMessage,
+            },
+          },
+        }));
+
+        shouldAnswer = false;
+      } break;
     }
 
     if (shouldAnswer) {

@@ -37,6 +37,7 @@ import { NanoContractFeedbackModal } from './Reown/NanoContractFeedbackModal';
 import { TokenCreationFeedbackModal } from './Reown/TokenCreationFeedbackModal';
 import { MessageSigningFeedbackModal } from './Reown/MessageSigningFeedbackModal';
 import { TransactionFeedbackModal } from './Reown/TransactionFeedbackModal';
+import { GenericErrorFeedbackModal } from './Reown/GenericErrorFeedbackModal';
 import ModalError from './ModalError';
 import RequestErrorModal from './RequestError';
 
@@ -78,6 +79,7 @@ export const MODAL_TYPES = {
   'MESSAGE_SIGNING_FEEDBACK': 'MESSAGE_SIGNING_FEEDBACK',
   'ERROR_MODAL': 'ERROR_MODAL',
   'REQUEST_ERROR': 'REQUEST_ERROR',
+  'GENERIC_ERROR_FEEDBACK': 'GENERIC_ERROR_FEEDBACK',
 };
 
 export const MODAL_COMPONENTS = {
@@ -112,6 +114,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK]: MessageSigningFeedbackModal,
   [MODAL_TYPES.ERROR_MODAL]: ModalError,
   [MODAL_TYPES.REQUEST_ERROR]: RequestErrorModal,
+  [MODAL_TYPES.GENERIC_ERROR_FEEDBACK]: GenericErrorFeedbackModal,
 };
 
 export const GlobalModalContext = createContext(initialState);

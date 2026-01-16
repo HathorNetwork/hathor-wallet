@@ -8,7 +8,7 @@
 import React from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
-import { types, unregisteredTokensClean } from '../../actions';
+import { types, unregisteredTokensClean, setReownError } from '../../actions';
 import { FeedbackModal } from './FeedbackModal';
 import tokens from '../../utils/tokens';
 
@@ -21,6 +21,7 @@ export const MODAL_ID = 'transactionFeedbackModal';
 export function TransactionFeedbackModal({ isError, isLoading = true, errorMessage, onClose, manageDomLifecycle }) {
   const dispatch = useDispatch();
   const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
+  const errorDetails = useSelector((state) => state.reown.error);
 
   // Get unregistered tokens from tokensMap
   const unregisteredTokensList = Object.values(unregisteredTokens.tokensMap || {});
@@ -41,6 +42,8 @@ export function TransactionFeedbackModal({ isError, isLoading = true, errorMessa
   const handleClose = () => {
     // Clean unregistered tokens state
     dispatch(unregisteredTokensClean());
+    // Clear error state
+    dispatch(setReownError(null));
     onClose();
   };
 
@@ -106,6 +109,7 @@ export function TransactionFeedbackModal({ isError, isLoading = true, errorMessa
       retryDismissAction={types.REOWN_SEND_TX_RETRY_DISMISS}
       extraComponent={renderUnregisteredTokensComponent()}
       customButtons={renderCustomButtons()}
+      errorDetails={errorDetails}
     />
   );
 } 
