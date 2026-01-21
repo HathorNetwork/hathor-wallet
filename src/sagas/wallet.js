@@ -28,6 +28,7 @@ import {
   WALLET_SERVICE_FEATURE_TOGGLE,
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
   IGNORE_WS_TOGGLE_FLAG,
+  WALLET_STATUS,
 } from '../constants';
 import {
   types,
@@ -75,13 +76,6 @@ import helpersUtils from '../utils/helpers';
 import { initializeSwapServiceBaseUrlForWallet } from "../utils/atomicSwap";
 import { getGlobalWallet, setGlobalWallet } from "../modules/wallet";
 import { isEmpty } from 'lodash';
-
-export const WALLET_STATUS = {
-  READY: 'ready',
-  FAILED: 'failed',
-  LOADING: 'loading',
-  SYNCING: 'syncing',
-};
 
 export function* isWalletServiceEnabled() {
   const shouldIgnoreFlag = localStorage.getItem(IGNORE_WS_TOGGLE_FLAG);

@@ -18,7 +18,7 @@ import TokenDelegate from '../components/tokens/TokenDelegate';
 import TokenDestroy from '../components/tokens/TokenDestroy';
 import Loading from '../components/Loading';
 import helpers from '../utils/helpers';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../constants';
 import LOCAL_STORE from '../storage';
 
 const mapStateToProps = (state) => {

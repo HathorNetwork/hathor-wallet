@@ -18,7 +18,7 @@ import helpers from '../utils/helpers';
 import { colors } from '../constants';
 import TokenPagination from './TokenPagination';
 import HathorAlert from './HathorAlert';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../constants';
 import { getGlobalWallet } from "../modules/wallet";
 
 const mapStateToProps = (state, props) => {

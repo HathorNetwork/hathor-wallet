@@ -10,7 +10,7 @@ import { t } from 'ttag'
 import { get } from 'lodash';
 import { useSelector } from 'react-redux';
 import { NFT_LIST_PER_PAGE } from '../constants';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../constants';
 import HathorPaginate from '../components/HathorPaginate';
 import NFTListElement from '../components/NFTListElement';
 import BackButton from '../components/BackButton';

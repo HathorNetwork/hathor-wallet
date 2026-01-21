@@ -5,15 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION, TOKEN_DOWNLOAD_STATUS, WALLET_STATUS, PROPOSAL_DOWNLOAD_STATUS, NANOCONTRACT_REGISTER_STATUS } from '../constants';
 import { types } from '../actions';
 import { get, findIndex } from 'lodash';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
-import { WALLET_STATUS } from '../sagas/wallet';
-import { NANOCONTRACT_REGISTER_STATUS } from '../sagas/nanoContract';
-import { PROPOSAL_DOWNLOAD_STATUS } from '../utils/atomicSwap';
-import { constants as hathorLibConstants } from "@hathor/wallet-lib";
-import helpersUtils from '../utils/helpers';
+import { constants as hathorLibConstants, transactionUtils } from "@hathor/wallet-lib";
 import LOCAL_STORE from '../storage';
 import reownReducer from './reown';
 
@@ -493,6 +488,22 @@ const rootReducer = (state = initialState, action) => {
   }
 };
 
+const isAllAuthority = (tx) => {
+  for (let txin of tx.inputs) {
+    if (!transactionUtils.isAuthorityOutput(txin)) {
+      return false;
+    }
+  }
+
+  for (let txout of tx.outputs) {
+    if (!transactionUtils.isAuthorityOutput(txout)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
   return {
     tx_id: tx.tx_id,
@@ -501,7 +512,7 @@ const getTxHistoryFromWSTx = (tx, tokenUid, tokenTxBalance) => {
     balance: tokenTxBalance,
     is_voided: tx.is_voided,
     version: tx.version,
-    isAllAuthority: helpersUtils.isAllAuthority(tx),
+    isAllAuthority: isAllAuthority(tx),
   }
 };
 

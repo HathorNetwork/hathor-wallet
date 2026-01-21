@@ -318,3 +318,42 @@ export const REOWN_CONNECTION_STATE = {
   SUCCESS: 'success',       // Connection successful
   FAILED: 'failed',         // Connection failed
 };
+
+/**
+ * Token download status
+ */
+export const TOKEN_DOWNLOAD_STATUS = {
+  READY: 'ready',
+  FAILED: 'failed',
+  LOADING: 'loading',
+  INVALIDATED: 'invalidated',
+};
+
+/**
+ * Wallet status
+ */
+export const WALLET_STATUS = {
+  READY: 'ready',
+  FAILED: 'failed',
+  LOADING: 'loading',
+  SYNCING: 'syncing',
+};
+
+/**
+ * Proposal download status
+ */
+export const PROPOSAL_DOWNLOAD_STATUS = {
+  READY: 'ready',
+  FAILED: 'failed',
+  LOADING: 'loading',
+  INVALIDATED: 'invalidated',
+};
+
+/**
+ * Nano Contract register status
+ */
+export const NANOCONTRACT_REGISTER_STATUS = {
+  LOADING: 'loading',
+  ERROR: 'error',
+  SUCCESS: 'success',
+};
