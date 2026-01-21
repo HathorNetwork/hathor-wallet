@@ -783,6 +783,13 @@ export function* featureToggleUpdateListener() {
   }
 }
 
+export function* resolveLockWallet(action) {
+  const promise = yield select((state) => state.lockWalletPromise);
+  if (promise) {
+    promise(action.payload);
+  }
+}
+
 export function* saga() {
   yield all([
     takeLatest(types.START_WALLET_REQUESTED, errorHandler(startWallet, startWalletFailed())),
@@ -795,5 +802,6 @@ export function* saga() {
     takeEvery('WALLET_PARTIAL_UPDATE', loadPartialUpdate),
     takeEvery('WALLET_RELOAD_DATA', walletReloading),
     takeEvery('WALLET_REFRESH_SHARED_ADDRESS', refreshSharedAddress),
+    takeEvery(types.RESOLVE_LOCK_WALLET_PROMISE, resolveLockWallet),
   ]);
 }
