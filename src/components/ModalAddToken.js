@@ -41,10 +41,12 @@ class ModalAddToken extends React.Component {
     this.setState({ alwaysShow: newValue });
   }
 
-  componentDidMount = () => {
-    $('#addTokenModal').modal('show');
+  modalRef = React.createRef();
 
-    $('#addTokenModal').on('hide.bs.modal', (e) => {
+  componentDidMount = () => {
+    $(this.modalRef.current).modal('show');
+
+    $(this.modalRef.current).on('hide.bs.modal', (e) => {
       this.refs.config.value = '';
       this.setState({
         errorMessage: '',
@@ -54,17 +56,17 @@ class ModalAddToken extends React.Component {
       });
     });
 
-    $('#addTokenModal').on('shown.bs.modal', (e) => {
+    $(this.modalRef.current).on('shown.bs.modal', (e) => {
       this.refs.config.focus();
     });
 
-    $('#addTokenModal').on('hidden.bs.modal', this.props.onClose);
+    $(this.modalRef.current).on('hidden.bs.modal', this.props.onClose);
   }
 
   componentWillUnmount = () => {
     // Removing all event listeners
-    $('#addTokenModal').modal('hide');
-    $('#addTokenModal').off();
+    $(this.modalRef.current).modal('hide');
+    $(this.modalRef.current).off();
   }
 
   /**
@@ -146,7 +148,7 @@ class ModalAddToken extends React.Component {
     }
 
     return (
-      <div className="modal fade" id="addTokenModal" tabIndex="-1" role="dialog" aria-labelledby="addTokenModal" aria-hidden="true">
+      <div ref={this.modalRef} className="modal fade" id="addTokenModal" tabIndex="-1" role="dialog" aria-labelledby="addTokenModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">

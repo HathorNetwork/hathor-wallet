@@ -7,3 +7,7 @@
 - Refactored circular dependencies in reducers/sagas/utils to enable store initialization in tests.
 - Fixed existing tests (atomicSwap.test.js, ModalPin.test.js) to match environment and library updates.
 - Verified setup with src/__tests__/infrastructure_check.test.js.
+
+2026-01-21: Components - Critical Tasks
+- Added missing dependencies to useEffect/useLayoutEffect arrays in AddressList.js, InputNumber.js, ModalConfirmTestnet.js, ModalError.js, NetworkSettingsForm.js, PinPad.js.
+- Replaced jQuery DOM manipulation with React state/refs in GlobalModal.js, ModalAddManyTokens.js, ModalAddToken.js, ModalBackupWords.js, ModalConfirm.js, RequestError.js, SendTokensOne.js, OutputsWrapper.js, TxData.js, ModalAddressQRCode.js.

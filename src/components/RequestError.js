@@ -26,19 +26,18 @@ const MODAL_DOM_ID = '#requestErrorModal';
  */
 function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose, onChangeServer }) {
   const dispatch = useDispatch();
-  const advancedDataRef = useRef();
-  const showAdvancedLinkRef = useRef();
-  const hideAdvancedLinkRef = useRef();
+  const modalRef = useRef();
+  const [showAdvancedData, setShowAdvancedData] = React.useState(false);
 
   useEffect(() => {
-    $(MODAL_DOM_ID).modal('show');
+    $(modalRef.current).modal('show');
   }, []);
 
   /**
    * User clicked to change server, then push to choose server screen
    */
   const handleChangeServer = () => {
-    $(MODAL_DOM_ID).modal('hide');
+    $(modalRef.current).modal('hide');
     if (onClose) onClose();
     if (onChangeServer) {
       onChangeServer();
@@ -51,7 +50,7 @@ function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose,
    * User clicked to retry request: hide the modal and try again
    */
   const handleRetryRequest = () => {
-    $(MODAL_DOM_ID).modal('hide');
+    $(modalRef.current).modal('hide');
     if (onClose) onClose();
     modalHiddenRetry();
   }
@@ -127,9 +126,7 @@ function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose,
    */
   const showAdvanced = (e) => {
     e.preventDefault();
-    $(advancedDataRef.current).show(300);
-    $(showAdvancedLinkRef.current).hide();
-    $(hideAdvancedLinkRef.current).show();
+    setShowAdvancedData(true);
   }
 
   /**
@@ -139,15 +136,13 @@ function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose,
    */
   const hideAdvanced = (e) => {
     e.preventDefault();
-    $(advancedDataRef.current).hide(300);
-    $(hideAdvancedLinkRef.current).hide();
-    $(showAdvancedLinkRef.current).show();
+    setShowAdvancedData(false);
   }
 
   const serverURL = hathorLib.config.getServerUrl();
 
   return (
-    <div className="modal fade" id="requestErrorModal" tabIndex="-1" role="dialog" aria-labelledby="requestErrorModal" aria-hidden="true">
+    <div ref={modalRef} className="modal fade" id="requestErrorModal" tabIndex="-1" role="dialog" aria-labelledby="requestErrorModal" aria-hidden="true">
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
@@ -159,9 +154,9 @@ function RequestErrorModal({ lastFailedRequest, requestErrorStatusCode, onClose,
           <div className="modal-body">
             <p className="white-space-pre-wrap">{getErrorMessage()}</p>
             <p><SpanFmt>{t`You are connected to **${serverURL}**`}</SpanFmt></p>
-            <a onClick={showAdvanced} ref={showAdvancedLinkRef} href="true">{t`Show advanced data`}</a>
-            <a onClick={hideAdvanced} ref={hideAdvancedLinkRef} href="true" style={{ display: 'none' }}>{t`Hide advanced data`}</a>
-            <div ref={advancedDataRef} className="mt-3" style={{ display: 'none' }}>{getAdvancedMessage()}</div>
+            {!showAdvancedData && <a onClick={showAdvanced} href="true">{t`Show advanced data`}</a>}
+            {showAdvancedData && <a onClick={hideAdvanced} href="true">{t`Hide advanced data`}</a>}
+            {showAdvancedData && <div className="mt-3">{getAdvancedMessage()}</div>}
           </div>
           <div className="modal-footer">
             <button onClick={handleChangeServer} type="button" className="btn btn-secondary">{t`Change server`}</button>

@@ -59,7 +59,8 @@ class SendTokensOne extends React.Component {
       inputsCount: 1,
       outputsCount: 1,
       selected: null,
-      selectedTokens: []
+      selectedTokens: [],
+      inputsVisible: false,
     };
   }
 
@@ -153,11 +154,7 @@ class SendTokensOne extends React.Component {
    */
   handleCheckboxChange = (e) => {
     const value = e.target.checked;
-    if (value) {
-      $(this.inputsWrapper.current).hide(400);
-    } else {
-      $(this.inputsWrapper.current).show(400);
-    }
+    this.setState({ inputsVisible: !value });
   }
 
   /**
@@ -254,7 +251,7 @@ class SendTokensOne extends React.Component {
             {t`Choose inputs automatically`}
           </label>
         </div>
-        <div ref={this.inputsWrapper} className="inputs-wrapper" style={{display: 'none'}}>
+        <div ref={this.inputsWrapper} className="inputs-wrapper" style={{display: this.state.inputsVisible ? 'block' : 'none'}}>
           <label htmlFor="inputs">{t`Inputs`}</label>
           {renderInputs()}
         </div>

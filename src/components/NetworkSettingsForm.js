@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import walletUtils from '../utils/wallet';
@@ -54,7 +54,7 @@ function NetworkSettingsForm(props) {
         network: networkSettings.newNetwork,
       });
     }
-  }, [networkSettings.status]);
+  }, [networkSettings.status, context, networkSettings.newNetwork, onNetworkConfirmed, onNetworkConfirmationCancel]);
 
   useEffect(() => {
     // Start with the status change to READY, in case it had been left in an inconsistent state
@@ -73,16 +73,16 @@ function NetworkSettingsForm(props) {
    * Called when user confirms that wants to connect
    * to the testnet/privatenet in the confirmation modal
    */
-  const onNetworkConfirmed = () => {
+  const onNetworkConfirmed = useCallback(() => {
     dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.NETWORK_CONFIRMED }));
-  }
+  }, [dispatch]);
 
   /**
    * Called when user closes the modal to confirm testnet/privatenet connection
    */
-  const onNetworkConfirmationCancel = () => {
+  const onNetworkConfirmationCancel = useCallback(() => {
     dispatch(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.READY }));
-  }
+  }, [dispatch]);
 
   /**
    * Called when user selects one network from the select

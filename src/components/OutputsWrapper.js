@@ -34,6 +34,10 @@ class OutputsWrapper extends React.Component {
     this.timelockCheckbox = React.createRef();
     this.uniqueID = _.uniqueId()
 
+    this.state = {
+      timelockVisible: false,
+    };
+
     props.setRef(this);
   }
 
@@ -44,11 +48,7 @@ class OutputsWrapper extends React.Component {
    */
   handleCheckboxTimelockChange = (e) => {
     const value = e.target.checked;
-    if (value) {
-      $(this.timelock.current).show(400);
-    } else {
-      $(this.timelock.current).hide(400);
-    }
+    this.setState({ timelockVisible: value });
   }
 
   render = () => {
@@ -71,7 +71,7 @@ class OutputsWrapper extends React.Component {
           </label>
         </div>
         <input type="datetime-local" placeholder={t`Date and time in GMT`} step="1"
-          className="form-control output-timelock col-3" style={{display: 'none'}} ref={this.timelock}
+          className="form-control output-timelock col-3" style={{display: this.state.timelockVisible ? 'block' : 'none'}} ref={this.timelock}
           disabled={LOCAL_STORE.isHardwareWallet() ? true : null}/>
         {this.props.index === 0 ? <button type="button" className="btn btn-hathor" onClick={this.props.addOutput}>+</button> : null}
       </div>

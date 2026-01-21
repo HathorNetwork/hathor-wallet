@@ -47,11 +47,12 @@ class ModalBackupWords extends React.Component {
       validationSteps: [],
       words: props.words || '',
     };
+    this.modalRef = React.createRef();
   }
 
   componentDidMount = () => {
-    $('#backupWordsModal').modal('show');
-    $('#backupWordsModal').on('hide.bs.modal', (e) => {
+    $(this.modalRef.current).modal('show');
+    $(this.modalRef.current).on('hide.bs.modal', (e) => {
       this.setState({
         errorMessage: '',
         passwordSuccess: false,
@@ -64,9 +65,9 @@ class ModalBackupWords extends React.Component {
       }
     });
 
-    $('#backupWordsModal').on('hidden.bs.modal', this.props.onClose);
+    $(this.modalRef.current).on('hidden.bs.modal', this.props.onClose);
 
-    $('#backupWordsModal').on('shown.bs.modal', (e) => {
+    $(this.modalRef.current).on('shown.bs.modal', (e) => {
       if (this.refs.password) {
         this.refs.password.focus();
       }
@@ -75,9 +76,9 @@ class ModalBackupWords extends React.Component {
 
   componentWillUnmount = () => {
     this.setState({ words: '' }); // Being extra cautious with sensitive information
-    $('#backupWordsModal').modal('hide');
+    $(this.modalRef.current).modal('hide');
     // Removing all event listeners
-    $('#backupWordsModal').off();
+    $(this.modalRef.current).off();
   };
 
   /**
@@ -339,6 +340,7 @@ class ModalBackupWords extends React.Component {
 
     return (
       <div
+        ref={this.modalRef}
         className='modal fade'
         id='backupWordsModal'
         tabIndex='-1'

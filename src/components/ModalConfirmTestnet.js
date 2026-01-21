@@ -14,7 +14,7 @@ export default function ModalConfirmTestnet({ onClose, success, network, onUserC
     $(`#${confirmTestnetModalID}`).on('hidden.bs.modal', (e) => {
       onClose(`#${confirmTestnetModalID}`);
     });
-  }, []);
+  }, [onClose]);
 
   const confirmTestnetServer = useCallback(() => {
     if (confirmText.toLowerCase() !== network) {

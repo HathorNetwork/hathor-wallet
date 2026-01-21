@@ -34,16 +34,17 @@ class ModalAddressQRCode extends React.Component {
 
     // Set timeout timer to be cleared in case of unmount
     this.timer = null;
+    this.modalRef = React.createRef();
   }
 
   componentDidMount() {
-    $('#addressQRCodeModal').modal('show');
-    $('#addressQRCodeModal').on('hidden.bs.modal', this.props.onClose);
+    $(this.modalRef.current).modal('show');
+    $(this.modalRef.current).on('hidden.bs.modal', this.props.onClose);
   }
 
   componentWillUnmount() {
-    $('#addressQRCodeModal').modal('hide');
-    $('#addressQRCodeModal').off();
+    $(this.modalRef.current).modal('hide');
+    $(this.modalRef.current).off();
     // Preventing calling setState when the component is not mounted
     if (this.timer) {
       clearTimeout(this.timer);
@@ -57,7 +58,7 @@ class ModalAddressQRCode extends React.Component {
    * @param {Object} e Event emitted by the link clicked
    */
   download = (e) => {
-    const elements = document.getElementsByTagName('canvas');
+    const elements = this.modalRef.current.getElementsByTagName('canvas');
     if (elements.length > 0) {
       this.refs.downloadLink.href = elements[0].toDataURL();
     }
@@ -84,7 +85,7 @@ class ModalAddressQRCode extends React.Component {
 
   render() {
     return (
-      <div className="modal fade" id="addressQRCodeModal" tabIndex="-1" role="dialog" aria-labelledby="addressQRCodeModal" aria-hidden="true">
+      <div ref={this.modalRef} className="modal fade" id="addressQRCodeModal" tabIndex="-1" role="dialog" aria-labelledby="addressQRCodeModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { t } from 'ttag';
 import LOCAL_STORE from '../storage';
 
@@ -35,7 +35,9 @@ export function PinPad({ manageDomLifecycle, onComplete, onCancel }) {
     };
   }, [modalId, manageDomLifecycle]);
 
-  const animateErase = (currentPin) => {
+  const animateEraseRef = useRef();
+
+  const animateErase = useCallback((currentPin) => {
     if (currentPin.length === 0) {
       setIsErasing(false);
       return;
@@ -43,23 +45,17 @@ export function PinPad({ manageDomLifecycle, onComplete, onCancel }) {
 
     setTimeout(() => {
       setPin(currentPin.slice(0, -1));
-      animateErase(currentPin.slice(0, -1));
-    }, ERASE_DELAY);
-  };
-
-  const handleNumberClick = (number) => {
-    if (pin.length < PIN_LENGTH && !isErasing) {
-      const newPin = pin + number;
-      setPin(newPin);
-      setErrorMessage('');
-      
-      if (newPin.length === PIN_LENGTH) {
-        validateAndSubmitPin(newPin);
+      if (animateEraseRef.current) {
+        animateEraseRef.current(currentPin.slice(0, -1));
       }
-    }
-  };
+    }, ERASE_DELAY);
+  }, []);
 
-  const validateAndSubmitPin = async (pinToValidate) => {
+  useEffect(() => {
+    animateEraseRef.current = animateErase;
+  }, [animateErase]);
+
+  const validateAndSubmitPin = useCallback(async (pinToValidate) => {
     try {
       if (!await LOCAL_STORE.checkPin(pinToValidate)) {
         setErrorMessage(t`Invalid PIN`);
@@ -73,21 +69,33 @@ export function PinPad({ manageDomLifecycle, onComplete, onCancel }) {
       setIsErasing(true);
       animateErase(pinToValidate);
     }
-  };
+  }, [onComplete, animateErase]);
 
-  const handleDelete = () => {
+  const handleNumberClick = useCallback((number) => {
+    if (pin.length < PIN_LENGTH && !isErasing) {
+      const newPin = pin + number;
+      setPin(newPin);
+      setErrorMessage('');
+      
+      if (newPin.length === PIN_LENGTH) {
+        validateAndSubmitPin(newPin);
+      }
+    }
+  }, [pin, isErasing, validateAndSubmitPin]);
+
+  const handleDelete = useCallback(() => {
     if (!isErasing) {
       setPin(pin.slice(0, -1));
       setErrorMessage('');
     }
-  };
+  }, [pin, isErasing]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     if (!isErasing) {
       setPin('');
       setErrorMessage('');
     }
-  };
+  }, [isErasing]);
 
   // Handle keyboard input
   const handleKeyDown = useCallback((e) => {

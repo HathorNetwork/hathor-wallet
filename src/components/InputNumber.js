@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
+import React, { useState, useLayoutEffect, useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from 'react-redux';
 import { numberUtils } from "@hathor/wallet-lib";
@@ -51,10 +51,24 @@ const InputNumber = React.forwardRef(
      *
      * @return {string} Formatted string
      */
-    const format = (rawValue) => numberUtils.prettyValue(rawValue, decimalPlaces);
+    const format = useCallback((rawValue) => numberUtils.prettyValue(rawValue, decimalPlaces), [decimalPlaces]);
 
     const innerRef = useRef();
     const [value, setValue] = useState(defaultValue);
+
+    /**
+     * Put the caret always at the end.
+     *
+     * @param  {bigint} value Current input value
+     */
+    const updateCaretPosition = useCallback((value) => {
+      setTimeout(() => {
+        const { current } = innerRef;
+        if (current) {
+          current.selectionStart = format(value).length;
+        }
+      });
+    }, [format]);
 
     /**
      * Listen keydown events while this component is focused overriding the default native input behavior.
@@ -62,7 +76,7 @@ const InputNumber = React.forwardRef(
      *
      * @param  {KeyboardEvent} evt Event carrying the keyboard key
      */
-    const onKeyDown = (evt) =>
+    const onKeyDown = useCallback((evt) =>
       setValue((value) => {
         const isNumberChar = /\d/.test(evt.key);
         const isBackspace = evt.key === "Backspace" || evt.key === "Delete";
@@ -86,29 +100,15 @@ const InputNumber = React.forwardRef(
         }
         updateCaretPosition(newValue);
         return newValue;
-      });
+      }), [format, updateCaretPosition]);
 
     /**
      * Handle onClick events just to update the caret position.
      */
-    const onClick = () => setValue((currentValue) => {
+    const onClick = useCallback(() => setValue((currentValue) => {
       updateCaretPosition(currentValue);
       return currentValue;
-    });
-
-    /**
-     * Put the caret always at the end.
-     *
-     * @param  {bigint} value Current input value
-     */
-    const updateCaretPosition = (value) => {
-      setTimeout(() => {
-        const { current } = innerRef;
-        if (current) {
-          current.selectionStart = format(value).length;
-        }
-      });
-    };
+    }), [updateCaretPosition]);
 
     /**
      * Listen paste events as the default behavior of inputs is overridden.
@@ -117,13 +117,13 @@ const InputNumber = React.forwardRef(
      *
      * @method InputNumber#onPaste
      */
-    const onPaste = (evt) =>
+    const onPaste = useCallback((evt) =>
       setValue(() => {
         const paste = (evt.clipboardData || window.clipboardData).getData("text");
         const newValue = BigInt(paste.replace(/\D/g, ''))
         updateCaretPosition(newValue);
         return newValue;
-      });
+      }), [updateCaretPosition]);
 
     /**
      * Set listeners to keydown and to paste events.
@@ -140,7 +140,7 @@ const InputNumber = React.forwardRef(
           current.removeEventListener("click", onClick);
         };
       }
-    }, []);
+    }, [onKeyDown, onPaste, onClick]);
 
     /**
      * Call onValueChange every time the value changes, similarly the native onChange callback.
@@ -152,7 +152,7 @@ const InputNumber = React.forwardRef(
       } else {
         innerRef.current.setCustomValidity('');
       }
-    }, [value]);
+    }, [value, onValueChange, requirePositive]);
 
     return <input ref={innerRef} value={format(value)} onChange={() => {}} {...otherProps} type="text" />;
   }

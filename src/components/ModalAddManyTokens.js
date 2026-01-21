@@ -44,9 +44,11 @@ class ModalAddManyTokens extends React.Component {
     this.setState( { alwaysShow: newValue });
   }
 
+  modalRef = React.createRef();
+
   componentDidMount = () => {
-    $('#addManyTokensModal').modal('show');
-    $('#addManyTokensModal').on('hide.bs.modal', (e) => {
+    $(this.modalRef.current).modal('show');
+    $(this.modalRef.current).on('hide.bs.modal', (e) => {
       this.refs.configs.value = '';
       this.setState({
         errorMessage: '',
@@ -57,19 +59,19 @@ class ModalAddManyTokens extends React.Component {
       });
     });
 
-    $('#addManyTokensModal').on('hidden.bs.modal', (e) => {
+    $(this.modalRef.current).on('hidden.bs.modal', (e) => {
       this.props.onClose();
     });
 
-    $('#addManyTokensModal').on('shown.bs.modal', (e) => {
+    $(this.modalRef.current).on('shown.bs.modal', (e) => {
       this.refs.configs.focus();
     })
   }
 
   componentWillUnmount = () => {
     // Removing all event listeners
-    $('#addManyTokensModal').off();
-    $('#addManyTokensModal').modal('hide');
+    $(this.modalRef.current).off();
+    $(this.modalRef.current).modal('hide');
   }
 
   /**
@@ -197,7 +199,7 @@ class ModalAddManyTokens extends React.Component {
     }
 
     return (
-      <div className="modal fade" id="addManyTokensModal" tabIndex="-1" role="dialog" aria-labelledby="addManyTokensModal" aria-hidden="true">
+      <div ref={this.modalRef} className="modal fade" id="addManyTokensModal" tabIndex="-1" role="dialog" aria-labelledby="addManyTokensModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">

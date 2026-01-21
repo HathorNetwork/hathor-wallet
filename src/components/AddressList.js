@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { t } from 'ttag'
 import HathorPaginate from '../components/HathorPaginate';
 import HathorAlert from '../components/HathorAlert';
@@ -50,9 +50,9 @@ function AddressList({ count, onAddressClick, showNumberOfTransaction, isModal }
    *
    * @return {Number} Total number of pages of the list
    */
-  const getTotalPages = (array) => {
+  const getTotalPages = useCallback((array) => {
     return Math.ceil(array.length / count);
-  }
+  }, [count]);
 
   useEffect(() => {
     /* useEffect callback cannot be async, so we create a function to do the asynchronous work inside it
@@ -78,7 +78,7 @@ function AddressList({ count, onAddressClick, showNumberOfTransaction, isModal }
     }
 
     fetchAddresses();
-  }, []);
+  }, [wallet, count, getTotalPages]);
 
   /**
    * Event received from pagination component after a page button in clicked

@@ -22,18 +22,16 @@ class ModalConfirm extends React.Component {
     errorMessage: '',
   }
 
-  componentDidMount() {
-    const modalId = this.props.modalID ? this.props.modalID : 'confirmModal';
+  modalRef = React.createRef();
 
-    $(`#${modalId}`).modal('show');
-    $(`#${modalId}`).on('hidden.bs.modal', this.props.onClose);
+  componentDidMount() {
+    $(this.modalRef.current).modal('show');
+    $(this.modalRef.current).on('hidden.bs.modal', this.props.onClose);
   }
 
   componentWillUnmount() {
-    const modalId = this.props.modalID ? this.props.modalID : 'confirmModal';
-
-    $(`#${modalId}`).modal('hide');
-    $(`#${modalId}`).off();
+    $(this.modalRef.current).modal('hide');
+    $(this.modalRef.current).off();
   }
 
   updateErrorMessage(errorMessage) {
@@ -44,7 +42,7 @@ class ModalConfirm extends React.Component {
     const modalId = this.props.modalID ? this.props.modalID : 'confirmModal';
 
     return (
-      <div className="modal fade" id={modalId} tabIndex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">
+      <div ref={this.modalRef} className="modal fade" id={modalId} tabIndex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">

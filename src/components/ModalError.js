@@ -16,7 +16,7 @@ import { t } from 'ttag';
 export function ModalError({ title, message, onClose, manageDomLifecycle }) {
   useEffect(() => {
     manageDomLifecycle('#errorModal');
-  }, []);
+  }, [manageDomLifecycle]);
 
   return (
     <div

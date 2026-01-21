@@ -135,7 +135,7 @@ export const GlobalModal = ({ children }) => {
     });
 
     // Managing the modal lifecycle, if the string parameter is offered
-    if (typeof domSelector === 'string') {
+    if (domSelector) {
       const domElement = $(domSelector);
       domElement.modal('hide');
       domElement.off();
