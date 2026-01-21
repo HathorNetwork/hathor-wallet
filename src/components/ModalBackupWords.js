@@ -228,7 +228,7 @@ class ModalBackupWords extends React.Component {
         const start = idx * eachRow;
         const end = start + eachRow;
         return (
-          <tr key={idx}>
+          <tr key={`row-${idx}`}>
             {renderWordsTd(start, end)}
           </tr>
         );

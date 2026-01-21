@@ -45,8 +45,8 @@ class SendTokensOne extends React.Component {
 
     this.inputsWrapper = React.createRef();
     this.noInputs = React.createRef();
-    this.inputs = [React.createRef()];
-    this.outputs = [React.createRef()];
+    this.inputs = [{ id: _.uniqueId('input'), ref: React.createRef() }];
+    this.outputs = [{ id: _.uniqueId('output'), ref: React.createRef() }];
     this.uniqueID = _.uniqueId();
 
     /**
@@ -79,7 +79,7 @@ class SendTokensOne extends React.Component {
    * Add a new output wrapper for this token
    */
   addOutput = () => {
-    this.outputs.push(React.createRef());
+    this.outputs.push({ id: _.uniqueId('output'), ref: React.createRef() });
     const newCount = this.state.outputsCount + 1;
     this.setState({ outputsCount: newCount });
   }
@@ -88,7 +88,7 @@ class SendTokensOne extends React.Component {
    * Add a new input wrapper for this token
    */
   addInput = () => {
-    this.inputs.push(React.createRef());
+    this.inputs.push({ id: _.uniqueId('input'), ref: React.createRef() });
     const newCount = this.state.inputsCount + 1;
     this.setState({ inputsCount: newCount });
   }
@@ -106,22 +106,22 @@ class SendTokensOne extends React.Component {
   getData = () => {
     let data = {'outputs': [], 'inputs': []};
     for (const output of this.outputs) {
-      const address = output.current.address.current.value.replace(/\s/g, '');
-      const value = output.current.value;
+      const address = output.ref.current.address.current.value.replace(/\s/g, '');
+      const value = output.ref.current.value;
 
       if (address && value) {
         // Doing the check here because need to validate before doing parseInt
         if (value > hathorLib.constants.MAX_OUTPUT_VALUE) {
-          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
           return null;
         }
         let dataOutput = {'address': address, 'value': value, 'token': this.state.selected.uid};
 
-        const hasTimelock = output.current.timelockCheckbox.current.checked;
+        const hasTimelock = output.ref.current.timelockCheckbox.current.checked;
         if (hasTimelock) {
-          const timelock = output.current.timelock.current.value;
+          const timelock = output.ref.current.timelock.current.value;
           if (!timelock) {
-            this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. You need to fill a complete date and time` });
+            this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. You need to fill a complete date and time` });
             return null;
           }
           const timestamp = hathorLib.dateFormatter.dateToTimestamp(new Date(timelock));
@@ -135,8 +135,8 @@ class SendTokensOne extends React.Component {
     const noInputs = this.noInputs.current.checked;
     if (!noInputs) {
       for (const input of this.inputs) {
-        const txId = input.current.txId.current.value;
-        const index = input.current.index.current.value;
+        const txId = input.ref.current.txId.current.value;
+        const index = input.ref.current.index.current.value;
 
         if (txId && index) {
           data['inputs'].push({'txId': txId, 'index': parseInt(index, 10), 'token': this.state.selected.uid });
@@ -171,13 +171,13 @@ class SendTokensOne extends React.Component {
   render = () => {
     const renderOutputs = () => {
       return this.outputs.map((output, index) =>
-        <OutputsWrapper key={index} index={index} setRef={(node) => { output.current = node; }} addOutput={this.addOutput} isNFT={this.isNFT()} />
+        <OutputsWrapper key={output.id} index={index} setRef={(node) => { output.ref.current = node; }} addOutput={this.addOutput} isNFT={this.isNFT()} />
       );
     }
 
     const renderInputs = () => {
       return this.inputs.map((input, index) =>
-        <InputsWrapper key={index} index={index} ref={input} addInput={this.addInput} />
+        <InputsWrapper key={input.id} index={index} ref={input.ref} addInput={this.addInput} />
       );
     }
 

@@ -537,7 +537,6 @@ class TxData extends React.Component {
         if (!(e instanceof hathorLib.errors.ParseScriptError)) {
           // Parse script error is the expected error in case the output script
           // is not a script data. If we get another error here, we should at least log it
-          console.log('Unexpected error', e);
         }
       }
 
