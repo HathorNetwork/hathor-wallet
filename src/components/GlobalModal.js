@@ -127,7 +127,7 @@ export const GlobalModal = ({ children }) => {
   /**
    * @param {string|unknown} [domSelector] Optional parameter, will attempt to hide this modal if informed with a string
    */
-  const hideModal = (domSelector) => {
+  const hideModal = (domSelector) => setTimeout(() => {
     setStore({
       ...store,
       modalType: null,
@@ -153,7 +153,7 @@ export const GlobalModal = ({ children }) => {
     // causing the app to stop scrolling and accumulate whitespace on the right.
     // We remove both the class and the inline padding-right style.
     $('body').removeClass('modal-open').css('padding-right', '');
-  };
+  }, 0);
 
   /* Without this setTimeout, calling showModal right after hiding an existing
    * modal will not display the backdrop due to a race condition. setTimeout
