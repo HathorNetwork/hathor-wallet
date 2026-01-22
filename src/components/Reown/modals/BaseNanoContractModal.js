@@ -384,6 +384,12 @@ export function BaseNanoContractModal({
         )}
 
         {renderAdditionalContent && renderAdditionalContent()}
+
+        {nanoContract?.pushTx === false && (
+          <p className="text-muted small mt-3 mb-0">
+            {t`This transaction will only be built, not pushed to the network.`}
+          </p>
+        )}
       </div>
       <div className="modal-footer">
         <button
