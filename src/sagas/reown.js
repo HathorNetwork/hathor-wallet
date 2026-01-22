@@ -34,6 +34,7 @@ import {
   InsufficientFundsError,
   SignMessageWithAddressError,
   CreateNanoContractCreateTokenTxError,
+  PromptRejectedError,
 } from '@hathor/hathor-rpc-handler';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
@@ -551,6 +552,26 @@ export function* processRequest(action) {
           yield put(setReownError(null));
           yield* processRequest(action);
         }
+      } break;
+      case PromptRejectedError: {
+        // User intentionally rejected the prompt - this is not an error condition
+        // Just respond with rejection, no error modal needed
+        yield put(setReownError(null));
+        yield put(unregisteredTokensClean());
+
+        yield call(() => walletKit.respondSessionRequest({
+          topic: payload.topic,
+          response: {
+            id: payload.id,
+            jsonrpc: '2.0',
+            error: {
+              code: ERROR_CODES.USER_REJECTED_METHOD,
+              message: 'Rejected by the user',
+            },
+          },
+        }));
+
+        shouldAnswer = false;
       } break;
       default: {
         // Handle generic errors (e.g., from getBalance, signMessage, etc.)
