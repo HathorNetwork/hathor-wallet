@@ -81,6 +81,10 @@ const AVAILABLE_METHODS = {
   HATHOR_SEND_TRANSACTION: 'htr_sendTransaction',
   HATHOR_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX: 'htr_createNanoContractCreateTokenTx',
   HATHOR_GET_BALANCE: 'htr_getBalance',
+  HATHOR_GET_ADDRESS: 'htr_getAddress',
+  HATHOR_GET_UTXOS: 'htr_getUtxos',
+  HATHOR_GET_WALLET_INFORMATION: 'htr_getWalletInformation',
+  HATHOR_GET_CONNECTED_NETWORK: 'htr_getConnectedNetwork',
 };
 
 const AVAILABLE_EVENTS = [];
@@ -851,6 +855,73 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           log.error('PIN confirmation error:', error);
           reject(error);
         }
+      } break;
+
+      case TriggerTypes.AddressRequestPrompt: {
+        const addressRequestResponseTemplate = (accepted) => () => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.AddressRequestConfirmationResponse,
+            data: accepted,
+          });
+        };
+
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.GET_ADDRESS,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: addressRequestResponseTemplate(true),
+          onRejectAction: addressRequestResponseTemplate(false),
+        }));
+      } break;
+
+      case TriggerTypes.AddressRequestClientPrompt: {
+        const addressClientResponseTemplate = (accepted) => (selectedAddress) => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.AddressRequestClientResponse,
+            data: {
+              accepted,
+              address: selectedAddress?.address,
+              addressIndex: selectedAddress?.index,
+            },
+          });
+        };
+
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.GET_ADDRESS_CLIENT,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: addressClientResponseTemplate(true),
+          onRejectAction: addressClientResponseTemplate(false),
+        }));
+      } break;
+
+      case TriggerTypes.GetUtxosConfirmationPrompt: {
+        const getUtxosResponseTemplate = (accepted) => () => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.GetUtxosConfirmationResponse,
+            data: accepted,
+          });
+        };
+
+        // request.params contains the filter parameters
+        // request.data contains the actual UTXOs (result)
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.GET_UTXOS,
+          data: {
+            params: request.params,
+            utxos: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: getUtxosResponseTemplate(true),
+          onRejectAction: getUtxosResponseTemplate(false),
+        }));
       } break;
 
       default:
