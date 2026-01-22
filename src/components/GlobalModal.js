@@ -127,7 +127,11 @@ export const GlobalModal = ({ children }) => {
   /**
    * @param {string|unknown} [domSelector] Optional parameter, will attempt to hide this modal if informed with a string
    */
-  const hideModal = (domSelector) => {
+  const hideModal = (domSelector) => setTimeout(() => {
+    // The processing time for sending a tx with push_tx=false is too short,
+    // then the modal is set to hide almost instantly. The showModal method has setTimeout(..., 0)
+    // but the hideModal doesn't. For fast processing, this would make us call hideModal
+    // before the modal is properly shown, leaving the processing modal hanging forever
     setStore({
       ...store,
       modalType: null,
@@ -153,7 +157,7 @@ export const GlobalModal = ({ children }) => {
     // causing the app to stop scrolling and accumulate whitespace on the right.
     // We remove both the class and the inline padding-right style.
     $('body').removeClass('modal-open').css('padding-right', '');
-  };
+  }, 0);
 
   /* Without this setTimeout, calling showModal right after hiding an existing
    * modal will not display the backdrop due to a race condition. setTimeout
