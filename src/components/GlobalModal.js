@@ -128,6 +128,10 @@ export const GlobalModal = ({ children }) => {
    * @param {string|unknown} [domSelector] Optional parameter, will attempt to hide this modal if informed with a string
    */
   const hideModal = (domSelector) => setTimeout(() => {
+    // The processing time for sending a tx with push_tx=false is too short,
+    // then the modal is set to hide almost instantly. The showModal method has setTimeout(..., 0)
+    // but the hideModal doesn't. For fast processing, this would make us call hideModal
+    // before the modal is properly shown, leaving the processing modal hanging forever
     setStore({
       ...store,
       modalType: null,
