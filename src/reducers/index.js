@@ -266,7 +266,7 @@ const initialState = {
    *       return_type: 'int'
    *     }
    *   },
-   *   private_methods: {}
+   *   view_methods: {}
    * }
   */
   blueprintsData: {},
