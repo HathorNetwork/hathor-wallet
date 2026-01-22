@@ -37,6 +37,7 @@ import { NanoContractFeedbackModal } from './Reown/NanoContractFeedbackModal';
 import { TokenCreationFeedbackModal } from './Reown/TokenCreationFeedbackModal';
 import { MessageSigningFeedbackModal } from './Reown/MessageSigningFeedbackModal';
 import { TransactionFeedbackModal } from './Reown/TransactionFeedbackModal';
+import { GenericErrorFeedbackModal } from './Reown/GenericErrorFeedbackModal';
 import ModalError from './ModalError';
 import RequestErrorModal from './RequestError';
 
@@ -78,6 +79,7 @@ export const MODAL_TYPES = {
   'MESSAGE_SIGNING_FEEDBACK': 'MESSAGE_SIGNING_FEEDBACK',
   'ERROR_MODAL': 'ERROR_MODAL',
   'REQUEST_ERROR': 'REQUEST_ERROR',
+  'GENERIC_ERROR_FEEDBACK': 'GENERIC_ERROR_FEEDBACK',
 };
 
 export const MODAL_COMPONENTS = {
@@ -112,6 +114,7 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.MESSAGE_SIGNING_FEEDBACK]: MessageSigningFeedbackModal,
   [MODAL_TYPES.ERROR_MODAL]: ModalError,
   [MODAL_TYPES.REQUEST_ERROR]: RequestErrorModal,
+  [MODAL_TYPES.GENERIC_ERROR_FEEDBACK]: GenericErrorFeedbackModal,
 };
 
 export const GlobalModalContext = createContext(initialState);
@@ -131,22 +134,25 @@ export const GlobalModal = ({ children }) => {
       modalProps: {},
     });
 
-    // jQuery aparently is not happy with us destroying the DOM
-    // before he is done with his modal hide events, so to prevent
-    // a bug where the backdrop some times gets stuck even after the
-    // modal is closed, we can just remove it:
-    $('.modal-backdrop').fadeOut(150);
-
-    // Same problem happens with the class jquery adds to the body,
-    // causing the app to stop scrolling. We can just remove it
-    $('body').removeClass('modal-open');
-
     // Managing the modal lifecycle, if the string parameter is offered
     if (typeof domSelector === 'string') {
       const domElement = $(domSelector);
       domElement.modal('hide');
       domElement.off();
     }
+
+    // jQuery apparently is not happy with us destroying the DOM
+    // before it is done with its modal hide events, so to prevent
+    // a bug where the backdrop sometimes gets stuck even after the
+    // modal is closed, we fade it out then remove it from DOM:
+    $('.modal-backdrop').fadeOut(150, function() {
+      $(this).remove();
+    });
+
+    // Same problem happens with the class and padding-right that Bootstrap adds to the body,
+    // causing the app to stop scrolling and accumulate whitespace on the right.
+    // We remove both the class and the inline padding-right style.
+    $('body').removeClass('modal-open').css('padding-right', '');
   };
 
   /* Without this setTimeout, calling showModal right after hiding an existing
@@ -184,6 +190,13 @@ export const GlobalModal = ({ children }) => {
     domElement.on('hidden.bs.modal', (e) => {
       hideModal(domSelector);
     });
+
+    // Before showing a new modal, ensure clean state to prevent Bootstrap from
+    // accumulating padding-right on the body (which causes whitespace on the right).
+    // This handles rapid modal transitions (e.g., Reown request -> feedback modal)
+    // where hideModal's fadeOut hasn't completed yet.
+    $('.modal-backdrop').remove();
+    $('body').css('padding-right', '');
 
     domElement.modal({
       show: true,
