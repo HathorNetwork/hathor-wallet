@@ -229,6 +229,12 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
             </div>
           </div>
         )}
+
+        {data?.data?.pushTx === false && (
+          <p className="text-muted small mt-3 mb-0">
+            {t`This transaction will only be built, not pushed to the network.`}
+          </p>
+        )}
       </div>
       <div className="modal-footer border-0">
         <button type="button" className="btn btn-secondary" onClick={handleReject} data-dismiss="modal">{t`Reject`}</button>
