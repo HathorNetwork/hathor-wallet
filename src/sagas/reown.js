@@ -91,6 +91,7 @@ const AVAILABLE_EVENTS = [];
 
 const ERROR_CODES = {
   UNAUTHORIZED_METHODS: 3001,
+  UNSUPPORTED_CHAINS: 5100,
   USER_DISCONNECTED: 6000,
   USER_REJECTED: 5000,
   USER_REJECTED_METHOD: 5002,
@@ -1108,6 +1109,44 @@ export function* onSessionProposal(action) {
       log.debug('Some unsupported methods were requested, but they are optional:', unsupportedMethods);
     }
 
+    // Validating network compatibility
+    const networkSettings = yield select(getNetworkSettings);
+    const walletNetwork = networkSettings.network;
+    const walletChain = `hathor:${walletNetwork}`;
+
+    // Get chains from both required and optional namespaces and combine them
+    const requiredChains = get(data.requiredNamespaces, 'hathor.chains', []);
+    const optionalChains = get(data.optionalNamespaces, 'hathor.chains', []);
+    const allRequestedChains = [...requiredChains, ...optionalChains];
+
+    // If the dApp specifies any chains, the wallet's network must be in that list
+    if (allRequestedChains.length > 0 && !allRequestedChains.includes(walletChain)) {
+      const requestedNetworks = allRequestedChains.map(chain => chain.replace('hathor:', '')).join(', ');
+      log.error(`Network mismatch: dApp requires ${requestedNetworks}, wallet is on ${walletNetwork}`);
+
+      // Set connection state to FAILED
+      yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
+
+      // Show error modal to user
+      yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+        title: t`Network Mismatch`,
+        message: t`The dApp requires a different network (${requestedNetworks}) but your wallet is connected to ${walletNetwork}.`,
+      }));
+
+      // Reject the session
+      const { walletKit } = getGlobalReown();
+      if (walletKit) {
+        yield call([walletKit, walletKit.rejectSession], {
+          id,
+          reason: {
+            code: ERROR_CODES.UNSUPPORTED_CHAINS,
+            message: `Network mismatch: wallet is on ${walletNetwork}`,
+          },
+        });
+      }
+      return;
+    }
+
     let dispatch;
     yield put((_dispatch) => {
       dispatch = _dispatch;
@@ -1140,8 +1179,6 @@ export function* onSessionProposal(action) {
       throw new Error('WalletKit not initialized');
     }
 
-    const networkSettings = yield select(getNetworkSettings);
-    log.debug('Network Settings: ', networkSettings);
     if (accepted) {
       const wallet = getGlobalWallet();
       const firstAddress = yield call(() => wallet.getAddressAtIndex(0));
@@ -1204,9 +1241,6 @@ export function* onSessionProposal(action) {
     } catch (rejectError) {
       log.error('Error rejecting session after failure:', rejectError);
     }
-  } finally {
-    // Make sure to close the modal even if there's an error
-    yield put(hideGlobalModal());
   }
 }
 
