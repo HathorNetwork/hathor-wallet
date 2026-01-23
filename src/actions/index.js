@@ -100,6 +100,7 @@ export const types = {
   SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL: 'SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL',
   SHOW_CREATE_TOKEN_REQUEST_MODAL: 'SHOW_CREATE_TOKEN_REQUEST_MODAL',
   SHOW_SIGN_MESSAGE_REQUEST_MODAL: 'SHOW_SIGN_MESSAGE_REQUEST_MODAL',
+  SHOW_GET_BALANCE_REQUEST_MODAL: 'SHOW_GET_BALANCE_REQUEST_MODAL',
   SHOW_NANO_CONTRACT_SEND_TX_MODAL: 'SHOW_NANO_CONTRACT_SEND_TX_MODAL',
   SHOW_SEND_TRANSACTION_REQUEST_MODAL: 'SHOW_SEND_TRANSACTION_REQUEST_MODAL',
   SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL: 'SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL',
@@ -117,6 +118,7 @@ export const types = {
   REOWN_SEND_TX_STATUS_FAILED: 'REOWN_SEND_TX_STATUS_FAILED',
   UNREGISTERED_TOKENS_STORE_SUCCESS: 'UNREGISTERED_TOKENS_STORE_SUCCESS',
   UNREGISTERED_TOKENS_CLEAN: 'UNREGISTERED_TOKENS_CLEAN',
+  REOWN_SET_ERROR: 'REOWN_SET_ERROR',
 };
 
 /**
@@ -998,4 +1000,15 @@ export const unregisteredTokensStoreSuccess = (tokens) => ({
  */
 export const unregisteredTokensClean = () => ({
   type: types.UNREGISTERED_TOKENS_CLEAN,
+});
+
+/**
+ * Set error information for the current Reown operation.
+ * Only one RPC is processed at a time, so a single error suffices.
+ *
+ * @param {Object|null} errorDetails - Error details object with { message, stack, type, timestamp } or null to clear
+ */
+export const setReownError = (errorDetails = null) => ({
+  type: types.REOWN_SET_ERROR,
+  payload: errorDetails,
 });

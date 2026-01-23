@@ -266,7 +266,7 @@ const initialState = {
    *       return_type: 'int'
    *     }
    *   },
-   *   private_methods: {}
+   *   view_methods: {}
    * }
   */
   blueprintsData: {},
@@ -475,6 +475,11 @@ const rootReducer = (state = initialState, action) => {
     case types.REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL:
     case types.REOWN_CREATE_TOKEN_STATUS_FAILED:
     case types.REOWN_SET_FIRST_ADDRESS:
+    case types.REOWN_SET_ERROR:
+    case types.REOWN_SEND_TX_STATUS_LOADING:
+    case types.REOWN_SEND_TX_STATUS_READY:
+    case types.REOWN_SEND_TX_STATUS_SUCCESS:
+    case types.REOWN_SEND_TX_STATUS_FAILED:
       return {
         ...state,
         reown: reownReducer(state.reown, action),
