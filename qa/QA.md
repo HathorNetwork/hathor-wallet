@@ -222,7 +222,7 @@ The token uids used in this test are only available on the testnet network. For 
 
 ### Reset menu
 1. Reset the wallet and close it.
-1. Open the wallet with the parameters `--unsafe-mode --hathor-debug` (see [the README.md](./README.md#debug-mode-on-installed-app) to understand how).
+1. Open the wallet with the parameters `--unsafe-mode --hathor-debug` (see [the README.md](../README.md#debug-mode-on-installed-app) to understand how).
 1. Click on the application menu Debug > Reset all data. Then fill the form with "anything" and click on the "Reset all data" button.
 1. Check that a message with "Invalid value." appears.
 1. Click on "Cancel", the modal should close.
@@ -237,13 +237,13 @@ The token uids used in this test are only available on the testnet network. For 
 1. The backup message has to disappear.
 
 ## QA for the Hardware Wallet (Ledger integration)
-See the [QA_LEDGER.md](./QA_LEDGER.md) file for the Ledger specific tests.
+See the [QA_LEDGER.md](QA_LEDGER.md) file for the Ledger specific tests.
 
 ## QA for the Wallet Service
-See the [QA_WALLET_SERVICE.md](./QA_WALLET_SERVICE.md) file for the Wallet Service specific tests.
+See the [QA_WALLET_SERVICE.md](QA_WALLET_SERVICE.md) file for the Wallet Service specific tests.
 
 ## QA for the Nano Contract
-See the [QA_Nano.md](./QA_Nano.md) file for the Nano Contract specific tests.
+See the [QA_Nano.md](QA_Nano.md) file for the Nano Contract specific tests.
 
 ## QA for Large Values
-See the [QA_LARGE_VALUES.md](./QA_LARGE_VALUES.md) file for the Large Values specific tests that run in a dedicated local private network.
+See the [QA_LARGE_VALUES.md](QA_LARGE_VALUES.md) file for the Large Values specific tests that run in a dedicated local private network.
