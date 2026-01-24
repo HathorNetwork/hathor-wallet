@@ -12,7 +12,7 @@ import {
   VIDEO_MEDIA_TYPES_BY_EXTENSION,
   AUDIO_MEDIA_TYPES_BY_EXTENSION,
 } from '../constants';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../constants';
 import helpers from '../utils/helpers';
 import Loading from '../components/Loading';
 import { numberUtils } from '@hathor/wallet-lib';
