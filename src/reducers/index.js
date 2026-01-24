@@ -115,6 +115,7 @@ const initialState = {
   walletState: null,
   // Metadata of tokens
   tokenMetadata: {},
+  tokenVersion: 1, // TODO: import this from wallet-lib TokenInfoVersion.DEPOSIT
   // Token list of uids that had errors when loading metadata
   tokenMetadataErrors: [],
   // When metadata is loaded from the lib
@@ -616,12 +617,10 @@ const onUpdateHeight = (state, action) => {
   return state;
 };
 
-/**
- * Update token metadata
- */
 const tokenMetadataUpdated = (state, action) => {
   const { data, errors } = action.payload;
-  const newMeta = Object.assign({}, state.tokenMetadata, data);
+  const { tokenVersion, ...newData } = data;
+  const newMeta = Object.assign({}, state.tokenMetadata, newData);
   const newErrors = [...state.tokenMetadataErrors, ...errors]
 
   return {
@@ -629,6 +628,7 @@ const tokenMetadataUpdated = (state, action) => {
     metadataLoaded: true,
     tokenMetadata: newMeta,
     tokenMetadataErrors: newErrors,
+    tokenVersion,
   };
 };
 
