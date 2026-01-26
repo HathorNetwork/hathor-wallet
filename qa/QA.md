@@ -245,5 +245,8 @@ See the [QA_WALLET_SERVICE.md](QA_WALLET_SERVICE.md) file for the Wallet Service
 ## QA for the Nano Contract
 See the [QA_Nano.md](QA_Nano.md) file for the Nano Contract specific tests.
 
+## QA for ReOwn
+See the [QA_REOWN.md](QA_REOWN.md) file for the Reown specific tests.
+
 ## QA for Large Values
 See the [QA_LARGE_VALUES.md](QA_LARGE_VALUES.md) file for the Large Values specific tests that run in a dedicated local private network.
