@@ -242,9 +242,6 @@ See the [QA_LEDGER.md](QA_LEDGER.md) file for the Ledger specific tests.
 ## QA for the Wallet Service
 See the [QA_WALLET_SERVICE.md](QA_WALLET_SERVICE.md) file for the Wallet Service specific tests.
 
-## QA for the Nano Contract
-See the [QA_Nano.md](QA_Nano.md) file for the Nano Contract specific tests.
-
 ## QA for ReOwn
 See the [QA_REOWN.md](QA_REOWN.md) file for the Reown specific tests.
 
