@@ -28,7 +28,7 @@ export function ConnectModal({ data, onAccept, onReject }) {
         <p>{data.description}</p>
         <p className="mb-0">{t`This dApp would like to:`}</p>
         <ul className="mt-2">
-          {data.requiredNamespaces?.hathor?.methods?.map((method) => (
+          {data.acceptedMethods?.map((method) => (
             <li key={method}>{method}</li>
           ))}
         </ul>
@@ -39,4 +39,4 @@ export function ConnectModal({ data, onAccept, onReject }) {
       </div>
     </>
   );
-} 
+}

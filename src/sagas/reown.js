@@ -34,6 +34,7 @@ import {
   InsufficientFundsError,
   SignMessageWithAddressError,
   CreateNanoContractCreateTokenTxError,
+  PromptRejectedError,
 } from '@hathor/hathor-rpc-handler';
 import { isWalletServiceEnabled } from './wallet';
 import { ReownModalTypes } from '../components/Reown/ReownModal';
@@ -60,6 +61,7 @@ import {
   hideGlobalModal,
   setReownFirstAddress,
   unregisteredTokensClean,
+  setReownError,
 } from '../actions';
 import { checkForFeatureFlag, getNetworkSettings, retryHandler } from './helpers';
 import { logger } from '../utils/logger';
@@ -78,21 +80,42 @@ const AVAILABLE_METHODS = {
   HATHOR_CREATE_TOKEN: 'htr_createToken',
   HATHOR_SEND_TRANSACTION: 'htr_sendTransaction',
   HATHOR_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX: 'htr_createNanoContractCreateTokenTx',
+  HATHOR_GET_BALANCE: 'htr_getBalance',
+  HATHOR_GET_ADDRESS: 'htr_getAddress',
+  HATHOR_GET_UTXOS: 'htr_getUtxos',
+  HATHOR_GET_WALLET_INFORMATION: 'htr_getWalletInformation',
+  HATHOR_GET_CONNECTED_NETWORK: 'htr_getConnectedNetwork',
 };
 
 const AVAILABLE_EVENTS = [];
 
 const ERROR_CODES = {
   UNAUTHORIZED_METHODS: 3001,
+  UNSUPPORTED_CHAINS: 5100,
   USER_DISCONNECTED: 6000,
   USER_REJECTED: 5000,
   USER_REJECTED_METHOD: 5002,
   INVALID_PAYLOAD: 5003,
+  INTERNAL_ERROR: 5004,
 };
 
 /**
+ * Extracts and normalizes error details from an error object
+ * @param {Error} error - The error object to extract details from
+ * @returns {Object} Normalized error details with message, stack, type, and timestamp
+ */
+function extractErrorDetails(error) {
+  return {
+    message: error?.message || 'Unknown error',
+    stack: error?.stack || 'No stack trace available',
+    type: error?.constructor?.name || 'Error',
+    timestamp: Date.now(),
+  };
+}
+
+/**
  * Checks if the Reown feature is enabled via feature flags
- * 
+ *
  * @returns {boolean} True if the Reown feature is enabled, false otherwise
  */
 function* isReownEnabled() {
@@ -210,7 +233,7 @@ export function* checkForPendingRequests() {
 /**
  * Refreshes the list of active Reown sessions in the Redux store
  * Optionally extends the expiration time of existing sessions
- * 
+ *
  * @param {boolean} extend - Whether to extend the expiration time of sessions
  */
 export function* refreshActiveSessions(extend = false) {
@@ -259,7 +282,7 @@ export function* refreshActiveSessions(extend = false) {
 /**
  * Sets up event listeners for the Reown WalletKit
  * Creates an event channel to handle various Reown events
- * 
+ *
  * @param {Object} walletKit - The WalletKit instance to attach listeners to
  */
 export function* setupListeners(walletKit) {
@@ -356,7 +379,7 @@ function* requestsListener() {
 /**
  * Processes a Reown session request
  * Handles RPC requests from dApps and responds appropriately
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* processRequest(action) {
@@ -436,6 +459,10 @@ export function* processRequest(action) {
     }));
   } catch (e) {
     let shouldAnswer = true;
+
+    const errorDetails = extractErrorDetails(e);
+    yield put(setReownError(errorDetails));
+
     switch (e.constructor) {
       case SendNanoContractTxError: {
         yield put(setNewNanoContractStatusFailure());
@@ -450,6 +477,7 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
@@ -465,6 +493,7 @@ export function* processRequest(action) {
 
         if (retry) {
           yield put(setCreateTokenStatusReady()); // Reset status before retrying
+          yield put(setReownError(null));
           shouldAnswer = false;
           yield* processRequest(action);
         } else {
@@ -489,6 +518,7 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
@@ -503,6 +533,7 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
@@ -519,12 +550,50 @@ export function* processRequest(action) {
 
         if (retry) {
           shouldAnswer = false;
+          yield put(setReownError(null));
           yield* processRequest(action);
         }
       } break;
-      default:
-        log.error('Unknown error type:', e);
-        break;
+      case PromptRejectedError: {
+        // User intentionally rejected the prompt - this is not an error condition
+        // Just respond with rejection, no error modal needed
+        yield put(setReownError(null));
+        yield put(unregisteredTokensClean());
+
+        yield call(() => walletKit.respondSessionRequest({
+          topic: payload.topic,
+          response: {
+            id: payload.id,
+            jsonrpc: '2.0',
+            error: {
+              code: ERROR_CODES.USER_REJECTED_METHOD,
+              message: 'Rejected by the user',
+            },
+          },
+        }));
+
+        shouldAnswer = false;
+      } break;
+      default: {
+        // Handle generic errors (e.g., from getBalance, signMessage, etc.)
+        const errorMessage = e.message || 'An error occurred processing the request';
+
+        yield put(showGlobalModal(MODAL_TYPES.GENERIC_ERROR_FEEDBACK, { errorMessage }));
+
+        yield call(() => walletKit.respondSessionRequest({
+          topic: payload.topic,
+          response: {
+            id: payload.id,
+            jsonrpc: '2.0',
+            error: {
+              code: ERROR_CODES.INTERNAL_ERROR,
+              message: errorMessage,
+            },
+          },
+        }));
+
+        shouldAnswer = false;
+      } break;
     }
 
     if (shouldAnswer) {
@@ -694,6 +763,26 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         });
       } break;
 
+      case TriggerTypes.GetBalanceConfirmationPrompt: {
+        const getBalanceResponseTemplate = (accepted) => () => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.GetBalanceConfirmationResponse,
+            data: accepted,
+          });
+        };
+
+        dispatch({
+          type: types.SHOW_GET_BALANCE_REQUEST_MODAL,
+          payload: {
+            accept: getBalanceResponseTemplate(true),
+            deny: getBalanceResponseTemplate(false),
+            data: request.data,
+            dapp: requestMetadata,
+          }
+        });
+      } break;
+
       case TriggerTypes.SendNanoContractTxLoadingTrigger:
         dispatch(setNewNanoContractStatusLoading());
         dispatch(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: true }));
@@ -769,6 +858,73 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         }
       } break;
 
+      case TriggerTypes.AddressRequestPrompt: {
+        const addressRequestResponseTemplate = (accepted) => () => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.AddressRequestConfirmationResponse,
+            data: accepted,
+          });
+        };
+
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.GET_ADDRESS,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: addressRequestResponseTemplate(true),
+          onRejectAction: addressRequestResponseTemplate(false),
+        }));
+      } break;
+
+      case TriggerTypes.AddressRequestClientPrompt: {
+        const addressClientResponseTemplate = (accepted) => (selectedAddress) => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.AddressRequestClientResponse,
+            data: {
+              accepted,
+              address: selectedAddress?.address,
+              addressIndex: selectedAddress?.index,
+            },
+          });
+        };
+
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.GET_ADDRESS_CLIENT,
+          data: {
+            data: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: addressClientResponseTemplate(true),
+          onRejectAction: addressClientResponseTemplate(false),
+        }));
+      } break;
+
+      case TriggerTypes.GetUtxosConfirmationPrompt: {
+        const getUtxosResponseTemplate = (accepted) => () => {
+          dispatch(hideGlobalModal());
+          resolve({
+            type: TriggerResponseTypes.GetUtxosConfirmationResponse,
+            data: accepted,
+          });
+        };
+
+        // request.params contains the filter parameters
+        // request.data contains the actual UTXOs (result)
+        dispatch(showGlobalModal(MODAL_TYPES.REOWN, {
+          type: ReownModalTypes.GET_UTXOS,
+          data: {
+            params: request.params,
+            utxos: request.data,
+            dapp: requestMetadata,
+          },
+          onAcceptAction: getUtxosResponseTemplate(true),
+          onRejectAction: getUtxosResponseTemplate(false),
+        }));
+      } break;
+
       default:
         reject(new Error('Invalid request'));
     }
@@ -777,7 +933,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
 /**
  * Generic handler for dApp requests that require user confirmation
  * Shows a modal to the user and manages the accept/reject flow
- * 
+ *
  * @param {Object} payload - The request payload
  * @param {Function} payload.accept - Callback for when user accepts
  * @param {Function} payload.deny - Callback for when user rejects
@@ -817,7 +973,7 @@ export function* handleDAppRequest({ payload }, modalType) {
 /**
  * Handles a sign message request from a dApp
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onSignMessageRequest(action) {
@@ -827,7 +983,7 @@ export function* onSignMessageRequest(action) {
 /**
  * Handles a sign oracle data request from a dApp
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onSignOracleDataRequest(action) {
@@ -835,9 +991,19 @@ export function* onSignOracleDataRequest(action) {
 }
 
 /**
+ * Handles a get balance request from a dApp
+ * Shows a modal to the user for confirmation
+ *
+ * @param {Object} action - The action containing the request payload
+ */
+export function* onGetBalanceRequest(action) {
+  yield* handleDAppRequest(action, ReownModalTypes.GET_BALANCE);
+}
+
+/**
  * Handles a request to send a nano contract transaction
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onSendNanoContractTxRequest(action) {
@@ -857,7 +1023,7 @@ export function* onSendTransactionRequest(action) {
 /**
  * Handles a request to create a token
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onCreateTokenRequest(action) {
@@ -881,7 +1047,7 @@ export function* onWalletReset() {
 /**
  * Handles a session proposal from a dApp
  * Shows a modal to the user for confirmation and manages the session approval/rejection
- * 
+ *
  * @param {Object} action - The action containing the session proposal
  */
 export function* onSessionProposal(action) {
@@ -891,28 +1057,38 @@ export function* onSessionProposal(action) {
   yield put(setWCConnectionState(REOWN_CONNECTION_STATE.CONNECTING));
 
   try {
+    /*
+     * "requiredNamespaces" has been deprecated in WalletConnect v2 in favor of "optionalNamespaces",
+     * but some of our RPC handlers still use it, so we will support both for now.
+     * @see https://github.com/WalletConnect/walletconnect-monorepo/pull/6667
+     */
     const data = {
       icon: get(params, 'proposer.metadata.icons[0]', null),
       proposer: get(params, 'proposer.metadata.name', ''),
       url: get(params, 'proposer.metadata.url', ''),
       description: get(params, 'proposer.metadata.description', ''),
-      requiredNamespaces: get(params, 'requiredNamespaces', []),
+      requiredNamespaces: get(params, 'requiredNamespaces', {}),
+      optionalNamespaces: get(params, 'optionalNamespaces', {}),
     };
 
-    // Check if the required methods are supported
-    const requiredMethods = get(params, 'requiredNamespaces.hathor.methods', []);
+    // Validating method support
+    const mandatoryMethods = get(data.requiredNamespaces, 'hathor.methods', []);
+    const optionalMethods = get(data.optionalNamespaces, 'hathor.methods', []);
+    const allRequestedMethods = [...mandatoryMethods, ...optionalMethods];
     const availableMethods = values(AVAILABLE_METHODS);
-    const unsupportedMethods = requiredMethods.filter(method => !availableMethods.includes(method));
+    const unsupportedMandatoryMethods = mandatoryMethods.filter(method => !availableMethods.includes(method));
+    const unsupportedMethods = optionalMethods.filter(method => !availableMethods.includes(method));
+    const acceptedMethods = allRequestedMethods.filter(method => availableMethods.includes(method));
 
-    if (unsupportedMethods.length > 0) {
-      log.error('Unsupported methods requested:', unsupportedMethods);
+    if (unsupportedMandatoryMethods.length > 0) {
+      log.error('Unsupported methods requested:', unsupportedMandatoryMethods);
       // Set connection state to FAILED
       yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
 
       // Show error modal to user
       yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
         title: 'Connection Error',
-        message: `The dApp is requesting methods that are not supported: ${unsupportedMethods.join(', ')}`,
+        message: `The dApp is requesting methods that are not supported: ${unsupportedMandatoryMethods.join(', ')}`,
       }));
 
       // Reject the session
@@ -922,7 +1098,49 @@ export function* onSessionProposal(action) {
           id,
           reason: {
             code: ERROR_CODES.UNAUTHORIZED_METHODS,
-            message: 'Requested methods are not supported',
+            message: 'Required methods are not supported',
+          },
+        });
+      }
+      return;
+    }
+
+    if (unsupportedMethods.length > 0) {
+      log.debug('Some unsupported methods were requested, but they are optional:', unsupportedMethods);
+    }
+
+    // Validating network compatibility
+    const networkSettings = yield select(getNetworkSettings);
+    const walletNetwork = networkSettings.network;
+    const walletChain = `hathor:${walletNetwork}`;
+
+    // Get chains from both required and optional namespaces and combine them
+    const requiredChains = get(data.requiredNamespaces, 'hathor.chains', []);
+    const optionalChains = get(data.optionalNamespaces, 'hathor.chains', []);
+    const allRequestedChains = [...requiredChains, ...optionalChains];
+
+    // If the dApp specifies any chains, the wallet's network must be in that list
+    if (allRequestedChains.length > 0 && !allRequestedChains.includes(walletChain)) {
+      const requestedNetworks = allRequestedChains.map(chain => chain.replace('hathor:', '')).join(', ');
+      log.error(`Network mismatch: dApp requires ${requestedNetworks}, wallet is on ${walletNetwork}`);
+
+      // Set connection state to FAILED
+      yield put(setWCConnectionState(REOWN_CONNECTION_STATE.FAILED));
+
+      // Show error modal to user
+      yield put(showGlobalModal(MODAL_TYPES.ERROR_MODAL, {
+        title: t`Network Mismatch`,
+        message: t`The dApp requires a different network (${requestedNetworks}) but your wallet is connected to ${walletNetwork}.`,
+      }));
+
+      // Reject the session
+      const { walletKit } = getGlobalReown();
+      if (walletKit) {
+        yield call([walletKit, walletKit.rejectSession], {
+          id,
+          reason: {
+            code: ERROR_CODES.UNSUPPORTED_CHAINS,
+            message: `Network mismatch: wallet is on ${walletNetwork}`,
           },
         });
       }
@@ -946,7 +1164,7 @@ export function* onSessionProposal(action) {
     // Show the modal
     yield put(showGlobalModal(MODAL_TYPES.REOWN, {
       type: ReownModalTypes.CONNECT,
-      data,
+      data: { ...data, acceptedMethods }, // Passing accepted methods to the modal for display
       onAcceptAction: connectResponseTemplate(true),
       onRejectAction: connectResponseTemplate(false),
     }));
@@ -961,8 +1179,6 @@ export function* onSessionProposal(action) {
       throw new Error('WalletKit not initialized');
     }
 
-    const networkSettings = yield select(getNetworkSettings);
-    log.debug('Network Settings: ', networkSettings);
     if (accepted) {
       const wallet = getGlobalWallet();
       const firstAddress = yield call(() => wallet.getAddressAtIndex(0));
@@ -976,7 +1192,7 @@ export function* onSessionProposal(action) {
             accounts: [`hathor:${networkSettings.network}:${firstAddress}`],
             chains: [`hathor:${networkSettings.network}`],
             events: AVAILABLE_EVENTS,
-            methods: requiredMethods, // Use the methods requested by the dApp instead of all available methods
+            methods: acceptedMethods, // Use the methods requested by the dApp instead of all available methods
           },
         },
       });
@@ -1025,16 +1241,13 @@ export function* onSessionProposal(action) {
     } catch (rejectError) {
       log.error('Error rejecting session after failure:', rejectError);
     }
-  } finally {
-    // Make sure to close the modal even if there's an error
-    yield put(hideGlobalModal());
   }
 }
 
 /**
  * Handles a WalletConnect URI input
  * Attempts to pair with the provided URI
- * 
+ *
  * @param {Object} action - The action containing the URI payload
  */
 export function* onUriInputted(action) {
@@ -1087,7 +1300,7 @@ export function* featureToggleUpdateListener() {
 /**
  * Handles a request to cancel a session
  * Disconnects the specified session and refreshes the session list
- * 
+ *
  * @param {Object} action - The action containing the session ID
  */
 export function* onCancelSession(action) {
@@ -1116,7 +1329,7 @@ export function* onCancelSession(action) {
 /**
  * Handles a session delete event
  * Delegates to onCancelSession to handle the session deletion
- * 
+ *
  * @param {Object} action - The action containing the session data
  */
 export function* onSessionDelete(action) {
@@ -1126,7 +1339,7 @@ export function* onSessionDelete(action) {
 /**
  * Handles a request to create a nano contract and token in a single transaction
  * Shows a modal to the user for confirmation
- * 
+ *
  * @param {Object} action - The action containing the request payload
  */
 export function* onCreateNanoContractCreateTokenTxRequest(action) {
@@ -1146,6 +1359,7 @@ export function* saga() {
     takeLatest(types.SHOW_NANO_CONTRACT_SEND_TX_MODAL, onSendNanoContractTxRequest),
     takeLatest(types.SHOW_SIGN_MESSAGE_REQUEST_MODAL, onSignMessageRequest),
     takeLatest(types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL, onSignOracleDataRequest),
+    takeLatest(types.SHOW_GET_BALANCE_REQUEST_MODAL, onGetBalanceRequest),
     takeLatest(types.SHOW_CREATE_TOKEN_REQUEST_MODAL, onCreateTokenRequest),
     takeLatest(types.SHOW_SEND_TRANSACTION_REQUEST_MODAL, onSendTransactionRequest),
     takeLatest(types.SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL, onCreateNanoContractCreateTokenTxRequest),
@@ -1156,4 +1370,4 @@ export function* saga() {
     takeEvery(types.WALLET_RESET, onWalletReset),
     takeLatest(types.REOWN_URI_INPUTTED, onUriInputted),
   ]);
-} 
+}

@@ -528,7 +528,7 @@ msgstr ""
 #: src/components/ModalPin.js:134
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/PinPad.js:235
-#: src/components/Reown/modals/BaseNanoContractModal.js:275
+#: src/components/Reown/modals/BaseNanoContractModal.js:330
 #: src/components/atomic-swap/ModalAtomicReceive.js:129
 #: src/components/atomic-swap/ModalAtomicSend.js:365
 #: src/components/nano-contract/ModalChangeAddress.js:153
@@ -551,7 +551,7 @@ msgstr ""
 msgid "No dApps connected. Click \"Add New Connection\" to connect to a dApp."
 msgstr ""
 
-#: src/screens/SendTokens.js:156
+#: src/screens/SendTokens.js:157
 msgid "Invalid custom tokens"
 msgstr ""
 
@@ -560,31 +560,33 @@ msgstr ""
 #: src/components/ModalError.js:45
 #: src/components/ModalLedgerResetTokenSignatures.js:122
 #: src/components/ModalLedgerSignToken.js:243
-#: src/components/Reown/FeedbackModal.js:93
-#: src/components/Reown/NanoContractFeedbackModal.js:80
-#: src/components/Reown/TransactionFeedbackModal.js:79
-#: src/screens/SendTokens.js:157
-#: src/screens/SendTokens.js:293
-#: src/screens/SendTokens.js:466
+#: src/components/Reown/ErrorDetailModal.js:121
+#: src/components/Reown/FeedbackModal.js:96
+#: src/components/Reown/GenericErrorFeedbackModal.js:58
+#: src/components/Reown/NanoContractFeedbackModal.js:83
+#: src/components/Reown/TransactionFeedbackModal.js:82
+#: src/screens/SendTokens.js:158
+#: src/screens/SendTokens.js:294
+#: src/screens/SendTokens.js:467
 msgid "Close"
 msgstr ""
 
-#: src/screens/SendTokens.js:223
-#: src/screens/SendTokens.js:350
+#: src/screens/SendTokens.js:224
+#: src/screens/SendTokens.js:351
 msgid "Validate outputs on Ledger"
 msgstr ""
 
-#: src/screens/SendTokens.js:291
+#: src/screens/SendTokens.js:292
 #.  there are tokens without signatures, missingSigs
 #.  set tittle and content
 msgid "Unverified custom tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:380
+#: src/screens/SendTokens.js:381
 msgid "Sending transaction"
 msgstr ""
 
-#: src/screens/SendTokens.js:453
+#: src/screens/SendTokens.js:454
 #.  Custom token not allowed for this Ledger version
 msgid ""
 "Unfortunately this feature is not supported with the Hathor app version on "
@@ -592,7 +594,7 @@ msgid ""
 "the most recent Hathor app."
 msgstr ""
 
-#: src/screens/SendTokens.js:461
+#: src/screens/SendTokens.js:462
 #.  limit is 10 custom tokens per tx
 #, javascript-format
 msgid ""
@@ -600,40 +602,40 @@ msgid ""
 "per transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:464
+#: src/screens/SendTokens.js:465
 msgid "Token limit reached"
 msgstr ""
 
-#: src/screens/SendTokens.js:473
+#: src/screens/SendTokens.js:474
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:538
+#: src/screens/SendTokens.js:539
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:539
+#: src/screens/SendTokens.js:540
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
 #: src/components/tokens/TokenAction.js:147
-#: src/screens/SendTokens.js:599
+#: src/screens/SendTokens.js:600
 msgid "Loading metadata..."
 msgstr ""
 
-#: src/screens/SendTokens.js:613
+#: src/screens/SendTokens.js:614
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:620
+#: src/screens/SendTokens.js:621
 msgid "Add data output"
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicSend.js:296
-#: src/screens/SendTokens.js:627
-#: src/screens/SendTokens.js:639
+#: src/screens/SendTokens.js:628
+#: src/screens/SendTokens.js:640
 msgid "Send Tokens"
 msgstr ""
 
@@ -909,11 +911,13 @@ msgstr ""
 msgid "Total:"
 msgstr ""
 
+#: src/components/Reown/modals/GetBalanceModal.js:53
 #: src/components/WalletBalance.js:48
 #: src/screens/UnknownTokens.js:214
 msgid "Available:"
 msgstr ""
 
+#: src/components/Reown/modals/GetBalanceModal.js:54
 #: src/components/WalletBalance.js:49
 #: src/screens/UnknownTokens.js:215
 msgid "Locked:"
@@ -947,8 +951,8 @@ msgstr ""
 msgid "Unknown Tokens"
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:83
-#: src/components/Reown/TransactionFeedbackModal.js:82
+#: src/components/Reown/NanoContractFeedbackModal.js:86
+#: src/components/Reown/TransactionFeedbackModal.js:85
 #: src/screens/UnknownTokens.js:294
 msgid "Register Tokens"
 msgstr ""
@@ -1278,14 +1282,14 @@ msgid "Public Methods"
 msgstr ""
 
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:157
-msgid "Private Methods"
+msgid "View Methods"
 msgstr ""
 
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:165
 msgid "Select Blueprint"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:41
+#: src/components/Reown/modals/BaseNanoContractModal.js:55
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:170
 msgid "Blueprint ID"
 msgstr ""
@@ -1491,7 +1495,7 @@ msgstr ""
 msgid "Error updating network settings."
 msgstr ""
 
-#: src/sagas/reown.js:476
+#: src/sagas/reown.js:504
 msgid "Insufficient funds to complete the transaction."
 msgstr ""
 
@@ -1958,7 +1962,7 @@ msgid "Home"
 msgstr ""
 
 #: src/components/ModalUnhandledError.js:98
-#: src/components/Reown/FeedbackModal.js:75
+#: src/components/Reown/FeedbackModal.js:78
 msgid "Dismiss"
 msgstr ""
 
@@ -2852,7 +2856,7 @@ msgstr ""
 msgid "To register your nano contract, just write down the ID of the contract."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:27
+#: src/components/Reown/modals/BaseNanoContractModal.js:41
 #: src/components/nano-contract/ModalRegisterNanoContract.js:97
 msgid "Nano Contract ID"
 msgstr ""
@@ -2873,7 +2877,7 @@ msgstr ""
 msgid "Sign Data"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:265
+#: src/components/Reown/modals/BaseNanoContractModal.js:320
 #: src/components/nano-contract/ModalSelectAddressToSignTx.js:49
 msgid "Select the address that will be used to sign the transaction"
 msgstr ""
@@ -2981,6 +2985,14 @@ msgstr ""
 msgid "Receiving"
 msgstr ""
 
+#: src/components/Reown/AdvancedErrorOptions.js:44
+msgid "Advanced options"
+msgstr ""
+
+#: src/components/Reown/AdvancedErrorOptions.js:55
+msgid "See error details"
+msgstr ""
+
 #: src/components/Reown/CreateTokenRequestData.js:107
 msgid "No token data available."
 msgstr ""
@@ -3018,55 +3030,91 @@ msgstr ""
 msgid "Unknown dApp proposer"
 msgstr ""
 
-#: src/components/Reown/FeedbackModal.js:25
-msgid "Processing"
+#: src/components/Reown/ErrorDetailModal.js:62
+msgid "Error Details"
+msgstr ""
+
+#: src/components/Reown/ErrorDetailModal.js:69
+msgid "Error Type"
+msgstr ""
+
+#: src/components/Reown/ErrorDetailModal.js:74
+msgid "Message"
+msgstr ""
+
+#: src/components/Reown/ErrorDetailModal.js:81
+msgid "Timestamp"
+msgstr ""
+
+#: src/components/Reown/ErrorDetailModal.js:86
+msgid "Stack Trace"
+msgstr ""
+
+#: src/components/Reown/ErrorDetailModal.js:111
+msgid "Copied!"
+msgstr ""
+
+#: src/components/Reown/ErrorDetailModal.js:116
+msgid "Copy to Clipboard"
 msgstr ""
 
 #: src/components/Reown/FeedbackModal.js:26
-msgid "Operation Failed"
+msgid "Processing"
 msgstr ""
 
 #: src/components/Reown/FeedbackModal.js:27
+msgid "Operation Failed"
+msgstr ""
+
+#: src/components/Reown/FeedbackModal.js:28
 msgid "Operation Successful"
 msgstr ""
 
-#: src/components/Reown/FeedbackModal.js:30
+#: src/components/Reown/FeedbackModal.js:31
 msgid "Processing operation..."
 msgstr ""
 
-#: src/components/Reown/FeedbackModal.js:31
+#: src/components/Reown/FeedbackModal.js:32
 msgid "There was an error. Would you like to try again?"
 msgstr ""
 
-#: src/components/Reown/FeedbackModal.js:32
+#: src/components/Reown/FeedbackModal.js:33
 msgid "The operation completed successfully."
 msgstr ""
 
-#: src/components/Reown/FeedbackModal.js:78
+#: src/components/Reown/FeedbackModal.js:81
 msgid "Retry"
 msgstr ""
 
-#: src/components/Reown/MessageSigningFeedbackModal.js:28
+#: src/components/Reown/GenericErrorFeedbackModal.js:47
+msgid "Request Failed"
+msgstr ""
+
+#: src/components/Reown/GenericErrorFeedbackModal.js:53
+msgid "An error occurred while processing the request."
+msgstr ""
+
+#: src/components/Reown/MessageSigningFeedbackModal.js:38
 msgid "Signing Message"
 msgstr ""
 
-#: src/components/Reown/MessageSigningFeedbackModal.js:29
+#: src/components/Reown/MessageSigningFeedbackModal.js:39
 msgid "Message Signing Failed"
 msgstr ""
 
-#: src/components/Reown/MessageSigningFeedbackModal.js:30
+#: src/components/Reown/MessageSigningFeedbackModal.js:40
 msgid "Message Signing Successful"
 msgstr ""
 
-#: src/components/Reown/MessageSigningFeedbackModal.js:33
+#: src/components/Reown/MessageSigningFeedbackModal.js:43
 msgid "Signing message..."
 msgstr ""
 
-#: src/components/Reown/MessageSigningFeedbackModal.js:34
+#: src/components/Reown/MessageSigningFeedbackModal.js:44
 msgid "There was an error signing the message. Would you like to try again?"
 msgstr ""
 
-#: src/components/Reown/MessageSigningFeedbackModal.js:35
+#: src/components/Reown/MessageSigningFeedbackModal.js:45
 msgid "The message was signed successfully."
 msgstr ""
 
@@ -3151,47 +3199,47 @@ msgstr ""
 msgid "Address to send authority:"
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:53
-#: src/components/Reown/TransactionFeedbackModal.js:52
+#: src/components/Reown/NanoContractFeedbackModal.js:56
+#: src/components/Reown/TransactionFeedbackModal.js:55
 #, javascript-format
 msgid ""
 "There are ${ unregisteredTokensList.length } unregistered tokens in this "
 "transaction. Do you want to register them?"
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:54
-#: src/components/Reown/TransactionFeedbackModal.js:53
+#: src/components/Reown/NanoContractFeedbackModal.js:57
+#: src/components/Reown/TransactionFeedbackModal.js:56
 msgid ""
 "There is 1 unregistered token in this transaction. Do you want to register "
 "it?"
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:97
-#: src/components/Reown/TransactionFeedbackModal.js:96
+#: src/components/Reown/NanoContractFeedbackModal.js:100
+#: src/components/Reown/TransactionFeedbackModal.js:99
 msgid "Processing Transaction"
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:98
-#: src/components/Reown/TransactionFeedbackModal.js:97
+#: src/components/Reown/NanoContractFeedbackModal.js:101
+#: src/components/Reown/TransactionFeedbackModal.js:100
 msgid "Transaction Failed"
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:99
-#: src/components/Reown/TransactionFeedbackModal.js:98
+#: src/components/Reown/NanoContractFeedbackModal.js:102
+#: src/components/Reown/TransactionFeedbackModal.js:101
 msgid "Transaction Successful"
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:102
+#: src/components/Reown/NanoContractFeedbackModal.js:105
 msgid "Processing nano contract transaction..."
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:103
+#: src/components/Reown/NanoContractFeedbackModal.js:106
 msgid ""
 "There was an error sending the nano contract transaction. Would you like to "
 "try again?"
 msgstr ""
 
-#: src/components/Reown/NanoContractFeedbackModal.js:104
+#: src/components/Reown/NanoContractFeedbackModal.js:107
 msgid "The nano contract transaction was sent successfully."
 msgstr ""
 
@@ -3215,94 +3263,95 @@ msgstr ""
 msgid "Copy signature"
 msgstr ""
 
-#: src/components/Reown/TokenCreationFeedbackModal.js:28
+#: src/components/Reown/TokenCreationFeedbackModal.js:38
 msgid "Processing Token Creation"
 msgstr ""
 
-#: src/components/Reown/TokenCreationFeedbackModal.js:29
+#: src/components/Reown/TokenCreationFeedbackModal.js:39
 msgid "Token Creation Failed"
 msgstr ""
 
-#: src/components/Reown/TokenCreationFeedbackModal.js:30
+#: src/components/Reown/TokenCreationFeedbackModal.js:40
 msgid "Token Creation Successful"
 msgstr ""
 
-#: src/components/Reown/TokenCreationFeedbackModal.js:33
+#: src/components/Reown/TokenCreationFeedbackModal.js:43
 msgid "Processing token creation transaction..."
 msgstr ""
 
-#: src/components/Reown/TokenCreationFeedbackModal.js:34
+#: src/components/Reown/TokenCreationFeedbackModal.js:44
 msgid "There was an error creating the token. Would you like to try again?"
 msgstr ""
 
-#: src/components/Reown/TokenCreationFeedbackModal.js:35
+#: src/components/Reown/TokenCreationFeedbackModal.js:45
 msgid "The token was created successfully."
 msgstr ""
 
-#: src/components/Reown/TransactionFeedbackModal.js:101
+#: src/components/Reown/TransactionFeedbackModal.js:104
 msgid "Processing transaction..."
 msgstr ""
 
-#: src/components/Reown/TransactionFeedbackModal.js:102
+#: src/components/Reown/TransactionFeedbackModal.js:105
 msgid "There was an error sending the transaction. Would you like to try again?"
 msgstr ""
 
-#: src/components/Reown/TransactionFeedbackModal.js:103
+#: src/components/Reown/TransactionFeedbackModal.js:106
 msgid "The transaction was sent successfully."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:56
+#: src/components/Reown/modals/BaseNanoContractModal.js:70
 #. *
 #.  * Component for Blueprint Information Card
 #.  
 msgid "Blueprint Name"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:62
+#: src/components/Reown/modals/BaseNanoContractModal.js:76
 #. *
 #.  * Component for Blueprint Information Card
 #.  
 msgid "Blueprint Method"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:78
+#: src/components/Reown/modals/BaseNanoContractModal.js:132
 msgid "Arguments"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:114
+#: src/components/Reown/modals/BaseNanoContractModal.js:168
 msgid "Caller"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:120
-#: src/components/Reown/modals/BaseNanoContractModal.js:259
+#: src/components/Reown/modals/BaseNanoContractModal.js:174
+#: src/components/Reown/modals/BaseNanoContractModal.js:314
 msgid "Select Address"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:129
+#: src/components/Reown/modals/BaseNanoContractModal.js:183
 msgid ""
 "This nano contract is not registered in your wallet. Would you like to "
 "register it?"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:142
+#: src/components/Reown/modals/BaseNanoContractModal.js:196
 msgid "Registering..."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:142
+#: src/components/Reown/modals/BaseNanoContractModal.js:196
 msgid "Register Nano Contract"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:167
+#: src/components/Reown/modals/BaseNanoContractModal.js:221
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:71
 #: src/components/Reown/modals/SendNanoContractTxModal.js:37
 #: src/components/Reown/modals/SendTransactionModal.js:235
 msgid "Accept Transaction"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:168
+#: src/components/Reown/modals/BaseNanoContractModal.js:222
 #: src/components/Reown/modals/ConnectModal.js:37
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
 #: src/components/Reown/modals/CreateTokenModal.js:59
+#: src/components/Reown/modals/GetBalanceModal.js:66
 #: src/components/Reown/modals/SendNanoContractTxModal.js:38
 #: src/components/Reown/modals/SendTransactionModal.js:234
 #: src/components/Reown/modals/SignMessageModal.js:27
@@ -3310,16 +3359,16 @@ msgstr ""
 msgid "Reject"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:293
+#: src/components/Reown/modals/BaseNanoContractModal.js:348
 msgid "Review your transaction from this dApp"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:294
+#: src/components/Reown/modals/BaseNanoContractModal.js:349
 #: src/components/Reown/modals/SignOracleDataModal.js:26
 msgid "Stay vigilant and protect your data from potential phishing attempts."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:319
+#: src/components/Reown/modals/BaseNanoContractModal.js:379
 msgid "Action List"
 msgstr ""
 
@@ -3348,6 +3397,26 @@ msgstr ""
 
 #: src/components/Reown/modals/CreateTokenModal.js:54
 msgid "Token details:"
+msgstr ""
+
+#: src/components/Reown/modals/GetBalanceModal.js:31
+msgid "Get Balance Request"
+msgstr ""
+
+#: src/components/Reown/modals/GetBalanceModal.js:38
+msgid "The dApp is requesting access to the balance of the following tokens:"
+msgstr ""
+
+#: src/components/Reown/modals/GetBalanceModal.js:49
+msgid "Token ID:"
+msgstr ""
+
+#: src/components/Reown/modals/GetBalanceModal.js:61
+msgid "No balance data available"
+msgstr ""
+
+#: src/components/Reown/modals/GetBalanceModal.js:67
+msgid "Allow"
 msgstr ""
 
 #: src/components/Reown/modals/SendNanoContractTxModal.js:36

@@ -13,7 +13,7 @@ import helpers from '../../../utils/helpers';
 import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
 import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
-import { constants, nanoUtils, numberUtils, dateUtils, scriptsUtils, bufferUtils } from '@hathor/wallet-lib';
+import { constants, nanoUtils, numberUtils, dateUtils, scriptsUtils, bufferUtils, bigIntUtils } from '@hathor/wallet-lib';
 import { DAppInfo } from '../DAppInfo';
 import { SignedDataDisplay } from '../SignedDataDisplay';
 
@@ -118,6 +118,9 @@ const ArgumentsTable = ({ args, decimalPlaces, tokens, network }) => {
       } else if (tokens && value in tokens) {
         displayValue = `${tokens[value].symbol} (${value})`;
       }
+    } else if (typeof value === 'object' && value !== null) {
+      // Handle objects and arrays by converting to JSON string with BigInt support
+      displayValue = bigIntUtils.JSONBigInt.stringify(value, null, 2);
     }
 
     return (
@@ -384,6 +387,12 @@ export function BaseNanoContractModal({
         )}
 
         {renderAdditionalContent && renderAdditionalContent()}
+
+        {nanoContract?.pushTx === false && (
+          <p className="text-muted small mt-3 mb-0">
+            {t`This transaction will only be built, not pushed to the network.`}
+          </p>
+        )}
       </div>
       <div className="modal-footer">
         <button

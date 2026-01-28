@@ -10,6 +10,7 @@ import { t } from 'ttag';
 import { useDispatch } from 'react-redux';
 import ReactLoading from 'react-loading';
 import { colors } from '../../constants';
+import { AdvancedErrorOptions } from './AdvancedErrorOptions';
 
 /**
  * Generic component that shows a modal with feedback for various operations
@@ -34,7 +35,8 @@ export function FeedbackModal({
   retryAction,
   retryDismissAction,
   extraComponent,
-  customButtons
+  customButtons,
+  errorDetails
 }) {
   const dispatch = useDispatch();
 
@@ -69,6 +71,7 @@ export function FeedbackModal({
     <>
       <div className="modal-body">
         <p>{messages.error}</p>
+        <AdvancedErrorOptions errorDetails={errorDetails} />
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" onClick={handleDismiss}>
