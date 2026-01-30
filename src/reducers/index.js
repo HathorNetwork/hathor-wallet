@@ -1121,8 +1121,26 @@ export const onStartWalletFailed = (state) => ({
   walletStartState: WALLET_STATUS.FAILED,
 });
 
+/**
+ * Reset wallet state when user explicitly resets their wallet.
+ *
+ * Resets to initialState but preserves:
+ * - isVersionAllowed: API version check is independent of wallet data
+ * - ledgerWasClosed: Ledger device state persists across wallet instances
+ * - featureTogglesInitialized: Unleash client runs independently
+ *
+ * Note: networkSettings is intentionally reset because the onWalletReset saga
+ * resets localStorage and reloads default network settings before this reducer runs.
+ *
+ * Note 2: The default values to preserve are the same from `onCleanData()`
+ */
 export const onStartWalletReset = (state) => ({
-  ...state,
+  ...initialState,
+  // Preserve session-level flags independent of wallet data
+  isVersionAllowed: state.isVersionAllowed,
+  ledgerWasClosed: state.ledgerWasClosed,
+  featureTogglesInitialized: state.featureTogglesInitialized,
+  // Explicitly ensure these states are cleared
   walletStartState: null,
   loadingAddresses: false,
 });
