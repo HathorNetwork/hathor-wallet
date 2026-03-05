@@ -132,7 +132,6 @@ export const NFT_MEDIA_TYPES = {
   image: 'IMAGE',
   video: 'VIDEO',
   audio: 'AUDIO',
-  pdf: 'PDF',
 }
 
 /**
