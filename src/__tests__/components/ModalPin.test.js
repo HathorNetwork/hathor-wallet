@@ -4,7 +4,10 @@ import { act, render, screen } from '@testing-library/react';
 import $ from 'jquery'
 import { ModalPin } from '../../components/ModalPin';
 import userEvent from '@testing-library/user-event';
+import { getGlobalWallet } from '../../modules/wallet';
 // import '@testing-library/jest-dom'; Temporarily removed. See https://github.com/HathorNetwork/hathor-wallet/pull/567
+
+jest.mock('../../modules/wallet');
 
 let container = null;
 const MODAL_ID = '#modalPin';
@@ -61,6 +64,7 @@ describe('pin validation', () => {
     const failingPin = 'abc123';
     const passingPin = '123321'
     const wallet = { checkPin: () => Promise.resolve(false) };
+    getGlobalWallet.mockReturnValue(wallet);
     render(
       <ModalPin
         onSuccess={jest.fn()}
@@ -100,6 +104,7 @@ describe('pin validation', () => {
 
   it('displays error on incorrect pin', async () => {
     const wallet = { checkPin: () => Promise.resolve(false) };
+    getGlobalWallet.mockReturnValue(wallet);
     render(
       <ModalPin
         onSuccess={jest.fn()}
@@ -130,6 +135,7 @@ describe('pin validation', () => {
     const closeCallback = jest.fn();
     const pinText = '123321';
     const wallet = { checkPin: () => Promise.resolve(true) };
+    getGlobalWallet.mockReturnValue(wallet);
 
     render(
       <ModalPin

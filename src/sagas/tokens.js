@@ -15,7 +15,7 @@ import { channel } from 'redux-saga';
 import { get } from 'lodash';
 import { specificTypeAndPayload, dispatchAndWait } from './helpers';
 import helpers from '../utils/helpers';
-import { METADATA_CONCURRENT_DOWNLOAD } from '../constants';
+import { METADATA_CONCURRENT_DOWNLOAD, TOKEN_DOWNLOAD_STATUS } from '../constants';
 import {
   types,
   tokenFetchBalanceRequested,
@@ -37,13 +37,6 @@ const CONCURRENT_FETCH_REQUESTS = 5;
 const METADATA_MAX_RETRIES = 3;
 
 const log = logger('tokens');
-
-export const TOKEN_DOWNLOAD_STATUS = {
-  READY: 'ready',
-  FAILED: 'failed',
-  LOADING: 'loading',
-  INVALIDATED: 'invalidated',
-};
 
 /**
  * This saga will create a channel to queue TOKEN_FETCH_BALANCE_REQUESTED actions and

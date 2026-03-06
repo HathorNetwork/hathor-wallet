@@ -16,6 +16,7 @@ import {
 import { TOKEN_MINT_MASK, TOKEN_MELT_MASK, NATIVE_TOKEN_UID } from "@hathor/wallet-lib/lib/constants";
 import { get } from 'lodash';
 import walletUtil from "./wallet";
+import { PROPOSAL_DOWNLOAD_STATUS } from "../constants";
 
 /**
  * @typedef ProposalData
@@ -49,13 +50,6 @@ import walletUtil from "./wallet";
  * @property {number} timestamp Latest update timestamp
  * @property {{partialTx: string, timestamp: number}[]} history Historic data
  */
-
-export const PROPOSAL_DOWNLOAD_STATUS = {
-    READY: 'ready',
-    FAILED: 'failed',
-    LOADING: 'loading',
-    INVALIDATED: 'invalidated',
-};
 
 export const PROPOSAL_SIGNATURE_STATUS = {
     OPEN: 'Open',

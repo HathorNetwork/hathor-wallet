@@ -24,7 +24,7 @@ import version from '../utils/version';
 import walletUtils from '../utils/wallet';
 import BackButton from '../components/BackButton';
 import { colors } from '../constants';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actions/index';
 import LOCAL_STORE from '../storage';

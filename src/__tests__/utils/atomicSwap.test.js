@@ -1,4 +1,5 @@
-import { calculateExhibitionData, PROPOSAL_DOWNLOAD_STATUS } from "../../utils/atomicSwap";
+import { calculateExhibitionData } from "../../utils/atomicSwap";
+import { PROPOSAL_DOWNLOAD_STATUS } from "../../constants";
 import { PartialTxProposal } from "@hathor/wallet-lib";
 
 const customTokenUid = '00003b47ce1a6774cfc132169122c38c15fbc4a7f43487cf1041ff4826c1842e';
@@ -36,7 +37,7 @@ function createNewProposal() {
       hash: "000000e5924f0b07a626fd47839f85983a0faf14a337ac85e53cc6bb877bd14a",
       index: 0,
       data: null,
-      value: 6400,
+      value: 6400n,
       authorities: 0,
       token: "00",
       address: "other-1"
@@ -44,7 +45,7 @@ function createNewProposal() {
   ]
   np.partialTx.outputs = [
     {
-      value: 6200,
+      value: 6200n,
       tokenData: 0,
       decodedScript: {
         address: { base58: "other-2" },
@@ -55,7 +56,7 @@ function createNewProposal() {
       authorities: 0
     },
     {
-      value: 1,
+      value: 1n,
       tokenData: 1,
       decodedScript: {
         address: { base58: "other-2" },
@@ -86,7 +87,7 @@ describe('calculateExhibitionData', () => {
     deserializeSpy.mockImplementationOnce(() => {
       const np = createNewProposal();
       np.partialTx.outputs.push({
-        value: 200,
+        value: 200n,
         tokenData: 0,
         decodedScript: {
           address: { base58: "mine-1" },
@@ -104,7 +105,7 @@ describe('calculateExhibitionData', () => {
     expect(results).toStrictEqual([
       expect.objectContaining({
         tokenUid: '00',
-        receiving: 200,
+        receiving: 200n,
       })
     ]);
   })
@@ -117,7 +118,7 @@ describe('calculateExhibitionData', () => {
         hash: "000000e5924f0b07a626fd47839f85983a0faf14a337ac85e53cc6bb877bd14a",
         index: 0,
         data: null,
-        value: 1,
+        value: 1n,
         authorities: 0,
         token: customTokenUid,
         address: "mine-1",
@@ -130,7 +131,7 @@ describe('calculateExhibitionData', () => {
     expect(results).toStrictEqual([
       expect.objectContaining({
         tokenUid: customTokenUid,
-        sending: 1,
+        sending: 1n,
       })
     ]);
   })
@@ -143,14 +144,14 @@ describe('calculateExhibitionData', () => {
         hash: "000000e5924f0b07a626fd47839f85983a0faf14a337ac85e53cc6bb877bd14a",
         index: 0,
         data: null,
-        value: 1,
+        value: 1n,
         authorities: 0,
         token: customTokenUid,
         address: "mine-1",
         isAuthority: () => false,
       })
       np.partialTx.outputs.push({
-        value: 200,
+        value: 200n,
         tokenData: 0,
         decodedScript: {
           address: { base58: "mine-1" },
@@ -168,11 +169,11 @@ describe('calculateExhibitionData', () => {
     expect(results).toStrictEqual(expect.arrayContaining([
       expect.objectContaining({
         tokenUid: customTokenUid,
-        sending: 1,
+        sending: 1n,
       }),
       expect.objectContaining({
         tokenUid: '00',
-        receiving: 200,
+        receiving: 200n,
       })
     ]));
   })
@@ -185,14 +186,14 @@ describe('calculateExhibitionData', () => {
         hash: "000000e5924f0b07a626fd47839f85983a0faf14a337ac85e53cc6bb877bd14a",
         index: 0,
         data: null,
-        value: 1,
+        value: 1n,
         authorities: 0,
         token: '00',
         address: "mine-1",
         isAuthority: () => false,
       })
       np.partialTx.outputs.push({
-        value: 1,
+        value: 1n,
         tokenData: 0,
         decodedScript: {
           address: { base58: "mine-2" },
@@ -222,14 +223,14 @@ describe('calculateExhibitionData', () => {
         hash: "000000e5924f0b07a626fd47839f85983a0faf14a337ac85e53cc6bb877bd14a",
         index: 0,
         data: null,
-        value: 1,
+        value: 1n,
         authorities: 0,
         token: '00',
         address: "mine-1",
         isAuthority: () => false,
       })
       np.partialTx.outputs.push({
-        value: 1,
+        value: 1n,
         tokenData: 0,
         decodedScript: {
           address: { base58: "mine-2" },
@@ -246,7 +247,7 @@ describe('calculateExhibitionData', () => {
         hash: "000000e5924f0b07a626fd47839f85983a0faf14a337ac85e53cc6bb877bd14a",
         index: 0,
         data: null,
-        value: 2,
+        value: 2n,
         authorities: 0,
         token: 'fake1',
         address: "mine-3",
@@ -255,7 +256,7 @@ describe('calculateExhibitionData', () => {
 
       // Token 'fake2' has receiving balance
       np.partialTx.outputs.push({
-        value: 3,
+        value: 3n,
         tokenData: 0,
         decodedScript: {
           address: { base58: "mine-4" },
@@ -272,14 +273,14 @@ describe('calculateExhibitionData', () => {
         hash: "000000e5924f0b07a626fd47839f85983a0faf14a337ac85e53cc6bb877bd14a",
         index: 0,
         data: null,
-        value: 4,
+        value: 4n,
         authorities: 0,
         token: 'fake3',
         address: "other-1",
         isAuthority: () => false,
       })
       np.partialTx.outputs.push({
-        value: 3,
+        value: 3n,
         tokenData: 0,
         decodedScript: {
           address: { base58: "other-2" },
@@ -301,11 +302,11 @@ describe('calculateExhibitionData', () => {
       }),
       expect.objectContaining({
         tokenUid: 'fake1',
-        sending: 2
+        sending: 2n
       }),
       expect.objectContaining({
         tokenUid: 'fake2',
-        receiving: 3
+        receiving: 3n
       }),
     ]);
     expect(results).not.toContain(

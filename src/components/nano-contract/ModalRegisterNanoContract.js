@@ -12,8 +12,7 @@ import { get } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import { cleanNanoContractRegisterMetadata, registerNanoContract } from '../../actions/index';
 import { getGlobalWallet } from "../../modules/wallet";
-import { NANOCONTRACT_REGISTER_STATUS } from '../../sagas/nanoContract';
-import { colors } from '../../constants';
+import { NANOCONTRACT_REGISTER_STATUS, colors } from '../../constants';
 import ReactLoading from 'react-loading';
 
 /**

@@ -18,7 +18,7 @@ import version from '../utils/version';
 import OutputsWrapper from '../components/OutputsWrapper';
 import InputsWrapper from '../components/InputsWrapper';
 import Loading from '../components/Loading';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../constants';
 import LOCAL_STORE from '../storage';
 
 

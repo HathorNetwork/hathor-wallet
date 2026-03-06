@@ -15,7 +15,7 @@ import HathorAlert from '../components/HathorAlert';
 import TokenHistory from '../components/TokenHistory';
 import BackButton from '../components/BackButton';
 import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actions';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../constants';
 import { WALLET_HISTORY_COUNT } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import helpers from '../utils/helpers';

@@ -17,7 +17,13 @@
       "text-summary",
       "lcov",
       "clover"
-    ]
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!axios|@hathor/wallet-lib)"
+    ],
+    "moduleNameMapper": {
+      "^axios$": "axios/dist/node/axios.cjs"
+    }
   },
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
@@ -106,6 +112,7 @@
     "@sentry/browser": "7.99.0",
     "@sentry/cli": "2.27.0",
     "@testing-library/cypress": "10.0.2",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "14.1.2",
     "@testing-library/user-event": "14.5.1",
     "buffer": "6.0.3",
@@ -122,6 +129,7 @@
     "nodemon": "3.0.3",
     "null-loader": "4.0.1",
     "process": "0.11.10",
+    "redux-saga-test-plan": "^4.0.6",
     "sass": "1.70.0"
   },
   "build": {
