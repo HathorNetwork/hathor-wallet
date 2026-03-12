@@ -36,6 +36,9 @@ export function CreateNanoContractCreateTokenTxModal({ data, onAccept, onReject 
   const requestData = data?.data || {};
   const nanoContract = requestData.nano || {};
   const token = requestData.token || {};
+  // Extract params for inputs/outputs if available
+  const params = requestData.params || {};
+  const { inputs = [], outputs = [] } = params;
 
   // Restructure data for BaseNanoContractModal
   const restructuredData = {

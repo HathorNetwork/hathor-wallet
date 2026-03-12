@@ -9,6 +9,8 @@ import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 
+const DEFAULT_TOKEN_SYMBOL = hathorLib.constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
+
 /**
  * Component for displaying a single token parameter
  */
@@ -75,6 +77,19 @@ export default function CreateTokenRequestData({ data }) {
     }
   };
 
+
+/**
+ * Renders translated values for token version
+ * @param {TokenVersion} version
+ */
+function formatTokenVersion(version) {
+  const versionMap = {
+    [hathorLib.TokenVersion.FEE]: t`Fee`,
+    [hathorLib.TokenVersion.DEPOSIT]: t`Deposit`,
+  };
+  return versionMap[version] || t`Unknown`;
+}
+
   /**
    * Check if token has mint authority
    */
@@ -100,6 +115,16 @@ export default function CreateTokenRequestData({ data }) {
       data.data !== undefined;
   };
 
+  /**
+   * Check if there are fee-related fields to show
+   */
+  const hasFeeFields = () => {
+    return data.contractPaysFees !== undefined ||
+      data.contractPaysTokenDeposit !== undefined ||
+      data.deposit !== undefined ||
+      data.fee !== undefined;
+  };
+
   if (!data || Object.keys(data).length === 0) {
     return (
       <div className="text-center text-muted py-3">
@@ -116,6 +141,7 @@ export default function CreateTokenRequestData({ data }) {
         <TokenParameter label={t`Name`} value={data.name} />
         <TokenParameter label={t`Symbol`} value={data.symbol} />
         <TokenParameter label={t`Amount`} value={formatAmount(data.amount)} />
+        <TokenParameter label={t`Type`} value={formatTokenVersion(data.version)} />
       </div>
 
       {/* Authority Settings */}
@@ -168,6 +194,34 @@ export default function CreateTokenRequestData({ data }) {
             <TokenParameter
               label={t`Data`}
               value={typeof data.data === 'string' ? data.data : JSON.stringify(data.data)}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Fee Fields */}
+      {hasFeeFields() && (
+        <div className="mb-4">
+          <TokenParameter
+            label={t`Contract pays fees?`}
+            value={data.contractPaysFees}
+            isBoolean
+          />
+          <TokenParameter
+            label={t`Contract pays token deposit?`}
+            value={data.contractPaysTokenDeposit}
+            isBoolean
+          />
+          {data.deposit && (
+            <TokenParameter
+              label={t`Deposit`}
+              value={`${formatAmount(data.deposit)} ${DEFAULT_TOKEN_SYMBOL}`}
+            />
+          )}
+          {data.fee !== undefined && data.fee !== null && (
+            <TokenParameter
+              label={t`Network Fee`}
+              value={data.fee ? `${formatAmount(data.fee)} ${DEFAULT_TOKEN_SYMBOL}` : '-'}
             />
           )}
         </div>

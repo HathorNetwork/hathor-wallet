@@ -9,13 +9,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { t } from 'ttag';
 import { useDispatch, useSelector } from 'react-redux';
 import { types, unregisteredTokensStoreSuccess } from '../../../actions';
-import helpers from '../../../utils/helpers';
 import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
 import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
-import { constants, nanoUtils, numberUtils, dateUtils, scriptsUtils, bufferUtils, bigIntUtils } from '@hathor/wallet-lib';
+import { constants, numberUtils, dateUtils, scriptsUtils, bufferUtils, bigIntUtils } from '@hathor/wallet-lib';
 import { DAppInfo } from '../DAppInfo';
 import { SignedDataDisplay } from '../SignedDataDisplay';
+import { TransactionFees } from '../TransactionFees';
 
 /**
  * Parse script data from hex string
@@ -75,6 +75,15 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
         <div className="mb-3">
           <strong>{t`Blueprint Method`}</strong>
           <div>{nanoContract.method}</div>
+        </div>
+      )}
+
+      {nanoContract.contractPaysFees && (
+        <div className="d-flex justify-content-between align-items-center">
+          <strong>{t`Contract pays fees?`}</strong>
+          <span className={`badge badge-${nanoContract.contractPaysFees ? 'success' : 'secondary'}`}>
+            {nanoContract.contractPaysFees ? t`Yes` : t`No`}
+          </span>
         </div>
       )}
     </div>
@@ -385,6 +394,8 @@ export function BaseNanoContractModal({
             />
           </div>
         )}
+
+        <TransactionFees fee={nanoContract.fee} />
 
         {renderAdditionalContent && renderAdditionalContent()}
 
