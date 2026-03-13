@@ -10,16 +10,17 @@ import { t } from 'ttag';
 import { useDispatch } from 'react-redux';
 import ReactLoading from 'react-loading';
 import { colors } from '../../constants';
+import { AdvancedErrorOptions } from './AdvancedErrorOptions';
 
 /**
  * Generic component that shows a modal with feedback for various operations
  * Shows loading, success or error message and provides retry option on failure
  */
-export function FeedbackModal({ 
+export function FeedbackModal({
   modalId,
-  isError, 
-  isLoading = true, 
-  onClose, 
+  isError,
+  isLoading = true,
+  onClose,
   manageDomLifecycle,
   titles = {
     loading: t`Processing`,
@@ -32,7 +33,10 @@ export function FeedbackModal({
     success: t`The operation completed successfully.`
   },
   retryAction,
-  retryDismissAction
+  retryDismissAction,
+  extraComponent,
+  customButtons,
+  errorDetails
 }) {
   const dispatch = useDispatch();
 
@@ -67,6 +71,7 @@ export function FeedbackModal({
     <>
       <div className="modal-body">
         <p>{messages.error}</p>
+        <AdvancedErrorOptions errorDetails={errorDetails} />
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" onClick={handleDismiss}>
@@ -83,11 +88,14 @@ export function FeedbackModal({
     <>
       <div className="modal-body">
         <p>{messages.success}</p>
+        {extraComponent && extraComponent}
       </div>
       <div className="modal-footer">
-        <button type="button" className="btn btn-hathor" onClick={handleDismiss}>
-          {t`Close`}
-        </button>
+        {customButtons ? customButtons : (
+          <button type="button" className="btn btn-hathor" onClick={handleDismiss}>
+            {t`Close`}
+          </button>
+        )}
       </div>
     </>
   );

@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
 import { OutputType } from '@hathor/wallet-lib/lib/wallet/types';
 import { SendDataOutputOne } from '../components/SendDataOutputOne';
+import { uniqueId } from 'lodash';
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -567,7 +568,7 @@ function SendTokens() {
   }
 
   const addDataOutput = () => {
-    const uId = _.uniqueId('data_output');
+    const uId = uniqueId('data_output');
     setDataOutputs([...dataOutputs, uId]);
     dataOutputRefs.current[uId] = React.createRef();
   };

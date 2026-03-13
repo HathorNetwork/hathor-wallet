@@ -154,7 +154,7 @@ function NanoContractSelectBlueprint() {
         <h4 className="mt-5 mb-4">{t`Attributes`}</h4>
         { renderBlueprintAttributes() }
         { renderBlueprintMethods('public_methods', t`Public Methods`) }
-        { renderBlueprintMethods('private_methods', t`Private Methods`) }
+        { renderBlueprintMethods('view_methods', t`View Methods`) }
       </div>
     );
   }

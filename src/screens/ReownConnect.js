@@ -66,7 +66,7 @@ function ReownConnect() {
     return (
       <div key={sessionId} className="card mb-3">
         <div className="card-body d-flex justify-content-between align-items-center">
-          <div>
+          <div className="d-flex align-items-center">
             {metadata.icons && metadata.icons[0] && (
               <img 
                 src={metadata.icons[0]} 
@@ -75,8 +75,13 @@ function ReownConnect() {
                 style={{ width: 32, height: 32, borderRadius: '50%' }}
               />
             )}
-            <strong className="mr-2">{metadata.name}</strong>
-            <small className="text-muted">{metadata.url}</small>
+            <div className="d-flex flex-column">
+              <div className="d-flex flex-row align-items-center">
+                <strong className="mr-2">{metadata.name}</strong>
+                <small className="text-muted">{metadata.url}</small>
+              </div>
+              <small className="text-muted">{metadata.description}</small>
+            </div>
           </div>
           <button 
             className="btn btn-outline-danger" 

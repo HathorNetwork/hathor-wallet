@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { types } from '../../actions';
+import { useSelector, useDispatch } from 'react-redux';
+import { types, setReownError } from '../../actions';
 import { FeedbackModal } from './FeedbackModal';
 
 export const MODAL_ID = 'tokenCreationFeedbackModal';
@@ -17,12 +18,21 @@ export const MODAL_ID = 'tokenCreationFeedbackModal';
  * Shows loading, success or error message and provides retry option on failure
  */
 export function TokenCreationFeedbackModal({ isError, isLoading = true, onClose, manageDomLifecycle }) {
+  const dispatch = useDispatch();
+  const errorDetails = useSelector((state) => state.reown.error);
+
+  const handleClose = () => {
+    // Clear error state
+    dispatch(setReownError(null));
+    onClose();
+  };
+
   return (
     <FeedbackModal
       modalId={MODAL_ID}
       isError={isError}
       isLoading={isLoading}
-      onClose={onClose}
+      onClose={handleClose}
       manageDomLifecycle={manageDomLifecycle}
       titles={{
         loading: t`Processing Token Creation`,
@@ -36,6 +46,7 @@ export function TokenCreationFeedbackModal({ isError, isLoading = true, onClose,
       }}
       retryAction={types.REOWN_CREATE_TOKEN_RETRY}
       retryDismissAction={types.REOWN_CREATE_TOKEN_RETRY_DISMISS}
+      errorDetails={errorDetails}
     />
   );
 } 

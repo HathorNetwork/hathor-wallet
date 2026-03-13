@@ -87,6 +87,25 @@ const initialState = {
    * @example { 00: "00", abc123: "abc123" }
    */
   allTokens: {},
+  /**
+   * Remarks
+   * We use the map of tokens to collect token details for tokens
+   * used in nano contract actions but not registered by the user.
+   *
+   * @example
+   * {
+   *   tokensMap: {
+   *     '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824': {
+   *       name: 'YanCoin',
+   *       symbol: 'YAN',
+   *       uid: '000003a3b261e142d3dfd84970d3a50a93b5bc3a66a3b6ba973956148a3eb824',
+   *     },
+   *   }
+   * }
+   */
+  unregisteredTokens: {
+    tokensMap: {},
+  },
   // If is in the proccess of loading addresses transactions from the full node
   // When the request to load addresses fails this variable can continue true
   loadingAddresses: false,
@@ -247,7 +266,7 @@ const initialState = {
    *       return_type: 'int'
    *     }
    *   },
-   *   private_methods: {}
+   *   view_methods: {}
    * }
   */
   blueprintsData: {},
@@ -271,6 +290,8 @@ const initialState = {
    * {
    *   data: {
    *     node: string,
+   *     network: string,
+   *     fullNetwork: string,
    *     txMining: string,
    *     explorer: string
    *     explorerService: string,
@@ -401,6 +422,8 @@ const rootReducer = (state = initialState, action) => {
       return onStartWalletSuccess(state);
     case types.START_WALLET_FAILED:
       return onStartWalletFailed(state);
+    case types.START_WALLET_RESET:
+      return onStartWalletReset(state);
     case types.WALLET_BEST_BLOCK_UPDATE:
       return onWalletBestBlockUpdate(state, action);
     case types.SET_NAVIGATE_TO:
@@ -452,13 +475,19 @@ const rootReducer = (state = initialState, action) => {
     case types.REOWN_CREATE_TOKEN_STATUS_SUCCESSFUL:
     case types.REOWN_CREATE_TOKEN_STATUS_FAILED:
     case types.REOWN_SET_FIRST_ADDRESS:
+    case types.REOWN_SET_ERROR:
+    case types.REOWN_SEND_TX_STATUS_LOADING:
+    case types.REOWN_SEND_TX_STATUS_READY:
+    case types.REOWN_SEND_TX_STATUS_SUCCESS:
+    case types.REOWN_SEND_TX_STATUS_FAILED:
       return {
         ...state,
         reown: reownReducer(state.reown, action),
       };
-    case types.UNREGISTERED_TOKENS_DOWNLOAD_SUCCESS:
-      return onUnregisteredTokensDownloadSuccess(state, action);
-    case types.UNREGISTERED_TOKENS_DOWNLOAD_FAILED:
+    case types.UNREGISTERED_TOKENS_STORE_SUCCESS:
+      return onUnregisteredTokensStoreSuccess(state, action);
+    case types.UNREGISTERED_TOKENS_CLEAN:
+      return onUnregisteredTokensClean(state);
     default:
       return state;
   }
@@ -1093,6 +1122,30 @@ export const onStartWalletFailed = (state) => ({
 });
 
 /**
+ * Reset wallet state when user explicitly resets their wallet.
+ *
+ * Resets to initialState but preserves:
+ * - isVersionAllowed: API version check is independent of wallet data
+ * - ledgerWasClosed: Ledger device state persists across wallet instances
+ * - featureTogglesInitialized: Unleash client runs independently
+ *
+ * Note: networkSettings is intentionally reset because the onWalletReset saga
+ * resets localStorage and reloads default network settings before this reducer runs.
+ *
+ * Note 2: The default values to preserve are the same from `onCleanData()`
+ */
+export const onStartWalletReset = (state) => ({
+  ...initialState,
+  // Preserve session-level flags independent of wallet data
+  isVersionAllowed: state.isVersionAllowed,
+  ledgerWasClosed: state.ledgerWasClosed,
+  featureTogglesInitialized: state.featureTogglesInitialized,
+  // Explicitly ensure these states are cleared
+  walletStartState: null,
+  loadingAddresses: false,
+});
+
+/**
  * @param {String} action.tokenId - The tokenId to invalidate
  */
 export const onTokenInvalidateBalance = (state, action) => {
@@ -1485,6 +1538,7 @@ export const onSetNetworkSettingsStatus = (state, { payload }) => {
  * @param {Object} action.payload
  * @param {string} action.payload.node
  * @param {string} action.payload.network
+ * @param {string} action.payload.fullNetwork
  * @param {string} action.payload.txMining
  * @param {string} action.payload.explorer
  * @param {string} action.payload.explorerService
@@ -1499,28 +1553,39 @@ export const onUpdateNetworkSettings = (state, { payload }) => {
     networkSettings: {
       ...state.networkSettings,
       data: payload,
-      status: NETWORK_SETTINGS_STATUS.SUCCESS,
     }
   }
 }
 
 /**
- * Handle successful download of unregistered token details
+ * Handle successful storage of unregistered token details
  * @param {Object} state Current state
  * @param {Object} action Action with token details
  * @param {Object} action.payload.tokens Object with token details
  */
-export const onUnregisteredTokensDownloadSuccess = (state, action) => {
+export const onUnregisteredTokensStoreSuccess = (state, action) => {
   const { tokens } = action.payload;
-  const newTokens = Object.values(tokens).map(token => ({
-    uid: token.uid,
-    name: token.name,
-    symbol: token.symbol
-  }));
 
   return {
     ...state,
-    tokens: [...state.tokens, ...newTokens],
+    unregisteredTokens: {
+      tokensMap: {
+        ...state.unregisteredTokens.tokensMap,
+        ...tokens
+      }
+    },
+  };
+};
+
+/**
+ * Clean unregistered tokens state to its default value
+ */
+export const onUnregisteredTokensClean = (state) => {
+  return {
+    ...state,
+    unregisteredTokens: {
+      tokensMap: {},
+    },
   };
 };
 

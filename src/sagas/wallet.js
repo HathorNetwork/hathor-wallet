@@ -59,6 +59,7 @@ import {
   setNativeTokenData,
   addRegisteredTokens,
   startWalletSuccess,
+  startWalletReset,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -620,6 +621,12 @@ export function* setupWalletListeners(wallet) {
     while (true) {
       const message = yield take(channel);
 
+      if (message.type === 'WALLET_CHANGE_STATE' && message.payload === HathorWallet.CLOSED) {
+        // If the wallet was stopped, we close the channel
+        channel.close();
+        return;
+      }
+
       yield put({
         type: message.type,
         payload: message.data,
@@ -751,8 +758,10 @@ export function* onWalletReset() {
   // This will update the lib config and redux state with the default network settings
   helpersUtils.loadStorageState();
   if (wallet) {
-    yield call([wallet.storage, wallet.storage.cleanStorage], true, true);
+    yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
   }
+
+  yield put(startWalletReset());
 
   yield put(setNavigateTo('/welcome'));
 }
