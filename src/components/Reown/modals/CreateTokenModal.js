@@ -26,9 +26,6 @@ export function CreateTokenModal({ data, onAccept, onReject, params }) {
 
   // Reset state when component unmounts
   useEffect(() => {
-    console.log('data', data)
-    console.log('tokenData', tokenData)
-    console.log('params', params)
     return () => {
       // Reset token creation state to ready when the modal is closed
       dispatch(setCreateTokenStatusReady());
