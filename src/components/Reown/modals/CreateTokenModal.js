@@ -41,12 +41,12 @@ export function CreateTokenModal({ data, onAccept, onReject, params }) {
         </button>
       </div>
       <div className="modal-body p-3" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-        <DAppInfo dapp={data.dapp} className="d-flex align-items-center mb-4" />
+        <DAppInfo dapp={data.dapp} className="d-flex align-items-center mb-3" />
 
         <p className="font-weight-bold mb-3">{t`Review token creation request`}</p>
-        <p className="text-muted small mb-4">{t`Stay vigilant and protect your data from potential phishing attempts.`}</p>
+        <p className="text-muted small mb-3">{t`Stay vigilant and protect your data from potential phishing attempts.`}</p>
 
-        <div className="card mb-4">
+        <div className="card mb-3">
           <div className="card-body">
             <CreateTokenRequestData data={tokenData} />
           </div>
