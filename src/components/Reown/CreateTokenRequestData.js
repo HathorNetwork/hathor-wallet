@@ -9,6 +9,8 @@ import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
 
+const DEFAULT_TOKEN_SYMBOL = hathorLib.constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
+
 /**
  * Component for displaying a single token parameter
  */
@@ -44,14 +46,22 @@ const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) 
     return <span>{value}</span>;
   };
 
+  // Addresses need special layout (stacked) due to their length
+  if (isAddress) {
+    return (
+      <div className="token-param py-2">
+        <div className="text-muted small">{label}</div>
+        <div className="mt-1">
+          {renderValue()}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mb-3">
-      <div className="d-flex justify-content-between align-items-start">
-        <strong className="text-muted small text-uppercase">{label}</strong>
-      </div>
-      <div className="mt-1">
-        {renderValue()}
-      </div>
+    <div className="token-param d-flex justify-content-between align-items-center py-2">
+      <span className="text-muted small">{label}</span>
+      <span>{renderValue()}</span>
     </div>
   );
 };
@@ -75,6 +85,19 @@ export default function CreateTokenRequestData({ data }) {
     }
   };
 
+
+/**
+ * Renders translated values for token version
+ * @param {TokenVersion} version
+ */
+function formatTokenVersion(version) {
+  const versionMap = {
+    [hathorLib.TokenVersion.FEE]: t`Fee`,
+    [hathorLib.TokenVersion.DEPOSIT]: t`Deposit`,
+  };
+  return versionMap[version] || t`Unknown`;
+}
+
   /**
    * Check if token has mint authority
    */
@@ -89,16 +112,6 @@ export default function CreateTokenRequestData({ data }) {
     return data.createMelt === true || data.meltAuthorityAddress;
   };
 
-  /**
-   * Check if there are additional settings to show
-   */
-  const hasAdditionalSettings = () => {
-    return data.address ||
-      data.changeAddress !== undefined ||
-      data.allowExternalMintAuthorityAddress !== undefined ||
-      data.allowExternalMeltAuthorityAddress !== undefined ||
-      data.data !== undefined;
-  };
 
   if (!data || Object.keys(data).length === 0) {
     return (
@@ -112,65 +125,79 @@ export default function CreateTokenRequestData({ data }) {
   return (
     <div className="token-creation-data">
       {/* Basic Token Information */}
-      <div className="mb-4">
-        <TokenParameter label={t`Name`} value={data.name} />
-        <TokenParameter label={t`Symbol`} value={data.symbol} />
-        <TokenParameter label={t`Amount`} value={formatAmount(data.amount)} />
-      </div>
+      <TokenParameter label={t`Name`} value={data.name} />
+      <TokenParameter label={t`Symbol`} value={data.symbol} />
+      <TokenParameter label={t`Amount`} value={formatAmount(data.amount)} />
+      <TokenParameter label={t`Type`} value={formatTokenVersion(data.version)} />
 
       {/* Authority Settings */}
-      {(hasMintAuthority() || hasMeltAuthority()) && (
-        <div className="mb-4">
-          {hasMintAuthority() && (
-            <div className="mb-3">
-              <TokenParameter label={t`Create mint authority?`} value={data.createMint} isBoolean />
-              {data.mintAuthorityAddress && (
-                <TokenParameter
-                  label={t`Mint Authority Address`}
-                  value={data.mintAuthorityAddress}
-                  isAddress
-                />
-              )}
-            </div>
+      {hasMintAuthority() && (
+        <>
+          <TokenParameter label={t`Create mint authority?`} value={data.createMint} isBoolean />
+          {data.mintAuthorityAddress && (
+            <TokenParameter
+              label={t`Mint Authority Address`}
+              value={data.mintAuthorityAddress}
+              isAddress
+            />
           )}
-
-          {hasMeltAuthority() && (
-            <div className="mb-3">
-              <TokenParameter label={t`Create melt authority?`} value={data.createMelt} isBoolean />
-              {data.meltAuthorityAddress && (
-                <TokenParameter
-                  label={t`Melt Authority Address`}
-                  value={data.meltAuthorityAddress}
-                  isAddress
-                />
-              )}
-            </div>
+        </>
+      )}
+      {hasMeltAuthority() && (
+        <>
+          <TokenParameter label={t`Create melt authority?`} value={data.createMelt} isBoolean />
+          {data.meltAuthorityAddress && (
+            <TokenParameter
+              label={t`Melt Authority Address`}
+              value={data.meltAuthorityAddress}
+              isAddress
+            />
           )}
-        </div>
+        </>
       )}
 
       {/* Additional Settings */}
-      {hasAdditionalSettings() && (
-        <div className="mb-4">
-          <TokenParameter label={t`Address`} value={data.address} isAddress />
-          <TokenParameter label={t`Change Address`} value={data.changeAddress} isAddress />
-          <TokenParameter
-            label={t`Allow External Mint Authority Address`}
-            value={data.allowExternalMintAuthorityAddress}
-            isBoolean
-          />
-          <TokenParameter
-            label={t`Allow External Melt Authority Address`}
-            value={data.allowExternalMeltAuthorityAddress}
-            isBoolean
-          />
-          {data.data && (
-            <TokenParameter
-              label={t`Data`}
-              value={typeof data.data === 'string' ? data.data : JSON.stringify(data.data)}
-            />
-          )}
-        </div>
+      <TokenParameter label={t`Address`} value={data.address} isAddress />
+      <TokenParameter label={t`Change Address`} value={data.changeAddress} isAddress />
+      <TokenParameter
+        label={t`Allow External Mint Authority Address`}
+        value={data.allowExternalMintAuthorityAddress}
+        isBoolean
+      />
+      <TokenParameter
+        label={t`Allow External Melt Authority Address`}
+        value={data.allowExternalMeltAuthorityAddress}
+        isBoolean
+      />
+      {data.data && (
+        <TokenParameter
+          label={t`Data`}
+          value={typeof data.data === 'string' ? data.data : JSON.stringify(data.data)}
+        />
+      )}
+
+      {/* Fee Fields */}
+      <TokenParameter
+        label={t`Contract pays fees?`}
+        value={data.contractPaysFees}
+        isBoolean
+      />
+      <TokenParameter
+        label={t`Contract pays token deposit?`}
+        value={data.contractPaysTokenDeposit}
+        isBoolean
+      />
+      {data.deposit && (
+        <TokenParameter
+          label={t`Deposit`}
+          value={`${formatAmount(data.deposit)} ${DEFAULT_TOKEN_SYMBOL}`}
+        />
+      )}
+      {data.fee !== undefined && data.fee !== null && (
+        <TokenParameter
+          label={t`Network Fee`}
+          value={data.fee ? `${formatAmount(data.fee)} ${DEFAULT_TOKEN_SYMBOL}` : '-'}
+        />
       )}
     </div>
   );

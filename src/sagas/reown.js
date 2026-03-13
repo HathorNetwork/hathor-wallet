@@ -638,6 +638,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
           type: ReownModalTypes.SEND_TRANSACTION,
           data: {
             data: request.data,
+            params: request.params,
             dapp: requestMetadata,
           },
           onAcceptAction: sendTransactionResponseTemplate(true),
@@ -687,6 +688,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
             accept: sendNanoContractTxResponseTemplate(true),
             deny: sendNanoContractTxResponseTemplate(false),
             data: request.data,
+            params: request.params,
             dapp: requestMetadata,
           }
         });
@@ -710,6 +712,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
             accept: createTokenResponseTemplate(true),
             deny: createTokenResponseTemplate(false),
             data: request.data,
+            params: request.params,
             dapp: requestMetadata,
           }
         });
@@ -738,6 +741,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
             accept: createNanoContractCreateTokenTxResponseTemplate(true),
             deny: createNanoContractCreateTokenTxResponseTemplate(false),
             data: request.data,
+            params: request.params,
             dapp: requestMetadata,
           }
         });
@@ -942,7 +946,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
  * @param {string} modalType - The type of modal to show from ReownModalTypes
  */
 export function* handleDAppRequest({ payload }, modalType) {
-  const { accept, deny: denyCb, data, dapp } = payload;
+  const { accept, deny: denyCb, data, dapp, params } = payload;
   const wallet = getGlobalWallet();
 
   if (!wallet.isReady()) {
@@ -952,7 +956,7 @@ export function* handleDAppRequest({ payload }, modalType) {
 
   yield put(showGlobalModal(MODAL_TYPES.REOWN, {
     type: modalType,
-    data: { data, dapp },
+    data: { data, dapp, params },
     onAcceptAction: accept,
     onRejectAction: denyCb,
   }));

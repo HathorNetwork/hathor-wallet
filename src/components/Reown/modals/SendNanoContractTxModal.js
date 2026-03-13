@@ -18,6 +18,10 @@ import { setNewNanoContractStatusReady } from '../../../actions';
  * @param {Function} onReject Function to call when the user rejects the request
  */
 export function SendNanoContractTxModal({ data, onAccept, onReject }) {
+  // Extract params for inputs/outputs if available
+  const params = data.data?.params || {};
+  const { inputs = [], outputs = [] } = params;
+
   // Status configuration for the base component
   const statusConfig = {
     setReadyAction: setNewNanoContractStatusReady,
