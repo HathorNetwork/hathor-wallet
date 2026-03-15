@@ -5,8 +5,25 @@ import hathorLib from '@hathor/wallet-lib';
 import { getGlobalWallet } from '../modules/wallet';
 import helpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
+import tokensUtils from '../utils/tokens';
+import LOCAL_STORE from '../storage';
 import { updateUnleashClientContext } from './featureToggle';
 import { t } from 'ttag';
+
+/**
+ * Save current network's registered tokens to localStorage keyed by genesis hash,
+ * so they can be restored when switching back to this network.
+ */
+function* saveCurrentNetworkTokens(wallet) {
+  const networkSettings = yield select((state) => state.networkSettings.data);
+  const genesisHash = networkSettings?.genesisHash;
+  if (!genesisHash) {
+    return;
+  }
+
+  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet, true);
+  LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
+}
 
 /**
  * Change network settings with new data
@@ -62,8 +79,13 @@ export function* changeNetworkSettings({ data, pin }) {
     return;
   }
 
+  // Save current registered tokens before switching networks
+  yield call(saveCurrentNetworkTokens, wallet);
+
+  const newGenesisHash = versionData.genesisBlockHash || null;
+
   if (versionData.network === 'mainnet') {
-    yield executeNetworkSettingsUpdate({ ...data, network: versionData.network, fullNetwork: versionData.network }, pin);
+    yield executeNetworkSettingsUpdate({ ...data, network: versionData.network, fullNetwork: versionData.network, genesisHash: newGenesisHash }, pin);
     return;
   }
 
@@ -87,7 +109,7 @@ export function* changeNetworkSettings({ data, pin }) {
     return;
   }
 
-  yield executeNetworkSettingsUpdate({ ...data, network: newNetwork, fullNetwork: versionData.network }, pin);
+  yield executeNetworkSettingsUpdate({ ...data, network: newNetwork, fullNetwork: versionData.network, genesisHash: newGenesisHash }, pin);
 }
 
 /**

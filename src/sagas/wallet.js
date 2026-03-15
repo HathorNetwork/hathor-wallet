@@ -60,6 +60,7 @@ import {
   addRegisteredTokens,
   startWalletSuccess,
   startWalletReset,
+  networkSettingsUpdate,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -231,6 +232,8 @@ export function* startWallet(action) {
   // wait until the wallet is ready
   yield fork(listenForWalletReady, wallet);
 
+  let genesisHash = null;
+
   try {
     console.log('[*] Start wallet.');
     const serverInfo = yield call([wallet, wallet.start], {
@@ -261,6 +264,21 @@ export function* startWallet(action) {
       customTokens,
       nanoContractsEnabled,
     }));
+
+    // Store genesis hash in network settings so we can use it to persist tokens per network
+    genesisHash = serverInfo?.genesisBlockHash || null;
+    if (genesisHash) {
+      const currentNetworkSettings = yield select((state) => state.networkSettings.data);
+      if (currentNetworkSettings && currentNetworkSettings.genesisHash !== genesisHash) {
+        const updatedSettings = { ...currentNetworkSettings, genesisHash };
+        LOCAL_STORE.setNetworkSettings(updatedSettings);
+        yield put(networkSettingsUpdate(updatedSettings));
+      }
+    } else {
+      // Fallback: use genesis hash from stored network settings if available
+      const currentNetworkSettings = yield select((state) => state.networkSettings.data);
+      genesisHash = currentNetworkSettings?.genesisHash || null;
+    }
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from
@@ -321,6 +339,19 @@ export function* startWallet(action) {
 
   // Register all network tokens on the redux store
   yield put(addRegisteredTokens(customTokens));
+
+  // Restore previously saved tokens for this network (identified by genesis hash)
+  if (genesisHash) {
+    const savedTokens = LOCAL_STORE.getTokensForNetwork(genesisHash);
+    if (savedTokens) {
+      for (const token of savedTokens) {
+        const isAlreadyRegistered = yield call([wallet.storage, wallet.storage.isTokenRegistered], token.uid);
+        if (!isAlreadyRegistered) {
+          yield call([wallet.storage, wallet.storage.registerToken], token);
+        }
+      }
+    }
+  }
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
