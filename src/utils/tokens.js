@@ -24,19 +24,8 @@ async function saveCurrentTokensForNetwork() {
   const globalWallet = getGlobalWallet();
   if (!globalWallet) return;
 
-  const htrUid = hathorLib.constants.NATIVE_TOKEN_UID;
-  const allTokens = [];
-  const iterator = globalWallet.storage.getRegisteredTokens();
-  let next = await iterator.next();
-  while (!next.done) {
-    const token = next.value;
-    if (token.uid !== htrUid) {
-      allTokens.push({ uid: token.uid, name: token.name, symbol: token.symbol });
-    }
-    next = await iterator.next();
-  }
-
-  LOCAL_STORE.saveTokensForNetwork(genesisHash, allTokens);
+  const registeredTokens = await tokens.getRegisteredTokens(globalWallet, true);
+  LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
 }
 
 /**
