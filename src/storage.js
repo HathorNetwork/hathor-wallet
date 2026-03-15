@@ -27,6 +27,7 @@ export const NETWORK_SETTINGS_KEY = 'localstorage:networkSettings';
 export const ACCESS_DATA_KEY = 'localstorage:accessdata';
 export const REGISTERED_TOKENS_KEY = 'localstorage:registeredTokens';
 export const REGISTERED_NANOCONTRACTS_KEY = 'localstorage:registeredNanoContracts';
+export const NETWORK_TOKENS_KEY = 'localstorage:networkTokens';
 
 export const storageKeys = [
   WALLET_VERSION_KEY,
@@ -42,6 +43,7 @@ export const storageKeys = [
   ACCESS_DATA_KEY,
   REGISTERED_TOKENS_KEY,
   REGISTERED_NANOCONTRACTS_KEY,
+  NETWORK_TOKENS_KEY,
 ];
 
 class HybridStore extends MemoryStore {
@@ -617,6 +619,31 @@ export class LocalStorageStore {
 
   setNetworkSettings(data) {
     this.setItem(NETWORK_SETTINGS_KEY, data);
+  }
+
+  /**
+   * Save registered tokens for a specific network identified by genesis block hash.
+   *
+   * @param {string} genesisHash The genesis block hash identifying the network
+   * @param {Array<{uid: string, name: string, symbol: string}>} tokens Tokens to save
+   */
+  saveTokensForNetwork(genesisHash, tokens) {
+    if (!genesisHash) return;
+    const networkTokens = this.getItem(NETWORK_TOKENS_KEY) || {};
+    networkTokens[genesisHash] = tokens;
+    this.setItem(NETWORK_TOKENS_KEY, networkTokens);
+  }
+
+  /**
+   * Get saved tokens for a specific network identified by genesis block hash.
+   *
+   * @param {string} genesisHash The genesis block hash identifying the network
+   * @returns {Array<{uid: string, name: string, symbol: string}>|null} Saved tokens or null
+   */
+  getTokensForNetwork(genesisHash) {
+    if (!genesisHash) return null;
+    const networkTokens = this.getItem(NETWORK_TOKENS_KEY) || {};
+    return networkTokens[genesisHash] || null;
   }
 }
 

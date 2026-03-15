@@ -13,6 +13,22 @@ import LOCAL_STORE from '../storage';
 import { getGlobalWallet } from '../modules/wallet';
 
 /**
+ * Save the current registered tokens (excluding native token) to the network tokens storage
+ * keyed by the current genesis hash, so they persist across network changes.
+ */
+async function saveCurrentTokensForNetwork() {
+  const networkSettings = LOCAL_STORE.getNetworkSettings();
+  const genesisHash = networkSettings?.genesisHash;
+  if (!genesisHash) return;
+
+  const globalWallet = getGlobalWallet();
+  if (!globalWallet) return;
+
+  const registeredTokens = await tokens.getRegisteredTokens(globalWallet, true);
+  LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
+}
+
+/**
  * Methods to create and handle tokens
  *
  * @namespace Tokens
@@ -62,6 +78,7 @@ const tokens = {
     const tokens = await this.getRegisteredTokens(globalWallet);
     store.dispatch(newTokens({tokens, uid: uid}));
     wallet.fetchTokensMetadata([uid], globalWallet.conn.network);
+    await saveCurrentTokensForNetwork();
   },
 
   /**
@@ -80,6 +97,7 @@ const tokens = {
     const tokens = await this.getRegisteredTokens(globalWallet);
     store.dispatch(newTokens({tokens, uid: hathorLib.constants.NATIVE_TOKEN_UID}));
     store.dispatch(removeTokenMetadata(uid));
+    await saveCurrentTokensForNetwork();
   },
 
   /**
