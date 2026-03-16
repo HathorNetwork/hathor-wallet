@@ -12,8 +12,8 @@ const { LocalStorageStore, NETWORK_TOKENS_KEY, storageKeys } = require('../../st
 
 describe('Network tokens persistence', () => {
   describe('storageKeys', () => {
-    it('should not include NETWORK_TOKENS_KEY', () => {
-      expect(storageKeys).not.toContain(NETWORK_TOKENS_KEY);
+    it('should include NETWORK_TOKENS_KEY so full wallet reset clears it', () => {
+      expect(storageKeys).toContain(NETWORK_TOKENS_KEY);
     });
   });
 
@@ -68,16 +68,13 @@ describe('Network tokens persistence', () => {
       expect(store.getTokensForNetwork('testnet_hash')).toEqual(testnetTokens);
     });
 
-    it('survives resetStorage()', () => {
+    it('is cleared by resetStorage()', () => {
       const tokens = [{ uid: 'token1', name: 'Token One', symbol: 'TK1' }];
       store.saveTokensForNetwork('hash_a', tokens);
 
-      // resetStorage() iterates storageKeys and removes each one
-      for (const key of storageKeys) {
-        store.removeItem(key);
-      }
+      store.resetStorage();
 
-      expect(store.getTokensForNetwork('hash_a')).toEqual(tokens);
+      expect(store.getTokensForNetwork('hash_a')).toBeNull();
     });
   });
 });

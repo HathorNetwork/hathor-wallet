@@ -348,8 +348,11 @@ export function* startWallet(action) {
   if (genesisHash) {
     const savedTokens = LOCAL_STORE.getTokensForNetwork(genesisHash);
     console.log('[NetworkTokens] startWallet - savedTokens from storage:', JSON.stringify(savedTokens));
-    if (savedTokens) {
+    if (Array.isArray(savedTokens)) {
       for (const token of savedTokens) {
+        if (!token || typeof token.uid !== 'string') {
+          continue;
+        }
         const isAlreadyRegistered = yield call([wallet.storage, wallet.storage.isTokenRegistered], token.uid);
         console.log('[NetworkTokens] startWallet - token:', token.uid, token.symbol, 'alreadyRegistered:', isAlreadyRegistered);
         if (!isAlreadyRegistered) {

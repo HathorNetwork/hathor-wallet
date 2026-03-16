@@ -43,6 +43,7 @@ export const storageKeys = [
   ACCESS_DATA_KEY,
   REGISTERED_TOKENS_KEY,
   REGISTERED_NANOCONTRACTS_KEY,
+  NETWORK_TOKENS_KEY,
 ];
 
 class HybridStore extends MemoryStore {
