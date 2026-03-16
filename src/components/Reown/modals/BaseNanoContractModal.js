@@ -78,14 +78,13 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
         </div>
       )}
 
-      {nanoContract.contractPaysFees && (
-        <div className="d-flex justify-content-between align-items-center">
-          <strong>{t`Contract pays fees?`}</strong>
-          <span className={`badge badge-${nanoContract.contractPaysFees ? 'success' : 'secondary'}`}>
-            {nanoContract.contractPaysFees ? t`Yes` : t`No`}
-          </span>
-        </div>
-      )}
+      <div className="d-flex justify-content-between align-items-center">
+        <strong>{t`Contract pays fees?`}</strong>
+        <span className={`badge badge-${nanoContract.contractPaysFees ? 'success' : 'secondary'}`}>
+          {nanoContract.contractPaysFees ? t`Yes` : t`No`}
+        </span>
+      </div>
+      
     </div>
   </div>
 );
@@ -243,7 +242,6 @@ export function BaseNanoContractModal({
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const firstAddress = useSelector((state) => state.reown.firstAddress);
   const registeredTokens = useSelector((state) => state.tokens);
-  const unregisteredTokens = useSelector((state) => state.unregisteredTokens);
   const network = useSelector((state) => state.serverInfo.network);
 
   // Local state

@@ -20,7 +20,7 @@ import CreateTokenRequestData from '../CreateTokenRequestData';
  * @param {Function} onAccept Function to call when the user accepts the request
  * @param {Function} onReject Function to call when the user rejects the request
  */
-export function CreateTokenModal({ data, onAccept, onReject, params }) {
+export function CreateTokenModal({ data, onAccept, onReject }) {
   const dispatch = useDispatch();
   const tokenData = data?.data || {};
 
@@ -51,12 +51,6 @@ export function CreateTokenModal({ data, onAccept, onReject, params }) {
             <CreateTokenRequestData data={tokenData} />
           </div>
         </div>
-
-        {params?.pushTx === false && (
-          <p className="text-muted small mt-3 mb-0">
-            {t`This transaction will only be built, not pushed to the network.`}
-          </p>
-        )}
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" onClick={onReject} data-dismiss="modal">{t`Reject`}</button>

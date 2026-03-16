@@ -943,6 +943,7 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
  * @param {Function} payload.deny - Callback for when user rejects
  * @param {Object} payload.data - The request data
  * @param {Object} payload.dapp - Metadata about the requesting dApp
+ * @param {Object} payload.params - The request parameters
  * @param {string} modalType - The type of modal to show from ReownModalTypes
  */
 export function* handleDAppRequest({ payload }, modalType) {

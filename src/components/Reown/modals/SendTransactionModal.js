@@ -46,10 +46,6 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
     }
   }, [data, registeredTokens, dispatch]);
 
-  useEffect(() => {
-    console.log('data', data)
-  }, [])
-
   const isTokenRegistered = (tokenId) => {
     if (tokenId === constants.NATIVE_TOKEN_UID) {
       return true;

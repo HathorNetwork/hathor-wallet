@@ -46,18 +46,6 @@ const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) 
     return <span>{value}</span>;
   };
 
-  // Addresses need special layout (stacked) due to their length
-  if (isAddress) {
-    return (
-      <div className="token-param py-2">
-        <div className="text-muted small">{label}</div>
-        <div className="mt-1">
-          {renderValue()}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="token-param d-flex justify-content-between align-items-center py-2">
       <span className="text-muted small">{label}</span>
