@@ -5,24 +5,8 @@ import hathorLib from '@hathor/wallet-lib';
 import { getGlobalWallet } from '../modules/wallet';
 import helpers from '../utils/helpers';
 import walletUtils from '../utils/wallet';
-import tokensUtils from '../utils/tokens';
-import LOCAL_STORE from '../storage';
 import { updateUnleashClientContext } from './featureToggle';
 import { t } from 'ttag';
-
-/**
- * Save current network's registered tokens to localStorage keyed by genesis hash,
- * so they can be restored when switching back to this network.
- */
-function* saveCurrentNetworkTokens(wallet) {
-  const genesisHash = yield select((state) => state.serverInfo.genesisHash);
-  if (!genesisHash) {
-    return;
-  }
-
-  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet, true);
-  LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
-}
 
 /**
  * Change network settings with new data
@@ -77,9 +61,6 @@ export function* changeNetworkSettings({ data, pin }) {
     yield put(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.ERROR, error: t`Invalid node.` }));
     return;
   }
-
-  // Save current registered tokens before switching networks
-  yield call(saveCurrentNetworkTokens, wallet);
 
   const newGenesisHash = versionData.genesis_block_hash || null;
 

@@ -60,7 +60,6 @@ import {
   addRegisteredTokens,
   startWalletSuccess,
   startWalletReset,
-  networkSettingsUpdate,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -267,16 +266,6 @@ export function* startWallet(action) {
       nanoContractsEnabled,
       genesisHash,
     }));
-
-    // Persist genesis hash in network settings so non-saga code (tokens.js) can access it
-    if (genesisHash) {
-      const currentNetworkSettings = yield select((state) => state.networkSettings.data);
-      if (currentNetworkSettings && currentNetworkSettings.genesisHash !== genesisHash) {
-        const updatedSettings = { ...currentNetworkSettings, genesisHash };
-        LOCAL_STORE.setNetworkSettings(updatedSettings);
-        yield put(networkSettingsUpdate(updatedSettings));
-      }
-    }
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from

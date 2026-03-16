@@ -31,6 +31,8 @@ import {
 } from '../actions';
 import { t } from "ttag";
 import { getGlobalWallet } from "../modules/wallet";
+import tokensUtils from '../utils/tokens';
+import LOCAL_STORE from '../storage';
 import { logger } from '../utils/logger';
 
 const CONCURRENT_FETCH_REQUESTS = 5;
@@ -239,8 +241,25 @@ function* routeTokenChange(action) {
           tokenId: token.uid,
         });
       }
+
+      // Persist registered tokens for the current network
+      yield call(saveCurrentNetworkTokens, wallet);
       break;
   }
+}
+
+/**
+ * Save current network's registered tokens to localStorage keyed by genesis hash,
+ * so they can be restored when switching back to this network.
+ */
+function* saveCurrentNetworkTokens(wallet) {
+  const genesisHash = yield select((state) => state.serverInfo.genesisHash);
+  if (!genesisHash) {
+    return;
+  }
+
+  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet, true);
+  LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
 }
 
 export function* fetchTokenData(tokenId) {
