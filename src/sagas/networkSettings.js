@@ -15,8 +15,7 @@ import { t } from 'ttag';
  * so they can be restored when switching back to this network.
  */
 function* saveCurrentNetworkTokens(wallet) {
-  const networkSettings = yield select((state) => state.networkSettings.data);
-  const genesisHash = networkSettings?.genesisHash;
+  const genesisHash = yield select((state) => state.serverInfo.genesisHash);
   if (!genesisHash) {
     return;
   }

@@ -1213,6 +1213,7 @@ const onSetServerInfo = (state, action) => {
       decimalPlaces: action.payload.decimalPlaces,
       customTokens: action.payload.customTokens,
       nanoContractsEnabled: action.payload.nanoContractsEnabled,
+      genesisHash: action.payload.genesisHash,
     },
   }
 };

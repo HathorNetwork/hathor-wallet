@@ -525,8 +525,8 @@ export const resetNavigateTo = () => ({
  * @param {string} customTokens[].symbol
  * @param {boolean} nanoContractsEnabled - if full node set nano contract as enabled
  */
-export const setServerInfo = ({ version, network, customTokens, decimalPlaces, nanoContractsEnabled }) => (
-  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces, nanoContractsEnabled } }
+export const setServerInfo = ({ version, network, customTokens, decimalPlaces, nanoContractsEnabled, genesisHash }) => (
+  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces, nanoContractsEnabled, genesisHash } }
 );
 
 /**

@@ -257,16 +257,18 @@ export function* startWallet(action) {
       nanoContractsEnabled = serverInfo.nano_contracts_enabled ?? false;
     }
 
+    genesisHash = serverInfo?.genesis_block_hash || null;
+
     yield put(setServerInfo({
       version,
       network: serverNetworkName,
       decimalPlaces,
       customTokens,
       nanoContractsEnabled,
+      genesisHash,
     }));
 
-    // Store genesis hash in network settings so we can use it to persist tokens per network
-    genesisHash = serverInfo?.genesis_block_hash || null;
+    // Persist genesis hash in network settings so non-saga code (tokens.js) can access it
     if (genesisHash) {
       const currentNetworkSettings = yield select((state) => state.networkSettings.data);
       if (currentNetworkSettings && currentNetworkSettings.genesisHash !== genesisHash) {
@@ -274,10 +276,6 @@ export function* startWallet(action) {
         LOCAL_STORE.setNetworkSettings(updatedSettings);
         yield put(networkSettingsUpdate(updatedSettings));
       }
-    } else {
-      // Fallback: use genesis hash from stored network settings if available
-      const currentNetworkSettings = yield select((state) => state.networkSettings.data);
-      genesisHash = currentNetworkSettings?.genesisHash || null;
     }
   } catch(e) {
     if (useWalletService) {
