@@ -267,11 +267,9 @@ export function* startWallet(action) {
 
     // Store genesis hash in network settings so we can use it to persist tokens per network
     genesisHash = serverInfo?.genesis_block_hash || null;
-    console.log('[NetworkTokens] startWallet - genesis_block_hash from serverInfo:', genesisHash);
     if (genesisHash) {
       const currentNetworkSettings = yield select((state) => state.networkSettings.data);
       if (currentNetworkSettings && currentNetworkSettings.genesisHash !== genesisHash) {
-        console.log('[NetworkTokens] startWallet - updating networkSettings with genesisHash:', genesisHash);
         const updatedSettings = { ...currentNetworkSettings, genesisHash };
         LOCAL_STORE.setNetworkSettings(updatedSettings);
         yield put(networkSettingsUpdate(updatedSettings));
@@ -280,7 +278,6 @@ export function* startWallet(action) {
       // Fallback: use genesis hash from stored network settings if available
       const currentNetworkSettings = yield select((state) => state.networkSettings.data);
       genesisHash = currentNetworkSettings?.genesisHash || null;
-      console.log('[NetworkTokens] startWallet - fallback genesisHash from settings:', genesisHash);
     }
   } catch(e) {
     if (useWalletService) {
@@ -344,25 +341,19 @@ export function* startWallet(action) {
   yield put(addRegisteredTokens(customTokens));
 
   // Restore previously saved tokens for this network (identified by genesis hash)
-  console.log('[NetworkTokens] startWallet - restoring tokens for genesisHash:', genesisHash);
   if (genesisHash) {
     const savedTokens = LOCAL_STORE.getTokensForNetwork(genesisHash);
-    console.log('[NetworkTokens] startWallet - savedTokens from storage:', JSON.stringify(savedTokens));
     if (Array.isArray(savedTokens)) {
       for (const token of savedTokens) {
         if (!token || typeof token.uid !== 'string') {
           continue;
         }
         const isAlreadyRegistered = yield call([wallet.storage, wallet.storage.isTokenRegistered], token.uid);
-        console.log('[NetworkTokens] startWallet - token:', token.uid, token.symbol, 'alreadyRegistered:', isAlreadyRegistered);
         if (!isAlreadyRegistered) {
           yield call([wallet.storage, wallet.storage.registerToken], token);
-          console.log('[NetworkTokens] startWallet - registered token:', token.uid, token.symbol);
         }
       }
     }
-  } else {
-    console.log('[NetworkTokens] startWallet - no genesisHash, skipping token restore');
   }
 
   if (hardware) {

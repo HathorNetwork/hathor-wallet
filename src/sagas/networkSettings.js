@@ -16,15 +16,12 @@ import { t } from 'ttag';
  */
 function* saveCurrentNetworkTokens(wallet) {
   const networkSettings = yield select((state) => state.networkSettings.data);
-  console.log('[NetworkTokens] saveCurrentNetworkTokens - networkSettings:', JSON.stringify(networkSettings));
   const genesisHash = networkSettings?.genesisHash;
   if (!genesisHash) {
-    console.log('[NetworkTokens] saveCurrentNetworkTokens - no genesisHash, skipping save');
     return;
   }
 
   const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet, true);
-  console.log('[NetworkTokens] saveCurrentNetworkTokens - saving tokens for hash:', genesisHash, 'tokens:', JSON.stringify(registeredTokens));
   LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
 }
 
@@ -86,7 +83,6 @@ export function* changeNetworkSettings({ data, pin }) {
   yield call(saveCurrentNetworkTokens, wallet);
 
   const newGenesisHash = versionData.genesis_block_hash || null;
-  console.log('[NetworkTokens] changeNetworkSettings - versionData keys:', Object.keys(versionData), 'newGenesisHash:', newGenesisHash);
 
   if (versionData.network === 'mainnet') {
     yield executeNetworkSettingsUpdate({ ...data, network: versionData.network, fullNetwork: versionData.network, genesisHash: newGenesisHash }, pin);
