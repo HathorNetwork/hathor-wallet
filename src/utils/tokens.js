@@ -19,12 +19,14 @@ import { getGlobalWallet } from '../modules/wallet';
 async function saveCurrentTokensForNetwork() {
   const networkSettings = LOCAL_STORE.getNetworkSettings();
   const genesisHash = networkSettings?.genesisHash;
+  console.log('[NetworkTokens] saveCurrentTokensForNetwork (on register/unregister) - genesisHash:', genesisHash);
   if (!genesisHash) return;
 
   const globalWallet = getGlobalWallet();
   if (!globalWallet) return;
 
   const registeredTokens = await tokens.getRegisteredTokens(globalWallet, true);
+  console.log('[NetworkTokens] saveCurrentTokensForNetwork - saving tokens:', JSON.stringify(registeredTokens));
   LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
 }
 
