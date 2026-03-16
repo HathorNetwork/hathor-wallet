@@ -262,6 +262,32 @@ function* saveCurrentNetworkTokens(wallet) {
   LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
 }
 
+/**
+ * Restore previously saved tokens for the current network.
+ * Called during wallet startup to re-register tokens that were
+ * saved before a network switch.
+ */
+export function* restoreTokensForNetwork(wallet, genesisHash) {
+  if (!genesisHash) {
+    return;
+  }
+
+  const savedTokens = LOCAL_STORE.getTokensForNetwork(genesisHash);
+  if (!Array.isArray(savedTokens)) {
+    return;
+  }
+
+  for (const token of savedTokens) {
+    if (!token || typeof token.uid !== 'string') {
+      continue;
+    }
+    const isAlreadyRegistered = yield call([wallet.storage, wallet.storage.isTokenRegistered], token.uid);
+    if (!isAlreadyRegistered) {
+      yield call([wallet.storage, wallet.storage.registerToken], token);
+    }
+  }
+}
+
 export function* fetchTokenData(tokenId) {
   const fetchBalanceResponse = yield call(
     dispatchAndWait,
