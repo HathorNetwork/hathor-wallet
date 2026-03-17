@@ -941,3 +941,23 @@ div .nc-token-balance:not(:last-child) {
 .remove-action-btn {
   margin-bottom: 1px;
 }
+
+/* Token Type Info Box */
+.token-type-info-box {
+  background-color: #e7f3ff;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.token-type-info-box i {
+  color: #0066cc;
+  margin-top: 0.2rem;
+}
+
+.token-type-info-box a {
+  color: #0066cc;
+}
