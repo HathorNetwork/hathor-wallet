@@ -130,7 +130,8 @@ const initialState = {
     version: null,
     decimalPlaces: DECIMAL_PLACES,
     customTokens: [],
-    nanoContractsEnabled: false
+    nanoContractsEnabled: false,
+    genesisHash: null,
   },
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
@@ -1204,6 +1205,14 @@ export const onSetNavigateTo = (state, action) => {
   };
 };
 
+/**
+ * @param {string} action.payload.network
+ * @param {string} action.payload.version
+ * @param {number} action.payload.decimalPlaces
+ * @param {Object[]} action.payload.customTokens
+ * @param {boolean} action.payload.nanoContractsEnabled
+ * @param {string|null} action.payload.genesisHash - genesis block hash identifying the network
+ */
 const onSetServerInfo = (state, action) => {
   return {
     ...state,
@@ -1213,6 +1222,7 @@ const onSetServerInfo = (state, action) => {
       decimalPlaces: action.payload.decimalPlaces,
       customTokens: action.payload.customTokens,
       nanoContractsEnabled: action.payload.nanoContractsEnabled,
+      genesisHash: action.payload.genesisHash,
     },
   }
 };

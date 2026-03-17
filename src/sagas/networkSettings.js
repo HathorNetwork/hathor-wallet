@@ -62,8 +62,10 @@ export function* changeNetworkSettings({ data, pin }) {
     return;
   }
 
+  const newGenesisHash = versionData.genesis_block_hash || null;
+
   if (versionData.network === 'mainnet') {
-    yield executeNetworkSettingsUpdate({ ...data, network: versionData.network, fullNetwork: versionData.network }, pin);
+    yield executeNetworkSettingsUpdate({ ...data, network: versionData.network, fullNetwork: versionData.network, genesisHash: newGenesisHash }, pin);
     return;
   }
 
@@ -87,7 +89,7 @@ export function* changeNetworkSettings({ data, pin }) {
     return;
   }
 
-  yield executeNetworkSettingsUpdate({ ...data, network: newNetwork, fullNetwork: versionData.network }, pin);
+  yield executeNetworkSettingsUpdate({ ...data, network: newNetwork, fullNetwork: versionData.network, genesisHash: newGenesisHash }, pin);
 }
 
 /**
