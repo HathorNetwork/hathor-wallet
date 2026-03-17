@@ -78,12 +78,12 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
         </div>
       )}
 
-      <div className="d-flex justify-content-between align-items-center">
+      {nanoContract.contractPaysFees != null &&<div className="d-flex justify-content-between align-items-center">
         <strong>{t`Contract pays fees?`}</strong>
         <span className={`badge badge-${nanoContract.contractPaysFees ? 'success' : 'secondary'}`}>
           {nanoContract.contractPaysFees ? t`Yes` : t`No`}
         </span>
-      </div>
+      </div>}
       
     </div>
   </div>

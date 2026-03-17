@@ -67,7 +67,7 @@ import {
   checkForFeatureFlag,
   dispatchLedgerTokenSignatureVerification,
 } from './helpers';
-import { fetchTokenData } from './tokens';
+import { fetchTokenData, restoreTokensForNetwork } from './tokens';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import nanoUtils from '../utils/nanoContracts';
@@ -231,6 +231,8 @@ export function* startWallet(action) {
   // wait until the wallet is ready
   yield fork(listenForWalletReady, wallet);
 
+  let genesisHash = null;
+
   try {
     console.log('[*] Start wallet.');
     const serverInfo = yield call([wallet, wallet.start], {
@@ -254,12 +256,15 @@ export function* startWallet(action) {
       nanoContractsEnabled = serverInfo.nano_contracts_enabled ?? false;
     }
 
+    genesisHash = serverInfo?.genesis_block_hash || null;
+
     yield put(setServerInfo({
       version,
       network: serverNetworkName,
       decimalPlaces,
       customTokens,
       nanoContractsEnabled,
+      genesisHash,
     }));
   } catch(e) {
     if (useWalletService) {
@@ -321,6 +326,9 @@ export function* startWallet(action) {
 
   // Register all network tokens on the redux store
   yield put(addRegisteredTokens(customTokens));
+
+  // Restore previously saved tokens for this network
+  yield call(restoreTokensForNetwork, wallet, genesisHash);
 
   if (hardware) {
     // This will verify all ledger trusted tokens to check their validity
