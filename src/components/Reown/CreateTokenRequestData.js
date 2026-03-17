@@ -12,6 +12,32 @@ import hathorLib from '@hathor/wallet-lib';
 const DEFAULT_TOKEN_SYMBOL = hathorLib.constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
 
 /**
+ * Format token amount with proper decimal places
+ */
+const formatAmount = (amount) => {
+  try {
+    if (amount === undefined || amount === null) return null;
+    return hathorLib.numberUtils.prettyValue(amount);
+  } catch (error) {
+    console.error('Error formatting amount:', error);
+    return amount.toString();
+  }
+};
+
+
+/**
+ * Renders translated values for token version
+ * @param {TokenVersion} version
+ */
+function formatTokenVersion(version) {
+  const versionMap = {
+    [hathorLib.TokenVersion.FEE]: t`Fee`,
+    [hathorLib.TokenVersion.DEPOSIT]: t`Deposit`,
+  };
+  return versionMap[version] || t`Unknown`;
+}
+
+/**
  * Component for displaying a single token parameter
  */
 const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) => {
@@ -49,7 +75,7 @@ const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) 
   return (
     <div className="token-param d-flex justify-content-between align-items-center py-2">
       <span className="text-muted small">{label}</span>
-      <span>{renderValue()}</span>
+      <div>{renderValue()}</div>
     </div>
   );
 };
@@ -60,32 +86,6 @@ const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) 
  * @param {Object} data The token data to be displayed
  */
 export default function CreateTokenRequestData({ data }) {
-  /**
-   * Format token amount with proper decimal places
-   */
-  const formatAmount = (amount) => {
-    try {
-      if (amount === undefined || amount === null) return null;
-      return hathorLib.numberUtils.prettyValue(amount);
-    } catch (error) {
-      console.error('Error formatting amount:', error);
-      return amount.toString();
-    }
-  };
-
-
-/**
- * Renders translated values for token version
- * @param {TokenVersion} version
- */
-function formatTokenVersion(version) {
-  const versionMap = {
-    [hathorLib.TokenVersion.FEE]: t`Fee`,
-    [hathorLib.TokenVersion.DEPOSIT]: t`Deposit`,
-  };
-  return versionMap[version] || t`Unknown`;
-}
-
   /**
    * Check if token has mint authority
    */
