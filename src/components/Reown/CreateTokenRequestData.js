@@ -29,7 +29,7 @@ const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) 
     if (isAddress && value) {
       return (
         <div className="d-flex align-items-center">
-          <code className="text-monospace small flex-grow-1" style={{ wordBreak: 'break-all' }}>
+          <code className="text-monospace small flex-grow-1" style={{ wordBreak: 'break-all', color: 'inherit' }}>
             {value}
           </code>
           <button
