@@ -44,7 +44,10 @@ function CreateToken() {
 
 
   const { type } = useParams();
-  const tokenVersion = type ? Number(type) : TokenVersion.DEPOSIT;
+  // Allowlist of valid token versions for token creation
+  const allowedTokenVersions = new Set([TokenVersion.DEPOSIT, TokenVersion.FEE]);
+  const parsedType = Number(type);
+  const tokenVersion = allowedTokenVersions.has(parsedType) ? parsedType : TokenVersion.DEPOSIT;
   const isDepositToken = tokenVersion === TokenVersion.DEPOSIT;
 
   const dispatch = useDispatch();
@@ -260,7 +263,7 @@ function CreateToken() {
       return mintAmount ? hathorLib.tokensUtils.getDepositAmount(mintAmount, depositPercent) : 0n;
     }
     // Fee tokens require a fixed 0.01 HTR network fee
-    return BigInt(10 ** (decimalPlaces - 2));
+    return hathorLib.constants.FEE_PER_OUTPUT;
   };
 
   const requiredAmount = getRequiredAmount(amount, tokenVersion);
