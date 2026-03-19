@@ -11,6 +11,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { types, unregisteredTokensClean, setReownError } from '../../actions';
 import { FeedbackModal } from './FeedbackModal';
 import tokens from '../../utils/tokens';
+import { getGlobalWallet } from '../../modules/wallet';
 
 export const MODAL_ID = 'transactionFeedbackModal';
 
@@ -28,11 +29,19 @@ export function TransactionFeedbackModal({ isError, isLoading = true, errorMessa
 
   const hasUnregisteredTokens = !isLoading && !isError && unregisteredTokensList.length > 0;
 
-  const handleRegisterTokens = () => {
+  const handleRegisterTokens = async () => {
+    const wallet = getGlobalWallet();
+
     // Register all unregistered tokens
-    unregisteredTokensList.forEach(token => {
-      tokens.addToken(token.uid, token.name, token.symbol);
-    });
+    for (const token of unregisteredTokensList) {
+      let { version } = token;
+      // Fetch version from API if not present
+      if (version === undefined) {
+        const { tokenInfo } = await wallet.getTokenDetails(token.uid);
+        version = tokenInfo.version;
+      }
+      await tokens.addToken(token.uid, token.name, token.symbol, version);
+    }
 
     // Clean unregistered tokens state
     dispatch(unregisteredTokensClean());

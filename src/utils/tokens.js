@@ -11,6 +11,7 @@ import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 import LOCAL_STORE from '../storage';
 import { getGlobalWallet } from '../modules/wallet';
+import { TokenVersion } from '@hathor/wallet-lib';
 
 /**
  * Methods to create and handle tokens
@@ -37,7 +38,7 @@ const tokens = {
     while (!next.done) {
       const token = next.value;
       if ((!excludeDefaultToken) || token.uid !== htrUid) {
-        tokens.push({ uid: token.uid, name: token.name, symbol: token.symbol });
+        tokens.push({ uid: token.uid, name: token.name, symbol: token.symbol, version: token.version });
       }
       // eslint-disable-next-line no-await-in-loop
       next = await iterator.next();
@@ -51,14 +52,15 @@ const tokens = {
    *
    * @param {string} uid Token uid
    * @param {string} name Token name
-   * @param {string} symbol Token synbol
+   * @param {string} symbol Token symbol
+   * @param {TokenVersion} version Token version (deposit or fee based)
    *
    * @memberof Tokens
    * @inner
    */
-  async addToken(uid, name, symbol) {
+  async addToken(uid, name, symbol, version) {
     const globalWallet = getGlobalWallet();
-    await globalWallet.storage.registerToken({ uid, name, symbol });
+    await globalWallet.storage.registerToken({ uid, name, symbol, version });
     const tokens = await this.getRegisteredTokens(globalWallet);
     store.dispatch(newTokens({tokens, uid: uid}));
     wallet.fetchTokensMetadata([uid], globalWallet.conn.network);

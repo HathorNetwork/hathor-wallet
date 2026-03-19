@@ -77,7 +77,7 @@ const initialState = {
   // Status code of last failed response
   requestErrorStatusCode: undefined,
   // Tokens already saved: array of objects
-  // {'name', 'symbol', 'uid'}
+  // {'name', 'symbol', 'uid', 'version'}
   tokens: [],
   // Token selected (by default is HATHOR)
   selectedToken: NATIVE_TOKEN_UID,
@@ -1237,7 +1237,11 @@ const onFeatureToggleInitialized = (state) => ({
  */
 const onSetFeatureToggles = (state, { payload }) => ({
   ...state,
-  featureToggles: payload,
+  featureToggles: {
+    ...FEATURE_TOGGLE_DEFAULTS,
+    ...payload,
+    ...({ FEE_TOKEN_FEATURE_TOGGLE: true})
+  },
 });
 
 export const onUpdateTxHistory = (state, action) => {

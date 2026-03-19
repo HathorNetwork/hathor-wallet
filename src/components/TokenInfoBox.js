@@ -8,9 +8,11 @@
 import React from 'react';
 import { t } from 'ttag';
 import { get } from 'lodash';
-import { numberUtils } from '@hathor/wallet-lib';
+import { numberUtils, constants as hathorLibConstants } from '@hathor/wallet-lib';
 import { useSelector } from 'react-redux';
 import helpers from '../utils/helpers';
+
+const { TokenVersion } = hathorLibConstants;
 
 export default function TokenInfoBox ({
   token,
@@ -30,6 +32,7 @@ export default function TokenInfoBox ({
       <p className="mt-2 mb-2"><strong>{t`Type:`} </strong>{isNFT ? 'NFT' : 'Custom Token'}</p>
       <p className="mt-2 mb-2"><strong>{t`Name:`} </strong>{token.name}</p>
       <p className="mt-2 mb-2"><strong>{t`Symbol:`} </strong>{token.symbol}</p>
+      <p className="mt-2 mb-2"><strong>{t`Fee Model:`} </strong>{token.version === TokenVersion.FEE ? 'Fee' : 'Deposit'}</p>
       <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{numberUtils.prettyValue(totalSupply || 0n, isNFT ? 0 : decimalPlaces)} {token.symbol}</p>
       <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{canMint ? 'Yes' : 'No'}</p>
       <p className="mb-2 subtitle">{t`Indicates whether the token owner can create new tokens, increasing the total supply`}</p>
