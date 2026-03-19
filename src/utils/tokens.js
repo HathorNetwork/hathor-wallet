@@ -67,6 +67,27 @@ const tokens = {
   },
 
   /**
+   * Update a token's version in storage and redux.
+   * Used to migrate tokens that were registered before version was tracked.
+   *
+   * @param {string} uid Token uid
+   * @param {string} name Token name
+   * @param {string} symbol Token symbol
+   * @param {number} version Token version (deposit or fee based)
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  async updateTokenVersion(uid, name, symbol, version) {
+    const globalWallet = getGlobalWallet();
+    // Re-register with version to update storage
+    await globalWallet.storage.registerToken({ uid, name, symbol, version });
+    // Update redux state
+    const tokens = await this.getRegisteredTokens(globalWallet);
+    store.dispatch(newTokens({ tokens, uid }));
+  },
+
+  /**
    * Unregister token from localStorage and redux
    *
    * @param {string} uid Token uid to be unregistered

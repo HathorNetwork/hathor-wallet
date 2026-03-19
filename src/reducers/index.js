@@ -1238,9 +1238,7 @@ const onFeatureToggleInitialized = (state) => ({
 const onSetFeatureToggles = (state, { payload }) => ({
   ...state,
   featureToggles: {
-    ...FEATURE_TOGGLE_DEFAULTS,
     ...payload,
-    ...({ FEE_TOKEN_FEATURE_TOGGLE: true})
   },
 });
 
