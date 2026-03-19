@@ -942,6 +942,14 @@ div .nc-token-balance:not(:last-child) {
   margin-bottom: 1px;
 }
 
+.token-creation-data > .token-param:first-child {
+  padding-top: 0;
+}
+
+.token-creation-data > .token-param + .token-param {
+  border-top: 1px solid #dee2e6;
+}
+
 /* Token Type Info Box */
 .token-type-info-box {
   background-color: #e7f3ff;

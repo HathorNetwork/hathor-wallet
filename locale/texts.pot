@@ -224,7 +224,7 @@ msgstr ""
 
 #: src/components/AddressList.js:194
 #: src/components/OutputsWrapper.js:62
-#: src/components/Reown/CreateTokenRequestData.js:155
+#: src/components/Reown/CreateTokenRequestData.js:148
 #: src/components/Reown/OracleDataDisplay.js:54
 #: src/components/atomic-swap/ModalAtomicReceive.js:105
 #: src/components/atomic-swap/ModalAtomicReceive.js:107
@@ -553,7 +553,7 @@ msgstr ""
 #: src/components/ModalPin.js:134
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/PinPad.js:235
-#: src/components/Reown/modals/BaseNanoContractModal.js:333
+#: src/components/Reown/modals/BaseNanoContractModal.js:341
 #: src/components/atomic-swap/ModalAtomicReceive.js:129
 #: src/components/atomic-swap/ModalAtomicSend.js:365
 #: src/components/nano-contract/ModalChangeAddress.js:153
@@ -576,7 +576,7 @@ msgstr ""
 msgid "No dApps connected. Click \"Add New Connection\" to connect to a dApp."
 msgstr ""
 
-#: src/components/Reown/modals/CreateTokenModal.js:47
+#: src/components/Reown/modals/CreateTokenModal.js:38
 #: src/screens/SelectTokenType.js:42
 msgid "Create Token"
 msgstr ""
@@ -846,7 +846,8 @@ msgid "Allow notifications:"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:173
-#: src/components/Reown/CreateTokenRequestData.js:22
+#: src/components/Reown/CreateTokenRequestData.js:50
+#: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:147
 #: src/screens/Settings.js:316
@@ -856,7 +857,8 @@ msgid "Yes"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:172
-#: src/components/Reown/CreateTokenRequestData.js:22
+#: src/components/Reown/CreateTokenRequestData.js:50
+#: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:148
 #: src/screens/Settings.js:316
@@ -891,7 +893,7 @@ msgid "Unique identifier"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:101
-#: src/components/Reown/CreateTokenRequestData.js:36
+#: src/components/Reown/CreateTokenRequestData.js:64
 #: src/components/TokenGeneralInfo.js:173
 #: src/components/WalletAddress.js:175
 #: src/screens/Settings.js:331
@@ -1296,6 +1298,7 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
+#: src/components/Reown/CreateTokenRequestData.js:119
 #: src/components/TokenHistory.js:228
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:633
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:92
@@ -1315,7 +1318,7 @@ msgstr ""
 msgid "Add action"
 msgstr ""
 
-#: src/components/Reown/modals/CreateTokenModal.js:60
+#: src/components/Reown/modals/CreateTokenModal.js:57
 #: src/screens/atomic-swap/NewSwap.js:92
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:663
 msgid "Create"
@@ -1583,12 +1586,12 @@ msgstr ""
 msgid "Insufficient funds to complete the transaction."
 msgstr ""
 
-#: src/sagas/reown.js:1132
+#: src/sagas/reown.js:1137
 #.  Show error modal to user
 msgid "Network Mismatch"
 msgstr ""
 
-#: src/sagas/reown.js:1133
+#: src/sagas/reown.js:1138
 #.  Show error modal to user
 #, javascript-format
 msgid ""
@@ -2281,7 +2284,7 @@ msgstr ""
 msgid "Choose inputs automatically"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:129
+#: src/components/Reown/modals/SendTransactionModal.js:134
 #: src/components/SendTokensOne.js:258
 msgid "Inputs"
 msgstr ""
@@ -2975,7 +2978,7 @@ msgstr ""
 msgid "Sign Data"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:323
+#: src/components/Reown/modals/BaseNanoContractModal.js:331
 #: src/components/nano-contract/ModalSelectAddressToSignTx.js:49
 msgid "Select the address that will be used to sign the transaction"
 msgstr ""
@@ -3061,8 +3064,8 @@ msgstr ""
 msgid "Duplicate utxo on line"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:156
-#: src/components/Reown/modals/SendTransactionModal.js:221
+#: src/components/Reown/CreateTokenRequestData.js:149
+#: src/components/Reown/modals/SendTransactionModal.js:226
 #: src/components/atomic-swap/ModalAtomicSend.js:333
 msgid "Change Address"
 msgstr ""
@@ -3087,37 +3090,64 @@ msgstr ""
 msgid "See error details"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:107
+#: src/components/Reown/CreateTokenRequestData.js:34
+msgid "Fee"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:35
+#: src/components/Reown/CreateTokenRequestData.js:180
+msgid "Deposit"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:37
+msgid "Unknown"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:108
 msgid "No token data available."
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:126
+#: src/components/Reown/CreateTokenRequestData.js:124
 msgid "Create mint authority?"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:129
+#: src/components/Reown/CreateTokenRequestData.js:127
 msgid "Mint Authority Address"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:139
+#: src/components/Reown/CreateTokenRequestData.js:136
 msgid "Create melt authority?"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:142
+#: src/components/Reown/CreateTokenRequestData.js:139
 msgid "Melt Authority Address"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:158
+#: src/components/Reown/CreateTokenRequestData.js:151
 msgid "Allow External Mint Authority Address"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:163
+#: src/components/Reown/CreateTokenRequestData.js:156
 msgid "Allow External Melt Authority Address"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:169
+#: src/components/Reown/CreateTokenRequestData.js:162
 #: src/components/Reown/OracleDataDisplay.js:88
 msgid "Data"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:169
+#: src/components/Reown/modals/BaseNanoContractModal.js:83
+msgid "Contract pays fees?"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:174
+msgid "Contract pays token deposit?"
+msgstr ""
+
+#: src/components/Reown/CreateTokenRequestData.js:186
+#: src/components/Reown/TransactionFees.js:28
+msgid "Network Fee"
 msgstr ""
 
 #: src/components/Reown/DAppInfo.js:26
@@ -3407,73 +3437,74 @@ msgstr ""
 msgid "Blueprint Method"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:135
+#: src/components/Reown/modals/BaseNanoContractModal.js:144
 msgid "Arguments"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:171
+#: src/components/Reown/modals/BaseNanoContractModal.js:180
 msgid "Caller"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:177
-#: src/components/Reown/modals/BaseNanoContractModal.js:317
+#: src/components/Reown/modals/BaseNanoContractModal.js:186
+#: src/components/Reown/modals/BaseNanoContractModal.js:325
 #: src/components/Reown/modals/GetAddressClientModal.js:46
 msgid "Select Address"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:186
+#: src/components/Reown/modals/BaseNanoContractModal.js:195
 msgid ""
 "This nano contract is not registered in your wallet. Would you like to "
 "register it?"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:199
+#: src/components/Reown/modals/BaseNanoContractModal.js:208
 msgid "Registering..."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:199
+#: src/components/Reown/modals/BaseNanoContractModal.js:208
 msgid "Register Nano Contract"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:224
+#: src/components/Reown/modals/BaseNanoContractModal.js:233
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:71
 #: src/components/Reown/modals/SendNanoContractTxModal.js:37
-#: src/components/Reown/modals/SendTransactionModal.js:241
+#: src/components/Reown/modals/SendTransactionModal.js:247
 msgid "Accept Transaction"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:225
+#: src/components/Reown/modals/BaseNanoContractModal.js:234
 #: src/components/Reown/modals/ConnectModal.js:37
 #: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
-#: src/components/Reown/modals/CreateTokenModal.js:59
+#: src/components/Reown/modals/CreateTokenModal.js:56
 #: src/components/Reown/modals/GetAddressClientModal.js:95
 #: src/components/Reown/modals/GetAddressModal.js:53
 #: src/components/Reown/modals/GetBalanceModal.js:66
 #: src/components/Reown/modals/GetUtxosModal.js:187
 #: src/components/Reown/modals/SendNanoContractTxModal.js:38
-#: src/components/Reown/modals/SendTransactionModal.js:240
+#: src/components/Reown/modals/SendTransactionModal.js:246
 #: src/components/Reown/modals/SignMessageModal.js:27
 #: src/components/Reown/modals/SignOracleDataModal.js:40
 msgid "Reject"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:351
+#: src/components/Reown/modals/BaseNanoContractModal.js:359
 #: src/components/Reown/modals/GetUtxosModal.js:96
 msgid "Review your transaction from this dApp"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:352
+#: src/components/Reown/modals/BaseNanoContractModal.js:360
+#: src/components/Reown/modals/CreateTokenModal.js:47
 #: src/components/Reown/modals/GetUtxosModal.js:97
 #: src/components/Reown/modals/SignOracleDataModal.js:26
 msgid "Stay vigilant and protect your data from potential phishing attempts."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:382
+#: src/components/Reown/modals/BaseNanoContractModal.js:390
 msgid "Action List"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:393
-#: src/components/Reown/modals/SendTransactionModal.js:235
+#: src/components/Reown/modals/BaseNanoContractModal.js:403
+#: src/components/Reown/modals/SendTransactionModal.js:241
 msgid "This transaction will only be built, not pushed to the network."
 msgstr ""
 
@@ -3496,8 +3527,8 @@ msgstr ""
 msgid "CREATE NANO CONTRACT & TOKEN"
 msgstr ""
 
-#: src/components/Reown/modals/CreateTokenModal.js:54
-msgid "Token details:"
+#: src/components/Reown/modals/CreateTokenModal.js:46
+msgid "Review token creation request"
 msgstr ""
 
 #: src/components/Reown/modals/GetAddressClientModal.js:53
@@ -3635,23 +3666,23 @@ msgstr ""
 msgid "NEW NANO CONTRACT TRANSACTION"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:134
+#: src/components/Reown/modals/SendTransactionModal.js:139
 msgid "Input"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:165
+#: src/components/Reown/modals/SendTransactionModal.js:170
 msgid "Outputs"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:170
+#: src/components/Reown/modals/SendTransactionModal.js:175
 msgid "Output"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:182
+#: src/components/Reown/modals/SendTransactionModal.js:187
 msgid "Data field:"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:205
+#: src/components/Reown/modals/SendTransactionModal.js:210
 msgid "NEW TRANSACTION"
 msgstr ""
 

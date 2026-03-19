@@ -12,9 +12,14 @@ import { constants, numberUtils } from '@hathor/wallet-lib';
 import { unregisteredTokensStoreSuccess } from '../../../actions';
 import { CopyButton } from '../../CopyButton';
 import helpers from '../../../utils/helpers';
+import { TransactionFees } from '../TransactionFees';
 
 export function SendTransactionModal({ data, onAccept, onReject }) {
   const dispatch = useDispatch();
+  // Extract params for inputs/outputs if available
+  const params = data?.params || {};
+  const { inputs = [], outputs = [] } = params;
+
   const { tokenMetadata, tokens: registeredTokens, decimalPlaces } = useSelector((state) => ({
     tokenMetadata: state.tokenMetadata,
     tokens: state.tokens,
@@ -120,14 +125,14 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
   };
 
   const renderInputs = () => {
-    if (!data?.data?.inputs || data.data.inputs.length === 0) {
+    if (inputs.length === 0) {
       return null;
     }
 
     return (
       <div className="mb-4">
         <h6 className="mb-3">{t`Inputs`}</h6>
-        {data.data.inputs.map((input, index) => (
+        {inputs.map((input, index) => (
           <div key={index} className="p-3 bg-light rounded mb-2">
             <div className="d-flex justify-content-between align-items-start mb-2">
               <div>
@@ -156,14 +161,14 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
   };
 
   const renderOutputs = () => {
-    if (!data?.data?.outputs || data.data.outputs.length === 0) {
+    if (outputs.length === 0) {
       return null;
     }
 
     return (
       <div className="mb-4">
         <h6 className="mb-3">{t`Outputs`}</h6>
-        {data.data.outputs.map((output, index) => (
+        {outputs.map((output, index) => (
           <div key={index} className="p-3 bg-light rounded mb-2">
             <div className="d-flex justify-content-between align-items-start mb-2">
               <div>
@@ -217,7 +222,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
         {renderOutputs()}
 
         {data?.data?.changeAddress && (
-          <div>
+          <div className="mb-4">
             <h6 className="mb-3">{t`Change Address`}</h6>
             <div className="p-3 bg-light rounded">
               <div className="text-monospace">
@@ -229,6 +234,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
             </div>
           </div>
         )}
+        <TransactionFees fee={data?.data?.fee} />
 
         {data?.data?.pushTx === false && (
           <p className="text-muted small mt-3 mb-0">
