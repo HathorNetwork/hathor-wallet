@@ -1,0 +1,9 @@
+
+2026-01-21: Setup Test Environment (Prerequisite)
+- Installed @testing-library/react, @testing-library/jest-dom, redux-saga-test-plan.
+- Configured src/setupTests.js with TextEncoder polyfill and jest-dom.
+- Configured package.json for Jest (axios transform).
+- Created src/test-utils.js.
+- Refactored circular dependencies in reducers/sagas/utils to enable store initialization in tests.
+- Fixed existing tests (atomicSwap.test.js, ModalPin.test.js) to match environment and library updates.
+- Verified setup with src/__tests__/infrastructure_check.test.js.

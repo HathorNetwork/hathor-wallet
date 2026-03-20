@@ -12,9 +12,9 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { importProposal, proposalFetchRequested } from "../../actions";
 import {
-    PROPOSAL_DOWNLOAD_STATUS,
     updatePersistentStorage
 } from "../../utils/atomicSwap";
+import { PROPOSAL_DOWNLOAD_STATUS } from "../../constants";
 
 export default function ImportExisting(props) {
     // Internal state

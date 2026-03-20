@@ -22,8 +22,8 @@ import {
     ATOMIC_SWAP_SERVICE_ERRORS,
     generateReduxObjFromProposal,
     updatePersistentStorage,
-    PROPOSAL_DOWNLOAD_STATUS,
 } from "../utils/atomicSwap";
+import { PROPOSAL_DOWNLOAD_STATUS } from "../constants";
 import { t } from "ttag";
 import { swapService } from '@hathor/wallet-lib'
 import { getGlobalWallet } from "../modules/wallet";

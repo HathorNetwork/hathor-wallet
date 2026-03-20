@@ -13,9 +13,9 @@ import { useNavigate } from 'react-router-dom';
 import Loading from "../../components/Loading";
 import { proposalFetchRequested, proposalRemoved } from "../../actions";
 import {
-    PROPOSAL_DOWNLOAD_STATUS,
     updatePersistentStorage
 } from "../../utils/atomicSwap";
+import { PROPOSAL_DOWNLOAD_STATUS } from "../../constants";
 import walletUtil from "../../utils/wallet";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
 

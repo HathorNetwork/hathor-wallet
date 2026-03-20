@@ -14,7 +14,7 @@ import { get } from 'lodash';
 import helpers from '../utils/helpers';
 import wallet from "../utils/wallet";
 import Loading from '../components/Loading';
-import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
+import { TOKEN_DOWNLOAD_STATUS } from '../constants';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LOCAL_STORE from '../storage';
 

@@ -18,15 +18,9 @@ import {
   types,
 } from '../actions';
 
-import { NANO_CONTRACT_DETAIL_STATUS } from '../constants';
+import { NANO_CONTRACT_DETAIL_STATUS, NANOCONTRACT_REGISTER_STATUS } from '../constants';
 
 import { all, call, delay, put, select, takeEvery } from 'redux-saga/effects';
-
-export const NANOCONTRACT_REGISTER_STATUS = {
-  LOADING: 'loading',
-  ERROR: 'error',
-  SUCCESS: 'success',
-};
 
 const NANOCONTRACT_WAIT_TX_CONFIRMED_DELAY = 5000;
 
