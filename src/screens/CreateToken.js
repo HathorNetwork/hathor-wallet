@@ -13,15 +13,13 @@ import { get } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { walletRefreshSharedAddress } from '../actions';
-import walletUtils from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
 import BackButton from '../components/BackButton';
 import helpers from '../utils/helpers';
-import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
+import { TOKEN_DEPOSIT_RFC_URL, TOKEN_FEE_RFC_URL } from '../constants';
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { str2jsx } from '../utils/i18n';
 import { useNavigate, useParams } from "react-router-dom";
 import { getGlobalWallet } from "../modules/wallet";
 
@@ -228,7 +226,11 @@ function CreateToken() {
    */
   const goToRFC = (e) => {
     e.preventDefault();
-    helpers.openExternalURL(TOKEN_DEPOSIT_RFC_URL);
+    if (isDepositToken) {
+      helpers.openExternalURL(TOKEN_DEPOSIT_RFC_URL);
+    } else {
+      helpers.openExternalURL(TOKEN_FEE_RFC_URL);
+    }
   }
 
   /**
