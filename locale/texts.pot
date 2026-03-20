@@ -102,7 +102,7 @@ msgid "Confirm"
 msgstr ""
 
 #: src/screens/CreateNFT.js:74
-#: src/screens/CreateToken.js:66
+#: src/screens/CreateToken.js:77
 msgid "Must choose an address or auto select"
 msgstr ""
 
@@ -131,7 +131,7 @@ msgid ""
 msgstr ""
 
 #: src/screens/CreateNFT.js:205
-#: src/screens/CreateToken.js:233
+#: src/screens/CreateToken.js:244
 msgid "Remember to **make a backup** of this configuration string."
 msgstr ""
 
@@ -183,55 +183,55 @@ msgid "ipfs://..."
 msgstr ""
 
 #: src/screens/CreateNFT.js:306
-#: src/screens/CreateToken.js:263
+#: src/screens/CreateToken.js:329
 msgid "Short name"
 msgstr ""
 
 #: src/screens/CreateNFT.js:307
-#: src/screens/CreateToken.js:264
+#: src/screens/CreateToken.js:330
 msgid "MyCoin"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:142
+#: src/components/Reown/CreateTokenRequestData.js:117
 #: src/screens/CreateNFT.js:310
-#: src/screens/CreateToken.js:267
+#: src/screens/CreateToken.js:333
 msgid "Symbol"
 msgstr ""
 
 #: src/screens/CreateNFT.js:311
-#: src/screens/CreateToken.js:268
+#: src/screens/CreateToken.js:334
 msgid "MYC (2-5 characters)"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:143
+#: src/components/Reown/CreateTokenRequestData.js:118
 #: src/components/atomic-swap/ModalAtomicReceive.js:115
 #: src/components/atomic-swap/ModalAtomicSend.js:323
 #: src/screens/CreateNFT.js:316
-#: src/screens/CreateToken.js:273
+#: src/screens/CreateToken.js:339
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:537
 msgid "Amount"
 msgstr ""
 
 #: src/screens/CreateNFT.js:323
-#: src/screens/CreateToken.js:284
+#: src/screens/CreateToken.js:350
 msgid "Select address automatically"
 msgstr ""
 
 #: src/screens/CreateNFT.js:328
-#: src/screens/CreateToken.js:289
+#: src/screens/CreateToken.js:355
 msgid "Destination address"
 msgstr ""
 
 #: src/components/AddressList.js:194
 #: src/components/OutputsWrapper.js:62
-#: src/components/Reown/CreateTokenRequestData.js:181
+#: src/components/Reown/CreateTokenRequestData.js:148
 #: src/components/Reown/OracleDataDisplay.js:54
 #: src/components/atomic-swap/ModalAtomicReceive.js:105
 #: src/components/atomic-swap/ModalAtomicReceive.js:107
 #: src/components/atomic-swap/ModalAtomicSend.js:331
 #: src/components/tokens/TokenMint.js:147
 #: src/screens/CreateNFT.js:329
-#: src/screens/CreateToken.js:290
+#: src/screens/CreateToken.js:356
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:573
 msgid "Address"
 msgstr ""
@@ -244,64 +244,88 @@ msgstr ""
 msgid "Create a melt authority"
 msgstr ""
 
-#: src/screens/CreateToken.js:73
+#: src/screens/CreateToken.js:84
 #, javascript-format
 msgid "Maximum value to mint token is ${ max_output_value_str }"
 msgstr ""
 
-#: src/screens/CreateToken.js:97
+#: src/screens/CreateToken.js:108
 msgid "Creating token"
 msgstr ""
 
-#: src/screens/CreateToken.js:177
+#: src/screens/CreateToken.js:188
 #, javascript-format
 msgid "Token ${ token.name } created"
 msgstr ""
 
-#: src/screens/CreateToken.js:231
+#: src/screens/CreateToken.js:242
 msgid "Your token has been successfully created!"
 msgstr ""
 
-#: src/screens/CreateToken.js:232
+#: src/screens/CreateToken.js:243
 msgid ""
 "You can share the following configuration string with other people to let "
 "them use your brand new token."
 msgstr ""
 
-#: src/screens/CreateToken.js:247
-msgid ""
-"Here you will create a new customized token. After the creation, you will "
-"be able to send this new token to other addresses."
-msgstr ""
-
-#: src/screens/CreateToken.js:248
-#, javascript-format
-msgid ""
-"Custom tokens share the address space with all other tokens, including ${ "
-"nativeTokenConfig.symbol }. This means that you can send and receive tokens "
-"using any valid address."
-msgstr ""
-
-#: src/screens/CreateToken.js:249
-msgid ""
-"Remember to make a backup of your new token's configuration string. You "
-"will need to send it to other people to allow them to use your new token."
-msgstr ""
-
+#: src/components/atomic-swap/ModalAtomicSend.js:318
 #: src/screens/CreateToken.js:252
-#, javascript-format
-msgid ""
-"When creating and minting tokens, a |bold:deposit of ${ htrDeposit }%| in "
-"${ nativeTokenConfig.symbol } is required. If these tokens are later "
-"melted, this ${ nativeTokenConfig.symbol } deposit will be returned. Read "
-"more about it |link:here|."
+msgid "available"
 msgstr ""
 
-#: src/screens/CustomTokens.js:77
+#: src/screens/CreateToken.js:289
+#: src/screens/CreateToken.js:300
+msgid "You chose to create a "
+msgstr ""
+
+#: src/screens/CreateToken.js:289
+msgid "Deposit-Based Token"
+msgstr ""
+
+#: src/screens/CreateToken.js:289
+msgid ""
+", which requires a 1% HTR deposit. This ensures that all future "
+"transactions with this token have no additional fees. "
+msgstr ""
+
+#: src/screens/CreateToken.js:290
+#: src/screens/CreateToken.js:301
+msgid "Learn more."
+msgstr ""
+
+#: src/screens/CreateToken.js:300
+msgid "Fee-Based Token"
+msgstr ""
+
+#: src/screens/CreateToken.js:300
+msgid ", so a small fee will be applied to each future transaction of this token. "
+msgstr ""
+
+#: src/screens/CreateToken.js:308
+msgid "Network fee"
+msgstr ""
+
+#: src/screens/CreateToken.js:310
+msgid "Deposit:"
+msgstr ""
+
+#: src/screens/CreateToken.js:324
+#: src/screens/CreateToken.js:369
+#: src/screens/SelectTokenType.js:78
+msgid "Create Deposit Token"
+msgstr ""
+
+#: src/screens/CreateToken.js:324
+#: src/screens/CreateToken.js:369
+#: src/screens/SelectTokenType.js:105
+msgid "Create Fee Token"
+msgstr ""
+
+#: src/screens/CustomTokens.js:83
 msgid "Custom Tokens"
 msgstr ""
 
-#: src/screens/CustomTokens.js:78
+#: src/screens/CustomTokens.js:84
 #, javascript-format
 msgid ""
 "You can create your own digital token with customized specifications on "
@@ -312,13 +336,13 @@ msgid ""
 "they can serve multiple purposes."
 msgstr ""
 
-#: src/screens/CustomTokens.js:79
+#: src/screens/CustomTokens.js:85
 msgid ""
 "Every custom token has a unique **Configuration String** which must be "
 "shared with all other people that will use the custom token."
 msgstr ""
 
-#: src/screens/CustomTokens.js:80
+#: src/screens/CustomTokens.js:86
 msgid ""
 "If you want to use a custom token that already exists, you need to register "
 "this token in your Hathor Wallet. For this, you will need the custom "
@@ -326,19 +350,19 @@ msgid ""
 "token."
 msgstr ""
 
-#: src/screens/CustomTokens.js:82
+#: src/screens/CustomTokens.js:88
 msgid "Create a new token"
 msgstr ""
 
-#: src/screens/CustomTokens.js:83
+#: src/screens/CustomTokens.js:89
 msgid "Create an NFT"
 msgstr ""
 
-#: src/screens/CustomTokens.js:84
+#: src/screens/CustomTokens.js:90
 msgid "Register a token"
 msgstr ""
 
-#: src/screens/CustomTokens.js:86
+#: src/screens/CustomTokens.js:92
 msgid "Token registered with success!"
 msgstr ""
 
@@ -528,7 +552,7 @@ msgstr ""
 #: src/components/ModalPin.js:134
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/PinPad.js:235
-#: src/components/Reown/modals/BaseNanoContractModal.js:342
+#: src/components/Reown/modals/BaseNanoContractModal.js:341
 #: src/components/atomic-swap/ModalAtomicReceive.js:129
 #: src/components/atomic-swap/ModalAtomicSend.js:365
 #: src/components/nano-contract/ModalChangeAddress.js:153
@@ -549,6 +573,63 @@ msgstr ""
 
 #: src/screens/ReownConnect.js:167
 msgid "No dApps connected. Click \"Add New Connection\" to connect to a dApp."
+msgstr ""
+
+#: src/components/Reown/modals/CreateTokenModal.js:38
+#: src/screens/SelectTokenType.js:42
+msgid "Create Token"
+msgstr ""
+
+#: src/screens/SelectTokenType.js:44
+msgid "Choose how your token will behave for future transactions."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:47
+msgid "Once selected, the token type cannot be changed later."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:49
+msgid "Learn more about deposits and fees here"
+msgstr ""
+
+#: src/screens/SelectTokenType.js:60
+msgid "Deposit Token:"
+msgstr ""
+
+#: src/screens/SelectTokenType.js:64
+msgid "Requires a 1% HTR deposit."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:65
+msgid "No transaction fees in future transfers."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:66
+msgid "Refundable if token is burned."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:69
+msgid "Recommended for frequent use."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:87
+msgid "Fee Token:"
+msgstr ""
+
+#: src/screens/SelectTokenType.js:91
+msgid "Requires 0.01 HTR fee to create."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:92
+msgid "No deposit required."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:93
+msgid "A small fee applies to every transfer."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:96
+msgid "Recommended for occasional use."
 msgstr ""
 
 #: src/screens/SendTokens.js:157
@@ -764,7 +845,7 @@ msgid "Allow notifications:"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:173
-#: src/components/Reown/CreateTokenRequestData.js:24
+#: src/components/Reown/CreateTokenRequestData.js:50
 #: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:147
@@ -775,7 +856,7 @@ msgid "Yes"
 msgstr ""
 
 #: src/components/ModalResetAllData.js:172
-#: src/components/Reown/CreateTokenRequestData.js:24
+#: src/components/Reown/CreateTokenRequestData.js:50
 #: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:148
@@ -811,7 +892,7 @@ msgid "Unique identifier"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:101
-#: src/components/Reown/CreateTokenRequestData.js:38
+#: src/components/Reown/CreateTokenRequestData.js:64
 #: src/components/TokenGeneralInfo.js:173
 #: src/components/WalletAddress.js:175
 #: src/screens/Settings.js:331
@@ -1216,7 +1297,7 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:144
+#: src/components/Reown/CreateTokenRequestData.js:119
 #: src/components/TokenHistory.js:228
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:633
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:92
@@ -1236,7 +1317,7 @@ msgstr ""
 msgid "Add action"
 msgstr ""
 
-#: src/components/Reown/modals/CreateTokenModal.js:66
+#: src/components/Reown/modals/CreateTokenModal.js:57
 #: src/screens/atomic-swap/NewSwap.js:92
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:663
 msgid "Create"
@@ -1265,7 +1346,7 @@ msgstr ""
 msgid "Select New Blueprint"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:141
+#: src/components/Reown/CreateTokenRequestData.js:116
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:91
 msgid "Name"
 msgstr ""
@@ -1496,7 +1577,7 @@ msgstr ""
 msgid "Invalid node."
 msgstr ""
 
-#: src/sagas/networkSettings.js:140
+#: src/sagas/networkSettings.js:142
 msgid "Error updating network settings."
 msgstr ""
 
@@ -1504,12 +1585,12 @@ msgstr ""
 msgid "Insufficient funds to complete the transaction."
 msgstr ""
 
-#: src/sagas/reown.js:1136
+#: src/sagas/reown.js:1137
 #.  Show error modal to user
 msgid "Network Mismatch"
 msgstr ""
 
-#: src/sagas/reown.js:1137
+#: src/sagas/reown.js:1138
 #.  Show error modal to user
 #, javascript-format
 msgid ""
@@ -1517,7 +1598,7 @@ msgid ""
 "wallet is connected to ${ walletNetwork }."
 msgstr ""
 
-#: src/sagas/tokens.js:369
+#: src/sagas/tokens.js:414
 msgid "An error occurred while fetching this token data"
 msgstr ""
 
@@ -2202,7 +2283,7 @@ msgstr ""
 msgid "Choose inputs automatically"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:138
+#: src/components/Reown/modals/SendTransactionModal.js:134
 #: src/components/SendTokensOne.js:258
 msgid "Inputs"
 msgstr ""
@@ -2896,7 +2977,7 @@ msgstr ""
 msgid "Sign Data"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:332
+#: src/components/Reown/modals/BaseNanoContractModal.js:331
 #: src/components/nano-contract/ModalSelectAddressToSignTx.js:49
 msgid "Select the address that will be used to sign the transaction"
 msgstr ""
@@ -2982,12 +3063,8 @@ msgstr ""
 msgid "Duplicate utxo on line"
 msgstr ""
 
-#: src/components/atomic-swap/ModalAtomicSend.js:318
-msgid "available"
-msgstr ""
-
-#: src/components/Reown/CreateTokenRequestData.js:182
-#: src/components/Reown/modals/SendTransactionModal.js:230
+#: src/components/Reown/CreateTokenRequestData.js:149
+#: src/components/Reown/modals/SendTransactionModal.js:226
 #: src/components/atomic-swap/ModalAtomicSend.js:333
 msgid "Change Address"
 msgstr ""
@@ -3012,62 +3089,62 @@ msgstr ""
 msgid "See error details"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:87
+#: src/components/Reown/CreateTokenRequestData.js:34
 msgid "Fee"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:88
-#: src/components/Reown/CreateTokenRequestData.js:217
+#: src/components/Reown/CreateTokenRequestData.js:35
+#: src/components/Reown/CreateTokenRequestData.js:180
 msgid "Deposit"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:90
+#: src/components/Reown/CreateTokenRequestData.js:37
 msgid "Unknown"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:132
+#: src/components/Reown/CreateTokenRequestData.js:108
 msgid "No token data available."
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:152
+#: src/components/Reown/CreateTokenRequestData.js:124
 msgid "Create mint authority?"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:155
+#: src/components/Reown/CreateTokenRequestData.js:127
 msgid "Mint Authority Address"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:165
+#: src/components/Reown/CreateTokenRequestData.js:136
 msgid "Create melt authority?"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:168
+#: src/components/Reown/CreateTokenRequestData.js:139
 msgid "Melt Authority Address"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:184
+#: src/components/Reown/CreateTokenRequestData.js:151
 msgid "Allow External Mint Authority Address"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:189
+#: src/components/Reown/CreateTokenRequestData.js:156
 msgid "Allow External Melt Authority Address"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:195
+#: src/components/Reown/CreateTokenRequestData.js:162
 #: src/components/Reown/OracleDataDisplay.js:88
 msgid "Data"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:206
+#: src/components/Reown/CreateTokenRequestData.js:169
 #: src/components/Reown/modals/BaseNanoContractModal.js:83
 msgid "Contract pays fees?"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:211
+#: src/components/Reown/CreateTokenRequestData.js:174
 msgid "Contract pays token deposit?"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:223
+#: src/components/Reown/CreateTokenRequestData.js:186
 #: src/components/Reown/TransactionFees.js:28
 msgid "Network Fee"
 msgstr ""
@@ -3368,7 +3445,7 @@ msgid "Caller"
 msgstr ""
 
 #: src/components/Reown/modals/BaseNanoContractModal.js:186
-#: src/components/Reown/modals/BaseNanoContractModal.js:326
+#: src/components/Reown/modals/BaseNanoContractModal.js:325
 #: src/components/Reown/modals/GetAddressClientModal.js:46
 msgid "Select Address"
 msgstr ""
@@ -3388,46 +3465,45 @@ msgid "Register Nano Contract"
 msgstr ""
 
 #: src/components/Reown/modals/BaseNanoContractModal.js:233
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:74
-#: src/components/Reown/modals/SendNanoContractTxModal.js:41
-#: src/components/Reown/modals/SendTransactionModal.js:251
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:71
+#: src/components/Reown/modals/SendNanoContractTxModal.js:37
+#: src/components/Reown/modals/SendTransactionModal.js:247
 msgid "Accept Transaction"
 msgstr ""
 
 #: src/components/Reown/modals/BaseNanoContractModal.js:234
 #: src/components/Reown/modals/ConnectModal.js:37
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:75
-#: src/components/Reown/modals/CreateTokenModal.js:65
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
+#: src/components/Reown/modals/CreateTokenModal.js:56
 #: src/components/Reown/modals/GetAddressClientModal.js:95
 #: src/components/Reown/modals/GetAddressModal.js:53
 #: src/components/Reown/modals/GetBalanceModal.js:66
 #: src/components/Reown/modals/GetUtxosModal.js:187
-#: src/components/Reown/modals/SendNanoContractTxModal.js:42
-#: src/components/Reown/modals/SendTransactionModal.js:250
+#: src/components/Reown/modals/SendNanoContractTxModal.js:38
+#: src/components/Reown/modals/SendTransactionModal.js:246
 #: src/components/Reown/modals/SignMessageModal.js:27
 #: src/components/Reown/modals/SignOracleDataModal.js:40
 msgid "Reject"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:360
+#: src/components/Reown/modals/BaseNanoContractModal.js:359
 #: src/components/Reown/modals/GetUtxosModal.js:96
 msgid "Review your transaction from this dApp"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:361
-#: src/components/Reown/modals/CreateTokenModal.js:50
+#: src/components/Reown/modals/BaseNanoContractModal.js:360
+#: src/components/Reown/modals/CreateTokenModal.js:47
 #: src/components/Reown/modals/GetUtxosModal.js:97
 #: src/components/Reown/modals/SignOracleDataModal.js:26
 msgid "Stay vigilant and protect your data from potential phishing attempts."
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:391
+#: src/components/Reown/modals/BaseNanoContractModal.js:390
 msgid "Action List"
 msgstr ""
 
-#: src/components/Reown/modals/BaseNanoContractModal.js:404
-#: src/components/Reown/modals/CreateTokenModal.js:60
-#: src/components/Reown/modals/SendTransactionModal.js:245
+#: src/components/Reown/modals/BaseNanoContractModal.js:403
+#: src/components/Reown/modals/SendTransactionModal.js:241
 msgid "This transaction will only be built, not pushed to the network."
 msgstr ""
 
@@ -3446,15 +3522,11 @@ msgstr ""
 msgid "Create Token Data"
 msgstr ""
 
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:73
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:70
 msgid "CREATE NANO CONTRACT & TOKEN"
 msgstr ""
 
-#: src/components/Reown/modals/CreateTokenModal.js:41
-msgid "Create Token"
-msgstr ""
-
-#: src/components/Reown/modals/CreateTokenModal.js:49
+#: src/components/Reown/modals/CreateTokenModal.js:46
 msgid "Review token creation request"
 msgstr ""
 
@@ -3589,27 +3661,27 @@ msgstr ""
 msgid "Share UTXOs Information"
 msgstr ""
 
-#: src/components/Reown/modals/SendNanoContractTxModal.js:40
+#: src/components/Reown/modals/SendNanoContractTxModal.js:36
 msgid "NEW NANO CONTRACT TRANSACTION"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:143
+#: src/components/Reown/modals/SendTransactionModal.js:139
 msgid "Input"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:174
+#: src/components/Reown/modals/SendTransactionModal.js:170
 msgid "Outputs"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:179
+#: src/components/Reown/modals/SendTransactionModal.js:175
 msgid "Output"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:191
+#: src/components/Reown/modals/SendTransactionModal.js:187
 msgid "Data field:"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:214
+#: src/components/Reown/modals/SendTransactionModal.js:210
 msgid "NEW TRANSACTION"
 msgstr ""
 
