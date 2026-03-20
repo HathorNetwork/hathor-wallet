@@ -249,7 +249,8 @@ function CreateToken() {
 
   const depositPercent = wallet.storage.getTokenDepositPercentage();
   const nativeTokenConfig = wallet.storage.getNativeTokenData();
-  const availableBalanceText = `${hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} ${nativeTokenConfig.symbol}`;
+  const availableBalanceText = `${hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} ${nativeTokenConfig.symbol} ${t`available`}`;
+  const requiredFeeAmountText = `${hathorLib.numberUtils.prettyValue(hathorLib.constants.FEE_PER_OUTPUT, decimalPlaces)} ${nativeTokenConfig.symbol}`;
 
   /**
    * Calculates the required HTR amount to create a token
@@ -257,8 +258,8 @@ function CreateToken() {
    * @param {number} version - TokenVersion enum value
    * @returns {bigint} Required HTR amount in smallest unit
    */
-  const getRequiredAmount = (mintAmount, version) => {
-    if (version === TokenVersion.DEPOSIT) {
+  const getRequiredAmount = (mintAmount) => {
+    if (isDepositToken) {
       // Deposit tokens require 1% of the minted amount
       return mintAmount ? hathorLib.tokensUtils.getDepositAmount(mintAmount, depositPercent) : 0n;
     }
@@ -302,6 +303,14 @@ function CreateToken() {
       </div>
     );
   };
+
+  const renderFeeModelInfo = () => {
+    let infoLabel = `${t`Network fee`}: ${requiredFeeAmountText} (${availableBalanceText})`;
+    if (isDepositToken) {
+      infoLabel = `${t`Deposit:`} ${tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} ${nativeTokenConfig.symbol} (${availableBalanceText})`;
+    }
+    return <p className="mb-0">{infoLabel}</p>;
+  }
 
   const formContainerStyle = {
     border: '1px solid #b7bfc7',
@@ -347,11 +356,7 @@ function CreateToken() {
               <input ref={addressInputRef} type="text" placeholder={t`Address`} className="form-control" />
             </div>
           </div>
-          {isDepositToken ? (
-            <p className="mb-0">{t`Deposit:`} {tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} {nativeTokenConfig.symbol} ({availableBalanceText} {t`available`})</p>
-          ) : (
-            <p className="mb-0">{t`Network fee:`} 0.01 {nativeTokenConfig.symbol} ({availableBalanceText} {t`available`})</p>
-          )}
+          {renderFeeModelInfo()}
         </div>
         {renderTokenTypeInfoBox()}
         <button
