@@ -257,7 +257,6 @@ function CreateToken() {
   /**
    * Calculates the required HTR amount to create a token
    * @param {bigint|null} mintAmount - Amount of tokens to mint
-   * @param {number} version - TokenVersion enum value
    * @returns {bigint} Required HTR amount in smallest unit
    */
   const getRequiredAmount = (mintAmount) => {
@@ -269,7 +268,7 @@ function CreateToken() {
     return hathorLib.constants.FEE_PER_OUTPUT;
   };
 
-  const requiredAmount = getRequiredAmount(amount, tokenVersion);
+  const requiredAmount = getRequiredAmount(amount);
   const hasInsufficientBalance = requiredAmount > htrBalance;
 
   /**
