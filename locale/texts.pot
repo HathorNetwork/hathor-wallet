@@ -102,7 +102,7 @@ msgid "Confirm"
 msgstr ""
 
 #: src/screens/CreateNFT.js:74
-#: src/screens/CreateToken.js:77
+#: src/screens/CreateToken.js:75
 msgid "Must choose an address or auto select"
 msgstr ""
 
@@ -131,7 +131,7 @@ msgid ""
 msgstr ""
 
 #: src/screens/CreateNFT.js:205
-#: src/screens/CreateToken.js:244
+#: src/screens/CreateToken.js:246
 msgid "Remember to **make a backup** of this configuration string."
 msgstr ""
 
@@ -183,23 +183,23 @@ msgid "ipfs://..."
 msgstr ""
 
 #: src/screens/CreateNFT.js:306
-#: src/screens/CreateToken.js:329
+#: src/screens/CreateToken.js:336
 msgid "Short name"
 msgstr ""
 
 #: src/screens/CreateNFT.js:307
-#: src/screens/CreateToken.js:330
+#: src/screens/CreateToken.js:337
 msgid "MyCoin"
 msgstr ""
 
 #: src/components/Reown/CreateTokenRequestData.js:117
 #: src/screens/CreateNFT.js:310
-#: src/screens/CreateToken.js:333
+#: src/screens/CreateToken.js:340
 msgid "Symbol"
 msgstr ""
 
 #: src/screens/CreateNFT.js:311
-#: src/screens/CreateToken.js:334
+#: src/screens/CreateToken.js:341
 msgid "MYC (2-5 characters)"
 msgstr ""
 
@@ -207,18 +207,18 @@ msgstr ""
 #: src/components/atomic-swap/ModalAtomicReceive.js:115
 #: src/components/atomic-swap/ModalAtomicSend.js:323
 #: src/screens/CreateNFT.js:316
-#: src/screens/CreateToken.js:339
+#: src/screens/CreateToken.js:346
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:537
 msgid "Amount"
 msgstr ""
 
 #: src/screens/CreateNFT.js:323
-#: src/screens/CreateToken.js:350
+#: src/screens/CreateToken.js:357
 msgid "Select address automatically"
 msgstr ""
 
 #: src/screens/CreateNFT.js:328
-#: src/screens/CreateToken.js:355
+#: src/screens/CreateToken.js:362
 msgid "Destination address"
 msgstr ""
 
@@ -231,7 +231,7 @@ msgstr ""
 #: src/components/atomic-swap/ModalAtomicSend.js:331
 #: src/components/tokens/TokenMint.js:147
 #: src/screens/CreateNFT.js:329
-#: src/screens/CreateToken.js:356
+#: src/screens/CreateToken.js:363
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:573
 msgid "Address"
 msgstr ""
@@ -244,80 +244,90 @@ msgstr ""
 msgid "Create a melt authority"
 msgstr ""
 
-#: src/screens/CreateToken.js:84
+#: src/screens/CreateToken.js:82
 #, javascript-format
 msgid "Maximum value to mint token is ${ max_output_value_str }"
 msgstr ""
 
-#: src/screens/CreateToken.js:108
+#: src/screens/CreateToken.js:106
 msgid "Creating token"
 msgstr ""
 
-#: src/screens/CreateToken.js:188
+#: src/screens/CreateToken.js:186
 #, javascript-format
 msgid "Token ${ token.name } created"
 msgstr ""
 
-#: src/screens/CreateToken.js:242
+#: src/screens/CreateToken.js:244
 msgid "Your token has been successfully created!"
 msgstr ""
 
-#: src/screens/CreateToken.js:243
+#: src/screens/CreateToken.js:245
 msgid ""
 "You can share the following configuration string with other people to let "
 "them use your brand new token."
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicSend.js:318
-#: src/screens/CreateToken.js:252
+#: src/screens/CreateToken.js:255
 msgid "available"
 msgstr ""
 
-#: src/screens/CreateToken.js:289
-#: src/screens/CreateToken.js:300
+#: src/screens/CreateToken.js:276
+msgid "Required deposit exceeds your available balance."
+msgstr ""
+
+#: src/screens/CreateToken.js:277
+msgid "Required network fee exceeds your available balance."
+msgstr ""
+
+#: src/screens/CreateToken.js:296
+#: src/screens/CreateToken.js:307
 msgid "You chose to create a "
 msgstr ""
 
-#: src/screens/CreateToken.js:289
+#: src/screens/CreateToken.js:296
 msgid "Deposit-Based Token"
 msgstr ""
 
-#: src/screens/CreateToken.js:289
+#: src/screens/CreateToken.js:296
+#, javascript-format
 msgid ""
-", which requires a 1% HTR deposit. This ensures that all future "
-"transactions with this token have no additional fees. "
+", which requires a ${ depositPercentDisplay }% ${ nativeTokenConfig.symbol "
+"} deposit. This ensures that all future transactions with this token have "
+"no additional fees. "
 msgstr ""
 
-#: src/screens/CreateToken.js:290
-#: src/screens/CreateToken.js:301
+#: src/screens/CreateToken.js:297
+#: src/screens/CreateToken.js:308
 msgid "Learn more."
 msgstr ""
 
-#: src/screens/CreateToken.js:300
+#: src/screens/CreateToken.js:307
 msgid "Fee-Based Token"
 msgstr ""
 
-#: src/screens/CreateToken.js:300
+#: src/screens/CreateToken.js:307
 msgid ", so a small fee will be applied to each future transaction of this token. "
 msgstr ""
 
-#: src/screens/CreateToken.js:308
+#: src/screens/CreateToken.js:315
 msgid "Network fee"
 msgstr ""
 
-#: src/screens/CreateToken.js:310
+#: src/screens/CreateToken.js:317
 msgid "Deposit:"
 msgstr ""
 
-#: src/screens/CreateToken.js:324
-#: src/screens/CreateToken.js:369
-#: src/screens/SelectTokenType.js:78
+#: src/screens/CreateToken.js:331
+#: src/screens/CreateToken.js:379
+#: src/screens/SelectTokenType.js:83
 msgid "Create Deposit Token"
 msgstr ""
 
-#: src/screens/CreateToken.js:324
-#: src/screens/CreateToken.js:369
-#: src/screens/SelectTokenType.js:105
+#: src/screens/CreateToken.js:331
+#: src/screens/CreateToken.js:379
+#: src/screens/SelectTokenType.js:110
 msgid "Create Fee Token"
 msgstr ""
 
@@ -576,59 +586,62 @@ msgid "No dApps connected. Click \"Add New Connection\" to connect to a dApp."
 msgstr ""
 
 #: src/components/Reown/modals/CreateTokenModal.js:38
-#: src/screens/SelectTokenType.js:42
+#: src/screens/SelectTokenType.js:47
 msgid "Create Token"
 msgstr ""
 
-#: src/screens/SelectTokenType.js:44
+#: src/screens/SelectTokenType.js:49
 msgid "Choose how your token will behave for future transactions."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:47
+#: src/screens/SelectTokenType.js:52
 msgid "Once selected, the token type cannot be changed later."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:49
+#: src/screens/SelectTokenType.js:54
 msgid "Learn more about deposits and fees here"
 msgstr ""
 
-#: src/screens/SelectTokenType.js:60
+#: src/screens/SelectTokenType.js:65
 msgid "Deposit Token:"
 msgstr ""
 
-#: src/screens/SelectTokenType.js:64
-msgid "Requires a 1% HTR deposit."
+#: src/screens/SelectTokenType.js:69
+#, javascript-format
+msgid ""
+"Requires a ${ depositPercentDisplay }% ${ nativeTokenConfig.symbol } "
+"deposit."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:65
+#: src/screens/SelectTokenType.js:70
 msgid "No transaction fees in future transfers."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:66
+#: src/screens/SelectTokenType.js:71
 msgid "Refundable if token is burned."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:69
+#: src/screens/SelectTokenType.js:74
 msgid "Recommended for frequent use."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:87
+#: src/screens/SelectTokenType.js:92
 msgid "Fee Token:"
 msgstr ""
 
-#: src/screens/SelectTokenType.js:91
+#: src/screens/SelectTokenType.js:96
 msgid "Requires 0.01 HTR fee to create."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:92
+#: src/screens/SelectTokenType.js:97
 msgid "No deposit required."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:93
+#: src/screens/SelectTokenType.js:98
 msgid "A small fee applies to every transfer."
 msgstr ""
 
-#: src/screens/SelectTokenType.js:96
+#: src/screens/SelectTokenType.js:101
 msgid "Recommended for occasional use."
 msgstr ""
 
