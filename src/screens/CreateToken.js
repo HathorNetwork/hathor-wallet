@@ -13,16 +13,14 @@ import { get } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { walletRefreshSharedAddress } from '../actions';
-import walletUtils from '../utils/wallet';
 import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
 import BackButton from '../components/BackButton';
 import helpers from '../utils/helpers';
-import { TOKEN_DEPOSIT_RFC_URL } from '../constants';
+import { TOKEN_DEPOSIT_RFC_URL, TOKEN_FEE_RFC_URL } from '../constants';
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { str2jsx } from '../utils/i18n';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getGlobalWallet } from "../modules/wallet";
 
 /**
@@ -38,6 +36,17 @@ function CreateToken() {
     decimalPlaces: state.serverInfo.decimalPlaces,
   }));
   const wallet = getGlobalWallet();
+
+  // Get TokenVersion enum from wallet-lib
+  const { TokenVersion } = hathorLib;
+
+
+  const { type } = useParams();
+  // Allowlist of valid token versions for token creation
+  const allowedTokenVersions = new Set([TokenVersion.DEPOSIT, TokenVersion.FEE]);
+  const parsedType = Number(type);
+  const tokenVersion = allowedTokenVersions.has(parsedType) ? parsedType : TokenVersion.DEPOSIT;
+  const isDepositToken = tokenVersion === TokenVersion.DEPOSIT;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -122,7 +131,7 @@ function CreateToken() {
         shortNameRef.current.value,
         symbolRef.current.value,
         amount,
-        { address, pinCode: pin }
+        { address, pinCode: pin, tokenVersion }
       );
 
       if (useWalletService) {
@@ -217,7 +226,11 @@ function CreateToken() {
    */
   const goToRFC = (e) => {
     e.preventDefault();
-    helpers.openExternalURL(TOKEN_DEPOSIT_RFC_URL);
+    if (isDepositToken) {
+      helpers.openExternalURL(TOKEN_DEPOSIT_RFC_URL);
+    } else {
+      helpers.openExternalURL(TOKEN_FEE_RFC_URL);
+    }
   }
 
   /**
@@ -237,61 +250,145 @@ function CreateToken() {
   }
 
   const depositPercent = wallet.storage.getTokenDepositPercentage();
-  const htrDeposit = depositPercent * 100;
+  const depositPercentDisplay = depositPercent * 100;
   const nativeTokenConfig = wallet.storage.getNativeTokenData();
+  const availableBalanceText = `${hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} ${nativeTokenConfig.symbol} ${t`available`}`;
+  const requiredFeeAmountText = `${hathorLib.numberUtils.prettyValue(hathorLib.constants.FEE_PER_OUTPUT, decimalPlaces)} ${nativeTokenConfig.symbol}`;
+
+  /**
+   * Calculates the required HTR amount to create a token
+   * @param {bigint} [mintAmount] - Amount of tokens to mint
+   * @returns {bigint} Required HTR amount in smallest unit
+   */
+  const getRequiredAmount = (mintAmount) => {
+    if (isDepositToken) {
+      // Deposit tokens require a percentage of the minted amount
+      return mintAmount ? hathorLib.tokensUtils.getDepositAmount(mintAmount, depositPercent) : 0n;
+    }
+    // Fee tokens require a fixed 0.01 HTR network fee
+    return hathorLib.constants.FEE_PER_OUTPUT;
+  };
+
+  const requiredAmount = getRequiredAmount(amount);
+  const hasInsufficientBalance = requiredAmount > htrBalance;
+
+  /**
+   * Returns the balance validation message when insufficient balance
+   * @returns {string|null} Validation message or null if balance is sufficient
+   */
+  const getBalanceValidationMessage = () => {
+    if (!hasInsufficientBalance) {
+      return null;
+    }
+    if (isDepositToken) {
+      return t`Required deposit exceeds your available balance.`;
+    }
+    return t`Required network fee exceeds your available balance.`;
+  };
+
+  const balanceValidationMessage = getBalanceValidationMessage();
+
+  /**
+   * Renders the info box explaining the token type choice
+   */
+  const renderTokenTypeInfoBox = () => {
+    const infoBoxStyle = {
+      backgroundColor: '#daf1ff',
+      borderRadius: '8px',
+      padding: '8px 16px',
+      fontSize: '14px',
+    };
+
+    if (isDepositToken) {
+      return (
+        <div className="d-flex align-items-center mt-4 mb-4" style={infoBoxStyle}>
+          <i className="fa fa-info-circle mr-2" style={{ color: '#0066cc' }} aria-hidden="true"></i>
+          <div>
+            {t`You chose to create a `}<strong>{t`Deposit-Based Token`}</strong>{t`, which requires a ${depositPercentDisplay}% ${nativeTokenConfig.symbol} deposit. This ensures that all future transactions with this token have no additional fees. `}
+            <a href="#" onClick={goToRFC} style={{ color: '#8C46FF', fontWeight: 'bold' }}>{t`Learn more.`}</a>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="d-flex align-items-center mt-4 mb-4" style={infoBoxStyle}>
+        <i className="fa fa-info-circle mr-2" style={{ color: '#0066cc' }} aria-hidden="true"></i>
+        <div>
+          {t`You chose to create a `}<strong>{t`Fee-Based Token`}</strong>{t`, so a small fee will be applied to each future transaction of this token. `}
+          <a href="#" onClick={goToRFC} style={{ color: '#8C46FF', fontWeight: 'bold' }}>{t`Learn more.`}</a>
+        </div>
+      </div>
+    );
+  };
+
+  const renderFeeModelInfo = () => {
+    let infoLabel = `${t`Network fee`}: ${requiredFeeAmountText} (${availableBalanceText})`;
+    if (isDepositToken) {
+      infoLabel = `${t`Deposit:`} ${tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} ${nativeTokenConfig.symbol} (${availableBalanceText})`;
+    }
+    return <p className="mb-0">{infoLabel}</p>;
+  }
+
+  const formContainerStyle = {
+    border: '1px solid #b7bfc7',
+    borderRadius: '8px',
+    padding: '16px',
+  };
 
   return (
     <div className="content-wrapper">
       <BackButton />
-      <h3 className="mt-4">Create Token</h3>
-      <p className="mt-5">{t`Here you will create a new customized token. After the creation, you will be able to send this new token to other addresses.`}</p>
-      <p>{t`Custom tokens share the address space with all other tokens, including ${nativeTokenConfig.symbol}. This means that you can send and receive tokens using any valid address.`}</p>
-      <p>{t`Remember to make a backup of your new token's configuration string. You will need to send it to other people to allow them to use your new token.`}</p>
-      <p>
-        {str2jsx(
-          t`When creating and minting tokens, a |bold:deposit of ${htrDeposit}%| in ${nativeTokenConfig.symbol} is required. If these tokens are later melted, this ${nativeTokenConfig.symbol} deposit will be returned. Read more about it |link:here|.`,
-          {
-            bold: (x, i) => <strong key={i}>{x}</strong>,
-            link: (x, i) => <a key={i} href="true" onClick={goToRFC}>{x}</a>,
-          }
-        )}
-      </p>
-      <hr className="mb-5 mt-5"/>
+      <h3 className="mt-4 mb-4">{isDepositToken ? t`Create Deposit Token` : t`Create Fee Token`}</h3>
       <form ref={formCreateTokenRef} id="formCreateToken">
-        <div className="row">
-          <div className="form-group col-6">
-            <label>{t`Short name`}</label>
-            <input required ref={shortNameRef} placeholder={t`MyCoin`} type="text" className="form-control" />
-          </div>
-          <div className="form-group col-3">
-            <label>{t`Symbol`}</label>
-            <input required ref={symbolRef} placeholder={t`MYC (2-5 characters)`} type="text" minLength={2} maxLength={5} className="form-control" />
-          </div>
-        </div>
-        <div className="row">
-          <div className="form-group col-4">
-            <label>{t`Amount`}</label>
-            <InputNumber
-             required
-             className="form-control"
-             onValueChange={onAmountChange}
-            />
-          </div>
-          <div className="form-group d-flex flex-row align-items-center address-checkbox">
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" ref={autoselectAddressRef} id="autoselectAddress" defaultChecked={true} onChange={handleCheckboxAddress} />
-              <label className="form-check-label" htmlFor="autoselectAddress">
-                {t`Select address automatically`}
-              </label>
+        <div className="rounded p-3 mb-3" style={formContainerStyle}>
+          <div className="row">
+            <div className="form-group col-6">
+              <label>{t`Short name`}</label>
+              <input required ref={shortNameRef} placeholder={t`MyCoin`} type="text" className="form-control" />
+            </div>
+            <div className="form-group col-4">
+              <label>{t`Symbol`}</label>
+              <input required ref={symbolRef} placeholder={t`MYC (2-5 characters)`} type="text" minLength={2} maxLength={5} className="form-control" />
             </div>
           </div>
-          <div className="form-group col-5" ref={addressWrapperRef} style={{display: 'none'}}>
-            <label>{t`Destination address`}</label>
-            <input ref={addressInputRef} type="text" placeholder={t`Address`} className="form-control" />
+          <div className="row">
+            <div className="form-group col-4">
+              <label>{t`Amount`}</label>
+              <InputNumber
+               required
+               className="form-control"
+               onValueChange={onAmountChange}
+              />
+            </div>
+            <div className="form-group d-flex flex-row align-items-center address-checkbox">
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox" ref={autoselectAddressRef} id="autoselectAddress" defaultChecked={true} onChange={handleCheckboxAddress} />
+                <label className="form-check-label" htmlFor="autoselectAddress">
+                  {t`Select address automatically`}
+                </label>
+              </div>
+            </div>
+            <div className="form-group col-5" ref={addressWrapperRef} style={{display: 'none'}}>
+              <label>{t`Destination address`}</label>
+              <input ref={addressInputRef} type="text" placeholder={t`Address`} className="form-control" />
+            </div>
           </div>
+          {renderFeeModelInfo()}
+          {balanceValidationMessage && (
+            <p className="text-danger mt-2 mb-0" role="alert">{balanceValidationMessage}</p>
+          )}
         </div>
-        <p>Deposit: {tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} {nativeTokenConfig.symbol} ({hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} {nativeTokenConfig.symbol} available)</p>
-        <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
+        {renderTokenTypeInfoBox()}
+        <button
+          type="button"
+          className="btn btn-hathor text-uppercase"
+          style={{ width: '260px', padding: '16px', fontSize: '14px' }}
+          onClick={onClickCreate}
+          disabled={hasInsufficientBalance}
+        >
+          {isDepositToken ? t`Create Deposit Token` : t`Create Fee Token`}
+        </button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>
     </div>
