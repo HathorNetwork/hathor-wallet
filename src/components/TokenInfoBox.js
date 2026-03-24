@@ -11,14 +11,27 @@ import { get } from 'lodash';
 import { numberUtils, TokenVersion } from '@hathor/wallet-lib';
 import { useSelector } from 'react-redux';
 import helpers from '../utils/helpers';
+import { FEE_TOKEN_FEATURE_TOGGLE, FEATURE_TOGGLE_DEFAULTS } from '../constants';
 
-const getFeeModelDescription = (tokenVersion) => {
-  if (tokenVersion === TokenVersion.FEE)
-    return t`This token was created without a deposit. A small network fee in HTR is charged on every transfer.`
-  if (tokenVersion === TokenVersion.DEPOSIT) {
-    return t`This token was created with a 1% HTR deposit. No network fees are charged for transfers.`
+const getFeeModelInfo = (tokenVersion) => {
+  if (tokenVersion === TokenVersion.FEE) {
+    return {
+      label: t`Fee-based`,
+      description: t`This token was created without a deposit. A small network fee in HTR is charged on every transfer.`,
+    };
   }
-  return t`Unknown fee model`
+  if (tokenVersion === TokenVersion.DEPOSIT) {
+    return {
+      label: t`Deposit-based`,
+      description: t`This token was created with a 1% HTR deposit. No network fees are charged for transfers.`,
+    };
+  }
+  // This should never happen because of the feature flag. When the feature flag is enabled
+  // the token sync will run after wallet startup
+  return {
+    label: t`Unknown`,
+    description: t`Unknown fee model`,
+  };
 };
 
 export default function TokenInfoBox ({
@@ -32,6 +45,9 @@ export default function TokenInfoBox ({
 }) {
   const isNFT = helpers.isTokenNFT(get(token, 'uid'), tokenMetadata || {});
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
+  const featureToggles = useSelector((state) => state.featureToggles);
+  const feeTokenFeatureEnabled = get(featureToggles, FEE_TOKEN_FEATURE_TOGGLE, get(FEATURE_TOGGLE_DEFAULTS, FEE_TOKEN_FEATURE_TOGGLE, false));
+  const feeModelInfo = getFeeModelInfo(token.version);
 
   return (
     <div className="token-general-info">
@@ -39,8 +55,12 @@ export default function TokenInfoBox ({
       <p className="mt-2 mb-2"><strong>{t`Type:`} </strong>{isNFT ? 'NFT' : 'Custom Token'}</p>
       <p className="mt-2 mb-2"><strong>{t`Name:`} </strong>{token.name}</p>
       <p className="mt-2 mb-2"><strong>{t`Symbol:`} </strong>{token.symbol}</p>
-      <p className="mt-2 mb-2"><strong>{t`Fee Model:`} </strong>{token.version === TokenVersion.FEE ? t`Fee-based` : t`Deposit-based`}</p>
-      <p className="mt-2 mb-2">{getFeeModelDescription(token.version)}</p>
+      {feeTokenFeatureEnabled && (
+        <>
+          <p className="mt-2 mb-2"><strong>{t`Fee Model:`} </strong>{feeModelInfo.label}</p>
+          <p className="mt-2 mb-2">{feeModelInfo.description}</p>
+        </>
+      )}
       <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{numberUtils.prettyValue(totalSupply || 0n, isNFT ? 0 : decimalPlaces)} {token.symbol}</p>
       <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{canMint ? 'Yes' : 'No'}</p>
       <p className="mb-2 subtitle">{t`Indicates whether the token owner can create new tokens, increasing the total supply`}</p>
