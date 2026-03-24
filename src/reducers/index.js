@@ -1269,7 +1269,6 @@ const onSetFeatureToggles = (state, { payload }) => ({
   ...state,
   featureToggles: {
     ...payload,
-    [FEE_TOKEN_FEATURE_TOGGLE]: true,
   },
 });
 
