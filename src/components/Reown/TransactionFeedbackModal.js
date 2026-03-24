@@ -29,14 +29,18 @@ export function TransactionFeedbackModal({ isError, isLoading = true, errorMessa
   const hasUnregisteredTokens = !isLoading && !isError && unregisteredTokensList.length > 0;
 
   const handleRegisterTokens = async () => {
-    // Register all unregistered tokens via saga (handles version fetching with error resilience)
-    for (const token of unregisteredTokensList) {
-      await tokens.registerToken(token.uid, token.name, token.symbol);
+    try {
+      // Register all unregistered tokens via saga (handles version fetching with error resilience)
+      for (const token of unregisteredTokensList) {
+        await tokens.registerToken(token.uid, token.name, token.symbol);
+      }
+    } catch (error) {
+      console.error('Failed to register tokens:', error);
+    } finally {
+      // Always clean unregistered tokens state and close modal
+      dispatch(unregisteredTokensClean());
+      onClose();
     }
-
-    // Clean unregistered tokens state
-    dispatch(unregisteredTokensClean());
-    onClose();
   };
 
   const handleClose = () => {

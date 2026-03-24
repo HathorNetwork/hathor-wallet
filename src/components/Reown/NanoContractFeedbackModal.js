@@ -30,13 +30,17 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
   const hasUnregisteredTokens = !isLoading && !isError && unregisteredTokensList.length > 0;
 
   const handleRegisterTokens = async () => {
-    for (const token of unregisteredTokensList) {
-      await tokens.registerToken(token.uid, token.name, token.symbol);
+    try {
+      for (const token of unregisteredTokensList) {
+        await tokens.registerToken(token.uid, token.name, token.symbol);
+      }
+    } catch (error) {
+      console.error('Failed to register tokens:', error);
+    } finally {
+      // Always clean unregistered tokens state and close modal
+      dispatch(unregisteredTokensClean());
+      onClose();
     }
-
-    // Clean unregistered tokens state
-    dispatch(unregisteredTokensClean());
-    onClose();
   };
 
   const handleClose = () => {
