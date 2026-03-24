@@ -1028,11 +1028,12 @@ export const setReownError = (errorDetails = null) => ({
  * @param {string} uid Token uid
  * @param {string} name Token name
  * @param {string} symbol Token symbol
- * @param {boolean} [alwaysShow] Whether to always show the token (overrides zero-balance hiding)
- * @param {Function} [resolve] Optional promise resolve callback
- * @param {Function} [reject] Optional promise reject callback
+ * @param {Object} [options] Optional parameters
+ * @param {boolean} [options.alwaysShow=false] Whether to always show the token (overrides zero-balance hiding)
+ * @param {Function} [options.resolve=null] Optional promise resolve callback
+ * @param {Function} [options.reject=null] Optional promise reject callback
  */
-export const tokenRegisterRequested = (uid, name, symbol, alwaysShow = false, resolve = null, reject = null) => ({
+export const tokenRegisterRequested = (uid, name, symbol, { alwaysShow = false, resolve = null, reject = null } = {}) => ({
   type: types.TOKEN_REGISTER_REQUESTED,
   payload: { uid, name, symbol, alwaysShow, resolve, reject },
 });

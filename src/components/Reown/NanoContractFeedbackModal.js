@@ -31,6 +31,7 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
 
   const handleRegisterTokens = async () => {
     try {
+      // Register all unregistered tokens via saga (handles version fetching with error resilience)
       for (const token of unregisteredTokensList) {
         await tokens.registerToken(token.uid, token.name, token.symbol);
       }

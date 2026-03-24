@@ -6,7 +6,7 @@
  */
 
 import store from '../store/index';
-import { newTokens, removeTokenMetadata, types } from '../actions/index';
+import { newTokens, removeTokenMetadata, tokenRegisterRequested } from '../actions/index';
 import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 import LOCAL_STORE from '../storage';
@@ -82,10 +82,9 @@ const tokens = {
    */
   registerToken(uid, name, symbol, alwaysShow = false) {
     return new Promise((resolve, reject) => {
-      store.dispatch({
-        type: types.TOKEN_REGISTER_REQUESTED,
-        payload: { uid, name, symbol, alwaysShow, resolve, reject },
-      });
+      store.dispatch(
+        tokenRegisterRequested(uid, name, symbol, { alwaysShow, resolve, reject })
+      );
     });
   },
 

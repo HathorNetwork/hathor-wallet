@@ -458,6 +458,12 @@ function* fetchTokenVersionWithRetry(wallet, tokenUid) {
  * This saga is called during wallet startup when the fee-based-tokens
  * feature flag is enabled.
  *
+ * This function exists for backwards compatibility: tokens registered before
+ * the fee-based tokens feature was introduced don't have a version stored.
+ * It fetches and persists the version for these legacy tokens so the UI can
+ * display the correct fee model. This migration can be removed once all users
+ * have synced their tokens (or after a sufficient deprecation period).
+ *
  * @returns {{success: boolean, skipped?: boolean, syncedTokens?: Array, failedTokens?: Array}}
  */
 export function* syncTokenVersions() {
