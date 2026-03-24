@@ -82,7 +82,12 @@ export const SENTRY_DSN = process.env.SENTRY_DSN || 'https://69c067d1587c465cac8
 /**
  * URL of token deposit RFC
  */
-export const TOKEN_DEPOSIT_RFC_URL = "https://gitlab.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
+export const TOKEN_DEPOSIT_RFC_URL = "https://github.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
+
+/**
+ * URL of token fee RFC
+ */
+export const TOKEN_FEE_RFC_URL = "https://github.com/HathorNetwork/rfcs/blob/master/text/0045-transaction_fee_minting.md";
 
 /**
  * URL of NFT standard
