@@ -46,7 +46,7 @@ export default function TokenInfoBox ({
   const isNFT = helpers.isTokenNFT(get(token, 'uid'), tokenMetadata || {});
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const featureToggles = useSelector((state) => state.featureToggles);
-  const feeTokenFeatureEnabled = get(featureToggles, FEE_TOKEN_FEATURE_TOGGLE, get(FEATURE_TOGGLE_DEFAULTS, FEE_TOKEN_FEATURE_TOGGLE, false));
+  const feeTokenFeatureEnabled = get(featureToggles, FEE_TOKEN_FEATURE_TOGGLE, FEATURE_TOGGLE_DEFAULTS[FEE_TOKEN_FEATURE_TOGGLE]);
   const feeModelInfo = getFeeModelInfo(token.version);
 
   return (
