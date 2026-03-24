@@ -109,12 +109,8 @@ class ModalAddToken extends React.Component {
         return;
       }
 
-      // Fetch token version from API (validateTokenToAddByConfigurationString doesn't return it)
-      const { tokenInfo } = await wallet.getTokenDetails(tokenUid);
-
-      // Adding the token to the wallet and returning with the success callback
-      tokens.addToken(tokenUid, tokenData.name, tokenData.symbol, tokenInfo.version);
-      walletUtils.setTokenAlwaysShow(tokenUid, this.state.alwaysShow);
+      // Register the token via saga (handles version fetching with error resilience)
+      await tokens.registerToken(tokenUid, tokenData.name, tokenData.symbol, this.state.alwaysShow);
 
       this.props.success();
     } catch (e) {

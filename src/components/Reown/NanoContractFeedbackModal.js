@@ -12,7 +12,6 @@ import { types, unregisteredTokensClean, setReownError } from '../../actions';
 import { FeedbackModal } from './FeedbackModal';
 import { constants } from '@hathor/wallet-lib';
 import tokens from '../../utils/tokens';
-import { getGlobalWallet } from '../../modules/wallet';
 
 export const MODAL_ID = 'nanoContractFeedbackModal';
 
@@ -31,17 +30,8 @@ export function NanoContractFeedbackModal({ isError, isLoading = true, onClose, 
   const hasUnregisteredTokens = !isLoading && !isError && unregisteredTokensList.length > 0;
 
   const handleRegisterTokens = async () => {
-    const wallet = getGlobalWallet();
-
-    // Register all unregistered tokens
     for (const token of unregisteredTokensList) {
-      let { version } = token;
-      // Fetch version from API if not present
-      if (version === undefined) {
-        const { tokenInfo } = await wallet.getTokenDetails(token.uid);
-        version = tokenInfo.version;
-      }
-      await tokens.addToken(token.uid, token.name, token.symbol, version);
+      await tokens.registerToken(token.uid, token.name, token.symbol);
     }
 
     // Clean unregistered tokens state

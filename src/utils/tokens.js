@@ -6,12 +6,11 @@
  */
 
 import store from '../store/index';
-import { newTokens, removeTokenMetadata } from '../actions/index';
+import { newTokens, removeTokenMetadata, types } from '../actions/index';
 import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 import LOCAL_STORE from '../storage';
 import { getGlobalWallet } from '../modules/wallet';
-import { TokenVersion } from '@hathor/wallet-lib';
 
 /**
  * Methods to create and handle tokens
@@ -48,12 +47,13 @@ const tokens = {
   },
 
   /**
-   * Add a new token to the localStorage and redux
+   * Add a new token to the localStorage and redux.
+   * This is the legacy method - prefer using registerToken() which handles version fetching.
    *
    * @param {string} uid Token uid
    * @param {string} name Token name
    * @param {string} symbol Token symbol
-   * @param {TokenVersion} version Token version (deposit or fee based)
+   * @param {number} version Token version (deposit or fee based)
    *
    * @memberof Tokens
    * @inner
@@ -67,24 +67,26 @@ const tokens = {
   },
 
   /**
-   * Update a token's version in storage and redux.
-   * Used to migrate tokens that were registered before version was tracked.
+   * Register a token with resilient version fetching via Redux saga.
+   * This dispatches an action that the saga handles, fetching the version
+   * with error resilience (falls back to undefined if version fetch fails).
    *
    * @param {string} uid Token uid
    * @param {string} name Token name
    * @param {string} symbol Token symbol
-   * @param {number} version Token version (deposit or fee based)
+   * @param {boolean} [alwaysShow=false] Whether to always show the token
+   * @returns {Promise<{uid: string, name: string, symbol: string, version: number|undefined}>}
    *
    * @memberof Tokens
    * @inner
    */
-  async updateTokenVersion(uid, name, symbol, version) {
-    const globalWallet = getGlobalWallet();
-    // Re-register with version to update storage
-    await globalWallet.storage.registerToken({ uid, name, symbol, version });
-    // Update redux state
-    const tokens = await this.getRegisteredTokens(globalWallet);
-    store.dispatch(newTokens({ tokens, uid }));
+  registerToken(uid, name, symbol, alwaysShow = false) {
+    return new Promise((resolve, reject) => {
+      store.dispatch({
+        type: types.TOKEN_REGISTER_REQUESTED,
+        payload: { uid, name, symbol, alwaysShow, resolve, reject },
+      });
+    });
   },
 
   /**

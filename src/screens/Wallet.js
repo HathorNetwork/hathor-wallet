@@ -163,17 +163,11 @@ function Wallet() {
     }
 
     // Update the state with the new data
-    const { totalSupply: newTotalSupply, totalTransactions, authorities, tokenInfo } = tokenDetails;
+    const { totalSupply: newTotalSupply, totalTransactions, authorities } = tokenDetails;
     setTotalSupply(newTotalSupply);
     setCanMint(authorities.mint);
     setCanMelt(authorities.melt);
     setTransactionsCount(totalTransactions);
-
-    // Migrate tokens that were registered before version was tracked
-    const currentToken = tokens.find(t => t.uid === tokenUid);
-    if (currentToken && currentToken.version === undefined && tokenInfo.version !== undefined) {
-      await tokensUtils.updateTokenVersion(tokenUid, currentToken.name, currentToken.symbol, tokenInfo.version);
-    }
   }
 
   /**

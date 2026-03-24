@@ -36,6 +36,7 @@ import Page404 from './screens/Page404';
 import VersionError from './screens/VersionError';
 import WalletVersionError from './screens/WalletVersionError';
 import LoadWalletFailed from './screens/LoadWalletFailed';
+import TokenVersionSync from './screens/TokenVersionSync';
 import versionUtils from './utils/version';
 import helpersUtils from './utils/helpers';
 import tokensUtils from './utils/tokens';
@@ -218,6 +219,7 @@ function Root() {
       <Route path="/locked" element={<DefaultComponent children={<LockedWallet />} />} />
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/loading_addresses" element={<LoadingAddresses />} />
+      <Route path="/token-version-sync" element={<TokenVersionSync />} />
       <Route path="/permission" element={<SentryPermission />} />
       <Route path="/" element={<StartedComponent children={<Wallet />} loaded={true} />} />
       <Route path="/reown/connect" element={<ReownConnect />} />

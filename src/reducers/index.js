@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, FEE_TOKEN_FEATURE_TOGGLE, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
@@ -311,6 +311,22 @@ const initialState = {
     error: null,
   },
   reown: reownReducer(undefined, {}),
+  /**
+   * Stores the status of token registration operations
+   * @type {Record<string, { status: string, error?: string }>}
+   * @example { 'abc123': { status: 'loading' }, 'def456': { status: 'success' } }
+   */
+  tokenRegistration: {},
+  /**
+   * Token version sync state during startup
+   */
+  tokenVersionSync: {
+    status: 'idle', // 'idle' | 'syncing' | 'success' | 'failed'
+    failedTokens: [],
+    errorMessage: null,
+    syncedCount: 0,
+    totalCount: 0,
+  },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -489,6 +505,20 @@ const rootReducer = (state = initialState, action) => {
       return onUnregisteredTokensStoreSuccess(state, action);
     case types.UNREGISTERED_TOKENS_CLEAN:
       return onUnregisteredTokensClean(state);
+    case types.TOKEN_REGISTER_REQUESTED:
+      return onTokenRegisterRequested(state, action);
+    case types.TOKEN_REGISTER_SUCCESS:
+      return onTokenRegisterSuccess(state, action);
+    case types.TOKEN_REGISTER_FAILED:
+      return onTokenRegisterFailed(state, action);
+    case types.TOKEN_VERSION_SYNC_REQUESTED:
+      return onTokenVersionSyncRequested(state, action);
+    case types.TOKEN_VERSION_SYNC_PROGRESS:
+      return onTokenVersionSyncProgress(state, action);
+    case types.TOKEN_VERSION_SYNC_SUCCESS:
+      return onTokenVersionSyncSuccess(state, action);
+    case types.TOKEN_VERSION_SYNC_FAILED:
+      return onTokenVersionSyncFailed(state, action);
     default:
       return state;
   }
@@ -1239,6 +1269,7 @@ const onSetFeatureToggles = (state, { payload }) => ({
   ...state,
   featureToggles: {
     ...payload,
+    [FEE_TOKEN_FEATURE_TOGGLE]: true,
   },
 });
 
@@ -1600,5 +1631,111 @@ export const onUnregisteredTokensClean = (state) => {
     },
   };
 };
+
+/**
+ * Handle token registration request - set status to loading
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ */
+export const onTokenRegisterRequested = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.LOADING },
+    },
+  };
+};
+
+/**
+ * Handle token registration success
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ */
+export const onTokenRegisterSuccess = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.READY },
+    },
+  };
+};
+
+/**
+ * Handle token registration failure
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ * @param {string} action.payload.error Error message
+ */
+export const onTokenRegisterFailed = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.FAILED, error: payload.error },
+    },
+  };
+};
+
+/**
+ * Token version sync requested - start syncing
+ */
+export const onTokenVersionSyncRequested = (state, action) => ({
+  ...state,
+  tokenVersionSync: {
+    status: 'syncing',
+    failedTokens: [],
+    errorMessage: null,
+    syncedCount: 0,
+    totalCount: action.payload?.totalCount || 0,
+  },
+});
+
+/**
+ * Token version sync progress update
+ */
+export const onTokenVersionSyncProgress = (state, action) => ({
+  ...state,
+  tokenVersionSync: {
+    ...state.tokenVersionSync,
+    syncedCount: action.payload.syncedCount,
+    totalCount: action.payload.totalCount,
+  },
+});
+
+/**
+ * Token version sync succeeded
+ */
+export const onTokenVersionSyncSuccess = (state, action) => ({
+  ...state,
+  tokenVersionSync: {
+    status: 'success',
+    failedTokens: [],
+    errorMessage: null,
+    syncedCount: action.payload.syncedTokens.length,
+    totalCount: action.payload.syncedTokens.length,
+  },
+});
+
+/**
+ * Token version sync failed
+ */
+export const onTokenVersionSyncFailed = (state, action) => ({
+  ...state,
+  tokenVersionSync: {
+    status: 'failed',
+    failedTokens: action.payload.failedTokens,
+    errorMessage: action.payload.errorMessage,
+    syncedCount: 0,
+    totalCount: state.tokenVersionSync.totalCount,
+  },
+});
 
 export default rootReducer;

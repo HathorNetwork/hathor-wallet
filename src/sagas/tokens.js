@@ -15,7 +15,7 @@ import { channel } from 'redux-saga';
 import { get } from 'lodash';
 import { specificTypeAndPayload, dispatchAndWait } from './helpers';
 import helpers from '../utils/helpers';
-import { METADATA_CONCURRENT_DOWNLOAD } from '../constants';
+import { METADATA_CONCURRENT_DOWNLOAD, FEE_TOKEN_FEATURE_TOGGLE } from '../constants';
 import {
   types,
   tokenFetchBalanceRequested,
@@ -28,7 +28,16 @@ import {
   proposalTokenFetchFailed,
   onExceptionCaptured,
   tokenFetchMetadataRequested,
+  tokenRegisterSuccess,
+  tokenRegisterFailed,
+  newTokens,
+  tokenVersionSyncRequested,
+  tokenVersionSyncProgress,
+  tokenVersionSyncSuccess,
+  tokenVersionSyncFailed,
 } from '../actions';
+import { constants as hathorLibConstants } from '@hathor/wallet-lib';
+import walletUtils from '../utils/wallet';
 import { t } from "ttag";
 import { getGlobalWallet } from "../modules/wallet";
 import tokensUtils from '../utils/tokens';
@@ -37,6 +46,7 @@ import { logger } from '../utils/logger';
 
 const CONCURRENT_FETCH_REQUESTS = 5;
 const METADATA_MAX_RETRIES = 3;
+const VERSION_SYNC_MAX_RETRIES = 3;
 
 const log = logger('tokens');
 
@@ -415,6 +425,219 @@ function* fetchProposalTokenData(action) {
   }
 }
 
+/**
+ * Fetch token version with retry logic.
+ * @param {HathorWallet} wallet
+ * @param {string} tokenUid
+ * @returns {Generator<*, number, *>} Token version
+ * @throws {Error} If all retries fail
+ */
+function* fetchTokenVersionWithRetry(wallet, tokenUid) {
+  // Retry mechanism (same pattern as fetchTokenMetadata)
+  for (let i = 0; i <= VERSION_SYNC_MAX_RETRIES; i += 1) {
+    try {
+      const { tokenInfo } = yield call([wallet, wallet.getTokenDetails], tokenUid);
+
+      if (tokenInfo?.version === undefined) {
+        // this should never happen, the fullnode should return the version for all tokens
+        throw new Error('Token version not available from API');
+      }
+
+      return tokenInfo.version;
+    } catch (e) {
+      log.warn(`Attempt ${i + 1}/${VERSION_SYNC_MAX_RETRIES + 1} failed for token ${tokenUid}`, e);
+      yield delay(1000); // Wait 1s before trying again
+    }
+  }
+
+  throw new Error(`Max retries requesting version for token ${tokenUid}`);
+}
+
+/**
+ * Sync token versions for all tokens that have undefined version.
+ * This saga is called during wallet startup when the fee-based-tokens
+ * feature flag is enabled.
+ *
+ * @returns {{success: boolean, skipped?: boolean, syncedTokens?: Array, failedTokens?: Array}}
+ */
+export function* syncTokenVersions() {
+  const featureToggles = yield select((state) => state.featureToggles);
+  const isFeeTokenEnabled = featureToggles[FEE_TOKEN_FEATURE_TOGGLE];
+
+  if (!isFeeTokenEnabled) {
+    log.debug('Fee token feature flag is disabled, skipping version sync');
+    return { success: true, skipped: true };
+  }
+
+  const wallet = getGlobalWallet();
+  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet);
+
+  // Filter tokens that need version sync (version is undefined)
+  const tokensNeedingSync = registeredTokens.filter(
+    (token) => token.version === undefined && token.uid !== hathorLibConstants.NATIVE_TOKEN_UID
+  );
+
+  if (tokensNeedingSync.length === 0) {
+    log.debug('All tokens have version defined, no sync needed');
+    yield put(tokenVersionSyncSuccess([]));
+    return { success: true, syncedTokens: [] };
+  }
+
+  const totalCount = tokensNeedingSync.length;
+  log.info(`Starting version sync for ${totalCount} tokens`);
+  yield put(tokenVersionSyncRequested(totalCount));
+
+  const syncedTokens = [];
+  const failedTokens = [];
+
+  for (const token of tokensNeedingSync) {
+    try {
+      const version = yield call(fetchTokenVersionWithRetry, wallet, token.uid);
+
+      // Update token in storage with the fetched version
+      yield call([wallet.storage, wallet.storage.registerToken], {
+        uid: token.uid,
+        name: token.name,
+        symbol: token.symbol,
+        version,
+      });
+
+      syncedTokens.push({ uid: token.uid, name: token.name, symbol: token.symbol, version });
+      log.debug(`Synced version for token ${token.symbol}: ${version}`);
+
+      // Update progress in UI
+      yield put(tokenVersionSyncProgress(syncedTokens.length, totalCount));
+    } catch (error) {
+      log.error(`Failed to sync version for token ${token.symbol}`, error);
+      failedTokens.push({
+        uid: token.uid,
+        name: token.name,
+        symbol: token.symbol,
+        error: error.message,
+      });
+    }
+  }
+
+  if (failedTokens.length > 0) {
+    const errorMessage = t`Failed to sync version for ${failedTokens.length} token(s). Please check your connection and try again.`;
+    yield put(tokenVersionSyncFailed(failedTokens, errorMessage));
+    return { success: false, failedTokens, syncedTokens };
+  }
+
+  // Token versions are updated in storage. The wallet startup flow will
+  // call loadTokens() and loadWalletSuccess() to update Redux state.
+  // We don't dispatch newTokens here to avoid setting selectedToken to undefined.
+  yield put(tokenVersionSyncSuccess(syncedTokens));
+
+  return { success: true, syncedTokens };
+}
+
+/**
+ * Watch for retry requests and re-run sync.
+ */
+function* watchTokenVersionSyncRetry() {
+  yield takeLatest(types.TOKEN_VERSION_SYNC_RETRY, function* () {
+    yield call(syncTokenVersions);
+  });
+}
+
+/**
+ * Saga to register a token with version fetching.
+ *
+ * Behavior depends on feature flag:
+ * - flag=false: Fallback to undefined if version fetch fails (resilient)
+ * - flag=true:  FAIL if version fetch fails (strict)
+ *
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ * @param {string} action.payload.name Token name
+ * @param {string} action.payload.symbol Token symbol
+ * @param {boolean} action.payload.alwaysShow Whether to always show the token
+ * @param {Function} [action.payload.resolve] Optional promise resolve callback
+ * @param {Function} [action.payload.reject] Optional promise reject callback
+ */
+function* registerToken(action) {
+  const { uid, name, symbol, alwaysShow, resolve, reject } = action.payload;
+
+  try {
+    const wallet = getGlobalWallet();
+    const featureToggles = yield select((state) => state.featureToggles);
+    const isFeeTokenEnabled = featureToggles[FEE_TOKEN_FEATURE_TOGGLE];
+
+    // Fetch version with behavior depending on feature flag
+    let version;
+    try {
+      const { tokenInfo } = yield call([wallet, wallet.getTokenDetails], uid);
+      version = tokenInfo?.version;
+
+      // When flag is enabled, version is REQUIRED
+      if (isFeeTokenEnabled && version === undefined) {
+        throw new Error('Token version not available from API');
+      }
+    } catch (e) {
+      if (isFeeTokenEnabled) {
+        // Flag enabled: FAIL - no fallback allowed
+        throw new Error(`Failed to fetch token version: ${e.message}`);
+      }
+      // Flag disabled: fallback to undefined (legacy behavior)
+      log.debug(`Failed to fetch version for token ${uid}, continuing with undefined version`, e);
+      version = undefined;
+    }
+
+    // Register the token in storage
+    yield call([wallet.storage, wallet.storage.registerToken], { uid, name, symbol, version });
+
+    // Get updated registered tokens list
+    const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet);
+
+    // Update Redux state
+    yield put(newTokens({ tokens: registeredTokens, uid }));
+
+    // Set always show preference
+    walletUtils.setTokenAlwaysShow(uid, alwaysShow);
+
+    // Fetch token metadata
+    yield put(tokenFetchMetadataRequested(uid));
+
+    yield put(tokenRegisterSuccess(uid, name, symbol, version));
+
+    // Call resolve callback if provided
+    if (resolve) {
+      resolve({ uid, name, symbol, version });
+    }
+  } catch (e) {
+    log.error(`Error registering token ${uid}`, e);
+    yield put(tokenRegisterFailed(uid, e.message));
+
+    // Call reject callback if provided
+    if (reject) {
+      reject(e);
+    }
+  }
+}
+
+/**
+ * Queue-based consumer for token registration requests.
+ * Ensures registrations are processed sequentially to avoid race conditions.
+ */
+function* registerTokenQueue() {
+  const registerTokenChannel = yield call(channel);
+
+  // Single consumer to ensure sequential registration
+  yield fork(function* registerTokenConsumer() {
+    while (true) {
+      const action = yield take(registerTokenChannel);
+      yield call(registerToken, action);
+    }
+  });
+
+  while (true) {
+    const action = yield take(types.TOKEN_REGISTER_REQUESTED);
+    yield put(registerTokenChannel, action);
+  }
+}
+
 const NODE_RATE_LIMIT_CONF = {
   thin_wallet_token: {
     burst: 10,
@@ -436,6 +659,8 @@ export function* saga() {
     fork(fetchTokenBalanceQueue),
     fork(monitorSelectedToken),
     fork(fetchProposalTokenDataQueue),
+    fork(registerTokenQueue),
+    fork(watchTokenVersionSyncRetry),
     takeEvery(types.TOKEN_FETCH_HISTORY_REQUESTED, fetchTokenHistory),
     takeEvery('new_tokens', routeTokenChange),
   ]);
