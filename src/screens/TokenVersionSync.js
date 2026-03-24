@@ -12,6 +12,7 @@ import ReactLoading from 'react-loading';
 import { tokenVersionSyncRetry } from '../actions';
 import logo from '../assets/images/hathor-logo.png';
 import InitialImages from '../components/InitialImages';
+import SpanFmt from '../components/SpanFmt';
 import { colors } from '../constants';
 
 /**
@@ -45,71 +46,60 @@ function TokenVersionSync() {
 
           {/* Syncing state */}
           {isSyncing && (
-            <div className="d-flex flex-column align-items-center mt-5">
-              <ReactLoading
-                type="spin"
-                color={colors.purpleHathor}
-                width={48}
-                height={48}
-                delay={500}
-              />
-              <h4 className="mt-4">{t`Syncing registered tokens data`}</h4>
-              <p className="text-muted">
-                {totalCount > 0
-                  ? t`${syncedCount} of ${totalCount} tokens synced...`
-                  : t`Checking tokens...`}
-              </p>
-            </div>
+            <>
+              <div className="mt-5 mb-4 d-flex flex-row align-items-center">
+                <p className="mr-3 mb-0"><strong>{t`Syncing registered tokens...`}</strong></p>
+                <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={0} />
+              </div>
+              <p>{t`Please wait while we sync your registered tokens data.`}</p>
+              <p>{t`You will be automatically redirected to the wallet when we finish syncing.`}</p>
+              <p><SpanFmt>{totalCount > 0
+                ? t`**Tokens synced:** ${syncedCount} of ${totalCount}`
+                : t`**Checking tokens...**`}</SpanFmt></p>
+            </>
           )}
 
           {/* Failed state */}
           {isFailed && (
-            <div className="d-flex flex-column align-items-center mt-4">
-              <i className="fa fa-exclamation-triangle text-warning fa-3x mb-3" />
-
-              <h4 className="mb-3">{t`Token Sync Failed`}</h4>
-
-              <p className="text-muted mb-4 text-center">{errorMessage}</p>
-
+            <>
+              <div className="mt-5 mb-4 d-flex flex-row align-items-center">
+                <p className="mr-3 mb-0"><strong>{t`Token sync failed`}</strong></p>
+                <i className="fa fa-exclamation-triangle text-warning" />
+              </div>
+              <p>{errorMessage}</p>
+              <p>{t`Make sure you have a stable internet connection.`}</p>
               {failedTokens.length > 0 && (
-                <div className="mb-4 text-center">
-                  <p className="font-weight-bold">{t`Failed tokens:`}</p>
-                  <ul className="list-unstyled">
+                <>
+                  <p><SpanFmt>{t`**Failed tokens:**`}</SpanFmt></p>
+                  <ul className="list-unstyled ml-3">
                     {failedTokens.map((token) => (
                       <li key={token.uid} className="text-danger">
                         {token.name} ({token.symbol})
                       </li>
                     ))}
                   </ul>
-                </div>
+                </>
               )}
-
-              <button
-                className="btn btn-hathor"
-                onClick={handleRetry}
-              >
-                <i className="fa fa-refresh mr-2" />
-                {t`Try Again`}
-              </button>
-
-              <p className="mt-3 text-muted small">
-                {t`Make sure you have a stable internet connection.`}
-              </p>
-            </div>
+              <div className="mt-4">
+                <button
+                  className="btn btn-hathor"
+                  onClick={handleRetry}
+                >
+                  <i className="fa fa-refresh mr-2" />
+                  {t`Try Again`}
+                </button>
+              </div>
+            </>
           )}
 
           {/* Idle or success state - show loading (should redirect soon) */}
           {!isSyncing && !isFailed && (
-            <div className="d-flex flex-column align-items-center mt-5">
-              <ReactLoading
-                type="spin"
-                color={colors.purpleHathor}
-                width={48}
-                height={48}
-                delay={500}
-              />
-              <p className="text-muted mt-4">{t`Preparing...`}</p>
-            </div>
+            <>
+              <div className="mt-5 mb-4 d-flex flex-row align-items-center">
+                <p className="mr-3 mb-0"><strong>{t`Preparing...`}</strong></p>
+                <ReactLoading type='spin' color={colors.purpleHathor} width={24} height={24} delay={0} />
+              </div>
+            </>
           )}
         </div>
         <InitialImages />
