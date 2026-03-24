@@ -83,8 +83,8 @@ class ModalAddToken extends React.Component {
     }
 
     try {
-      const wallet = getGlobalWallet();
-      const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(this.refs.config.value, wallet.storage);
+      const { storage } = getGlobalWallet();
+      const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(this.refs.config.value, storage);
       const tokensBalance = this.props.tokensBalance;
 
       const tokenUid = tokenData.uid;

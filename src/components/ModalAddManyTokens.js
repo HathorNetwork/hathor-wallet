@@ -95,13 +95,13 @@ class ModalAddManyTokens extends React.Component {
       return;
     }
 
-    const wallet = getGlobalWallet();
     const validations = [];
     for (const config of matches) {
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
         // Getting all validation promises
-        validations.push(hathorLib.tokensUtils.validateTokenToAddByConfigurationString(config, wallet.storage));
+        const storage = getGlobalWallet().storage;
+        validations.push(hathorLib.tokensUtils.validateTokenToAddByConfigurationString(config, storage));
       }
     }
 
