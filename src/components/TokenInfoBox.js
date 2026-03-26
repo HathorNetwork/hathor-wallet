@@ -22,6 +22,7 @@ export default function TokenInfoBox ({
   transactionsCount,
   tokenMetadata,
   isLoadingVersion = false,
+  versionError = null,
   children,
 }) {
   const isNFT = helpers.isTokenNFT(get(token, 'uid'), tokenMetadata || {});
@@ -36,7 +37,7 @@ export default function TokenInfoBox ({
       <p className="mt-2 mb-2"><strong>{t`Name:`} </strong>{token.name}</p>
       <p className="mt-2 mb-2"><strong>{t`Symbol:`} </strong>{token.symbol}</p>
       {feeTokenFeatureEnabled && (
-        <FeeModelInfo tokenVersion={token.version} isLoading={isLoadingVersion} />
+        <FeeModelInfo tokenVersion={token.version} isLoading={isLoadingVersion} error={versionError} />
       )}
       <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{numberUtils.prettyValue(totalSupply || 0n, isNFT ? 0 : decimalPlaces)} {token.symbol}</p>
       <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{canMint ? 'Yes' : 'No'}</p>

@@ -8,26 +8,30 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { tokenRegisterRequested } from '../actions';
+import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 /**
  * Hook to fetch token details (including version) on-demand.
  * Automatically dispatches tokenRegisterRequested if version is undefined.
  *
  * @param {string|undefined} uid - Token uid to fetch details for
- * @returns {{ token: { uid: string, name: string, symbol: string, version: number|undefined }|undefined, isLoading: boolean }}
+ * @returns {{ token: object|undefined, isLoading: boolean, error: string|null }}
  */
 export function useTokenDetails(uid) {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.tokens.find((t) => t.uid === uid));
+  const registration = useSelector((state) => uid && state.tokenRegistration?.[uid]);
 
+  const registrationFailed = registration?.status === TOKEN_DOWNLOAD_STATUS.FAILED;
   const needsVersionFetch = Boolean(uid && token && token.version === undefined);
-  const isLoading = needsVersionFetch;
+  const isLoading = needsVersionFetch && !registrationFailed;
+  const error = registrationFailed ? registration.error : null;
 
   useEffect(() => {
-    if (needsVersionFetch) {
+    if (needsVersionFetch && !registrationFailed) {
       dispatch(tokenRegisterRequested(uid));
     }
-  }, [needsVersionFetch, uid, dispatch]);
+  }, [needsVersionFetch, registrationFailed, uid, dispatch]);
 
-  return { token, isLoading };
+  return { token, isLoading, error };
 }
