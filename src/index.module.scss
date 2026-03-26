@@ -1007,6 +1007,8 @@ div .nc-token-balance:not(:last-child) {
 }
 
 .modal-token-import {
+  min-width: 600px;
+
   .token-list {
     max-height: 400px;
     overflow-y: auto;
@@ -1037,7 +1039,7 @@ div .nc-token-balance:not(:last-child) {
     font-weight: bold;
     font-size: 14px;
     text-align: center;
-    min-width: 55px;
+    min-width: 72px;
   }
 
   .token-details {

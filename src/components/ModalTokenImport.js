@@ -140,21 +140,33 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
   };
 
   /**
-   * Dispatch tokenRegisterRequested for every selected token, tracking
-   * resolve/reject via callbacks.
+   * Toggle all tokens selected / deselected.
    */
-  const handleContinue = () => {
+  const toggleAll = () => {
+    setSelected((prev) => {
+      if (prev.size === unknownTokens.length) {
+        return new Set();
+      }
+      return new Set(unknownTokens.map((tk) => tk.uid));
+    });
+  };
+
+  /**
+   * Dispatch tokenRegisterRequested for a list of token uids, tracking
+   * resolve/reject via callbacks.
+   * @param {string[]} uids
+   */
+  const dispatchRegistrations = (uids) => {
     setModalState(MODAL_STATE.REGISTERING);
-    const selectedUids = Array.from(selected);
     let completed = 0;
     const errors = {};
 
-    selectedUids.forEach((uid) => {
+    uids.forEach((uid) => {
       dispatch(
         tokenRegisterRequested(uid, {
           resolve: () => {
             completed += 1;
-            if (completed === selectedUids.length) {
+            if (completed === uids.length) {
               if (Object.keys(errors).length > 0) {
                 setFailedTokens(errors);
                 setModalState(MODAL_STATE.ERROR);
@@ -166,7 +178,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
           reject: (error) => {
             errors[uid] = error?.message || t`Unknown error`;
             completed += 1;
-            if (completed === selectedUids.length) {
+            if (completed === uids.length) {
               setFailedTokens(errors);
               setModalState(MODAL_STATE.ERROR);
             }
@@ -176,42 +188,14 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     });
   };
 
-  /**
-   * Retry only the tokens that failed.
-   */
+  const handleContinue = () => {
+    dispatchRegistrations(Array.from(selected));
+  };
+
   const handleRetry = () => {
     const uidsToRetry = Object.keys(failedTokens);
     setFailedTokens({});
-    setModalState(MODAL_STATE.REGISTERING);
-
-    let completed = 0;
-    const errors = {};
-
-    uidsToRetry.forEach((uid) => {
-      dispatch(
-        tokenRegisterRequested(uid, {
-          resolve: () => {
-            completed += 1;
-            if (completed === uidsToRetry.length) {
-              if (Object.keys(errors).length > 0) {
-                setFailedTokens(errors);
-                setModalState(MODAL_STATE.ERROR);
-              } else {
-                setModalState(MODAL_STATE.SUCCESS);
-              }
-            }
-          },
-          reject: (error) => {
-            errors[uid] = error?.message || t`Unknown error`;
-            completed += 1;
-            if (completed === uidsToRetry.length) {
-              setFailedTokens(errors);
-              setModalState(MODAL_STATE.ERROR);
-            }
-          },
-        })
-      );
-    });
+    dispatchRegistrations(uidsToRetry);
   };
 
   /**
@@ -237,8 +221,8 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     // balance from fetchUnknownTokens may be wrapped: { status, data: { available, locked } }
     // or direct: { available, locked }
     const balanceData = balance.data || balance;
-    const available = balanceData.available || 0n;
-    const locked = balanceData.locked || 0n;
+    const available = balanceData.available ?? 0n;
+    const locked = balanceData.locked ?? 0n;
     const total = available + locked;
     return `${hathorLib.numberUtils.prettyValue(total, decimalPlaces)} ${symbol}`;
   };
@@ -292,10 +276,22 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
 
   const renderSelection = () => {
     const tokenUids = unknownTokens.map((tk) => tk.uid);
+    const allSelected = selected.size === unknownTokens.length;
 
     return (
       <>
         <p className="mb-3">{t`Select the tokens you want to add to your wallet.`}</p>
+        <div className="d-flex align-items-center mb-2 ml-1">
+          <input
+            type="checkbox"
+            className="mr-2"
+            checked={allSelected}
+            onChange={toggleAll}
+          />
+          <span className="font-weight-bold" style={{ fontSize: 13 }}>
+            {allSelected ? t`Deselect all` : t`Select all`}
+          </span>
+        </div>
         <div className="token-list">
           {tokenUids.map((uid) => renderTokenRow(uid))}
         </div>

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { t } from 'ttag';
 import { dismissTokenImportBanner } from '../actions/index';
@@ -28,11 +28,9 @@ export default function TokenImportBanner() {
   const dismissed = useSelector((state) => state.tokenImportBannerDismissed);
 
   const hideZeroBalance = walletUtils.areZeroBalanceTokensHidden();
-  const unknownTokens = walletUtils.fetchUnknownTokens(
-    allTokens,
-    tokens,
-    tokensBalance,
-    hideZeroBalance,
+  const unknownTokens = useMemo(
+    () => walletUtils.fetchUnknownTokens(allTokens, tokens, tokensBalance, hideZeroBalance),
+    [allTokens, tokens, tokensBalance, hideZeroBalance]
   );
 
   // Do not render if banner was dismissed or there are no unknown tokens
@@ -54,7 +52,7 @@ export default function TokenImportBanner() {
       <div className="token-import-banner__content">
         <p className="mb-0">
           <strong>{t`New tokens:`}</strong> {t`We found tokens linked to your address that are not yet in your wallet.`}{' '}
-          <a href="true" onClick={handleAddTokens}>{t`Add tokens`}</a>.
+          <a href="#" onClick={handleAddTokens}>{t`Add tokens`}</a>.
         </p>
         <button type="button" className="close ml-3" onClick={handleDismiss} aria-label={t`Close`}>
           <span aria-hidden="true">&times;</span>
