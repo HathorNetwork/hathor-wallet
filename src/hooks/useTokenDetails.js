@@ -14,7 +14,7 @@ import { tokenRegisterRequested } from '../actions';
  * Automatically dispatches tokenRegisterRequested if version is undefined.
  *
  * @param {string|undefined} uid - Token uid to fetch details for
- * @returns {{ token: Object|undefined, isLoading: boolean }}
+ * @returns {{ token: { uid: string, name: string, symbol: string, version: number|undefined }|undefined, isLoading: boolean }}
  */
 export function useTokenDetails(uid) {
   const dispatch = useDispatch();
