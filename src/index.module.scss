@@ -52,6 +52,10 @@ a:hover {
     .backup-alert {
       padding-left: 5rem;
     }
+
+    .token-import-banner {
+      padding-left: 5rem;
+    }
   }
 }
 
@@ -478,6 +482,38 @@ svg.svg-wrapper {
   a {
     color: #856404;
     text-decoration: underline;
+  }
+}
+
+.token-import-banner {
+  background-color: #daf1ff;
+  position: sticky;
+  top: 64px;
+  z-index: 2;
+  margin-bottom: 0;
+  margin-left: 80px;
+  padding: 0.75rem 1rem;
+
+  > .token-import-banner__content {
+    max-width: 988px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  a {
+    color: $purpleHathor;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+
+  .close {
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
@@ -968,4 +1004,87 @@ div .nc-token-balance:not(:last-child) {
 
 .token-type-info-box a {
   color: #0066cc;
+}
+
+.modal-token-import {
+  .token-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .token-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 8px;
+    background: white;
+
+    & + .token-row {
+      border-top: 1px solid #f0f0f0;
+    }
+  }
+
+  .token-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .token-symbol-tag {
+    background-color: #eff0f2;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    min-width: 55px;
+  }
+
+  .token-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .token-name {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  .token-uid {
+    color: #616161;
+    font-size: 14px;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .token-balance {
+    font-size: 14px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .btn-continue {
+    background-color: $purpleHathor;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 16px;
+    width: 185px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+
+    &:disabled {
+      background-color: #e5e5e5;
+      color: #b0b0b0;
+    }
+
+    &:not(:disabled):hover {
+      background-color: $purpleHathorHover;
+    }
+  }
 }

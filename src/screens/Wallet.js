@@ -31,6 +31,7 @@ import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
 import { useTokenDetails } from '../hooks/useTokenDetails';
+import TokenImportBanner from '../components/TokenImportBanner';
 
 
 /**
@@ -497,6 +498,7 @@ function Wallet() {
   return (
     <div id="wallet-div">
       {!backupDone && renderBackupAlert()}
+      <TokenImportBanner />
       <div className="content-wrapper">
       {/* This back button is not 100% perfect because when the user has just unlocked the wallet, it would go back to it when clicked
         * There is no easy way to get the previous path

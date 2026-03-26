@@ -1,0 +1,423 @@
+/**
+ * Copyright (c) Hathor Labs and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import React, { useState, useEffect, useContext } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { t } from 'ttag';
+import ReactLoading from 'react-loading';
+import hathorLib from '@hathor/wallet-lib';
+import { GlobalModalContext } from './GlobalModal';
+import { tokenRegisterRequested } from '../actions/index';
+import { getGlobalWallet } from '../modules/wallet';
+import { colors } from '../constants';
+
+/**
+ * States the modal can be in.
+ * @enum {string}
+ */
+const MODAL_STATE = {
+  LOADING: 'loading',
+  SELECTION: 'selection',
+  REGISTERING: 'registering',
+  SUCCESS: 'success',
+  ERROR: 'error',
+};
+
+/**
+ * Truncates a token UID showing the first 6 and last 6 characters.
+ * @param {string} uid
+ * @returns {string}
+ */
+function truncateUid(uid) {
+  if (uid.length <= 15) return uid;
+  return `${uid.slice(0, 6)}...${uid.slice(-6)}`;
+}
+
+/**
+ * Modal component for importing unknown tokens into the wallet.
+ *
+ * Shows a list of tokens found on the user's addresses that are not yet
+ * registered. The user can select which tokens to register.
+ *
+ * States:
+ * 1. Loading: Fetching token metadata (name, symbol) from the fullnode.
+ * 2. Selection: Token list with checkboxes; user picks which to import.
+ * 3. Registering: Dispatching registration actions, spinner shown.
+ * 4. Success: Brief confirmation message, auto-closes after 2 seconds.
+ * 5. Error: Shows which tokens failed, with a Retry button.
+ *
+ * @memberof Components
+ */
+export default function ModalTokenImport({ unknownTokens, onClose, manageDomLifecycle }) {
+  const dispatch = useDispatch();
+  const context = useContext(GlobalModalContext);
+
+  const explorerUrl = useSelector((state) => state.networkSettings.data.explorer);
+  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
+
+  // Current modal state
+  const [modalState, setModalState] = useState(MODAL_STATE.LOADING);
+
+  // Map of uid -> { uid, name, symbol, balance } for all resolved tokens
+  const [tokenDetails, setTokenDetails] = useState({});
+
+  // Set of selected token uids
+  const [selected, setSelected] = useState(new Set());
+
+  // Map of uid -> error message for tokens that failed registration
+  const [failedTokens, setFailedTokens] = useState({});
+
+  /**
+   * On mount, bootstrap the modal DOM lifecycle and fetch token details
+   * for every unknown token.
+   */
+  useEffect(() => {
+    manageDomLifecycle('#tokenImportModal');
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchDetails() {
+      const wallet = getGlobalWallet();
+      const details = {};
+
+      await Promise.all(
+        unknownTokens.map(async (token) => {
+          try {
+            const { tokenInfo } = await wallet.getTokenDetails(token.uid);
+            details[token.uid] = {
+              uid: token.uid,
+              name: tokenInfo?.name || token.uid,
+              symbol: tokenInfo?.symbol || '???',
+              balance: token.balance,
+            };
+          } catch (_err) {
+            // Fallback: use uid as name and ??? as symbol
+            details[token.uid] = {
+              uid: token.uid,
+              name: token.uid,
+              symbol: '???',
+              balance: token.balance,
+            };
+          }
+        })
+      );
+
+      if (cancelled) return;
+
+      setTokenDetails(details);
+      // All tokens checked by default
+      setSelected(new Set(unknownTokens.map((tk) => tk.uid)));
+      setModalState(MODAL_STATE.SELECTION);
+    }
+
+    fetchDetails();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [unknownTokens]);
+
+  /**
+   * Toggle an individual token's selection.
+   * @param {string} uid
+   */
+  const toggleToken = (uid) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(uid)) {
+        next.delete(uid);
+      } else {
+        next.add(uid);
+      }
+      return next;
+    });
+  };
+
+  /**
+   * Dispatch tokenRegisterRequested for every selected token, tracking
+   * resolve/reject via callbacks.
+   */
+  const handleContinue = () => {
+    setModalState(MODAL_STATE.REGISTERING);
+    const selectedUids = Array.from(selected);
+    let completed = 0;
+    const errors = {};
+
+    selectedUids.forEach((uid) => {
+      dispatch(
+        tokenRegisterRequested(uid, {
+          resolve: () => {
+            completed += 1;
+            if (completed === selectedUids.length) {
+              if (Object.keys(errors).length > 0) {
+                setFailedTokens(errors);
+                setModalState(MODAL_STATE.ERROR);
+              } else {
+                setModalState(MODAL_STATE.SUCCESS);
+              }
+            }
+          },
+          reject: (error) => {
+            errors[uid] = error?.message || t`Unknown error`;
+            completed += 1;
+            if (completed === selectedUids.length) {
+              setFailedTokens(errors);
+              setModalState(MODAL_STATE.ERROR);
+            }
+          },
+        })
+      );
+    });
+  };
+
+  /**
+   * Retry only the tokens that failed.
+   */
+  const handleRetry = () => {
+    const uidsToRetry = Object.keys(failedTokens);
+    setFailedTokens({});
+    setModalState(MODAL_STATE.REGISTERING);
+
+    let completed = 0;
+    const errors = {};
+
+    uidsToRetry.forEach((uid) => {
+      dispatch(
+        tokenRegisterRequested(uid, {
+          resolve: () => {
+            completed += 1;
+            if (completed === uidsToRetry.length) {
+              if (Object.keys(errors).length > 0) {
+                setFailedTokens(errors);
+                setModalState(MODAL_STATE.ERROR);
+              } else {
+                setModalState(MODAL_STATE.SUCCESS);
+              }
+            }
+          },
+          reject: (error) => {
+            errors[uid] = error?.message || t`Unknown error`;
+            completed += 1;
+            if (completed === uidsToRetry.length) {
+              setFailedTokens(errors);
+              setModalState(MODAL_STATE.ERROR);
+            }
+          },
+        })
+      );
+    });
+  };
+
+  /**
+   * Auto-close the modal 2 seconds after entering success state.
+   */
+  useEffect(() => {
+    if (modalState !== MODAL_STATE.SUCCESS) return;
+
+    const timer = setTimeout(() => {
+      context.hideModal();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [modalState]);
+
+  /**
+   * Format a balance value for display.
+   * @param {{ available: BigInt, locked: BigInt }} balance
+   * @param {string} symbol
+   * @returns {string}
+   */
+  const formatBalance = (balance, symbol) => {
+    // balance from fetchUnknownTokens may be wrapped: { status, data: { available, locked } }
+    // or direct: { available, locked }
+    const balanceData = balance.data || balance;
+    const available = balanceData.available || 0n;
+    const locked = balanceData.locked || 0n;
+    const total = available + locked;
+    return `${hathorLib.numberUtils.prettyValue(total, decimalPlaces)} ${symbol}`;
+  };
+
+  // -- Render helpers -------------------------------------------------------
+
+  const renderLoading = () => (
+    <div className="d-flex flex-column align-items-center justify-content-center py-5">
+      <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
+      <p className="mt-3 mb-0">{t`Loading token details...`}</p>
+    </div>
+  );
+
+  const renderTokenRow = (uid) => {
+    const token = tokenDetails[uid];
+    if (!token) return null;
+
+    const isDisabled = modalState === MODAL_STATE.REGISTERING;
+    const explorerLink = `${explorerUrl}/token/${uid}`;
+
+    return (
+      <div className="token-row" key={uid}>
+        <div className="d-flex align-items-center">
+          <input
+            type="checkbox"
+            className="mr-3"
+            checked={selected.has(uid)}
+            disabled={isDisabled}
+            onChange={() => toggleToken(uid)}
+          />
+          <div className="token-info">
+            <span className="token-symbol-tag">{token.symbol}</span>
+            <div className="token-details">
+              <span className="token-name">{token.name}</span>
+              <a
+                className="token-uid"
+                href={explorerLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={uid}
+              >
+                {truncateUid(uid)} <i className="fa fa-external-link" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <span className="token-balance">{formatBalance(token.balance, token.symbol)}</span>
+      </div>
+    );
+  };
+
+  const renderSelection = () => {
+    const tokenUids = unknownTokens.map((tk) => tk.uid);
+
+    return (
+      <>
+        <p className="mb-3">{t`Select the tokens you want to add to your wallet.`}</p>
+        <div className="token-list">
+          {tokenUids.map((uid) => renderTokenRow(uid))}
+        </div>
+        <div className="d-flex justify-content-center mt-4">
+          <button
+            className="btn btn-continue"
+            disabled={selected.size === 0}
+            onClick={handleContinue}
+          >
+            {t`Continue`}
+          </button>
+        </div>
+      </>
+    );
+  };
+
+  const renderRegistering = () => {
+    const tokenUids = unknownTokens.map((tk) => tk.uid);
+
+    return (
+      <>
+        <p className="mb-3">{t`Registering selected tokens...`}</p>
+        <div className="token-list">
+          {tokenUids.filter((uid) => selected.has(uid)).map((uid) => renderTokenRow(uid))}
+        </div>
+        <div className="d-flex justify-content-center mt-4">
+          <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
+        </div>
+      </>
+    );
+  };
+
+  const renderSuccess = () => (
+    <div className="d-flex flex-column align-items-center justify-content-center py-5">
+      <i className="fa fa-check-circle text-success" style={{ fontSize: 48 }}></i>
+      <p className="mt-3 mb-0">{t`Tokens registered successfully!`}</p>
+    </div>
+  );
+
+  const renderError = () => {
+    const failedUids = Object.keys(failedTokens);
+
+    return (
+      <>
+        <p className="text-danger mb-3">{t`Some tokens failed to register:`}</p>
+        <div className="token-list">
+          {failedUids.map((uid) => {
+            const token = tokenDetails[uid];
+            const name = token ? token.name : uid;
+            return (
+              <div className="token-row" key={uid}>
+                <div className="d-flex align-items-center">
+                  <div className="token-info">
+                    {token && <span className="token-symbol-tag">{token.symbol}</span>}
+                    <div className="token-details">
+                      <span className="token-name">{name}</span>
+                      <span className="text-danger" style={{ fontSize: 12 }}>{failedTokens[uid]}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="d-flex justify-content-center mt-4">
+          <button className="btn btn-continue" onClick={handleRetry}>
+            {t`Retry`}
+          </button>
+        </div>
+      </>
+    );
+  };
+
+  const renderBody = () => {
+    switch (modalState) {
+      case MODAL_STATE.LOADING:
+        return renderLoading();
+      case MODAL_STATE.SELECTION:
+        return renderSelection();
+      case MODAL_STATE.REGISTERING:
+        return renderRegistering();
+      case MODAL_STATE.SUCCESS:
+        return renderSuccess();
+      case MODAL_STATE.ERROR:
+        return renderError();
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div
+      className="modal fade"
+      id="tokenImportModal"
+      tabIndex="-1"
+      role="dialog"
+      aria-labelledby="tokenImportModal"
+      aria-hidden="true"
+      data-backdrop="static"
+      data-keyboard="false"
+    >
+      <div className="modal-dialog" role="document">
+        <div className="modal-content modal-token-import">
+          <div className="modal-header">
+            <h5 className="modal-title">
+              {t`Tokens found`} ({unknownTokens.length})
+            </h5>
+            <button
+              type="button"
+              className="close"
+              data-dismiss="modal"
+              aria-label={t`Close`}
+              onClick={onClose}
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div className="modal-body">
+            {renderBody()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -317,6 +317,7 @@ const initialState = {
    * @example { 'abc123': { status: 'loading' }, 'def456': { status: 'success' } }
    */
   tokenRegistration: {},
+  tokenImportBannerDismissed: false,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -501,6 +502,8 @@ const rootReducer = (state = initialState, action) => {
       return onTokenRegisterSuccess(state, action);
     case types.TOKEN_REGISTER_FAILED:
       return onTokenRegisterFailed(state, action);
+    case types.TOKEN_IMPORT_BANNER_DISMISSED:
+      return { ...state, tokenImportBannerDismissed: true };
     default:
       return state;
   }
