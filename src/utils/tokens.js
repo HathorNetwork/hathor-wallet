@@ -68,22 +68,20 @@ const tokens = {
 
   /**
    * Register a token with resilient version fetching via Redux saga.
-   * This dispatches an action that the saga handles, fetching the version
-   * with error resilience (falls back to undefined if version fetch fails).
+   * This dispatches an action that the saga handles, fetching name, symbol,
+   * and version from the fullnode API.
    *
    * @param {string} uid Token uid
-   * @param {string} name Token name
-   * @param {string} symbol Token symbol
    * @param {boolean} [alwaysShow=false] Whether to always show the token
    * @returns {Promise<{uid: string, name: string, symbol: string, version: number|undefined}>}
    *
    * @memberof Tokens
    * @inner
    */
-  registerToken(uid, name, symbol, alwaysShow = false) {
+  registerToken(uid, alwaysShow = false) {
     return new Promise((resolve, reject) => {
       store.dispatch(
-        tokenRegisterRequested(uid, name, symbol, { alwaysShow, resolve, reject })
+        tokenRegisterRequested(uid, { alwaysShow, resolve, reject })
       );
     });
   },

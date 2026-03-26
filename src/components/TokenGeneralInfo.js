@@ -33,6 +33,7 @@ export default function TokenGeneralInfo ({
   totalSupply,
   showConfigString,
   errorMessage,
+  isLoadingVersion,
 }) {
   const [successMessage, setSuccessMessage]  = useState('');
 
@@ -127,6 +128,7 @@ export default function TokenGeneralInfo ({
         canMelt={canMelt}
         transactionsCount={transactionsCount}
         tokenMetadata={tokenMetadata}
+        isLoadingVersion={isLoadingVersion}
       >
         {showAlwaysShowTokenCheckbox && renderAlwaysShowTokenCheckbox()}
       </TokenInfoBox>

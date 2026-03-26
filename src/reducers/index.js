@@ -317,16 +317,6 @@ const initialState = {
    * @example { 'abc123': { status: 'loading' }, 'def456': { status: 'success' } }
    */
   tokenRegistration: {},
-  /**
-   * Token version sync state during startup
-   */
-  tokenVersionSync: {
-    status: 'idle', // 'idle' | 'syncing' | 'success' | 'failed'
-    failedTokens: [],
-    errorMessage: null,
-    syncedCount: 0,
-    totalCount: 0,
-  },
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -511,14 +501,6 @@ const rootReducer = (state = initialState, action) => {
       return onTokenRegisterSuccess(state, action);
     case types.TOKEN_REGISTER_FAILED:
       return onTokenRegisterFailed(state, action);
-    case types.TOKEN_VERSION_SYNC_REQUESTED:
-      return onTokenVersionSyncRequested(state, action);
-    case types.TOKEN_VERSION_SYNC_PROGRESS:
-      return onTokenVersionSyncProgress(state, action);
-    case types.TOKEN_VERSION_SYNC_SUCCESS:
-      return onTokenVersionSyncSuccess(state, action);
-    case types.TOKEN_VERSION_SYNC_FAILED:
-      return onTokenVersionSyncFailed(state, action);
     default:
       return state;
   }
@@ -1682,59 +1664,5 @@ export const onTokenRegisterFailed = (state, { payload }) => {
     },
   };
 };
-
-/**
- * Token version sync requested - start syncing
- */
-export const onTokenVersionSyncRequested = (state, action) => ({
-  ...state,
-  tokenVersionSync: {
-    status: 'syncing',
-    failedTokens: [],
-    errorMessage: null,
-    syncedCount: 0,
-    totalCount: action.payload?.totalCount || 0,
-  },
-});
-
-/**
- * Token version sync progress update
- */
-export const onTokenVersionSyncProgress = (state, action) => ({
-  ...state,
-  tokenVersionSync: {
-    ...state.tokenVersionSync,
-    syncedCount: action.payload.syncedCount,
-    totalCount: action.payload.totalCount,
-  },
-});
-
-/**
- * Token version sync succeeded
- */
-export const onTokenVersionSyncSuccess = (state, action) => ({
-  ...state,
-  tokenVersionSync: {
-    status: 'success',
-    failedTokens: [],
-    errorMessage: null,
-    syncedCount: action.payload.syncedTokens.length,
-    totalCount: action.payload.syncedTokens.length,
-  },
-});
-
-/**
- * Token version sync failed
- */
-export const onTokenVersionSyncFailed = (state, action) => ({
-  ...state,
-  tokenVersionSync: {
-    status: 'failed',
-    failedTokens: action.payload.failedTokens,
-    errorMessage: action.payload.errorMessage,
-    syncedCount: 0,
-    totalCount: state.tokenVersionSync.totalCount,
-  },
-});
 
 export default rootReducer;

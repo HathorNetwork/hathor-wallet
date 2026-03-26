@@ -32,7 +32,7 @@ export function TransactionFeedbackModal({ isError, isLoading = true, errorMessa
     try {
       // Register all unregistered tokens via saga (handles version fetching with error resilience)
       for (const token of unregisteredTokensList) {
-        await tokens.registerToken(token.uid, token.name, token.symbol);
+        await tokens.registerToken(token.uid);
       }
     } catch (error) {
       console.error('Failed to register tokens:', error);

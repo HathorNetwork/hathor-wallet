@@ -110,7 +110,7 @@ class ModalAddToken extends React.Component {
       }
 
       // Register the token via saga (handles version fetching with error resilience)
-      await tokens.registerToken(tokenUid, tokenData.name, tokenData.symbol, this.state.alwaysShow);
+      await tokens.registerToken(tokenUid, this.state.alwaysShow);
 
       this.props.success();
     } catch (e) {

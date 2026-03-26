@@ -28,9 +28,7 @@ import {
   WALLET_SERVICE_FEATURE_TOGGLE,
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
   IGNORE_WS_TOGGLE_FLAG,
-  FEE_TOKEN_FEATURE_TOGGLE,
 } from '../constants';
-import { syncTokenVersions } from './tokens';
 import {
   types,
   isOnlineUpdate,
@@ -338,43 +336,8 @@ export function* startWallet(action) {
   }
 
   try {
-    let { allTokens, registeredTokens } = yield call(loadTokens);
+    const { allTokens, registeredTokens } = yield call(loadTokens);
     const currentAddress = yield call([wallet, wallet.getCurrentAddress]);
-
-    // Sync token versions if fee-based-tokens flag is enabled
-    const featureToggles = yield select((state) => state.featureToggles);
-    if (featureToggles[FEE_TOKEN_FEATURE_TOGGLE]) {
-      // Check if there are tokens needing sync BEFORE navigating
-      const tokensNeedingSync = registeredTokens.filter(
-        (t) => t.version === undefined && t.uid !== hathorLibConstants.NATIVE_TOKEN_UID
-      );
-
-      if (tokensNeedingSync.length > 0) {
-        // Navigate to explicit sync screen
-        yield put(setNavigateTo('/token-version-sync', true));
-
-        // Run sync (this will update the screen state)
-        const syncResult = yield call(syncTokenVersions);
-
-        if (!syncResult.success && !syncResult.skipped) {
-          // Sync failed - stay on sync screen showing error
-          // Wait for retry success or wallet restart
-          const { retry } = yield race({
-            retry: take(types.TOKEN_VERSION_SYNC_SUCCESS),
-            cancel: take(types.START_WALLET_REQUESTED),
-          });
-
-          if (!retry) {
-            return; // User restarted wallet, exit this startup
-          }
-        }
-
-        // Reload tokens with updated versions
-        const reloadedTokens = yield call(loadTokens);
-        registeredTokens = reloadedTokens.registeredTokens;
-        allTokens = reloadedTokens.allTokens;
-      }
-    }
 
     // Convert tokens to an object map before storing on Redux
     const allTokensMap = {};

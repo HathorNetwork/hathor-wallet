@@ -159,7 +159,7 @@ class ModalAddManyTokens extends React.Component {
 
       // Adding the tokens to the wallet via saga (handles version fetching with error resilience)
       for (const config of tokensToAdd) {
-        await tokens.registerToken(config.uid, config.name, config.symbol, this.state.alwaysShow);
+        await tokens.registerToken(config.uid, this.state.alwaysShow);
       }
 
       this.props.success(toAdd.length);

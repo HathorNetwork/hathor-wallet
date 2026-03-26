@@ -30,6 +30,7 @@ import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actio
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
+import { useTokenDetails } from '../hooks/useTokenDetails';
 
 
 /**
@@ -308,7 +309,7 @@ function Wallet() {
   }
 
   // Rendering process below
-  const token = tokens.find((token) => token.uid === selectedToken);
+  const { token, isLoading: isLoadingToken } = useTokenDetails(selectedToken)
   const tokenHistory = get(tokensHistory, selectedToken, {
     status: TOKEN_DOWNLOAD_STATUS.LOADING,
     data: [],
@@ -398,6 +399,7 @@ function Wallet() {
               canMelt={canMelt}
               transactionsCount={transactionsCount}
               tokenMetadata={tokenMetadata}
+              isLoadingVersion={isLoadingToken}
             />
           </div>
           {

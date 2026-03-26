@@ -122,11 +122,6 @@ export const types = {
   TOKEN_REGISTER_REQUESTED: 'TOKEN_REGISTER_REQUESTED',
   TOKEN_REGISTER_SUCCESS: 'TOKEN_REGISTER_SUCCESS',
   TOKEN_REGISTER_FAILED: 'TOKEN_REGISTER_FAILED',
-  TOKEN_VERSION_SYNC_REQUESTED: 'TOKEN_VERSION_SYNC_REQUESTED',
-  TOKEN_VERSION_SYNC_PROGRESS: 'TOKEN_VERSION_SYNC_PROGRESS',
-  TOKEN_VERSION_SYNC_SUCCESS: 'TOKEN_VERSION_SYNC_SUCCESS',
-  TOKEN_VERSION_SYNC_FAILED: 'TOKEN_VERSION_SYNC_FAILED',
-  TOKEN_VERSION_SYNC_RETRY: 'TOKEN_VERSION_SYNC_RETRY',
 };
 
 /**
@@ -1023,19 +1018,18 @@ export const setReownError = (errorDetails = null) => ({
 });
 
 /**
- * Request to register a token. The saga will fetch the version and register the token.
+ * Request to register a new token.
+ * Token name, symbol, and version are fetched from the fullnode API.
  *
- * @param {string} uid Token uid
- * @param {string} name Token name
- * @param {string} symbol Token symbol
+ * @param {string} uid Token uid (required)
  * @param {Object} [options] Optional parameters
- * @param {boolean} [options.alwaysShow=false] Whether to always show the token (overrides zero-balance hiding)
+ * @param {boolean} [options.alwaysShow=false] Whether to always show the token
  * @param {Function} [options.resolve=null] Optional promise resolve callback
  * @param {Function} [options.reject=null] Optional promise reject callback
  */
-export const tokenRegisterRequested = (uid, name, symbol, { alwaysShow = false, resolve = null, reject = null } = {}) => ({
+export const tokenRegisterRequested = (uid, { alwaysShow = false, resolve = null, reject = null } = {}) => ({
   type: types.TOKEN_REGISTER_REQUESTED,
-  payload: { uid, name, symbol, alwaysShow, resolve, reject },
+  payload: { uid, alwaysShow, resolve, reject },
 });
 
 /**
@@ -1060,49 +1054,4 @@ export const tokenRegisterSuccess = (uid, name, symbol, version) => ({
 export const tokenRegisterFailed = (uid, error) => ({
   type: types.TOKEN_REGISTER_FAILED,
   payload: { uid, error },
-});
-
-/**
- * Request to sync all token versions that are undefined.
- * @param {number} totalCount Total number of tokens to sync
- */
-export const tokenVersionSyncRequested = (totalCount) => ({
-  type: types.TOKEN_VERSION_SYNC_REQUESTED,
-  payload: { totalCount },
-});
-
-/**
- * Progress update for token version sync.
- * @param {number} syncedCount Number of tokens synced so far
- * @param {number} totalCount Total number of tokens to sync
- */
-export const tokenVersionSyncProgress = (syncedCount, totalCount) => ({
-  type: types.TOKEN_VERSION_SYNC_PROGRESS,
-  payload: { syncedCount, totalCount },
-});
-
-/**
- * All token versions synced successfully.
- * @param {Array<{uid: string, version: number}>} syncedTokens
- */
-export const tokenVersionSyncSuccess = (syncedTokens) => ({
-  type: types.TOKEN_VERSION_SYNC_SUCCESS,
-  payload: { syncedTokens },
-});
-
-/**
- * Token version sync failed.
- * @param {Array<{uid: string, name: string, symbol: string, error: string}>} failedTokens
- * @param {string} errorMessage
- */
-export const tokenVersionSyncFailed = (failedTokens, errorMessage) => ({
-  type: types.TOKEN_VERSION_SYNC_FAILED,
-  payload: { failedTokens, errorMessage },
-});
-
-/**
- * User clicked "Try Again" button on sync error screen.
- */
-export const tokenVersionSyncRetry = () => ({
-  type: types.TOKEN_VERSION_SYNC_RETRY,
 });
