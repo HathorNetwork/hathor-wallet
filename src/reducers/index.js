@@ -501,6 +501,13 @@ const rootReducer = (state = initialState, action) => {
       return onTokenRegisterSuccess(state, action);
     case types.TOKEN_REGISTER_FAILED:
       return onTokenRegisterFailed(state, action);
+    case types.NEW_UNKNOWN_TOKENS_FOUND: {
+      const allTokens = { ...state.allTokens };
+      for (const tokenUid of action.payload.tokenUids) {
+        allTokens[tokenUid] = tokenUid;
+      }
+      return { ...state, allTokens };
+    }
     default:
       return state;
   }
