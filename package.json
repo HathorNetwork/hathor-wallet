@@ -94,7 +94,7 @@
     "watch-electron": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev nodemon --watch ./public/**/* --watch . --exec 'npm run electron'",
     "electron-dev": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --trace-uncaught --no-sandbox .",
     "electron-debug": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --trace-uncaught --no-sandbox --unsafe-mode --hathor-debug .",
-    "electron-dev-concurrently": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .'",
+    "electron-dev-concurrently": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --no-sandbox .'",
     "locale-update-pot": "bash -c 'if command -v ttag &> /dev/null; then ttag extract -o ./locale/texts.pot ./src/; else ./node_modules/.bin/ttag extract -o ./locale/texts.pot ./src/; fi'",
     "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps && patch-package",
     "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0",
