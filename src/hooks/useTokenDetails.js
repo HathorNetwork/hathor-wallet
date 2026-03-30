@@ -24,14 +24,14 @@ export function useTokenDetails(uid) {
 
   const registrationFailed = registration?.status === TOKEN_DOWNLOAD_STATUS.FAILED;
   const needsVersionFetch = Boolean(uid && token && token.version === undefined);
-  const isLoading = needsVersionFetch && !registrationFailed;
+  const isLoading = registration?.status === TOKEN_DOWNLOAD_STATUS.LOADING;
   const error = registrationFailed ? registration.error : null;
 
   useEffect(() => {
-    if (needsVersionFetch && !registrationFailed) {
+    if (needsVersionFetch) {
       dispatch(tokenRegisterRequested(uid));
     }
-  }, [needsVersionFetch, registrationFailed, uid, dispatch]);
+  }, [needsVersionFetch, uid, dispatch]);
 
   return { token, isLoading, error };
 }
