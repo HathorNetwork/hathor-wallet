@@ -31,6 +31,8 @@ import {
 } from '../actions';
 import { t } from "ttag";
 import { getGlobalWallet } from "../modules/wallet";
+import tokensUtils from '../utils/tokens';
+import LOCAL_STORE from '../storage';
 import { logger } from '../utils/logger';
 
 const CONCURRENT_FETCH_REQUESTS = 5;
@@ -239,7 +241,50 @@ function* routeTokenChange(action) {
           tokenId: token.uid,
         });
       }
+
+      // Persist registered tokens for the current network
+      yield call(saveCurrentNetworkTokens, wallet);
       break;
+  }
+}
+
+/**
+ * Save current network's registered tokens to localStorage keyed by genesis hash,
+ * so they can be restored when switching back to this network.
+ */
+function* saveCurrentNetworkTokens(wallet) {
+  const genesisHash = yield select((state) => state.serverInfo.genesisHash);
+  if (!genesisHash) {
+    return;
+  }
+
+  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet, true);
+  LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
+}
+
+/**
+ * Restore previously saved tokens for the current network.
+ * Called during wallet startup to re-register tokens that were
+ * saved before a network switch.
+ */
+export function* restoreTokensForNetwork(wallet, genesisHash) {
+  if (!genesisHash) {
+    return;
+  }
+
+  const savedTokens = LOCAL_STORE.getTokensForNetwork(genesisHash);
+  if (!Array.isArray(savedTokens)) {
+    return;
+  }
+
+  for (const token of savedTokens) {
+    if (!token || typeof token.uid !== 'string') {
+      continue;
+    }
+    const isAlreadyRegistered = yield call([wallet.storage, wallet.storage.isTokenRegistered], token.uid);
+    if (!isAlreadyRegistered) {
+      yield call([wallet.storage, wallet.storage.registerToken], token);
+    }
   }
 }
 

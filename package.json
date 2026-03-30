@@ -37,8 +37,8 @@
     "@hathor/hathor-rpc-handler/@hathor/wallet-lib/bitcore-lib": "8.25.10"
   },
   "dependencies": {
-    "@hathor/hathor-rpc-handler": "3.6.0",
-    "@hathor/wallet-lib": "2.14.0",
+    "@hathor/hathor-rpc-handler": "4.3.0",
+    "@hathor/wallet-lib": "2.17.0",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
     "@reown/walletkit": "1.1.2",
@@ -122,7 +122,8 @@
     "nodemon": "3.0.3",
     "null-loader": "4.0.1",
     "process": "0.11.10",
-    "sass": "1.70.0"
+    "sass": "1.70.0",
+    "ttag-cli": "1.11.2"
   },
   "build": {
     "appId": "network.hathor.macos.wallet",
