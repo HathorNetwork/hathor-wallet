@@ -177,6 +177,9 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     uids.forEach((uid) => {
       dispatch(
         tokenRegisterRequested(uid, {
+          // Keep imported tokens visible even with zero balance,
+          // so they don't vanish when "Hide zero-balance tokens" is enabled.
+          alwaysShow: true,
           resolve: () => {
             completed += 1;
             if (completed === uids.length) {
@@ -265,6 +268,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
             checked={selected.has(uid)}
             disabled={isDisabled}
             onChange={() => toggleToken(uid)}
+            aria-label={`${token.name} (${token.symbol}) ${uid}`}
           />
           <div className="token-info">
             <span className="token-symbol-tag">{token.symbol}</span>
@@ -300,6 +304,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
             className="mr-2"
             checked={allSelected}
             onChange={toggleAll}
+            aria-label={allSelected ? t`Deselect all` : t`Select all`}
           />
           <span className="font-weight-bold" style={{ fontSize: 13 }}>
             {allSelected ? t`Deselect all` : t`Select all`}
