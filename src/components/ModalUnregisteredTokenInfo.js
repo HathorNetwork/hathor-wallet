@@ -64,8 +64,8 @@ class ModalUnregisteredTokenInfo extends React.Component {
 
       try {
         const storage = getGlobalWallet().storage;
-        await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(configurationString, storage);
-        await tokens.registerToken(this.props.token.uid);
+        const tokenData = await hathorLib.tokensUtils.validateTokenToAddByConfigurationString(configurationString, storage);
+        await tokens.registerToken(tokenData.uid);
         $('#unregisteredTokenInfoModal').modal('hide');
         this.props.tokenRegistered(this.props.token);
       } catch (err) {

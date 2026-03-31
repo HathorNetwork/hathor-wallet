@@ -434,17 +434,25 @@ function* registerToken(action) {
     const featureToggles = yield select((state) => state.featureToggles);
     const isFeeTokenEnabled = featureToggles[FEE_TOKEN_FEATURE_TOGGLE];
 
-    // Fetch token details (name, symbol, version) from API
+    // Try to get token details from the in-memory store first (populated during tx processing),
+    // falling back to the API only if not found.
     let name, symbol, version;
     try {
-      const { tokenInfo } = yield call([wallet, wallet.getTokenDetails], uid);
-      name = tokenInfo?.name;
-      symbol = tokenInfo?.symbol;
-      version = tokenInfo?.version;
+      const tokenData = yield call([wallet.storage.store, wallet.storage.store.getToken], uid);
+      if (tokenData?.name && tokenData?.symbol && tokenData?.version) {
+        name = tokenData.name;
+        symbol = tokenData.symbol;
+        version = tokenData.version;
+      } else {
+        const { tokenInfo } = yield call([wallet, wallet.getTokenDetails], uid);
+        name = tokenInfo?.name;
+        symbol = tokenInfo?.symbol;
+        version = tokenInfo?.version;
+      }
 
       // When flag is enabled, version is REQUIRED
       if (isFeeTokenEnabled && version === undefined) {
-        throw new Error('Token version not available from API');
+        throw new Error('Token version not available');
       }
     } catch (e) {
       throw new Error(`Failed to fetch token details: ${e.message}`);

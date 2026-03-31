@@ -504,6 +504,13 @@ const rootReducer = (state = initialState, action) => {
       return onTokenRegisterFailed(state, action);
     case types.TOKEN_IMPORT_BANNER_DISMISSED:
       return { ...state, tokenImportBannerDismissed: true };
+    case types.NEW_UNKNOWN_TOKENS_FOUND: {
+      const allTokens = { ...state.allTokens };
+      for (const tokenUid of action.payload.tokenUids) {
+        allTokens[tokenUid] = tokenUid;
+      }
+      return { ...state, allTokens, tokenImportBannerDismissed: false };
+    }
     default:
       return state;
   }

@@ -310,7 +310,7 @@ function Wallet() {
   }
 
   // Rendering process below
-  const { token, isLoading: isLoadingToken } = useTokenDetails(selectedToken)
+  const { token, isLoading: isLoadingToken, error: tokenVersionError } = useTokenDetails(selectedToken)
   const tokenHistory = get(tokensHistory, selectedToken, {
     status: TOKEN_DOWNLOAD_STATUS.LOADING,
     data: [],
@@ -401,6 +401,7 @@ function Wallet() {
               transactionsCount={transactionsCount}
               tokenMetadata={tokenMetadata}
               isLoadingVersion={isLoadingToken}
+              versionError={tokenVersionError}
             />
           </div>
           {

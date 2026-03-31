@@ -38,13 +38,23 @@ const getFeeModelInfo = (tokenVersion) => {
 };
 
 /**
- * Component to display fee model information with loading state
+ * Component to display fee model information with loading and error states
  * @param {Object} props
  * @param {TokenVersion} props.tokenVersion - The token version (FEE or DEPOSIT)
  * @param {boolean} props.isLoading - Whether the version is still loading
+ * @param {string|null} props.error - Error message if registration failed
  */
-export default function FeeModelInfo({ tokenVersion, isLoading }) {
+export default function FeeModelInfo({ tokenVersion, isLoading, error }) {
   const feeModelInfo = getFeeModelInfo(tokenVersion);
+
+  if (error) {
+    return (
+      <p className="mt-2 mb-2 text-danger">
+        <strong>{t`Fee Model:`} </strong>
+        {t`Error fetching fee model`}
+      </p>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -53,7 +63,6 @@ export default function FeeModelInfo({ tokenVersion, isLoading }) {
         <div style={{ marginTop: -10, marginLeft: 8 }}>
           <ReactLoading type='spin' color={colors.purpleHathor} width={16} height={16} delay={0}/>
         </div>
-        
         <span className="ml-2">{t`Loading...`}</span>
       </div>
     );

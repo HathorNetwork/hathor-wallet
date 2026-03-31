@@ -123,6 +123,7 @@ export const types = {
   TOKEN_REGISTER_SUCCESS: 'TOKEN_REGISTER_SUCCESS',
   TOKEN_REGISTER_FAILED: 'TOKEN_REGISTER_FAILED',
   TOKEN_IMPORT_BANNER_DISMISSED: 'TOKEN_IMPORT_BANNER_DISMISSED',
+  NEW_UNKNOWN_TOKENS_FOUND: 'NEW_UNKNOWN_TOKENS_FOUND',
 };
 
 /**
@@ -1059,4 +1060,15 @@ export const tokenRegisterFailed = (uid, error) => ({
 
 export const dismissTokenImportBanner = () => ({
   type: types.TOKEN_IMPORT_BANNER_DISMISSED,
+});
+
+/**
+ * New unknown tokens were found in a transaction.
+ * Updates allTokens and resets the banner dismissed state.
+ *
+ * @param {string[]} tokenUids Array of new token UIDs
+ */
+export const newUnknownTokensFound = (tokenUids) => ({
+  type: types.NEW_UNKNOWN_TOKENS_FOUND,
+  payload: { tokenUids },
 });
