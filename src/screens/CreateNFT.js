@@ -173,8 +173,8 @@ function CreateNFT() {
       symbol
     };
 
-    // Update redux with added token
-    tokensUtils.addToken(token.uid, name, symbol);
+    // Update redux with added token (NFTs are always deposit-based)
+    tokensUtils.addToken(token.uid, name, symbol, hathorLib.TokenVersion.DEPOSIT);
     // Must update the shared address, in case we have used one for the change
     dispatch(walletRefreshSharedAddress());
     // Also update the redux state with the NFT metadata for correct exhibition on all screens

@@ -167,7 +167,7 @@ function CreateToken() {
     };
 
     // Update redux with added token
-    await tokens.addToken(token.uid, name, symbol);
+    await tokens.addToken(token.uid, name, symbol, tokenVersion);
 
     // Must update the shared address, in case we have used one for the change
     dispatch(walletRefreshSharedAddress())
