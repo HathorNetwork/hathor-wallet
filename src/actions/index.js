@@ -122,7 +122,6 @@ export const types = {
   TOKEN_REGISTER_REQUESTED: 'TOKEN_REGISTER_REQUESTED',
   TOKEN_REGISTER_SUCCESS: 'TOKEN_REGISTER_SUCCESS',
   TOKEN_REGISTER_FAILED: 'TOKEN_REGISTER_FAILED',
-  NEW_UNKNOWN_TOKENS_FOUND: 'NEW_UNKNOWN_TOKENS_FOUND',
 };
 
 /**
@@ -1055,15 +1054,4 @@ export const tokenRegisterSuccess = (uid, name, symbol, version) => ({
 export const tokenRegisterFailed = (uid, error) => ({
   type: types.TOKEN_REGISTER_FAILED,
   payload: { uid, error },
-});
-
-/**
- * New unknown tokens were found in a transaction.
- * Updates allTokens and resets the banner dismissed state.
- *
- * @param {string[]} tokenUids Array of new token UIDs
- */
-export const newUnknownTokensFound = (tokenUids) => ({
-  type: types.NEW_UNKNOWN_TOKENS_FOUND,
-  payload: { tokenUids },
 });

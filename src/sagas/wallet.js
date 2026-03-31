@@ -60,7 +60,6 @@ import {
   addRegisteredTokens,
   startWalletSuccess,
   startWalletReset,
-  newUnknownTokensFound,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -536,24 +535,6 @@ export function* handleNewTx(action) {
   const affectedTokens = yield call(handleTx, wallet, tx);
   const stateTokens = yield select((state) => state.tokens);
   const registeredTokens = stateTokens.map((token) => token.uid);
-  const stateAllTokens = yield select((state) => state.allTokens);
-
-  // Detect tokens in this tx that are not yet tracked in allTokens
-  const newUnknownTokenUids = [];
-  for (const tokenUid of affectedTokens) {
-    if (!stateAllTokens[tokenUid]) {
-      newUnknownTokenUids.push(tokenUid);
-    }
-  }
-
-  // If new unknown tokens were found, add them to allTokens and reset banner
-  if (newUnknownTokenUids.length > 0) {
-    yield put(newUnknownTokensFound(newUnknownTokenUids));
-    // Fetch balance for new unknown tokens so the banner can display them
-    for (const tokenUid of newUnknownTokenUids) {
-      yield put(tokenFetchBalanceRequested(tokenUid, true));
-    }
-  }
 
   // We should download the **balance** and **history** for every token involved
   // in the transaction
