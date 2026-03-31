@@ -225,13 +225,14 @@ class TokenAdministrative extends React.Component {
 
 
 /*
- * token: Token to show administrative tools {name, symbol, uid}
+ * token: Token to show administrative tools {name, symbol, uid, version}
  */
 TokenAdministrative.propTypes = {
   token: PropTypes.exact({
     name: PropTypes.string,
     symbol: PropTypes.string,
     uid: PropTypes.string,
+    version: PropTypes.number,
   }),
 };
 

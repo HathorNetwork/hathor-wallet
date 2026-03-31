@@ -625,7 +625,7 @@ export class LocalStorageStore {
    * Save registered tokens for a specific network identified by genesis block hash.
    *
    * @param {string} genesisHash The genesis block hash identifying the network
-   * @param {Array<{uid: string, name: string, symbol: string}>} tokens Tokens to save
+   * @param {Array<{uid: string, name: string, symbol: string, version: number}>} tokens Tokens to save
    */
   saveTokensForNetwork(genesisHash, tokens) {
     if (!genesisHash) return;
@@ -638,7 +638,7 @@ export class LocalStorageStore {
    * Get saved tokens for a specific network identified by genesis block hash.
    *
    * @param {string} genesisHash The genesis block hash identifying the network
-   * @returns {Array<{uid: string, name: string, symbol: string}>|null} Saved tokens or null
+   * @returns {Array<{uid: string, name: string, symbol: string, version: number}>|null} Saved tokens or null
    */
   getTokensForNetwork(genesisHash) {
     if (!genesisHash) return null;
