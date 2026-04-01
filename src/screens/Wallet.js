@@ -83,6 +83,7 @@ function Wallet() {
   // Refs
   const alertSuccessRef = useRef(null);
   const unregisterModalRef = useRef(null);
+  const tokenInfoInFlight = useRef(null);
 
   // Navigation and actions
   const navigate = useNavigate();
@@ -98,11 +99,17 @@ function Wallet() {
     initializeWalletScreen();
   }, [selectedToken]);
 
-  // When the tokens history changes, update the token info
+  // Debounce: the reducer creates a new reference for the selected
+  // token's history on every registration, so rapid successive
+  // changes are coalesced into a single API call.
+  const selectedTokenHistory = tokensHistory[selectedToken];
   useEffect(() => {
-    updateTokenInfo(selectedToken);
-    updateWalletInfo(selectedToken);
-  }, [tokensHistory]);
+    const timer = setTimeout(() => {
+      updateTokenInfo(selectedToken);
+      updateWalletInfo(selectedToken);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [selectedTokenHistory]);
 
   /**
    * Resets the state data and triggers token information requests
@@ -157,19 +164,32 @@ function Wallet() {
     if (tokenUid === hathorLib.constants.NATIVE_TOKEN_UID) {
       return;
     }
-    const tokenDetails = await wallet.getTokenDetails(tokenUid);
 
-    // If the user has changed the selectedToken while we were fetching the data, discard it
-    if (selectedToken !== tokenUid) {
+    // Skip if a request for this token is already in flight
+    if (tokenInfoInFlight.current === tokenUid) {
       return;
     }
 
-    // Update the state with the new data
-    const { totalSupply: newTotalSupply, totalTransactions, authorities } = tokenDetails;
-    setTotalSupply(newTotalSupply);
-    setCanMint(authorities.mint);
-    setCanMelt(authorities.melt);
-    setTransactionsCount(totalTransactions);
+    tokenInfoInFlight.current = tokenUid;
+    try {
+      const tokenDetails = await wallet.getTokenDetails(tokenUid);
+
+      // If the user has changed the selectedToken while we were fetching the data, discard it
+      if (selectedToken !== tokenUid) {
+        return;
+      }
+
+      // Update the state with the new data
+      const { totalSupply: newTotalSupply, totalTransactions, authorities } = tokenDetails;
+      setTotalSupply(newTotalSupply);
+      setCanMint(authorities.mint);
+      setCanMelt(authorities.melt);
+      setTransactionsCount(totalTransactions);
+    } catch (err) {
+      console.warn(`Failed to fetch token info for ${tokenUid}:`, err.message);
+    } finally {
+      tokenInfoInFlight.current = null;
+    }
   }
 
   /**

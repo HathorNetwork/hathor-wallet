@@ -62,14 +62,17 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
   // Current modal state
   const [modalState, setModalState] = useState(MODAL_STATE.LOADING);
 
-  // Map of uid -> { uid, name, symbol, balance } for all resolved tokens
+  // Map of uid -> { uid, name, symbol, balance, selected } for all resolved tokens
   const [tokenDetails, setTokenDetails] = useState({});
 
-  // Set of selected token uids
-  const [selected, setSelected] = useState(new Set());
+  const selectedUids = Object.keys(tokenDetails).filter((uid) => tokenDetails[uid].selected);
+  const allSelected = selectedUids.length > 0 && selectedUids.length === Object.keys(tokenDetails).length;
 
   // Map of uid -> error message for tokens that failed registration
   const [failedTokens, setFailedTokens] = useState({});
+
+  // Number of tokens whose metadata could not be fetched (e.g. 429 / network error)
+  const [fetchErrorCount, setFetchErrorCount] = useState(0);
 
   /**
    * On mount, bootstrap the modal DOM lifecycle and fetch token details
@@ -85,47 +88,47 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     async function fetchDetails() {
       const wallet = getGlobalWallet();
       const details = {};
+      let errorCount = 0;
 
-      await Promise.all(
-        unknownTokens.map(async (token) => {
-          try {
-            // Try storage first (populated during tx processing, no API call)
-            const tokenData = await wallet.storage.getToken(token.uid);
-            if (tokenData?.name && tokenData?.symbol) {
-              details[token.uid] = {
-                uid: token.uid,
-                name: tokenData.name,
-                symbol: tokenData.symbol,
-                balance: token.balance,
-              };
-              return;
-            }
+      const makeEntry = (uid, name, symbol, balance) => ({
+        uid, name, symbol, balance, selected: true,
+      });
 
-            // Fallback to API if MemoryStore data is incomplete
-            const { tokenInfo } = await wallet.getTokenDetails(token.uid);
-            details[token.uid] = {
-              uid: token.uid,
-              name: tokenInfo?.name || token.uid,
-              symbol: tokenInfo?.symbol || '???',
-              balance: token.balance,
-            };
-          } catch (_err) {
-            // Fallback: use uid as name and ??? as symbol
-            details[token.uid] = {
-              uid: token.uid,
-              name: token.uid,
-              symbol: '???',
-              balance: token.balance,
-            };
+      const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      // Process tokens sequentially with a delay between API calls
+      // to avoid 429 Too Many Requests from the fullnode.
+      for (const token of unknownTokens) {
+        if (cancelled) return;
+
+        try {
+          // Try storage first (populated during tx processing, no API call)
+          const tokenData = await wallet.storage.getToken(token.uid);
+          if (tokenData?.name && tokenData?.symbol) {
+            details[token.uid] = makeEntry(token.uid, tokenData.name, tokenData.symbol, token.balance);
+            continue;
           }
-        })
-      );
+
+          // Fallback to API if MemoryStore data is incomplete
+          const { tokenInfo } = await wallet.getTokenDetails(token.uid);
+          details[token.uid] = makeEntry(
+            token.uid, tokenInfo?.name || token.uid, tokenInfo?.symbol || '???', token.balance
+          );
+
+          // Throttle between API calls
+          await delay(200);
+        } catch (_err) {
+          // Fallback: use uid as name and ??? as symbol
+          details[token.uid] = makeEntry(token.uid, token.uid, '???', token.balance);
+          errorCount += 1;
+          console.error(_err);
+        }
+      }
 
       if (cancelled) return;
 
       setTokenDetails(details);
-      // All tokens checked by default
-      setSelected(new Set(unknownTokens.map((tk) => tk.uid)));
+      setFetchErrorCount(errorCount);
       setModalState(MODAL_STATE.SELECTION);
     }
 
@@ -141,26 +144,23 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
    * @param {string} uid
    */
   const toggleToken = (uid) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(uid)) {
-        next.delete(uid);
-      } else {
-        next.add(uid);
-      }
-      return next;
-    });
+    setTokenDetails((prev) => ({
+      ...prev,
+      [uid]: { ...prev[uid], selected: !prev[uid].selected },
+    }));
   };
 
   /**
    * Toggle all tokens selected / deselected.
    */
   const toggleAll = () => {
-    setSelected((prev) => {
-      if (prev.size === unknownTokens.length) {
-        return new Set();
+    setTokenDetails((prev) => {
+      const newSelected = !Object.values(prev).every((t) => t.selected);
+      const next = {};
+      for (const [uid, token] of Object.entries(prev)) {
+        next[uid] = { ...token, selected: newSelected };
       }
-      return new Set(unknownTokens.map((tk) => tk.uid));
+      return next;
     });
   };
 
@@ -205,7 +205,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
   };
 
   const handleContinue = () => {
-    dispatchRegistrations(Array.from(selected));
+    dispatchRegistrations(selectedUids);
   };
 
   const handleRetry = () => {
@@ -265,7 +265,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
           <input
             type="checkbox"
             className="mr-3"
-            checked={selected.has(uid)}
+            checked={token.selected}
             disabled={isDisabled}
             onChange={() => toggleToken(uid)}
             aria-label={`${token.name} (${token.symbol}) ${uid}`}
@@ -293,11 +293,16 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
 
   const renderSelection = () => {
     const tokenUids = unknownTokens.map((tk) => tk.uid);
-    const allSelected = selected.size === unknownTokens.length;
 
     return (
       <>
         <p className="mb-3">{t`Select the tokens you want to add to your wallet.`}</p>
+        {fetchErrorCount > 0 && (
+          <div className="alert alert-warning py-2 px-3 mb-3" style={{ fontSize: 13 }}>
+            <i className="fa fa-exclamation-triangle mr-1" />
+            {t`Could not load details for ${fetchErrorCount} token(s). They are shown with partial information but can still be imported.`}
+          </div>
+        )}
         <div className="d-flex align-items-center mb-2 ml-1">
           <input
             type="checkbox"
@@ -316,7 +321,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
         <div className="d-flex justify-content-center mt-4">
           <button
             className="btn btn-continue"
-            disabled={selected.size === 0}
+            disabled={selectedUids.length === 0}
             onClick={handleContinue}
           >
             {t`Continue`}
@@ -333,7 +338,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
       <>
         <p className="mb-3">{t`Registering selected tokens...`}</p>
         <div className="token-list">
-          {tokenUids.filter((uid) => selected.has(uid)).map((uid) => renderTokenRow(uid))}
+          {tokenUids.filter((uid) => tokenDetails[uid]?.selected).map((uid) => renderTokenRow(uid))}
         </div>
         <div className="d-flex justify-content-center mt-4">
           <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
