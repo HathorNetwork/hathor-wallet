@@ -183,23 +183,23 @@ msgid "ipfs://..."
 msgstr ""
 
 #: src/screens/CreateNFT.js:306
-#: src/screens/CreateToken.js:263
+#: src/screens/CreateToken.js:336
 msgid "Short name"
 msgstr ""
 
 #: src/screens/CreateNFT.js:307
-#: src/screens/CreateToken.js:264
+#: src/screens/CreateToken.js:337
 msgid "MyCoin"
 msgstr ""
 
 #: src/components/Reown/CreateTokenRequestData.js:117
 #: src/screens/CreateNFT.js:310
-#: src/screens/CreateToken.js:267
+#: src/screens/CreateToken.js:340
 msgid "Symbol"
 msgstr ""
 
 #: src/screens/CreateNFT.js:311
-#: src/screens/CreateToken.js:268
+#: src/screens/CreateToken.js:341
 msgid "MYC (2-5 characters)"
 msgstr ""
 
@@ -207,31 +207,31 @@ msgstr ""
 #: src/components/atomic-swap/ModalAtomicReceive.js:115
 #: src/components/atomic-swap/ModalAtomicSend.js:323
 #: src/screens/CreateNFT.js:316
-#: src/screens/CreateToken.js:273
+#: src/screens/CreateToken.js:346
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:537
 msgid "Amount"
 msgstr ""
 
 #: src/screens/CreateNFT.js:323
-#: src/screens/CreateToken.js:284
+#: src/screens/CreateToken.js:357
 msgid "Select address automatically"
 msgstr ""
 
 #: src/screens/CreateNFT.js:328
-#: src/screens/CreateToken.js:289
+#: src/screens/CreateToken.js:362
 msgid "Destination address"
 msgstr ""
 
 #: src/components/AddressList.js:194
 #: src/components/OutputsWrapper.js:62
-#: src/components/Reown/CreateTokenRequestData.js:181
+#: src/components/Reown/CreateTokenRequestData.js:148
 #: src/components/Reown/OracleDataDisplay.js:54
 #: src/components/atomic-swap/ModalAtomicReceive.js:105
 #: src/components/atomic-swap/ModalAtomicReceive.js:107
 #: src/components/atomic-swap/ModalAtomicSend.js:331
 #: src/components/tokens/TokenMint.js:147
 #: src/screens/CreateNFT.js:329
-#: src/screens/CreateToken.js:290
+#: src/screens/CreateToken.js:363
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:573
 msgid "Address"
 msgstr ""
@@ -273,21 +273,24 @@ msgstr ""
 msgid "available"
 msgstr ""
 
-#: src/screens/CreateToken.js:248
-#, javascript-format
-msgid ""
-"Custom tokens share the address space with all other tokens, including ${ "
-"nativeTokenConfig.symbol }. This means that you can send and receive tokens "
-"using any valid address."
+#: src/screens/CreateToken.js:276
+msgid "Required deposit exceeds your available balance."
 msgstr ""
 
-#: src/screens/CreateToken.js:249
-msgid ""
-"Remember to make a backup of your new token's configuration string. You "
-"will need to send it to other people to allow them to use your new token."
+#: src/screens/CreateToken.js:277
+msgid "Required network fee exceeds your available balance."
 msgstr ""
 
-#: src/screens/CreateToken.js:252
+#: src/screens/CreateToken.js:296
+#: src/screens/CreateToken.js:307
+msgid "You chose to create a "
+msgstr ""
+
+#: src/screens/CreateToken.js:296
+msgid "Deposit-Based Token"
+msgstr ""
+
+#: src/screens/CreateToken.js:296
 #, javascript-format
 msgid ""
 ", which requires a ${ depositPercentDisplay }% ${ nativeTokenConfig.symbol "
@@ -295,7 +298,40 @@ msgid ""
 "no additional fees. "
 msgstr ""
 
-#: src/screens/CustomTokens.js:77
+#: src/screens/CreateToken.js:297
+#: src/screens/CreateToken.js:308
+msgid "Learn more."
+msgstr ""
+
+#: src/screens/CreateToken.js:307
+msgid "Fee-Based Token"
+msgstr ""
+
+#: src/screens/CreateToken.js:307
+msgid ", so a small fee will be applied to each future transaction of this token. "
+msgstr ""
+
+#: src/screens/CreateToken.js:315
+msgid "Network fee"
+msgstr ""
+
+#: src/screens/CreateToken.js:317
+msgid "Deposit:"
+msgstr ""
+
+#: src/screens/CreateToken.js:331
+#: src/screens/CreateToken.js:379
+#: src/screens/SelectTokenType.js:83
+msgid "Create Deposit Token"
+msgstr ""
+
+#: src/screens/CreateToken.js:331
+#: src/screens/CreateToken.js:379
+#: src/screens/SelectTokenType.js:110
+msgid "Create Fee Token"
+msgstr ""
+
+#: src/screens/CustomTokens.js:83
 msgid "Custom Tokens"
 msgstr ""
 
@@ -549,6 +585,66 @@ msgstr ""
 
 #: src/screens/ReownConnect.js:167
 msgid "No dApps connected. Click \"Add New Connection\" to connect to a dApp."
+msgstr ""
+
+#: src/components/Reown/modals/CreateTokenModal.js:38
+#: src/screens/SelectTokenType.js:47
+msgid "Create Token"
+msgstr ""
+
+#: src/screens/SelectTokenType.js:49
+msgid "Choose how your token will behave for future transactions."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:52
+msgid "Once selected, the token type cannot be changed later."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:54
+msgid "Learn more about deposits and fees here"
+msgstr ""
+
+#: src/screens/SelectTokenType.js:65
+msgid "Deposit Token:"
+msgstr ""
+
+#: src/screens/SelectTokenType.js:69
+#, javascript-format
+msgid ""
+"Requires a ${ depositPercentDisplay }% ${ nativeTokenConfig.symbol } "
+"deposit."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:70
+msgid "No transaction fees in future transfers."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:71
+msgid "Refundable if token is burned."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:74
+msgid "Recommended for frequent use."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:92
+msgid "Fee Token:"
+msgstr ""
+
+#: src/screens/SelectTokenType.js:96
+msgid "Requires 0.01 HTR fee to create."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:97
+msgid "No deposit required."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:98
+msgid "A small fee applies to every transfer."
+msgstr ""
+
+#: src/screens/SelectTokenType.js:101
+msgid "Recommended for occasional use."
 msgstr ""
 
 #: src/components/Reown/modals/CreateTokenModal.js:38
@@ -927,7 +1023,7 @@ msgid "Unique identifier"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:101
-#: src/components/Reown/CreateTokenRequestData.js:38
+#: src/components/Reown/CreateTokenRequestData.js:64
 #: src/components/TokenGeneralInfo.js:173
 #: src/components/WalletAddress.js:175
 #: src/screens/Settings.js:332
@@ -1634,7 +1730,7 @@ msgid ""
 "wallet is connected to ${ walletNetwork }."
 msgstr ""
 
-#: src/sagas/tokens.js:369
+#: src/sagas/tokens.js:414
 msgid "An error occurred while fetching this token data"
 msgstr ""
 
@@ -2469,7 +2565,7 @@ msgstr ""
 msgid "Choose inputs automatically"
 msgstr ""
 
-#: src/components/Reown/modals/SendTransactionModal.js:138
+#: src/components/Reown/modals/SendTransactionModal.js:134
 #: src/components/SendTokensOne.js:258
 msgid "Inputs"
 msgstr ""
@@ -3287,11 +3383,11 @@ msgstr ""
 msgid "Deposit"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:90
+#: src/components/Reown/CreateTokenRequestData.js:37
 msgid "Unknown"
 msgstr ""
 
-#: src/components/Reown/CreateTokenRequestData.js:132
+#: src/components/Reown/CreateTokenRequestData.js:108
 msgid "No token data available."
 msgstr ""
 
