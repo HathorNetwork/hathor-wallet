@@ -89,8 +89,8 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
       await Promise.all(
         unknownTokens.map(async (token) => {
           try {
-            // Try MemoryStore first (populated during tx processing, no API call)
-            const tokenData = await wallet.storage.store.getToken(token.uid);
+            // Try storage first (populated during tx processing, no API call)
+            const tokenData = await wallet.storage.getToken(token.uid);
             if (tokenData?.name && tokenData?.symbol) {
               details[token.uid] = {
                 uid: token.uid,
