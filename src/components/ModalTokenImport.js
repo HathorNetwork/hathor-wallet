@@ -99,7 +99,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     let errorCount = 0;
 
     const makeEntry = (uid, name, symbol, balance) => ({
-      uid, name, symbol, balance, selected: true,
+      uid, name, symbol, balance, selected: false,
     });
 
     const delay = (ms) => new Promise((r) => setTimeout(r, ms));
