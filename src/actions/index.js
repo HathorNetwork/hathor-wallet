@@ -119,6 +119,7 @@ export const types = {
   UNREGISTERED_TOKENS_STORE_SUCCESS: 'UNREGISTERED_TOKENS_STORE_SUCCESS',
   UNREGISTERED_TOKENS_CLEAN: 'UNREGISTERED_TOKENS_CLEAN',
   REOWN_SET_ERROR: 'REOWN_SET_ERROR',
+  SET_ADDRESS_MODE: 'SET_ADDRESS_MODE',
 };
 
 /**
@@ -238,6 +239,11 @@ export const partiallyUpdateHistoryAndBalance = (data) => ({ type: 'partially_up
  * Flag indicating if we are using the wallet service facade
  */
 export const setUseWalletService = (useWalletService) => ({ type: 'set_use_wallet_service', payload: useWalletService });
+
+/**
+ * Set the wallet address mode (single or multi)
+ */
+export const setAddressMode = (mode) => ({ type: types.SET_ADDRESS_MODE, payload: mode });
 
 /**
  * Action to display the locked wallet screen and resolve the passed promise after the user typed his PIN

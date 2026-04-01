@@ -49,6 +49,7 @@ if (window.require) {
  * sentry: string,
  * alwaysShowTokens: string,
  * atomicProposals: string,
+ * addressMode: string,
  * }}
  * @readonly
  */
@@ -58,6 +59,7 @@ const storageKeys = {
   hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
   alwaysShowTokens: 'wallet:always_show_tokens',
   atomicProposals: 'wallet:atomic_swap_proposals',
+  addressMode: 'wallet:address_mode',
 }
 
 /**
@@ -574,6 +576,30 @@ const wallet = {
    */
   showZeroBalanceTokens() {
     LOCAL_STORE.setItem(storageKeys.hideZeroBalanceTokens, false);
+  },
+
+  /**
+   * Gets the address mode preference
+   *
+   * @return {string|null} 'single', 'multi', or null if not set
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  getAddressMode() {
+    return LOCAL_STORE.getItem(storageKeys.addressMode);
+  },
+
+  /**
+   * Sets the address mode preference
+   *
+   * @param {string} mode 'single' or 'multi'
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  setAddressMode(mode) {
+    LOCAL_STORE.setItem(storageKeys.addressMode, mode);
   },
 
   /**

@@ -228,6 +228,7 @@ export const ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE = 'atomic-swap-service-desktop.r
 export const NANO_CONTRACTS_FEATURE_TOGGLE = 'nano-contracts-desktop.rollout';
 export const REOWN_FEATURE_TOGGLE = 'wallet-desktop-reown.rollout';
 export const FEE_TOKEN_FEATURE_TOGGLE = 'fee-based-tokens-desktop.rollout';
+export const SINGLE_ADDRESS_FEATURE_TOGGLE = 'single-address-desktop.rollout';
 
 export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
@@ -235,6 +236,7 @@ export const FEATURE_TOGGLE_DEFAULTS = {
   [NANO_CONTRACTS_FEATURE_TOGGLE]: false,
   [REOWN_FEATURE_TOGGLE]: false,
   [FEE_TOKEN_FEATURE_TOGGLE]: false,
+  [SINGLE_ADDRESS_FEATURE_TOGGLE]: false,
 };
 
 /**

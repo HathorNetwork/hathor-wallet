@@ -7,6 +7,7 @@ import {
   transactionUtils,
   errors as hathorErrors,
   cryptoUtils,
+  SCANNING_POLICY,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -28,6 +29,7 @@ import {
   WALLET_SERVICE_FEATURE_TOGGLE,
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
   IGNORE_WS_TOGGLE_FLAG,
+  SINGLE_ADDRESS_FEATURE_TOGGLE,
 } from '../constants';
 import {
   types,
@@ -60,6 +62,7 @@ import {
   addRegisteredTokens,
   startWalletSuccess,
   startWalletReset,
+  setAddressMode,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -126,6 +129,9 @@ export function* startWallet(action) {
 
   yield put(loadingAddresses(true));
 
+  // Capture whether this is an existing wallet before initStorage may create new data
+  const isExistingWallet = LOCAL_STORE.isLoadedSync(true);
+
   if (hardware) {
     // We need to ensure that the hardware wallet storage is always generated here since we may be
     // starting the wallet with a second device and so we cannot trust the xpub saved on storage.
@@ -137,6 +143,29 @@ export function* startWallet(action) {
   }
 
   const storage = LOCAL_STORE.getStorage();
+
+  // Determine address mode
+  const singleAddressFeatureEnabled = yield call(checkForFeatureFlag, SINGLE_ADDRESS_FEATURE_TOGGLE);
+  let addressMode = walletUtils.getAddressMode();
+
+  if (addressMode === null) {
+    // No preference stored yet
+    if (isExistingWallet) {
+      // Existing wallet — default to multi (no disruption)
+      addressMode = 'multi';
+    } else if (singleAddressFeatureEnabled) {
+      // New wallet with feature flag enabled — default to single
+      addressMode = 'single';
+    } else {
+      // New wallet without feature flag — default to multi
+      addressMode = 'multi';
+    }
+    walletUtils.setAddressMode(addressMode);
+  }
+
+  const scanPolicy = addressMode === 'single'
+    ? { policy: SCANNING_POLICY.SINGLE_ADDRESS }
+    : undefined;
 
   // We are offline, the connection object is yet to be created
   yield put(isOnlineUpdate({ isOnline: false }));
@@ -187,6 +216,7 @@ export function* startWallet(action) {
       passphrase,
       storage,
       network,
+      singleAddressMode: addressMode === 'single',
     };
 
     wallet = new HathorWalletServiceWallet(walletConfig);
@@ -214,6 +244,7 @@ export function* startWallet(action) {
       connection,
       beforeReloadCallback,
       storage,
+      scanPolicy,
     };
 
     wallet = new HathorWallet(walletConfig);
@@ -266,6 +297,8 @@ export function* startWallet(action) {
       nanoContractsEnabled,
       genesisHash,
     }));
+
+    yield put(setAddressMode(addressMode));
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from

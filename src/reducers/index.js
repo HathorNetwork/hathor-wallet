@@ -121,6 +121,8 @@ const initialState = {
   metadataLoaded: false,
   // Should we use the wallet service facade?
   useWalletService: false,
+  // Address mode: 'single' or 'multi'
+  addressMode: null,
   // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
   lockWalletPromise: null,
   // Track if the Ledger device app was closed while the wallet was loaded.
@@ -489,6 +491,8 @@ const rootReducer = (state = initialState, action) => {
       return onUnregisteredTokensStoreSuccess(state, action);
     case types.UNREGISTERED_TOKENS_CLEAN:
       return onUnregisteredTokensClean(state);
+    case types.SET_ADDRESS_MODE:
+      return { ...state, addressMode: action.payload };
     default:
       return state;
   }

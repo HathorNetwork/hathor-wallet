@@ -27,6 +27,7 @@ const mapStateToProps = (state) => {
   return {
     lastSharedAddress: state.lastSharedAddress,
     lastSharedIndex: state.lastSharedIndex,
+    addressMode: state.addressMode,
   };
 };
 
@@ -146,20 +147,24 @@ export class WalletAddress extends React.Component {
 
   render() {
     const renderAddress = () => {
+      const isSingleAddress = this.props.addressMode === 'single';
+
       return (
         <div className="d-flex flex-column align-items-center address-wrapper card">
           <p><strong>{t`Address to receive tokens`}</strong></p>
           {showAddressString()}
           <div className="d-flex flex-row align-items-center">
-            <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">{t`Generate new address`} <i className="fa fa-refresh ml-1" title={t`Get new address`}></i></a>
-            {(!LOCAL_STORE.isHardwareWallet()) &&   // hide the QR code for hardware wallet
+            {!isSingleAddress && (
+              <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">{t`Generate new address`} <i className="fa fa-refresh ml-1" title={t`Get new address`}></i></a>
+            )}
+            {(!LOCAL_STORE.isHardwareWallet()) &&
               <div>
-                <span className="ml-3 mr-3">|</span>
+                {!isSingleAddress && <span className="ml-3 mr-3">|</span>}
                 <a href="true" onClick={(e) => this.showQRCode(e)}>{t`QR Code`} <i className="fa fa-qrcode ml-1" title={t`Get qrcode`}></i></a>
               </div>
             }
           </div>
-          {(!LOCAL_STORE.isHardwareWallet()) &&   // hide all addresses for hardware wallet
+          {(!LOCAL_STORE.isHardwareWallet() && !isSingleAddress) &&
             <a href="true" onClick={this.seeAllAddresses} className="mt-3 ">{t`See all addresses`}</a>
           }
         </div>

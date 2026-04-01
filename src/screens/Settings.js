@@ -19,8 +19,9 @@ import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE } from '../constants';
-import { walletReset } from '../actions';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE, SINGLE_ADDRESS_FEATURE_TOGGLE } from '../constants';
+import { walletReset, reloadWalletRequested } from '../actions';
+import { getGlobalWallet } from '../modules/wallet';
 import LOCAL_STORE from '../storage';
 
 /**
@@ -50,6 +51,8 @@ function Settings() {
 
   const reownEnabled = useSelector(state => state.featureToggles[REOWN_FEATURE_TOGGLE]);
   const reownSessions = useSelector(state => state.reown.sessions);
+  const singleAddressEnabled = useSelector(state => state.featureToggles[SINGLE_ADDRESS_FEATURE_TOGGLE]);
+  const addressMode = useSelector(state => state.addressMode);
   const connectedSessionsCount = Object.keys(reownSessions).length;
 
   useEffect(() => {
@@ -277,72 +280,124 @@ function Settings() {
     navigate('/reown/connect');
   }
 
+  const openAddressModeModal = () => {
+    context.showModal(MODAL_TYPES.ADDRESS_MODE, {
+      currentMode: addressMode,
+      onSave: handleAddressModeChange,
+    });
+  };
+
+  const handleAddressModeChange = async (newMode) => {
+    context.hideModal();
+
+    try {
+      const globalWallet = getGlobalWallet();
+
+      if (newMode === 'single') {
+        await globalWallet.enableSingleAddressMode();
+      } else {
+        await globalWallet.enableMultiAddressMode();
+      }
+
+      wallet.setAddressMode(newMode);
+
+      // Trigger wallet reload — reloadWalletRequested re-dispatches the original
+      // startWalletRequested action (which has the correct PIN/password),
+      // and the saga will re-read addressMode from localStorage
+      dispatch(reloadWalletRequested());
+    } catch (e) {
+      console.error('Error changing address mode:', e);
+      context.showModal(MODAL_TYPES.ALERT, {
+        title: t`Error`,
+        body: t`Failed to change address mode. Please try again.`,
+      });
+    }
+  };
+
   const serverURL = useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
   const wsServerURL = useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
   const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
   const uniqueIdentifier = helpers.getUniqueId();
 
+  const rawNetworkName = hathorLib.config.getNetwork().name || 'mainnet';
+  const networkName = rawNetworkName.charAt(0).toUpperCase() + rawNetworkName.slice(1);
+
   return (
     <div className="content-wrapper settings">
       <BackButton />
-      <div>
+
+      <h4>{t`General Settings`}</h4>
+      <div className="settings-section">
+        <p>
+          <strong>{t`Network:`}</strong>{' '}
+          {t`Connected to`} <strong>{networkName}</strong> ({serverURL})
+          {useWalletService && (
+            <span> | {wsServerURL}</span>
+          )}
+          <a className="settings-change-link" href="true" onClick={(e) => { e.preventDefault(); changeNetwork(); }}>{t`Change`}</a>
+        </p>
+        <p>
+          <strong>{t`Allow notifications:`}</strong>{' '}
+          {isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>}
+          <a className="settings-change-link" href="true" onClick={toggleNotificationSettings}>{t`Change`}</a>
+        </p>
+      </div>
+
+      <hr />
+
+      <h4>{t`Advanced Settings`}</h4>
+      <div className="settings-section">
+        <p>
+          <strong>{t`Hide zero-balance tokens:`}</strong>{' '}
+          {zeroBalanceTokensHidden ? <span>{t`Yes`}</span> : <span>{t`No`}</span>}
+          <a className="settings-change-link" href="true" onClick={toggleZeroBalanceTokens}>{t`Change`}</a>
+          <i className="fa fa-question-circle pointer ml-3"
+             title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallet.`}>
+          </i>
+        </p>
+        <p>
+          <strong>{t`Automatically report bugs to Hathor:`}</strong>{' '}
+          {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>}
+          <Link className="settings-change-link" to='/permission/'>{t`Change`}</Link>
+        </p>
+        {singleAddressEnabled && (
+          <p>
+            <strong>{t`Address Mode:`}</strong>{' '}
+            {addressMode === 'single' ? t`Single address` : t`Multi address`}
+            <a className="settings-change-link" href="true" onClick={(e) => { e.preventDefault(); openAddressModeModal(); }}>
+              {t`Change`}
+            </a>
+          </p>
+        )}
+        {!useWalletService && reownEnabled && (
+          <p>
+            <strong>{t`Reown:`}</strong>{' '}
+            {t`Connected Sessions: ${connectedSessionsCount}`}
+            <a className="settings-change-link" href="true" onClick={(e) => { e.preventDefault(); goToReown(); }}>{t`Manage sessions`}</a>
+          </p>
+        )}
+        <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); exportTokens(); }}>{t`Export registered tokens`}</a>
+        <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); addPassphrase(); }}>{t`Set a passphrase`}</a>
+        {ledgerCustomTokens && <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); untrustClicked(); }}>{t`Untrust all tokens on Ledger`}</a>}
+        <a className="settings-action-link settings-action-link--danger" href="true" onClick={(e) => { e.preventDefault(); resetClicked(); }}>{t`Reset wallet`}</a>
+      </div>
+
+      <hr />
+
+      <div className="settings-info">
+        <CopyToClipboard text={uniqueIdentifier} onCopy={copyClicked}>
+          <span>
+            <p><strong>{t`Unique identifier:`}</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
+          </span>
+        </CopyToClipboard>
         <p onDoubleClick={() => setShowTimestamp(!showTimestamp)}><strong>{t`Date and time:`}</strong> {showTimestamp ? hathorLib.dateFormatter.dateToTimestamp(now) : now.toString()}</p>
       </div>
-      <div>
-        <p><SpanFmt>{t`**Server:** You are connected to ${serverURL}`}</SpanFmt></p>
-        {
-          useWalletService && (
-            <p><SpanFmt>{t`**Real-time server:** You are connected to ${wsServerURL}`}</SpanFmt></p>
-          )
-        }
-        <button className="btn btn-hathor" onClick={changeNetwork}>{t`Change network`}</button>
-      </div>
-      <hr />
 
-      {!useWalletService && reownEnabled && (
-        <div>
-          <h4>{t`Reown`}</h4>
-          <div className="d-flex flex-row align-items-center mb-2">
-            <span>{t`Connected Sessions: ${connectedSessionsCount}`}</span>
-          </div>
-          <button className="btn btn-hathor" onClick={goToReown}>{t`Manage sessions`}</button>
-          <hr />
-        </div>
-      )}
-
-      <div>
-        <h4>{t`Advanced Settings`}</h4>
-        <div className="d-flex flex-column align-items-start mt-4">
-          <p><strong>{t`Allow notifications:`}</strong> {isNotificationOn ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <a className='ml-3' href="true" onClick={toggleNotificationSettings}> {t`Change`} </a></p>
-          <p>
-            <strong>{t`Hide zero-balance tokens:`}</strong> {
-            zeroBalanceTokensHidden
-              ? <span>{t`Yes`}</span>
-              : <span>{t`No`}</span>
-            }
-            <a className="ml-3" href="true" onClick={toggleZeroBalanceTokens}> {t`Change`} </a>
-            <i className="fa fa-question-circle pointer ml-3"
-               title={t`When selected, any tokens with a balance of zero will not be displayed anywhere in the wallet.`}>
-            </i>
-          </p>
-          <p><strong>{t`Automatically report bugs to Hathor:`}</strong> {wallet.isSentryAllowed() ? <span>{t`Yes`}</span> : <span>{t`No`}</span>} <Link className='ml-3' to='/permission/'> {t`Change`} </Link></p>
-          <CopyToClipboard text={uniqueIdentifier} onCopy={copyClicked}>
-            <span>
-              <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
-            </span>
-          </CopyToClipboard>
-          <button className="btn btn-hathor mt-4" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
-          <button className="btn btn-hathor mt-4" onClick={addPassphrase}>{t`Set a passphrase`}</button>
-          {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
-          <button className="btn btn-hathor mt-4" onClick={resetClicked}>{t`Reset all data`}</button>
-        </div>
-      </div>
-      <hr />
-
-      <div className="pb-5">
+      <div className="settings-footer">
         <div><a href="true" onClick={goToTermsOfService}>Terms of Service</a></div>
         <div><a href="true" onClick={goToPrivacyPolicy}>Privacy Policy</a></div>
       </div>
+
       <HathorAlert ref={alertCopiedRef} text={t`Copied to clipboard!`} type="success" />
     </div>
   );

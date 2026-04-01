@@ -465,7 +465,7 @@ svg.svg-wrapper {
 }
 
 .settings hr {
-  margin: 3rem 0;
+  margin: 1.5rem 0;
 }
 
 .backup-alert {
@@ -968,4 +968,183 @@ div .nc-token-balance:not(:last-child) {
 
 .token-type-info-box a {
   color: #0066cc;
+}
+
+/* Address Mode modal utilities */
+.border-hathor {
+  border-color: $purpleHathor !important;
+}
+
+.text-hathor {
+  color: $purpleHathor !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+/* Settings screen facelift */
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+.settings-section p {
+  margin-bottom: 26px;
+}
+
+.settings-change-link {
+  color: $purpleHathor;
+  font-weight: 600;
+  margin-left: 16px;
+  cursor: pointer;
+}
+
+.settings-action-link {
+  color: $purpleHathor;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+  margin-top: 12px;
+}
+
+.settings-action-link:hover {
+  text-decoration: none;
+  color: $purpleHathorHover;
+}
+
+.settings-action-link--danger {
+  color: #a92224;
+}
+
+.settings-action-link--danger:hover {
+  color: #a92224;
+}
+
+.settings-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.settings-footer {
+  margin-top: 24px;
+  padding-bottom: 3rem;
+}
+
+/* Address Mode modal */
+.address-mode-option {
+  background: #f7f7f7;
+  border-radius: 16px;
+  padding: 24px 16px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.address-mode-option input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #c4c4c4;
+  border-radius: 50%;
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.address-mode-option input[type="radio"]:checked {
+  border-color: $purpleHathor;
+}
+
+.address-mode-option input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: $purpleHathor;
+}
+
+.address-mode-option--disabled input[type="radio"] {
+  border-color: #e0e0e0;
+  cursor: default;
+}
+
+.address-mode-option--disabled {
+  cursor: default;
+}
+
+.address-mode-option--disabled .address-mode-label {
+  color: #c4c4c4;
+}
+
+.address-mode-option--disabled .address-mode-description {
+  color: #b0b0b0;
+}
+
+.address-mode-option--disabled .address-mode-hint {
+  color: #b0b0b0;
+  font-style: normal;
+}
+
+.address-mode-label {
+  color: $purpleHathor;
+  font-size: 14px;
+}
+
+.address-mode-description {
+  font-size: 12px;
+  margin-bottom: 0;
+  line-height: 20px;
+}
+
+.address-mode-hint {
+  font-style: italic;
+  color: #57606a;
+}
+
+.address-mode-alert {
+  background: rgba(217, 119, 6, 0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.address-mode-save-btn {
+  background: #e5e5e5;
+  border: none;
+  border-radius: 8px;
+  padding: 16px;
+  width: 185px;
+  color: #b0b0b0;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: default;
+}
+
+.address-mode-save-btn--active {
+  background: $purpleHathor;
+  color: white;
+  cursor: pointer;
+}
+
+.address-mode-save-btn--active:hover {
+  background: $purpleHathorHover;
 }
