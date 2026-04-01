@@ -13,6 +13,7 @@ import hathorLib from '@hathor/wallet-lib';
 import { GlobalModalContext } from './GlobalModal';
 import { tokenRegisterRequested } from '../actions/index';
 import { getGlobalWallet } from '../modules/wallet';
+import walletUtils from '../utils/wallet';
 import { colors } from '../constants';
 
 /**
@@ -173,13 +174,12 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     setModalState(MODAL_STATE.REGISTERING);
     let completed = 0;
     const errors = {};
+    const hideZeroBalance = walletUtils.areZeroBalanceTokensHidden();
 
     uids.forEach((uid) => {
       dispatch(
         tokenRegisterRequested(uid, {
-          // Keep imported tokens visible even with zero balance,
-          // so they don't vanish when "Hide zero-balance tokens" is enabled.
-          alwaysShow: true,
+          alwaysShow: !hideZeroBalance,
           resolve: () => {
             completed += 1;
             if (completed === uids.length) {
