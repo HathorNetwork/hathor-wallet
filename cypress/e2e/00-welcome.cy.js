@@ -200,7 +200,7 @@ describe('create a new wallet and back it up', () => {
     cy.get('h2.validation-step-index').invoke('text').then(text => {
       currentIndex = parseInt(text, 10);
       correctWord = backupWords[currentIndex - 1];
-      cy.findByText(correctWord).click();
+      cy.findByRole('button', { name: correctWord }).click();
     })
 
     // Insert wrong second word
@@ -208,12 +208,8 @@ describe('create a new wallet and back it up', () => {
       currentIndex = parseInt(text, 10) || 1;
       correctWord = backupWords[currentIndex - 1];
 
-      cy.findByText(correctWord)
-        .closest('section')
-        .children() // Get all child divs
-        .filter((index, element) => {
-          return element.innerText !== correctWord; // Keep only divs where key is not correct
-        })
+      cy.get('section.validation-step-words button.validate-step-option')
+        .filter((index, element) => element.innerText.trim() !== correctWord)
         .first()
         .click();
     })
@@ -226,7 +222,7 @@ describe('create a new wallet and back it up', () => {
       cy.get('h2.validation-step-index').invoke('text').then(text => {
         currentIndex = parseInt(text, 10);
         correctWord = backupWords[currentIndex - 1];
-        cy.findByText(correctWord).click();
+        cy.findByRole('button', { name: correctWord }).click();
       })
     }
 
