@@ -83,7 +83,13 @@ function Wallet() {
   // Refs
   const alertSuccessRef = useRef(null);
   const unregisterModalRef = useRef(null);
-  const tokenInfoInFlight = useRef(null);
+  const tokenInfoInFlight = useRef(new Set());
+  const selectedTokenRef = useRef(selectedToken);
+
+  // Keep the ref in sync with the latest selectedToken
+  useEffect(() => {
+    selectedTokenRef.current = selectedToken;
+  }, [selectedToken]);
 
   // Navigation and actions
   const navigate = useNavigate();
@@ -109,7 +115,7 @@ function Wallet() {
       updateWalletInfo(selectedToken);
     }, 500);
     return () => clearTimeout(timer);
-  }, [selectedTokenHistory]);
+  }, [selectedToken, selectedTokenHistory]);
 
   /**
    * Resets the state data and triggers token information requests
@@ -142,7 +148,7 @@ function Wallet() {
     const meltUtxos = await wallet.getMeltAuthority(tokenUid, { many: true });
 
     // If the user has changed the selectedToken while we were fetching the data, discard it
-    if (selectedToken !== tokenUid) {
+    if (selectedTokenRef.current !== tokenUid) {
       return;
     }
 
@@ -166,16 +172,16 @@ function Wallet() {
     }
 
     // Skip if a request for this token is already in flight
-    if (tokenInfoInFlight.current === tokenUid) {
+    if (tokenInfoInFlight.current.has(tokenUid)) {
       return;
     }
 
-    tokenInfoInFlight.current = tokenUid;
+    tokenInfoInFlight.current.add(tokenUid);
     try {
       const tokenDetails = await wallet.getTokenDetails(tokenUid);
 
       // If the user has changed the selectedToken while we were fetching the data, discard it
-      if (selectedToken !== tokenUid) {
+      if (selectedTokenRef.current !== tokenUid) {
         return;
       }
 
@@ -188,7 +194,7 @@ function Wallet() {
     } catch (err) {
       console.warn(`Failed to fetch token info for ${tokenUid}:`, err.message);
     } finally {
-      tokenInfoInFlight.current = null;
+      tokenInfoInFlight.current.delete(tokenUid);
     }
   }
 
@@ -200,11 +206,21 @@ function Wallet() {
   const calculateShouldShowAdministrativeTab = async (tokenId) => {
     const mintAuthorities = await wallet.getMintAuthority(tokenId, { skipSpent: false });
 
+    // If the user has changed the selectedToken while we were fetching the data, discard it
+    if (selectedTokenRef.current !== tokenId) {
+      return;
+    }
+
     if (mintAuthorities.length > 0) {
       return setShouldShowAdministrativeTab(true);
     }
 
     const meltAuthorities = await wallet.getMeltAuthority(tokenId, { skipSpent: false });
+
+    // If the user has changed the selectedToken while we were fetching the data, discard it
+    if (selectedTokenRef.current !== tokenId) {
+      return;
+    }
 
     if (meltAuthorities.length > 0) {
       return setShouldShowAdministrativeTab(true);
