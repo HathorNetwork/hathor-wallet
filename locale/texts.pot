@@ -89,7 +89,7 @@ msgid ""
 "passphrase, you will never have access to your tokens again."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:317
+#: src/components/ModalTokenImport.js:327
 #: src/components/nano-contract/ModalChangeAddress.js:106
 #: src/screens/ChoosePassphrase.js:174
 #: src/screens/SentryPermission.js:89
@@ -511,7 +511,7 @@ msgid "Backup now"
 msgstr ""
 
 #: src/screens/NewWallet.js:193
-#: src/screens/Wallet.js:217
+#: src/screens/Wallet.js:253
 msgid "Backup completed!"
 msgstr ""
 
@@ -655,7 +655,7 @@ msgstr ""
 #: src/components/ModalError.js:45
 #: src/components/ModalLedgerResetTokenSignatures.js:122
 #: src/components/ModalLedgerSignToken.js:243
-#: src/components/ModalTokenImport.js:419
+#: src/components/ModalTokenImport.js:429
 #: src/components/Reown/ErrorDetailModal.js:121
 #: src/components/Reown/FeedbackModal.js:96
 #: src/components/Reown/GenericErrorFeedbackModal.js:58
@@ -1009,73 +1009,73 @@ msgstr ""
 msgid "Change Server"
 msgstr ""
 
-#: src/screens/Wallet.js:233
-#: src/screens/Wallet.js:483
+#: src/screens/Wallet.js:269
+#: src/screens/Wallet.js:519
 msgid "Unregister token"
 msgstr ""
 
-#: src/screens/Wallet.js:241
+#: src/screens/Wallet.js:277
 #, javascript-format
 msgid ""
 "Are you sure you want to unregister the token **${ token.name } (${ "
 "token.symbol })**?"
 msgstr ""
 
-#: src/screens/Wallet.js:242
+#: src/screens/Wallet.js:278
 msgid ""
 "You won't lose your tokens, you just won't see this token on the side bar "
 "anymore."
 msgstr ""
 
-#: src/screens/Wallet.js:329
+#: src/screens/Wallet.js:365
 msgid ""
 "You haven't done the backup of your wallet yet. You should do it as soon as "
 "possible for your own safety."
 msgstr ""
 
-#: src/screens/Wallet.js:330
+#: src/screens/Wallet.js:366
 msgid "Do it now"
 msgstr ""
 
-#: src/screens/Wallet.js:366
+#: src/screens/Wallet.js:402
 msgid "Administrative Tools"
 msgstr ""
 
-#: src/screens/Wallet.js:381
+#: src/screens/Wallet.js:417
 msgid "Balance & History"
 msgstr ""
 
-#: src/screens/Wallet.js:385
+#: src/screens/Wallet.js:421
 #, javascript-format
 msgid "About ${ token.name }"
 msgstr ""
 
-#: src/screens/Wallet.js:435
+#: src/screens/Wallet.js:471
 msgid "Sign token on Ledger"
 msgstr ""
 
-#: src/screens/Wallet.js:436
+#: src/screens/Wallet.js:472
 msgid "Token signed with Ledger"
 msgstr ""
 
-#: src/screens/Wallet.js:456
+#: src/screens/Wallet.js:492
 msgid "Loading token information, please wait..."
 msgstr ""
 
 #: src/components/TokenBar.js:206
 #: src/components/TokenBar.js:207
-#: src/screens/Wallet.js:464
+#: src/screens/Wallet.js:500
 msgid "Settings"
 msgstr ""
 
-#: src/screens/Wallet.js:467
+#: src/screens/Wallet.js:503
 msgid "Token load failed, please"
 msgstr ""
 
 #: src/components/TxData.js:694
 #: src/components/TxData.js:709
 #: src/components/TxData.js:865
-#: src/screens/Wallet.js:469
+#: src/screens/Wallet.js:505
 msgid "try again"
 msgstr ""
 
@@ -2005,45 +2005,54 @@ msgstr ""
 msgid "Ok"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:192
+#: src/components/ModalTokenImport.js:195
 msgid "Unknown error"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:248
+#: src/components/ModalTokenImport.js:251
 #.  -- Render helpers -------------------------------------------------------
 msgid "Loading token details..."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:296
+#: src/components/ModalTokenImport.js:299
 msgid "Select the tokens you want to add to your wallet."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:305
+#: src/components/ModalTokenImport.js:303
+#, javascript-format
+msgid ""
+"Could not load details for ${ fetchErrorCount } token(s). They are shown "
+"with partial information but can still be imported."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:312
+#: src/components/ModalTokenImport.js:315
 msgid "Deselect all"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:305
+#: src/components/ModalTokenImport.js:312
+#: src/components/ModalTokenImport.js:315
 msgid "Select all"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:329
+#: src/components/ModalTokenImport.js:339
 msgid "Registering selected tokens..."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:343
+#: src/components/ModalTokenImport.js:353
 msgid "Tokens registered successfully!"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:352
+#: src/components/ModalTokenImport.js:362
 msgid "Some tokens failed to register:"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:374
+#: src/components/ModalTokenImport.js:384
 #: src/components/Reown/FeedbackModal.js:81
 msgid "Retry"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:413
+#: src/components/ModalTokenImport.js:423
 msgid "Tokens found"
 msgstr ""
 
