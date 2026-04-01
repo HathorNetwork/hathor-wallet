@@ -119,6 +119,9 @@ export const types = {
   UNREGISTERED_TOKENS_STORE_SUCCESS: 'UNREGISTERED_TOKENS_STORE_SUCCESS',
   UNREGISTERED_TOKENS_CLEAN: 'UNREGISTERED_TOKENS_CLEAN',
   REOWN_SET_ERROR: 'REOWN_SET_ERROR',
+  TOKEN_REGISTER_REQUESTED: 'TOKEN_REGISTER_REQUESTED',
+  TOKEN_REGISTER_SUCCESS: 'TOKEN_REGISTER_SUCCESS',
+  TOKEN_REGISTER_FAILED: 'TOKEN_REGISTER_FAILED',
 };
 
 /**
@@ -1012,4 +1015,43 @@ export const unregisteredTokensClean = () => ({
 export const setReownError = (errorDetails = null) => ({
   type: types.REOWN_SET_ERROR,
   payload: errorDetails,
+});
+
+/**
+ * Request to register a new token.
+ * Token name, symbol, and version are fetched from the fullnode API.
+ *
+ * @param {string} uid Token uid (required)
+ * @param {Object} [options] Optional parameters
+ * @param {boolean} [options.alwaysShow=false] Whether to always show the token
+ * @param {Function} [options.resolve=null] Optional promise resolve callback
+ * @param {Function} [options.reject=null] Optional promise reject callback
+ */
+export const tokenRegisterRequested = (uid, { alwaysShow = false, resolve = null, reject = null } = {}) => ({
+  type: types.TOKEN_REGISTER_REQUESTED,
+  payload: { uid, alwaysShow, resolve, reject },
+});
+
+/**
+ * Token registration succeeded
+ *
+ * @param {string} uid Token uid
+ * @param {string} name Token name
+ * @param {string} symbol Token symbol
+ * @param {number|undefined} version Token version (deposit or fee based)
+ */
+export const tokenRegisterSuccess = (uid, name, symbol, version) => ({
+  type: types.TOKEN_REGISTER_SUCCESS,
+  payload: { uid, name, symbol, version },
+});
+
+/**
+ * Token registration failed
+ *
+ * @param {string} uid Token uid
+ * @param {string} error Error message
+ */
+export const tokenRegisterFailed = (uid, error) => ({
+  type: types.TOKEN_REGISTER_FAILED,
+  payload: { uid, error },
 });

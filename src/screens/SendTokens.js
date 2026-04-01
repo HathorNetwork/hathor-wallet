@@ -25,6 +25,7 @@ import { getGlobalWallet } from "../modules/wallet";
 import { OutputType } from '@hathor/wallet-lib/lib/wallet/types';
 import { SendDataOutputOne } from '../components/SendDataOutputOne';
 import { uniqueId } from 'lodash';
+import { useTokensDetails } from '../hooks/useTokenDetails';
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -45,13 +46,14 @@ function SendTokens() {
   const navigate = useNavigate();
 
   // Redux state
-  const { selectedToken, tokens, metadataLoaded, useWalletService } = useSelector(
+  const { selectedToken, tokens, useWalletService, tokensBalance, decimalPlaces } = useSelector(
     (state) => {
       return {
         selectedToken: state.selectedToken,
         tokens: state.tokens,
-        metadataLoaded: state.metadataLoaded,
         useWalletService: state.useWalletService,
+        tokensBalance: state.tokensBalance,
+        decimalPlaces: state.serverInfo.decimalPlaces,
       };
     });
   const wallet = getGlobalWallet();
@@ -71,6 +73,12 @@ function SendTokens() {
   const [txTokens, setTxTokens] = useState([...getSelectedToken()]);
   /** dataOutputs {Array} Array of data output added by the user */
   const [dataOutputs, setDataOutputs] = useState([]);
+  /** tokenFees {Object} Map of token UID to calculated fee */
+  const [tokenFees, setTokenFees] = useState({});
+  /** tokenChangeOutputs {Object} Map of tokenUid -> changeOutput ({ address, value, token }) */
+  const [tokenChangeOutputs, setTokenChangeOutputs] = useState({});
+  /** feeError {string} Error message if insufficient HTR for fees */
+  const [feeError, setFeeError] = useState('');
 
   // Create refs
   const formSendTokensRef = useRef();
@@ -104,6 +112,39 @@ function SendTokens() {
       }
     };
   }, []);
+
+  // Fetch token details (including version) for any token in txTokens that lacks it.
+  useTokensDetails(txTokens.map(t => t.uid));
+
+  /**
+   * Validate if user has enough HTR to pay total fee.
+   * Returns an error message string, or empty string if balance is sufficient.
+   */
+  const validateFeeBalance = () => {
+    const fees = Object.values(tokenFees);
+    if (fees.length === 0) {
+      return '';
+    }
+
+    const totalFee = fees.reduce((a, b) => a + b, 0n);
+
+    if (totalFee > 0n) {
+      const htrBalance = tokensBalance[hathorLib.constants.NATIVE_TOKEN_UID]?.data?.available || 0n;
+
+      if (htrBalance < totalFee) {
+        return t`Insufficient HTR balance to pay network fee`;
+      }
+    }
+
+    return '';
+  };
+
+  /**
+   * Check if user has enough HTR to pay total fee
+   */
+  useEffect(() => {
+    setFeeError(validateFeeBalance());
+  }, [tokenFees, tokensBalance]);
 
   /**
    * Handle the response of a send tx call to Ledger.
@@ -243,7 +284,7 @@ function SendTokens() {
   }
 
   /**
-   * Method executed when tx is sent with success
+   * Method executed when tx is sent with success (Ledger flow)
    *
    * @param {Object} tx Transaction sent data
    */
@@ -355,60 +396,126 @@ function SendTokens() {
   }
 
   /**
-   * Method executed when user validates its PIN on the modal
-   * Checks if the form is valid, get data from child components, complete the transaction and execute API request
+   * Validates form, prepares modal data, and shows the Transaction Overview modal.
    */
   const beforeSend = () => {
-    // Validates form
     const isValid = validateFormData();
     if (!isValid) return;
 
-    // Validates inputs and outputs
     let data = getFormData();
     if (!data) return;
 
-    // All inputs validated: proceed with the send process
     setErrorMessage('');
+
     try {
       if (!LOCAL_STORE.isHardwareWallet()) {
-        globalModalContext.showModal(MODAL_TYPES.PIN, {
-          onSuccess: ({pin}) => {
-            globalModalContext.showModal(MODAL_TYPES.SEND_TX, {
-              pin,
-              prepareSendTransaction: prepareSendTransaction,
-              onSendSuccess: onSendSuccess,
-              onSendError: onSendError,
-              title: t`Sending transaction`,
+        // Flush any pending debounced fee calculations so state is up to date
+        for (const ref of references.current) {
+          ref.current?.debouncedCalculateFee?.flush();
+        }
+
+        // Calculate total fee
+        const totalFee = Object.values(tokenFees).reduce((a, b) => a + b, 0n);
+
+        // Build flat output list for the modal
+        const modalOutputs = [];
+
+        for (const output of data.outputs) {
+          if (output.type === OutputType.DATA) {
+            modalOutputs.push({ type: 'data', data: String(output.data) });
+          } else {
+            const tokenConfig = txTokens.find(tk => tk.uid === output.token);
+            modalOutputs.push({
+              address: output.address,
+              value: output.value,
+              tokenUid: output.token,
+              tokenSymbol: tokenConfig?.symbol || '???',
+              isChangeOutput: false,
             });
           }
-        })
+        }
+
+        // Append change outputs
+        for (const co of Object.values(tokenChangeOutputs)) {
+          const tokenConfig = txTokens.find(tk => tk.uid === co.token);
+          modalOutputs.push({
+            address: co.address,
+            value: co.value,
+            tokenUid: co.token,
+            tokenSymbol: tokenConfig?.symbol || '???',
+            isChangeOutput: true,
+          });
+        }
+
+        // Show Transaction Overview modal (handles full send flow internally)
+        globalModalContext.showModal(MODAL_TYPES.TRANSACTION_OVERVIEW, {
+          outputs: modalOutputs,
+          totalFee,
+          decimalPlaces,
+          prepareSendTransaction: (pin) => prepareSendTransaction(pin, data),
+          onSendSuccess: (tx) => handleSendSuccess(tx, data),
+          onCancel: () => globalModalContext.hideModal(),
+        });
       } else {
         beforeSendLedger();
       }
-    } catch(e) {
+    } catch (e) {
       handleSendError(e);
     }
-  }
+  };
 
   /**
    * Prepare data before sending tx to be mined and after user writes PIN
    *
    * @param {String} pin PIN written by the user
+   * @param {Object} data Form data with outputs and inputs
    *
    * @return {SendTransaction} SendTransaction object, in case of success, null otherwise
    */
-  const prepareSendTransaction = async (pin) => {
-    const txData = getFormData();
+  const prepareSendTransaction = async (pin, data) => {
     if (useWalletService) {
+      await wallet.validateAndRenewAuthToken(pin);
       return new hathorLib.SendTransactionWalletService(wallet, {
-        outputs: txData.outputs,
-        inputs: txData.inputs,
+        outputs: data.outputs,
+        inputs: data.inputs,
         pin,
       });
     }
 
-    return new hathorLib.SendTransaction({ outputs: txData.outputs, inputs: txData.inputs, pin, storage: wallet.storage });
-  }
+    return new hathorLib.SendTransaction({ outputs: data.outputs, inputs: data.inputs, pin, storage: wallet.storage });
+  };
+
+  /**
+   * Handle successful transaction send
+   */
+  const handleSendSuccess = (tx, data) => {
+    const regularOutputs = data.outputs
+      .filter((o) => o.type !== OutputType.DATA)
+      .map((o) => ({ address: o.address, value: o.value, token: o.token }));
+    const grouped = groupOutputsByToken(regularOutputs);
+    const tokensSent = grouped.map((group) => ({
+      symbol: group.token.symbol,
+      amount: group.total,
+    }));
+
+    // Must update the shared address, in case we have used one for the change
+    dispatch(walletRefreshSharedAddress());
+
+    globalModalContext.showModal(MODAL_TYPES.SEND_SUCCESS, {
+      tx,
+      tokensSent,
+      decimalPlaces,
+      onClose: () => {
+        globalModalContext.hideModal();
+        resetForm();
+      },
+      onViewDetails: () => {
+        console.log('View tx details:', tx.hash, tx);
+        globalModalContext.hideModal();
+        navigate(`/transaction/${tx.hash}`);
+      },
+    });
+  };
 
   /**
    * Handle error when executing sendTransaction method of the lib
@@ -438,6 +545,87 @@ function SendTokens() {
     // The only state that SendTokensOne expects to update with this callback is the errorMessage
     setErrorMessage(newState.errorMessage)
   }
+
+  /**
+   * Clean up fee and change output data for a given token.
+   * Used when removing a token or switching to a different token.
+   *
+   * @param {string} tokenUid - The token UID to clean up
+   */
+  const cleanupTokenFeeData = (tokenUid) => {
+    setTokenFees((prev) => {
+      const { [tokenUid]: removed, ...rest } = prev;
+      return rest;
+    });
+    setTokenChangeOutputs((prev) => {
+      const { [tokenUid]: removed, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  /**
+   * Handle fee and change output updates from child components
+   *
+   * @param {string} tokenUid - The token UID
+   * @param {bigint} fee - The calculated fee
+   * @param {Object|null} changeOutput - The change output { address, value, token } or null
+   */
+  const handleFeeChange = (tokenUid, fee, changeOutput) => {
+    setTokenFees(prev => ({ ...prev, [tokenUid]: fee }));
+    setTokenChangeOutputs(prev => {
+      if (changeOutput) {
+        return { ...prev, [tokenUid]: changeOutput };
+      }
+      const { [tokenUid]: removed, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  /**
+   * Reset form to initial state after successful send
+   */
+  const resetForm = () => {
+    setTxTokens([...getSelectedToken()]);
+    setDataOutputs([]);
+    setTokenFees({});
+    setTokenChangeOutputs({});
+    setFeeError('');
+    setErrorMessage('');
+    references.current = [React.createRef()];
+    dataOutputRefs.current = {};
+  };
+
+  /**
+   * Group outputs by token for display in the transaction overview modal.
+   * Returns an array of { token, outputs, total } where total only includes
+   * non-change outputs.
+   *
+   * @param {Array} allOutputs - Combined user outputs and change outputs
+   * @returns {Array<{ token: Object, outputs: Array, total: bigint }>}
+   */
+  const groupOutputsByToken = (allOutputs) => {
+    const groups = new Map();
+
+    for (const output of allOutputs) {
+      const tokenUid = output.token;
+      if (!groups.has(tokenUid)) {
+        const tokenConfig = txTokens.find((t) => t.uid === tokenUid);
+        groups.set(tokenUid, {
+          token: tokenConfig,
+          outputs: [],
+          total: 0n,
+        });
+      }
+      const group = groups.get(tokenUid);
+      group.outputs.push(output);
+      // Only add to total if not a change output
+      if (!output.isChangeOutput) {
+        group.total += BigInt(output.value);
+      }
+    }
+
+    return Array.from(groups.values());
+  };
 
   /**
    * Executed when user clicks to add another token to this transaction
@@ -494,6 +682,13 @@ function SendTokens() {
    * @param {number} index Index of the child component
    */
   const tokenSelectChange = (selected, index) => {
+    const oldToken = txTokens[index];
+
+    // Clean up fee and change output for old token when switching to a different token
+    if (oldToken && oldToken.uid !== selected.uid) {
+      cleanupTokenFeeData(oldToken.uid);
+    }
+
     const newTxTokens = [...txTokens];
     newTxTokens[index] = selected;
     setTxTokens(newTxTokens);
@@ -505,6 +700,10 @@ function SendTokens() {
    * @param {number} index Index of the child component
    */
   const removeToken = (index) => {
+    const removedToken = txTokens[index];
+
+    cleanupTokenFeeData(removedToken.uid);
+
     const newTxTokens = [...txTokens];
     newTxTokens.splice(index, 1);
     setTxTokens(newTxTokens);
@@ -554,16 +753,20 @@ function SendTokens() {
 
   const renderOnePage = () => {
     return txTokens.map((token, index) => {
-      return <SendTokensOne key={`${token.uid}-${index}`}
-                            ref={references.current[index]}
-                            config={token}
-                            index={index}
-                            selectedTokens={txTokens}
-                            tokens={tokens}
-                            tokenSelectChange={tokenSelectChange}
-                            removeToken={removeToken}
-                            updateState={updateState}
-      />
+      return (
+        <SendTokensOne
+          key={`${token.uid}-${index}`}
+          ref={references.current[index]}
+          config={token}
+          index={index}
+          selectedTokens={txTokens}
+          tokens={tokens}
+          tokenSelectChange={tokenSelectChange}
+          removeToken={removeToken}
+          updateState={updateState}
+          onFeeChange={handleFeeChange}
+        />
+      );
     });
   }
 
@@ -596,10 +799,6 @@ function SendTokens() {
   );
 
   const renderPage = () => {
-    if (!metadataLoaded) {
-      return <p>{t`Loading metadata...`}</p>
-    }
-
     return (
       <div>
         <form ref={formSendTokensRef} id="formSendTokens">
@@ -624,11 +823,13 @@ function SendTokens() {
               type="button"
               className="btn btn-hathor"
               onClick={onSendTokensClicked}
+              disabled={!!feeError}
             >
               {t`Send Tokens`}
             </button>
           </div>
         </form>
+        {feeError && <p className="text-danger mt-3">{feeError}</p>}
         <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p>
       </div>
     );

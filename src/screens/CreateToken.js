@@ -131,7 +131,7 @@ function CreateToken() {
         shortNameRef.current.value,
         symbolRef.current.value,
         amount,
-        { address, pinCode: pin, tokenVersion: tokenVersion }
+        { address, pinCode: pin, tokenVersion }
       );
 
       if (useWalletService) {
@@ -250,27 +250,43 @@ function CreateToken() {
   }
 
   const depositPercent = wallet.storage.getTokenDepositPercentage();
+  const depositPercentDisplay = depositPercent * 100;
   const nativeTokenConfig = wallet.storage.getNativeTokenData();
   const availableBalanceText = `${hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} ${nativeTokenConfig.symbol} ${t`available`}`;
   const requiredFeeAmountText = `${hathorLib.numberUtils.prettyValue(hathorLib.constants.FEE_PER_OUTPUT, decimalPlaces)} ${nativeTokenConfig.symbol}`;
 
   /**
    * Calculates the required HTR amount to create a token
-   * @param {bigint|null} mintAmount - Amount of tokens to mint
-   * @param {number} version - TokenVersion enum value
+   * @param {bigint} [mintAmount] - Amount of tokens to mint
    * @returns {bigint} Required HTR amount in smallest unit
    */
   const getRequiredAmount = (mintAmount) => {
     if (isDepositToken) {
-      // Deposit tokens require 1% of the minted amount
+      // Deposit tokens require a percentage of the minted amount
       return mintAmount ? hathorLib.tokensUtils.getDepositAmount(mintAmount, depositPercent) : 0n;
     }
     // Fee tokens require a fixed 0.01 HTR network fee
     return hathorLib.constants.FEE_PER_OUTPUT;
   };
 
-  const requiredAmount = getRequiredAmount(amount, tokenVersion);
+  const requiredAmount = getRequiredAmount(amount);
   const hasInsufficientBalance = requiredAmount > htrBalance;
+
+  /**
+   * Returns the balance validation message when insufficient balance
+   * @returns {string|null} Validation message or null if balance is sufficient
+   */
+  const getBalanceValidationMessage = () => {
+    if (!hasInsufficientBalance) {
+      return null;
+    }
+    if (isDepositToken) {
+      return t`Required deposit exceeds your available balance.`;
+    }
+    return t`Required network fee exceeds your available balance.`;
+  };
+
+  const balanceValidationMessage = getBalanceValidationMessage();
 
   /**
    * Renders the info box explaining the token type choice
@@ -288,7 +304,7 @@ function CreateToken() {
         <div className="d-flex align-items-center mt-4 mb-4" style={infoBoxStyle}>
           <i className="fa fa-info-circle mr-2" style={{ color: '#0066cc' }} aria-hidden="true"></i>
           <div>
-            {t`You chose to create a `}<strong>{t`Deposit-Based Token`}</strong>{t`, which requires a 1% HTR deposit. This ensures that all future transactions with this token have no additional fees. `}
+            {t`You chose to create a `}<strong>{t`Deposit-Based Token`}</strong>{t`, which requires a ${depositPercentDisplay}% ${nativeTokenConfig.symbol} deposit. This ensures that all future transactions with this token have no additional fees. `}
             <a href="#" onClick={goToRFC} style={{ color: '#8C46FF', fontWeight: 'bold' }}>{t`Learn more.`}</a>
           </div>
         </div>
@@ -359,6 +375,9 @@ function CreateToken() {
             </div>
           </div>
           {renderFeeModelInfo()}
+          {balanceValidationMessage && (
+            <p className="text-danger mt-2 mb-0" role="alert">{balanceValidationMessage}</p>
+          )}
         </div>
         {renderTokenTypeInfoBox()}
         <button

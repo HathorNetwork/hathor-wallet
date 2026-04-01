@@ -12,6 +12,16 @@ jest.mock('../../utils/helpers', () => ({
   openExternalURL: jest.fn(),
 }));
 
+// Mock the wallet module
+jest.mock('../../modules/wallet', () => ({
+  getGlobalWallet: () => ({
+    storage: {
+      getTokenDepositPercentage: () => 0.01,
+      getNativeTokenData: () => ({ symbol: 'HTR', name: 'Hathor' }),
+    },
+  }),
+}));
+
 // Mock useNavigate
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -48,7 +58,7 @@ describe('SelectTokenType', () => {
   it('renders deposit token card content', () => {
     renderComponent();
 
-    expect(screen.getByText('Requires a 1% HTR deposit.') instanceof HTMLElement).toStrictEqual(true);
+    expect(screen.getByText('Requires a 1% HTR deposit.') instanceof HTMLElement).toStrictEqual(true); // Dynamic based on fullnode config
     expect(screen.getByText('No transaction fees in future transfers.') instanceof HTMLElement).toStrictEqual(true);
     expect(screen.getByText('Refundable if token is burned.') instanceof HTMLElement).toStrictEqual(true);
     expect(screen.getByText('Recommended for frequent use.') instanceof HTMLElement).toStrictEqual(true);

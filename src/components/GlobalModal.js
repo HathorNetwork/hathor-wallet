@@ -40,6 +40,8 @@ import { TransactionFeedbackModal } from './Reown/TransactionFeedbackModal';
 import { GenericErrorFeedbackModal } from './Reown/GenericErrorFeedbackModal';
 import ModalError from './ModalError';
 import RequestErrorModal from './RequestError';
+import ModalSendSuccess from './ModalSendSuccess';
+import ModalTransactionOverview from './ModalTransactionOverview';
 
 const initialState = {
   showModal: () => { },
@@ -80,6 +82,8 @@ export const MODAL_TYPES = {
   'ERROR_MODAL': 'ERROR_MODAL',
   'REQUEST_ERROR': 'REQUEST_ERROR',
   'GENERIC_ERROR_FEEDBACK': 'GENERIC_ERROR_FEEDBACK',
+  'TRANSACTION_OVERVIEW': 'TRANSACTION_OVERVIEW',
+  'SEND_SUCCESS': 'SEND_SUCCESS',
 };
 
 export const MODAL_COMPONENTS = {
@@ -115,6 +119,8 @@ export const MODAL_COMPONENTS = {
   [MODAL_TYPES.ERROR_MODAL]: ModalError,
   [MODAL_TYPES.REQUEST_ERROR]: RequestErrorModal,
   [MODAL_TYPES.GENERIC_ERROR_FEEDBACK]: GenericErrorFeedbackModal,
+  [MODAL_TYPES.SEND_SUCCESS]: ModalSendSuccess,
+  [MODAL_TYPES.TRANSACTION_OVERVIEW]: ModalTransactionOverview,
 };
 
 export const GlobalModalContext = createContext(initialState);

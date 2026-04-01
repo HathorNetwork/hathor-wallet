@@ -12,6 +12,7 @@ import hathorLib from '@hathor/wallet-lib';
 import BackButton from '../components/BackButton';
 import helpers from '../utils/helpers';
 import { TOKEN_FEE_RFC_URL } from '../constants';
+import { getGlobalWallet } from '../modules/wallet';
 
 const { TokenVersion } = hathorLib;
 
@@ -22,6 +23,10 @@ const { TokenVersion } = hathorLib;
  */
 function SelectTokenType() {
   const navigate = useNavigate();
+  const wallet = getGlobalWallet();
+  const depositPercent = wallet.storage.getTokenDepositPercentage();
+  const depositPercentDisplay = depositPercent * 100;
+  const nativeTokenConfig = wallet.storage.getNativeTokenData();
 
   const handleDepositClick = () => {
     navigate(`/create_token/${TokenVersion.DEPOSIT}`);
@@ -61,7 +66,7 @@ function SelectTokenType() {
           </h5>
           <div className="d-flex flex-column flex-grow-1 justify-content-between">
             <ul className="pl-4 mb-0" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-              <li>{t`Requires a 1% HTR deposit.`}</li>
+              <li>{t`Requires a ${depositPercentDisplay}% ${nativeTokenConfig.symbol} deposit.`}</li>
               <li>{t`No transaction fees in future transfers.`}</li>
               <li>{t`Refundable if token is burned.`}</li>
             </ul>

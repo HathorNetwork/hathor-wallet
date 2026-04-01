@@ -30,6 +30,7 @@ import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actio
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
+import { useTokensDetails } from '../hooks/useTokenDetails';
 
 
 /**
@@ -163,17 +164,11 @@ function Wallet() {
     }
 
     // Update the state with the new data
-    const { totalSupply: newTotalSupply, totalTransactions, authorities, tokenInfo } = tokenDetails;
+    const { totalSupply: newTotalSupply, totalTransactions, authorities } = tokenDetails;
     setTotalSupply(newTotalSupply);
     setCanMint(authorities.mint);
     setCanMelt(authorities.melt);
     setTransactionsCount(totalTransactions);
-
-    // Migrate tokens that were registered before version was tracked
-    const currentToken = tokens.find(t => t.uid === tokenUid);
-    if (currentToken && currentToken.version === undefined && tokenInfo.version !== undefined) {
-      await tokensUtils.updateTokenVersion(tokenUid, currentToken.name, currentToken.symbol, tokenInfo.version);
-    }
   }
 
   /**
@@ -314,7 +309,7 @@ function Wallet() {
   }
 
   // Rendering process below
-  const token = tokens.find((token) => token.uid === selectedToken);
+  const { tokens: [token], isLoading: isLoadingToken, errors: tokenErrors } = useTokensDetails([selectedToken])
   const tokenHistory = get(tokensHistory, selectedToken, {
     status: TOKEN_DOWNLOAD_STATUS.LOADING,
     data: [],
@@ -404,6 +399,8 @@ function Wallet() {
               canMelt={canMelt}
               transactionsCount={transactionsCount}
               tokenMetadata={tokenMetadata}
+              isLoadingVersion={isLoadingToken}
+              versionError={tokenErrors[selectedToken] ?? null}
             />
           </div>
           {

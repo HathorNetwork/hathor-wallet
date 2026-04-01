@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, FEE_TOKEN_FEATURE_TOGGLE, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
@@ -311,6 +311,12 @@ const initialState = {
     error: null,
   },
   reown: reownReducer(undefined, {}),
+  /**
+   * Stores the status of token registration operations
+   * @type {Record<string, { status: string, error?: string }>}
+   * @example { 'abc123': { status: 'loading' }, 'def456': { status: 'success' } }
+   */
+  tokenRegistration: {},
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -489,6 +495,12 @@ const rootReducer = (state = initialState, action) => {
       return onUnregisteredTokensStoreSuccess(state, action);
     case types.UNREGISTERED_TOKENS_CLEAN:
       return onUnregisteredTokensClean(state);
+    case types.TOKEN_REGISTER_REQUESTED:
+      return onTokenRegisterRequested(state, action);
+    case types.TOKEN_REGISTER_SUCCESS:
+      return onTokenRegisterSuccess(state, action);
+    case types.TOKEN_REGISTER_FAILED:
+      return onTokenRegisterFailed(state, action);
     default:
       return state;
   }
@@ -1597,6 +1609,58 @@ export const onUnregisteredTokensClean = (state) => {
     ...state,
     unregisteredTokens: {
       tokensMap: {},
+    },
+  };
+};
+
+/**
+ * Handle token registration request - set status to loading
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ */
+export const onTokenRegisterRequested = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.LOADING },
+    },
+  };
+};
+
+/**
+ * Handle token registration success
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ */
+export const onTokenRegisterSuccess = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.READY },
+    },
+  };
+};
+
+/**
+ * Handle token registration failure
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ * @param {string} action.payload.error Error message
+ */
+export const onTokenRegisterFailed = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.FAILED, error: payload.error },
     },
   };
 };

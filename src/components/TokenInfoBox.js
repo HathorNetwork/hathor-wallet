@@ -8,18 +8,11 @@
 import React from 'react';
 import { t } from 'ttag';
 import { get } from 'lodash';
-import { numberUtils, TokenVersion } from '@hathor/wallet-lib';
+import { numberUtils } from '@hathor/wallet-lib';
 import { useSelector } from 'react-redux';
 import helpers from '../utils/helpers';
-
-const getFeeModelDescription = (tokenVersion) => {
-  if (tokenVersion === TokenVersion.FEE)
-    return t`This token was created without a deposit. A small network fee in HTR is charged on every transfer.`
-  if (tokenVersion === TokenVersion.DEPOSIT) {
-    return t`This token was created with a 1% HTR deposit. No network fees are charged for transfers.`
-  }
-  return t`Unknown fee model`
-};
+import { FEE_TOKEN_FEATURE_TOGGLE, FEATURE_TOGGLE_DEFAULTS } from '../constants';
+import FeeModelInfo from './FeeModelInfo';
 
 export default function TokenInfoBox ({
   token,
@@ -28,10 +21,14 @@ export default function TokenInfoBox ({
   canMelt,
   transactionsCount,
   tokenMetadata,
+  isLoadingVersion = false,
+  versionError = null,
   children,
 }) {
   const isNFT = helpers.isTokenNFT(get(token, 'uid'), tokenMetadata || {});
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
+  const featureToggles = useSelector((state) => state.featureToggles);
+  const feeTokenFeatureEnabled = get(featureToggles, FEE_TOKEN_FEATURE_TOGGLE, FEATURE_TOGGLE_DEFAULTS[FEE_TOKEN_FEATURE_TOGGLE]);
 
   return (
     <div className="token-general-info">
@@ -39,8 +36,9 @@ export default function TokenInfoBox ({
       <p className="mt-2 mb-2"><strong>{t`Type:`} </strong>{isNFT ? 'NFT' : 'Custom Token'}</p>
       <p className="mt-2 mb-2"><strong>{t`Name:`} </strong>{token.name}</p>
       <p className="mt-2 mb-2"><strong>{t`Symbol:`} </strong>{token.symbol}</p>
-      <p className="mt-2 mb-2"><strong>{t`Fee Model:`} </strong>{token.version === TokenVersion.FEE ? t`Fee-based` : t`Deposit-based`}</p>
-      <p className="mt-2 mb-2">{getFeeModelDescription(token.version)}</p>
+      {feeTokenFeatureEnabled && (
+        <FeeModelInfo tokenVersion={token.version} isLoading={isLoadingVersion} error={versionError} />
+      )}
       <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{numberUtils.prettyValue(totalSupply || 0n, isNFT ? 0 : decimalPlaces)} {token.symbol}</p>
       <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{canMint ? 'Yes' : 'No'}</p>
       <p className="mb-2 subtitle">{t`Indicates whether the token owner can create new tokens, increasing the total supply`}</p>

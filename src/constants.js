@@ -88,6 +88,12 @@ export const TOKEN_DEPOSIT_RFC_URL = "https://github.com/HathorNetwork/rfcs/blob
  * URL of token fee RFC
  */
 export const TOKEN_FEE_RFC_URL = "https://github.com/HathorNetwork/rfcs/blob/master/text/0045-transaction_fee_minting.md";
+export const TOKEN_DEPOSIT_RFC_URL = "https://github.com/HathorNetwork/rfcs/blob/master/text/0011-token-deposit.md";
+
+/**
+ * URL of token fee RFC
+ */
+export const TOKEN_FEE_RFC_URL = "https://github.com/HathorNetwork/rfcs/blob/master/text/0045-transaction_fee_minting.md";
 
 /**
  * URL of NFT standard

@@ -95,28 +95,18 @@ class ModalAddManyTokens extends React.Component {
       return;
     }
 
-    const wallet = getGlobalWallet();
     const validations = [];
     for (const config of matches) {
       // Preventing when the user forgets a comma in the end
       if (config !== '') {
         // Getting all validation promises
-        validations.push(hathorLib.tokensUtils.validateTokenToAddByConfigurationString(config, wallet.storage));
+        const storage = getGlobalWallet().storage;
+        validations.push(hathorLib.tokensUtils.validateTokenToAddByConfigurationString(config, storage));
       }
     }
 
     try {
       const toAdd = await Promise.all(validations)
-
-      // Fetch version for each token (validateTokenToAddByConfigurationString doesn't return it)
-      const tokenDetailsPromises = toAdd.map(t => wallet.getTokenDetails(t.uid));
-      const tokenDetails = await Promise.all(tokenDetailsPromises);
-
-      // Merge version into token data
-      const tokensWithVersion = toAdd.map((t, i) => ({
-        ...t,
-        version: tokenDetails[i].tokenInfo.version,
-      }));
 
       const tokensBalance = this.props.tokensBalance;
       const areZeroBalanceTokensHidden = walletUtils.areZeroBalanceTokensHidden();
@@ -124,7 +114,7 @@ class ModalAddManyTokens extends React.Component {
       const tokensToAdd = [];
 
       // All promises succeeded, validating token balances
-      for (const config of tokensWithVersion) {
+      for (const config of toAdd) {
         const tokenUid = config.uid;
         const { available, locked } = get(tokensBalance, `${tokenUid}.data`, {
           available: 0n,
@@ -167,10 +157,9 @@ class ModalAddManyTokens extends React.Component {
         return;
       }
 
-      // Adding the tokens to the wallet and returning with the success callback
+      // Adding the tokens to the wallet via saga (handles version fetching with error resilience)
       for (const config of tokensToAdd) {
-        await tokens.addToken(config.uid, config.name, config.symbol, config.version);
-        walletUtils.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
+        await tokens.registerToken(config.uid, this.state.alwaysShow);
       }
 
       this.props.success(toAdd.length);
