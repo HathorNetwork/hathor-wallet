@@ -66,7 +66,7 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
           </div>
           <div className="modal-body" style={{ display: 'flex', flexDirection: 'column' }}>
             <p style={{ marginBottom: 40 }}>
-              {t`You can set your wallet to `}<strong>{t`single or multi address mode`}</strong>{t`.`}
+              {t`You can set your wallet to `}<strong>{t`single or multi address mode`}</strong>{'.'}
               <br />
               {t`You can switch anytime in the settings.`}
             </p>
@@ -120,7 +120,7 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
                     <span>
                       {t`You can't switch to single address mode because other addresses in your wallet are already in use.`}
                       {' '}
-                      <a href="true" onClick={openLearnMore} style={{ textDecoration: 'underline', color: 'inherit' }}>{t`Learn more`}</a>{t`.`}
+                      <a href="true" onClick={openLearnMore} style={{ textDecoration: 'underline', color: 'inherit' }}>{t`Learn more`}</a>{'.'}
                     </span>
                   </div>
                 )}

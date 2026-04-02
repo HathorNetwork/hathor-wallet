@@ -54,6 +54,7 @@ function Settings() {
   const singleAddressEnabled = useSelector(state => state.featureToggles[SINGLE_ADDRESS_FEATURE_TOGGLE]);
   const addressMode = useSelector(state => state.addressMode);
   const connectedSessionsCount = Object.keys(reownSessions).length;
+  const isHardwareWallet = LOCAL_STORE.isHardwareWallet();
 
   useEffect(() => {
     setIsNotificationOn(wallet.isNotificationOn());
@@ -91,7 +92,7 @@ function Settings() {
    * When user clicks Add Passphrase button we redirect to Passphrase screen
    */
   const addPassphrase = () => {
-    if (LOCAL_STORE.isHardwareWallet()) {
+    if (isHardwareWallet) {
       context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
         title: t`Complete action on your hardware wallet`,
         children: (
@@ -316,7 +317,7 @@ function Settings() {
 
   const serverURL = useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
   const wsServerURL = useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
-  const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
+  const ledgerCustomTokens = isHardwareWallet && version.isLedgerCustomTokenAllowed();
   const uniqueIdentifier = helpers.getUniqueId();
 
   const rawNetworkName = hathorLib.config.getNetwork().name || 'mainnet';
