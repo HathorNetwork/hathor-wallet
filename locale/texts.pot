@@ -1676,6 +1676,7 @@ msgstr ""
 
 #: src/components/FeeModelInfo.js:35
 #: src/components/Reown/CreateTokenRequestData.js:37
+#: src/components/TxData.js:311
 #.  This should never happen because of the feature flag. When the feature flag is enabled
 #.  the token sync will run after wallet startup
 msgid "Unknown"

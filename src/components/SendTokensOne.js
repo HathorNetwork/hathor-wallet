@@ -421,7 +421,7 @@ class SendTokensOne extends React.Component {
    * Renders the fee value display: a "No fee" badge for deposit tokens, or the fee amount for fee tokens
    */
   renderFeeValue = () => {
-    if (this.state.isDepositToken) {
+    if (hathorLib.tokensUtils.isHathorToken(this.state.selected.uid) || this.state.isDepositToken) {
       return (
         <span className="badge badge-success">
           <i className="fa fa-check mr-1" />

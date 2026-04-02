@@ -308,7 +308,7 @@ class TxData extends React.Component {
       const feeEntries = feeHeader.entries.map(entry => {
         const tokenConfig = this.getOutputToken(entry.tokenIndex);
         return {
-          tokenSymbol: tokenConfig?.symbol || 'Unknown',
+          tokenSymbol: tokenConfig?.symbol || t`Unknown`,
           amount: entry.amount,
         };
       });
