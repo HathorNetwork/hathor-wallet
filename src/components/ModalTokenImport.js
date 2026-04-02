@@ -174,12 +174,11 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     setModalState(MODAL_STATE.REGISTERING);
     let completed = 0;
     const errors = {};
-    const hideZeroBalance = walletUtils.areZeroBalanceTokensHidden();
 
     uids.forEach((uid) => {
       dispatch(
         tokenRegisterRequested(uid, {
-          alwaysShow: !hideZeroBalance,
+          alwaysShow: false,
           resolve: () => {
             completed += 1;
             if (completed === uids.length) {

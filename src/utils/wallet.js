@@ -249,10 +249,11 @@ const wallet = {
 
       // If the "show only non-zero balance tokens" flag is active, filter here.
       if (hideZeroBalance) {
-        const totalBalance = balance.available + balance.locked;
+        const balanceData = balance.data || balance;
+        const totalBalance = (balanceData.available ?? 0n) + (balanceData.locked ?? 0n);
 
         // This token has zero balance: skip it.
-        if (hideZeroBalance && totalBalance === 0n) {
+        if (totalBalance === 0n) {
           continue;
         }
       }
