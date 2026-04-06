@@ -256,7 +256,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     if (!token) return null;
 
     const isDisabled = modalState === MODAL_STATE.REGISTERING;
-    const explorerLink = `${explorerUrl}/token/${uid}`;
+    const explorerLink = `${explorerUrl}/token_detail/${uid}`;
 
     return (
       <div className="token-row" key={uid}>
