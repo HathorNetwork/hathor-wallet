@@ -235,7 +235,7 @@ const wallet = {
       if (registeredTokens.find((x) => x.uid === tokenUid)) {
         continue;
       }
-      const balance = tokensBalance[tokenUid] || { available: 0n, locked: 0n };
+      const balance = tokensBalance[tokenUid].data || { available: 0n, locked: 0n };
       const tokenData = {
         uid: tokenUid,
         balance: balance,
@@ -249,8 +249,7 @@ const wallet = {
 
       // If the "show only non-zero balance tokens" flag is active, filter here.
       if (hideZeroBalance) {
-        const balanceData = balance.data || balance;
-        const totalBalance = (balanceData.available ?? 0n) + (balanceData.locked ?? 0n);
+        const totalBalance = balance.available + balance.locked;
 
         // This token has zero balance: skip it.
         if (totalBalance === 0n) {

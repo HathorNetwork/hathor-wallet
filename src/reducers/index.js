@@ -743,8 +743,8 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   const tokensBalance = state.tokensBalance;
   const selectedToken = state.selectedToken;
 
-  const balance = tokensBalance[selectedToken] || { available: 0n, locked: 0n };
-  const hasZeroBalance = (balance.available + balance.locked) === 0n;
+  const { available = 0n, locked = 0n } = (tokensBalance[selectedToken] || {}).data || {};
+  const hasZeroBalance = (available + locked) === 0n;
 
   if (hasZeroBalance) {
     return {
