@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
 import SendTokensOne from '../components/SendTokensOne';
 import { useDispatch, useSelector } from 'react-redux';
@@ -121,7 +121,7 @@ function SendTokens() {
    * Validate if user has enough HTR to pay total fee.
    * Returns an error message string, or empty string if balance is sufficient.
    */
-  const validateFeeBalance = () => {
+  const validateFeeBalance = useCallback(() => {
     const fees = Object.values(tokenFees);
     if (fees.length === 0) {
       return '';
@@ -138,14 +138,14 @@ function SendTokens() {
     }
 
     return '';
-  };
+  }, [tokenFees, tokensBalance]);
 
   /**
    * Check if user has enough HTR to pay total fee
    */
   useEffect(() => {
     setFeeError(validateFeeBalance());
-  }, [tokenFees, tokensBalance]);
+  }, [validateFeeBalance]);
 
   /**
    * Handle the response of a send tx call to Ledger.
