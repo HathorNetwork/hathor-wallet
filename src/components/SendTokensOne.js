@@ -48,7 +48,8 @@ class SendTokensOne extends React.Component {
     this.inputsWrapper = React.createRef();
     this.noInputs = React.createRef();
     this.inputs = [React.createRef()];
-    this.outputs = [React.createRef()];
+    this.outputIdCounter = 1;
+    this.outputs = [{ id: 0, ref: React.createRef() }];
     this.uniqueID = _.uniqueId();
 
     /**
@@ -93,7 +94,7 @@ class SendTokensOne extends React.Component {
    * Add a new output wrapper for this token
    */
   addOutput = () => {
-    this.outputs.push(React.createRef());
+    this.outputs.push({ id: this.outputIdCounter++, ref: React.createRef() });
     const newCount = this.state.outputsCount + 1;
     this.setState({ outputsCount: newCount });
   }
@@ -151,9 +152,9 @@ class SendTokensOne extends React.Component {
   getOutputsForFeeCalculation = () => {
     const outputs = [];
     for (const output of this.outputs) {
-      if (!output.current) continue;
-      const address = output.current.address?.current?.value?.replace(/\s/g, '');
-      const value = output.current.value;
+      if (!output.ref.current) continue;
+      const address = output.ref.current.address?.current?.value?.replace(/\s/g, '');
+      const value = output.ref.current.value;
       if (address && value && value > 0) {
         outputs.push({ address, value: BigInt(value) });
       }
@@ -334,22 +335,22 @@ class SendTokensOne extends React.Component {
   getData = () => {
     let data = {'outputs': [], 'inputs': []};
     for (const output of this.outputs) {
-      const address = output.current.address.current.value.replace(/\s/g, '');
-      const value = output.current.value;
+      const address = output.ref.current.address.current.value.replace(/\s/g, '');
+      const value = output.ref.current.value;
 
       if (address && value) {
         // Doing the check here because need to validate before doing parseInt
         if (value > hathorLib.constants.MAX_OUTPUT_VALUE) {
-          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
           return null;
         }
         let dataOutput = {'address': address, 'value': value, 'token': this.state.selected.uid};
 
-        const hasTimelock = output.current.timelockCheckbox.current.checked;
+        const hasTimelock = output.ref.current.timelockCheckbox.current.checked;
         if (hasTimelock) {
-          const timelock = output.current.timelock.current.value;
+          const timelock = output.ref.current.timelock.current.value;
           if (!timelock) {
-            this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. You need to fill a complete date and time` });
+            this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. You need to fill a complete date and time` });
             return null;
           }
           const timestamp = hathorLib.dateFormatter.dateToTimestamp(new Date(timelock));
@@ -441,10 +442,10 @@ class SendTokensOne extends React.Component {
     const renderOutputs = () => {
       return this.outputs.map((output, index) =>
         <OutputsWrapper
-          key={index}
+          key={output.id}
           index={index}
-          setRef={(node) => { output.current = node; }}
-          addOutput={this.addOutput}
+          outputsCount={this.state.outputsCount}
+          setRef={(node) => { output.ref.current = node; }}
           removeOutput={this.removeOutput}
           isNFT={this.isNFT()}
           onValueChange={this.handleOutputChange}
@@ -521,6 +522,13 @@ class SendTokensOne extends React.Component {
         <div className="outputs-wrapper mt-3">
           <label>Outputs</label>
           {renderOutputs()}
+          <button
+            type="button"
+            className="btn btn-secondary mt-2 mb-3"
+            onClick={this.addOutput}
+          >
+            {t`+ Add output`}
+          </button>
         </div>
         {/* Fee display section */}
         {this.state.selected && this.hasValidOutputs() && (

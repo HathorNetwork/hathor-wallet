@@ -46,11 +46,12 @@ function SendTokens() {
   const navigate = useNavigate();
 
   // Redux state
-  const { selectedToken, tokens, useWalletService, tokensBalance, decimalPlaces } = useSelector(
+  const { selectedToken, tokens, metadataLoaded, useWalletService, tokensBalance, decimalPlaces } = useSelector(
     (state) => {
       return {
         selectedToken: state.selectedToken,
         tokens: state.tokens,
+        metadataLoaded: state.metadataLoaded,
         useWalletService: state.useWalletService,
         tokensBalance: state.tokensBalance,
         decimalPlaces: state.serverInfo.decimalPlaces,
@@ -799,6 +800,10 @@ function SendTokens() {
   );
 
   const renderPage = () => {
+    if (!metadataLoaded) {
+      return <p>{t`Loading metadata...`}</p>
+    }
+
     return (
       <div>
         <form ref={formSendTokensRef} id="formSendTokens">

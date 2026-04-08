@@ -93,9 +93,17 @@ class OutputsWrapper extends React.Component {
         <input type="datetime-local" placeholder={t`Date and time in GMT`} step="1"
           className="form-control output-timelock col-3" style={{display: 'none'}} ref={this.timelock}
           disabled={LOCAL_STORE.isHardwareWallet() ? true : null}/>
-        {this.props.index === 0
-          ? <button type="button" className="btn btn-hathor" onClick={this.props.addOutput}>+</button>
-          : <button type="button" className="btn btn-hathor" onClick={() => this.props.removeOutput(this.props.index)}>-</button>}
+        {this.props.outputsCount > 1 && (
+          <button
+            type="button"
+            className="btn btn-link text-danger p-0 ml-2"
+            style={{ fontSize: '18px', lineHeight: 1 }}
+            onClick={() => this.props.removeOutput(this.props.index)}
+            title={t`Remove output`}
+          >
+            <i className="fa fa-times" />
+          </button>
+        )}
       </div>
     );
   }

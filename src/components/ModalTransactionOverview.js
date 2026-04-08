@@ -11,6 +11,7 @@ import $ from 'jquery';
 import PropTypes from 'prop-types';
 import hathorLib from '@hathor/wallet-lib';
 import ReactLoading from 'react-loading';
+import { useSelector } from 'react-redux';
 import helpers from '../utils/helpers';
 import { TOKEN_FEE_RFC_URL, colors } from '../constants';
 import SendTxHandler from './SendTxHandler';
@@ -39,6 +40,7 @@ function ModalTransactionOverview({
   const [phase, setPhase] = useState('review');
   const [errorMessage, setErrorMessage] = useState('');
   const [preparedTx, setPreparedTx] = useState(null);
+  const tokenMetadata = useSelector((state) => state.tokenMetadata);
 
   useEffect(() => {
     manageDomLifecycle(`#${MODAL_ID}`);
@@ -46,6 +48,10 @@ function ModalTransactionOverview({
 
   const fee = typeof totalFee === 'bigint' ? totalFee : BigInt(totalFee || 0);
   const hasAnyFee = fee > 0n;
+
+  const getDecimalPlaces = (tokenUid) => {
+    return helpers.isTokenNFT(tokenUid, tokenMetadata) ? 0 : decimalPlaces;
+  };
 
   /**
    * Format total payment string: "0.03 HTR + 1.00 FBT"
@@ -75,8 +81,8 @@ function ModalTransactionOverview({
     }
 
     const parts = [];
-    for (const [, { symbol, total }] of tokenTotals) {
-      parts.push(`${hathorLib.numberUtils.prettyValue(total, decimalPlaces)} ${symbol}`);
+    for (const [uid, { symbol, total }] of tokenTotals) {
+      parts.push(`${hathorLib.numberUtils.prettyValue(total, getDecimalPlaces(uid))} ${symbol}`);
     }
     return parts.join(' + ');
   };
@@ -182,7 +188,7 @@ function ModalTransactionOverview({
             fontSize: '14px',
           }}
         >
-          {hathorLib.numberUtils.prettyValue(output.value, decimalPlaces)} {output.tokenSymbol}
+          {hathorLib.numberUtils.prettyValue(output.value, getDecimalPlaces(output.tokenUid))} {output.tokenSymbol}
           <i
             className={`fa ${arrowClass}`}
             style={{
