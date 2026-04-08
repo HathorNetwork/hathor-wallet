@@ -64,6 +64,7 @@ class SendTokensOne extends React.Component {
       selected: null,
       selectedTokens: [],
       fee: 0n,
+      isNativeToken: false,
       isDepositToken: false,
       showFeeTooltip: false,
       changeOutput: null,      // { address, value, token } | null
@@ -73,7 +74,11 @@ class SendTokensOne extends React.Component {
   }
 
   componentDidMount = () => {
-    this.setState({ selected: this.props.config, selectedTokens: this.props.selectedTokens });
+    this.setState({
+      selected: this.props.config,
+      selectedTokens: this.props.selectedTokens,
+      isNativeToken: hathorLib.tokensUtils.isHathorToken(this.props.config.uid),
+    });
     this.debouncedCalculateFee = _.debounce(this.calculateFeeAndChange, 300);
   }
 
@@ -397,7 +402,10 @@ class SendTokensOne extends React.Component {
    */
   changeSelect = (e) => {
     const selected = this.props.tokens.find((token) => token.uid === e.target.value);
-    this.setState({ selected }, () => {
+    this.setState({
+      selected,
+      isNativeToken: hathorLib.tokensUtils.isHathorToken(selected.uid),
+    }, () => {
       this.calculateFeeAndChange();
     });
     this.props.tokenSelectChange(selected, this.props.index);
@@ -407,7 +415,7 @@ class SendTokensOne extends React.Component {
    * Returns the tooltip text for the fee info icon based on the selected token type
    */
   getFeeTooltipText = () => {
-    if (hathorLib.tokensUtils.isHathorToken(this.state.selected.uid)) {
+    if (this.state.isNativeToken) {
       return t`This is the native token, no network fee will be charged.`;
     }
 
@@ -422,7 +430,7 @@ class SendTokensOne extends React.Component {
    * Renders the fee value display: a "No fee" badge for deposit tokens, or the fee amount for fee tokens
    */
   renderFeeValue = () => {
-    if (hathorLib.tokensUtils.isHathorToken(this.state.selected.uid) || this.state.isDepositToken) {
+    if (this.state.isNativeToken || this.state.isDepositToken) {
       return (
         <span className="badge badge-success">
           <i className="fa fa-check mr-1" />
