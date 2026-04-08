@@ -532,7 +532,8 @@ class SendTokensOne extends React.Component {
           {renderOutputs()}
           <button
             type="button"
-            className="btn btn-secondary mt-2 mb-3"
+            className="btn btn-link p-0 mt-2 mb-3"
+            style={{ color: '#8b46cf', textDecoration: 'none', fontWeight: 500 }}
             onClick={this.addOutput}
           >
             {t`+ Add output`}

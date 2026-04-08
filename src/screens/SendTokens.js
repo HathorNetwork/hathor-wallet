@@ -132,8 +132,22 @@ function SendTokens() {
     if (totalFee > 0n) {
       const htrBalance = tokensBalance[hathorLib.constants.NATIVE_TOKEN_UID]?.data?.available || 0n;
 
-      if (htrBalance < totalFee) {
-        return t`Insufficient HTR balance to pay network fee`;
+      // Sum outgoing HTR being sent to recipients
+      let outgoingHTR = 0n;
+      for (const ref of references.current) {
+        const instance = ref.current;
+        if (!instance?.state?.selected) continue;
+        if (instance.state.selected.uid === hathorLib.constants.NATIVE_TOKEN_UID) {
+          const outputs = instance.getOutputsForFeeCalculation();
+          for (const output of outputs) {
+            outgoingHTR += output.value;
+          }
+        }
+      }
+
+      if (htrBalance < totalFee + outgoingHTR) {
+        const requiredAmount = hathorLib.numberUtils.prettyValue(totalFee + outgoingHTR, decimalPlaces);
+        return t`Insufficient HTR balance to complete the transaction. It requires ${requiredAmount} for outputs and network fee`;
       }
     }
 
@@ -809,6 +823,7 @@ function SendTokens() {
         <form ref={formSendTokensRef} id="formSendTokens">
           {renderOnePage()}
           {renderDataOutputs()}
+          {feeError && <p className="text-danger mt-3">{feeError}</p>}
           <div className="mt-5">
             <button
               type="button"
@@ -834,7 +849,6 @@ function SendTokens() {
             </button>
           </div>
         </form>
-        {feeError && <p className="text-danger mt-3">{feeError}</p>}
         <p className="text-danger mt-3 white-space-pre-wrap">{errorMessage}</p>
       </div>
     );

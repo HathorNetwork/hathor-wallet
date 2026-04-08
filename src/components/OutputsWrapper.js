@@ -96,7 +96,7 @@ class OutputsWrapper extends React.Component {
         {this.props.outputsCount > 1 && (
           <button
             type="button"
-            className="btn btn-link text-danger p-0 ml-2"
+            className="btn btn-link text-muted p-0 ml-2"
             style={{ fontSize: '18px', lineHeight: 1 }}
             onClick={() => this.props.removeOutput(this.props.index)}
             title={t`Remove output`}

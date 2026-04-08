@@ -311,8 +311,8 @@ msgstr ""
 msgid ", so a small fee will be applied to each future transaction of this token. "
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:273
-#: src/components/SendTokensOne.js:530
+#: src/components/ModalTransactionOverview.js:279
+#: src/components/SendTokensOne.js:547
 #: src/screens/CreateToken.js:326
 msgid "Network fee"
 msgstr ""
@@ -562,8 +562,8 @@ msgstr ""
 #: src/components/ModalBackupWords.js:202
 #: src/components/ModalConfirmClearStorage.js:61
 #: src/components/ModalPin.js:134
-#: src/components/ModalTransactionOverview.js:344
-#: src/components/ModalTransactionOverview.js:356
+#: src/components/ModalTransactionOverview.js:350
+#: src/components/ModalTransactionOverview.js:362
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/PinPad.js:235
 #: src/components/Reown/modals/BaseNanoContractModal.js:341
@@ -649,11 +649,14 @@ msgstr ""
 msgid "Recommended for occasional use."
 msgstr ""
 
-#: src/screens/SendTokens.js:135
-msgid "Insufficient HTR balance to pay network fee"
+#: src/screens/SendTokens.js:150
+#, javascript-format
+msgid ""
+"Insufficient HTR balance to complete the transaction. It requires ${ "
+"requiredAmount } for outputs and network fee"
 msgstr ""
 
-#: src/screens/SendTokens.js:198
+#: src/screens/SendTokens.js:213
 msgid "Invalid custom tokens"
 msgstr ""
 
@@ -668,24 +671,24 @@ msgstr ""
 #: src/components/Reown/GenericErrorFeedbackModal.js:58
 #: src/components/Reown/NanoContractFeedbackModal.js:87
 #: src/components/Reown/TransactionFeedbackModal.js:86
-#: src/screens/SendTokens.js:199
-#: src/screens/SendTokens.js:335
-#: src/screens/SendTokens.js:655
+#: src/screens/SendTokens.js:214
+#: src/screens/SendTokens.js:350
+#: src/screens/SendTokens.js:670
 msgid "Close"
 msgstr ""
 
-#: src/screens/SendTokens.js:265
-#: src/screens/SendTokens.js:392
+#: src/screens/SendTokens.js:280
+#: src/screens/SendTokens.js:407
 msgid "Validate outputs on Ledger"
 msgstr ""
 
-#: src/screens/SendTokens.js:333
+#: src/screens/SendTokens.js:348
 #.  there are tokens without signatures, missingSigs
 #.  set tittle and content
 msgid "Unverified custom tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:642
+#: src/screens/SendTokens.js:657
 #.  Custom token not allowed for this Ledger version
 msgid ""
 "Unfortunately this feature is not supported with the Hathor app version on "
@@ -693,7 +696,7 @@ msgid ""
 "the most recent Hathor app."
 msgstr ""
 
-#: src/screens/SendTokens.js:650
+#: src/screens/SendTokens.js:665
 #.  limit is 10 custom tokens per tx
 #, javascript-format
 msgid ""
@@ -701,35 +704,40 @@ msgid ""
 "per transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:653
+#: src/screens/SendTokens.js:668
 msgid "Token limit reached"
 msgstr ""
 
-#: src/screens/SendTokens.js:662
+#: src/screens/SendTokens.js:677
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:738
+#: src/screens/SendTokens.js:753
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:739
+#: src/screens/SendTokens.js:754
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:813
+#: src/components/tokens/TokenAction.js:147
+#: src/screens/SendTokens.js:818
+msgid "Loading metadata..."
+msgstr ""
+
+#: src/screens/SendTokens.js:833
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:820
+#: src/screens/SendTokens.js:840
 msgid "Add data output"
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicSend.js:296
-#: src/screens/SendTokens.js:828
-#: src/screens/SendTokens.js:841
+#: src/screens/SendTokens.js:848
+#: src/screens/SendTokens.js:860
 msgid "Send Tokens"
 msgstr ""
 
@@ -951,7 +959,7 @@ msgid "Unsupported Ledger app version"
 msgstr ""
 
 #: src/components/ModalLedgerResetTokenSignatures.js:121
-#: src/components/ModalTransactionOverview.js:347
+#: src/components/ModalTransactionOverview.js:353
 #: src/screens/StartHardwareWallet.js:153
 #: src/screens/TransactionDetail.js:161
 #: src/screens/VersionError.js:58
@@ -1305,7 +1313,7 @@ msgid "Token"
 msgstr ""
 
 #: src/components/SendDataOutputOne.js:29
-#: src/components/SendTokensOne.js:518
+#: src/components/SendTokensOne.js:527
 #: src/screens/atomic-swap/ProposalList.js:107
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:558
 msgid "Remove"
@@ -2087,7 +2095,7 @@ msgid "View transaction details"
 msgstr ""
 
 #: src/components/ModalSendTx.js:93
-#: src/components/ModalTransactionOverview.js:118
+#: src/components/ModalTransactionOverview.js:124
 msgid "Error sending transaction."
 msgstr ""
 
@@ -2095,59 +2103,59 @@ msgstr ""
 msgid "Ok"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:103
+#: src/components/ModalTransactionOverview.js:109
 msgid "Error preparing transaction."
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:150
+#: src/components/ModalTransactionOverview.js:156
 msgid "Data output:"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:172
+#: src/components/ModalTransactionOverview.js:178
 msgid "change"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:224
-#: src/components/SendTokensOne.js:428
+#: src/components/ModalTransactionOverview.js:230
+#: src/components/SendTokensOne.js:437
 msgid "No fee"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:234
+#: src/components/ModalTransactionOverview.js:240
 msgid "This fee is fixed and required for every transfer of this token."
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:237
+#: src/components/ModalTransactionOverview.js:243
 msgid "Read more about fees"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:247
+#: src/components/ModalTransactionOverview.js:253
 msgid "You will pay"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:274
+#: src/components/ModalTransactionOverview.js:280
 #.  --- Phase-specific body and footer ---
 msgid "paid in HTR"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:286
+#: src/components/ModalTransactionOverview.js:292
 #.  --- Phase-specific body and footer ---
 msgid "Pin* (6 digit password)"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:304
+#: src/components/ModalTransactionOverview.js:310
 msgid "Sending transaction..."
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:321
-#: src/components/ModalTransactionOverview.js:385
+#: src/components/ModalTransactionOverview.js:327
+#: src/components/ModalTransactionOverview.js:391
 msgid "Transaction failed"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:364
+#: src/components/ModalTransactionOverview.js:370
 msgid "Confirm transfer"
 msgstr ""
 
-#: src/components/ModalTransactionOverview.js:385
+#: src/components/ModalTransactionOverview.js:391
 msgid "Transaction overview"
 msgstr ""
 
@@ -2321,6 +2329,10 @@ msgstr ""
 msgid "Date and time in GMT"
 msgstr ""
 
+#: src/components/OutputsWrapper.js:102
+msgid "Remove output"
+msgstr ""
+
 #: src/components/PinPad.js:72
 msgid "Error validating PIN"
 msgstr ""
@@ -2401,55 +2413,59 @@ msgstr ""
 msgid "Data content"
 msgstr ""
 
-#: src/components/SendTokensOne.js:249
+#: src/components/SendTokensOne.js:255
 #, javascript-format
 msgid "Insufficient balance for ${ token.symbol }"
 msgstr ""
 
-#: src/components/SendTokensOne.js:410
+#: src/components/SendTokensOne.js:419
 msgid "This is the native token, no network fee will be charged."
 msgstr ""
 
-#: src/components/SendTokensOne.js:414
+#: src/components/SendTokensOne.js:423
 msgid "This token is deposit-based, no network fee will be charged."
 msgstr ""
 
-#: src/components/SendTokensOne.js:417
+#: src/components/SendTokensOne.js:426
 msgid "This transaction will be processed with a small network fee paid in HTR."
 msgstr ""
 
-#: src/components/SendTokensOne.js:475
+#: src/components/SendTokensOne.js:484
 msgid "Select token"
 msgstr ""
 
-#: src/components/SendTokensOne.js:475
+#: src/components/SendTokensOne.js:484
 msgid "This feature is disabled for the current Ledger app version"
 msgstr ""
 
-#: src/components/SendTokensOne.js:494
+#: src/components/SendTokensOne.js:503
 msgid "Balance available: "
 msgstr ""
 
 #: src/components/Reown/modals/GetUtxosModal.js:120
-#: src/components/SendTokensOne.js:515
+#: src/components/SendTokensOne.js:524
 msgid "Token:"
 msgstr ""
 
-#: src/components/SendTokensOne.js:564
+#: src/components/SendTokensOne.js:539
+msgid "+ Add output"
+msgstr ""
+
+#: src/components/SendTokensOne.js:581
 msgid "Amount to be sent"
 msgstr ""
 
-#: src/components/SendTokensOne.js:573
+#: src/components/SendTokensOne.js:590
 msgid "You'll pay:"
 msgstr ""
 
-#: src/components/SendTokensOne.js:589
+#: src/components/SendTokensOne.js:606
 #: src/components/atomic-swap/ModalAtomicSend.js:348
 msgid "Choose inputs automatically"
 msgstr ""
 
 #: src/components/Reown/modals/SendTransactionModal.js:134
-#: src/components/SendTokensOne.js:593
+#: src/components/SendTokensOne.js:610
 msgid "Inputs"
 msgstr ""
 
@@ -2941,10 +2957,6 @@ msgstr ""
 
 #: src/components/WalletHistory.js:23
 msgid "Transaction history"
-msgstr ""
-
-#: src/components/tokens/TokenAction.js:147
-msgid "Loading metadata..."
 msgstr ""
 
 #: src/components/tokens/TokenDelegate.js:47
