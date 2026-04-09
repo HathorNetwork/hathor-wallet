@@ -649,14 +649,14 @@ msgstr ""
 msgid "Recommended for occasional use."
 msgstr ""
 
-#: src/screens/SendTokens.js:150
+#: src/screens/SendTokens.js:152
 #, javascript-format
 msgid ""
 "Insufficient HTR balance to complete the transaction. It requires ${ "
 "requiredAmount } for outputs and network fee"
 msgstr ""
 
-#: src/screens/SendTokens.js:213
+#: src/screens/SendTokens.js:215
 msgid "Invalid custom tokens"
 msgstr ""
 
@@ -671,24 +671,24 @@ msgstr ""
 #: src/components/Reown/GenericErrorFeedbackModal.js:58
 #: src/components/Reown/NanoContractFeedbackModal.js:87
 #: src/components/Reown/TransactionFeedbackModal.js:86
-#: src/screens/SendTokens.js:214
-#: src/screens/SendTokens.js:350
-#: src/screens/SendTokens.js:670
+#: src/screens/SendTokens.js:216
+#: src/screens/SendTokens.js:352
+#: src/screens/SendTokens.js:674
 msgid "Close"
 msgstr ""
 
-#: src/screens/SendTokens.js:280
-#: src/screens/SendTokens.js:407
+#: src/screens/SendTokens.js:282
+#: src/screens/SendTokens.js:409
 msgid "Validate outputs on Ledger"
 msgstr ""
 
-#: src/screens/SendTokens.js:348
+#: src/screens/SendTokens.js:350
 #.  there are tokens without signatures, missingSigs
 #.  set tittle and content
 msgid "Unverified custom tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:657
+#: src/screens/SendTokens.js:661
 #.  Custom token not allowed for this Ledger version
 msgid ""
 "Unfortunately this feature is not supported with the Hathor app version on "
@@ -696,7 +696,7 @@ msgid ""
 "the most recent Hathor app."
 msgstr ""
 
-#: src/screens/SendTokens.js:665
+#: src/screens/SendTokens.js:669
 #.  limit is 10 custom tokens per tx
 #, javascript-format
 msgid ""
@@ -704,40 +704,40 @@ msgid ""
 "per transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:668
+#: src/screens/SendTokens.js:672
 msgid "Token limit reached"
 msgstr ""
 
-#: src/screens/SendTokens.js:677
+#: src/screens/SendTokens.js:681
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:753
+#: src/screens/SendTokens.js:757
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:754
+#: src/screens/SendTokens.js:758
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
 #: src/components/tokens/TokenAction.js:147
-#: src/screens/SendTokens.js:818
+#: src/screens/SendTokens.js:822
 msgid "Loading metadata..."
 msgstr ""
 
-#: src/screens/SendTokens.js:833
+#: src/screens/SendTokens.js:837
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:840
+#: src/screens/SendTokens.js:844
 msgid "Add data output"
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicSend.js:296
-#: src/screens/SendTokens.js:848
-#: src/screens/SendTokens.js:860
+#: src/screens/SendTokens.js:852
+#: src/screens/SendTokens.js:864
 msgid "Send Tokens"
 msgstr ""
 
@@ -2121,7 +2121,7 @@ msgid "No fee"
 msgstr ""
 
 #: src/components/ModalTransactionOverview.js:240
-msgid "This fee is fixed and required for every transfer of this token."
+msgid "This fee is calculated using fee-based tokens outputs and data outputs."
 msgstr ""
 
 #: src/components/ModalTransactionOverview.js:243

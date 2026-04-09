@@ -127,7 +127,9 @@ function SendTokens() {
       return '';
     }
 
-    const totalFee = fees.reduce((a, b) => a + b, 0n);
+    const tokenOutputFee = fees.reduce((a, b) => a + b, 0n);
+    const dataOutputFee = hathorLib.tokensUtils.getDataFee(dataOutputs.length);
+    const totalFee = tokenOutputFee + dataOutputFee;
 
     if (totalFee > 0n) {
       const htrBalance = tokensBalance[hathorLib.constants.NATIVE_TOKEN_UID]?.data?.available || 0n;
@@ -152,7 +154,7 @@ function SendTokens() {
     }
 
     return '';
-  }, [tokenFees, tokensBalance]);
+  }, [tokenFees, tokensBalance, dataOutputs]);
 
   /**
    * Check if user has enough HTR to pay total fee
@@ -429,8 +431,10 @@ function SendTokens() {
           ref.current?.debouncedCalculateFee?.flush();
         }
 
-        // Calculate total fee
-        const totalFee = Object.values(tokenFees).reduce((a, b) => a + b, 0n);
+        // Calculate total fee (token output fees + data output fees)
+        const tokenOutputFee = Object.values(tokenFees).reduce((a, b) => a + b, 0n);
+        const dataOutputFee = hathorLib.tokensUtils.getDataFee(dataOutputs.length);
+        const totalFee = tokenOutputFee + dataOutputFee;
 
         // Build flat output list for the modal
         const modalOutputs = [];

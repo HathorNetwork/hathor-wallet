@@ -237,7 +237,7 @@ function ModalTransactionOverview({
 
     return (
       <div style={{ fontSize: '10px', color: '#8e8e93', marginBottom: '16px' }}>
-        {t`This fee is fixed and required for every transfer of this token.`}
+        {t`This fee is calculated using fee-based tokens outputs and data outputs.`}
         <br />
         <a href="#" onClick={openFeeRFC} style={{ color: '#8f37ff', fontWeight: 700 }}>
           {t`Read more about fees`}

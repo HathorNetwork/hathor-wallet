@@ -32,17 +32,13 @@ export function useTokensDetails(uids) {
     }
   }
 
-  const uidsNeedingFetch = tokens
-    .filter(t => t.version === undefined && !errors[t.uid] && tokenRegistration[t.uid]?.status !== TOKEN_DOWNLOAD_STATUS.LOADING)
-    .map(t => t.uid);
-
-  const isLoading = uidsNeedingFetch.length > 0;
+  const isLoading = tokens.some(t => t.version === undefined && !errors[t.uid]);
 
   useEffect(() => {
-    uidsNeedingFetch.forEach(uid => {
-      dispatch(tokenRegisterRequested(uid));
-    });
-  }, [uidsNeedingFetch.join(','), dispatch]);
+    tokens
+      .filter(t => t.version === undefined)
+      .forEach(t => dispatch(tokenRegisterRequested(t.uid)));
+  }, [tokens]);
 
   return { tokens, isLoading, errors };
 }
