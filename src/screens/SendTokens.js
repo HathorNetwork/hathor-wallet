@@ -123,10 +123,6 @@ function SendTokens() {
    */
   const validateFeeBalance = useCallback(() => {
     const fees = Object.values(tokenFees);
-    if (fees.length === 0) {
-      return '';
-    }
-
     const tokenOutputFee = fees.reduce((a, b) => a + b, 0n);
     const dataOutputFee = hathorLib.tokensUtils.getDataFee(dataOutputs.length);
     const totalFee = tokenOutputFee + dataOutputFee;
