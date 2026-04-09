@@ -193,7 +193,7 @@ class SendTokensOne extends React.Component {
       if (totalAmount > 0n && tokenBalance && tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY) {
         const available = tokenBalance.data.available;
         if (totalAmount > available) {
-          error = `Insufficient ${token.symbol} balance.`;
+          error = t`Insufficient ${token.symbol} balance.`;
         }
       }
 

@@ -2413,6 +2413,11 @@ msgstr ""
 msgid "Data content"
 msgstr ""
 
+#: src/components/SendTokensOne.js:196
+#, javascript-format
+msgid "Insufficient ${ token.symbol } balance."
+msgstr ""
+
 #: src/components/SendTokensOne.js:255
 #, javascript-format
 msgid "Insufficient balance for ${ token.symbol }"
