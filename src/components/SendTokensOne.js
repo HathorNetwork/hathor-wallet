@@ -12,8 +12,10 @@ import { t } from 'ttag';
 import { get } from 'lodash';
 import { connect } from "react-redux";
 import hathorLib from '@hathor/wallet-lib';
-import wallet from '../utils/wallet';
+import { Fee } from '@hathor/wallet-lib';
+import { TokenVersion } from '@hathor/wallet-lib/lib/types';
 import helpers from '../utils/helpers';
+import { getGlobalWallet } from '../modules/wallet';
 import version from '../utils/version';
 import OutputsWrapper from '../components/OutputsWrapper';
 import InputsWrapper from '../components/InputsWrapper';
@@ -46,7 +48,8 @@ class SendTokensOne extends React.Component {
     this.inputsWrapper = React.createRef();
     this.noInputs = React.createRef();
     this.inputs = [React.createRef()];
-    this.outputs = [React.createRef()];
+    this.outputIdCounter = 1;
+    this.outputs = [{ id: 0, ref: React.createRef() }];
     this.uniqueID = _.uniqueId();
 
     /**
@@ -59,12 +62,24 @@ class SendTokensOne extends React.Component {
       inputsCount: 1,
       outputsCount: 1,
       selected: null,
-      selectedTokens: []
+      selectedTokens: [],
+      fee: 0n,
+      isNativeToken: false,
+      isDepositToken: false,
+      showFeeTooltip: false,
+      changeOutput: null,      // { address, value, token } | null
+      selectedUtxos: [],       // UTXOs selected for the transaction
+      error: null,             // Error message
     };
   }
 
   componentDidMount = () => {
-    this.setState({ selected: this.props.config, selectedTokens: this.props.selectedTokens });
+    this.setState({
+      selected: this.props.config,
+      selectedTokens: this.props.selectedTokens,
+      isNativeToken: hathorLib.tokensUtils.isHathorToken(this.props.config.uid),
+    });
+    this.debouncedCalculateFee = _.debounce(this.calculateFeeAndChange, 300);
   }
 
   componentDidUpdate = (prevProps) => {
@@ -74,13 +89,29 @@ class SendTokensOne extends React.Component {
     }
   }
 
+  componentWillUnmount = () => {
+    if (this.debouncedCalculateFee) {
+      this.debouncedCalculateFee.cancel();
+    }
+  }
+
   /**
    * Add a new output wrapper for this token
    */
   addOutput = () => {
-    this.outputs.push(React.createRef());
+    this.outputs.push({ id: this.outputIdCounter++, ref: React.createRef() });
     const newCount = this.state.outputsCount + 1;
     this.setState({ outputsCount: newCount });
+  }
+
+  /**
+   * Remove an output wrapper for this token at the given index
+   */
+  removeOutput = (index) => {
+    this.outputs.splice(index, 1);
+    this.setState((prevState) => ({ outputsCount: prevState.outputsCount - 1 }), () => {
+      this.handleOutputChange();
+    });
   }
 
   /**
@@ -100,27 +131,231 @@ class SendTokensOne extends React.Component {
   }
 
   /**
+   * Calculate fee and change output based on input selection mode
+   */
+  calculateFeeAndChange = async () => {
+    const token = this.state.selected;
+    if (!token) return;
+
+    // Token version must always be available
+    if (token.version === undefined) {
+      throw new Error(`Token version not loaded for ${token.uid}. This should never happen.`);
+    }
+
+    const isAutoInputs = this.noInputs.current.checked;
+
+    if (isAutoInputs) {
+      await this.calculateWithAutoInputs(token);
+    } else {
+      await this.calculateWithManualInputs(token);
+    }
+  };
+
+  /**
+   * Get outputs from form for fee calculation
+   */
+  getOutputsForFeeCalculation = () => {
+    const outputs = [];
+    for (const output of this.outputs) {
+      if (!output.ref.current) continue;
+      const address = output.ref.current.address?.current?.value?.replace(/\s/g, '');
+      const value = output.ref.current.value;
+      if (address && value && value > 0) {
+        outputs.push({ address, value: BigInt(value) });
+      }
+    }
+    return outputs;
+  };
+
+  /**
+   * Get total output amount as BigInt for UTXO selection
+   */
+  getTotalOutputAmountRaw = () => {
+    const outputs = this.getOutputsForFeeCalculation();
+    return outputs.reduce((sum, o) => sum + o.value, 0n);
+  };
+
+  /**
+   * Calculate fee and change for automatic input selection
+   * Fetches UTXOs, calculates change, and computes fee including change output
+   */
+  calculateWithAutoInputs = async (token) => {
+    const isFeeToken = token.version === TokenVersion.FEE;
+
+    // Non-fee tokens: validate balance and return early (no fee calculation needed)
+    if (!isFeeToken) {
+      // Distinguishes deposit tokens from HTR (both are non-fee) for tooltip and fee badge rendering
+      const isDepositToken = token.version === TokenVersion.DEPOSIT;
+
+      const totalAmount = this.getTotalOutputAmountRaw();
+      const tokenBalance = this.props.tokensBalance[token.uid];
+      let error = null;
+      if (totalAmount > 0n && tokenBalance && tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY) {
+        const available = tokenBalance.data.available;
+        if (totalAmount > available) {
+          error = t`Insufficient ${token.symbol} balance.`;
+        }
+      }
+
+      this.setState({ fee: 0n, isDepositToken, changeOutput: null, selectedUtxos: [], error });
+      if (this.props.onFeeChange) {
+        this.props.onFeeChange(token.uid, 0n, null);
+      }
+      return;
+    }
+
+    // Fee token: calculate fee with UTXO selection
+    const totalAmount = this.getTotalOutputAmountRaw();
+    if (totalAmount === 0n) {
+      this.setState({ fee: 0n, isDepositToken: false, changeOutput: null, selectedUtxos: [], error: null });
+      if (this.props.onFeeChange) {
+        this.props.onFeeChange(token.uid, 0n, null);
+      }
+      return;
+    }
+
+    try {
+      const globalWallet = getGlobalWallet();
+      const { utxos, changeAmount } = await globalWallet.getUtxosForAmount(totalAmount, { token: token.uid });
+
+      let changeOutput = null;
+      if (changeAmount > 0n) {
+        const changeAddress = (await globalWallet.getCurrentAddress()).address;
+        changeOutput = { address: changeAddress, value: changeAmount, token: token.uid };
+      }
+
+      // Calculate fee including change output
+      const outputs = this.getOutputsForFeeCalculation();
+      const allOutputs = changeOutput
+        ? [...outputs, { address: changeOutput.address, value: changeOutput.value }]
+        : outputs;
+
+      // Fee calculation with actual UTXOs
+      const tokenData = new Map([[token.uid, { uid: token.uid, version: token.version }]]);
+      const formattedOutputs = allOutputs.map((o) => ({
+        token: token.uid,
+        value: o.value,
+        address: o.address,
+        authorities: 0n,
+      }));
+      const fee = await Fee.calculate(utxos, formattedOutputs, tokenData);
+
+      this.setState({ fee, isDepositToken: false, changeOutput, selectedUtxos: utxos, error: null });
+      if (this.props.onFeeChange) {
+        this.props.onFeeChange(token.uid, fee, changeOutput);
+      }
+
+    } catch (e) {
+      console.error('Error selecting UTXOs:', e);
+      this.setState({
+        fee: 0n,
+        isDepositToken: false,
+        changeOutput: null,
+        selectedUtxos: [],
+        error: t`Insufficient balance for ${token.symbol}`
+      });
+      if (this.props.onFeeChange) {
+        this.props.onFeeChange(token.uid, 0n, null);
+      }
+    }
+  };
+
+  /**
+   * Calculate fee for manual input selection
+   * Uses only outputs for fee calculation (current behavior)
+   */
+  calculateWithManualInputs = async (token) => {
+    // Only FEE tokens require fee calculation
+    const isFeeToken = token.version === TokenVersion.FEE;
+
+    if (!isFeeToken) {
+      const isDepositToken = token.version === TokenVersion.DEPOSIT;
+      this.setState({ fee: 0n, isDepositToken, changeOutput: null, selectedUtxos: [], error: null });
+      if (this.props.onFeeChange) {
+        this.props.onFeeChange(token.uid, 0n, null);
+      }
+      return;
+    }
+
+    // Get outputs from form
+    const outputs = this.getOutputsForFeeCalculation();
+    if (outputs.length === 0) {
+      this.setState({ fee: 0n, isDepositToken: false, changeOutput: null, selectedUtxos: [], error: null });
+      if (this.props.onFeeChange) {
+        this.props.onFeeChange(token.uid, 0n, null);
+      }
+      return;
+    }
+
+    // Calculate fee with empty inputs (current behavior for manual inputs)
+    const tokenData = new Map([[token.uid, { uid: token.uid, version: token.version }]]);
+    const formattedOutputs = outputs.map((o) => ({
+      token: token.uid,
+      value: o.value,
+      address: o.address,
+      authorities: 0n,
+    }));
+
+    try {
+      const fee = await Fee.calculate([], formattedOutputs, tokenData);
+      this.setState({ fee, isDepositToken: false, changeOutput: null, selectedUtxos: [], error: null });
+      if (this.props.onFeeChange) {
+        this.props.onFeeChange(token.uid, fee, null);
+      }
+    } catch (e) {
+      console.error('Error calculating fee:', e);
+      this.setState({ fee: 0n, isDepositToken: false, changeOutput: null, selectedUtxos: [], error: null });
+      if (this.props.onFeeChange) {
+        this.props.onFeeChange(token.uid, 0n, null);
+      }
+    }
+  };
+
+  /**
+   * Get total output amount for display
+   */
+  getTotalOutputAmount = () => {
+    const outputs = this.getOutputsForFeeCalculation();
+    const total = outputs.reduce((sum, o) => sum + o.value, 0n);
+    return hathorLib.numberUtils.prettyValue(total, this.isNFT() ? 0 : this.props.decimalPlaces);
+  };
+
+  /**
+   * Check if there are valid outputs to show fee section
+   */
+  hasValidOutputs = () => {
+    return this.getOutputsForFeeCalculation().length > 0;
+  };
+
+  /**
+   * Called when output fields change
+   */
+  handleOutputChange = () => {
+    this.debouncedCalculateFee();
+  };
+
+  /**
    * Iterate through inputs and outputs to add each information typed to the data object
    */
   getData = () => {
     let data = {'outputs': [], 'inputs': []};
     for (const output of this.outputs) {
-      const address = output.current.address.current.value.replace(/\s/g, '');
-      const value = output.current.value;
+      const address = output.ref.current.address.current.value.replace(/\s/g, '');
+      const value = output.ref.current.value;
 
       if (address && value) {
         // Doing the check here because need to validate before doing parseInt
         if (value > hathorLib.constants.MAX_OUTPUT_VALUE) {
-          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
           return null;
         }
         let dataOutput = {'address': address, 'value': value, 'token': this.state.selected.uid};
 
-        const hasTimelock = output.current.timelockCheckbox.current.checked;
+        const hasTimelock = output.ref.current.timelockCheckbox.current.checked;
         if (hasTimelock) {
-          const timelock = output.current.timelock.current.value;
+          const timelock = output.ref.current.timelock.current.value;
           if (!timelock) {
-            this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.current.props.index}. You need to fill a complete date and time` });
+            this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. You need to fill a complete date and time` });
             return null;
           }
           const timestamp = hathorLib.dateFormatter.dateToTimestamp(new Date(timelock));
@@ -167,14 +402,62 @@ class SendTokensOne extends React.Component {
    */
   changeSelect = (e) => {
     const selected = this.props.tokens.find((token) => token.uid === e.target.value);
-    this.setState({ selected });
+    this.setState({
+      selected,
+      isNativeToken: hathorLib.tokensUtils.isHathorToken(selected.uid),
+    }, () => {
+      this.calculateFeeAndChange();
+    });
     this.props.tokenSelectChange(selected, this.props.index);
+  }
+
+  /**
+   * Returns the tooltip text for the fee info icon based on the selected token type
+   */
+  getFeeTooltipText = () => {
+    if (this.state.isNativeToken) {
+      return t`This is the native token, no network fee will be charged.`;
+    }
+
+    if (this.state.isDepositToken) {
+      return t`This token is deposit-based, no network fee will be charged.`;
+    }
+
+    return t`This transaction will be processed with a small network fee paid in HTR.`;
+  }
+
+  /**
+   * Renders the fee value display: a "No fee" badge for deposit tokens, or the fee amount for fee tokens
+   */
+  renderFeeValue = () => {
+    if (this.state.isNativeToken || this.state.isDepositToken) {
+      return (
+        <span className="badge badge-success">
+          <i className="fa fa-check mr-1" />
+          {t`No fee`}
+        </span>
+      );
+    }
+
+    return (
+      <span>
+        {hathorLib.numberUtils.prettyValue(this.state.fee, this.props.decimalPlaces)} HTR
+      </span>
+    );
   }
 
   render = () => {
     const renderOutputs = () => {
       return this.outputs.map((output, index) =>
-        <OutputsWrapper key={index} index={index} setRef={(node) => { output.current = node; }} addOutput={this.addOutput} isNFT={this.isNFT()} />
+        <OutputsWrapper
+          key={output.id}
+          index={index}
+          outputsCount={this.state.outputsCount}
+          setRef={(node) => { output.ref.current = node; }}
+          removeOutput={this.removeOutput}
+          isNFT={this.isNFT()}
+          onValueChange={this.handleOutputChange}
+        />
       );
     }
 
@@ -241,13 +524,82 @@ class SendTokensOne extends React.Component {
           <label><strong>{t`Token:`}</strong></label>
           {this.state.selected && renderSelectToken()}
           {this.state.selected && renderBalance()}
-          {this.state.selectedTokens.length !== 1 ? <button type="button" className="text-danger remove-token-btn ml-3" onClick={(e) => this.props.removeToken(this.props.index)}>{t`Remove`}</button> : null}
+          {this.state.selectedTokens.length !== 1 ? <button type="button" className="text-danger remove-token-btn ml-3" onClick={() => this.props.removeToken(this.props.index)}>{t`Remove`}</button> : null}
         </div>
         {this.isNFT() && renderNFTHelper()}
         <div className="outputs-wrapper mt-3">
           <label>Outputs</label>
           {renderOutputs()}
+          <button
+            type="button"
+            className="btn btn-link p-0 mt-2 mb-3"
+            style={{ color: '#8b46cf', textDecoration: 'none', fontWeight: 500 }}
+            onClick={this.addOutput}
+          >
+            {t`+ Add output`}
+          </button>
         </div>
+        {/* Fee display section */}
+        {this.state.selected && this.hasValidOutputs() && (
+          <div className="fee-info mt-3 mb-3" style={{ maxWidth: '280px' }}>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="d-flex align-items-center" style={{ position: 'relative' }}>
+                <span style={{ fontWeight: 600, fontSize: '14px' }}>{t`Network fee`}</span>
+                <i
+                  className="fa fa-info-circle ml-2"
+                  style={{ fontSize: '14px', color: '#6c757d', cursor: 'help' }}
+                  onMouseEnter={() => this.setState({ showFeeTooltip: true })}
+                  onMouseLeave={() => this.setState({ showFeeTooltip: false })}
+                />
+                {this.state.showFeeTooltip && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '100%',
+                      left: 0,
+                      marginBottom: '4px',
+                      backgroundColor: '#322F35',
+                      color: '#F5EFF7',
+                      fontSize: '10px',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      whiteSpace: 'nowrap',
+                      zIndex: 1000,
+                      lineHeight: '16px',
+                    }}
+                  >
+                    {this.getFeeTooltipText()}
+                  </div>
+                )}
+              </span>
+              <span style={{ fontSize: '12px', color: '#404040' }}>
+                {this.renderFeeValue()}
+              </span>
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span style={{ fontWeight: 600, fontSize: '14px' }}>{t`Amount to be sent`}</span>
+              <span style={{ fontSize: '12px', color: '#404040' }}>
+                {this.getTotalOutputAmount()} {this.state.selected.symbol}
+              </span>
+            </div>
+
+            {!this.state.isDepositToken && this.state.fee > 0n && (
+              <div className="d-flex justify-content-end">
+                <span style={{ fontSize: '12px', color: '#8e8e93' }}>
+                  <strong>{t`You'll pay:`}</strong>
+                  {` ${this.getTotalOutputAmount()} ${this.state.selected.symbol} + ${hathorLib.numberUtils.prettyValue(this.state.fee, this.props.decimalPlaces)} HTR`}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+        {/* Error display */}
+        {this.state.error && (
+          <div className="alert alert-danger mt-2 mb-3" style={{ fontSize: '12px' }}>
+            {this.state.error}
+          </div>
+        )}
         <div className="form-check checkbox-wrapper">
           <input className="form-check-input" type="checkbox" defaultChecked="true" ref={this.noInputs} id={this.uniqueID} onChange={this.handleCheckboxChange} />
           <label className="form-check-label" htmlFor={this.uniqueID}>

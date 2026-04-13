@@ -30,7 +30,7 @@ import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actio
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
-import { useTokenDetails } from '../hooks/useTokenDetails';
+import { useTokensDetails } from '../hooks/useTokenDetails';
 import TokenImportBanner from '../components/TokenImportBanner';
 
 
@@ -346,7 +346,7 @@ function Wallet() {
   }
 
   // Rendering process below
-  const { token, isLoading: isLoadingToken, error: tokenVersionError } = useTokenDetails(selectedToken)
+  const { tokens: [token], isLoading: isLoadingToken, errors: tokenErrors } = useTokensDetails([selectedToken])
   const tokenHistory = get(tokensHistory, selectedToken, {
     status: TOKEN_DOWNLOAD_STATUS.LOADING,
     data: [],
@@ -437,7 +437,7 @@ function Wallet() {
               transactionsCount={transactionsCount}
               tokenMetadata={tokenMetadata}
               isLoadingVersion={isLoadingToken}
-              versionError={tokenVersionError}
+              versionError={tokenErrors[selectedToken] ?? null}
             />
           </div>
           {
