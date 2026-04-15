@@ -104,12 +104,7 @@ export default function ModalTokenImport({ unknownTokens, hasHiddenZeroBalanceTo
       uid, name, symbol, balance, selected: false,
     });
 
-    const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-
-    // Process tokens sequentially with a delay between API calls
-    // to avoid 429 Too Many Requests from the fullnode.
     for (const token of tokens) {
-      if (isCancelled()) return;
 
       try {
         // Try storage first (populated during tx processing, no API call)
@@ -118,15 +113,6 @@ export default function ModalTokenImport({ unknownTokens, hasHiddenZeroBalanceTo
           details[token.uid] = makeEntry(token.uid, tokenData.name, tokenData.symbol, token.balance);
           continue;
         }
-
-        // Fallback to API if MemoryStore data is incomplete
-        const { tokenInfo } = await wallet.getTokenDetails(token.uid);
-        details[token.uid] = makeEntry(
-          token.uid, tokenInfo?.name || token.uid, tokenInfo?.symbol || '???', token.balance
-        );
-
-        // Throttle between API calls
-        await delay(200);
       } catch (_err) {
         // Fallback: use uid as name and ??? as symbol
         details[token.uid] = makeEntry(token.uid, token.uid, '???', token.balance);
