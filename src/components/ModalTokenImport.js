@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { t } from 'ttag';
 import ReactLoading from 'react-loading';
 import hathorLib from '@hathor/wallet-lib';
-import { GlobalModalContext } from './GlobalModal';
+import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import { tokenRegisterRequested } from '../actions/index';
 import { getGlobalWallet } from '../modules/wallet';
 import walletUtils from '../utils/wallet';
@@ -22,7 +22,9 @@ import { colors } from '../constants';
  */
 const MODAL_STATE = {
   LOADING: 'loading',
+  EMPTY: 'empty',
   SELECTION: 'selection',
+  CONFIRMATION: 'confirmation',
   REGISTERING: 'registering',
   SUCCESS: 'success',
   ERROR: 'error',
@@ -53,7 +55,7 @@ function truncateUid(uid) {
  *
  * @memberof Components
  */
-export default function ModalTokenImport({ unknownTokens, onClose, manageDomLifecycle }) {
+export default function ModalTokenImport({ unknownTokens, hasHiddenZeroBalanceTokens, onClose, manageDomLifecycle }) {
   const dispatch = useDispatch();
   const context = useContext(GlobalModalContext);
 
@@ -137,7 +139,11 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
 
     setTokenDetails(details);
     setFetchErrorCount(errorCount);
-    setModalState(MODAL_STATE.SELECTION);
+    if (Object.keys(details).length === 0) {
+      setModalState(MODAL_STATE.EMPTY);
+    } else {
+      setModalState(MODAL_STATE.SELECTION);
+    }
   }
 
   /**
@@ -204,6 +210,14 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
   };
 
   const handleContinue = () => {
+    setModalState(MODAL_STATE.CONFIRMATION);
+  };
+
+  const handleBack = () => {
+    setModalState(MODAL_STATE.SELECTION);
+  };
+
+  const handleConfirmImport = () => {
     dispatchRegistrations(selectedUids);
   };
 
@@ -242,12 +256,45 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     return `${hathorLib.numberUtils.prettyValue(total, decimalPlaces)} ${symbol}`;
   };
 
+  const renderZeroBalanceAlert = () => {
+    if (!hasHiddenZeroBalanceTokens) return null;
+    return (
+      <div className="alert alert-warning py-2 px-3 mt-3" style={{ fontSize: 13 }}>
+        {t`Some tokens are hidden because "hide zero-balance tokens" is enabled. You can change this on settings.`}
+      </div>
+    );
+  };
+
   // -- Render helpers -------------------------------------------------------
 
   const renderLoading = () => (
     <div className="d-flex flex-column align-items-center justify-content-center py-5">
       <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
       <p className="mt-3 mb-0">{t`Loading token details...`}</p>
+    </div>
+  );
+
+  const renderEmpty = () => (
+    <div className="d-flex flex-column align-items-center py-4">
+      <p className="mb-3 text-left w-100" style={{ fontSize: 14 }}>
+        {t`We didn't find any unregistered tokens linked to your wallet.`}
+      </p>
+      <p className="mb-3 text-left w-100" style={{ fontSize: 14 }}>
+        {t`You can register a new one manually.`}
+      </p>
+      {renderZeroBalanceAlert()}
+      <a
+        href="#"
+        className="mt-3"
+        style={{ color: '#8f37ff', fontSize: 14 }}
+        onClick={(e) => {
+          e.preventDefault();
+          context.hideModal();
+          context.showModal(MODAL_TYPES.MODAL_ADD_TOKEN, {});
+        }}
+      >
+        {t`Register a token`}
+      </a>
     </div>
   );
 
@@ -317,6 +364,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
         <div className="token-list">
           {tokenUids.map((uid) => renderTokenRow(uid))}
         </div>
+        {renderZeroBalanceAlert()}
         <div className="d-flex justify-content-center mt-4">
           <button
             className="btn btn-continue"
@@ -329,6 +377,49 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
       </>
     );
   };
+
+  const renderConfirmation = () => (
+    <>
+      <p className="mb-3">{t`You are about to add these tokens to your wallet:`}</p>
+      <div className="token-list">
+        {selectedUids.map((uid) => {
+          const token = tokenDetails[uid];
+          if (!token) return null;
+          return (
+            <div className="token-row" key={uid}>
+              <div className="d-flex align-items-center">
+                <div className="token-info">
+                  <span className="token-symbol-tag">{token.symbol}</span>
+                  <div className="token-details">
+                    <span className="token-name">{token.name}</span>
+                  </div>
+                </div>
+              </div>
+              <span className="token-balance">{formatBalance(token.balance, token.symbol)}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="info-banner mt-3">
+        <i className="fa fa-info-circle" style={{ fontSize: 16 }} />
+        <span>{t`Only add tokens you recognize.`}</span>
+      </div>
+      <div className="d-flex justify-content-center align-items-center mt-4">
+        <button
+          className="btn btn-back"
+          onClick={handleBack}
+        >
+          {t`Back`}
+        </button>
+        <button
+          className="btn btn-continue"
+          onClick={handleConfirmImport}
+        >
+          {t`Import tokens`}
+        </button>
+      </div>
+    </>
+  );
 
   const renderRegistering = () => {
     const tokenUids = unknownTokens.map((tk) => tk.uid);
@@ -349,7 +440,7 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
   const renderSuccess = () => (
     <div className="d-flex flex-column align-items-center justify-content-center py-5">
       <i className="fa fa-check-circle text-success" style={{ fontSize: 48 }}></i>
-      <p className="mt-3 mb-0">{t`Tokens registered successfully!`}</p>
+      <p className="mt-3 mb-0">{t`New tokens added!`}</p>
     </div>
   );
 
@@ -391,8 +482,12 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
     switch (modalState) {
       case MODAL_STATE.LOADING:
         return renderLoading();
+      case MODAL_STATE.EMPTY:
+        return renderEmpty();
       case MODAL_STATE.SELECTION:
         return renderSelection();
+      case MODAL_STATE.CONFIRMATION:
+        return renderConfirmation();
       case MODAL_STATE.REGISTERING:
         return renderRegistering();
       case MODAL_STATE.SUCCESS:
@@ -419,7 +514,14 @@ export default function ModalTokenImport({ unknownTokens, onClose, manageDomLife
         <div className="modal-content modal-token-import">
           <div className="modal-header">
             <h5 className="modal-title">
-              {t`Tokens found`} ({unknownTokens.length})
+              {modalState === MODAL_STATE.EMPTY && t`No tokens available to import`}
+              {modalState === MODAL_STATE.CONFIRMATION && t`Confirm Import`}
+              {modalState === MODAL_STATE.SUCCESS && t`Tokens added`}
+              {(modalState === MODAL_STATE.LOADING
+                || modalState === MODAL_STATE.SELECTION
+                || modalState === MODAL_STATE.REGISTERING
+                || modalState === MODAL_STATE.ERROR
+              ) && `${t`Tokens found`} (${unknownTokens.length})`}
             </h5>
             <button
               type="button"
