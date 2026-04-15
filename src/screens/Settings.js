@@ -43,11 +43,9 @@ function Settings() {
   /** showTimestamp {boolean} If should show timestamp or full date in date and time */
   const [showTimestamp, setShowTimestamp] = useState(false);
 
-  const { useWalletService, registeredTokens, allTokens, tokensBalance } = useSelector(state => ({
+  const { useWalletService, registeredTokens } = useSelector(state => ({
     useWalletService: state.useWalletService,
     registeredTokens: state.tokens,
-    allTokens: state.allTokens,
-    tokensBalance: state.tokensBalance,
   }))
 
   const reownEnabled = useSelector(state => state.featureToggles[REOWN_FEATURE_TOGGLE]);
@@ -113,16 +111,7 @@ function Settings() {
    * When user clicks Import Tokens button, open the token import modal
    */
   const importTokens = () => {
-    const hideZeroBalance = wallet.areZeroBalanceTokensHidden();
-    const unknownTokens = wallet.fetchUnknownTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance);
-
-    let hasHiddenZeroBalanceTokens = false;
-    if (hideZeroBalance) {
-      const allUnknown = wallet.fetchUnknownTokens(allTokens, registeredTokens, tokensBalance, false);
-      hasHiddenZeroBalanceTokens = allUnknown.length > unknownTokens.length;
-    }
-
-    context.showModal(MODAL_TYPES.TOKEN_IMPORT, { unknownTokens, hasHiddenZeroBalanceTokens });
+    context.showModal(MODAL_TYPES.TOKEN_IMPORT, {});
   };
 
   /**

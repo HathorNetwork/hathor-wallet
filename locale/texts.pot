@@ -34,7 +34,7 @@ msgid "Invalid PIN"
 msgstr ""
 
 #: src/screens/ChoosePassphrase.js:83
-#: src/screens/Settings.js:355
+#: src/screens/Settings.js:344
 #.  Everything is fine, so show confirm modal
 msgid "Set a passphrase"
 msgstr ""
@@ -89,7 +89,7 @@ msgid ""
 "passphrase, you will never have access to your tokens again."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:360
+#: src/components/ModalTokenImport.js:375
 #: src/components/nano-contract/ModalChangeAddress.js:106
 #: src/screens/ChoosePassphrase.js:174
 #: src/screens/SentryPermission.js:89
@@ -371,7 +371,7 @@ msgstr ""
 msgid "Create an NFT"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:282
+#: src/components/ModalTokenImport.js:297
 #: src/screens/CustomTokens.js:90
 msgid "Register a token"
 msgstr ""
@@ -389,7 +389,7 @@ msgid "Words separated by single space"
 msgstr ""
 
 #: src/components/BackButton.js:29
-#: src/components/ModalTokenImport.js:398
+#: src/components/ModalTokenImport.js:413
 #: src/components/PinPasswordWrapper.js:60
 #: src/screens/LoadWallet.js:147
 #: src/screens/NewWallet.js:149
@@ -448,7 +448,7 @@ msgstr ""
 #: src/components/ModalConfirmClearStorage.js:58
 #: src/components/ModalResetAllData.js:137
 #: src/screens/LockedWallet.js:120
-#: src/screens/Settings.js:357
+#: src/screens/Settings.js:346
 msgid "Reset all data"
 msgstr ""
 
@@ -669,13 +669,13 @@ msgstr ""
 #: src/components/ModalLedgerResetTokenSignatures.js:122
 #: src/components/ModalLedgerSignToken.js:243
 #: src/components/ModalSendSuccess.js:87
-#: src/components/ModalTokenImport.js:516
+#: src/components/ModalTokenImport.js:531
 #: src/components/Reown/ErrorDetailModal.js:121
 #: src/components/Reown/FeedbackModal.js:96
 #: src/components/Reown/GenericErrorFeedbackModal.js:58
 #: src/components/Reown/NanoContractFeedbackModal.js:87
 #: src/components/Reown/TransactionFeedbackModal.js:86
-#: src/components/TokenImportBanner.js:63
+#: src/components/TokenImportBanner.js:57
 #: src/screens/SendTokens.js:212
 #: src/screens/SendTokens.js:348
 #: src/screens/SendTokens.js:670
@@ -787,86 +787,86 @@ msgstr ""
 msgid "I allow Hathor Wallet to report error information to Hathor team."
 msgstr ""
 
-#: src/screens/Settings.js:96
+#: src/screens/Settings.js:94
 msgid "Complete action on your hardware wallet"
 msgstr ""
 
-#: src/screens/Settings.js:99
+#: src/screens/Settings.js:97
 msgid "You can set your passphrase directly on your hardware wallet."
 msgstr ""
 
-#: src/screens/Settings.js:101
+#: src/screens/Settings.js:99
 msgid "|fn:More info| about this on Ledger."
 msgstr ""
 
-#: src/screens/Settings.js:175
+#: src/screens/Settings.js:164
 msgid "Turn notifications off"
 msgstr ""
 
-#: src/screens/Settings.js:176
+#: src/screens/Settings.js:165
 msgid "Are you sure you don't want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:178
+#: src/screens/Settings.js:167
 msgid "Turn notifications on"
 msgstr ""
 
-#: src/screens/Settings.js:179
+#: src/screens/Settings.js:168
 msgid "Are you sure you want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:200
+#: src/screens/Settings.js:189
 msgid "Show zero-balance tokens"
 msgstr ""
 
-#: src/screens/Settings.js:201
+#: src/screens/Settings.js:190
 msgid "Are you sure you want to show all tokens, including those with zero balance?"
 msgstr ""
 
-#: src/screens/Settings.js:203
+#: src/screens/Settings.js:192
 msgid "Hide zero-balance tokens"
 msgstr ""
 
-#: src/screens/Settings.js:204
+#: src/screens/Settings.js:193
 msgid "Are you sure you want to hide tokens with zero balance?"
 msgstr ""
 
-#: src/screens/Settings.js:308
+#: src/screens/Settings.js:297
 msgid "Date and time:"
 msgstr ""
 
-#: src/screens/Settings.js:311
+#: src/screens/Settings.js:300
 #, javascript-format
 msgid "**Server:** You are connected to ${ serverURL }"
 msgstr ""
 
-#: src/screens/Settings.js:314
+#: src/screens/Settings.js:303
 #, javascript-format
 msgid "**Real-time server:** You are connected to ${ wsServerURL }"
 msgstr ""
 
-#: src/screens/Settings.js:317
+#: src/screens/Settings.js:306
 msgid "Change network"
 msgstr ""
 
-#: src/screens/Settings.js:323
+#: src/screens/Settings.js:312
 msgid "Reown"
 msgstr ""
 
-#: src/screens/Settings.js:325
+#: src/screens/Settings.js:314
 #, javascript-format
 msgid "Connected Sessions: ${ connectedSessionsCount }"
 msgstr ""
 
-#: src/screens/Settings.js:327
+#: src/screens/Settings.js:316
 msgid "Manage sessions"
 msgstr ""
 
-#: src/screens/Settings.js:333
+#: src/screens/Settings.js:322
 msgid "Advanced Settings"
 msgstr ""
 
-#: src/screens/Settings.js:335
+#: src/screens/Settings.js:324
 msgid "Allow notifications:"
 msgstr ""
 
@@ -875,9 +875,9 @@ msgstr ""
 #: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:151
-#: src/screens/Settings.js:335
-#: src/screens/Settings.js:339
-#: src/screens/Settings.js:347
+#: src/screens/Settings.js:324
+#: src/screens/Settings.js:328
+#: src/screens/Settings.js:336
 msgid "Yes"
 msgstr ""
 
@@ -886,34 +886,34 @@ msgstr ""
 #: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:152
-#: src/screens/Settings.js:335
-#: src/screens/Settings.js:340
-#: src/screens/Settings.js:347
+#: src/screens/Settings.js:324
+#: src/screens/Settings.js:329
+#: src/screens/Settings.js:336
 msgid "No"
 msgstr ""
 
 #: src/components/TokenGeneralInfo.js:154
-#: src/screens/Settings.js:335
-#: src/screens/Settings.js:342
-#: src/screens/Settings.js:347
+#: src/screens/Settings.js:324
+#: src/screens/Settings.js:331
+#: src/screens/Settings.js:336
 msgid "Change"
 msgstr ""
 
-#: src/screens/Settings.js:337
+#: src/screens/Settings.js:326
 msgid "Hide zero-balance tokens:"
 msgstr ""
 
-#: src/screens/Settings.js:344
+#: src/screens/Settings.js:333
 msgid ""
 "When selected, any tokens with a balance of zero will not be displayed "
 "anywhere in the wallet."
 msgstr ""
 
-#: src/screens/Settings.js:347
+#: src/screens/Settings.js:336
 msgid "Automatically report bugs to Hathor:"
 msgstr ""
 
-#: src/screens/Settings.js:350
+#: src/screens/Settings.js:339
 msgid "Unique identifier"
 msgstr ""
 
@@ -921,28 +921,28 @@ msgstr ""
 #: src/components/Reown/CreateTokenRequestData.js:64
 #: src/components/TokenGeneralInfo.js:177
 #: src/components/WalletAddress.js:175
-#: src/screens/Settings.js:350
+#: src/screens/Settings.js:339
 #: src/screens/atomic-swap/EditSwap.js:97
 #: src/screens/atomic-swap/EditSwap.js:111
 msgid "Copy to clipboard"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:404
-#: src/screens/Settings.js:353
+#: src/components/ModalTokenImport.js:419
+#: src/screens/Settings.js:342
 msgid "Import tokens"
 msgstr ""
 
-#: src/screens/Settings.js:354
+#: src/screens/Settings.js:343
 msgid "Export Registered Tokens"
 msgstr ""
 
-#: src/screens/Settings.js:356
+#: src/screens/Settings.js:345
 msgid "Untrust all tokens on Ledger"
 msgstr ""
 
 #: src/components/TxData.js:1114
 #: src/components/WalletAddress.js:195
-#: src/screens/Settings.js:366
+#: src/screens/Settings.js:355
 #: src/screens/atomic-swap/EditSwap.js:596
 msgid "Copied to clipboard!"
 msgstr ""
@@ -2044,88 +2044,88 @@ msgstr ""
 msgid "Ok"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:186
+#: src/components/ModalTokenImport.js:201
 msgid "Unknown error"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:249
+#: src/components/ModalTokenImport.js:264
 msgid ""
 "Some tokens are hidden because \"hide zero-balance tokens\" is enabled. You "
 "can change this on settings."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:259
+#: src/components/ModalTokenImport.js:274
 #.  -- Render helpers -------------------------------------------------------
 msgid "Loading token details..."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:266
+#: src/components/ModalTokenImport.js:281
 msgid "We didn't find any unregistered tokens linked to your wallet."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:269
+#: src/components/ModalTokenImport.js:284
 msgid "You can register a new one manually."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:331
+#: src/components/ModalTokenImport.js:346
 msgid "Select the tokens you want to add to your wallet."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:335
+#: src/components/ModalTokenImport.js:350
 #, javascript-format
 msgid ""
 "Could not load details for ${ fetchErrorCount } token(s). They are shown "
 "with partial information but can still be imported."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:344
-#: src/components/ModalTokenImport.js:347
+#: src/components/ModalTokenImport.js:359
+#: src/components/ModalTokenImport.js:362
 msgid "Deselect all"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:344
-#: src/components/ModalTokenImport.js:347
+#: src/components/ModalTokenImport.js:359
+#: src/components/ModalTokenImport.js:362
 msgid "Select all"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:369
+#: src/components/ModalTokenImport.js:384
 msgid "You are about to add these tokens to your wallet:"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:391
+#: src/components/ModalTokenImport.js:406
 msgid "Only add tokens you recognize."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:415
+#: src/components/ModalTokenImport.js:430
 msgid "Registering selected tokens..."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:429
+#: src/components/ModalTokenImport.js:444
 msgid "New tokens added!"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:438
+#: src/components/ModalTokenImport.js:453
 msgid "Some tokens failed to register:"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:460
+#: src/components/ModalTokenImport.js:475
 #: src/components/Reown/FeedbackModal.js:81
 msgid "Retry"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:503
+#: src/components/ModalTokenImport.js:518
 msgid "No tokens available to import"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:504
+#: src/components/ModalTokenImport.js:519
 msgid "Confirm Import"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:505
+#: src/components/ModalTokenImport.js:520
 msgid "Tokens added"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:510
+#: src/components/ModalTokenImport.js:525
 msgid "Tokens found"
 msgstr ""
 
@@ -2693,15 +2693,15 @@ msgstr ""
 msgid "Page ${ page }"
 msgstr ""
 
-#: src/components/TokenImportBanner.js:60
+#: src/components/TokenImportBanner.js:54
 msgid "New tokens:"
 msgstr ""
 
-#: src/components/TokenImportBanner.js:60
+#: src/components/TokenImportBanner.js:54
 msgid "We found tokens linked to your address that are not yet in your wallet."
 msgstr ""
 
-#: src/components/TokenImportBanner.js:61
+#: src/components/TokenImportBanner.js:55
 msgid "Add tokens"
 msgstr ""
 

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { t } from 'ttag';
 import ReactLoading from 'react-loading';
@@ -55,12 +55,27 @@ function truncateUid(uid) {
  *
  * @memberof Components
  */
-export default function ModalTokenImport({ unknownTokens, hasHiddenZeroBalanceTokens, onClose, manageDomLifecycle }) {
+export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
   const dispatch = useDispatch();
   const context = useContext(GlobalModalContext);
 
+  const allTokens = useSelector((state) => state.allTokens);
+  const registeredTokens = useSelector((state) => state.tokens);
+  const tokensBalance = useSelector((state) => state.tokensBalance);
   const explorerUrl = useSelector((state) => state.networkSettings.data.explorer);
   const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
+
+  const hideZeroBalance = walletUtils.areZeroBalanceTokensHidden();
+  const unknownTokens = useMemo(
+    () => walletUtils.fetchUnknownTokens(allTokens, registeredTokens, tokensBalance, hideZeroBalance),
+    [allTokens, registeredTokens, tokensBalance, hideZeroBalance]
+  );
+
+  const hasHiddenZeroBalanceTokens = useMemo(() => {
+    if (!hideZeroBalance) return false;
+    const allUnknown = walletUtils.fetchUnknownTokens(allTokens, registeredTokens, tokensBalance, false);
+    return allUnknown.length > unknownTokens.length;
+  }, [allTokens, registeredTokens, tokensBalance, hideZeroBalance, unknownTokens]);
 
   // Current modal state
   const [modalState, setModalState] = useState(MODAL_STATE.LOADING);

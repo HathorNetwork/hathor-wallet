@@ -121,7 +121,7 @@ export default function TokenBar () {
    * Called when user clicks in the unknown tokens number, then opens the token import modal
    */
   const unknownClicked = () => {
-    context.showModal(MODAL_TYPES.TOKEN_IMPORT, { unknownTokens: unknownTokensData });
+    context.showModal(MODAL_TYPES.TOKEN_IMPORT, {});
   };
 
   const renderLoading = () => (

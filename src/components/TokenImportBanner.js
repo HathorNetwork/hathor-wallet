@@ -33,12 +33,6 @@ export default function TokenImportBanner() {
     [allTokens, tokens, tokensBalance, hideZeroBalance]
   );
 
-  const hasHiddenZeroBalanceTokens = useMemo(() => {
-    if (!hideZeroBalance) return false;
-    const allUnknown = walletUtils.fetchUnknownTokens(allTokens, tokens, tokensBalance, false);
-    return allUnknown.length > unknownTokens.length;
-  }, [allTokens, tokens, tokensBalance, hideZeroBalance, unknownTokens]);
-
   // Do not render if banner was dismissed or there are no unknown tokens
   if (dismissed || unknownTokens.length === 0) {
     return null;
@@ -46,7 +40,7 @@ export default function TokenImportBanner() {
 
   const handleAddTokens = (e) => {
     e.preventDefault();
-    context.showModal(MODAL_TYPES.TOKEN_IMPORT, { unknownTokens, hasHiddenZeroBalanceTokens });
+    context.showModal(MODAL_TYPES.TOKEN_IMPORT, {});
   };
 
   const handleDismiss = () => {
