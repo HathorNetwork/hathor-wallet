@@ -108,6 +108,13 @@ function Settings() {
   }
 
   /**
+   * When user clicks Import Tokens button, open the token import modal
+   */
+  const importTokens = () => {
+    context.showModal(MODAL_TYPES.TOKEN_IMPORT, {});
+  };
+
+  /**
    * When user clicks Export Registered Tokens button, then we save all config strings in a txt file
    */
   const exportTokens = () => {
@@ -332,6 +339,7 @@ function Settings() {
               <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
             </span>
           </CopyToClipboard>
+          <button className="btn btn-hathor mt-4" onClick={importTokens}>{t`Import tokens`}</button>
           <button className="btn btn-hathor mt-4" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
           <button className="btn btn-hathor mt-4" onClick={addPassphrase}>{t`Set a passphrase`}</button>
           {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }

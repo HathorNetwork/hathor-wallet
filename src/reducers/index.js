@@ -317,6 +317,7 @@ const initialState = {
    * @example { 'abc123': { status: 'loading' }, 'def456': { status: 'success' } }
    */
   tokenRegistration: {},
+  tokenImportBannerDismissed: false,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -501,6 +502,15 @@ const rootReducer = (state = initialState, action) => {
       return onTokenRegisterSuccess(state, action);
     case types.TOKEN_REGISTER_FAILED:
       return onTokenRegisterFailed(state, action);
+    case types.TOKEN_IMPORT_BANNER_DISMISSED:
+      return { ...state, tokenImportBannerDismissed: true };
+    case types.NEW_UNKNOWN_TOKENS_FOUND: {
+      const allTokens = { ...state.allTokens };
+      for (const tokenUid of action.payload.tokenUids) {
+        allTokens[tokenUid] = tokenUid;
+      }
+      return { ...state, allTokens, tokenImportBannerDismissed: false };
+    }
     default:
       return state;
   }
@@ -733,8 +743,8 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   const tokensBalance = state.tokensBalance;
   const selectedToken = state.selectedToken;
 
-  const balance = tokensBalance[selectedToken] || { available: 0n, locked: 0n };
-  const hasZeroBalance = (balance.available + balance.locked) === 0n;
+  const { available = 0n, locked = 0n } = (tokensBalance[selectedToken] || {}).data || {};
+  const hasZeroBalance = (available + locked) === 0n;
 
   if (hasZeroBalance) {
     return {
