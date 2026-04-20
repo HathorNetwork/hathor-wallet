@@ -8,7 +8,6 @@ import {
   errors as hathorErrors,
   cryptoUtils,
   SCANNING_POLICY,
-  GAP_LIMIT,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -150,24 +149,19 @@ export function* startWallet(action) {
   const singleAddressFeatureEnabled = yield call(checkForFeatureFlag, SINGLE_ADDRESS_FEATURE_TOGGLE);
   let addressMode = walletUtils.getAddressMode();
 
-  if (addressMode === null) {
-    // No preference stored yet
-    if (isExistingWallet) {
-      // Existing wallet — default to multi (no disruption)
-      addressMode = 'multi';
-    } else if (singleAddressFeatureEnabled) {
-      // New wallet with feature flag enabled — default to single
-      addressMode = 'single';
-    } else {
-      // New wallet without feature flag — default to multi
-      addressMode = 'multi';
-    }
+  if (!isExistingWallet) {
+    // New wallet (import or create): always determine fresh
+    addressMode = singleAddressFeatureEnabled ? 'single' : 'multi';
+    walletUtils.setAddressMode(addressMode);
+  } else if (addressMode === null) {
+    // Existing wallet with no stored preference: default to multi
+    addressMode = 'multi';
     walletUtils.setAddressMode(addressMode);
   }
 
   const scanPolicy = addressMode === 'single'
     ? { policy: SCANNING_POLICY.SINGLE_ADDRESS }
-    : { policy: SCANNING_POLICY.GAP_LIMIT, gapLimit: GAP_LIMIT };
+    : { policy: SCANNING_POLICY.GAP_LIMIT, gapLimit: hathorLibConstants.GAP_LIMIT };
 
   // We are offline, the connection object is yet to be created
   yield put(isOnlineUpdate({ isOnline: false }));
@@ -348,6 +342,21 @@ export function* startWallet(action) {
 
     if (error) {
       yield put(startWalletFailed());
+      return;
+    }
+  }
+
+  // After the wallet is connected, check if the address mode matches the actual
+  // wallet state. Wallets without transactions outside index 0 should be single,
+  // wallets with transactions outside index 0 must be multi.
+  if (singleAddressFeatureEnabled) {
+    const hasTxOutside = yield call([wallet, wallet.hasTxOutsideFirstAddress]);
+    const correctMode = hasTxOutside ? 'multi' : 'single';
+
+    if (addressMode !== correctMode) {
+      walletUtils.setAddressMode(correctMode);
+      // Re-dispatch start so the wallet loads with the correct scanning policy
+      yield put(action);
       return;
     }
   }

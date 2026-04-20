@@ -1139,10 +1139,10 @@ div .nc-token-balance:not(:last-child) {
   display: flex;
   flex-direction: column;
   margin-top: 24px;
-}
 
-.settings-section p {
-  margin-bottom: 26px;
+  p {
+    margin-bottom: 26px;
+  }
 }
 
 .settings-change-link {
@@ -1160,19 +1160,19 @@ div .nc-token-balance:not(:last-child) {
   text-decoration: none;
   display: block;
   margin-top: 12px;
-}
 
-.settings-action-link:hover {
-  text-decoration: none;
-  color: $purpleHathorHover;
-}
+  &:hover {
+    text-decoration: none;
+    color: $purpleHathorHover;
+  }
 
-.settings-action-link--danger {
-  color: #a92224;
-}
+  &--danger {
+    color: #a92224;
 
-.settings-action-link--danger:hover {
-  color: #a92224;
+    &:hover {
+      color: #a92224;
+    }
+  }
 }
 
 .settings-info {
@@ -1188,110 +1188,111 @@ div .nc-token-balance:not(:last-child) {
 }
 
 /* Address Mode modal */
-.address-mode-option {
-  background: #f7f7f7;
-  border-radius: 16px;
-  padding: 24px 16px;
-  cursor: pointer;
-  margin-bottom: 16px;
-}
+.address-mode {
+  &-option {
+    background: #f7f7f7;
+    border-radius: 16px;
+    padding: 24px 16px;
+    margin-bottom: 16px;
 
-.address-mode-option input[type="radio"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 24px;
-  height: 24px;
-  border: 2px solid #c4c4c4;
-  border-radius: 50%;
-  margin: 0;
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
-}
+    input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border: 2px solid #c4c4c4;
+      border-radius: 50%;
+      margin: 0;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
 
-.address-mode-option input[type="radio"]:checked {
-  border-color: $purpleHathor;
-}
+      &:checked {
+        border-color: $purpleHathor;
 
-.address-mode-option input[type="radio"]:checked::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: $purpleHathor;
-}
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: $purpleHathor;
+        }
+      }
+    }
 
-.address-mode-option--disabled input[type="radio"] {
-  border-color: #e0e0e0;
-  cursor: default;
-}
+    &--disabled {
+      input[type="radio"] {
+        border-color: #e0e0e0;
+        cursor: default;
+      }
 
-.address-mode-option--disabled {
-  cursor: default;
-}
+      .address-mode-label {
+        color: #c4c4c4;
+        cursor: default;
+      }
 
-.address-mode-option--disabled .address-mode-label {
-  color: #c4c4c4;
-}
+      .address-mode-description {
+        color: #b0b0b0;
+      }
 
-.address-mode-option--disabled .address-mode-description {
-  color: #b0b0b0;
-}
+      .address-mode-hint {
+        color: #b0b0b0;
+        font-style: normal;
+      }
+    }
+  }
 
-.address-mode-option--disabled .address-mode-hint {
-  color: #b0b0b0;
-  font-style: normal;
-}
+  &-label {
+    color: $purpleHathor;
+    font-size: 14px;
+    cursor: pointer;
+  }
 
-.address-mode-label {
-  color: $purpleHathor;
-  font-size: 14px;
-}
+  &-description {
+    font-size: 12px;
+    margin-bottom: 0;
+    line-height: 20px;
+  }
 
-.address-mode-description {
-  font-size: 12px;
-  margin-bottom: 0;
-  line-height: 20px;
-}
+  &-hint {
+    font-style: italic;
+    color: #57606a;
+  }
 
-.address-mode-hint {
-  font-style: italic;
-  color: #57606a;
-}
+  &-alert {
+    background: rgba(217, 119, 6, 0.2);
+    border-radius: 8px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 20px;
+  }
 
-.address-mode-alert {
-  background: rgba(217, 119, 6, 0.2);
-  border-radius: 8px;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  line-height: 20px;
-}
+  &-save-btn {
+    background: #e5e5e5;
+    border: none;
+    border-radius: 8px;
+    padding: 16px;
+    width: 185px;
+    color: #b0b0b0;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: default;
 
-.address-mode-save-btn {
-  background: #e5e5e5;
-  border: none;
-  border-radius: 8px;
-  padding: 16px;
-  width: 185px;
-  color: #b0b0b0;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: default;
-}
+    &--active {
+      background: $purpleHathor;
+      color: white;
+      cursor: pointer;
 
-.address-mode-save-btn--active {
-  background: $purpleHathor;
-  color: white;
-  cursor: pointer;
-}
-
-.address-mode-save-btn--active:hover {
-  background: $purpleHathorHover;
+      &:hover {
+        background: $purpleHathorHover;
+      }
+    }
+  }
 }
