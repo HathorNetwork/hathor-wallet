@@ -30,7 +30,8 @@ import { tokenFetchBalanceRequested, tokenFetchHistoryRequested } from '../actio
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
-import { useTokenDetails } from '../hooks/useTokenDetails';
+import { useTokensDetails } from '../hooks/useTokenDetails';
+import TokenImportBanner from '../components/TokenImportBanner';
 
 
 /**
@@ -82,6 +83,13 @@ function Wallet() {
   // Refs
   const alertSuccessRef = useRef(null);
   const unregisterModalRef = useRef(null);
+  const tokenInfoInFlight = useRef(new Set());
+  const selectedTokenRef = useRef(selectedToken);
+
+  // Keep the ref in sync with the latest selectedToken
+  useEffect(() => {
+    selectedTokenRef.current = selectedToken;
+  }, [selectedToken]);
 
   // Navigation and actions
   const navigate = useNavigate();
@@ -97,11 +105,17 @@ function Wallet() {
     initializeWalletScreen();
   }, [selectedToken]);
 
-  // When the tokens history changes, update the token info
+  // Debounce: the reducer creates a new reference for the selected
+  // token's history on every registration, so rapid successive
+  // changes are coalesced into a single API call.
+  const selectedTokenHistory = tokensHistory[selectedToken];
   useEffect(() => {
-    updateTokenInfo(selectedToken);
-    updateWalletInfo(selectedToken);
-  }, [tokensHistory]);
+    const timer = setTimeout(() => {
+      updateTokenInfo(selectedToken);
+      updateWalletInfo(selectedToken);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [selectedToken, selectedTokenHistory]);
 
   /**
    * Resets the state data and triggers token information requests
@@ -134,7 +148,7 @@ function Wallet() {
     const meltUtxos = await wallet.getMeltAuthority(tokenUid, { many: true });
 
     // If the user has changed the selectedToken while we were fetching the data, discard it
-    if (selectedToken !== tokenUid) {
+    if (selectedTokenRef.current !== tokenUid) {
       return;
     }
 
@@ -156,19 +170,32 @@ function Wallet() {
     if (tokenUid === hathorLib.constants.NATIVE_TOKEN_UID) {
       return;
     }
-    const tokenDetails = await wallet.getTokenDetails(tokenUid);
 
-    // If the user has changed the selectedToken while we were fetching the data, discard it
-    if (selectedToken !== tokenUid) {
+    // Skip if a request for this token is already in flight
+    if (tokenInfoInFlight.current.has(tokenUid)) {
       return;
     }
 
-    // Update the state with the new data
-    const { totalSupply: newTotalSupply, totalTransactions, authorities } = tokenDetails;
-    setTotalSupply(newTotalSupply);
-    setCanMint(authorities.mint);
-    setCanMelt(authorities.melt);
-    setTransactionsCount(totalTransactions);
+    tokenInfoInFlight.current.add(tokenUid);
+    try {
+      const tokenDetails = await wallet.getTokenDetails(tokenUid);
+
+      // If the user has changed the selectedToken while we were fetching the data, discard it
+      if (selectedTokenRef.current !== tokenUid) {
+        return;
+      }
+
+      // Update the state with the new data
+      const { totalSupply: newTotalSupply, totalTransactions, authorities } = tokenDetails;
+      setTotalSupply(newTotalSupply);
+      setCanMint(authorities.mint);
+      setCanMelt(authorities.melt);
+      setTransactionsCount(totalTransactions);
+    } catch (err) {
+      console.warn(`Failed to fetch token info for ${tokenUid}:`, err.message);
+    } finally {
+      tokenInfoInFlight.current.delete(tokenUid);
+    }
   }
 
   /**
@@ -179,11 +206,21 @@ function Wallet() {
   const calculateShouldShowAdministrativeTab = async (tokenId) => {
     const mintAuthorities = await wallet.getMintAuthority(tokenId, { skipSpent: false });
 
+    // If the user has changed the selectedToken while we were fetching the data, discard it
+    if (selectedTokenRef.current !== tokenId) {
+      return;
+    }
+
     if (mintAuthorities.length > 0) {
       return setShouldShowAdministrativeTab(true);
     }
 
     const meltAuthorities = await wallet.getMeltAuthority(tokenId, { skipSpent: false });
+
+    // If the user has changed the selectedToken while we were fetching the data, discard it
+    if (selectedTokenRef.current !== tokenId) {
+      return;
+    }
 
     if (meltAuthorities.length > 0) {
       return setShouldShowAdministrativeTab(true);
@@ -309,7 +346,7 @@ function Wallet() {
   }
 
   // Rendering process below
-  const { token, isLoading: isLoadingToken, error: tokenVersionError } = useTokenDetails(selectedToken)
+  const { tokens: [token], isLoading: isLoadingToken, errors: tokenErrors } = useTokensDetails([selectedToken])
   const tokenHistory = get(tokensHistory, selectedToken, {
     status: TOKEN_DOWNLOAD_STATUS.LOADING,
     data: [],
@@ -400,7 +437,7 @@ function Wallet() {
               transactionsCount={transactionsCount}
               tokenMetadata={tokenMetadata}
               isLoadingVersion={isLoadingToken}
-              versionError={tokenVersionError}
+              versionError={tokenErrors[selectedToken] ?? null}
             />
           </div>
           {
@@ -498,6 +535,7 @@ function Wallet() {
   return (
     <div id="wallet-div">
       {!backupDone && renderBackupAlert()}
+      <TokenImportBanner />
       <div className="content-wrapper">
       {/* This back button is not 100% perfect because when the user has just unlocked the wallet, it would go back to it when clicked
         * There is no easy way to get the previous path

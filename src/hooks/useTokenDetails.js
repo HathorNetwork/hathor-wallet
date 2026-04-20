@@ -11,27 +11,34 @@ import { tokenRegisterRequested } from '../actions';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 
 /**
- * Hook to fetch token details (including version) on-demand.
- * Automatically dispatches tokenRegisterRequested if version is undefined.
+ * Hook to fetch token details (including version) on-demand for multiple tokens.
+ * Automatically dispatches tokenRegisterRequested for each token whose version is undefined.
  *
- * @param {string|undefined} uid - Token uid to fetch details for
- * @returns {{ token: object|undefined, isLoading: boolean, error: string|null }}
+ * @param {string[]} uids - Array of token uids to fetch details for
+ * @returns {{ tokens: Array<{uid: string, name: string, symbol: string, version: number|undefined}>, isLoading: boolean, errors: Object<string, string|null> }}
  */
-export function useTokenDetails(uid) {
+export function useTokensDetails(uids) {
   const dispatch = useDispatch();
-  const token = useSelector((state) => state.tokens.find((t) => t.uid === uid));
-  const registration = useSelector((state) => uid && state.tokenRegistration?.[uid]);
+  const tokens = useSelector((state) =>
+    uids.map(uid => state.tokens.find((t) => t.uid === uid)).filter(Boolean)
+  );
+  const tokenRegistration = useSelector((state) => state.tokenRegistration ?? {});
 
-  const registrationFailed = registration?.status === TOKEN_DOWNLOAD_STATUS.FAILED;
-  const needsVersionFetch = Boolean(uid && token && token.version === undefined);
-  const isLoading = registration?.status === TOKEN_DOWNLOAD_STATUS.LOADING;
-  const error = registrationFailed ? registration.error : null;
+  const errors = {};
+  for (const uid of uids) {
+    const reg = tokenRegistration[uid];
+    if (reg?.status === TOKEN_DOWNLOAD_STATUS.FAILED) {
+      errors[uid] = reg.error;
+    }
+  }
+
+  const isLoading = tokens.some(t => t.version === undefined && !errors[t.uid]);
 
   useEffect(() => {
-    if (needsVersionFetch) {
-      dispatch(tokenRegisterRequested(uid));
-    }
-  }, [needsVersionFetch, uid, dispatch]);
+    tokens
+      .filter(t => t.version === undefined)
+      .forEach(t => dispatch(tokenRegisterRequested(t.uid)));
+  }, [tokens]);
 
-  return { token, isLoading, error };
+  return { tokens, isLoading, errors };
 }

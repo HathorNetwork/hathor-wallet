@@ -111,6 +111,13 @@ function Settings() {
   }
 
   /**
+   * When user clicks Import Tokens button, open the token import modal
+   */
+  const importTokens = () => {
+    context.showModal(MODAL_TYPES.TOKEN_IMPORT, {});
+  };
+
+  /**
    * When user clicks Export Registered Tokens button, then we save all config strings in a txt file
    */
   const exportTokens = () => {
@@ -377,6 +384,7 @@ function Settings() {
             <a className="settings-change-link" href="true" onClick={(e) => { e.preventDefault(); goToReown(); }}>{t`Manage sessions`}</a>
           </p>
         )}
+        <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); importTokens(); }}>{t`Import tokens`}</a>
         <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); exportTokens(); }}>{t`Export registered tokens`}</a>
         <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); addPassphrase(); }}>{t`Set a passphrase`}</a>
         {ledgerCustomTokens && <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); untrustClicked(); }}>{t`Untrust all tokens on Ledger`}</a>}

@@ -89,6 +89,7 @@ msgid ""
 "passphrase, you will never have access to your tokens again."
 msgstr ""
 
+#: src/components/ModalTokenImport.js:375
 #: src/components/nano-contract/ModalChangeAddress.js:106
 #: src/screens/ChoosePassphrase.js:174
 #: src/screens/SentryPermission.js:89
@@ -223,7 +224,7 @@ msgid "Destination address"
 msgstr ""
 
 #: src/components/AddressList.js:194
-#: src/components/OutputsWrapper.js:62
+#: src/components/OutputsWrapper.js:75
 #: src/components/Reown/CreateTokenRequestData.js:148
 #: src/components/Reown/OracleDataDisplay.js:54
 #: src/components/atomic-swap/ModalAtomicReceive.js:105
@@ -368,6 +369,7 @@ msgstr ""
 msgid "Create an NFT"
 msgstr ""
 
+#: src/components/ModalTokenImport.js:297
 #: src/screens/CustomTokens.js:90
 msgid "Register a token"
 msgstr ""
@@ -385,6 +387,7 @@ msgid "Words separated by single space"
 msgstr ""
 
 #: src/components/BackButton.js:29
+#: src/components/ModalTokenImport.js:413
 #: src/components/PinPasswordWrapper.js:60
 #: src/screens/LoadWallet.js:147
 #: src/screens/NewWallet.js:149
@@ -560,6 +563,8 @@ msgstr ""
 #: src/components/ModalBackupWords.js:202
 #: src/components/ModalConfirmClearStorage.js:61
 #: src/components/ModalPin.js:134
+#: src/components/ModalTransactionOverview.js:350
+#: src/components/ModalTransactionOverview.js:362
 #: src/components/ModalUnregisteredTokenInfo.js:128
 #: src/components/PinPad.js:235
 #: src/components/Reown/modals/BaseNanoContractModal.js:341
@@ -645,7 +650,14 @@ msgstr ""
 msgid "Recommended for occasional use."
 msgstr ""
 
-#: src/screens/SendTokens.js:157
+#: src/screens/SendTokens.js:148
+#, javascript-format
+msgid ""
+"Insufficient HTR balance to complete the transaction. It requires ${ "
+"requiredAmount } for outputs and network fee"
+msgstr ""
+
+#: src/screens/SendTokens.js:211
 msgid "Invalid custom tokens"
 msgstr ""
 
@@ -654,6 +666,8 @@ msgstr ""
 #: src/components/ModalError.js:45
 #: src/components/ModalLedgerResetTokenSignatures.js:122
 #: src/components/ModalLedgerSignToken.js:243
+#: src/components/ModalSendSuccess.js:87
+#: src/components/ModalTokenImport.js:531
 #: src/components/Reown/ErrorDetailModal.js:121
 #: src/components/Reown/FeedbackModal.js:96
 #: src/components/Reown/GenericErrorFeedbackModal.js:58
@@ -665,22 +679,18 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: src/screens/SendTokens.js:224
-#: src/screens/SendTokens.js:351
+#: src/screens/SendTokens.js:278
+#: src/screens/SendTokens.js:405
 msgid "Validate outputs on Ledger"
 msgstr ""
 
-#: src/screens/SendTokens.js:292
+#: src/screens/SendTokens.js:346
 #.  there are tokens without signatures, missingSigs
 #.  set tittle and content
 msgid "Unverified custom tokens"
 msgstr ""
 
-#: src/screens/SendTokens.js:381
-msgid "Sending transaction"
-msgstr ""
-
-#: src/screens/SendTokens.js:454
+#: src/screens/SendTokens.js:657
 #.  Custom token not allowed for this Ledger version
 msgid ""
 "Unfortunately this feature is not supported with the Hathor app version on "
@@ -688,7 +698,7 @@ msgid ""
 "the most recent Hathor app."
 msgstr ""
 
-#: src/screens/SendTokens.js:462
+#: src/screens/SendTokens.js:665
 #.  limit is 10 custom tokens per tx
 #, javascript-format
 msgid ""
@@ -696,40 +706,40 @@ msgid ""
 "per transaction."
 msgstr ""
 
-#: src/screens/SendTokens.js:465
+#: src/screens/SendTokens.js:668
 msgid "Token limit reached"
 msgstr ""
 
-#: src/screens/SendTokens.js:474
+#: src/screens/SendTokens.js:677
 msgid "All your tokens were already added"
 msgstr ""
 
-#: src/screens/SendTokens.js:539
+#: src/screens/SendTokens.js:753
 msgid ""
 "Please go to you Ledger and validate each output of your transaction. Press "
 "both buttons in case the output is correct."
 msgstr ""
 
-#: src/screens/SendTokens.js:540
+#: src/screens/SendTokens.js:754
 msgid "In the end, a final screen will ask you to confirm sending the transaction."
 msgstr ""
 
 #: src/components/tokens/TokenAction.js:147
-#: src/screens/SendTokens.js:600
+#: src/screens/SendTokens.js:818
 msgid "Loading metadata..."
 msgstr ""
 
-#: src/screens/SendTokens.js:614
+#: src/screens/SendTokens.js:833
 msgid "Add another token"
 msgstr ""
 
-#: src/screens/SendTokens.js:621
+#: src/screens/SendTokens.js:840
 msgid "Add data output"
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicSend.js:296
-#: src/screens/SendTokens.js:628
-#: src/screens/SendTokens.js:640
+#: src/screens/SendTokens.js:848
+#: src/screens/SendTokens.js:860
 msgid "Send Tokens"
 msgstr ""
 
@@ -972,6 +982,7 @@ msgid "Unsupported Ledger app version"
 msgstr ""
 
 #: src/components/ModalLedgerResetTokenSignatures.js:121
+#: src/components/ModalTransactionOverview.js:353
 #: src/screens/StartHardwareWallet.js:153
 #: src/screens/TransactionDetail.js:161
 #: src/screens/VersionError.js:58
@@ -1156,7 +1167,6 @@ msgstr ""
 msgid "Loading token information, please wait..."
 msgstr ""
 
-#: src/components/TokenBar.js:205
 #: src/components/TokenBar.js:206
 #: src/screens/Wallet.js:463
 msgid "Settings"
@@ -1164,6 +1174,13 @@ msgstr ""
 
 #: src/screens/Wallet.js:466
 msgid "Token load failed, please"
+msgstr ""
+
+#: src/components/TxData.js:725
+#: src/components/TxData.js:740
+#: src/components/TxData.js:912
+#: src/screens/Wallet.js:505
+msgid "try again"
 msgstr ""
 
 #: src/screens/WalletType.js:76
@@ -1325,7 +1342,7 @@ msgid "Token"
 msgstr ""
 
 #: src/components/SendDataOutputOne.js:29
-#: src/components/SendTokensOne.js:244
+#: src/components/SendTokensOne.js:527
 #: src/screens/atomic-swap/ProposalList.js:107
 #: src/screens/nano-contract/NanoContractExecuteMethod.js:558
 msgid "Remove"
@@ -2134,12 +2151,175 @@ msgstr ""
 msgid "I forgot my password"
 msgstr ""
 
+#: src/components/ModalSendSuccess.js:45
+msgid "and"
+msgstr ""
+
+#: src/components/ModalSendSuccess.js:73
+msgid "Transaction sent"
+msgstr ""
+
+#: src/components/ModalSendSuccess.js:80
+#: src/components/SendTxHandler.js:31
+msgid "Your transaction was sent successfully!"
+msgstr ""
+
+#: src/components/ModalSendSuccess.js:82
+msgid "You successfully sent"
+msgstr ""
+
+#: src/components/ModalSendSuccess.js:90
+msgid "View transaction details"
+msgstr ""
+
 #: src/components/ModalSendTx.js:93
+#: src/components/ModalTransactionOverview.js:124
 msgid "Error sending transaction."
 msgstr ""
 
 #: src/components/ModalSendTx.js:175
 msgid "Ok"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:201
+msgid "Unknown error"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:264
+msgid ""
+"Some tokens are hidden because \"hide zero-balance tokens\" is enabled. You "
+"can change this on settings."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:274
+#.  -- Render helpers -------------------------------------------------------
+msgid "Loading token details..."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:281
+msgid "We didn't find any unregistered tokens linked to your wallet."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:284
+msgid "You can register a new one manually."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:346
+msgid "Select the tokens you want to add to your wallet."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:350
+#, javascript-format
+msgid ""
+"Could not load details for ${ fetchErrorCount } token(s). They are shown "
+"with partial information but can still be imported."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:359
+#: src/components/ModalTokenImport.js:362
+msgid "Deselect all"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:359
+#: src/components/ModalTokenImport.js:362
+msgid "Select all"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:384
+msgid "You are about to add these tokens to your wallet:"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:406
+msgid "Only add tokens you recognize."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:430
+msgid "Registering selected tokens..."
+msgstr ""
+
+#: src/components/ModalTokenImport.js:444
+msgid "New tokens added!"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:453
+msgid "Some tokens failed to register:"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:475
+#: src/components/Reown/FeedbackModal.js:81
+msgid "Retry"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:518
+msgid "No tokens available to import"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:519
+msgid "Confirm Import"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:520
+msgid "Tokens added"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:525
+msgid "Tokens found"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:109
+msgid "Error preparing transaction."
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:156
+msgid "Data output:"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:178
+msgid "change"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:230
+#: src/components/SendTokensOne.js:437
+msgid "No fee"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:240
+msgid "This fee is calculated using fee-based tokens outputs and data outputs."
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:243
+msgid "Read more about fees"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:253
+msgid "You will pay"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:280
+#.  --- Phase-specific body and footer ---
+msgid "paid in HTR"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:292
+#.  --- Phase-specific body and footer ---
+msgid "Pin* (6 digit password)"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:310
+msgid "Sending transaction..."
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:327
+#: src/components/ModalTransactionOverview.js:391
+msgid "Transaction failed"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:370
+msgid "Confirm transfer"
+msgstr ""
+
+#: src/components/ModalTransactionOverview.js:391
+msgid "Transaction overview"
 msgstr ""
 
 #: src/components/ModalUnhandledError.js:61
@@ -2296,20 +2476,24 @@ msgstr ""
 msgid "Select the network if you want to change"
 msgstr ""
 
-#: src/components/OutputsWrapper.js:67
+#: src/components/OutputsWrapper.js:87
 msgid "This feature is disabled for hardware wallet"
 msgstr ""
 
-#: src/components/OutputsWrapper.js:67
+#: src/components/OutputsWrapper.js:87
 msgid "Timelock"
 msgstr ""
 
-#: src/components/OutputsWrapper.js:70
+#: src/components/OutputsWrapper.js:90
 msgid "Time lock"
 msgstr ""
 
-#: src/components/OutputsWrapper.js:73
+#: src/components/OutputsWrapper.js:93
 msgid "Date and time in GMT"
+msgstr ""
+
+#: src/components/OutputsWrapper.js:102
+msgid "Remove output"
 msgstr ""
 
 #: src/components/PinPad.js:72
@@ -2392,30 +2576,64 @@ msgstr ""
 msgid "Data content"
 msgstr ""
 
-#: src/components/SendTokensOne.js:201
+#: src/components/SendTokensOne.js:196
+#, javascript-format
+msgid "Insufficient ${ token.symbol } balance."
+msgstr ""
+
+#: src/components/SendTokensOne.js:255
+#, javascript-format
+msgid "Insufficient balance for ${ token.symbol }"
+msgstr ""
+
+#: src/components/SendTokensOne.js:419
+msgid "This is the native token, no network fee will be charged."
+msgstr ""
+
+#: src/components/SendTokensOne.js:423
+msgid "This token is deposit-based, no network fee will be charged."
+msgstr ""
+
+#: src/components/SendTokensOne.js:426
+msgid "This transaction will be processed with a small network fee paid in HTR."
+msgstr ""
+
+#: src/components/SendTokensOne.js:484
 msgid "Select token"
 msgstr ""
 
-#: src/components/SendTokensOne.js:201
+#: src/components/SendTokensOne.js:484
 msgid "This feature is disabled for the current Ledger app version"
 msgstr ""
 
-#: src/components/SendTokensOne.js:220
+#: src/components/SendTokensOne.js:503
 msgid "Balance available: "
 msgstr ""
 
 #: src/components/Reown/modals/GetUtxosModal.js:120
-#: src/components/SendTokensOne.js:241
+#: src/components/SendTokensOne.js:524
 msgid "Token:"
 msgstr ""
 
-#: src/components/SendTokensOne.js:254
+#: src/components/SendTokensOne.js:539
+msgid "+ Add output"
+msgstr ""
+
+#: src/components/SendTokensOne.js:581
+msgid "Amount to be sent"
+msgstr ""
+
+#: src/components/SendTokensOne.js:590
+msgid "You'll pay:"
+msgstr ""
+
+#: src/components/SendTokensOne.js:606
 #: src/components/atomic-swap/ModalAtomicSend.js:348
 msgid "Choose inputs automatically"
 msgstr ""
 
 #: src/components/Reown/modals/SendTransactionModal.js:134
-#: src/components/SendTokensOne.js:258
+#: src/components/SendTokensOne.js:610
 msgid "Inputs"
 msgstr ""
 
@@ -2427,11 +2645,6 @@ msgstr ""
 #: src/components/SendTxHandler.js:28
 #.  Loading message to be shown after return from the server
 msgid "Propagating transaction to the network."
-msgstr ""
-
-#: src/components/SendTxHandler.js:31
-#.  Success message to be show after tx is sent
-msgid "Your transaction was sent successfully!"
 msgstr ""
 
 #: src/components/SendTxHandler.js:93
@@ -2527,12 +2740,12 @@ msgstr ""
 msgid "Your balance available:"
 msgstr ""
 
-#: src/components/TokenBar.js:173
+#: src/components/TokenBar.js:174
 msgid "Tokens"
 msgstr ""
 
-#: src/components/TokenBar.js:201
 #: src/components/TokenBar.js:202
+#: src/components/TokenBar.js:203
 msgid "Lock wallet"
 msgstr ""
 
@@ -2646,58 +2859,58 @@ msgstr ""
 msgid "Total number of transactions:"
 msgstr ""
 
-#: src/components/TxData.js:479
+#: src/components/TxData.js:510
 msgid "Mint authority"
 msgstr ""
 
-#: src/components/TxData.js:481
+#: src/components/TxData.js:512
 msgid "Melt authority"
 msgstr ""
 
-#: src/components/TxData.js:484
+#: src/components/TxData.js:515
 #.  Should never come here
 msgid "Unknown authority"
 msgstr ""
 
-#: src/components/TxData.js:494
+#: src/components/TxData.js:525
 msgid "This token is not registered in your wallet."
 msgstr ""
 
-#: src/components/TxData.js:510
+#: src/components/TxData.js:541
 msgid "Spent"
 msgstr ""
 
-#: src/components/TxData.js:566
+#: src/components/TxData.js:597
 #, javascript-format
 msgid "${ ret } | Locked until ${ parsedTimestamp }"
 msgstr ""
 
-#: src/components/TxData.js:608
-#: src/components/TxData.js:617
+#: src/components/TxData.js:639
+#: src/components/TxData.js:648
 #.  there are conflicts, but it is not voided
 #, javascript-format
 msgid "This ${ typeStr } is valid."
 msgstr ""
 
-#: src/components/TxData.js:619
+#: src/components/TxData.js:650
 #.  there are conflicts, but it is not voided
 msgid ""
 "Although there is a double-spending transaction, this transaction has the "
 "highest accumulated weight and is valid."
 msgstr ""
 
-#: src/components/TxData.js:624
+#: src/components/TxData.js:655
 #.  there are conflicts, but it is not voided
 msgid "Transactions double spending the same outputs as this transaction:"
 msgstr ""
 
-#: src/components/TxData.js:638
+#: src/components/TxData.js:669
 #.  it is voided, but there is no conflict
 #, javascript-format
 msgid "This ${ typeStr } is voided and **NOT** valid."
 msgstr ""
 
-#: src/components/TxData.js:640
+#: src/components/TxData.js:671
 #.  it is voided, but there is no conflict
 #, javascript-format
 msgid ""
@@ -2705,148 +2918,152 @@ msgid ""
 "double-spending transaction, hence it is voided as well."
 msgstr ""
 
-#: src/components/TxData.js:643
+#: src/components/TxData.js:674
 #.  it is voided, but there is no conflict
 #, javascript-format
 msgid "This ${ typeStr } is voided because of these transactions: "
 msgstr ""
 
-#: src/components/TxData.js:653
+#: src/components/TxData.js:684
 #.  it is voided, and there is a conflict
 #, javascript-format
 msgid "This ${ typeStr } is **NOT** valid."
 msgstr ""
 
-#: src/components/TxData.js:655
+#: src/components/TxData.js:686
 #.  it is voided, and there is a conflict
 msgid "It is voided by: "
 msgstr ""
 
-#: src/components/TxData.js:661
+#: src/components/TxData.js:692
 #.  it is voided, and there is a conflict
 msgid "Conflicts with: "
 msgstr ""
 
-#: src/components/TxData.js:691
+#: src/components/TxData.js:722
 msgid "Download failed"
 msgstr ""
 
-#: src/components/TxData.js:708
+#: src/components/TxData.js:739
 msgid "Error retrieving accumulated weight data..."
 msgstr ""
 
-#: src/components/TxData.js:717
+#: src/components/TxData.js:748
 #, javascript-format
 msgid "Over ${ acc }"
 msgstr ""
 
-#: src/components/TxData.js:722
+#: src/components/TxData.js:753
 msgid "Retrieving accumulated weight data..."
 msgstr ""
 
-#: src/components/TxData.js:774
+#: src/components/TxData.js:805
 msgid "Tokens:"
 msgstr ""
 
-#: src/components/TxData.js:788
+#: src/components/TxData.js:819
 msgid "Your address"
 msgstr ""
 
-#: src/components/TxData.js:802
+#: src/components/TxData.js:833
 #, javascript-format
 msgid "**${ tokenSymbol }:** Received"
 msgstr ""
 
-#: src/components/TxData.js:808
+#: src/components/TxData.js:839
 #, javascript-format
 msgid "**${ tokenSymbol }:** Sent"
 msgstr ""
 
-#: src/components/TxData.js:831
+#: src/components/TxData.js:862
 msgid "Balance:"
 msgstr ""
 
-#: src/components/TxData.js:840
+#: src/components/TxData.js:874
+msgid "Fee paid:"
+msgstr ""
+
+#: src/components/TxData.js:887
 msgid "First block:"
 msgstr ""
 
-#: src/components/TxData.js:849
+#: src/components/TxData.js:896
 msgid "Accumulated weight:"
 msgstr ""
 
-#: src/components/TxData.js:864
+#: src/components/TxData.js:911
 msgid "Error retrieving confirmation level..."
 msgstr ""
 
-#: src/components/TxData.js:874
+#: src/components/TxData.js:921
 msgid "Retrieving confirmation level data..."
 msgstr ""
 
-#: src/components/TxData.js:879
+#: src/components/TxData.js:926
 msgid "Confirmation level:"
 msgstr ""
 
-#: src/components/TxData.js:980
+#: src/components/TxData.js:1027
 msgid "Block"
 msgstr ""
 
-#: src/components/TxData.js:980
+#: src/components/TxData.js:1027
 msgid "Transaction"
 msgstr ""
 
-#: src/components/TxData.js:985
+#: src/components/TxData.js:1032
 msgid "Time:"
 msgstr ""
 
-#: src/components/TxData.js:986
+#: src/components/TxData.js:1033
 msgid "Nonce:"
 msgstr ""
 
-#: src/components/TxData.js:987
+#: src/components/TxData.js:1034
 msgid "Weight:"
 msgstr ""
 
-#: src/components/TxData.js:1005
+#: src/components/TxData.js:1053
 msgid "Inputs:"
 msgstr ""
 
-#: src/components/TxData.js:1009
+#: src/components/TxData.js:1057
 msgid "Outputs:"
 msgstr ""
 
-#: src/components/TxData.js:1016
+#: src/components/TxData.js:1064
 msgid "Parents:"
 msgstr ""
 
-#: src/components/TxData.js:1020
+#: src/components/TxData.js:1068
 msgid "Children:"
 msgstr ""
 
-#: src/components/TxData.js:1020
+#: src/components/TxData.js:1068
 msgid "Click to hide"
 msgstr ""
 
-#: src/components/TxData.js:1020
+#: src/components/TxData.js:1068
 msgid "Click to show"
 msgstr ""
 
-#: src/components/TxData.js:1026
+#: src/components/TxData.js:1074
 msgid "Verification neighbors"
 msgstr ""
 
-#: src/components/TxData.js:1035
+#: src/components/TxData.js:1083
 msgid "Funds neighbors"
 msgstr ""
 
-#: src/components/TxData.js:1052
+#: src/components/TxData.js:1100
 msgid "Hide raw transaction"
 msgstr ""
 
-#: src/components/TxData.js:1052
+#: src/components/TxData.js:1100
 msgid "Show raw transaction"
 msgstr ""
 
-#: src/components/TxData.js:1055
+#: src/components/TxData.js:1103
 msgid "Copy raw tx to clipboard"
 msgstr ""
 
@@ -2901,6 +3118,20 @@ msgstr ""
 
 #: src/components/WalletAddress.js:201
 msgid "You must use an old address before generating new ones"
+msgstr ""
+
+#: src/components/WalletBalance.js:47
+msgid "Total:"
+msgstr ""
+
+#: src/components/Reown/modals/GetBalanceModal.js:53
+#: src/components/WalletBalance.js:48
+msgid "Available:"
+msgstr ""
+
+#: src/components/Reown/modals/GetBalanceModal.js:54
+#: src/components/WalletBalance.js:49
+msgid "Locked:"
 msgstr ""
 
 #: src/components/WalletHistory.js:23
@@ -3327,10 +3558,6 @@ msgstr ""
 
 #: src/components/Reown/FeedbackModal.js:33
 msgid "The operation completed successfully."
-msgstr ""
-
-#: src/components/Reown/FeedbackModal.js:81
-msgid "Retry"
 msgstr ""
 
 #: src/components/Reown/GenericErrorFeedbackModal.js:47
