@@ -8,6 +8,7 @@ import {
   errors as hathorErrors,
   cryptoUtils,
   SCANNING_POLICY,
+  GAP_LIMIT,
 } from '@hathor/wallet-lib';
 import {
   takeLatest,
@@ -165,7 +166,7 @@ export function* startWallet(action) {
 
   const scanPolicy = addressMode === 'single'
     ? { policy: SCANNING_POLICY.SINGLE_ADDRESS }
-    : undefined;
+    : { policy: SCANNING_POLICY.GAP_LIMIT, gapLimit: GAP_LIMIT };
 
   // We are offline, the connection object is yet to be created
   yield put(isOnlineUpdate({ isOnline: false }));

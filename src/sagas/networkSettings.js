@@ -32,7 +32,7 @@ export function* changeNetworkSettings({ data, pin }) {
     '';
 
   // Update new server in storage and in the config singleton
-  wallet.changeServer(data.node);
+  yield call([wallet, wallet.changeServer], data.node);
 
   // We only have a different websocket server on the wallet-service facade, so update the config singleton
   if (useWalletService) {
@@ -54,7 +54,7 @@ export function* changeNetworkSettings({ data, pin }) {
     versionData = yield call([response, response.json]);
   } catch (e) {
     // Invalid node, so go back to the previous server and return
-    wallet.changeServer(currentServer);
+    yield call([wallet, wallet.changeServer], currentServer);
     if (useWalletService) {
       yield call([wallet, wallet.changeWsServer], currentWsServer);
     }
@@ -82,7 +82,7 @@ export function* changeNetworkSettings({ data, pin }) {
   const networkSettingsStatus = yield select((state) => state.networkSettings.status);
   if (networkSettingsStatus !== NETWORK_SETTINGS_STATUS.NETWORK_CONFIRMED) {
     // User cancelled the operation, so we change the old server back and return
-    wallet.changeServer(currentServer);
+    yield call([wallet, wallet.changeServer], currentServer);
     if (useWalletService) {
       yield call([wallet, wallet.changeWsServer], currentWsServer);
     }
