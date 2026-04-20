@@ -250,6 +250,14 @@ describe('create a new wallet and back it up', () => {
 
     cy.findByText('Next').click();
 
+    // Wait a moment then capture what the screen actually shows
+    cy.wait(2000);
+    cy.screenshot('after-pin-click');
+    cy.document().then(doc => {
+      const bodyText = doc.body?.innerText || '';
+      cy.log('PAGE TEXT: ' + bodyText.substring(0, 500));
+    });
+
     // PIN was successful
     cy.contains('Loading transactions'); // For a few seconds this screen will be shown
 
