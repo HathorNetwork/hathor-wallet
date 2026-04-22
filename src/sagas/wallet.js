@@ -346,15 +346,15 @@ export function* startWallet(action) {
     }
   }
 
-  // After the wallet is connected, check if the address mode matches the actual
-  // wallet state. Wallets without transactions outside index 0 should be single,
-  // wallets with transactions outside index 0 must be multi.
-  if (singleAddressFeatureEnabled) {
+  // After the wallet is connected, check if a single-address wallet actually has
+  // transactions outside index 0. If so, upgrade to multi to avoid data loss.
+  // We only check when in 'single' mode — a user who explicitly chose 'multi'
+  // should never be forced back to 'single'.
+  if (singleAddressFeatureEnabled && addressMode === 'single') {
     const hasTxOutside = yield call([wallet, wallet.hasTxOutsideFirstAddress]);
-    const correctMode = hasTxOutside ? 'multi' : 'single';
 
-    if (addressMode !== correctMode) {
-      walletUtils.setAddressMode(correctMode);
+    if (hasTxOutside) {
+      walletUtils.setAddressMode('multi');
       // Re-dispatch start so the wallet loads with the correct scanning policy
       yield put(action);
       return;
