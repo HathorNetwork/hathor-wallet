@@ -251,18 +251,10 @@ describe('create a new wallet and back it up', () => {
 
     cy.findByText('Next').click();
 
-    // Wait a moment then capture what the screen actually shows
-    cy.wait(2000);
-    cy.screenshot('after-pin-click');
-    cy.document().then(doc => {
-      const bodyText = doc.body?.innerText || '';
-      cy.log('PAGE TEXT: ' + bodyText.substring(0, 500));
-    });
-
-    // PIN was successful
-    cy.contains('Loading transactions', { timeout: 15000 }); // For a few seconds this screen will be shown
-
-    // There is a timeout in place that needs to be waited. The error should be handled gracefully
-    cy.contains('There has been a problem loading your wallet', { timeout: 30000 });
+    // PIN was successful, the wallet starts loading and eventually fails
+    // due to the intercepted 500 response on address_history.
+    // The wallet-lib retries failed requests up to 5 times with 5s sleep between each,
+    // so the error screen may take up to ~35s to appear.
+    cy.contains('There has been a problem loading your wallet', { timeout: 40000 });
   })
 })
