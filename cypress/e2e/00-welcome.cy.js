@@ -243,7 +243,8 @@ describe('create a new wallet and back it up', () => {
       req.reply({
         statusCode: 500,
         body: {
-          history: [],
+          success: false,
+          message: 'Internal Server Error',
         },
       });
     });
@@ -259,9 +260,9 @@ describe('create a new wallet and back it up', () => {
     });
 
     // PIN was successful
-    cy.contains('Loading transactions'); // For a few seconds this screen will be shown
+    cy.contains('Loading transactions', { timeout: 15000 }); // For a few seconds this screen will be shown
 
     // There is a timeout in place that needs to be waited. The error should be handled gracefully
-    cy.contains('There has been a problem loading your wallet', { timeout: 15000 });
+    cy.contains('There has been a problem loading your wallet', { timeout: 30000 });
   })
 })

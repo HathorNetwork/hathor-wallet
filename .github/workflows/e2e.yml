@@ -42,9 +42,3 @@ jobs:
           wait-on-timeout: 120
           browser: chrome
           install-command: npm ci
-      - name: Upload Cypress screenshots
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
