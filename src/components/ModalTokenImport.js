@@ -101,6 +101,13 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
   }, []);
 
   useEffect(() => {
+    // Only fetch during the initial LOADING phase. Re-fetching after the user
+    // has reached SELECTION would wipe their selected flags when transitioning
+    // back from CONFIRMATION (handleBack: CONFIRMATION → SELECTION).
+    if (modalState !== MODAL_STATE.LOADING) {
+      return;
+    }
+
     let cancelled = false;
 
     fetchDetails(unknownTokens, () => cancelled);
@@ -108,7 +115,7 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
     return () => {
       cancelled = true;
     };
-  }, [unknownTokens]);
+  }, [unknownTokens, modalState]);
 
   async function fetchDetails(tokens, isCancelled) {
     const wallet = getGlobalWallet();
@@ -422,21 +429,17 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
     </>
   );
 
-  const renderRegistering = () => {
-    const tokenUids = unknownTokens.map((tk) => tk.uid);
-
-    return (
-      <>
-        <p className="mb-3">{t`Registering selected tokens...`}</p>
-        <div className="token-list">
-          {tokenUids.filter((uid) => tokenDetails[uid]?.selected).map((uid) => renderTokenRow(uid))}
-        </div>
-        <div className="d-flex justify-content-center mt-4">
-          <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
-        </div>
-      </>
-    );
-  };
+  const renderRegistering = () => (
+    <>
+      <p className="mb-3">{t`Registering selected tokens...`}</p>
+      <div className="token-list">
+        {selectedUids.map((uid) => renderTokenRow(uid))}
+      </div>
+      <div className="d-flex justify-content-center mt-4">
+        <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
+      </div>
+    </>
+  );
 
   const renderSuccess = () => (
     <div className="d-flex flex-column align-items-center justify-content-center py-5">
