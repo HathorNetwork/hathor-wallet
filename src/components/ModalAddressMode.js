@@ -11,7 +11,7 @@ import { t } from 'ttag';
 import { getGlobalWallet } from '../modules/wallet';
 import helpers from '../utils/helpers';
 
-const LEARN_MORE_URL = 'https://www.google.com';
+const LEARN_MORE_URL = 'https://docs.hathor.network/explanations/features/wallet-service/address-mode';
 
 function ModalAddressMode({ currentMode, onSave, onClose }) {
   const [selectedMode, setSelectedMode] = useState(currentMode);
@@ -22,18 +22,6 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
     $('#addressModeModal').modal('show');
     $('#addressModeModal').on('hidden.bs.modal', onClose);
 
-    const checkTxOutside = async () => {
-      try {
-        const wallet = getGlobalWallet();
-        const result = await wallet.hasTxOutsideFirstAddress();
-        setHasTxOutside(result);
-      } catch (e) {
-        console.error('Error checking hasTxOutsideFirstAddress:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     checkTxOutside();
 
     return () => {
@@ -41,6 +29,19 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
       $('#addressModeModal').off();
     };
   }, []);
+
+  const checkTxOutside = async () => {
+    try {
+      const wallet = getGlobalWallet();
+      const result = await wallet.hasTxOutsideFirstAddress();
+      setHasTxOutside(result);
+    } catch (e) {
+      console.error('Error checking hasTxOutsideFirstAddress:', e);
+      setHasTxOutside(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = () => {
     onSave(selectedMode);

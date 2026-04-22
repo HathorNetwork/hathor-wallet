@@ -403,8 +403,8 @@ function Settings() {
       </div>
 
       <div className="settings-footer">
-        <div><a href="true" onClick={goToTermsOfService}>Terms of Service</a></div>
-        <div><a href="true" onClick={goToPrivacyPolicy}>Privacy Policy</a></div>
+        <div><a href="true" onClick={goToTermsOfService}>{t`Terms of Service`}</a></div>
+        <div><a href="true" onClick={goToPrivacyPolicy}>{t`Privacy Policy`}</a></div>
       </div>
 
       <HathorAlert ref={alertCopiedRef} text={t`Copied to clipboard!`} type="success" />

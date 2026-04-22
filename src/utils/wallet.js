@@ -587,7 +587,11 @@ const wallet = {
    * @inner
    */
   getAddressMode() {
-    return LOCAL_STORE.getItem(storageKeys.addressMode);
+    const mode = LOCAL_STORE.getItem(storageKeys.addressMode);
+    if (mode === 'single' || mode === 'multi') {
+      return mode;
+    }
+    return null;
   },
 
   /**
@@ -599,6 +603,9 @@ const wallet = {
    * @inner
    */
   setAddressMode(mode) {
+    if (mode !== 'single' && mode !== 'multi') {
+      return;
+    }
     LOCAL_STORE.setItem(storageKeys.addressMode, mode);
   },
 
