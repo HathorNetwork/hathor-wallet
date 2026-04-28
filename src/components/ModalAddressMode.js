@@ -10,6 +10,7 @@ import $ from 'jquery';
 import { t } from 'ttag';
 import { getGlobalWallet } from '../modules/wallet';
 import helpers from '../utils/helpers';
+import { ADDRESS_MODE } from '../constants';
 
 const LEARN_MORE_URL = 'https://docs.hathor.network/explanations/features/wallet-service/address-mode';
 
@@ -52,7 +53,7 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
     helpers.openExternalURL(LEARN_MORE_URL);
   };
 
-  const isSingleDisabled = hasTxOutside && currentMode !== 'single';
+  const isSingleDisabled = hasTxOutside && currentMode !== ADDRESS_MODE.SINGLE;
   const hasChanged = selectedMode !== currentMode;
 
   return (
@@ -74,16 +75,16 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
 
             <div>
               <div
-                className={`address-mode-option ${selectedMode === 'single' ? 'address-mode-option--selected' : ''} ${isSingleDisabled ? 'address-mode-option--disabled' : ''}`}
-                onClick={() => !isSingleDisabled && setSelectedMode('single')}
+                className={`address-mode-option ${selectedMode === ADDRESS_MODE.SINGLE ? 'address-mode-option--selected' : ''} ${isSingleDisabled ? 'address-mode-option--disabled' : ''}`}
+                onClick={() => !isSingleDisabled && setSelectedMode(ADDRESS_MODE.SINGLE)}
               >
                 <div className="d-flex align-items-center mb-2" style={{ gap: '6px' }}>
                   <input
                     type="radio"
                     name="addressMode"
-                    checked={selectedMode === 'single'}
+                    checked={selectedMode === ADDRESS_MODE.SINGLE}
                     disabled={isSingleDisabled}
-                    onChange={() => setSelectedMode('single')}
+                    onChange={() => setSelectedMode(ADDRESS_MODE.SINGLE)}
                   />
                   <strong className="address-mode-label">{t`Single Address`}</strong>
                 </div>
@@ -96,15 +97,15 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
 
               <div>
                 <div
-                  className={`address-mode-option ${selectedMode === 'multi' ? 'address-mode-option--selected' : ''}`}
-                  onClick={() => setSelectedMode('multi')}
+                  className={`address-mode-option ${selectedMode === ADDRESS_MODE.MULTI ? 'address-mode-option--selected' : ''}`}
+                  onClick={() => setSelectedMode(ADDRESS_MODE.MULTI)}
                 >
                   <div className="d-flex align-items-center mb-2" style={{ gap: '6px' }}>
                     <input
                       type="radio"
                       name="addressMode"
-                      checked={selectedMode === 'multi'}
-                      onChange={() => setSelectedMode('multi')}
+                      checked={selectedMode === ADDRESS_MODE.MULTI}
+                      onChange={() => setSelectedMode(ADDRESS_MODE.MULTI)}
                     />
                     <strong className="address-mode-label">{t`Multi Address`}</strong>
                   </div>

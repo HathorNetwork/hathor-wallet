@@ -11,7 +11,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import HathorAlert from './HathorAlert';
 import { connect } from "react-redux";
 import ledger from '../utils/ledger';
-import { IPC_RENDERER } from '../constants';
+import { IPC_RENDERER, ADDRESS_MODE } from '../constants';
 import { sharedAddressUpdate } from '../actions/index';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import LOCAL_STORE from '../storage';
@@ -147,7 +147,7 @@ export class WalletAddress extends React.Component {
 
   render() {
     const renderAddress = () => {
-      const isSingleAddress = this.props.addressMode === 'single';
+      const isSingleAddress = this.props.addressMode === ADDRESS_MODE.SINGLE;
 
       return (
         <div className="d-flex flex-column align-items-center address-wrapper card">

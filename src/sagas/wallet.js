@@ -30,6 +30,7 @@ import {
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
   IGNORE_WS_TOGGLE_FLAG,
   SINGLE_ADDRESS_FEATURE_TOGGLE,
+  ADDRESS_MODE,
 } from '../constants';
 import {
   types,
@@ -151,15 +152,15 @@ export function* startWallet(action) {
 
   if (!isExistingWallet) {
     // New wallet (import or create): always determine fresh
-    addressMode = singleAddressFeatureEnabled ? 'single' : 'multi';
+    addressMode = singleAddressFeatureEnabled ? ADDRESS_MODE.SINGLE : ADDRESS_MODE.MULTI;
     walletUtils.setAddressMode(addressMode);
   } else if (addressMode === null) {
     // Existing wallet with no stored preference: default to multi
-    addressMode = 'multi';
+    addressMode = ADDRESS_MODE.MULTI;
     walletUtils.setAddressMode(addressMode);
   }
 
-  const scanPolicy = addressMode === 'single'
+  const scanPolicy = addressMode === ADDRESS_MODE.SINGLE
     ? { policy: SCANNING_POLICY.SINGLE_ADDRESS }
     : { policy: SCANNING_POLICY.GAP_LIMIT, gapLimit: hathorLibConstants.GAP_LIMIT };
 
@@ -212,7 +213,7 @@ export function* startWallet(action) {
       passphrase,
       storage,
       network,
-      singleAddressMode: addressMode === 'single',
+      singleAddressMode: addressMode === ADDRESS_MODE.SINGLE,
     };
 
     wallet = new HathorWalletServiceWallet(walletConfig);
@@ -348,13 +349,13 @@ export function* startWallet(action) {
 
   // After the wallet is connected, check if a single-address wallet actually has
   // transactions outside index 0. If so, upgrade to multi to avoid data loss.
-  // We only check when in 'single' mode — a user who explicitly chose 'multi'
-  // should never be forced back to 'single'.
-  if (singleAddressFeatureEnabled && addressMode === 'single') {
+  // We only check when in single mode — a user who explicitly chose multi
+  // should never be forced back to single.
+  if (singleAddressFeatureEnabled && addressMode === ADDRESS_MODE.SINGLE) {
     const hasTxOutside = yield call([wallet, wallet.hasTxOutsideFirstAddress]);
 
     if (hasTxOutside) {
-      walletUtils.setAddressMode('multi');
+      walletUtils.setAddressMode(ADDRESS_MODE.MULTI);
       // Re-dispatch start so the wallet loads with the correct scanning policy
       yield put(action);
       return;

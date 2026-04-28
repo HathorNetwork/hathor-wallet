@@ -326,3 +326,11 @@ export const REOWN_CONNECTION_STATE = {
   SUCCESS: 'success',       // Connection successful
   FAILED: 'failed',         // Connection failed
 };
+
+/**
+ * Wallet address modes
+ */
+export const ADDRESS_MODE = {
+  SINGLE: 'single',
+  MULTI: 'multi',
+};

@@ -9,6 +9,7 @@ import {
   SENTRY_DSN,
   WALLET_HISTORY_COUNT,
   METADATA_CONCURRENT_DOWNLOAD,
+  ADDRESS_MODE,
 } from '../constants';
 import store from '../store/index';
 import {
@@ -581,14 +582,14 @@ const wallet = {
   /**
    * Gets the address mode preference
    *
-   * @return {string|null} 'single', 'multi', or null if not set
+   * @return {string|null} ADDRESS_MODE.SINGLE, ADDRESS_MODE.MULTI, or null if not set
    *
    * @memberof Wallet
    * @inner
    */
   getAddressMode() {
     const mode = LOCAL_STORE.getItem(storageKeys.addressMode);
-    if (mode === 'single' || mode === 'multi') {
+    if (mode === ADDRESS_MODE.SINGLE || mode === ADDRESS_MODE.MULTI) {
       return mode;
     }
     return null;
@@ -597,13 +598,13 @@ const wallet = {
   /**
    * Sets the address mode preference
    *
-   * @param {string} mode 'single' or 'multi'
+   * @param {string} mode ADDRESS_MODE.SINGLE or ADDRESS_MODE.MULTI
    *
    * @memberof Wallet
    * @inner
    */
   setAddressMode(mode) {
-    if (mode !== 'single' && mode !== 'multi') {
+    if (mode !== ADDRESS_MODE.SINGLE && mode !== ADDRESS_MODE.MULTI) {
       return;
     }
     LOCAL_STORE.setItem(storageKeys.addressMode, mode);

@@ -19,7 +19,7 @@ import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE, SINGLE_ADDRESS_FEATURE_TOGGLE } from '../constants';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE, SINGLE_ADDRESS_FEATURE_TOGGLE, ADDRESS_MODE } from '../constants';
 import { walletReset, reloadWalletRequested } from '../actions';
 import { getGlobalWallet } from '../modules/wallet';
 import LOCAL_STORE from '../storage';
@@ -301,7 +301,7 @@ function Settings() {
     try {
       const globalWallet = getGlobalWallet();
 
-      if (newMode === 'single') {
+      if (newMode === ADDRESS_MODE.SINGLE) {
         await globalWallet.enableSingleAddressMode();
       } else {
         await globalWallet.enableMultiAddressMode();
@@ -371,7 +371,7 @@ function Settings() {
         {singleAddressEnabled && (
           <p>
             <strong>{t`Address Mode:`}</strong>{' '}
-            {addressMode === 'single' ? t`Single address` : t`Multi address`}
+            {addressMode === ADDRESS_MODE.SINGLE ? t`Single address` : t`Multi address`}
             <a className="settings-change-link" href="true" onClick={(e) => { e.preventDefault(); openAddressModeModal(); }}>
               {t`Change`}
             </a>

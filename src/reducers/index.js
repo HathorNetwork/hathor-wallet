@@ -121,7 +121,7 @@ const initialState = {
   metadataLoaded: false,
   // Should we use the wallet service facade?
   useWalletService: false,
-  // Address mode: 'single' or 'multi'
+  // Address mode: ADDRESS_MODE.SINGLE or ADDRESS_MODE.MULTI
   addressMode: null,
   // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
   lockWalletPromise: null,
