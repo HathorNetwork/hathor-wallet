@@ -347,18 +347,16 @@ export function* startWallet(action) {
     }
   }
 
-  // After the wallet is connected, check if a single-address wallet actually has
-  // transactions outside index 0. If so, upgrade to multi to avoid data loss.
-  // We only check when in single mode — a user who explicitly chose multi
-  // should never be forced back to single.
+  // The wallet-lib silently downgrades scan policy from SINGLE_ADDRESS to GAP_LIMIT
+  // during the first connection if it detects transactions on addresses with index > 0
+  // (see HathorWallet.onConnectionChangedState / HathorWalletServiceWallet.onWalletReady).
+  // When that happens we must sync our app-level preference (localStorage + Redux) with
+  // the policy the lib actually used — otherwise Settings would keep showing "Single address".
   if (singleAddressFeatureEnabled && addressMode === ADDRESS_MODE.SINGLE) {
-    const hasTxOutside = yield call([wallet, wallet.hasTxOutsideFirstAddress]);
-
-    if (hasTxOutside) {
+    const actualScanPolicy = yield call([wallet.storage, wallet.storage.getScanningPolicy]);
+    if (actualScanPolicy !== SCANNING_POLICY.SINGLE_ADDRESS) {
       walletUtils.setAddressMode(ADDRESS_MODE.MULTI);
-      // Re-dispatch start so the wallet loads with the correct scanning policy
-      yield put(action);
-      return;
+      yield put(setAddressMode(ADDRESS_MODE.MULTI));
     }
   }
 
