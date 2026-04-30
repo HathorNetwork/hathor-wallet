@@ -69,6 +69,7 @@ import {
   dispatchLedgerTokenSignatureVerification,
 } from './helpers';
 import { fetchTokenData, restoreTokensForNetwork } from './tokens';
+import { updateUnleashClientContext } from './featureToggle';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import nanoUtils from '../utils/nanoContracts';
@@ -783,6 +784,18 @@ export function* onWalletReset() {
   config.setNetwork('mainnet');
   // This will update the lib config and redux state with the default network settings
   helpersUtils.loadStorageState();
+
+  // Sync the unleash client + redux feature toggles with the post-reset network
+  // (mainnet defaults). Without this, state.featureToggles would still reflect
+  // the network the user was on before the reset, and the next startWallet would
+  // read stale flags. Errors here must not block the reset (it is irreversible
+  // from the user's perspective); FEATURE_TOGGLE_DEFAULTS covers the degraded case.
+  try {
+    yield call(updateUnleashClientContext);
+  } catch (e) {
+    console.error('Failed to refresh unleash context after wallet reset', e);
+  }
+
   if (wallet) {
     yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
   }
