@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { useSelector } from 'react-redux';
 import { BaseNanoContractModal } from './BaseNanoContractModal';
 import { setNewNanoContractStatusReady } from '../../../actions';
+import { ADDRESS_MODE } from '../../../constants';
 import CreateTokenRequestData from '../CreateTokenRequestData';
 
 /**
@@ -33,6 +35,7 @@ const TokenDataCard = ({ token }) => (
  * @param {Function} onReject Function to call when the user rejects the request
  */
 export function CreateNanoContractCreateTokenTxModal({ data, onAccept, onReject }) {
+  const isSingleAddress = useSelector((state) => state.addressMode) === ADDRESS_MODE.SINGLE;
   const requestData = data?.data || {};
   const nanoContract = requestData.nano || {};
   const token = requestData.token || {};
@@ -70,7 +73,7 @@ export function CreateNanoContractCreateTokenTxModal({ data, onAccept, onReject 
       modalTitle={t`CREATE NANO CONTRACT & TOKEN`}
       acceptButtonText={t`Accept Transaction`}
       rejectButtonText={t`Reject`}
-      showCallerSection={true}
+      showCallerSection={!isSingleAddress}
     />
   );
 } 
