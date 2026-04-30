@@ -51,6 +51,7 @@ function Settings() {
   const reownEnabled = useSelector(state => state.featureToggles[REOWN_FEATURE_TOGGLE]);
   const reownSessions = useSelector(state => state.reown.sessions);
   const connectedSessionsCount = Object.keys(reownSessions).length;
+  const isHardwareWallet = LOCAL_STORE.isHardwareWallet();
 
   useEffect(() => {
     setIsNotificationOn(wallet.isNotificationOn());
@@ -88,7 +89,7 @@ function Settings() {
    * When user clicks Add Passphrase button we redirect to Passphrase screen
    */
   const addPassphrase = () => {
-    if (LOCAL_STORE.isHardwareWallet()) {
+    if (isHardwareWallet) {
       context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
         title: t`Complete action on your hardware wallet`,
         children: (
@@ -105,6 +106,13 @@ function Settings() {
       navigate('/wallet/passphrase/');
     }
   }
+
+  /**
+   * When user clicks Import Tokens button, open the token import modal
+   */
+  const importTokens = () => {
+    context.showModal(MODAL_TYPES.TOKEN_IMPORT, {});
+  };
 
   /**
    * When user clicks Export Registered Tokens button, then we save all config strings in a txt file
@@ -279,7 +287,7 @@ function Settings() {
 
   const serverURL = useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
   const wsServerURL = useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
-  const ledgerCustomTokens = LOCAL_STORE.isHardwareWallet() && version.isLedgerCustomTokenAllowed();
+  const ledgerCustomTokens = isHardwareWallet && version.isLedgerCustomTokenAllowed();
   const uniqueIdentifier = helpers.getUniqueId();
 
   return (
@@ -331,10 +339,11 @@ function Settings() {
               <p><strong>{t`Unique identifier`}:</strong> {uniqueIdentifier} <i className="fa fa-clone pointer ml-1" title={t`Copy to clipboard`}></i></p>
             </span>
           </CopyToClipboard>
+          <button className="btn btn-hathor mt-4" onClick={importTokens}>{t`Import tokens`}</button>
           <button className="btn btn-hathor mt-4" onClick={exportTokens}>{t`Export Registered Tokens`}</button>
           <button className="btn btn-hathor mt-4" onClick={addPassphrase}>{t`Set a passphrase`}</button>
           {ledgerCustomTokens && <button className="btn btn-hathor mt-4" onClick={untrustClicked}>{t`Untrust all tokens on Ledger`}</button> }
-          <button className="btn btn-hathor mt-4" onClick={resetClicked}>{t`Reset all data`}</button>
+          { !isHardwareWallet && <button className="btn btn-hathor mt-4" onClick={resetClicked}>{t`Reset all data`}</button> }
         </div>
       </div>
       <hr />
