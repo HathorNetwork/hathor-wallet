@@ -1157,11 +1157,13 @@ export const onStartWalletFailed = (state) => ({
  * - isVersionAllowed: API version check is independent of wallet data
  * - ledgerWasClosed: Ledger device state persists across wallet instances
  * - featureTogglesInitialized: Unleash client runs independently
- * - featureToggles: same — must be preserved together with the initialized
- *   flag, otherwise checkForFeatureFlag (which skips waiting when
+ * - featureToggles: must be preserved together with the initialized flag,
+ *   otherwise checkForFeatureFlag (which skips waiting when
  *   featureTogglesInitialized is true) reads the defaults and the next
- *   startWallet picks the wrong values (e.g. addressMode falls back to multi
- *   even when single-address-desktop.rollout is on at the Unleash client).
+ *   startWallet picks the wrong values for any flag that has divergent
+ *   values per network at the Unleash client. The onWalletReset saga
+ *   calls updateUnleashClientContext before dispatching START_WALLET_RESET,
+ *   so the value preserved here already reflects the post-reset network.
  *
  * Note: networkSettings is intentionally reset because the onWalletReset saga
  * resets localStorage and reloads default network settings before this reducer runs.
