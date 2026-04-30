@@ -53,6 +53,7 @@ function Settings() {
   const reownSessions = useSelector(state => state.reown.sessions);
   const singleAddressEnabled = useSelector(state => state.featureToggles[SINGLE_ADDRESS_FEATURE_TOGGLE]);
   const addressMode = useSelector(state => state.addressMode);
+  const network = useSelector(state => state.networkSettings.data.network);
   const connectedSessionsCount = Object.keys(reownSessions).length;
   const isHardwareWallet = LOCAL_STORE.isHardwareWallet();
 
@@ -307,7 +308,7 @@ function Settings() {
         await globalWallet.enableMultiAddressMode();
       }
 
-      wallet.setAddressMode(newMode);
+      wallet.setAddressMode(network, newMode);
 
       // Trigger wallet reload — reloadWalletRequested re-dispatches the original
       // startWalletRequested action (which has the correct PIN/password),

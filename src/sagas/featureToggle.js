@@ -110,7 +110,15 @@ export function* updateUnleashClientContext(networkSettings = null) {
     },
   };
 
-  yield call(() => unleashClient.updateContext(options));
+  // updateContext refetches toggles for the new context. Once the promise
+  // resolves, unleashClient.toggles already reflects the new network.
+  // Sync redux synchronously here so consumers reading state.featureToggles
+  // immediately after (e.g. startWallet -> checkForFeatureFlag) see the
+  // post-context values, not the previous network's stale values.
+  yield call([unleashClient, unleashClient.updateContext], options);
+
+  const featureToggles = mapFeatureToggles(unleashClient.toggles);
+  yield put(setFeatureToggles(featureToggles));
 }
 
 export function* monitorFeatureFlags(currentRetry = 0) {
@@ -229,7 +237,7 @@ export function* setupUnleashListeners(unleashClient) {
   }
 }
 
-function mapFeatureToggles(toggles) {
+export function mapFeatureToggles(toggles) {
   console.log('feature toggles', toggles);
   return toggles.reduce((acc, toggle) => {
     acc[toggle.name] = get(

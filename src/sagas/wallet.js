@@ -73,6 +73,7 @@ import {
   dispatchLedgerTokenSignatureVerification,
 } from './helpers';
 import { fetchTokenData, restoreTokensForNetwork } from './tokens';
+import { updateUnleashClientContext } from './featureToggle';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import nanoUtils from '../utils/nanoContracts';
@@ -87,6 +88,31 @@ export const WALLET_STATUS = {
   LOADING: 'loading',
   SYNCING: 'syncing',
 };
+
+/**
+ * Pure helper: computes the address mode the wallet should *attempt* to use.
+ *
+ * The wallet-lib is the source of truth — if we attempt SINGLE_ADDRESS but it
+ * detects tx on addresses with index > 0 during the first connection, it
+ * changes to GAP_LIMIT. We sync after wallet.start (see startWallet).
+ *
+ * @param {object} opts
+ * @param {boolean} opts.singleAddressFeatureEnabled
+ * @param {string|null} opts.storedAddressMode  ADDRESS_MODE.SINGLE, ADDRESS_MODE.MULTI, or null
+ * @returns {string} ADDRESS_MODE.SINGLE or ADDRESS_MODE.MULTI
+ */
+export function decideAddressMode({ singleAddressFeatureEnabled, storedAddressMode }) {
+  if (!singleAddressFeatureEnabled) {
+    return ADDRESS_MODE.MULTI;
+  }
+  if (storedAddressMode === ADDRESS_MODE.MULTI) {
+    // User explicitly chose multi via Settings → respect.
+    return ADDRESS_MODE.MULTI;
+  }
+  // null (no preference) or SINGLE → attempt single. The wallet-lib
+  // will change the mode if it detects existing tx on addresses with index > 0.
+  return ADDRESS_MODE.SINGLE;
+}
 
 export function* isWalletServiceEnabled() {
   const shouldIgnoreFlag = localStorage.getItem(IGNORE_WS_TOGGLE_FLAG);
@@ -131,9 +157,6 @@ export function* startWallet(action) {
 
   yield put(loadingAddresses(true));
 
-  // Capture whether this is an existing wallet before initStorage may create new data
-  const isExistingWallet = LOCAL_STORE.isLoadedSync(true);
-
   if (hardware) {
     // We need to ensure that the hardware wallet storage is always generated here since we may be
     // starting the wallet with a second device and so we cannot trust the xpub saved on storage.
@@ -146,21 +169,18 @@ export function* startWallet(action) {
 
   const storage = LOCAL_STORE.getStorage();
 
-  // Determine address mode
+  // Determine the address mode to attempt. The wallet-lib is the source of
+  // truth: if we attempt SINGLE_ADDRESS but it detects tx on addresses with
+  // index > 0 during the first connection, it changes to GAP_LIMIT and
+  // we sync after wallet.start. Persistence of the address mode to
+  // localStorage is therefore deferred to after the connection.
+  const network = yield select((state) => state.networkSettings.data.network);
   const singleAddressFeatureEnabled = yield call(checkForFeatureFlag, SINGLE_ADDRESS_FEATURE_TOGGLE);
-  let addressMode = walletUtils.getAddressMode();
+  const storedAddressMode = walletUtils.getAddressMode(network);
 
-  if (!isExistingWallet) {
-    // New wallet (import or create): always determine fresh
-    addressMode = singleAddressFeatureEnabled ? ADDRESS_MODE.SINGLE : ADDRESS_MODE.MULTI;
-    walletUtils.setAddressMode(addressMode);
-  } else if (addressMode === null) {
-    // Existing wallet with no stored preference: default to multi
-    addressMode = ADDRESS_MODE.MULTI;
-    walletUtils.setAddressMode(addressMode);
-  }
+  const attemptedAddressMode = decideAddressMode({ singleAddressFeatureEnabled, storedAddressMode });
 
-  const scanPolicy = addressMode === ADDRESS_MODE.SINGLE
+  const scanPolicy = attemptedAddressMode === ADDRESS_MODE.SINGLE
     ? { policy: SCANNING_POLICY.SINGLE_ADDRESS }
     : { policy: SCANNING_POLICY.GAP_LIMIT, gapLimit: hathorLibConstants.GAP_LIMIT };
 
@@ -213,7 +233,7 @@ export function* startWallet(action) {
       passphrase,
       storage,
       network,
-      singleAddressMode: addressMode === ADDRESS_MODE.SINGLE,
+      singleAddressMode: attemptedAddressMode === ADDRESS_MODE.SINGLE,
     };
 
     wallet = new HathorWalletServiceWallet(walletConfig);
@@ -295,7 +315,7 @@ export function* startWallet(action) {
       genesisHash,
     }));
 
-    yield put(setAddressMode(addressMode));
+    yield put(setAddressMode(attemptedAddressMode));
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from
@@ -347,18 +367,20 @@ export function* startWallet(action) {
     }
   }
 
-  // The wallet-lib silently downgrades scan policy from SINGLE_ADDRESS to GAP_LIMIT
-  // during the first connection if it detects transactions on addresses with index > 0
-  // (see HathorWallet.onConnectionChangedState / HathorWalletServiceWallet.onWalletReady).
-  // When that happens we must sync our app-level preference (localStorage + Redux) with
-  // the policy the lib actually used — otherwise Settings would keep showing "Single address".
-  if (singleAddressFeatureEnabled && addressMode === ADDRESS_MODE.SINGLE) {
+  // After connection, confirm the actual scan policy. The wallet-lib changes
+  // SINGLE_ADDRESS → GAP_LIMIT during the first connection if it finds tx on
+  // addresses with index > 0. We persist the *real* mode here — this is the
+  // single point of write to localStorage for addressMode.
+  let finalAddressMode = attemptedAddressMode;
+  if (attemptedAddressMode === ADDRESS_MODE.SINGLE) {
     const actualScanPolicy = yield call([wallet.storage, wallet.storage.getScanningPolicy]);
     if (actualScanPolicy !== SCANNING_POLICY.SINGLE_ADDRESS) {
-      walletUtils.setAddressMode(ADDRESS_MODE.MULTI);
+      finalAddressMode = ADDRESS_MODE.MULTI;
       yield put(setAddressMode(ADDRESS_MODE.MULTI));
     }
   }
+
+  walletUtils.setAddressMode(network, finalAddressMode);
 
   // Register native token + network tokens in order
   const nativeToken = wallet.storage.getNativeTokenData();
@@ -819,12 +841,29 @@ export function* onWalletReset() {
   const wallet = getGlobalWallet();
 
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
+  // Clear per-network address mode preferences. LOCAL_STORE.resetStorage()
+  // only removes keys in its static storageKeys list, but addressMode keys
+  // are namespaced per network (wallet:address_mode:<network>) and so must
+  // be cleared explicitly here.
+  walletUtils.clearAllAddressModes();
   LOCAL_STORE.resetStorage();
   // We must set the lib config network to mainnet because it's the default network
   // XXX we should have a method in the config to reset all configs
   config.setNetwork('mainnet');
   // This will update the lib config and redux state with the default network settings
   helpersUtils.loadStorageState();
+
+  // Sync the unleash client + redux feature toggles with the post-reset network
+  // (mainnet defaults). Without this, state.featureToggles would still reflect
+  // the network the user was on before the reset, and the next startWallet would
+  // read stale flags. Errors here must not block the reset (it is irreversible
+  // from the user's perspective); FEATURE_TOGGLE_DEFAULTS covers the degraded case.
+  try {
+    yield call(updateUnleashClientContext);
+  } catch (e) {
+    console.error('Failed to refresh unleash context after wallet reset', e);
+  }
+
   if (wallet) {
     yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
   }

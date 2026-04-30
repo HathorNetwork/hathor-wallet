@@ -50,7 +50,6 @@ if (window.require) {
  * sentry: string,
  * alwaysShowTokens: string,
  * atomicProposals: string,
- * addressMode: string,
  * }}
  * @readonly
  */
@@ -60,8 +59,11 @@ const storageKeys = {
   hideZeroBalanceTokens: 'wallet:hide_zero_balance_tokens',
   alwaysShowTokens: 'wallet:always_show_tokens',
   atomicProposals: 'wallet:atomic_swap_proposals',
-  addressMode: 'wallet:address_mode',
 }
+
+// Address mode is namespaced per network so the Unleash rollout flag per network
+// cannot be bypassed by switching networks while a mode is stored globally.
+const addressModeKey = (network) => `wallet:address_mode:${network}`;
 
 /**
  * We use localStorage and Redux to save data.
@@ -580,15 +582,16 @@ const wallet = {
   },
 
   /**
-   * Gets the address mode preference
+   * Gets the address mode preference for the given network.
    *
-   * @return {string|null} ADDRESS_MODE.SINGLE, ADDRESS_MODE.MULTI, or null if not set
+   * @param {string} network Network name (e.g. 'mainnet', 'testnet')
+   * @return {string|null} ADDRESS_MODE.SINGLE, ADDRESS_MODE.MULTI, or null if not set / invalid
    *
    * @memberof Wallet
    * @inner
    */
-  getAddressMode() {
-    const mode = LOCAL_STORE.getItem(storageKeys.addressMode);
+  getAddressMode(network) {
+    const mode = LOCAL_STORE.getItem(addressModeKey(network));
     if (mode === ADDRESS_MODE.SINGLE || mode === ADDRESS_MODE.MULTI) {
       return mode;
     }
@@ -596,18 +599,44 @@ const wallet = {
   },
 
   /**
-   * Sets the address mode preference
+   * Sets the address mode preference for the given network.
    *
+   * @param {string} network Network name (e.g. 'mainnet', 'testnet')
    * @param {string} mode ADDRESS_MODE.SINGLE or ADDRESS_MODE.MULTI
    *
    * @memberof Wallet
    * @inner
    */
-  setAddressMode(mode) {
+  setAddressMode(network, mode) {
     if (mode !== ADDRESS_MODE.SINGLE && mode !== ADDRESS_MODE.MULTI) {
       return;
     }
-    LOCAL_STORE.setItem(storageKeys.addressMode, mode);
+    LOCAL_STORE.setItem(addressModeKey(network), mode);
+  },
+
+  /**
+   * Removes the address mode preference for every network.
+   *
+   * The per-network keys are dynamic (one entry per network the user has connected to,
+   * including custom networks), so they cannot live in LOCAL_STORE's static
+   * storageKeys list. Wallet reset must call this to avoid leaking a stored
+   * preference into a freshly-created wallet.
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  clearAllAddressModes() {
+    const prefix = 'wallet:address_mode:';
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(prefix)) {
+        keysToRemove.push(key);
+      }
+    }
+    for (const key of keysToRemove) {
+      localStorage.removeItem(key);
+    }
   },
 
   /**
