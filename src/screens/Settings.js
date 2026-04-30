@@ -389,7 +389,6 @@ function Settings() {
         <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); exportTokens(); }}>{t`Export registered tokens`}</a>
         <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); addPassphrase(); }}>{t`Set a passphrase`}</a>
         {ledgerCustomTokens && <a className="settings-action-link" href="true" onClick={(e) => { e.preventDefault(); untrustClicked(); }}>{t`Untrust all tokens on Ledger`}</a>}
-        <a className="settings-action-link settings-action-link--danger" href="true" onClick={(e) => { e.preventDefault(); resetClicked(); }}>{t`Reset wallet`}</a>
       </div>
 
       <hr />
@@ -402,6 +401,8 @@ function Settings() {
         </CopyToClipboard>
         <p onDoubleClick={() => setShowTimestamp(!showTimestamp)}><strong>{t`Date and time:`}</strong> {showTimestamp ? hathorLib.dateFormatter.dateToTimestamp(now) : now.toString()}</p>
       </div>
+
+      <button type="button" className="settings-reset-button" onClick={resetClicked}>{t`Reset wallet`}</button>
 
       <div className="settings-footer">
         <div><a href="true" onClick={goToTermsOfService}>{t`Terms of Service`}</a></div>
