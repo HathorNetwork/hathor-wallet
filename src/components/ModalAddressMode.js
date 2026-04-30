@@ -53,7 +53,7 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
     helpers.openExternalURL(LEARN_MORE_URL);
   };
 
-  const isSingleDisabled = hasTxOutside && currentMode !== ADDRESS_MODE.SINGLE;
+  const isSingleDisabled = (loading || hasTxOutside) && currentMode !== ADDRESS_MODE.SINGLE;
   const hasChanged = selectedMode !== currentMode;
 
   return (
