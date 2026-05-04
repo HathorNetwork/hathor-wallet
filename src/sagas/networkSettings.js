@@ -1,5 +1,13 @@
-import { NETWORK_SETTINGS_STATUS } from '../constants';
-import { types, isVersionAllowedUpdate, selectToken, setNetworkSettingsStatus, serverInfoUpdated } from '../actions';
+import { FEATURE_TOGGLE_DEFAULTS, NETWORK_SETTINGS_STATUS } from '../constants';
+import {
+  types,
+  isVersionAllowedUpdate,
+  selectToken,
+  setFeatureToggles,
+  setNetworkSettingsStatus,
+  serverInfoUpdated,
+  unleashContextUpdated,
+} from '../actions';
 import { all, call, fork, join, put, select, take, takeEvery } from 'redux-saga/effects';
 import hathorLib from '@hathor/wallet-lib';
 import { getGlobalWallet } from '../modules/wallet';
@@ -93,10 +101,34 @@ export function* changeNetworkSettings({ data, pin }) {
 }
 
 /**
- * This method returns when a NETWORKSETTINGS_UPDATE_SUCCESS event arrives
+ * This method returns when an UNLEASH_CONTEXT_UPDATED event arrives.
+ *
+ * UNLEASH_CONTEXT_UPDATED is dispatched by onNetworkSettingsUpdateSuccess after
+ * updateUnleashClientContext finishes, so waiting for it implicitly waits for
+ * both the NETWORKSETTINGS_UPDATE_SUCCESS dispatch and the Unleash refresh —
+ * giving us synchronous ordering before the wallet restart.
  */
-function* waitForUpdateSuccess() {
-  yield take('NETWORKSETTINGS_UPDATE_SUCCESS');
+function* waitForUnleashContextUpdated() {
+  yield take(types.UNLEASH_CONTEXT_UPDATED);
+}
+
+/**
+ * Single reaction point for network changes: refreshes the Unleash context and
+ * emits UNLEASH_CONTEXT_UPDATED when done. Both the regular network-change flow
+ * and the wallet-reset flow reach this listener through helpers.updateNetworkSettings.
+ *
+ * On Unleash failure we write FEATURE_TOGGLE_DEFAULTS so consumers don't keep
+ * reading the previous network's values. UNLEASH_CONTEXT_UPDATED is always
+ * emitted (success or failure) so callers waiting on it never hang.
+ */
+export function* onNetworkSettingsUpdateSuccess() {
+  try {
+    yield call(updateUnleashClientContext);
+  } catch (e) {
+    console.error('Failed to refresh unleash context after network change', e);
+    yield put(setFeatureToggles(FEATURE_TOGGLE_DEFAULTS));
+  }
+  yield put(unleashContextUpdated());
 }
 
 /**
@@ -120,14 +152,13 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
   const networkSettingsRedux = yield select((state) => state.networkSettings);
   const networkSettingsBackup = { ...networkSettingsRedux };
   try {
-    // Start waiting for the success in parallel
-    const waitTask = yield fork(waitForUpdateSuccess);
-    // Call the function that dispatches the action (e.g., makes API call)
+    // Fork before the dispatch: updateNetworkSettings dispatches synchronously,
+    // so a `take` placed after it would miss the action.
+    const waitTask = yield fork(waitForUnleashContextUpdated);
     helpers.updateNetworkSettings(networkSettings);
-    // Wait for the success to actually happen
+    // Block until the Unleash refresh finishes. The wallet restart below reads
+    // state.featureToggles via checkForFeatureFlag, which must reflect the new network.
     yield join(waitTask);
-    // Update unleash client context
-    yield call(updateUnleashClientContext, networkSettings);
     // Forces the re-validation of the allowed version after server change
     yield put(isVersionAllowedUpdate({ allowed: undefined }));
     yield put(selectToken(hathorLib.constants.NATIVE_TOKEN_UID));
@@ -136,9 +167,10 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
     yield put(serverInfoUpdated());
   } catch (e) {
     console.error(e);
-    // Restores storage and states as it was before
+    // Restores storage and states as it was before. The listener will refresh
+    // Unleash for the restored network asynchronously; we don't await it here
+    // because the saga is exiting on error.
     helpers.updateNetworkSettings(networkSettingsBackup);
-    yield call(updateUnleashClientContext, networkSettingsBackup);
     yield put(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.ERROR, error: t`Error updating network settings.` }));
   }
   yield put(setNetworkSettingsStatus({ status: NETWORK_SETTINGS_STATUS.SUCCESS }));
@@ -147,5 +179,6 @@ function* executeNetworkSettingsUpdate(networkSettings, pin) {
 export function* saga() {
   yield all([
     takeEvery(types.NETWORKSETTINGS_UPDATE_REQUESTED, changeNetworkSettings),
+    takeEvery(types.NETWORKSETTINGS_UPDATE_SUCCESS, onNetworkSettingsUpdateSuccess),
   ]);
 }

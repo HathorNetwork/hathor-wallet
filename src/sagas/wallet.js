@@ -28,7 +28,6 @@ import {
   WALLET_SERVICE_FEATURE_TOGGLE,
   ATOMIC_SWAP_SERVICE_FEATURE_TOGGLE,
   IGNORE_WS_TOGGLE_FLAG,
-  FEATURE_TOGGLE_DEFAULTS,
 } from '../constants';
 import {
   types,
@@ -61,7 +60,6 @@ import {
   addRegisteredTokens,
   startWalletSuccess,
   startWalletReset,
-  setFeatureToggles,
   newUnknownTokensFound,
 } from '../actions';
 import {
@@ -71,7 +69,6 @@ import {
   dispatchLedgerTokenSignatureVerification,
 } from './helpers';
 import { fetchTokenData, restoreTokensForNetwork } from './tokens';
-import { updateUnleashClientContext } from './featureToggle';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import nanoUtils from '../utils/nanoContracts';
@@ -786,21 +783,6 @@ export function* onWalletReset() {
   config.setNetwork('mainnet');
   // This will update the lib config and redux state with the default network settings
   helpersUtils.loadStorageState();
-
-  // Sync the unleash client + redux feature toggles with the post-reset network
-  // (mainnet defaults). Without this, state.featureToggles would still reflect
-  // the network the user was on before the reset, and the next startWallet would
-  // read stale flags. Errors here must not block the reset (it is irreversible
-  // from the user's perspective); on failure we explicitly write
-  // FEATURE_TOGGLE_DEFAULTS so checkForFeatureFlag (which reads via lodash.get
-  // with a per-key default) doesn't return the previous network's stale values
-  // — the defaults only kick in for missing keys, not pre-existing stale ones.
-  try {
-    yield call(updateUnleashClientContext);
-  } catch (e) {
-    console.error('Failed to refresh unleash context after wallet reset', e);
-    yield put(setFeatureToggles(FEATURE_TOGGLE_DEFAULTS));
-  }
 
   if (wallet) {
     yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
