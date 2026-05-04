@@ -402,7 +402,7 @@ function Settings() {
         <p onDoubleClick={() => setShowTimestamp(!showTimestamp)}><strong>{t`Date and time:`}</strong> {showTimestamp ? hathorLib.dateFormatter.dateToTimestamp(now) : now.toString()}</p>
       </div>
 
-      <button type="button" className="settings-reset-button" onClick={resetClicked}>{t`Reset wallet`}</button>
+      {!isHardwareWallet && <button type="button" className="settings-reset-button" onClick={resetClicked}>{t`Reset wallet`}</button>}
 
       <div className="settings-footer">
         <div><a href="true" onClick={goToTermsOfService}>{t`Terms of Service`}</a></div>
