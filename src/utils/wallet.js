@@ -635,7 +635,7 @@ const wallet = {
       }
     }
     for (const key of keysToRemove) {
-      localStorage.removeItem(key);
+      LOCAL_STORE.removeItem(key);
     }
   },
 
