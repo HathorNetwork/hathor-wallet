@@ -316,8 +316,6 @@ export function* startWallet(action) {
       nanoContractsEnabled,
       genesisHash,
     }));
-
-    yield put(setAddressMode(attemptedAddressMode));
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from
@@ -372,16 +370,16 @@ export function* startWallet(action) {
   // After connection, confirm the actual scan policy. The wallet-lib changes
   // SINGLE_ADDRESS → GAP_LIMIT during the first connection if it finds tx on
   // addresses with index > 0. We persist the *real* mode here — this is the
-  // single point of write to localStorage for addressMode.
+  // single point of write for addressMode (both Redux and localStorage).
   let finalAddressMode = attemptedAddressMode;
   if (attemptedAddressMode === ADDRESS_MODE.SINGLE) {
     const actualScanPolicy = yield call([wallet.storage, wallet.storage.getScanningPolicy]);
     if (actualScanPolicy !== SCANNING_POLICY.SINGLE_ADDRESS) {
       finalAddressMode = ADDRESS_MODE.MULTI;
-      yield put(setAddressMode(ADDRESS_MODE.MULTI));
     }
   }
 
+  yield put(setAddressMode(finalAddressMode));
   walletUtils.setAddressMode(network, finalAddressMode);
 
   // Register native token + network tokens in order
