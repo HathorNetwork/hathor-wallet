@@ -70,6 +70,7 @@ export const types = {
   NETWORKSETTINGS_UPDATED: 'NETWORKSETTINGS_UPDATED',
   NETWORKSETTINGS_UPDATE_SUCCESS: 'NETWORKSETTINGS_UPDATE_SUCCESS',
   NETWORKSETTINGS_SET_STATUS: 'NETWORKSETTINGS_SET_STATUS',
+  UNLEASH_CONTEXT_UPDATED: 'UNLEASH_CONTEXT_UPDATED',
   REOWN_SET_CLIENT: 'REOWN_SET_CLIENT',
   REOWN_SET_MODAL: 'REOWN_SET_MODAL',
   REOWN_SET_SESSIONS: 'REOWN_SET_SESSIONS',
@@ -749,6 +750,18 @@ export const networkSettingsRequestUpdate = (data, pin) => ({
  */
 export const networkSettingsUpdateSuccess = () => ({
   type: types.NETWORKSETTINGS_UPDATE_SUCCESS,
+});
+
+/**
+ * Signals that the Unleash client context has been refreshed and
+ * state.featureToggles reflects the current network. Dispatched by the
+ * NETWORKSETTINGS_UPDATE_SUCCESS listener after updateUnleashClientContext
+ * completes (success or failure). Consumers that need synchronous ordering
+ * with the refresh (e.g. executeNetworkSettingsUpdate before restarting the
+ * wallet) should `take` this action.
+ */
+export const unleashContextUpdated = () => ({
+  type: types.UNLEASH_CONTEXT_UPDATED,
 });
 
 /**
