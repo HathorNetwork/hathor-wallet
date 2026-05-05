@@ -781,13 +781,18 @@ export function* onWalletReset() {
   // We must set the lib config network to mainnet because it's the default network
   // XXX we should have a method in the config to reset all configs
   config.setNetwork('mainnet');
-  // This will update the lib config and redux state with the default network settings
-  helpersUtils.loadStorageState();
+
   if (wallet) {
     yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
   }
 
+  // Wipe redux to initialState first, then push fresh defaults via loadStorageState.
+  // loadStorageState dispatches NETWORKSETTINGS_UPDATE_SUCCESS, which triggers the
+  // listener that refreshes Unleash and writes setFeatureToggles. Doing the wipe
+  // first guarantees that setFeatureToggles is the final write to state.featureToggles,
+  // not something the wipe clobbers.
   yield put(startWalletReset());
+  helpersUtils.loadStorageState();
 
   yield put(setNavigateTo('/welcome'));
 }

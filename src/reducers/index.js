@@ -1152,8 +1152,9 @@ export const onStartWalletFailed = (state) => ({
  * - ledgerWasClosed: Ledger device state persists across wallet instances
  * - featureTogglesInitialized: Unleash client runs independently
  *
- * Note: networkSettings is intentionally reset because the onWalletReset saga
- * resets localStorage and reloads default network settings before this reducer runs.
+ * Note: networkSettings is reset to initialState; onWalletReset calls
+ * helpers.loadStorageState() after this reducer to repopulate it and trigger
+ * the Unleash refresh listener.
  *
  * Note 2: The default values to preserve are the same from `onCleanData()`
  */
