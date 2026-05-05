@@ -22,7 +22,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
 import { getGlobalWallet } from "../modules/wallet";
-import { OutputType } from '@hathor/wallet-lib/lib/wallet/types';
+import { OutputType } from '@hathor/wallet-lib';
 import { SendDataOutputOne } from '../components/SendDataOutputOne';
 import { uniqueId } from 'lodash';
 import { useTokensDetails } from '../hooks/useTokenDetails';

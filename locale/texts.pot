@@ -34,7 +34,7 @@ msgid "Invalid PIN"
 msgstr ""
 
 #: src/screens/ChoosePassphrase.js:83
-#: src/screens/Settings.js:344
+#: src/screens/Settings.js:389
 #.  Everything is fine, so show confirm modal
 msgid "Set a passphrase"
 msgstr ""
@@ -209,7 +209,7 @@ msgstr ""
 #: src/components/atomic-swap/ModalAtomicSend.js:323
 #: src/screens/CreateNFT.js:316
 #: src/screens/CreateToken.js:357
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:537
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:531
 msgid "Amount"
 msgstr ""
 
@@ -233,7 +233,7 @@ msgstr ""
 #: src/components/tokens/TokenMint.js:147
 #: src/screens/CreateNFT.js:329
 #: src/screens/CreateToken.js:374
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:573
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:567
 msgid "Address"
 msgstr ""
 
@@ -410,6 +410,7 @@ msgstr ""
 
 #: src/components/ModalUnhandledError.js:99
 #: src/screens/LoadWalletFailed.js:72
+#: src/screens/Settings.js:391
 msgid "Reset wallet"
 msgstr ""
 
@@ -448,7 +449,6 @@ msgstr ""
 #: src/components/ModalConfirmClearStorage.js:58
 #: src/components/ModalResetAllData.js:137
 #: src/screens/LockedWallet.js:120
-#: src/screens/Settings.js:346
 msgid "Reset all data"
 msgstr ""
 
@@ -787,86 +787,81 @@ msgstr ""
 msgid "I allow Hathor Wallet to report error information to Hathor team."
 msgstr ""
 
-#: src/screens/Settings.js:94
+#: src/screens/Settings.js:97
 msgid "Complete action on your hardware wallet"
 msgstr ""
 
-#: src/screens/Settings.js:97
+#: src/screens/Settings.js:100
 msgid "You can set your passphrase directly on your hardware wallet."
 msgstr ""
 
-#: src/screens/Settings.js:99
+#: src/screens/Settings.js:102
 msgid "|fn:More info| about this on Ledger."
 msgstr ""
 
-#: src/screens/Settings.js:164
+#: src/screens/Settings.js:167
 msgid "Turn notifications off"
 msgstr ""
 
-#: src/screens/Settings.js:165
+#: src/screens/Settings.js:168
 msgid "Are you sure you don't want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:167
+#: src/screens/Settings.js:170
 msgid "Turn notifications on"
 msgstr ""
 
-#: src/screens/Settings.js:168
+#: src/screens/Settings.js:171
 msgid "Are you sure you want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:189
+#: src/screens/Settings.js:192
 msgid "Show zero-balance tokens"
 msgstr ""
 
-#: src/screens/Settings.js:190
+#: src/screens/Settings.js:193
 msgid "Are you sure you want to show all tokens, including those with zero balance?"
 msgstr ""
 
-#: src/screens/Settings.js:192
+#: src/screens/Settings.js:195
 msgid "Hide zero-balance tokens"
 msgstr ""
 
-#: src/screens/Settings.js:193
+#: src/screens/Settings.js:196
 msgid "Are you sure you want to hide tokens with zero balance?"
 msgstr ""
 
-#: src/screens/Settings.js:297
-msgid "Date and time:"
+#: src/components/ModalError.js:35
+#: src/screens/Settings.js:319
+msgid "Error"
 msgstr ""
 
-#: src/screens/Settings.js:300
-#, javascript-format
-msgid "**Server:** You are connected to ${ serverURL }"
+#: src/screens/Settings.js:320
+msgid "Failed to change address mode. Please try again."
 msgstr ""
 
-#: src/screens/Settings.js:303
-#, javascript-format
-msgid "**Real-time server:** You are connected to ${ wsServerURL }"
+#: src/screens/Settings.js:337
+msgid "General Settings"
 msgstr ""
 
-#: src/screens/Settings.js:306
-msgid "Change network"
+#: src/screens/Settings.js:340
+msgid "Network:"
 msgstr ""
 
-#: src/screens/Settings.js:312
-msgid "Reown"
+#: src/screens/Settings.js:341
+msgid "Connected to"
 msgstr ""
 
-#: src/screens/Settings.js:314
-#, javascript-format
-msgid "Connected Sessions: ${ connectedSessionsCount }"
+#: src/components/TokenGeneralInfo.js:154
+#: src/screens/Settings.js:345
+#: src/screens/Settings.js:350
+#: src/screens/Settings.js:361
+#: src/screens/Settings.js:369
+#: src/screens/Settings.js:376
+msgid "Change"
 msgstr ""
 
-#: src/screens/Settings.js:316
-msgid "Manage sessions"
-msgstr ""
-
-#: src/screens/Settings.js:322
-msgid "Advanced Settings"
-msgstr ""
-
-#: src/screens/Settings.js:324
+#: src/screens/Settings.js:348
 msgid "Allow notifications:"
 msgstr ""
 
@@ -875,9 +870,9 @@ msgstr ""
 #: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:151
-#: src/screens/Settings.js:324
-#: src/screens/Settings.js:328
-#: src/screens/Settings.js:336
+#: src/screens/Settings.js:349
+#: src/screens/Settings.js:360
+#: src/screens/Settings.js:368
 msgid "Yes"
 msgstr ""
 
@@ -886,63 +881,89 @@ msgstr ""
 #: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:152
-#: src/screens/Settings.js:324
-#: src/screens/Settings.js:329
-#: src/screens/Settings.js:336
+#: src/screens/Settings.js:349
+#: src/screens/Settings.js:360
+#: src/screens/Settings.js:368
 msgid "No"
 msgstr ""
 
-#: src/components/TokenGeneralInfo.js:154
-#: src/screens/Settings.js:324
-#: src/screens/Settings.js:331
-#: src/screens/Settings.js:336
-msgid "Change"
+#: src/screens/Settings.js:356
+msgid "Advanced Settings"
 msgstr ""
 
-#: src/screens/Settings.js:326
+#: src/screens/Settings.js:359
 msgid "Hide zero-balance tokens:"
 msgstr ""
 
-#: src/screens/Settings.js:333
+#: src/screens/Settings.js:363
 msgid ""
 "When selected, any tokens with a balance of zero will not be displayed "
 "anywhere in the wallet."
 msgstr ""
 
-#: src/screens/Settings.js:336
+#: src/screens/Settings.js:367
 msgid "Automatically report bugs to Hathor:"
 msgstr ""
 
-#: src/screens/Settings.js:339
-msgid "Unique identifier"
+#: src/screens/Settings.js:373
+msgid "Address Mode:"
+msgstr ""
+
+#: src/screens/Settings.js:374
+msgid "Single address"
+msgstr ""
+
+#: src/screens/Settings.js:374
+msgid "Multi address"
+msgstr ""
+
+#: src/screens/Settings.js:382
+msgid "Reown:"
+msgstr ""
+
+#: src/screens/Settings.js:383
+#, javascript-format
+msgid "Connected Sessions: ${ connectedSessionsCount }"
+msgstr ""
+
+#: src/screens/Settings.js:384
+msgid "Manage sessions"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:419
+#: src/screens/Settings.js:387
+msgid "Import tokens"
+msgstr ""
+
+#: src/screens/Settings.js:388
+msgid "Export registered tokens"
+msgstr ""
+
+#: src/screens/Settings.js:390
+msgid "Untrust all tokens on Ledger"
+msgstr ""
+
+#: src/screens/Settings.js:399
+msgid "Unique identifier:"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:101
 #: src/components/Reown/CreateTokenRequestData.js:64
 #: src/components/TokenGeneralInfo.js:177
-#: src/components/WalletAddress.js:175
-#: src/screens/Settings.js:339
+#: src/components/WalletAddress.js:180
+#: src/screens/Settings.js:399
 #: src/screens/atomic-swap/EditSwap.js:97
 #: src/screens/atomic-swap/EditSwap.js:111
 msgid "Copy to clipboard"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:419
-#: src/screens/Settings.js:342
-msgid "Import tokens"
-msgstr ""
-
-#: src/screens/Settings.js:343
-msgid "Export Registered Tokens"
-msgstr ""
-
-#: src/screens/Settings.js:345
-msgid "Untrust all tokens on Ledger"
+#: src/screens/Settings.js:402
+msgid "Date and time:"
 msgstr ""
 
 #: src/components/TxData.js:1114
-#: src/components/WalletAddress.js:195
-#: src/screens/Settings.js:355
+#: src/components/WalletAddress.js:200
+#: src/screens/Settings.js:410
 #: src/screens/atomic-swap/EditSwap.js:596
 msgid "Copied to clipboard!"
 msgstr ""
@@ -1221,68 +1242,68 @@ msgstr ""
 msgid "Unregister"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:115
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:109
 msgid "Address is required."
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicReceive.js:44
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:125
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:119
 msgid "Invalid address."
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:186
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:180
 msgid "Creating Nano Contract"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:186
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:180
 msgid "Executing Nano Contract Method"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:456
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:450
 msgid "Select address to sign"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:484
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:478
 msgid "Select from a list"
 msgstr ""
 
 #: src/components/atomic-swap/ModalAtomicReceive.js:96
 #: src/components/atomic-swap/ModalAtomicSend.js:304
 #: src/screens/atomic-swap/EditSwap.js:190
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:533
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:527
 msgid "Token"
 msgstr ""
 
 #: src/components/SendDataOutputOne.js:29
 #: src/components/SendTokensOne.js:527
 #: src/screens/atomic-swap/ProposalList.js:107
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:558
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:552
 msgid "Remove"
 msgstr ""
 
 #: src/components/Reown/CreateTokenRequestData.js:119
 #: src/components/TokenHistory.js:228
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:633
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:627
 #: src/screens/nano-contract/NanoContractSelectBlueprint.js:92
 msgid "Type"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:649
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:643
 msgid "Create Nano Contract"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:649
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:663
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:643
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:657
 msgid "Execute Method"
 msgstr ""
 
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:658
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:652
 msgid "Add action"
 msgstr ""
 
 #: src/components/Reown/modals/CreateTokenModal.js:57
 #: src/screens/atomic-swap/NewSwap.js:92
-#: src/screens/nano-contract/NanoContractExecuteMethod.js:663
+#: src/screens/nano-contract/NanoContractExecuteMethod.js:657
 msgid "Create"
 msgstr ""
 
@@ -1748,13 +1769,67 @@ msgstr ""
 msgid "Configuration string"
 msgstr ""
 
+#: src/components/ModalAddressMode.js:62
+msgid "Address Mode"
+msgstr ""
+
+#: src/components/ModalAddressMode.js:69
+msgid "You can set your wallet to "
+msgstr ""
+
+#: src/components/ModalAddressMode.js:69
+msgid "single or multi address mode"
+msgstr ""
+
+#: src/components/ModalAddressMode.js:71
+msgid "You can switch anytime in the settings."
+msgstr ""
+
+#: src/components/ModalAddressMode.js:87
+msgid "Single Address"
+msgstr ""
+
+#: src/components/ModalAddressMode.js:90
+msgid "Your wallet will use only one address (index 0)."
+msgstr ""
+
+#: src/components/ModalAddressMode.js:92
+msgid "Easier to manage and compatible with all dApps."
+msgstr ""
+
+#: src/components/ModalAddressMode.js:108
+msgid "Multi Address"
+msgstr ""
+
+#: src/components/ModalAddressMode.js:111
+msgid "Your wallet will let you generate multiple addresses."
+msgstr ""
+
+#: src/components/ModalAddressMode.js:113
+msgid "Useful for advanced users."
+msgstr ""
+
+#: src/components/ModalAddressMode.js:121
+msgid ""
+"You can't switch to single address mode because other addresses in your "
+"wallet are already in use."
+msgstr ""
+
+#: src/components/ModalAddressMode.js:123
+msgid "Learn more"
+msgstr ""
+
+#: src/components/ModalAddressMode.js:137
+msgid "Save preferences"
+msgstr ""
+
 #: src/components/ModalAddressQRCode.js:78
 #.  If copied with success
 msgid "Address copied to clipboard!"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:91
-#: src/components/WalletAddress.js:151
+#: src/components/WalletAddress.js:154
 msgid "Address to receive tokens"
 msgstr ""
 
@@ -1896,10 +1971,6 @@ msgstr ""
 
 #: src/components/ModalConfirmTestnet.js:60
 msgid "Cancel change"
-msgstr ""
-
-#: src/components/ModalError.js:35
-msgid "Error"
 msgstr ""
 
 #: src/components/ModalLedgerResetTokenSignatures.js:115
@@ -2955,46 +3026,43 @@ msgstr ""
 msgid "Software Wallet"
 msgstr ""
 
-#: src/components/WalletAddress.js:92
+#: src/components/WalletAddress.js:93
 msgid "Validate address on Ledger"
 msgstr ""
 
-#: src/components/WalletAddress.js:140
+#: src/components/WalletAddress.js:141
 msgid "Validate that the address below is the same presented on the Ledger screen."
 msgstr ""
 
-#: src/components/WalletAddress.js:141
+#: src/components/WalletAddress.js:142
 msgid "Press both buttons on your Ledger in case the address is valid."
 msgstr ""
 
-#: src/components/WalletAddress.js:154
+#: src/components/WalletAddress.js:158
 msgid "Generate new address"
 msgstr ""
 
-#: src/components/WalletAddress.js:154
+#: src/components/WalletAddress.js:158
 msgid "Get new address"
 msgstr ""
 
-#: src/components/WalletAddress.js:158
-#.  hide the QR code for hardware wallet
+#: src/components/WalletAddress.js:163
 msgid "QR Code"
 msgstr ""
 
-#: src/components/WalletAddress.js:158
-#.  hide the QR code for hardware wallet
+#: src/components/WalletAddress.js:163
 msgid "Get qrcode"
 msgstr ""
 
-#: src/components/WalletAddress.js:163
-#.  hide all addresses for hardware wallet
+#: src/components/WalletAddress.js:168
 msgid "See all addresses"
 msgstr ""
 
-#: src/components/WalletAddress.js:185
+#: src/components/WalletAddress.js:190
 msgid "Show full address"
 msgstr ""
 
-#: src/components/WalletAddress.js:196
+#: src/components/WalletAddress.js:201
 msgid "You must use an old address before generating new ones"
 msgstr ""
 
