@@ -850,29 +850,18 @@ export function* onWalletReset() {
   // We must set the lib config network to mainnet because it's the default network
   // XXX we should have a method in the config to reset all configs
   config.setNetwork('mainnet');
-  // This will update the lib config and redux state with the default network settings
-  helpersUtils.loadStorageState();
-
-  // Sync the unleash client + redux feature toggles with the post-reset network
-  // (mainnet defaults). Without this, state.featureToggles would still reflect
-  // the network the user was on before the reset, and the next startWallet would
-  // read stale flags. Errors here must not block the reset (it is irreversible
-  // from the user's perspective); on failure we explicitly write
-  // FEATURE_TOGGLE_DEFAULTS so checkForFeatureFlag (which reads via lodash.get
-  // with a per-key default) doesn't return the previous network's stale values
-  // — the defaults only kick in for missing keys, not pre-existing stale ones.
-  try {
-    yield call(updateUnleashClientContext);
-  } catch (e) {
-    console.error('Failed to refresh unleash context after wallet reset', e);
-    yield put(setFeatureToggles(FEATURE_TOGGLE_DEFAULTS));
-  }
 
   if (wallet) {
     yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
   }
 
+  // Wipe redux to initialState first, then push fresh defaults via loadStorageState.
+  // loadStorageState dispatches NETWORKSETTINGS_UPDATE_SUCCESS, which triggers the
+  // listener that refreshes Unleash and writes setFeatureToggles. Doing the wipe
+  // first guarantees that setFeatureToggles is the final write to state.featureToggles,
+  // not something the wipe clobbers.
   yield put(startWalletReset());
+  helpersUtils.loadStorageState();
 
   yield put(setNavigateTo('/welcome'));
 }
