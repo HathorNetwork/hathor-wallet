@@ -600,8 +600,6 @@ const onCleanData = (state) => {
     loadingAddresses: state.loadingAddresses,
     ledgerWasClosed: state.ledgerWasClosed,
     featureTogglesInitialized: state.featureTogglesInitialized,
-    // Must be preserved together with featureTogglesInitialized — see onStartWalletReset.
-    featureToggles: state.featureToggles,
   });
 };
 
@@ -1157,13 +1155,6 @@ export const onStartWalletFailed = (state) => ({
  * - isVersionAllowed: API version check is independent of wallet data
  * - ledgerWasClosed: Ledger device state persists across wallet instances
  * - featureTogglesInitialized: Unleash client runs independently
- * - featureToggles: must be preserved together with the initialized flag,
- *   otherwise checkForFeatureFlag (which skips waiting when
- *   featureTogglesInitialized is true) reads the defaults and the next
- *   startWallet picks the wrong values for any flag that has divergent
- *   values per network at the Unleash client. The onWalletReset saga
- *   calls updateUnleashClientContext before dispatching START_WALLET_RESET,
- *   so the value preserved here already reflects the post-reset network.
  *
  * Note: networkSettings is reset to initialState; onWalletReset calls
  * helpers.loadStorageState() after this reducer to repopulate it and trigger
@@ -1177,7 +1168,6 @@ export const onStartWalletReset = (state) => ({
   isVersionAllowed: state.isVersionAllowed,
   ledgerWasClosed: state.ledgerWasClosed,
   featureTogglesInitialized: state.featureTogglesInitialized,
-  featureToggles: state.featureToggles,
   // Explicitly ensure these states are cleared
   walletStartState: null,
   loadingAddresses: false,
