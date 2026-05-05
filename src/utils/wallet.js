@@ -63,7 +63,8 @@ const storageKeys = {
 
 // Address mode is namespaced per network so the Unleash rollout flag per network
 // cannot be bypassed by switching networks while a mode is stored globally.
-const addressModeKey = (network) => `wallet:address_mode:${network}`;
+const ADDRESS_MODE_KEY_PREFIX = 'wallet:address_mode:';
+const addressModeKey = (network) => `${ADDRESS_MODE_KEY_PREFIX}${network}`;
 
 /**
  * We use localStorage and Redux to save data.
@@ -626,16 +627,15 @@ const wallet = {
    * @inner
    */
   clearAllAddressModes() {
-    const prefix = 'wallet:address_mode:';
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(prefix)) {
+      if (key && key.startsWith(ADDRESS_MODE_KEY_PREFIX)) {
         keysToRemove.push(key);
       }
     }
     for (const key of keysToRemove) {
-      localStorage.removeItem(key);
+      LOCAL_STORE.removeItem(key);
     }
   },
 

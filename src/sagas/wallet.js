@@ -31,6 +31,7 @@ import {
   IGNORE_WS_TOGGLE_FLAG,
   SINGLE_ADDRESS_FEATURE_TOGGLE,
   ADDRESS_MODE,
+  FEATURE_TOGGLE_DEFAULTS,
 } from '../constants';
 import {
   types,
@@ -64,6 +65,7 @@ import {
   startWalletSuccess,
   startWalletReset,
   setAddressMode,
+  setFeatureToggles,
   newUnknownTokensFound,
 } from '../actions';
 import {
@@ -314,8 +316,6 @@ export function* startWallet(action) {
       nanoContractsEnabled,
       genesisHash,
     }));
-
-    yield put(setAddressMode(attemptedAddressMode));
   } catch(e) {
     if (useWalletService) {
       // Wallet Service start wallet will fail if the status returned from
@@ -370,16 +370,13 @@ export function* startWallet(action) {
   // After connection, confirm the actual scan policy. The wallet-lib changes
   // SINGLE_ADDRESS → GAP_LIMIT during the first connection if it finds tx on
   // addresses with index > 0. We persist the *real* mode here — this is the
-  // single point of write to localStorage for addressMode.
-  let finalAddressMode = attemptedAddressMode;
-  if (attemptedAddressMode === ADDRESS_MODE.SINGLE) {
-    const actualScanPolicy = yield call([wallet.storage, wallet.storage.getScanningPolicy]);
-    if (actualScanPolicy !== SCANNING_POLICY.SINGLE_ADDRESS) {
-      finalAddressMode = ADDRESS_MODE.MULTI;
-      yield put(setAddressMode(ADDRESS_MODE.MULTI));
-    }
-  }
+  // single point of write for addressMode (both Redux and localStorage).
+  const actualScanPolicy = yield call([wallet.storage, wallet.storage.getScanningPolicy]);
+  const finalAddressMode = actualScanPolicy === SCANNING_POLICY.SINGLE_ADDRESS
+    ? ADDRESS_MODE.SINGLE
+    : ADDRESS_MODE.MULTI;
 
+  yield put(setAddressMode(finalAddressMode));
   walletUtils.setAddressMode(network, finalAddressMode);
 
   // Register native token + network tokens in order
@@ -850,25 +847,18 @@ export function* onWalletReset() {
   // We must set the lib config network to mainnet because it's the default network
   // XXX we should have a method in the config to reset all configs
   config.setNetwork('mainnet');
-  // This will update the lib config and redux state with the default network settings
-  helpersUtils.loadStorageState();
-
-  // Sync the unleash client + redux feature toggles with the post-reset network
-  // (mainnet defaults). Without this, state.featureToggles would still reflect
-  // the network the user was on before the reset, and the next startWallet would
-  // read stale flags. Errors here must not block the reset (it is irreversible
-  // from the user's perspective); FEATURE_TOGGLE_DEFAULTS covers the degraded case.
-  try {
-    yield call(updateUnleashClientContext);
-  } catch (e) {
-    console.error('Failed to refresh unleash context after wallet reset', e);
-  }
 
   if (wallet) {
     yield call([wallet, wallet.stop], { cleanStorage: true, cleanAddresses: true });
   }
 
+  // Wipe redux to initialState first, then push fresh defaults via loadStorageState.
+  // loadStorageState dispatches NETWORKSETTINGS_UPDATE_SUCCESS, which triggers the
+  // listener that refreshes Unleash and writes setFeatureToggles. Doing the wipe
+  // first guarantees that setFeatureToggles is the final write to state.featureToggles,
+  // not something the wipe clobbers.
   yield put(startWalletReset());
+  helpersUtils.loadStorageState();
 
   yield put(setNavigateTo('/welcome'));
 }

@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { t } from 'ttag';
+import { useSelector } from 'react-redux';
 import { BaseNanoContractModal } from './BaseNanoContractModal';
 import { setNewNanoContractStatusReady } from '../../../actions';
+import { ADDRESS_MODE } from '../../../constants';
 
 /**
  * Modal for handling nano contract transaction requests from dApps
@@ -18,6 +20,8 @@ import { setNewNanoContractStatusReady } from '../../../actions';
  * @param {Function} onReject Function to call when the user rejects the request
  */
 export function SendNanoContractTxModal({ data, onAccept, onReject }) {
+  const isSingleAddress = useSelector((state) => state.addressMode) === ADDRESS_MODE.SINGLE;
+
   // Status configuration for the base component
   const statusConfig = {
     setReadyAction: setNewNanoContractStatusReady,
@@ -36,7 +40,7 @@ export function SendNanoContractTxModal({ data, onAccept, onReject }) {
       modalTitle={t`NEW NANO CONTRACT TRANSACTION`}
       acceptButtonText={t`Accept Transaction`}
       rejectButtonText={t`Reject`}
-      showCallerSection={true}
+      showCallerSection={!isSingleAddress}
     />
   );
 } 
