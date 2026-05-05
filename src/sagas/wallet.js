@@ -371,13 +371,10 @@ export function* startWallet(action) {
   // SINGLE_ADDRESS → GAP_LIMIT during the first connection if it finds tx on
   // addresses with index > 0. We persist the *real* mode here — this is the
   // single point of write for addressMode (both Redux and localStorage).
-  let finalAddressMode = attemptedAddressMode;
-  if (attemptedAddressMode === ADDRESS_MODE.SINGLE) {
-    const actualScanPolicy = yield call([wallet.storage, wallet.storage.getScanningPolicy]);
-    if (actualScanPolicy !== SCANNING_POLICY.SINGLE_ADDRESS) {
-      finalAddressMode = ADDRESS_MODE.MULTI;
-    }
-  }
+  const actualScanPolicy = yield call([wallet.storage, wallet.storage.getScanningPolicy]);
+  const finalAddressMode = actualScanPolicy === SCANNING_POLICY.SINGLE_ADDRESS
+    ? ADDRESS_MODE.SINGLE
+    : ADDRESS_MODE.MULTI;
 
   yield put(setAddressMode(finalAddressMode));
   walletUtils.setAddressMode(network, finalAddressMode);
