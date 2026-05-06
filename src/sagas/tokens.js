@@ -222,9 +222,21 @@ function* fetchTokenHistory(action) {
 }
 
 /**
- * This saga will monitor the `new_tokens` actions to detect new tokens being registered
- * on the wallet and dispatch the TOKEN_FETCH_BALANCE_REQUESTED action so the balance
- * for this token gets downloaded
+ * Side-effect saga reacting to a `new_tokens` action, which is dispatched
+ * each time a single token transitions into the registered set (on manual
+ * import, automatic import, or after re-adding HTR following an unregister).
+ *
+ * Action payload contract:
+ *  - `uid`: the token whose registration state just changed.
+ *  - `tokens`: the full registered-token snapshot the reducer will store.
+ *
+ * Effects performed for the affected `uid` only:
+ *  1. Request a balance fetch. Other entries in `tokens` are not iterated
+ *     because their balances were already fetched on their own registration.
+ *  2. Persist the snapshot to localStorage keyed by genesis hash so the
+ *     list survives a network switch.
+ *
+ * @param {{ type: string, payload: { uid: string, tokens: Array } }} action
  */
 function* routeTokenChange(action) {
   const wallet = getGlobalWallet();
@@ -236,14 +248,11 @@ function* routeTokenChange(action) {
   switch (action.type) {
     default:
     case 'new_tokens':
-      for (const token of action.payload.tokens) {
-        yield put({
-          type: types.TOKEN_FETCH_BALANCE_REQUESTED,
-          tokenId: token.uid,
-        });
-      }
+      yield put({
+        type: types.TOKEN_FETCH_BALANCE_REQUESTED,
+        tokenId: action.payload.uid,
+      });
 
-      // Persist registered tokens for the current network
       yield call(saveCurrentNetworkTokens, wallet);
       break;
   }
