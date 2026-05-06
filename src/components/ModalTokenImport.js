@@ -101,6 +101,13 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
   }, []);
 
   useEffect(() => {
+    // Only fetch during the initial LOADING phase. Re-fetching after the user
+    // has reached SELECTION would wipe their selected flags when transitioning
+    // back from CONFIRMATION (handleBack: CONFIRMATION → SELECTION).
+    if (modalState !== MODAL_STATE.LOADING) {
+      return;
+    }
+
     let cancelled = false;
 
     fetchDetails(unknownTokens, () => cancelled);
@@ -108,7 +115,20 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
     return () => {
       cancelled = true;
     };
-  }, [unknownTokens]);
+  }, [unknownTokens, modalState]);
+
+  /**
+   * Auto-close the modal 2 seconds after entering success state.
+  */
+  useEffect(() => {
+    if (modalState !== MODAL_STATE.SUCCESS) return;
+
+    const timer = setTimeout(() => {
+      context.hideModal();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [modalState]);
 
   async function fetchDetails(tokens, isCancelled) {
     const wallet = getGlobalWallet();
@@ -173,41 +193,47 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
   };
 
   /**
-   * Dispatch tokenRegisterRequested for a list of token uids, tracking
-   * resolve/reject via callbacks.
+   * Register `uids` sequentially, then route the modal to SUCCESS or
+   * ERROR depending on whether any uid failed.
+   *
    * @param {string[]} uids
    */
-  const dispatchRegistrations = (uids) => {
+  const dispatchRegistrations = async (uids) => {
     setModalState(MODAL_STATE.REGISTERING);
-    let completed = 0;
-    const errors = {};
 
-    uids.forEach((uid) => {
-      dispatch(
-        tokenRegisterRequested(uid, {
-          alwaysShow: false,
-          resolve: () => {
-            completed += 1;
-            if (completed === uids.length) {
-              if (Object.keys(errors).length > 0) {
-                setFailedTokens(errors);
-                setModalState(MODAL_STATE.ERROR);
-              } else {
-                setModalState(MODAL_STATE.SUCCESS);
-              }
-            }
-          },
-          reject: (error) => {
-            errors[uid] = error?.message || t`Unknown error`;
-            completed += 1;
-            if (completed === uids.length) {
-              setFailedTokens(errors);
-              setModalState(MODAL_STATE.ERROR);
-            }
-          },
-        })
-      );
-    });
+    // Force REGISTERING to paint before the saga starts. Hot storage
+    // cache makes the saga finish synchronously, which would let React 18
+    // batching drop the loading state.
+    await new Promise((r) => setTimeout(r, 0));
+
+    const errors = {};
+    for (const uid of uids) {
+      // Await the saga's resolve/reject — serializes the loop.
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => {
+        dispatch(
+          tokenRegisterRequested(uid, {
+            alwaysShow: false,
+            resolve: () => resolve(),
+            reject: (error) => {
+              errors[uid] = error?.message || t`Unknown error`;
+              resolve();
+            },
+          })
+        );
+      });
+      // Yield between iterations; without it consecutive hot-cache
+      // saga runs block paint and freeze the spinner.
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFailedTokens(errors);
+      setModalState(MODAL_STATE.ERROR);
+    } else {
+      setModalState(MODAL_STATE.SUCCESS);
+    }
   };
 
   const handleContinue = () => {
@@ -227,19 +253,6 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
     setFailedTokens({});
     dispatchRegistrations(uidsToRetry);
   };
-
-  /**
-   * Auto-close the modal 2 seconds after entering success state.
-   */
-  useEffect(() => {
-    if (modalState !== MODAL_STATE.SUCCESS) return;
-
-    const timer = setTimeout(() => {
-      context.hideModal();
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [modalState]);
 
   /**
    * Format a balance value for display.
@@ -422,21 +435,12 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
     </>
   );
 
-  const renderRegistering = () => {
-    const tokenUids = unknownTokens.map((tk) => tk.uid);
-
-    return (
-      <>
-        <p className="mb-3">{t`Registering selected tokens...`}</p>
-        <div className="token-list">
-          {tokenUids.filter((uid) => tokenDetails[uid]?.selected).map((uid) => renderTokenRow(uid))}
-        </div>
-        <div className="d-flex justify-content-center mt-4">
-          <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} delay={500} />
-        </div>
-      </>
-    );
-  };
+  const renderRegistering = () => (
+    <div className="d-flex flex-column align-items-center justify-content-center py-5">
+      <ReactLoading type='spin' width={24} height={24} color={colors.purpleHathor} />
+      <p className="mt-3 mb-0">{t`Registering selected tokens...`}</p>
+    </div>
+  );
 
   const renderSuccess = () => (
     <div className="d-flex flex-column align-items-center justify-content-center py-5">
@@ -518,9 +522,9 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
               {modalState === MODAL_STATE.EMPTY && t`No tokens available to import`}
               {modalState === MODAL_STATE.CONFIRMATION && t`Confirm Import`}
               {modalState === MODAL_STATE.SUCCESS && t`Tokens added`}
+              {modalState === MODAL_STATE.REGISTERING && t`Registering tokens`}
               {(modalState === MODAL_STATE.LOADING
                 || modalState === MODAL_STATE.SELECTION
-                || modalState === MODAL_STATE.REGISTERING
                 || modalState === MODAL_STATE.ERROR
               ) && `${t`Tokens found`} (${unknownTokens.length})`}
             </h5>

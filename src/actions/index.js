@@ -176,7 +176,10 @@ export const selectToken = data => ({ type: 'select_token', payload: data });
 /**
  * Update selected token and all known tokens in the wallet
  */
-export const newTokens = data => ({ type: 'new_tokens', payload: data });
+export const newTokens = ({ tokens, uid }) => {
+  if (!uid) throw new Error('newTokens action requires payload.uid');
+  return { type: 'new_tokens', payload: { tokens, uid } };
+};
 
 /**
  * Set if addresses are being loaded
