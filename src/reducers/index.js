@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
+import { FEATURE_TOGGLE_DEFAULTS, FEE_TOKEN_FEATURE_TOGGLE, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
@@ -77,7 +77,7 @@ const initialState = {
   // Status code of last failed response
   requestErrorStatusCode: undefined,
   // Tokens already saved: array of objects
-  // {'name', 'symbol', 'uid'}
+  // {'name', 'symbol', 'uid', 'version'}
   tokens: [],
   // Token selected (by default is HATHOR)
   selectedToken: NATIVE_TOKEN_UID,
@@ -121,6 +121,8 @@ const initialState = {
   metadataLoaded: false,
   // Should we use the wallet service facade?
   useWalletService: false,
+  // Address mode: ADDRESS_MODE.SINGLE or ADDRESS_MODE.MULTI
+  addressMode: null,
   // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
   lockWalletPromise: null,
   // Track if the Ledger device app was closed while the wallet was loaded.
@@ -130,7 +132,8 @@ const initialState = {
     version: null,
     decimalPlaces: DECIMAL_PLACES,
     customTokens: [],
-    nanoContractsEnabled: false
+    nanoContractsEnabled: false,
+    genesisHash: null,
   },
   // This should store the last action dispatched to the START_WALLET_REQUESTED so we can retry
   // in case the START_WALLET saga fails
@@ -310,6 +313,13 @@ const initialState = {
     error: null,
   },
   reown: reownReducer(undefined, {}),
+  /**
+   * Stores the status of token registration operations
+   * @type {Record<string, { status: string, error?: string }>}
+   * @example { 'abc123': { status: 'loading' }, 'def456': { status: 'success' } }
+   */
+  tokenRegistration: {},
+  tokenImportBannerDismissed: false,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -488,6 +498,23 @@ const rootReducer = (state = initialState, action) => {
       return onUnregisteredTokensStoreSuccess(state, action);
     case types.UNREGISTERED_TOKENS_CLEAN:
       return onUnregisteredTokensClean(state);
+    case types.SET_ADDRESS_MODE:
+      return { ...state, addressMode: action.payload };
+    case types.TOKEN_REGISTER_REQUESTED:
+      return onTokenRegisterRequested(state, action);
+    case types.TOKEN_REGISTER_SUCCESS:
+      return onTokenRegisterSuccess(state, action);
+    case types.TOKEN_REGISTER_FAILED:
+      return onTokenRegisterFailed(state, action);
+    case types.TOKEN_IMPORT_BANNER_DISMISSED:
+      return { ...state, tokenImportBannerDismissed: true };
+    case types.NEW_UNKNOWN_TOKENS_FOUND: {
+      const allTokens = { ...state.allTokens };
+      for (const tokenUid of action.payload.tokenUids) {
+        allTokens[tokenUid] = tokenUid;
+      }
+      return { ...state, allTokens, tokenImportBannerDismissed: false };
+    }
     default:
       return state;
   }
@@ -720,8 +747,8 @@ export const resetSelectedTokenIfNeeded = (state, action) => {
   const tokensBalance = state.tokensBalance;
   const selectedToken = state.selectedToken;
 
-  const balance = tokensBalance[selectedToken] || { available: 0n, locked: 0n };
-  const hasZeroBalance = (balance.available + balance.locked) === 0n;
+  const { available = 0n, locked = 0n } = (tokensBalance[selectedToken] || {}).data || {};
+  const hasZeroBalance = (available + locked) === 0n;
 
   if (hasZeroBalance) {
     return {
@@ -1121,8 +1148,27 @@ export const onStartWalletFailed = (state) => ({
   walletStartState: WALLET_STATUS.FAILED,
 });
 
+/**
+ * Reset wallet state when user explicitly resets their wallet.
+ *
+ * Resets to initialState but preserves:
+ * - isVersionAllowed: API version check is independent of wallet data
+ * - ledgerWasClosed: Ledger device state persists across wallet instances
+ * - featureTogglesInitialized: Unleash client runs independently
+ *
+ * Note: networkSettings is reset to initialState; onWalletReset calls
+ * helpers.loadStorageState() after this reducer to repopulate it and trigger
+ * the Unleash refresh listener.
+ *
+ * Note 2: The default values to preserve are the same from `onCleanData()`
+ */
 export const onStartWalletReset = (state) => ({
-  ...state,
+  ...initialState,
+  // Preserve session-level flags independent of wallet data
+  isVersionAllowed: state.isVersionAllowed,
+  ledgerWasClosed: state.ledgerWasClosed,
+  featureTogglesInitialized: state.featureTogglesInitialized,
+  // Explicitly ensure these states are cleared
   walletStartState: null,
   loadingAddresses: false,
 });
@@ -1186,6 +1232,14 @@ export const onSetNavigateTo = (state, action) => {
   };
 };
 
+/**
+ * @param {string} action.payload.network
+ * @param {string} action.payload.version
+ * @param {number} action.payload.decimalPlaces
+ * @param {Object[]} action.payload.customTokens
+ * @param {boolean} action.payload.nanoContractsEnabled
+ * @param {string|null} action.payload.genesisHash - genesis block hash identifying the network
+ */
 const onSetServerInfo = (state, action) => {
   return {
     ...state,
@@ -1195,6 +1249,7 @@ const onSetServerInfo = (state, action) => {
       decimalPlaces: action.payload.decimalPlaces,
       customTokens: action.payload.customTokens,
       nanoContractsEnabled: action.payload.nanoContractsEnabled,
+      genesisHash: action.payload.genesisHash,
     },
   }
 };
@@ -1209,7 +1264,9 @@ const onFeatureToggleInitialized = (state) => ({
  */
 const onSetFeatureToggles = (state, { payload }) => ({
   ...state,
-  featureToggles: payload,
+  featureToggles: {
+    ...payload,
+  },
 });
 
 export const onUpdateTxHistory = (state, action) => {
@@ -1567,6 +1624,58 @@ export const onUnregisteredTokensClean = (state) => {
     ...state,
     unregisteredTokens: {
       tokensMap: {},
+    },
+  };
+};
+
+/**
+ * Handle token registration request - set status to loading
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ */
+export const onTokenRegisterRequested = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.LOADING },
+    },
+  };
+};
+
+/**
+ * Handle token registration success
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ */
+export const onTokenRegisterSuccess = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.READY },
+    },
+  };
+};
+
+/**
+ * Handle token registration failure
+ * @param {Object} state
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid
+ * @param {string} action.payload.error Error message
+ */
+export const onTokenRegisterFailed = (state, { payload }) => {
+  return {
+    ...state,
+    tokenRegistration: {
+      ...state.tokenRegistration,
+      [payload.uid]: { status: TOKEN_DOWNLOAD_STATUS.FAILED, error: payload.error },
     },
   };
 };

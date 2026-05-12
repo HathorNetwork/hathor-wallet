@@ -7,15 +7,13 @@ import {
   take,
   all,
   put,
-  join,
-  takeLatest,
 } from 'redux-saga/effects';
 import { metadataApi } from '@hathor/wallet-lib';
 import { channel } from 'redux-saga';
 import { get } from 'lodash';
 import { specificTypeAndPayload, dispatchAndWait } from './helpers';
 import helpers from '../utils/helpers';
-import { METADATA_CONCURRENT_DOWNLOAD } from '../constants';
+import { METADATA_CONCURRENT_DOWNLOAD, FEE_TOKEN_FEATURE_TOGGLE } from '../constants';
 import {
   types,
   tokenFetchBalanceRequested,
@@ -26,11 +24,16 @@ import {
   tokenFetchHistoryFailed,
   proposalTokenFetchSuccess,
   proposalTokenFetchFailed,
-  onExceptionCaptured,
   tokenFetchMetadataRequested,
+  tokenRegisterSuccess,
+  tokenRegisterFailed,
+  newTokens,
 } from '../actions';
+import walletUtils from '../utils/wallet';
 import { t } from "ttag";
 import { getGlobalWallet } from "../modules/wallet";
+import tokensUtils from '../utils/tokens';
+import LOCAL_STORE from '../storage';
 import { logger } from '../utils/logger';
 
 const CONCURRENT_FETCH_REQUESTS = 5;
@@ -219,9 +222,21 @@ function* fetchTokenHistory(action) {
 }
 
 /**
- * This saga will monitor the `new_tokens` actions to detect new tokens being registered
- * on the wallet and dispatch the TOKEN_FETCH_BALANCE_REQUESTED action so the balance
- * for this token gets downloaded
+ * Side-effect saga reacting to a `new_tokens` action, which is dispatched
+ * each time a single token transitions into the registered set (on manual
+ * import, automatic import, or after re-adding HTR following an unregister).
+ *
+ * Action payload contract:
+ *  - `uid`: the token whose registration state just changed.
+ *  - `tokens`: the full registered-token snapshot the reducer will store.
+ *
+ * Effects performed for the affected `uid` only:
+ *  1. Request a balance fetch. Other entries in `tokens` are not iterated
+ *     because their balances were already fetched on their own registration.
+ *  2. Persist the snapshot to localStorage keyed by genesis hash so the
+ *     list survives a network switch.
+ *
+ * @param {{ type: string, payload: { uid: string, tokens: Array } }} action
  */
 function* routeTokenChange(action) {
   const wallet = getGlobalWallet();
@@ -233,13 +248,53 @@ function* routeTokenChange(action) {
   switch (action.type) {
     default:
     case 'new_tokens':
-      for (const token of action.payload.tokens) {
-        yield put({
-          type: types.TOKEN_FETCH_BALANCE_REQUESTED,
-          tokenId: token.uid,
-        });
-      }
+      yield put({
+        type: types.TOKEN_FETCH_BALANCE_REQUESTED,
+        tokenId: action.payload.uid,
+      });
+
+      yield call(saveCurrentNetworkTokens, wallet);
       break;
+  }
+}
+
+/**
+ * Save current network's registered tokens to localStorage keyed by genesis hash,
+ * so they can be restored when switching back to this network.
+ */
+function* saveCurrentNetworkTokens(wallet) {
+  const genesisHash = yield select((state) => state.serverInfo.genesisHash);
+  if (!genesisHash) {
+    return;
+  }
+
+  const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet, true);
+  LOCAL_STORE.saveTokensForNetwork(genesisHash, registeredTokens);
+}
+
+/**
+ * Restore previously saved tokens for the current network.
+ * Called during wallet startup to re-register tokens that were
+ * saved before a network switch.
+ */
+export function* restoreTokensForNetwork(wallet, genesisHash) {
+  if (!genesisHash) {
+    return;
+  }
+
+  const savedTokens = LOCAL_STORE.getTokensForNetwork(genesisHash);
+  if (!Array.isArray(savedTokens)) {
+    return;
+  }
+
+  for (const token of savedTokens) {
+    if (!token || typeof token.uid !== 'string') {
+      continue;
+    }
+    const isAlreadyRegistered = yield call([wallet.storage, wallet.storage.isTokenRegistered], token.uid);
+    if (!isAlreadyRegistered) {
+      yield call([wallet.storage, wallet.storage.registerToken], token);
+    }
   }
 }
 
@@ -370,6 +425,99 @@ function* fetchProposalTokenData(action) {
   }
 }
 
+/**
+  * Saga to register a token. It will fetch the token details from the API and register the token
+  in the storage.
+ * @param {Object} action
+ * @param {Object} action.payload
+ * @param {string} action.payload.uid Token uid (required)
+ * @param {boolean} [action.payload.alwaysShow] Whether to always show the token
+ * @param {Function} [action.payload.resolve] Optional promise resolve callback
+ * @param {Function} [action.payload.reject] Optional promise reject callback
+ */
+function* registerToken(action) {
+  const { uid, alwaysShow, resolve, reject } = action.payload;
+
+  try {
+    const wallet = getGlobalWallet();
+    const featureToggles = yield select((state) => state.featureToggles);
+    const isFeeTokenEnabled = featureToggles[FEE_TOKEN_FEATURE_TOGGLE];
+
+    // Try to get token details from the in-memory store first (populated during tx processing),
+    // falling back to the API only if not found.
+    let name, symbol, version;
+    try {
+      const tokenData = yield call([wallet.storage.store, wallet.storage.store.getToken], uid);
+      if (tokenData?.name && tokenData?.symbol && tokenData?.version) {
+        name = tokenData.name;
+        symbol = tokenData.symbol;
+        version = tokenData.version;
+      } else {
+        const { tokenInfo } = yield call([wallet, wallet.getTokenDetails], uid);
+        name = tokenInfo?.name;
+        symbol = tokenInfo?.symbol;
+        version = tokenInfo?.version;
+      }
+
+      // When flag is enabled, version is REQUIRED
+      if (isFeeTokenEnabled && version === undefined) {
+        throw new Error('Token version not available');
+      }
+    } catch (e) {
+      throw new Error(`Failed to fetch token details: ${e.message}`);
+    }
+
+    // Register the token in storage
+    yield call([wallet.storage, wallet.storage.registerToken], { uid, name, symbol, version });
+
+    // Get updated registered tokens list
+    const registeredTokens = yield call(tokensUtils.getRegisteredTokens, wallet);
+
+    // Update Redux state
+    yield put(newTokens({ tokens: registeredTokens, uid }));
+
+    // Set always show preference
+    walletUtils.setTokenAlwaysShow(uid, alwaysShow);
+    yield put(tokenFetchMetadataRequested(uid));
+
+    yield put(tokenRegisterSuccess(uid, name, symbol, version));
+
+    // Call resolve callback if provided
+    if (resolve) {
+      resolve({ uid, name, symbol, version });
+    }
+  } catch (e) {
+    log.error(`Error registering token ${uid}`, e);
+    yield put(tokenRegisterFailed(uid, e.message));
+
+    // Call reject callback if provided
+    if (reject) {
+      reject(e);
+    }
+  }
+}
+
+/**
+ * Queue-based consumer for token registration requests.
+ * Ensures registrations are processed sequentially to avoid race conditions.
+ */
+function* registerTokenQueue() {
+  const registerTokenChannel = yield call(channel);
+
+  // Single consumer to ensure sequential registration
+  yield fork(function* registerTokenConsumer() {
+    while (true) {
+      const action = yield take(registerTokenChannel);
+      yield call(registerToken, action);
+    }
+  });
+
+  while (true) {
+    const action = yield take(types.TOKEN_REGISTER_REQUESTED);
+    yield put(registerTokenChannel, action);
+  }
+}
+
 const NODE_RATE_LIMIT_CONF = {
   thin_wallet_token: {
     burst: 10,
@@ -391,6 +539,7 @@ export function* saga() {
     fork(fetchTokenBalanceQueue),
     fork(monitorSelectedToken),
     fork(fetchProposalTokenDataQueue),
+    fork(registerTokenQueue),
     takeEvery(types.TOKEN_FETCH_HISTORY_REQUESTED, fetchTokenHistory),
     takeEvery('new_tokens', routeTokenChange),
   ]);

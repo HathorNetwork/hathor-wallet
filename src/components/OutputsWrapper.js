@@ -54,12 +54,32 @@ class OutputsWrapper extends React.Component {
   render = () => {
     const renderInputNumber = () => {
       const classNames = "form-control output-value col-2";
-      return <InputNumber key={this.props.isNFT ? "nft-value" : "value"} onValueChange={(value) => this.value = value} className={classNames} isNFT={this.props.isNFT} />;
+      return <InputNumber
+        key={this.props.isNFT ? "nft-value" : "value"}
+        onValueChange={(value) => {
+          this.value = value;
+          if (this.props.onValueChange) {
+            this.props.onValueChange();
+          }
+        }}
+        className={classNames}
+        isNFT={this.props.isNFT}
+      />;
     }
 
     return (
       <div className="input-group mb-3">
-        <input type="text" ref={this.address} placeholder={t`Address`} className="form-control output-address col-5" />
+        <input
+          type="text"
+          ref={this.address}
+          placeholder={t`Address`}
+          className="form-control output-address col-5"
+          onChange={() => {
+            if (this.props.onValueChange) {
+              this.props.onValueChange();
+            }
+          }}
+        />
         {renderInputNumber()}
         <div className="form-check mr-2 d-flex flex-column justify-content-center">
           <input className="form-check-input mt-0 has-timelock" type="checkbox"
@@ -73,7 +93,17 @@ class OutputsWrapper extends React.Component {
         <input type="datetime-local" placeholder={t`Date and time in GMT`} step="1"
           className="form-control output-timelock col-3" style={{display: 'none'}} ref={this.timelock}
           disabled={LOCAL_STORE.isHardwareWallet() ? true : null}/>
-        {this.props.index === 0 ? <button type="button" className="btn btn-hathor" onClick={this.props.addOutput}>+</button> : null}
+        {this.props.outputsCount > 1 && (
+          <button
+            type="button"
+            className="btn btn-link text-muted p-0 ml-2"
+            style={{ fontSize: '18px', lineHeight: 1 }}
+            onClick={() => this.props.removeOutput(this.props.index)}
+            title={t`Remove output`}
+          >
+            <i className="fa fa-times" />
+          </button>
+        )}
       </div>
     );
   }

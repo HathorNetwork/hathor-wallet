@@ -85,10 +85,6 @@ class NFTListElement extends React.Component {
           Your browser does not support the audio element.
         </audio>
       )
-    } else if (nftType === NFT_MEDIA_TYPES.pdf) {
-      // Toolbar to prevent showing download/print icons
-      const data = `${file}#toolbar=0`;
-      media = <object data={data} width="100%" height="100%" type="application/pdf" alt="NFT Preview" aria-label="NFT Preview" />;
     } else {
       media = <p> Preview Unavailable </p>
     }

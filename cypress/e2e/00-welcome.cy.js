@@ -200,7 +200,7 @@ describe('create a new wallet and back it up', () => {
     cy.get('h2.validation-step-index').invoke('text').then(text => {
       currentIndex = parseInt(text, 10);
       correctWord = backupWords[currentIndex - 1];
-      cy.findByText(correctWord).click();
+      cy.findByRole('button', { name: correctWord }).click();
     })
 
     // Insert wrong second word
@@ -208,12 +208,8 @@ describe('create a new wallet and back it up', () => {
       currentIndex = parseInt(text, 10) || 1;
       correctWord = backupWords[currentIndex - 1];
 
-      cy.findByText(correctWord)
-        .closest('section')
-        .children() // Get all child divs
-        .filter((index, element) => {
-          return element.innerText !== correctWord; // Keep only divs where key is not correct
-        })
+      cy.get('section.validation-step-words button.validate-step-option')
+        .filter((index, element) => element.innerText.trim() !== correctWord)
         .first()
         .click();
     })
@@ -226,7 +222,7 @@ describe('create a new wallet and back it up', () => {
       cy.get('h2.validation-step-index').invoke('text').then(text => {
         currentIndex = parseInt(text, 10);
         correctWord = backupWords[currentIndex - 1];
-        cy.findByText(correctWord).click();
+        cy.findByRole('button', { name: correctWord }).click();
       })
     }
 
@@ -247,17 +243,18 @@ describe('create a new wallet and back it up', () => {
       req.reply({
         statusCode: 500,
         body: {
-          history: [],
+          success: false,
+          message: 'Internal Server Error',
         },
       });
     });
 
     cy.findByText('Next').click();
 
-    // PIN was successful
-    cy.contains('Loading transactions'); // For a few seconds this screen will be shown
-
-    // There is a timeout in place that needs to be waited. The error should be handled gracefully
-    cy.contains('There has been a problem loading your wallet', { timeout: 15000 });
+    // PIN was successful, the wallet starts loading and eventually fails
+    // due to the intercepted 500 response on address_history.
+    // The wallet-lib retries failed requests up to 5 times with 5s sleep between each,
+    // so the error screen may take up to ~35s to appear.
+    cy.contains('There has been a problem loading your wallet', { timeout: 40000 });
   })
 })

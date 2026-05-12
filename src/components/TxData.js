@@ -82,6 +82,7 @@ class TxData extends React.Component {
     graphvizVerificationRequestLoading: false,
     ncDeserializer: null,
     ncLoading: false,
+    feeEntries: [],
   };
 
   // Array of token uid that was already found to show the symbol
@@ -93,6 +94,7 @@ class TxData extends React.Component {
     this.fetchWalletAddressesMap();
     this.queryVerificationData();
     this.queryFundsData();
+    this.parseFeeHeader();
     await this.handleNanoContractFetch();
   }
 
@@ -287,6 +289,35 @@ class TxData extends React.Component {
       balance[token] = tokenBalance.tokens.locked + tokenBalance.tokens.unlocked;
     }
     this.setState({ balance });
+  }
+
+  /**
+   * Parse fee header from raw transaction bytes and store fee entries in state
+   */
+  parseFeeHeader = () => {
+    try {
+      const { raw } = this.props.transaction;
+      if (!raw) return;
+
+      const network = hathorLib.config.getNetwork();
+      const txBytes = Buffer.from(raw, 'hex');
+      const parsedTx = hathorLib.Transaction.createFromBytes(txBytes, network);
+      const feeHeader = parsedTx.getFeeHeader();
+      if (!feeHeader) return;
+
+      const feeEntries = feeHeader.entries.map(entry => {
+        const tokenConfig = this.getOutputToken(entry.tokenIndex);
+        return {
+          tokenSymbol: tokenConfig?.symbol || t`Unknown`,
+          amount: entry.amount,
+        };
+      });
+
+      this.setState({ feeEntries });
+    } catch (e) {
+      // If parsing fails, we simply don't show fee information
+      console.error('Error parsing fee header', e);
+    }
   }
 
   /**
@@ -834,6 +865,22 @@ class TxData extends React.Component {
       );
     }
 
+    const renderFee = () => {
+      if (this.state.feeEntries.length === 0) return null;
+      if (hathorLib.transactionUtils.isBlock(this.props.transaction)) return null;
+
+      return (
+        <div className="d-flex flex-column common-div bordered-wrapper mt-3 mb-3">
+          <div><label>{t`Fee paid:`}</label></div>
+          {this.state.feeEntries.map((entry, idx) => (
+            <div key={idx}>
+              {numberUtils.prettyValue(entry.amount, this.props.decimalPlaces)} {entry.tokenSymbol}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     const renderFirstBlockDiv = () => {
       return (
         <div>
@@ -987,13 +1034,14 @@ class TxData extends React.Component {
               <div><label>{t`Weight:`}</label> {hathorLib.helpersUtils.roundFloat(this.props.transaction.weight)}</div>
               {!hathorLib.transactionUtils.isBlock(this.props.transaction) && renderFirstBlockDiv()}
             </div>
-            <div className="d-flex flex-column align-items-center important-div bordered-wrapper">
+            <div className="d-flex flex-column align-items-start common-div bordered-wrapper">
               {hathorLib.transactionUtils.isBlock(this.props.transaction) && renderHeight()}
               {hathorLib.transactionUtils.isBlock(this.props.transaction) && renderScore()}
               {!hathorLib.transactionUtils.isBlock(this.props.transaction) && renderAccWeightDiv()}
               {!hathorLib.transactionUtils.isBlock(this.props.transaction) && renderConfirmationLevel()}
             </div>
           </div>
+          {renderFee()}
           <div className="d-flex flex-row align-items-start mb-3">
             {this.props.transaction.version === hathorLib.constants.NANO_CONTRACTS_VERSION && renderNCData()}
           </div>

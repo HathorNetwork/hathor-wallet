@@ -7,11 +7,12 @@
 
 import React, { useRef, useContext } from 'react';
 import { t } from 'ttag'
+import hathorLib from '@hathor/wallet-lib';
 
 import SpanFmt from '../components/SpanFmt';
 import HathorAlert from '../components/HathorAlert';
 import BackButton from '../components/BackButton';
-import { NFT_ENABLED } from '../constants';
+import { NFT_ENABLED, FEE_TOKEN_FEATURE_TOGGLE } from '../constants';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useSelector } from 'react-redux';
 import LOCAL_STORE from '../storage';
@@ -27,7 +28,10 @@ function CustomTokens() {
   const context = useContext(GlobalModalContext);
   const alertSuccessRef = useRef(null);
   const navigate = useNavigate();
-  const { tokensBalance } = useSelector(state => ({  tokensBalance: state.tokensBalance }));
+  const { tokensBalance, feeTokenEnabled } = useSelector(state => ({
+    tokensBalance: state.tokensBalance,
+    feeTokenEnabled: state.featureToggles[FEE_TOKEN_FEATURE_TOGGLE],
+  }));
   const wallet = getGlobalWallet();
   const nativeToken = wallet.storage.getNativeTokenData();
 
@@ -54,9 +58,11 @@ function CustomTokens() {
    */
   const createTokenClicked = () => {
     if (LOCAL_STORE.isHardwareWallet()) {
-      context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED);
+        context.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED);
+    } else if (feeTokenEnabled) {
+      navigate('/select_token_type');
     } else {
-      navigate('/create_token/');
+      navigate(`/create_token/${hathorLib.TokenVersion.DEPOSIT}`);
     }
   }
 
