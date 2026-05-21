@@ -24,6 +24,9 @@
 
 import '@testing-library/jest-dom';
 
+// Manual mocks live under src/__mocks__/ and are auto-discovered by Jest
+// because CRA's config has `roots: ['<rootDir>/src']`. Each call below
+// activates the corresponding manual mock for every test file.
 jest.mock('@hathor/wallet-lib');
 jest.mock('@hathor/hathor-rpc-handler');
 jest.mock('@reown/walletkit');

@@ -138,9 +138,16 @@ const Transaction = jest.fn();
 const SendTransaction = jest.fn();
 const Fee = jest.fn();
 
-const PartialTxProposal = {
-  fromPartialTx: jest.fn(),
-};
+class PartialTxProposal {
+  constructor(storage) {
+    this.storage = storage;
+    this.partialTx = { inputs: [], outputs: [] };
+  }
+}
+// Static factory used by both production code and tests that spy on it
+// (jest.spyOn(PartialTxProposal, 'fromPartialTx')).
+PartialTxProposal.fromPartialTx = jest.fn();
+
 const PartialTx = jest.fn();
 
 const ErrorMessages = {
