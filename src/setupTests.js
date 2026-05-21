@@ -35,3 +35,26 @@ jest.mock('@walletconnect/utils');
 jest.mock('@sentry/electron');
 jest.mock('@ledgerhq/hw-transport-node-hid');
 jest.mock('unleash-proxy-client');
+
+// Stub the Redux store module to break a circular import chain that only
+// triggers in test path: reducers → sagas/tokens → sagas/helpers →
+// utils/tokens → store/index → reducers (re-entry). In production the cycle
+// is benign because the entry-point evaluation order avoids re-entry; in a
+// test, importing reducers first does not.
+//
+// The stub provides:
+//   - a default-exported store with no-op dispatch/getState/subscribe, used
+//     by ad-hoc dispatchers like utils/tokens.js and utils/wallet.js, and
+//   - a `sagaMiddleware` with a no-op `.run()`, called once at store init.
+//
+// Tests that care about saga dispatch use redux-saga-test-plan against a
+// fresh local store via createTestStore — they do not touch this stub.
+jest.mock('./store/index', () => ({
+  __esModule: true,
+  default: {
+    dispatch: jest.fn(),
+    getState: jest.fn(() => ({})),
+    subscribe: jest.fn(),
+  },
+  sagaMiddleware: { run: jest.fn() },
+}));
