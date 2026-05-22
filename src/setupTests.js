@@ -54,7 +54,7 @@ jest.mock('./store/index', () => ({
   default: {
     dispatch: jest.fn(),
     getState: jest.fn(() => ({})),
-    subscribe: jest.fn(),
+    subscribe: jest.fn(() => jest.fn()),
   },
   sagaMiddleware: { run: jest.fn() },
 }));

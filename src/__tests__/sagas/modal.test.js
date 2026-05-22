@@ -34,6 +34,9 @@ describe('sagas/modal — module-state hygiene via *ForTesting', () => {
   });
 
   it('logs and exits early when no modal context is registered', () => {
+    // `.finally()` (not `.then()`) so the spy is restored even if silentRun
+    // rejects — otherwise the spy would leak across tests in this file and
+    // silently swallow real console.error output from subsequent cases.
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     return expectSaga(modalSaga)
@@ -46,6 +49,8 @@ describe('sagas/modal — module-state hygiene via *ForTesting', () => {
         expect(errorSpy).toHaveBeenCalledWith(
           expect.stringContaining('Modal context not found'),
         );
+      })
+      .finally(() => {
         errorSpy.mockRestore();
       });
   });

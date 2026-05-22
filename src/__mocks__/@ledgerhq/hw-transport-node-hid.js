@@ -40,7 +40,7 @@ const transport = {
 const TransportNodeHid = {
   isSupported: jest.fn().mockResolvedValue(true),
   list: jest.fn().mockResolvedValue([]),
-  listen: jest.fn(),
+  listen: jest.fn(() => ({ unsubscribe: jest.fn() })),
   open: jest.fn().mockResolvedValue(transport),
   create: jest.fn().mockResolvedValue(transport),
 };
