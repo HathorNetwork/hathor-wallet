@@ -57,6 +57,9 @@ import LOCAL_STORE from './storage';
 import { getGlobalWallet } from "./modules/wallet";
 import ReownConnect from './screens/ReownConnect';
 import NetworkSettingsRecovery from './screens/NetworkSettingsRecovery';
+import Web3AuthLogin from './screens/Web3AuthLogin';
+import Web3AuthRecovery from './screens/Web3AuthRecovery';
+import { restoreWeb3AuthState } from './sagas/web3auth';
 
 function Root() {
   const {
@@ -84,6 +87,13 @@ function Root() {
       navigate('/locked/');
     }
   }, [ledgerClosed]);
+
+  // Restore Web3Auth identity (walletType + email) from localStorage on boot
+  // so the rest of the app can branch on walletType without waiting on saga
+  // hydration. See sagas/web3auth.js#restoreWeb3AuthState.
+  useEffect(() => {
+    restoreWeb3AuthState(dispatch);
+  }, [dispatch]);
 
   /**
    * Initializes the application, including:
@@ -215,6 +225,8 @@ function Root() {
       <Route path="/wallet_type" element={<StartedComponent children={<WalletType loaded={false} />} />} />
       <Route path="/software_warning" element={<StartedComponent children={<SoftwareWalletWarning />} loaded={false} />} />
       <Route path="/signin" element={<StartedComponent children={<Signin />} loaded={false} />} />
+      <Route path="/web3auth_login/" element={<Web3AuthLogin />} />
+      <Route path="/web3auth_recovery/" element={<Web3AuthRecovery />} />
       <Route path="/hardware_wallet" element={<StartedComponent children={<StartHardwareWallet />} loaded={false} />} />
       <Route path="/locked" element={<DefaultComponent children={<LockedWallet />} />} />
       <Route path="/welcome" element={<Welcome />} />

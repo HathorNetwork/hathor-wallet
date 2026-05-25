@@ -15,6 +15,7 @@ import helpers from '../utils/helpers';
 import { useSelector } from 'react-redux';
 import { FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACTS_FEATURE_TOGGLE } from '../constants';
 import { get } from 'lodash';
+import { isSingleKeyWallet } from '../reducers';
 
 /**
  * Component that shows a navigation bar with the menu options
@@ -24,12 +25,15 @@ import { get } from 'lodash';
 function Navigation() {
   const useAtomicSwap = useSelector(state => state.useAtomicSwap);
   const featureToggles = useSelector(state => state.featureToggles);
+  const isWeb3Auth = useSelector(isSingleKeyWallet);
   const nanoEnabledDefault = get(FEATURE_TOGGLE_DEFAULTS, NANO_CONTRACTS_FEATURE_TOGGLE, false)
   const nanoEnabledFeatureToggle = get(featureToggles, NANO_CONTRACTS_FEATURE_TOGGLE, nanoEnabledDefault);
   const fullNodeNanoEnabled = useSelector(state => state.serverInfo.nanoContractsEnabled);
   // To enable nano contract navigation, the unleash feature toggle must
-  // be enabled and the full node must support it as well
-  const nanoEnabled = nanoEnabledFeatureToggle && fullNodeNanoEnabled;
+  // be enabled and the full node must support it as well. Single-key (web3auth)
+  // wallets cannot derive the additional addresses these features require.
+  const nanoEnabled = nanoEnabledFeatureToggle && fullNodeNanoEnabled && !isWeb3Auth;
+  const atomicSwapEnabled = useAtomicSwap && !isWeb3Auth;
 
   /**
    * Method called when user clicked on Explorer menu
@@ -66,7 +70,7 @@ function Navigation() {
             <li className="nav-item">
               <NavLink to="/nft/" className="nav-link">{t`NFTs`}</NavLink>
             </li>
-            {useAtomicSwap && <li className="nav-item">
+            {atomicSwapEnabled && <li className="nav-item">
               <NavLink to="/wallet/atomic_swap/" className="nav-link">{t`Atomic Swap`}</NavLink>
             </li>}
             <li className="nav-item">

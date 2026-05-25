@@ -23,6 +23,7 @@ import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE, SINGLE_
 import { walletReset, reloadWalletRequested } from '../actions';
 import { getGlobalWallet } from '../modules/wallet';
 import LOCAL_STORE from '../storage';
+import { isSingleKeyWallet } from '../reducers';
 
 /**
  * Settings screen
@@ -54,6 +55,9 @@ function Settings() {
   const singleAddressEnabled = useSelector(state => state.featureToggles[SINGLE_ADDRESS_FEATURE_TOGGLE]);
   const addressMode = useSelector(state => state.addressMode);
   const network = useSelector(state => state.networkSettings.data.network);
+  const isWeb3Auth = useSelector(isSingleKeyWallet);
+  const web3authEmail = useSelector((state) => state.web3authEmail);
+  const displayEmail = web3authEmail || '';
   const connectedSessionsCount = Object.keys(reownSessions).length;
   const isHardwareWallet = LOCAL_STORE.isHardwareWallet();
 
@@ -378,7 +382,7 @@ function Settings() {
             </a>
           </p>
         )}
-        {!useWalletService && reownEnabled && (
+        {!useWalletService && reownEnabled && !isWeb3Auth && (
           <p>
             <strong>{t`Reown:`}</strong>{' '}
             {t`Connected Sessions: ${connectedSessionsCount}`}
@@ -402,7 +406,11 @@ function Settings() {
         <p onDoubleClick={() => setShowTimestamp(!showTimestamp)}><strong>{t`Date and time:`}</strong> {showTimestamp ? hathorLib.dateFormatter.dateToTimestamp(now) : now.toString()}</p>
       </div>
 
-      {!isHardwareWallet && <button type="button" className="settings-reset-button" onClick={resetClicked}>{t`Reset wallet`}</button>}
+      {!isHardwareWallet && (
+        <button type="button" className="settings-reset-button" onClick={resetClicked}>
+          {isWeb3Auth ? t`Sign out of your Hathor account ${displayEmail}` : t`Reset wallet`}
+        </button>
+      )}
 
       <div className="settings-footer">
         <div><a href="true" onClick={goToTermsOfService}>{t`Terms of Service`}</a></div>

@@ -119,6 +119,10 @@ function extractErrorDetails(error) {
  * @returns {boolean} True if the Reown feature is enabled, false otherwise
  */
 function* isReownEnabled() {
+  const walletType = yield select((state) => state.walletType);
+  if (walletType === 'web3auth') {
+    return false; // Reown is enabled for Web3Auth wallets in PR2.
+  }
   const reownEnabled = yield call(checkForFeatureFlag, REOWN_FEATURE_TOGGLE);
   return reownEnabled;
 }
