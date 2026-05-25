@@ -123,6 +123,10 @@ const initialState = {
   useWalletService: false,
   // Address mode: ADDRESS_MODE.SINGLE or ADDRESS_MODE.MULTI
   addressMode: null,
+  // Active wallet type: 'software' | 'hardware' | 'web3auth' | null
+  walletType: null,
+  // Email of the user signed in via Web3Auth; null when not a Web3Auth wallet
+  web3authEmail: null,
   // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
   lockWalletPromise: null,
   // Track if the Ledger device app was closed while the wallet was loaded.
@@ -500,6 +504,11 @@ const rootReducer = (state = initialState, action) => {
       return onUnregisteredTokensClean(state);
     case types.SET_ADDRESS_MODE:
       return { ...state, addressMode: action.payload };
+    case types.SET_WALLET_TYPE:
+      return { ...state, walletType: action.payload };
+
+    case types.SET_WEB3AUTH_EMAIL:
+      return { ...state, web3authEmail: action.payload };
     case types.TOKEN_REGISTER_REQUESTED:
       return onTokenRegisterRequested(state, action);
     case types.TOKEN_REGISTER_SUCCESS:
@@ -1679,5 +1688,13 @@ export const onTokenRegisterFailed = (state, { payload }) => {
     },
   };
 };
+
+/**
+ * Returns true when the loaded wallet is a Web3Auth single-key wallet.
+ *
+ * Use to gate UI features that don't make sense for single-key wallets
+ * (e.g., "generate new address", NanoContract menus, Reown — until PR2).
+ */
+export const isSingleKeyWallet = (state) => state.walletType === 'web3auth';
 
 export default rootReducer;

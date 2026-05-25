@@ -71,6 +71,33 @@ function createWindow () {
   // Adding wallet version to user agent, so we can get in all request headers
   mainWindow.webContents.setUserAgent(mainWindow.webContents.getUserAgent() + ' HathorWallet/' + constants.versionNumber);
 
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    // Allow the Web3Auth OAuth popup (and follow-up provider redirects).
+    const isAuthHost = (
+      url.startsWith('https://auth.web3auth.io/')
+      || url.startsWith('https://accounts.google.com/')
+      || url.startsWith('https://appleid.apple.com/')
+    );
+    if (!isAuthHost) {
+      return { action: 'deny' };
+    }
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        width: 480,
+        height: 720,
+        frame: true,
+        autoHideMenuBar: true,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+          sandbox: true,
+          partition: 'persist:web3auth',
+        },
+      },
+    };
+  });
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })

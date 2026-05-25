@@ -229,6 +229,7 @@ export const NANO_CONTRACTS_FEATURE_TOGGLE = 'nano-contracts-desktop.rollout';
 export const REOWN_FEATURE_TOGGLE = 'wallet-desktop-reown.rollout';
 export const FEE_TOKEN_FEATURE_TOGGLE = 'fee-based-tokens-desktop.rollout';
 export const SINGLE_ADDRESS_FEATURE_TOGGLE = 'single-address-desktop.rollout';
+export const WEB3AUTH_FEATURE_TOGGLE = 'web3auth-desktop.rollout';
 
 export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
@@ -237,7 +238,42 @@ export const FEATURE_TOGGLE_DEFAULTS = {
   [REOWN_FEATURE_TOGGLE]: false,
   [FEE_TOKEN_FEATURE_TOGGLE]: false,
   [SINGLE_ADDRESS_FEATURE_TOGGLE]: false,
+  [WEB3AUTH_FEATURE_TOGGLE]: false,
 };
+
+/**
+ * Web3Auth project configuration per Hathor network.
+ *
+ * The verifier is Hathor-owned and shared with the mobile wallet so the same
+ * Google account derives the same Hathor address on both platforms. The
+ * googleClientId is the Hathor-owned Google OAuth client registered in the
+ * Web3Auth dashboard under the `hathor-google` custom verifier.
+ *
+ * Mainnet entries are placeholders; getWeb3AuthConfig throws a controlled
+ * error if a user tries to log in on mainnet before the dashboard is set up.
+ */
+export const WEB3AUTH_CONFIG = {
+  testnet: {
+    clientId: 'BLQbTFHmFa4TpQwAKEnBsf9ZArKB8R_hP3gKjBdSrF48fSmzo3ES-KpoaAvX7JMaa1PvefbD5yEXgRrgsiQiauQ',
+    network: 'sapphire_devnet',
+    verifier: 'hathor-google',
+    googleClientId: '206408356798-lmqb7i1n1vr6e761479q146sfqgnvue8.apps.googleusercontent.com',
+    appleVerifier: 'hathor-apple',
+    appleClientId: null,
+  },
+  mainnet: {
+    clientId: null,
+    network: 'sapphire_mainnet',
+    verifier: 'hathor-google',
+    googleClientId: null,
+    appleVerifier: 'hathor-apple',
+    appleClientId: null,
+  },
+};
+
+// Storage keys are registered in src/storage.js storageKeys array in T4.
+export const WEB3AUTH_WALLET_TYPE_KEY = 'localstorage:web3auth:walletType';
+export const WEB3AUTH_EMAIL_KEY = 'localstorage:web3auth:email';
 
 /**
  * This property filters the full exported scss properties and exposes only the ones

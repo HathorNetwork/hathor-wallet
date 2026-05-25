@@ -7,7 +7,11 @@
 
 import CryptoJS from 'crypto-js';
 import { MemoryStore, Storage, walletUtils, config, cryptoUtils, WalletType } from "@hathor/wallet-lib";
-import { VERSION } from "./constants";
+import {
+  VERSION,
+  WEB3AUTH_WALLET_TYPE_KEY,
+  WEB3AUTH_EMAIL_KEY,
+} from "./constants";
 
 export const WALLET_VERSION_KEY = 'localstorage:version';
 // This key holds the storage version to indicate the migration strategy
@@ -44,6 +48,8 @@ export const storageKeys = [
   REGISTERED_TOKENS_KEY,
   REGISTERED_NANOCONTRACTS_KEY,
   NETWORK_TOKENS_KEY,
+  WEB3AUTH_WALLET_TYPE_KEY,
+  WEB3AUTH_EMAIL_KEY,
 ];
 
 class HybridStore extends MemoryStore {
@@ -323,6 +329,63 @@ export class LocalStorageStore {
     this._storage = storage;
     this.updateStorageVersion();
     return storage;
+  }
+
+  /**
+   * Initialize the local storage for a Web3Auth single-key wallet.
+   *
+   * Generates access data containing the encrypted privateKey via
+   * walletUtils.generateAccessDataFromPrivateKey, persists it through the
+   * HybridStore (which also saves to localStorage), and marks the wallet as
+   * non-hardware and started. Mirrors the seed-based initStorage flow so the
+   * rest of the app sees a normally-initialized wallet, except access data
+   * carries `singleKeyMode: true` and `singleKeyPrivateKey` instead of `mainKey`.
+   *
+   * @param {string} privateKey 32-byte hex private key from Web3Auth
+   * @param {string} publicKey 33-byte compressed public key hex
+   * @param {string} pin User PIN, used to encrypt the privateKey at rest
+   * @param {string} password User password (kept for API parity with
+   *   initStorage; currently unused by generateAccessDataFromPrivateKey).
+   * @returns {Promise<Storage>} the initialized storage instance
+   */
+  async initWeb3AuthStorage(privateKey, publicKey, pin, password) {
+    this._storage = null;
+    this.setHardwareWallet(false);
+    const accessData = walletUtils.generateAccessDataFromPrivateKey(
+      privateKey,
+      publicKey,
+      { pin, password }
+    );
+    this.setItem(ACCESS_DATA_KEY, accessData);
+    const storage = this.getStorage();
+    await storage.saveAccessData(accessData);
+    this._storage = storage;
+    this.markWalletAsStarted();
+    this.updateStorageVersion();
+    return storage;
+  }
+
+  /**
+   * Decrypt and return the raw Web3Auth private key from access data.
+   * Thin wrapper over the wallet-lib's storage.getSingleKeyPrivateKey.
+   *
+   * @param {string} pin User PIN
+   * @returns {Promise<string>} 32-byte hex private key
+   */
+  async getWeb3AuthPrivateKey(pin) {
+    const storage = this.getStorage();
+    return storage.getSingleKeyPrivateKey(pin);
+  }
+
+  /**
+   * Return the cached Web3Auth public key from access data.
+   *
+   * @returns {Promise<string|undefined>} 33-byte compressed public key hex
+   */
+  async getWeb3AuthPublicKey() {
+    const storage = this.getStorage();
+    const accessData = await storage.getAccessData();
+    return accessData?.singleKeyPublicKey;
   }
 
   /**

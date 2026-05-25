@@ -29,12 +29,12 @@ msgstr ""
 #: src/components/PinPad.js:65
 #: src/components/nano-contract/ModalSelectAddressToSignData.js:83
 #: src/screens/ChoosePassphrase.js:76
-#: src/screens/LockedWallet.js:66
+#: src/screens/LockedWallet.js:68
 msgid "Invalid PIN"
 msgstr ""
 
 #: src/screens/ChoosePassphrase.js:83
-#: src/screens/Settings.js:389
+#: src/screens/Settings.js:394
 #.  Everything is fine, so show confirm modal
 msgid "Set a passphrase"
 msgstr ""
@@ -63,7 +63,7 @@ msgstr ""
 
 #: src/components/NetworkSettingsForm.js:167
 #: src/screens/ChoosePassphrase.js:157
-#: src/screens/LockedWallet.js:116
+#: src/screens/LockedWallet.js:124
 msgid "PIN"
 msgstr ""
 
@@ -89,7 +89,7 @@ msgid ""
 "passphrase, you will never have access to your tokens again."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:375
+#: src/components/ModalTokenImport.js:388
 #: src/components/nano-contract/ModalChangeAddress.js:106
 #: src/screens/ChoosePassphrase.js:174
 #: src/screens/SentryPermission.js:89
@@ -371,7 +371,7 @@ msgstr ""
 msgid "Create an NFT"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:297
+#: src/components/ModalTokenImport.js:310
 #: src/screens/CustomTokens.js:90
 msgid "Register a token"
 msgstr ""
@@ -389,12 +389,12 @@ msgid "Words separated by single space"
 msgstr ""
 
 #: src/components/BackButton.js:29
-#: src/components/ModalTokenImport.js:413
+#: src/components/ModalTokenImport.js:426
 #: src/components/PinPasswordWrapper.js:60
 #: src/screens/LoadWallet.js:147
 #: src/screens/NewWallet.js:149
 #: src/screens/NewWallet.js:162
-#: src/screens/Signin.js:45
+#: src/screens/Signin.js:115
 #: src/screens/SoftwareWalletWarning.js:55
 #: src/screens/StartHardwareWallet.js:181
 msgid "Back"
@@ -410,7 +410,7 @@ msgstr ""
 
 #: src/components/ModalUnhandledError.js:99
 #: src/screens/LoadWalletFailed.js:72
-#: src/screens/Settings.js:391
+#: src/screens/Settings.js:411
 msgid "Reset wallet"
 msgstr ""
 
@@ -442,17 +442,17 @@ msgstr ""
 msgid "**Transactions found:** ${ transactionsFound }"
 msgstr ""
 
-#: src/screens/LockedWallet.js:114
+#: src/screens/LockedWallet.js:122
 msgid "Your wallet is locked. Please write down your PIN to unlock it."
 msgstr ""
 
 #: src/components/ModalConfirmClearStorage.js:58
 #: src/components/ModalResetAllData.js:137
-#: src/screens/LockedWallet.js:120
+#: src/screens/LockedWallet.js:128
 msgid "Reset all data"
 msgstr ""
 
-#: src/screens/LockedWallet.js:130
+#: src/screens/LockedWallet.js:138
 msgid "Unlock"
 msgstr ""
 
@@ -669,7 +669,7 @@ msgstr ""
 #: src/components/ModalLedgerResetTokenSignatures.js:122
 #: src/components/ModalLedgerSignToken.js:243
 #: src/components/ModalSendSuccess.js:87
-#: src/components/ModalTokenImport.js:531
+#: src/components/ModalTokenImport.js:535
 #: src/components/Reown/ErrorDetailModal.js:121
 #: src/components/Reown/FeedbackModal.js:96
 #: src/components/Reown/GenericErrorFeedbackModal.js:58
@@ -787,81 +787,81 @@ msgstr ""
 msgid "I allow Hathor Wallet to report error information to Hathor team."
 msgstr ""
 
-#: src/screens/Settings.js:97
+#: src/screens/Settings.js:102
 msgid "Complete action on your hardware wallet"
 msgstr ""
 
-#: src/screens/Settings.js:100
+#: src/screens/Settings.js:105
 msgid "You can set your passphrase directly on your hardware wallet."
 msgstr ""
 
-#: src/screens/Settings.js:102
+#: src/screens/Settings.js:107
 msgid "|fn:More info| about this on Ledger."
 msgstr ""
 
-#: src/screens/Settings.js:167
+#: src/screens/Settings.js:172
 msgid "Turn notifications off"
 msgstr ""
 
-#: src/screens/Settings.js:168
+#: src/screens/Settings.js:173
 msgid "Are you sure you don't want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:170
+#: src/screens/Settings.js:175
 msgid "Turn notifications on"
 msgstr ""
 
-#: src/screens/Settings.js:171
+#: src/screens/Settings.js:176
 msgid "Are you sure you want to receive wallet notifications?"
 msgstr ""
 
-#: src/screens/Settings.js:192
+#: src/screens/Settings.js:197
 msgid "Show zero-balance tokens"
 msgstr ""
 
-#: src/screens/Settings.js:193
+#: src/screens/Settings.js:198
 msgid "Are you sure you want to show all tokens, including those with zero balance?"
 msgstr ""
 
-#: src/screens/Settings.js:195
+#: src/screens/Settings.js:200
 msgid "Hide zero-balance tokens"
 msgstr ""
 
-#: src/screens/Settings.js:196
+#: src/screens/Settings.js:201
 msgid "Are you sure you want to hide tokens with zero balance?"
 msgstr ""
 
 #: src/components/ModalError.js:35
-#: src/screens/Settings.js:319
+#: src/screens/Settings.js:324
 msgid "Error"
 msgstr ""
 
-#: src/screens/Settings.js:320
+#: src/screens/Settings.js:325
 msgid "Failed to change address mode. Please try again."
 msgstr ""
 
-#: src/screens/Settings.js:337
+#: src/screens/Settings.js:342
 msgid "General Settings"
 msgstr ""
 
-#: src/screens/Settings.js:340
+#: src/screens/Settings.js:345
 msgid "Network:"
 msgstr ""
 
-#: src/screens/Settings.js:341
+#: src/screens/Settings.js:346
 msgid "Connected to"
 msgstr ""
 
 #: src/components/TokenGeneralInfo.js:154
-#: src/screens/Settings.js:345
 #: src/screens/Settings.js:350
-#: src/screens/Settings.js:361
-#: src/screens/Settings.js:369
-#: src/screens/Settings.js:376
+#: src/screens/Settings.js:355
+#: src/screens/Settings.js:366
+#: src/screens/Settings.js:374
+#: src/screens/Settings.js:381
 msgid "Change"
 msgstr ""
 
-#: src/screens/Settings.js:348
+#: src/screens/Settings.js:353
 msgid "Allow notifications:"
 msgstr ""
 
@@ -870,9 +870,9 @@ msgstr ""
 #: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:151
-#: src/screens/Settings.js:349
-#: src/screens/Settings.js:360
-#: src/screens/Settings.js:368
+#: src/screens/Settings.js:354
+#: src/screens/Settings.js:365
+#: src/screens/Settings.js:373
 msgid "Yes"
 msgstr ""
 
@@ -881,102 +881,116 @@ msgstr ""
 #: src/components/Reown/modals/BaseNanoContractModal.js:85
 #: src/components/Reown/modals/GetUtxosModal.js:157
 #: src/components/TokenGeneralInfo.js:152
-#: src/screens/Settings.js:349
-#: src/screens/Settings.js:360
-#: src/screens/Settings.js:368
+#: src/screens/Settings.js:354
+#: src/screens/Settings.js:365
+#: src/screens/Settings.js:373
 msgid "No"
 msgstr ""
 
-#: src/screens/Settings.js:356
+#: src/screens/Settings.js:361
 msgid "Advanced Settings"
 msgstr ""
 
-#: src/screens/Settings.js:359
+#: src/screens/Settings.js:364
 msgid "Hide zero-balance tokens:"
 msgstr ""
 
-#: src/screens/Settings.js:363
+#: src/screens/Settings.js:368
 msgid ""
 "When selected, any tokens with a balance of zero will not be displayed "
 "anywhere in the wallet."
 msgstr ""
 
-#: src/screens/Settings.js:367
+#: src/screens/Settings.js:372
 msgid "Automatically report bugs to Hathor:"
 msgstr ""
 
-#: src/screens/Settings.js:373
+#: src/screens/Settings.js:378
 msgid "Address Mode:"
 msgstr ""
 
-#: src/screens/Settings.js:374
+#: src/screens/Settings.js:379
 msgid "Single address"
 msgstr ""
 
-#: src/screens/Settings.js:374
+#: src/screens/Settings.js:379
 msgid "Multi address"
 msgstr ""
 
-#: src/screens/Settings.js:382
+#: src/screens/Settings.js:387
 msgid "Reown:"
 msgstr ""
 
-#: src/screens/Settings.js:383
+#: src/screens/Settings.js:388
 #, javascript-format
 msgid "Connected Sessions: ${ connectedSessionsCount }"
 msgstr ""
 
-#: src/screens/Settings.js:384
+#: src/screens/Settings.js:389
 msgid "Manage sessions"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:419
-#: src/screens/Settings.js:387
+#: src/components/ModalTokenImport.js:432
+#: src/screens/Settings.js:392
 msgid "Import tokens"
 msgstr ""
 
-#: src/screens/Settings.js:388
+#: src/screens/Settings.js:393
 msgid "Export registered tokens"
 msgstr ""
 
-#: src/screens/Settings.js:390
+#: src/screens/Settings.js:395
 msgid "Untrust all tokens on Ledger"
 msgstr ""
 
-#: src/screens/Settings.js:399
+#: src/screens/Settings.js:403
 msgid "Unique identifier:"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:101
 #: src/components/Reown/CreateTokenRequestData.js:64
 #: src/components/TokenGeneralInfo.js:177
-#: src/components/WalletAddress.js:180
-#: src/screens/Settings.js:399
+#: src/components/WalletAddress.js:184
+#: src/screens/Settings.js:403
 #: src/screens/atomic-swap/EditSwap.js:97
 #: src/screens/atomic-swap/EditSwap.js:111
 msgid "Copy to clipboard"
 msgstr ""
 
-#: src/screens/Settings.js:402
+#: src/screens/Settings.js:406
 msgid "Date and time:"
 msgstr ""
 
+#: src/screens/Settings.js:411
+#, javascript-format
+msgid "Sign out of your Hathor account ${ displayEmail }"
+msgstr ""
+
+#: src/screens/Settings.js:416
+msgid "Terms of Service"
+msgstr ""
+
+#: src/screens/Settings.js:417
+msgid "Privacy Policy"
+msgstr ""
+
 #: src/components/TxData.js:1114
-#: src/components/WalletAddress.js:200
-#: src/screens/Settings.js:410
+#: src/components/WalletAddress.js:204
+#: src/screens/Settings.js:420
 #: src/screens/atomic-swap/EditSwap.js:596
 msgid "Copied to clipboard!"
 msgstr ""
 
-#: src/screens/Signin.js:43
+#: src/screens/Signin.js:113
 msgid "You can start a new wallet or import data from a wallet that already exists."
 msgstr ""
 
-#: src/screens/Signin.js:46
+#: src/screens/Signin.js:116
+#: src/screens/Web3AuthLogin.js:119
 msgid "New wallet"
 msgstr ""
 
-#: src/screens/Signin.js:47
+#: src/screens/Signin.js:117
 msgid "Import wallet"
 msgstr ""
 
@@ -991,6 +1005,7 @@ msgstr ""
 
 #: src/components/ModalLedgerResetTokenSignatures.js:121
 #: src/components/ModalTransactionOverview.js:353
+#: src/components/Web3AuthErrorDialog.js:93
 #: src/screens/StartHardwareWallet.js:153
 #: src/screens/TransactionDetail.js:161
 #: src/screens/VersionError.js:58
@@ -1116,11 +1131,11 @@ msgstr ""
 msgid "try again"
 msgstr ""
 
-#: src/screens/WalletType.js:76
+#: src/screens/WalletType.js:87
 msgid "Hathor Wallet supports two types of wallet: software and hardware."
 msgstr ""
 
-#: src/screens/WalletType.js:78
+#: src/screens/WalletType.js:89
 msgid ""
 "|bold:Hardware wallets| are dedicated external devices that store your "
 "private information. We currently support the Ledger hardware wallet and "
@@ -1128,21 +1143,25 @@ msgid ""
 "about how to use the ledger app with Hathor Wallet check out |fn:this page|."
 msgstr ""
 
-#: src/screens/WalletType.js:85
+#: src/screens/WalletType.js:96
 msgid ""
 "**Software wallets**, on the other hand, store the information on your "
 "computer."
 msgstr ""
 
-#: src/screens/WalletType.js:87
+#: src/screens/WalletType.js:98
 msgid "Hardware wallet"
 msgstr ""
 
-#: src/screens/WalletType.js:88
+#: src/screens/WalletType.js:99
 msgid "Software wallet"
 msgstr ""
 
-#: src/screens/WalletType.js:100
+#: src/screens/WalletType.js:103
+msgid "Sign in with social"
+msgstr ""
+
+#: src/screens/WalletType.js:116
 msgid "Ledger disconnected! Either the app was closed or the connection was lost!"
 msgstr ""
 
@@ -1183,6 +1202,48 @@ msgstr ""
 
 #: src/screens/WalletVersionError.js:101
 msgid "Backup done with success!"
+msgstr ""
+
+#: src/screens/Web3AuthLogin.js:75
+msgid "Sign in to Hathor"
+msgstr ""
+
+#: src/screens/Web3AuthLogin.js:85
+msgid "Continue with Google"
+msgstr ""
+
+#: src/screens/Web3AuthLogin.js:93
+msgid "Apple sign-in coming soon"
+msgstr ""
+
+#: src/screens/Web3AuthLogin.js:96
+msgid "Continue with Apple"
+msgstr ""
+
+#: src/screens/Web3AuthLogin.js:103
+msgid "Email sign-in coming soon"
+msgstr ""
+
+#: src/screens/Web3AuthLogin.js:106
+msgid "Continue with Email"
+msgstr ""
+
+#: src/screens/Web3AuthLogin.js:111
+msgid "OR"
+msgstr ""
+
+#: src/screens/Web3AuthLogin.js:116
+msgid "Import with seed words"
+msgstr ""
+
+#: src/screens/Web3AuthRecovery.js:25
+msgid "Recovery"
+msgstr ""
+
+#: src/screens/Web3AuthRecovery.js:26
+msgid ""
+"Web3Auth recovery is managed through the Web3Auth-hosted recovery portal. A "
+"direct link from this screen will be added in a follow-up."
 msgstr ""
 
 #: src/screens/Welcome.js:76
@@ -1557,24 +1618,24 @@ msgstr ""
 msgid "Error getting nano contract state."
 msgstr ""
 
-#: src/sagas/networkSettings.js:61
+#: src/sagas/networkSettings.js:69
 msgid "Invalid node."
 msgstr ""
 
-#: src/sagas/networkSettings.js:142
+#: src/sagas/networkSettings.js:174
 msgid "Error updating network settings."
 msgstr ""
 
-#: src/sagas/reown.js:510
+#: src/sagas/reown.js:514
 msgid "Insufficient funds to complete the transaction."
 msgstr ""
 
-#: src/sagas/reown.js:1137
+#: src/sagas/reown.js:1141
 #.  Show error modal to user
 msgid "Network Mismatch"
 msgstr ""
 
-#: src/sagas/reown.js:1138
+#: src/sagas/reown.js:1142
 #.  Show error modal to user
 #, javascript-format
 msgid ""
@@ -1582,7 +1643,7 @@ msgid ""
 "wallet is connected to ${ walletNetwork }."
 msgstr ""
 
-#: src/sagas/tokens.js:415
+#: src/sagas/tokens.js:424
 msgid "An error occurred while fetching this token data"
 msgstr ""
 
@@ -1769,57 +1830,57 @@ msgstr ""
 msgid "Configuration string"
 msgstr ""
 
-#: src/components/ModalAddressMode.js:62
+#: src/components/ModalAddressMode.js:64
 msgid "Address Mode"
 msgstr ""
 
-#: src/components/ModalAddressMode.js:69
+#: src/components/ModalAddressMode.js:71
 msgid "You can set your wallet to "
 msgstr ""
 
-#: src/components/ModalAddressMode.js:69
+#: src/components/ModalAddressMode.js:71
 msgid "single or multi address mode"
 msgstr ""
 
-#: src/components/ModalAddressMode.js:71
+#: src/components/ModalAddressMode.js:73
 msgid "You can switch anytime in the settings."
 msgstr ""
 
-#: src/components/ModalAddressMode.js:87
+#: src/components/ModalAddressMode.js:89
 msgid "Single Address"
 msgstr ""
 
-#: src/components/ModalAddressMode.js:90
+#: src/components/ModalAddressMode.js:92
 msgid "Your wallet will use only one address (index 0)."
 msgstr ""
 
-#: src/components/ModalAddressMode.js:92
+#: src/components/ModalAddressMode.js:94
 msgid "Easier to manage and compatible with all dApps."
 msgstr ""
 
-#: src/components/ModalAddressMode.js:108
+#: src/components/ModalAddressMode.js:110
 msgid "Multi Address"
 msgstr ""
 
-#: src/components/ModalAddressMode.js:111
+#: src/components/ModalAddressMode.js:113
 msgid "Your wallet will let you generate multiple addresses."
 msgstr ""
 
-#: src/components/ModalAddressMode.js:113
+#: src/components/ModalAddressMode.js:115
 msgid "Useful for advanced users."
 msgstr ""
 
-#: src/components/ModalAddressMode.js:121
+#: src/components/ModalAddressMode.js:123
 msgid ""
 "You can't switch to single address mode because other addresses in your "
 "wallet are already in use."
 msgstr ""
 
-#: src/components/ModalAddressMode.js:123
+#: src/components/ModalAddressMode.js:125
 msgid "Learn more"
 msgstr ""
 
-#: src/components/ModalAddressMode.js:137
+#: src/components/ModalAddressMode.js:139
 msgid "Save preferences"
 msgstr ""
 
@@ -1829,7 +1890,7 @@ msgid "Address copied to clipboard!"
 msgstr ""
 
 #: src/components/ModalAddressQRCode.js:91
-#: src/components/WalletAddress.js:154
+#: src/components/WalletAddress.js:158
 msgid "Address to receive tokens"
 msgstr ""
 
@@ -2115,88 +2176,92 @@ msgstr ""
 msgid "Ok"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:201
+#: src/components/ModalTokenImport.js:219
 msgid "Unknown error"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:264
+#: src/components/ModalTokenImport.js:277
 msgid ""
 "Some tokens are hidden because \"hide zero-balance tokens\" is enabled. You "
 "can change this on settings."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:274
+#: src/components/ModalTokenImport.js:287
 #.  -- Render helpers -------------------------------------------------------
 msgid "Loading token details..."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:281
+#: src/components/ModalTokenImport.js:294
 msgid "We didn't find any unregistered tokens linked to your wallet."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:284
+#: src/components/ModalTokenImport.js:297
 msgid "You can register a new one manually."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:346
+#: src/components/ModalTokenImport.js:359
 msgid "Select the tokens you want to add to your wallet."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:350
+#: src/components/ModalTokenImport.js:363
 #, javascript-format
 msgid ""
 "Could not load details for ${ fetchErrorCount } token(s). They are shown "
 "with partial information but can still be imported."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:359
-#: src/components/ModalTokenImport.js:362
+#: src/components/ModalTokenImport.js:372
+#: src/components/ModalTokenImport.js:375
 msgid "Deselect all"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:359
-#: src/components/ModalTokenImport.js:362
+#: src/components/ModalTokenImport.js:372
+#: src/components/ModalTokenImport.js:375
 msgid "Select all"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:384
+#: src/components/ModalTokenImport.js:397
 msgid "You are about to add these tokens to your wallet:"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:406
+#: src/components/ModalTokenImport.js:419
 msgid "Only add tokens you recognize."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:430
+#: src/components/ModalTokenImport.js:441
 msgid "Registering selected tokens..."
 msgstr ""
 
-#: src/components/ModalTokenImport.js:444
+#: src/components/ModalTokenImport.js:448
 msgid "New tokens added!"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:453
+#: src/components/ModalTokenImport.js:457
 msgid "Some tokens failed to register:"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:475
+#: src/components/ModalTokenImport.js:479
 #: src/components/Reown/FeedbackModal.js:81
 msgid "Retry"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:518
+#: src/components/ModalTokenImport.js:522
 msgid "No tokens available to import"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:519
+#: src/components/ModalTokenImport.js:523
 msgid "Confirm Import"
 msgstr ""
 
-#: src/components/ModalTokenImport.js:520
+#: src/components/ModalTokenImport.js:524
 msgid "Tokens added"
 msgstr ""
 
 #: src/components/ModalTokenImport.js:525
+msgid "Registering tokens"
+msgstr ""
+
+#: src/components/ModalTokenImport.js:529
 msgid "Tokens found"
 msgstr ""
 
@@ -2332,31 +2397,31 @@ msgstr ""
 msgid "Register token"
 msgstr ""
 
-#: src/components/Navigation.js:58
+#: src/components/Navigation.js:62
 msgid "Wallet"
 msgstr ""
 
-#: src/components/Navigation.js:61
+#: src/components/Navigation.js:65
 msgid "Send tokens"
 msgstr ""
 
-#: src/components/Navigation.js:64
+#: src/components/Navigation.js:68
 msgid "Custom tokens"
 msgstr ""
 
-#: src/components/Navigation.js:67
+#: src/components/Navigation.js:71
 msgid "NFTs"
 msgstr ""
 
-#: src/components/Navigation.js:70
+#: src/components/Navigation.js:74
 msgid "Atomic Swap"
 msgstr ""
 
-#: src/components/Navigation.js:73
+#: src/components/Navigation.js:77
 msgid "Public Explorer"
 msgstr ""
 
-#: src/components/Navigation.js:76
+#: src/components/Navigation.js:80
 msgid "Nano Contract"
 msgstr ""
 
@@ -3026,43 +3091,43 @@ msgstr ""
 msgid "Software Wallet"
 msgstr ""
 
-#: src/components/WalletAddress.js:93
+#: src/components/WalletAddress.js:95
 msgid "Validate address on Ledger"
 msgstr ""
 
-#: src/components/WalletAddress.js:141
+#: src/components/WalletAddress.js:143
 msgid "Validate that the address below is the same presented on the Ledger screen."
 msgstr ""
 
-#: src/components/WalletAddress.js:142
+#: src/components/WalletAddress.js:144
 msgid "Press both buttons on your Ledger in case the address is valid."
 msgstr ""
 
-#: src/components/WalletAddress.js:158
+#: src/components/WalletAddress.js:162
 msgid "Generate new address"
 msgstr ""
 
-#: src/components/WalletAddress.js:158
+#: src/components/WalletAddress.js:162
 msgid "Get new address"
 msgstr ""
 
-#: src/components/WalletAddress.js:163
+#: src/components/WalletAddress.js:167
 msgid "QR Code"
 msgstr ""
 
-#: src/components/WalletAddress.js:163
+#: src/components/WalletAddress.js:167
 msgid "Get qrcode"
 msgstr ""
 
-#: src/components/WalletAddress.js:168
+#: src/components/WalletAddress.js:172
 msgid "See all addresses"
 msgstr ""
 
-#: src/components/WalletAddress.js:190
+#: src/components/WalletAddress.js:194
 msgid "Show full address"
 msgstr ""
 
-#: src/components/WalletAddress.js:201
+#: src/components/WalletAddress.js:205
 msgid "You must use an old address before generating new ones"
 msgstr ""
 
@@ -3082,6 +3147,100 @@ msgstr ""
 
 #: src/components/WalletHistory.js:23
 msgid "Transaction history"
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:20
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid "Connection problem"
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:21
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid "Could not reach Web3Auth. Check your internet connection and try again."
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:25
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid "Sign-in temporarily unavailable"
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:26
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid ""
+"There is a configuration issue with Web3Auth. The Hathor team has been "
+"notified."
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:30
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid "Set up a recovery factor"
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:31
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid ""
+"Hathor wallets require a recovery factor to protect your funds. You can "
+"configure it in the next step."
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:35
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid "Could not derive your wallet"
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:36
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid "Something went wrong while preparing your wallet. Please contact support."
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:40
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid "Sign-in failed"
+msgstr ""
+
+#: src/components/Web3AuthErrorDialog.js:41
+#. *
+#.  * Copy + observability tag for each Web3Auth error variant. USER_CANCELLED is
+#.  * intentionally absent: the saga swallows it silently before reaching this
+#.  * component, so any errorType reaching us is a real failure worth surfacing.
+#.  
+msgid "Something unexpected happened. Please try again."
 msgstr ""
 
 #: src/components/tokens/TokenDelegate.js:47
@@ -3767,21 +3926,21 @@ msgid "Register Nano Contract"
 msgstr ""
 
 #: src/components/Reown/modals/BaseNanoContractModal.js:233
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:71
-#: src/components/Reown/modals/SendNanoContractTxModal.js:37
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:74
+#: src/components/Reown/modals/SendNanoContractTxModal.js:41
 #: src/components/Reown/modals/SendTransactionModal.js:247
 msgid "Accept Transaction"
 msgstr ""
 
 #: src/components/Reown/modals/BaseNanoContractModal.js:234
 #: src/components/Reown/modals/ConnectModal.js:37
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:72
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:75
 #: src/components/Reown/modals/CreateTokenModal.js:56
 #: src/components/Reown/modals/GetAddressClientModal.js:95
 #: src/components/Reown/modals/GetAddressModal.js:53
 #: src/components/Reown/modals/GetBalanceModal.js:66
 #: src/components/Reown/modals/GetUtxosModal.js:187
-#: src/components/Reown/modals/SendNanoContractTxModal.js:38
+#: src/components/Reown/modals/SendNanoContractTxModal.js:42
 #: src/components/Reown/modals/SendTransactionModal.js:246
 #: src/components/Reown/modals/SignMessageModal.js:27
 #: src/components/Reown/modals/SignOracleDataModal.js:40
@@ -3817,14 +3976,14 @@ msgstr ""
 msgid "This dApp would like to:"
 msgstr ""
 
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:19
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:21
 #. *
 #.  * Component for Token Data Card
 #.  
 msgid "Create Token Data"
 msgstr ""
 
-#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:70
+#: src/components/Reown/modals/CreateNanoContractCreateTokenTxModal.js:73
 msgid "CREATE NANO CONTRACT & TOKEN"
 msgstr ""
 
@@ -3963,7 +4122,7 @@ msgstr ""
 msgid "Share UTXOs Information"
 msgstr ""
 
-#: src/components/Reown/modals/SendNanoContractTxModal.js:36
+#: src/components/Reown/modals/SendNanoContractTxModal.js:40
 msgid "NEW NANO CONTRACT TRANSACTION"
 msgstr ""
 

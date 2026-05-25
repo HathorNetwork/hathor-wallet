@@ -16,6 +16,7 @@ import { sharedAddressUpdate } from '../actions/index';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import LOCAL_STORE from '../storage';
 import { getGlobalWallet } from '../modules/wallet';
+import { isSingleKeyWallet } from '../reducers';
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -28,6 +29,7 @@ const mapStateToProps = (state) => {
     lastSharedAddress: state.lastSharedAddress,
     lastSharedIndex: state.lastSharedIndex,
     addressMode: state.addressMode,
+    isWeb3Auth: isSingleKeyWallet(state),
   };
 };
 
@@ -148,23 +150,25 @@ export class WalletAddress extends React.Component {
   render() {
     const renderAddress = () => {
       const isSingleAddress = this.props.addressMode === ADDRESS_MODE.SINGLE;
+      const { isWeb3Auth } = this.props;
+      const showGenerateNewAddress = !isSingleAddress && !isWeb3Auth;
 
       return (
         <div className="d-flex flex-column align-items-center address-wrapper card">
           <p><strong>{t`Address to receive tokens`}</strong></p>
           {showAddressString()}
           <div className="d-flex flex-row align-items-center">
-            {!isSingleAddress && (
+            {showGenerateNewAddress && (
               <a className="new-address" onClick={(e) => this.generateNewAddress(e)} href="true">{t`Generate new address`} <i className="fa fa-refresh ml-1" title={t`Get new address`}></i></a>
             )}
             {(!LOCAL_STORE.isHardwareWallet()) &&
               <div>
-                {!isSingleAddress && <span className="ml-3 mr-3">|</span>}
+                {showGenerateNewAddress && <span className="ml-3 mr-3">|</span>}
                 <a href="true" onClick={(e) => this.showQRCode(e)}>{t`QR Code`} <i className="fa fa-qrcode ml-1" title={t`Get qrcode`}></i></a>
               </div>
             }
           </div>
-          {(!LOCAL_STORE.isHardwareWallet() && !isSingleAddress) &&
+          {(!LOCAL_STORE.isHardwareWallet() && !isSingleAddress && !isWeb3Auth) &&
             <a href="true" onClick={this.seeAllAddresses} className="mt-3 ">{t`See all addresses`}</a>
           }
         </div>

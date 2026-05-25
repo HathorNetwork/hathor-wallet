@@ -15,6 +15,7 @@ import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { resolveLockWalletPromise, startWalletRequested, walletReset } from '../actions';
 import { colors } from '../constants';
 import LOCAL_STORE from '../storage';
+import { isSingleKeyWallet } from '../reducers';
 
 /**
  * When wallet is locked show this screen and ask for PIN to unlock the wallet
@@ -32,6 +33,7 @@ function LockedWallet() {
   const formRef = useRef(null);
   const context = useContext(GlobalModalContext);
   const lockWalletPromise = useSelector(state => state.lockWalletPromise);
+  const isWeb3Auth = useSelector(isSingleKeyWallet);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -83,7 +85,13 @@ function LockedWallet() {
 
     setLoading(true);
 
-    dispatch(startWalletRequested({ pin }));
+    if (isWeb3Auth) {
+      // Web3Auth single-key wallet: the saga's restore branch decrypts the
+      // persisted singleKeyPrivateKey using the PIN — no seed/xpub needed.
+      dispatch(startWalletRequested({ pin }));
+    } else {
+      dispatch(startWalletRequested({ pin }));
+    }
   }
 
   /**

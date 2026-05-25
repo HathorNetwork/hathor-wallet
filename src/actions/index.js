@@ -52,6 +52,8 @@ export const types = {
   FEATURE_TOGGLE_INITIALIZED: 'FEATURE_TOGGLE_INITIALIZED',
   SET_FEATURE_TOGGLES: 'SET_FEATURE_TOGGLES',
   SET_UNLEASH_CLIENT: 'SET_UNLEASH_CLIENT',
+  SET_WALLET_TYPE: 'SET_WALLET_TYPE',
+  SET_WEB3AUTH_EMAIL: 'SET_WEB3AUTH_EMAIL',
   UPDATE_TX_HISTORY: 'UPDATE_TX_HISTORY',
   SET_NATIVE_TOKEN_DATA: 'SET_NATIVE_TOKEN_DATA',
   ADD_REGISTERED_TOKENS: 'ADD_REGISTERED_TOKENS',
@@ -1093,4 +1095,27 @@ export const dismissTokenImportBanner = () => ({
 export const newUnknownTokensFound = (tokenUids) => ({
   type: types.NEW_UNKNOWN_TOKENS_FOUND,
   payload: { tokenUids },
+});
+
+/**
+ * Set the active wallet type — software (seed), hardware (Ledger), or web3auth.
+ * The value is also persisted to localStorage by the Web3Auth flow (see
+ * src/sagas/web3auth.js) so the app can restore it on startup.
+ *
+ * @param {'software'|'hardware'|'web3auth'|null} walletType
+ */
+export const setWalletType = (walletType) => ({
+  type: types.SET_WALLET_TYPE,
+  payload: walletType,
+});
+
+/**
+ * Set the email address of the user signed in via Web3Auth. Persisted alongside
+ * walletType in localStorage; null when the wallet is not a Web3Auth wallet.
+ *
+ * @param {string|null} email
+ */
+export const setWeb3authEmail = (email) => ({
+  type: types.SET_WEB3AUTH_EMAIL,
+  payload: email,
 });

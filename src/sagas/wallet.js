@@ -67,6 +67,8 @@ import {
   setAddressMode,
   setFeatureToggles,
   newUnknownTokensFound,
+  setWalletType,
+  setWeb3authEmail,
 } from '../actions';
 import {
   specificTypeAndPayload,
@@ -76,6 +78,7 @@ import {
 } from './helpers';
 import { fetchTokenData, restoreTokensForNetwork } from './tokens';
 import { updateUnleashClientContext } from './featureToggle';
+import { web3authLogout } from './web3auth';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import nanoUtils from '../utils/nanoContracts';
@@ -154,12 +157,35 @@ export function* startWallet(action) {
     password,
     xpub,
     hardware,
+    privateKey,
+    publicKey,
+    walletType,
   } = action.payload;
   let xpriv = null;
 
   yield put(loadingAddresses(true));
 
-  if (hardware) {
+  // Web3Auth branch: bypass wallet-service and force single-address policy.
+  // Read access data here (when storage is already initialized) to detect
+  // restore mode where no privateKey is in payload but the persisted access
+  // data has `singleKeyMode === true`.
+  const earlyStorage = LOCAL_STORE.getStorage();
+  const earlyAccessData = earlyStorage
+    ? yield call([earlyStorage, 'getAccessData'])
+    : null;
+  const isWeb3AuthFirstLogin = Boolean(privateKey);
+  const isWeb3AuthRestore = (
+    !privateKey
+    && !words
+    && !xpub
+    && earlyAccessData?.singleKeyMode === true
+  );
+  const isWeb3Auth = isWeb3AuthFirstLogin || isWeb3AuthRestore;
+
+  if (isWeb3Auth) {
+    // Storage was set up by Signin via initWeb3AuthStorage on first login,
+    // or persisted from a previous session on restore. Do not re-init.
+  } else if (hardware) {
     // We need to ensure that the hardware wallet storage is always generated here since we may be
     // starting the wallet with a second device and so we cannot trust the xpub saved on storage.
     yield LOCAL_STORE.initHWStorage(xpub);
@@ -177,20 +203,32 @@ export function* startWallet(action) {
   // we sync after wallet.start. Persistence of the address mode to
   // localStorage is therefore deferred to after the connection.
   const network = yield select((state) => state.networkSettings.data.network);
-  const singleAddressFeatureEnabled = yield call(checkForFeatureFlag, SINGLE_ADDRESS_FEATURE_TOGGLE);
-  const storedAddressMode = walletUtils.getAddressMode(network);
 
-  const attemptedAddressMode = decideAddressMode({ singleAddressFeatureEnabled, storedAddressMode });
+  let scanPolicy;
+  let attemptedAddressMode;
+  if (isWeb3Auth) {
+    // Web3Auth single-key wallets are single-address by construction.
+    scanPolicy = { policy: SCANNING_POLICY.SINGLE_ADDRESS };
+    attemptedAddressMode = ADDRESS_MODE.SINGLE;
+  } else {
+    const singleAddressFeatureEnabled = yield call(checkForFeatureFlag, SINGLE_ADDRESS_FEATURE_TOGGLE);
+    const storedAddressMode = walletUtils.getAddressMode(network);
 
-  const scanPolicy = attemptedAddressMode === ADDRESS_MODE.SINGLE
-    ? { policy: SCANNING_POLICY.SINGLE_ADDRESS }
-    : { policy: SCANNING_POLICY.GAP_LIMIT, gapLimit: hathorLibConstants.GAP_LIMIT };
+    attemptedAddressMode = decideAddressMode({ singleAddressFeatureEnabled, storedAddressMode });
+
+    scanPolicy = attemptedAddressMode === ADDRESS_MODE.SINGLE
+      ? { policy: SCANNING_POLICY.SINGLE_ADDRESS }
+      : { policy: SCANNING_POLICY.GAP_LIMIT, gapLimit: hathorLibConstants.GAP_LIMIT };
+  }
 
   // We are offline, the connection object is yet to be created
   yield put(isOnlineUpdate({ isOnline: false }));
 
-  // For now, the wallet service does not support hardware wallet, so default to the old facade
-  const useWalletService = hardware ? false : yield call(isWalletServiceEnabled);
+  // For now, the wallet service does not support hardware wallet, so default to the old facade.
+  // Web3Auth single-key wallets are also not supported by wallet-service yet (RFC #46 §1.9 defers).
+  const useWalletService = (isWeb3Auth || hardware)
+    ? false
+    : yield call(isWalletServiceEnabled);
   const enableAtomicSwap = yield call(isAtomicSwapEnabled);
 
   let customTokens = [];
@@ -250,23 +288,57 @@ export function* startWallet(action) {
       dispatch(reloadingWallet());
     };
 
-    if (!(words || xpub)) {
-      const accessData = yield storage.getAccessData();
-      xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
+    if (isWeb3Auth) {
+      // First-login: privateKey + publicKey come from action.payload.
+      // Restore: decrypt the persisted singleKeyPrivateKey using the pin and
+      // pass it back to the HathorWallet constructor — the constructor
+      // requires exactly one of seed/xpriv/xpub/privateKey, so we cannot
+      // construct without it even when storage already has the access data.
+      let restoredPrivateKey;
+      let restoredPublicKey;
+      if (isWeb3AuthRestore) {
+        restoredPrivateKey = yield call([storage, 'getSingleKeyPrivateKey'], pin);
+        // earlyAccessData was read above; singleKeyPublicKey holds the
+        // persisted DER-hex public key set by generateAccessDataFromPrivateKey.
+        // It is optional — the HathorWallet constructor derives it from
+        // privateKey when omitted — but passing it lets the constructor
+        // validate the pair.
+        restoredPublicKey = earlyAccessData?.singleKeyPublicKey;
+      }
+      const walletConfig = {
+        privateKey: isWeb3AuthFirstLogin ? privateKey : restoredPrivateKey,
+        publicKey: isWeb3AuthFirstLogin ? publicKey : restoredPublicKey,
+        connection,
+        beforeReloadCallback,
+        storage,
+        scanPolicy,
+      };
+      wallet = new HathorWallet(walletConfig);
+      // Register the unified getSignatureForTx as the external signer.
+      // It detects `singleKeyMode` internally and routes to single-key signing
+      // via buildSigningKeyResolver; for HD wallets it derives from xpriv.
+      wallet.setExternalTxSigningMethod(async (tx, walletStorage, pinCode) => (
+        transactionUtils.getSignatureForTx(tx, walletStorage, pinCode)
+      ));
+    } else {
+      if (!(words || xpub)) {
+        const accessData = yield storage.getAccessData();
+        xpriv = cryptoUtils.decryptData(accessData.mainKey, pin);
+      }
+
+      const walletConfig = {
+        seed: words,
+        xpriv,
+        xpub,
+        passphrase,
+        connection,
+        beforeReloadCallback,
+        storage,
+        scanPolicy,
+      };
+
+      wallet = new HathorWallet(walletConfig);
     }
-
-    const walletConfig = {
-      seed: words,
-      xpriv,
-      xpub,
-      passphrase,
-      connection,
-      beforeReloadCallback,
-      storage,
-      scanPolicy,
-    };
-
-    wallet = new HathorWallet(walletConfig);
   }
 
   setGlobalWallet(wallet);
@@ -836,6 +908,17 @@ export function* refreshSharedAddress() {
 
 export function* onWalletReset() {
   const wallet = getGlobalWallet();
+
+  // Web3Auth cleanup: terminate the SDK session and clear the Redux
+  // identity (walletType + email). Idempotent: safe to call for non-web3auth
+  // wallets (logout is a no-op when no SDK session exists, and the action
+  // dispatches just overwrite already-null state). The persisted
+  // WEB3AUTH_WALLET_TYPE_KEY / WEB3AUTH_EMAIL_KEY entries are erased by the
+  // LOCAL_STORE.resetStorage() call below, since both keys are registered in
+  // the storage layer's storageKeys list.
+  yield call(web3authLogout);
+  yield put(setWalletType(null));
+  yield put(setWeb3authEmail(null));
 
   localStorage.removeItem(IGNORE_WS_TOGGLE_FLAG);
   // Clear per-network address mode preferences. LOCAL_STORE.resetStorage()

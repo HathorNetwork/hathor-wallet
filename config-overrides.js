@@ -9,6 +9,7 @@ const webpack = require('webpack');
 const LavaMoatPlugin = require('@lavamoat/webpack')
 const path = require('path');
 const stdLibBrowser = require('node-stdlib-browser');
+const { NodeProtocolUrlPlugin } = require('node-stdlib-browser/helpers/webpack/plugin');
 
 module.exports = function override(config, env) {
   // Enable source maps for better debugging
@@ -34,7 +35,9 @@ module.exports = function override(config, env) {
     fallback: {
       buffer: require.resolve('buffer/'),
       assert: stdLibBrowser.assert,
-      crypto: stdLibBrowser.crypto,
+      // Custom shim that wraps crypto-browserify and adds the `webcrypto`
+      // export required by the Web3Auth SDK. See src/web3auth-crypto-shim.js.
+      crypto: path.resolve(__dirname, 'src/web3auth-crypto-shim.js'),
       path: stdLibBrowser.path,
       process: stdLibBrowser.process,
       stream: stdLibBrowser.stream,
@@ -136,7 +139,12 @@ module.exports = function override(config, env) {
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
       process: stdLibBrowser.process
-    })
+    }),
+    // Strip the `node:` scheme prefix from imports (e.g. `node:crypto` ->
+    // `crypto`) so the existing browser fallbacks above resolve.
+    // Required by the Web3Auth SDK (see sagas/web3auth.js) which uses the
+    // `node:` scheme for Node.js built-ins.
+    NodeProtocolUrlPlugin()
   ];
 
   // Only add LavaMoat in production because LavaMoat does not work with the

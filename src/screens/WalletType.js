@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateLedgerClosed } from '../actions/index';
 import LOCAL_STORE from '../storage';
 import { useNavigate } from 'react-router-dom';
-import { LEDGER_GUIDE_URL } from '../constants';
+import { LEDGER_GUIDE_URL, WEB3AUTH_FEATURE_TOGGLE } from '../constants';
 import helpers from '../utils/helpers';
 
 /**
@@ -30,6 +30,9 @@ function WalletType() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const ledgerClosed = useSelector((state) => state.ledgerWasClosed);
+  const web3authEnabled = useSelector(
+    (state) => state.featureToggles?.[WEB3AUTH_FEATURE_TOGGLE] || false
+  );
 
   useEffect(() => {
     // Update Sentry when user started wallet now
@@ -53,6 +56,14 @@ function WalletType() {
    */
   const goToHardwareWallet = () => {
     navigate('/hardware_wallet/');
+  }
+
+  /**
+   * Go to the Web3Auth login screen (Sign in with social).
+   */
+  const goToWeb3AuthLogin = () => {
+    LOCAL_STORE.setHardwareWallet(false);
+    navigate('/web3auth_login/');
   }
 
   /**
@@ -87,6 +98,11 @@ function WalletType() {
                 <button onClick={goToHardwareWallet} type="button" className="btn btn-hathor mr-3">{t`Hardware wallet`}</button>
                 <button onClick={goToSoftwareWallet} type="button" className="btn btn-hathor">{t`Software wallet`}</button>
               </div>
+              {web3authEnabled && (
+                <div className="d-flex align-items-center flex-column w-100 mt-3">
+                  <button onClick={goToWeb3AuthLogin} type="button" className="btn btn-hathor">{t`Sign in with social`}</button>
+                </div>
+              )}
             </div>
           </div>
         </div>

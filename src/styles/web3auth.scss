@@ -1,0 +1,77 @@
+/**
+ * Web3Auth social login screen styles.
+ *
+ * Expects the following variables to be defined by the importing file:
+ *   $purpleHathor, $purpleHathorHover
+ */
+
+.web3auth-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+
+  &__cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    margin-top: 2rem;
+  }
+
+  &__card {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    border: 1px solid $purpleHathor;
+    border-radius: 0.5rem;
+    background-color: white;
+    transition: box-shadow 0.15s ease-in-out;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  &__card-logo {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__divider {
+    width: 100%;
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+    color: #6c757d;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background-color: #ddd;
+      z-index: 0;
+    }
+
+    span {
+      position: relative;
+      background-color: white;
+      padding: 0 0.75rem;
+      z-index: 1;
+    }
+  }
+}
