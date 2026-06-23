@@ -32,6 +32,9 @@ export function ConnectModal({ data, onAccept, onReject }) {
             <li key={method}>{method}</li>
           ))}
         </ul>
+        <p className="mt-3 text-muted small">
+          {t`This dApp will also be able to view the balance of your tokens.`}
+        </p>
       </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" onClick={onReject} data-dismiss="modal">{t`Reject`}</button>
