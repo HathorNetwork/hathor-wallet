@@ -57,8 +57,13 @@ function createWindow () {
     height: 768,
     icon: path.join(__dirname, iconOS),
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      // Security: no Node in the renderer; it reaches main only through the
+      // contextBridge API in preload.js (window.electronAPI).
+      nodeIntegration: false,
+      contextIsolation: true,
+      // sandbox stays off so the preload can still use Node (require/process)
+      // for the bridge and Sentry — enabling it is a follow-up.
+      sandbox: false,
       preload: path.join(__dirname, 'preload.js')
     }
   })

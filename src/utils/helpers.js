@@ -13,9 +13,10 @@ import { networkUpdate, networkSettingsUpdate, networkSettingsUpdateSuccess } fr
 import { NETWORK_SETTINGS } from '../constants';
 import LOCAL_STORE from '../storage';
 
-let shell = null;
-if (window.require) {
-  shell = window.require('electron').shell;
+let openExternal = null;
+if (window.electronAPI) {
+  // Exposed by preload.js via contextBridge; wraps electron's shell.openExternal.
+  openExternal = window.electronAPI.openExternal;
 }
 
 const helpers = {
@@ -31,8 +32,8 @@ const helpers = {
   openExternalURL(url) {
     // We use electron shell to open the user external default browser
     // otherwise it would open another electron window and the user wouldn't be able to copy the URL
-    if (shell !== null) {
-      shell.openExternal(url);
+    if (openExternal !== null) {
+      openExternal(url);
     } else {
       // In case it's running on the browser it won't have electron shell
       // This should be used only when testing
