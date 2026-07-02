@@ -44,7 +44,7 @@ class WalletBalance extends React.Component {
     const renderBalance = () => {
       return (
         <div>
-          <p><strong>{t`Total:`}</strong> {numberUtils.prettyValue(balance.available + balance.locked, isNFT ? 0 : this.props.decimalPlaces)} {symbol}</p>
+          <p data-testid="wallet-balance-total"><strong>{t`Total:`}</strong> {numberUtils.prettyValue(balance.available + balance.locked, isNFT ? 0 : this.props.decimalPlaces)} {symbol}</p>
           <p><strong>{t`Available:`}</strong> {numberUtils.prettyValue(balance.available, isNFT ? 0 : this.props.decimalPlaces)} {symbol}</p>
           <p><strong>{t`Locked:`}</strong> {numberUtils.prettyValue(balance.locked, isNFT ? 0 : this.props.decimalPlaces)} {symbol}</p>
         </div>

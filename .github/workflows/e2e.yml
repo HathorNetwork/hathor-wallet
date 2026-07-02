@@ -1,29 +1,29 @@
 name: End-to-end tests
 on:
- push:
-   branches:
-     - master
-     - release-candidate
-     - release
-   tags:
-     - v*
- pull_request:
-   branches:
-     - master
-     - release-candidate
-     - release
+  push:
+    branches:
+      - master
+      - release-candidate
+      - release
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - master
+      - release-candidate
+      - release
 jobs:
-  cypress-run:
+  playwright-run:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         node-version: [22.x]
+    env:
+      E2E_IMPORT_SEED: ${{ secrets.E2E_IMPORT_SEED }}
     steps:
       - name: Checkout
-        # https://github.com/actions/checkout/releases/tag/v4.2.2
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Setup nodejs
-        # https://github.com/actions/setup-node/releases/tag/v4.1.0
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
         with:
           node-version: ${{ matrix.node-version }}
@@ -31,14 +31,18 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libusb-1.0-0-dev libudev-dev
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
-      - name: Cypress run
-        # https://github.com/cypress-io/github-action/releases/tag/v6.10.9
-        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7
+      - name: Install NPM dependencies
+        run: npm ci
+      - name: Install Playwright/Electron host libraries
+        run: npx playwright install-deps chromium
+      - name: Run Playwright E2E (headless via xvfb)
+        run: xvfb-run -a npm run e2e
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          start: npm start
-          wait-on: 'http://localhost:3000'
-          wait-on-timeout: 120
-          browser: chrome
-          install-command: npm ci
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

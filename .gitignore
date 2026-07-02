@@ -6,9 +6,6 @@ src/**/*.css
 
 # testing
 /coverage
-# Cypress
-cypress/screenshots/
-cypress/videos/
 
 # production
 /build
@@ -43,3 +40,9 @@ yarn-error.log*
 # yalc
 .yalc/
 yalc.lock
+
+# Playwright E2E
+.env.e2e
+/playwright-report/
+/test-results/
+/blob-report/

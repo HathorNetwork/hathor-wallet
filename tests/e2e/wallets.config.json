@@ -1,0 +1,6 @@
+{
+  "funded": {
+    "srpEnv": "E2E_IMPORT_SEED",
+    "description": "Funded testnet stub seed; supplied via .env.e2e / CI secret, never committed."
+  }
+}
