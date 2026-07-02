@@ -104,7 +104,7 @@
         "@hathor/wallet-lib>crypto-js": true,
         "@walletconnect/core>events": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
-        "cypress>lodash": true,
+        "@hathor/wallet-lib>lodash": true,
         "node-stdlib-browser>path-browserify": true,
         "@hathor/wallet-lib>queue-microtask": true,
         "@hathor/wallet-lib>zod": true
@@ -135,7 +135,7 @@
         "@hathor/wallet-lib>crypto-js": true,
         "@walletconnect/core>events": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
-        "cypress>lodash": true,
+        "@hathor/wallet-lib>lodash": true,
         "node-stdlib-browser>path-browserify": true,
         "@hathor/wallet-lib>queue-microtask": true,
         "@hathor/wallet-lib>zod": true
@@ -821,7 +821,7 @@
     },
     "@hathor/wallet-lib>bitcore-lib>bs58>base-x": {
       "packages": {
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "@hathor/wallet-lib>bitcore-lib": {
@@ -844,7 +844,7 @@
         "node-stdlib-browser>crypto-browserify": true,
         "@walletconnect/utils>elliptic": true,
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>lodash": true,
+        "@hathor/wallet-lib>lodash": true,
         "process": true,
         "node-stdlib-browser>url": true
       }
@@ -884,10 +884,7 @@
     },
     "@walletconnect/utils>elliptic>bn.js": {
       "globals": {
-        "console.error": true
-      },
-      "packages": {
-        "$root$": true
+        "Buffer": true
       }
     },
     "bootstrap": {
@@ -928,7 +925,7 @@
         "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true,
         "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": true,
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "node-stdlib-browser>crypto-browserify>browserify-cipher": {
@@ -943,7 +940,7 @@
         "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": true,
         "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-des>des.js": true,
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": {
@@ -953,7 +950,7 @@
       "packages": {
         "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa>bn.js": true,
         "buffer": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true
+        "ttag-cli>serialize-javascript>randombytes": true
       }
     },
     "node-stdlib-browser>crypto-browserify>browserify-sign": {
@@ -966,7 +963,7 @@
         "node-stdlib-browser>crypto-browserify>browserify-sign>inherits": true,
         "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": true,
         "node-stdlib-browser>crypto-browserify>browserify-sign>readable-stream": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "node-stdlib-browser>browserify-zlib": {
@@ -1022,7 +1019,7 @@
     "node-stdlib-browser>crypto-browserify>create-hash>cipher-base": {
       "packages": {
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
+        "ttag-cli>gettext-parser>safe-buffer": true,
         "node-stdlib-browser>stream-browserify": true,
         "node-stdlib-browser>string_decoder": true
       }
@@ -1075,7 +1072,7 @@
         "node-stdlib-browser>crypto-browserify>create-hash": true,
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
         "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": true,
-        "cypress>@cypress/request>safe-buffer": true,
+        "ttag-cli>gettext-parser>safe-buffer": true,
         "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": true
       }
     },
@@ -1089,7 +1086,7 @@
         "node-stdlib-browser>crypto-browserify>diffie-hellman": true,
         "node-stdlib-browser>crypto-browserify>pbkdf2": true,
         "node-stdlib-browser>crypto-browserify>public-encrypt": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true,
+        "ttag-cli>serialize-javascript>randombytes": true,
         "node-stdlib-browser>crypto-browserify>randomfill": true
       }
     },
@@ -1146,7 +1143,7 @@
         "@hathor/wallet-lib>bitcore-lib>bn.js": true,
         "buffer": true,
         "node-stdlib-browser>crypto-browserify>diffie-hellman>miller-rabin": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true
+        "ttag-cli>serialize-javascript>randombytes": true
       }
     },
     "eslint-plugin-react>array-includes>get-intrinsic>get-proto>dunder-proto": {
@@ -1174,7 +1171,7 @@
     "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": {
       "packages": {
         "node-stdlib-browser>crypto-browserify>create-hash>md5.js": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "node-stdlib-browser>util>is-typed-array>for-each": {
@@ -1213,7 +1210,7 @@
         "npm-run-all>string.prototype.padend>call-bind>es-define-property": true
       }
     },
-    "eslint-plugin-react>array-includes>is-string>has-tostringtag": {
+    "ttag-cli>koa>is-generator-function>has-tostringtag": {
       "packages": {
         "eslint-plugin-react>es-iterator-helpers>has-symbols": true
       }
@@ -1221,7 +1218,7 @@
     "node-stdlib-browser>crypto-browserify>browserify-sign>hash-base": {
       "packages": {
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true,
+        "ttag-cli>gettext-parser>safe-buffer": true,
         "node-stdlib-browser>stream-browserify": true
       }
     },
@@ -1264,7 +1261,7 @@
     "node-stdlib-browser>util>is-arguments": {
       "packages": {
         "npm-run-all>string.prototype.padend>call-bind": true,
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true
+        "ttag-cli>koa>is-generator-function>has-tostringtag": true
       }
     },
     "npm-run-all>string.prototype.padend>es-abstract>is-callable": {
@@ -1272,9 +1269,9 @@
         "document": true
       }
     },
-    "node-stdlib-browser>util>is-generator-function": {
+    "ttag-cli>koa>is-generator-function": {
       "packages": {
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true
+        "ttag-cli>koa>is-generator-function>has-tostringtag": true
       }
     },
     "node-stdlib-browser>assert>is-nan": {
@@ -1289,7 +1286,7 @@
         "npm-run-all>string.prototype.padend>call-bind": true,
         "node-stdlib-browser>util>is-typed-array>for-each": true,
         "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true
+        "ttag-cli>koa>is-generator-function>has-tostringtag": true
       }
     },
     "@hathor/wallet-lib>isomorphic-ws": {
@@ -1312,7 +1309,7 @@
         "process": true
       }
     },
-    "cypress>lodash": {
+    "@hathor/wallet-lib>lodash": {
       "globals": {
         "define": true
       }
@@ -1321,7 +1318,7 @@
       "packages": {
         "node-stdlib-browser>crypto-browserify>browserify-sign>hash-base": true,
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "node-stdlib-browser>crypto-browserify>diffie-hellman>miller-rabin": {
@@ -1366,7 +1363,7 @@
         "node-stdlib-browser>crypto-browserify>browserify-cipher>browserify-aes": true,
         "node-stdlib-browser>crypto-browserify>browserify-cipher>evp_bytestokey": true,
         "node-stdlib-browser>crypto-browserify>pbkdf2": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "node-stdlib-browser>path-browserify": {
@@ -1389,7 +1386,7 @@
         "node-stdlib-browser>crypto-browserify>create-hash": true,
         "process": true,
         "node-stdlib-browser>crypto-browserify>pbkdf2>ripemd160": true,
-        "cypress>@cypress/request>safe-buffer": true,
+        "ttag-cli>gettext-parser>safe-buffer": true,
         "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": true
       }
     },
@@ -1434,8 +1431,8 @@
         "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": true,
         "node-stdlib-browser>crypto-browserify>create-hash": true,
         "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>serialize-javascript>randombytes": true,
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "node-stdlib-browser>url>punycode": {
@@ -1452,7 +1449,7 @@
         "react": true
       }
     },
-    "cypress>@cypress/request>qs": {
+    "node-stdlib-browser>url>qs": {
       "packages": {
         "eslint-plugin-react>string.prototype.matchall>side-channel": true
       }
@@ -1471,7 +1468,7 @@
         "setTimeout": true
       }
     },
-    "node-stdlib-browser>crypto-browserify>randombytes": {
+    "ttag-cli>serialize-javascript>randombytes": {
       "globals": {
         "crypto": true,
         "msCrypto": true,
@@ -1479,7 +1476,7 @@
       },
       "packages": {
         "process": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "node-stdlib-browser>crypto-browserify>randomfill": {
@@ -1491,8 +1488,8 @@
       },
       "packages": {
         "process": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>serialize-javascript>randombytes": true,
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "react": {
@@ -1680,7 +1677,7 @@
         "@hathor/wallet-lib>bitcore-lib>inherits": true
       }
     },
-    "cypress>@cypress/request>safe-buffer": {
+    "ttag-cli>gettext-parser>safe-buffer": {
       "packages": {
         "buffer": true
       }
@@ -1719,7 +1716,7 @@
     "node-stdlib-browser>crypto-browserify>pbkdf2>sha.js": {
       "packages": {
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>@cypress/request>safe-buffer": true
+        "ttag-cli>gettext-parser>safe-buffer": true
       }
     },
     "eslint-plugin-react>string.prototype.matchall>side-channel": {
@@ -1829,7 +1826,7 @@
     "node-stdlib-browser>url": {
       "packages": {
         "node-stdlib-browser>url>punycode": true,
-        "cypress>@cypress/request>qs": true
+        "node-stdlib-browser>url>qs": true
       }
     },
     "node-stdlib-browser>readable-stream>util-deprecate": {
@@ -1849,7 +1846,7 @@
       "packages": {
         "node-stdlib-browser>util>inherits": true,
         "node-stdlib-browser>util>is-arguments": true,
-        "node-stdlib-browser>util>is-generator-function": true,
+        "ttag-cli>koa>is-generator-function": true,
         "node-stdlib-browser>util>is-typed-array": true,
         "process": true,
         "node-stdlib-browser>util>which-typed-array": true
@@ -1914,7 +1911,7 @@
         "npm-run-all>string.prototype.padend>call-bind": true,
         "node-stdlib-browser>util>is-typed-array>for-each": true,
         "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true,
+        "ttag-cli>koa>is-generator-function>has-tostringtag": true,
         "node-stdlib-browser>util>is-typed-array": true
       }
     },
