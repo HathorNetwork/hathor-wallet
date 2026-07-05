@@ -37,8 +37,25 @@ Settings screen ("Connected to Testnet") after the wallet restarts and re-syncs.
 Fresh Electron `--user-data-dir` per worker (removed on teardown). Alternatives (not used):
 `localStorage.clear()` + reload; the `app:clear_storage` IPC (needs `--unsafe-mode --hathor-debug`).
 
+## Targets
+The same specs run against two targets, selected by `E2E_TARGET`:
+
+- **`dev` (default)** — Playwright's `webServer` boots the CRA dev server and Electron loads it
+  via `ELECTRON_START_URL`. **No LavaMoat** (LavaMoat breaks dev hot-reload, so `config-overrides.js`
+  only adds it in the production build).
+- **`build`** — `E2E_TARGET=build` runs a Playwright `globalSetup` (`support/build.ts`) that does
+  `npm run build`, producing `build/index.html` with **LavaMoat applied** (SES lockdown). Electron
+  is launched with **no** `ELECTRON_START_URL`, so `public/electron.js` loads `build/index.html` via
+  `file://`. No dev server is started in this mode. Set `E2E_SKIP_BUILD=1` to reuse an existing
+  `build/` and skip the (slow) rebuild.
+
+Run the LavaMoat'd production target with `npm run e2e:release` (or `npm run e2e:release:headed`).
+`npm run build` regenerates `lavamoat/webpack/policy.json` as a side effect — that file is not
+part of the harness and should not be committed from an E2E run.
+
 ## Running
 `npm run e2e` (all) · `npm run e2e -- --project=onboarding` · `npm run e2e:headed` · `npm run e2e:ui`.
+LavaMoat production build: `npm run e2e:release` · `E2E_SKIP_BUILD=1 npm run e2e:release -- --project=import`.
 Set `E2E_IMPORT_SEED` in `.env.e2e` (gitignored) to run the import journey; otherwise it skips.
 If port 3000 is taken by another dev server, override just the port:
 `E2E_DEV_SERVER_PORT=3007 npm run e2e` — `ELECTRON_START_URL` auto-derives from it

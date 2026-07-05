@@ -85,6 +85,8 @@
     "e2e": "playwright test --config playwright.e2e.config.ts",
     "e2e:headed": "playwright test --config playwright.e2e.config.ts --headed",
     "e2e:ui": "playwright test --config playwright.e2e.config.ts --ui",
+    "e2e:release": "E2E_TARGET=build playwright test --config playwright.e2e.config.ts",
+    "e2e:release:headed": "E2E_TARGET=build playwright test --config playwright.e2e.config.ts --headed",
     "eject": "react-scripts eject",
     "electron": "electron --inspect=5858 --trace-uncaught .",
     "electron-deps": "electron-builder install-app-deps",

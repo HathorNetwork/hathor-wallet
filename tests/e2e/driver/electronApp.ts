@@ -23,16 +23,28 @@ export interface LaunchedApp {
 
 export async function launchWallet(): Promise<LaunchedApp> {
   const userDataDir = mkdtempSync(join(tmpdir(), 'hathor-wallet-e2e-'));
+
+  // build target: no ELECTRON_START_URL -> public/electron.js loads the production
+  // build/index.html via file:// (LavaMoat applied). dev target: point Electron at
+  // the CRA dev server (no LavaMoat).
+  const target = process.env.E2E_TARGET === 'build' ? 'build' : 'dev';
+  const env: NodeJS.ProcessEnv = { ...process.env, SENTRY_DSN: DUMMY_SENTRY_DSN };
+  if (target === 'build') {
+    delete env.ELECTRON_START_URL;
+    env.NODE_ENV = 'production';
+  } else {
+    env.ELECTRON_START_URL = env.ELECTRON_START_URL ?? 'http://localhost:3000';
+    env.NODE_ENV = 'dev';
+  }
+
   const app = await electron.launch({
     executablePath: electronBinary,
     cwd: repoRoot,
     args: ['.', '--no-sandbox', `--user-data-dir=${userDataDir}`],
-    env: {
-      ...process.env,
-      ELECTRON_START_URL: process.env.ELECTRON_START_URL ?? 'http://localhost:3000',
-      NODE_ENV: 'dev',
-      SENTRY_DSN: DUMMY_SENTRY_DSN,
-    },
+    // electron.launch types env as { [k: string]: string }; Node's process.env is
+    // { [k: string]: string | undefined }. At runtime present keys are strings, so
+    // reconcile the two here rather than filtering undefined values away.
+    env: env as { [key: string]: string },
     timeout: TIMEOUTS.appLaunch,
   });
   const page = await app.firstWindow();

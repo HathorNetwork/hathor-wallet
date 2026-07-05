@@ -11,13 +11,20 @@ loadEnvFile(resolve(__dirname, '.env.e2e'));
 const devServerPort = process.env.E2E_DEV_SERVER_PORT || '3000';
 const devServerUrl = `http://localhost:${devServerPort}`;
 
-// Keep the Electron app URL locked to the dev-server URL so the two can't drift:
-// overriding only E2E_DEV_SERVER_PORT is enough. An explicit ELECTRON_START_URL
-// still wins (e.g. pointing Electron at a remote/prebuilt bundle).
-process.env.ELECTRON_START_URL = process.env.ELECTRON_START_URL || devServerUrl;
+// Two targets: 'dev' (CRA dev server, NO LavaMoat) and 'build' (production
+// build/index.html via file://, WITH LavaMoat). Default stays 'dev'.
+const target = process.env.E2E_TARGET === 'build' ? 'build' : 'dev';
+
+if (target === 'dev') {
+  // Keep the Electron app URL locked to the dev-server URL so the two can't drift:
+  // overriding only E2E_DEV_SERVER_PORT is enough. An explicit ELECTRON_START_URL
+  // still wins (e.g. pointing Electron at a remote/prebuilt bundle).
+  process.env.ELECTRON_START_URL = process.env.ELECTRON_START_URL || devServerUrl;
+}
 
 export default defineConfig<Record<string, never>, { walletSetup: WalletSetup }>({
   testDir: './tests/e2e',
+  globalSetup: './tests/e2e/support/build.ts',
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
@@ -34,12 +41,17 @@ export default defineConfig<Record<string, never>, { walletSetup: WalletSetup }>
     { name: 'onboarding', testMatch: 'onboarding.spec.ts', use: { walletSetup: { kind: 'onboard' } } },
     { name: 'import', testMatch: 'import.spec.ts', use: { walletSetup: { kind: 'import', wallet: 'funded' } } },
   ],
-  webServer: {
-    command: `PORT=${devServerPort} BROWSER=none npm start`,
-    url: devServerUrl,
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  // Dev target boots the CRA dev server; build target loads build/index.html via
+  // file:// (produced by globalSetup) and needs no server.
+  webServer:
+    target === 'dev'
+      ? {
+          command: `PORT=${devServerPort} BROWSER=none npm start`,
+          url: devServerUrl,
+          reuseExistingServer: !process.env.CI,
+          timeout: 180_000,
+          stdout: 'pipe',
+          stderr: 'pipe',
+        }
+      : undefined,
 });
