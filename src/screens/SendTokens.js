@@ -522,7 +522,7 @@ function SendTokens() {
       decimalPlaces,
       onClose: () => {
         globalModalContext.hideModal();
-        resetForm();
+        navigate('/wallet/');
       },
       onViewDetails: () => {
         console.log('View tx details:', tx.hash, tx);
@@ -594,20 +594,6 @@ function SendTokens() {
       const { [tokenUid]: removed, ...rest } = prev;
       return rest;
     });
-  };
-
-  /**
-   * Reset form to initial state after successful send
-   */
-  const resetForm = () => {
-    setTxTokens([...getSelectedToken()]);
-    setDataOutputs([]);
-    setTokenFees({});
-    setTokenChangeOutputs({});
-    setFeeError('');
-    setErrorMessage('');
-    references.current = [React.createRef()];
-    dataOutputRefs.current = {};
   };
 
   /**

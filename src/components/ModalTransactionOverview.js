@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
@@ -40,11 +40,24 @@ function ModalTransactionOverview({
   const [phase, setPhase] = useState('review');
   const [errorMessage, setErrorMessage] = useState('');
   const [preparedTx, setPreparedTx] = useState(null);
+  const pinInputRef = useRef(null);
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
 
   useEffect(() => {
     manageDomLifecycle(`#${MODAL_ID}`);
   }, [manageDomLifecycle]);
+
+  // Focus the PIN field after the modal finishes fading in. `autoFocus` alone
+  // fails on first open: the input mounts while the modal is still `display:none`,
+  // so the browser drops the focus. `autoFocus` is still kept — it covers the
+  // error -> "Try again" -> review remount, where the modal is already visible.
+  useEffect(() => {
+    const onShown = () => pinInputRef.current?.focus();
+    $(`#${MODAL_ID}`).on('shown.bs.modal.focuspin', onShown);
+    return () => {
+      $(`#${MODAL_ID}`).off('shown.bs.modal.focuspin', onShown);
+    };
+  }, []);
 
   const fee = typeof totalFee === 'bigint' ? totalFee : BigInt(totalFee || 0);
   const hasAnyFee = fee > 0n;
@@ -291,6 +304,7 @@ function ModalTransactionOverview({
       <div className="form-group">
         <label htmlFor="pinInput">{t`Pin* (6 digit password)`}</label>
         <input
+          ref={pinInputRef}
           type="password"
           className="form-control"
           id="pinInput"
