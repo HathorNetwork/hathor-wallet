@@ -250,7 +250,14 @@ export function mapFeatureToggles(toggles) {
   }, {});
 }
 
-export function* handleToggleUpdate() {
+/**
+ * Re-hydrate state.featureToggles from the Unleash singleton after clean_data
+ * wipes it, so a post-restart checkForFeatureFlag read isn't stale.
+ *
+ * Doesn't dispatch FEATURE_TOGGLE_UPDATED — it can reload the wallet, unsafe
+ * from inside startWallet.
+ */
+export function* syncFeatureTogglesFromClient() {
   const unleashClient = getUnleashClient();
   const featureTogglesInitialized = yield select((state) => state.featureTogglesInitialized);
 
@@ -258,10 +265,12 @@ export function* handleToggleUpdate() {
     return;
   }
 
-  const { toggles } = unleashClient;
-  const featureToggles = mapFeatureToggles(toggles);
-
+  const featureToggles = mapFeatureToggles(unleashClient.toggles);
   yield put(setFeatureToggles(featureToggles));
+}
+
+export function* handleToggleUpdate() {
+  yield call(syncFeatureTogglesFromClient);
   yield put({ type: 'FEATURE_TOGGLE_UPDATED' });
 }
 

@@ -75,7 +75,7 @@ import {
   dispatchLedgerTokenSignatureVerification,
 } from './helpers';
 import { fetchTokenData, restoreTokensForNetwork } from './tokens';
-import { updateUnleashClientContext } from './featureToggle';
+import { updateUnleashClientContext, syncFeatureTogglesFromClient } from './featureToggle';
 import walletUtils from '../utils/wallet';
 import tokensUtils from '../utils/tokens';
 import nanoUtils from '../utils/nanoContracts';
@@ -158,6 +158,11 @@ export function* startWallet(action) {
   let xpriv = null;
 
   yield put(loadingAddresses(true));
+
+  // Refresh the mirror before the checkForFeatureFlag reads below: the passphrase
+  // flow reaches startWallet right after clean_data wiped it, which would make the
+  // single-address read fall back to multi.
+  yield call(syncFeatureTogglesFromClient);
 
   if (hardware) {
     // We need to ensure that the hardware wallet storage is always generated here since we may be
