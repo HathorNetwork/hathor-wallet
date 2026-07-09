@@ -84,6 +84,9 @@ function SendTokens() {
   // Create refs
   const formSendTokensRef = useRef();
   const references = useRef([React.createRef()]);
+  // Stable row id: keying by token uid would remount the row on token
+  // change and wipe its uncontrolled address/value inputs.
+  const rowIds = useRef([uniqueId('send_token_row')]);
   /**
    * Instance of SendTransaction containing tx data specifically for Ledger signing
    * @type MutableRefObject<SendTransaction>
@@ -686,6 +689,7 @@ function SendTokens() {
     });
 
     references.current.push(React.createRef());
+    rowIds.current.push(uniqueId('send_token_row'));
     setTxTokens([...txTokens, newToken]);
   }
 
@@ -723,6 +727,7 @@ function SendTokens() {
     newTxTokens.splice(index, 1);
     setTxTokens(newTxTokens);
     references.current.splice(index, 1);
+    rowIds.current.splice(index, 1);
   }
 
   /**
@@ -770,7 +775,7 @@ function SendTokens() {
     return txTokens.map((token, index) => {
       return (
         <SendTokensOne
-          key={`${token.uid}-${index}`}
+          key={rowIds.current[index]}
           ref={references.current[index]}
           config={token}
           index={index}
