@@ -767,26 +767,6 @@ const promptHandler = (dispatch) => (request, requestMetadata) =>
         });
       } break;
 
-      case TriggerTypes.GetBalanceConfirmationPrompt: {
-        const getBalanceResponseTemplate = (accepted) => () => {
-          dispatch(hideGlobalModal());
-          resolve({
-            type: TriggerResponseTypes.GetBalanceConfirmationResponse,
-            data: accepted,
-          });
-        };
-
-        dispatch({
-          type: types.SHOW_GET_BALANCE_REQUEST_MODAL,
-          payload: {
-            accept: getBalanceResponseTemplate(true),
-            deny: getBalanceResponseTemplate(false),
-            data: request.data,
-            dapp: requestMetadata,
-          }
-        });
-      } break;
-
       case TriggerTypes.SendNanoContractTxLoadingTrigger:
         dispatch(setNewNanoContractStatusLoading());
         dispatch(showGlobalModal(MODAL_TYPES.NANO_CONTRACT_FEEDBACK, { isLoading: true }));
@@ -993,16 +973,6 @@ export function* onSignMessageRequest(action) {
  */
 export function* onSignOracleDataRequest(action) {
   yield* handleDAppRequest(action, ReownModalTypes.SIGN_ORACLE_DATA);
-}
-
-/**
- * Handles a get balance request from a dApp
- * Shows a modal to the user for confirmation
- *
- * @param {Object} action - The action containing the request payload
- */
-export function* onGetBalanceRequest(action) {
-  yield* handleDAppRequest(action, ReownModalTypes.GET_BALANCE);
 }
 
 /**
@@ -1364,7 +1334,6 @@ export function* saga() {
     takeLatest(types.SHOW_NANO_CONTRACT_SEND_TX_MODAL, onSendNanoContractTxRequest),
     takeLatest(types.SHOW_SIGN_MESSAGE_REQUEST_MODAL, onSignMessageRequest),
     takeLatest(types.SHOW_SIGN_ORACLE_DATA_REQUEST_MODAL, onSignOracleDataRequest),
-    takeLatest(types.SHOW_GET_BALANCE_REQUEST_MODAL, onGetBalanceRequest),
     takeLatest(types.SHOW_CREATE_TOKEN_REQUEST_MODAL, onCreateTokenRequest),
     takeLatest(types.SHOW_SEND_TRANSACTION_REQUEST_MODAL, onSendTransactionRequest),
     takeLatest(types.SHOW_CREATE_NANO_CONTRACT_CREATE_TOKEN_TX_MODAL, onCreateNanoContractCreateTokenTxRequest),

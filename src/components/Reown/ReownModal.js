@@ -13,7 +13,6 @@ import { SendNanoContractTxModal } from './modals/SendNanoContractTxModal';
 import { SendTransactionModal } from './modals/SendTransactionModal';
 import { CreateTokenModal } from './modals/CreateTokenModal';
 import { CreateNanoContractCreateTokenTxModal } from './modals/CreateNanoContractCreateTokenTxModal';
-import { GetBalanceModal } from './modals/GetBalanceModal';
 import { GetAddressModal } from './modals/GetAddressModal';
 import { GetAddressClientModal } from './modals/GetAddressClientModal';
 import { GetUtxosModal } from './modals/GetUtxosModal';
@@ -26,7 +25,6 @@ export const ReownModalTypes = {
   SEND_TRANSACTION: 'SEND_TRANSACTION',
   CREATE_TOKEN: 'CREATE_TOKEN',
   CREATE_NANO_CONTRACT_CREATE_TOKEN_TX: 'CREATE_NANO_CONTRACT_CREATE_TOKEN_TX',
-  GET_BALANCE: 'GET_BALANCE',
   GET_ADDRESS: 'GET_ADDRESS',
   GET_ADDRESS_CLIENT: 'GET_ADDRESS_CLIENT',
   GET_UTXOS: 'GET_UTXOS',
@@ -61,9 +59,6 @@ export function ReownModal({ manageDomLifecycle, data, type, onAcceptAction, onR
 
       case ReownModalTypes.CREATE_NANO_CONTRACT_CREATE_TOKEN_TX:
         return <CreateNanoContractCreateTokenTxModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
-
-      case ReownModalTypes.GET_BALANCE:
-        return <GetBalanceModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
 
       case ReownModalTypes.GET_ADDRESS:
         return <GetAddressModal data={data} onAccept={onAcceptAction} onReject={onRejectAction} />;
