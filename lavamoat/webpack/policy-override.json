@@ -1,5 +1,11 @@
 {
   "resources": {
+    "cypress>lodash": {
+      "globals": {
+        "setTimeout": true,
+        "clearTimeout": true
+      }
+    },
     "bootstrap": {
       "globals": {
         "document": true,

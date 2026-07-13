@@ -107,6 +107,7 @@ class ModalAddManyTokens extends React.Component {
 
     try {
       const toAdd = await Promise.all(validations)
+
       const tokensBalance = this.props.tokensBalance;
       const areZeroBalanceTokensHidden = walletUtils.areZeroBalanceTokensHidden();
       const tokensWithoutBalance = [];
@@ -156,10 +157,9 @@ class ModalAddManyTokens extends React.Component {
         return;
       }
 
-      // Adding the tokens to the wallet and returning with the success callback
+      // Adding the tokens to the wallet via saga (handles version fetching with error resilience)
       for (const config of tokensToAdd) {
-        await tokens.addToken(config.uid, config.name, config.symbol);
-        walletUtils.setTokenAlwaysShow(config.uid, this.state.alwaysShow);
+        await tokens.registerToken(config.uid, this.state.alwaysShow);
       }
 
       this.props.success(toAdd.length);

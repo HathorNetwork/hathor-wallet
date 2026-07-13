@@ -9,7 +9,7 @@ import React, { useContext, useRef, useState } from 'react';
 import { t } from 'ttag'
 import BackButton from '../../components/BackButton';
 import InputNumber from '../../components/InputNumber';
-import hathorLib from '@hathor/wallet-lib';
+import hathorLib, { NanoContractActionType } from '@hathor/wallet-lib';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { get, pullAt } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,12 +18,6 @@ import { nanoContractRegisterSuccess, addBlueprintInformation } from '../../acti
 import { getGlobalWallet } from "../../modules/wallet";
 import walletUtils from '../../utils/wallet';
 import helpers from '../../utils/helpers';
-
-// We should export library types
-const NanoContractActionType = {
-  DEPOSIT: 'deposit',
-  WITHDRAWAL: 'withdrawal',
-};
 
 /**
  * Execute a nano contract method

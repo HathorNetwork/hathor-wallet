@@ -6,7 +6,7 @@
  */
 
 import store from '../store/index';
-import { newTokens, removeTokenMetadata } from '../actions/index';
+import { newTokens, removeTokenMetadata, tokenRegisterRequested } from '../actions/index';
 import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 import LOCAL_STORE from '../storage';
@@ -37,7 +37,7 @@ const tokens = {
     while (!next.done) {
       const token = next.value;
       if ((!excludeDefaultToken) || token.uid !== htrUid) {
-        tokens.push({ uid: token.uid, name: token.name, symbol: token.symbol });
+        tokens.push({ uid: token.uid, name: token.name, symbol: token.symbol, version: token.version });
       }
       // eslint-disable-next-line no-await-in-loop
       next = await iterator.next();
@@ -47,21 +47,43 @@ const tokens = {
   },
 
   /**
-   * Add a new token to the localStorage and redux
+   * Add a new token to the localStorage and redux.
+   * This is the legacy method - prefer using registerToken() which handles version fetching.
    *
    * @param {string} uid Token uid
    * @param {string} name Token name
-   * @param {string} symbol Token synbol
+   * @param {string} symbol Token symbol
+   * @param {number} version Token version (deposit or fee based)
    *
    * @memberof Tokens
    * @inner
    */
-  async addToken(uid, name, symbol) {
+  async addToken(uid, name, symbol, version) {
     const globalWallet = getGlobalWallet();
-    await globalWallet.storage.registerToken({ uid, name, symbol });
+    await globalWallet.storage.registerToken({ uid, name, symbol, version });
     const tokens = await this.getRegisteredTokens(globalWallet);
     store.dispatch(newTokens({tokens, uid: uid}));
     wallet.fetchTokensMetadata([uid], globalWallet.conn.network);
+  },
+
+  /**
+   * Register a token with resilient version fetching via Redux saga.
+   * This dispatches an action that the saga handles, fetching name, symbol,
+   * and version from the fullnode API.
+   *
+   * @param {string} uid Token uid
+   * @param {boolean} [alwaysShow=false] Whether to always show the token
+   * @returns {Promise<{uid: string, name: string, symbol: string, version: number|undefined}>}
+   *
+   * @memberof Tokens
+   * @inner
+   */
+  registerToken(uid, alwaysShow = false) {
+    return new Promise((resolve, reject) => {
+      store.dispatch(
+        tokenRegisterRequested(uid, { alwaysShow, resolve, reject })
+      );
+    });
   },
 
   /**

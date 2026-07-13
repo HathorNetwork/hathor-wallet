@@ -22,7 +22,7 @@
   "productName": "Hathor Wallet",
   "description": "Light wallet for Hathor Network",
   "author": "Hathor Labs <contact@hathor.network> (https://hathor.network/)",
-  "version": "0.34.0",
+  "version": "0.35.0-rc.4",
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
@@ -37,8 +37,8 @@
     "@hathor/hathor-rpc-handler/@hathor/wallet-lib/bitcore-lib": "8.25.10"
   },
   "dependencies": {
-    "@hathor/hathor-rpc-handler": "3.6.0",
-    "@hathor/wallet-lib": "2.14.0",
+    "@hathor/hathor-rpc-handler": "4.4.0",
+    "@hathor/wallet-lib": "3.1.1",
     "@ledgerhq/hw-transport-node-hid": "6.28.1",
     "@reduxjs/toolkit": "2.2.3",
     "@reown/walletkit": "1.1.2",
@@ -92,9 +92,9 @@
     "electron-pack-linux-arm64": "electron-builder --linux --arm64 -c.extraMetadata.main=build/electron.js",
     "electron-pack-win": "electron-builder --win -c.extraMetadata.main=build/electron.js",
     "watch-electron": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev nodemon --watch ./public/**/* --watch . --exec 'npm run electron'",
-    "electron-dev": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --trace-uncaught .",
-    "electron-debug": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --trace-uncaught --unsafe-mode --hathor-debug .",
-    "electron-dev-concurrently": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 .'",
+    "electron-dev": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --trace-uncaught --no-sandbox .",
+    "electron-debug": "ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --trace-uncaught --no-sandbox --unsafe-mode --hathor-debug .",
+    "electron-dev-concurrently": "npx concurrently 'npx cross-env BROWSER=none npm run start' 'npx wait-on http://localhost:3000/ && npx cross-env ELECTRON_START_URL=http://localhost:3000 NODE_ENV=dev electron --inspect=5858 --no-sandbox .'",
     "locale-update-pot": "bash -c 'if command -v ttag &> /dev/null; then ttag extract -o ./locale/texts.pot ./src/; else ./node_modules/.bin/ttag extract -o ./locale/texts.pot ./src/; fi'",
     "postinstall": "npx cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true npm run electron-deps && patch-package",
     "generate-doc": "npx jsdoc -c jsdoc.json -r src/. README.md || exit 0",
@@ -122,7 +122,8 @@
     "nodemon": "3.0.3",
     "null-loader": "4.0.1",
     "process": "0.11.10",
-    "sass": "1.70.0"
+    "sass": "1.70.0",
+    "ttag-cli": "1.11.2"
   },
   "build": {
     "appId": "network.hathor.macos.wallet",

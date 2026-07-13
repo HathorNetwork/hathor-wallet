@@ -34,8 +34,8 @@ jobs:
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
-        # https://github.com/cypress-io/github-action/releases/tag/v6.7.7
-        uses: cypress-io/github-action@f1f0912d392f0d06bdd01fb9ebe3b3299e5806fb
+        # https://github.com/cypress-io/github-action/releases/tag/v6.10.9
+        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7
         with:
           start: npm start
           wait-on: 'http://localhost:3000'

@@ -110,7 +110,15 @@ export function* updateUnleashClientContext(networkSettings = null) {
     },
   };
 
-  yield call(() => unleashClient.updateContext(options));
+  // updateContext refetches toggles for the new context. Once the promise
+  // resolves, unleashClient.toggles already reflects the new network.
+  // Sync redux synchronously here so consumers reading state.featureToggles
+  // immediately after (e.g. startWallet -> checkForFeatureFlag) see the
+  // post-context values, not the previous network's stale values.
+  yield call([unleashClient, unleashClient.updateContext], options);
+
+  const featureToggles = mapFeatureToggles(unleashClient.toggles);
+  yield put(setFeatureToggles(featureToggles));
 }
 
 export function* monitorFeatureFlags(currentRetry = 0) {
@@ -229,7 +237,7 @@ export function* setupUnleashListeners(unleashClient) {
   }
 }
 
-function mapFeatureToggles(toggles) {
+export function mapFeatureToggles(toggles) {
   console.log('feature toggles', toggles);
   return toggles.reduce((acc, toggle) => {
     acc[toggle.name] = get(
@@ -242,7 +250,14 @@ function mapFeatureToggles(toggles) {
   }, {});
 }
 
-export function* handleToggleUpdate() {
+/**
+ * Re-hydrate state.featureToggles from the Unleash singleton after clean_data
+ * wipes it, so a post-restart checkForFeatureFlag read isn't stale.
+ *
+ * Doesn't dispatch FEATURE_TOGGLE_UPDATED — it can reload the wallet, unsafe
+ * from inside startWallet.
+ */
+export function* syncFeatureTogglesFromClient() {
   const unleashClient = getUnleashClient();
   const featureTogglesInitialized = yield select((state) => state.featureTogglesInitialized);
 
@@ -250,10 +265,12 @@ export function* handleToggleUpdate() {
     return;
   }
 
-  const { toggles } = unleashClient;
-  const featureToggles = mapFeatureToggles(toggles);
-
+  const featureToggles = mapFeatureToggles(unleashClient.toggles);
   yield put(setFeatureToggles(featureToggles));
+}
+
+export function* handleToggleUpdate() {
+  yield call(syncFeatureTogglesFromClient);
   yield put({ type: 'FEATURE_TOGGLE_UPDATED' });
 }
 

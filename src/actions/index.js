@@ -70,6 +70,7 @@ export const types = {
   NETWORKSETTINGS_UPDATED: 'NETWORKSETTINGS_UPDATED',
   NETWORKSETTINGS_UPDATE_SUCCESS: 'NETWORKSETTINGS_UPDATE_SUCCESS',
   NETWORKSETTINGS_SET_STATUS: 'NETWORKSETTINGS_SET_STATUS',
+  UNLEASH_CONTEXT_UPDATED: 'UNLEASH_CONTEXT_UPDATED',
   REOWN_SET_CLIENT: 'REOWN_SET_CLIENT',
   REOWN_SET_MODAL: 'REOWN_SET_MODAL',
   REOWN_SET_SESSIONS: 'REOWN_SET_SESSIONS',
@@ -119,6 +120,12 @@ export const types = {
   UNREGISTERED_TOKENS_STORE_SUCCESS: 'UNREGISTERED_TOKENS_STORE_SUCCESS',
   UNREGISTERED_TOKENS_CLEAN: 'UNREGISTERED_TOKENS_CLEAN',
   REOWN_SET_ERROR: 'REOWN_SET_ERROR',
+  SET_ADDRESS_MODE: 'SET_ADDRESS_MODE',
+  TOKEN_REGISTER_REQUESTED: 'TOKEN_REGISTER_REQUESTED',
+  TOKEN_REGISTER_SUCCESS: 'TOKEN_REGISTER_SUCCESS',
+  TOKEN_REGISTER_FAILED: 'TOKEN_REGISTER_FAILED',
+  TOKEN_IMPORT_BANNER_DISMISSED: 'TOKEN_IMPORT_BANNER_DISMISSED',
+  NEW_UNKNOWN_TOKENS_FOUND: 'NEW_UNKNOWN_TOKENS_FOUND',
 };
 
 /**
@@ -169,7 +176,10 @@ export const selectToken = data => ({ type: 'select_token', payload: data });
 /**
  * Update selected token and all known tokens in the wallet
  */
-export const newTokens = data => ({ type: 'new_tokens', payload: data });
+export const newTokens = ({ tokens, uid }) => {
+  if (!uid) throw new Error('newTokens action requires payload.uid');
+  return { type: 'new_tokens', payload: { tokens, uid } };
+};
 
 /**
  * Set if addresses are being loaded
@@ -238,6 +248,11 @@ export const partiallyUpdateHistoryAndBalance = (data) => ({ type: 'partially_up
  * Flag indicating if we are using the wallet service facade
  */
 export const setUseWalletService = (useWalletService) => ({ type: 'set_use_wallet_service', payload: useWalletService });
+
+/**
+ * Set the wallet address mode (single or multi)
+ */
+export const setAddressMode = (mode) => ({ type: types.SET_ADDRESS_MODE, payload: mode });
 
 /**
  * Action to display the locked wallet screen and resolve the passed promise after the user typed his PIN
@@ -524,9 +539,10 @@ export const resetNavigateTo = () => ({
  * @param {string} customTokens[].name
  * @param {string} customTokens[].symbol
  * @param {boolean} nanoContractsEnabled - if full node set nano contract as enabled
+ * @param {string|null} genesisHash - genesis block hash identifying the network, used to persist tokens across network switches
  */
-export const setServerInfo = ({ version, network, customTokens, decimalPlaces, nanoContractsEnabled }) => (
-  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces, nanoContractsEnabled } }
+export const setServerInfo = ({ version, network, customTokens, decimalPlaces, nanoContractsEnabled, genesisHash }) => (
+  { type: types.SET_SERVER_INFO, payload: { version, network, customTokens, decimalPlaces, nanoContractsEnabled, genesisHash } }
 );
 
 /**
@@ -743,6 +759,18 @@ export const networkSettingsRequestUpdate = (data, pin) => ({
  */
 export const networkSettingsUpdateSuccess = () => ({
   type: types.NETWORKSETTINGS_UPDATE_SUCCESS,
+});
+
+/**
+ * Signals that the Unleash client context has been refreshed and
+ * state.featureToggles reflects the current network. Dispatched by the
+ * NETWORKSETTINGS_UPDATE_SUCCESS listener after updateUnleashClientContext
+ * completes (success or failure). Consumers that need synchronous ordering
+ * with the refresh (e.g. executeNetworkSettingsUpdate before restarting the
+ * wallet) should `take` this action.
+ */
+export const unleashContextUpdated = () => ({
+  type: types.UNLEASH_CONTEXT_UPDATED,
 });
 
 /**
@@ -1011,4 +1039,58 @@ export const unregisteredTokensClean = () => ({
 export const setReownError = (errorDetails = null) => ({
   type: types.REOWN_SET_ERROR,
   payload: errorDetails,
+});
+
+/**
+ * Request to register a new token.
+ * Token name, symbol, and version are fetched from the fullnode API.
+ *
+ * @param {string} uid Token uid (required)
+ * @param {Object} [options] Optional parameters
+ * @param {boolean} [options.alwaysShow=false] Whether to always show the token
+ * @param {Function} [options.resolve=null] Optional promise resolve callback
+ * @param {Function} [options.reject=null] Optional promise reject callback
+ */
+export const tokenRegisterRequested = (uid, { alwaysShow = false, resolve = null, reject = null } = {}) => ({
+  type: types.TOKEN_REGISTER_REQUESTED,
+  payload: { uid, alwaysShow, resolve, reject },
+});
+
+/**
+ * Token registration succeeded
+ *
+ * @param {string} uid Token uid
+ * @param {string} name Token name
+ * @param {string} symbol Token symbol
+ * @param {number|undefined} version Token version (deposit or fee based)
+ */
+export const tokenRegisterSuccess = (uid, name, symbol, version) => ({
+  type: types.TOKEN_REGISTER_SUCCESS,
+  payload: { uid, name, symbol, version },
+});
+
+/**
+ * Token registration failed
+ *
+ * @param {string} uid Token uid
+ * @param {string} error Error message
+ */
+export const tokenRegisterFailed = (uid, error) => ({
+  type: types.TOKEN_REGISTER_FAILED,
+  payload: { uid, error },
+});
+
+export const dismissTokenImportBanner = () => ({
+  type: types.TOKEN_IMPORT_BANNER_DISMISSED,
+});
+
+/**
+ * New unknown tokens were found in a transaction.
+ * Updates allTokens and resets the banner dismissed state.
+ *
+ * @param {string[]} tokenUids Array of new token UIDs
+ */
+export const newUnknownTokensFound = (tokenUids) => ({
+  type: types.NEW_UNKNOWN_TOKENS_FOUND,
+  payload: { tokenUids },
 });

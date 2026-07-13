@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
 import { numberUtils } from '@hathor/wallet-lib';
@@ -17,6 +17,7 @@ import Loading from '../components/Loading';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LOCAL_STORE from '../storage';
+import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 
 // Routes that should display the TokenBar
 const ROUTE_WHITELIST = [
@@ -28,6 +29,7 @@ export default function TokenBar () {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const context = useContext(GlobalModalContext);
 
   // These are all tokens that are currently registered on the wallet
   const tokens = useSelector((state) => state.tokens);
@@ -44,19 +46,17 @@ export default function TokenBar () {
   }
 
   /**
-   * Get quantity of unknown tokens comparing allTokens and registeredTokens in redux
+   * Get unknown tokens comparing allTokens and registeredTokens in redux
    *
-   * @return {number} Quantity of unknown tokens
+   * @return {Array} Array of unknown tokens {uid, balance}
    */
   const getUnknownTokens = (hideZeroBalance) => {
-    const unknownTokens = wallet.fetchUnknownTokens(
+    return wallet.fetchUnknownTokens(
       allTokens,
       tokens,
       tokensBalance,
       hideZeroBalance,
     );
-
-    return unknownTokens.length;
   };
 
   /**
@@ -118,10 +118,10 @@ export default function TokenBar () {
   };
 
   /**
-   * Called when user clicks in the unknown tokens number, then redirects to unknown tokens screen
+   * Called when user clicks in the unknown tokens number, then opens the token import modal
    */
   const unknownClicked = () => {
-    navigate('/unknown_tokens/');
+    context.showModal(MODAL_TYPES.TOKEN_IMPORT, {});
   };
 
   const renderLoading = () => (
@@ -129,7 +129,8 @@ export default function TokenBar () {
   );
 
   const shouldHideZeroBalanceTokens = wallet.areZeroBalanceTokensHidden();
-  const unknownTokens = getUnknownTokens(shouldHideZeroBalanceTokens);
+  const unknownTokensData = getUnknownTokens(shouldHideZeroBalanceTokens);
+  const unknownTokens = unknownTokensData.length;
 
   const renderTokens = () => {
     // Will fetch registered state.tokens respecting both the shouldHideZeroBalanceTokens setting and
