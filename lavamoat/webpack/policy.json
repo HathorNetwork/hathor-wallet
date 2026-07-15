@@ -953,7 +953,7 @@
       "packages": {
         "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa>bn.js": true,
         "buffer": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true
+        "ttag-cli>serialize-javascript>randombytes": true
       }
     },
     "node-stdlib-browser>crypto-browserify>browserify-sign": {
@@ -1089,7 +1089,7 @@
         "node-stdlib-browser>crypto-browserify>diffie-hellman": true,
         "node-stdlib-browser>crypto-browserify>pbkdf2": true,
         "node-stdlib-browser>crypto-browserify>public-encrypt": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true,
+        "ttag-cli>serialize-javascript>randombytes": true,
         "node-stdlib-browser>crypto-browserify>randomfill": true
       }
     },
@@ -1146,7 +1146,7 @@
         "@hathor/wallet-lib>bitcore-lib>bn.js": true,
         "buffer": true,
         "node-stdlib-browser>crypto-browserify>diffie-hellman>miller-rabin": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true
+        "ttag-cli>serialize-javascript>randombytes": true
       }
     },
     "eslint-plugin-react>array-includes>get-intrinsic>get-proto>dunder-proto": {
@@ -1213,7 +1213,7 @@
         "npm-run-all>string.prototype.padend>call-bind>es-define-property": true
       }
     },
-    "eslint-plugin-react>array-includes>is-string>has-tostringtag": {
+    "ttag-cli>koa>is-generator-function>has-tostringtag": {
       "packages": {
         "eslint-plugin-react>es-iterator-helpers>has-symbols": true
       }
@@ -1264,7 +1264,7 @@
     "node-stdlib-browser>util>is-arguments": {
       "packages": {
         "npm-run-all>string.prototype.padend>call-bind": true,
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true
+        "ttag-cli>koa>is-generator-function>has-tostringtag": true
       }
     },
     "npm-run-all>string.prototype.padend>es-abstract>is-callable": {
@@ -1272,9 +1272,9 @@
         "document": true
       }
     },
-    "node-stdlib-browser>util>is-generator-function": {
+    "ttag-cli>koa>is-generator-function": {
       "packages": {
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true
+        "ttag-cli>koa>is-generator-function>has-tostringtag": true
       }
     },
     "node-stdlib-browser>assert>is-nan": {
@@ -1289,7 +1289,7 @@
         "npm-run-all>string.prototype.padend>call-bind": true,
         "node-stdlib-browser>util>is-typed-array>for-each": true,
         "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true
+        "ttag-cli>koa>is-generator-function>has-tostringtag": true
       }
     },
     "@hathor/wallet-lib>isomorphic-ws": {
@@ -1434,7 +1434,7 @@
         "node-stdlib-browser>crypto-browserify>public-encrypt>browserify-rsa": true,
         "node-stdlib-browser>crypto-browserify>create-hash": true,
         "node-stdlib-browser>crypto-browserify>public-encrypt>parse-asn1": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true,
+        "ttag-cli>serialize-javascript>randombytes": true,
         "cypress>@cypress/request>safe-buffer": true
       }
     },
@@ -1471,7 +1471,7 @@
         "setTimeout": true
       }
     },
-    "node-stdlib-browser>crypto-browserify>randombytes": {
+    "ttag-cli>serialize-javascript>randombytes": {
       "globals": {
         "crypto": true,
         "msCrypto": true,
@@ -1491,7 +1491,7 @@
       },
       "packages": {
         "process": true,
-        "node-stdlib-browser>crypto-browserify>randombytes": true,
+        "ttag-cli>serialize-javascript>randombytes": true,
         "cypress>@cypress/request>safe-buffer": true
       }
     },
@@ -1849,7 +1849,7 @@
       "packages": {
         "node-stdlib-browser>util>inherits": true,
         "node-stdlib-browser>util>is-arguments": true,
-        "node-stdlib-browser>util>is-generator-function": true,
+        "ttag-cli>koa>is-generator-function": true,
         "node-stdlib-browser>util>is-typed-array": true,
         "process": true,
         "node-stdlib-browser>util>which-typed-array": true
@@ -1914,7 +1914,7 @@
         "npm-run-all>string.prototype.padend>call-bind": true,
         "node-stdlib-browser>util>is-typed-array>for-each": true,
         "eslint-plugin-react>object.hasown>es-abstract>gopd": true,
-        "eslint-plugin-react>array-includes>is-string>has-tostringtag": true,
+        "ttag-cli>koa>is-generator-function>has-tostringtag": true,
         "node-stdlib-browser>util>is-typed-array": true
       }
     },

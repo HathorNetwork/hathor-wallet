@@ -8,6 +8,11 @@
 
 extends: testnet.yml
 
+# hathor-core >=0.70 forbids --test-mode-tx-weight on production network names
+# (mainnet/testnet-*); test mode is only allowed on 'privatenet'/'unittests'.
+# This is an ephemeral private QA network, so name it accordingly.
+NETWORK_NAME: privatenet
+
 BOOTSTRAP_DNS: []
 
 # Genesis stuff

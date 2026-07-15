@@ -14,8 +14,8 @@ services:
       "--test-mode-tx-weight",
       "--wallet-index",
       "--allow-mining-without-peers",
-      "--unsafe-mode", "testnet-golf",
-      "--memory-storage",
+      "--unsafe-mode", "privatenet",
+      "--temp-data",
       "--config-yaml", "privnet/conf/privnet.yml"
     ]
     ports:
