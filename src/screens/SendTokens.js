@@ -409,9 +409,36 @@ function SendTokens() {
   }
 
   /**
+   * Check if any token being sent is a fee-based token.
+   * The version is read from the Redux tokens list (kept fresh by useTokensDetails),
+   * not from the local txTokens copies which may be stale.
+   *
+   * @returns {boolean}
+   */
+  const hasFeeBasedToken = () => {
+    return txTokens.some(txToken => {
+      const fullToken = tokens.find(t => t.uid === txToken.uid);
+      return fullToken?.version === hathorLib.TokenVersion.FEE;
+    });
+  }
+
+  /**
    * Validates form, prepares modal data, and shows the Transaction Overview modal.
    */
   const beforeSend = () => {
+    // Fee-based tokens carry a fee header that the Hathor Ledger app cannot deserialize yet,
+    // so block the send early with a clear message instead of letting the device reject it.
+    if (LOCAL_STORE.isHardwareWallet() && hasFeeBasedToken()) {
+      globalModalContext.showModal(MODAL_TYPES.ALERT_NOT_SUPPORTED, {
+        children: (
+          <div>
+            <p>{t`Unfortunately sending fee-based tokens is not yet supported when using a hardware wallet. If you need to send this token, you can use it by switching to a software wallet.`}</p>
+          </div>
+        )
+      });
+      return;
+    }
+
     const isValid = validateFormData();
     if (!isValid) return;
 
