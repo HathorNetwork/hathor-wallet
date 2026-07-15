@@ -27,6 +27,21 @@ export const setModalContext = (context) => {
 };
 
 /**
+ * Reset the module-level modal context. Test-only.
+ *
+ * Integration tests for the modal sagas can leave `modalContext` populated
+ * across test cases; calling this in a `beforeEach` restores the "context
+ * not yet installed" branch that production sees at startup.
+ *
+ * The `ForTesting` suffix marks this export as test-only by convention — do
+ * not call it from production code paths. Refs RFC 0001 (auto-qa)
+ * § Production code changes expected.
+ */
+export const clearModalContextForTesting = () => {
+  modalContext = null;
+};
+
+/**
  * Saga that handles showing a modal through the modal context.
  * It will use the provided modal context to display the modal with the given type and props.
  *
