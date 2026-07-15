@@ -670,18 +670,23 @@ const removeTokenMetadata = (state, action) => {
     delete newMeta[uid];
   }
 
-  // If the token has zero balance we should remove the balance data
+  // Drop a zero-balance unregistered token from allTokens and tokensBalance
+  // together (fetchUnknownTokens reads tokensBalance[uid].data for every allTokens
+  // entry): a leftover keeps the "Import Tokens" banner advertising a token the
+  // modal can't resolve. Tokens with a balance stay, still re-importable.
   const newBalance = Object.assign({}, state.tokensBalance);
-  if (uid in newBalance && (!!newBalance[uid].data)) {
-    const balance = newBalance[uid].data;
-    if ((balance.available + balance.locked) === 0n) {
-      delete newBalance[uid];
-    }
+  const newAllTokens = Object.assign({}, state.allTokens);
+  const balance = newBalance[uid]?.data;
+  if (balance && (balance.available + balance.locked) === 0n) {
+    delete newBalance[uid];
+    delete newAllTokens[uid];
   }
 
   return {
     ...state,
     tokenMetadata: newMeta,
+    tokensBalance: newBalance,
+    allTokens: newAllTokens,
   };
 };
 

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux';
 import helpers from '../utils/helpers';
 import { TOKEN_FEE_RFC_URL, colors } from '../constants';
 import SendTxHandler from './SendTxHandler';
+import { getGlobalWallet } from '../modules/wallet';
 
 const MODAL_ID = 'transactionOverviewModal';
 
@@ -39,12 +40,26 @@ function ModalTransactionOverview({
   const [pin, setPin] = useState('');
   const [phase, setPhase] = useState('review');
   const [errorMessage, setErrorMessage] = useState('');
+  const [pinError, setPinError] = useState('');
   const [preparedTx, setPreparedTx] = useState(null);
+  const pinInputRef = useRef(null);
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
 
   useEffect(() => {
     manageDomLifecycle(`#${MODAL_ID}`);
   }, [manageDomLifecycle]);
+
+  // Focus the PIN field after the modal finishes fading in. `autoFocus` alone
+  // fails on first open: the input mounts while the modal is still `display:none`,
+  // so the browser drops the focus. `autoFocus` is still kept — it covers the
+  // error -> "Try again" -> review remount, where the modal is already visible.
+  useEffect(() => {
+    const onShown = () => pinInputRef.current?.focus();
+    $(`#${MODAL_ID}`).on('shown.bs.modal.focuspin', onShown);
+    return () => {
+      $(`#${MODAL_ID}`).off('shown.bs.modal.focuspin', onShown);
+    };
+  }, []);
 
   const fee = typeof totalFee === 'bigint' ? totalFee : BigInt(totalFee || 0);
   const hasAnyFee = fee > 0n;
@@ -95,10 +110,28 @@ function ModalTransactionOverview({
   const handleCancel = () => {
     $(`#${MODAL_ID}`).modal('hide');
     setPin('');
+    setPinError('');
     onCancel();
   };
 
   const handleConfirm = async () => {
+    // Validate the PIN before attempting the send so a wrong PIN surfaces as
+    // "Invalid PIN" on the review phase instead of a generic send failure. A
+    // missing wallet or a checkPin failure is a real error, not a wrong PIN, so
+    // route it to the error phase instead of leaving the rejection unhandled.
+    try {
+      const wallet = getGlobalWallet();
+      if (!await wallet.checkPin(pin)) {
+        setPinError(t`Invalid PIN`);
+        return;
+      }
+    } catch (e) {
+      setErrorMessage(e.message || t`Error validating PIN.`);
+      setPhase('error');
+      return;
+    }
+
+    setPinError('');
     setPhase('sending');
     setErrorMessage('');
 
@@ -129,6 +162,7 @@ function ModalTransactionOverview({
   const handleRetry = () => {
     setPreparedTx(null);
     setErrorMessage('');
+    setPinError('');
     setPin('');
     setPhase('review');
   };
@@ -136,6 +170,7 @@ function ModalTransactionOverview({
   const handlePinChange = (e) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
     setPin(value);
+    setPinError('');
   };
 
   // --- Render helpers for the review phase ---
@@ -291,6 +326,7 @@ function ModalTransactionOverview({
       <div className="form-group">
         <label htmlFor="pinInput">{t`Pin* (6 digit password)`}</label>
         <input
+          ref={pinInputRef}
           type="password"
           className="form-control"
           id="pinInput"
@@ -300,6 +336,7 @@ function ModalTransactionOverview({
           autoFocus
           autoComplete="off"
         />
+        {pinError && <p className="text-danger mt-2 mb-0">{pinError}</p>}
       </div>
     </>
   );

@@ -14,6 +14,7 @@ import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import { tokenRegisterRequested } from '../actions/index';
 import { getGlobalWallet } from '../modules/wallet';
 import walletUtils from '../utils/wallet';
+import helpers from '../utils/helpers';
 import { colors } from '../constants';
 
 /**
@@ -337,7 +338,10 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
               <a
                 className="token-uid"
                 href={explorerLink}
-                target="_blank"
+                onClick={(e) => {
+                  e.preventDefault();
+                  helpers.openExternalURL(explorerLink);
+                }}
                 rel="noopener noreferrer"
                 title={uid}
               >
