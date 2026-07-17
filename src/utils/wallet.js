@@ -7,6 +7,7 @@
 
 import {
   SENTRY_DSN,
+  VERSION,
   WALLET_HISTORY_COUNT,
   METADATA_CONCURRENT_DOWNLOAD,
   ADDRESS_MODE,
@@ -30,14 +31,12 @@ import {
 import { chunk, get } from 'lodash';
 import helpers from '../utils/helpers';
 import LOCAL_STORE from '../storage';
+// In Electron, Sentry runs in the preload (@sentry/electron) via the bridge,
+// keeping it outside the LavaMoat-governed bundle. In a plain browser (dev/tests)
+// there's no bridge, so fall back to the bundled browser SDK.
+import * as SentryBrowser from '@sentry/browser';
 
-let Sentry = null;
-// Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
-if (window.require) {
-  Sentry = window.require('@sentry/electron');
-} else {
-  Sentry = require('@sentry/browser');
-}
+const sentryBridge = (typeof window !== 'undefined' && window.electronAPI) || null;
 
 /**
  * Key string constants for manipulating the storage
@@ -459,9 +458,13 @@ const wallet = {
    * @inner
    */
   initSentry(dsn) {
-    Sentry.init({
+    if (sentryBridge) {
+      sentryBridge.sentrySetEnabled(dsn);
+      return;
+    }
+    SentryBrowser.init({
       dsn: dsn,
-      release: process.env.npm_package_version
+      release: VERSION
     });
   },
 
@@ -491,12 +494,21 @@ const wallet = {
    * @inner
    */
   sentryWithScope(error, info) {
-    Sentry.withScope(scope => {
-      Object.entries(info).forEach(
+    if (sentryBridge) {
+      sentryBridge.sentryCapture({
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack,
+        extra: info,
+      });
+      return;
+    }
+    SentryBrowser.withScope(scope => {
+      Object.entries(info || {}).forEach(
         ([key, item]) => scope.setExtra(key, item)
       );
       // TODO: Add storage snapshot to sentry
-      Sentry.captureException(error);
+      SentryBrowser.captureException(error);
     });
   },
 
