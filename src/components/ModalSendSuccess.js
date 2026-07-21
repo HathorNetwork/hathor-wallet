@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { t } from 'ttag';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
-import hathorLib from '@hathor/wallet-lib';
+import { useAmountFormat } from '../hooks/useAmountFormat';
 
 const MODAL_ID = 'sendSuccessModal';
 
@@ -25,6 +25,8 @@ function ModalSendSuccess({
   onViewDetails,
   manageDomLifecycle,
 }) {
+  const formatValue = useAmountFormat();
+
   useEffect(() => {
     manageDomLifecycle(`#${MODAL_ID}`);
   }, [manageDomLifecycle]);
@@ -34,7 +36,7 @@ function ModalSendSuccess({
    */
   const formatSentAmounts = () => {
     const parts = tokensSent.map(({ symbol, amount }) =>
-      `${hathorLib.numberUtils.prettyValue(amount, decimalPlaces)} ${symbol}`
+      `${formatValue(amount)} ${symbol}`
     );
 
     if (parts.length === 1) {

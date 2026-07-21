@@ -17,12 +17,13 @@ import { connect } from "react-redux";
 import { get, upperFirst } from 'lodash';
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
-import hathorLib, { numberUtils, bigIntUtils } from '@hathor/wallet-lib';
+import hathorLib, { bigIntUtils } from '@hathor/wallet-lib';
 import { MAX_GRAPH_LEVEL } from '../constants';
 import helpers from '../utils/helpers';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import Loading from '../components/Loading';
 import { getGlobalWallet } from '../modules/wallet';
+import Amount from './Amount';
 
 
 const mapStateToProps = (state) => {
@@ -517,7 +518,7 @@ class TxData extends React.Component {
       } else {
         // if it's an NFT token we should show integer value
         const uid = this.getUIDFromTokenData(hathorLib.tokensUtils.getTokenIndexFromData(output.token_data));
-        return numberUtils.prettyValue(output.value, isNFT(uid) ? 0 : this.props.decimalPlaces);
+        return <Amount value={output.value} isNFT={isNFT(uid)} />;
       }
     }
 
@@ -830,13 +831,13 @@ class TxData extends React.Component {
         if (balance[token] > 0) {
           return (
             <div key={token}>
-              <span className='received-value'><SpanFmt>{t`**${tokenSymbol}:** Received`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-down'></i> {numberUtils.prettyValue(balance[token], isNFT(token) ? 0 : this.props.decimalPlaces)}</span>
+              <span className='received-value'><SpanFmt>{t`**${tokenSymbol}:** Received`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-down'></i> <Amount value={balance[token]} isNFT={isNFT(token)} /></span>
             </div>
           )
         } else {
           return (
             <div key={token}>
-              <span className='sent-value'><SpanFmt>{t`**${tokenSymbol}:** Sent`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-up'></i> {numberUtils.prettyValue(balance[token], isNFT(token) ? 0 : this.props.decimalPlaces)}</span>
+              <span className='sent-value'><SpanFmt>{t`**${tokenSymbol}:** Sent`}</SpanFmt> <i className='fa ml-2 mr-2 fa-long-arrow-up'></i> <Amount value={balance[token]} isNFT={isNFT(token)} /></span>
             </div>
           );
         }
@@ -874,7 +875,7 @@ class TxData extends React.Component {
           <div><label>{t`Fee paid:`}</label></div>
           {this.state.feeEntries.map((entry, idx) => (
             <div key={idx}>
-              {numberUtils.prettyValue(entry.amount, this.props.decimalPlaces)} {entry.tokenSymbol}
+              <Amount value={entry.amount} symbol={entry.tokenSymbol} />
             </div>
           ))}
         </div>
@@ -945,7 +946,7 @@ class TxData extends React.Component {
             <label>Type:</label> {upperFirst(action.type)}
           </div>
           <div>
-            <label>Amount:</label> {numberUtils.prettyValue(typeof action.amount === 'bigint' ? action.amount : BigInt(action.amount), this.props.decimalPlaces)} {this.getSymbol(action.token_uid)}
+            <label>Amount:</label> <Amount value={typeof action.amount === 'bigint' ? action.amount : BigInt(action.amount)} symbol={this.getSymbol(action.token_uid)} />
           </div>
         </div>
       ));
@@ -1009,7 +1010,7 @@ class TxData extends React.Component {
       }
 
       if (arg.type === 'Amount') {
-        return numberUtils.prettyValue(arg.parsed, this.props.decimalPlaces);
+        return <Amount value={arg.parsed} />;
       }
 
       // Handle objects and arrays by converting to JSON string with BigInt support
