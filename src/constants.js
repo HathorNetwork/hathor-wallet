@@ -229,6 +229,7 @@ export const NANO_CONTRACTS_FEATURE_TOGGLE = 'nano-contracts-desktop.rollout';
 export const REOWN_FEATURE_TOGGLE = 'wallet-desktop-reown.rollout';
 export const FEE_TOKEN_FEATURE_TOGGLE = 'fee-based-tokens-desktop.rollout';
 export const SINGLE_ADDRESS_FEATURE_TOGGLE = 'single-address-desktop.rollout';
+export const AMOUNT_FORMAT_FEATURE_TOGGLE = 'amount-format-desktop.rollout';
 
 export const FEATURE_TOGGLE_DEFAULTS = {
   [WALLET_SERVICE_FEATURE_TOGGLE]: false,
@@ -237,6 +238,7 @@ export const FEATURE_TOGGLE_DEFAULTS = {
   [REOWN_FEATURE_TOGGLE]: false,
   [FEE_TOKEN_FEATURE_TOGGLE]: false,
   [SINGLE_ADDRESS_FEATURE_TOGGLE]: false,
+  [AMOUNT_FORMAT_FEATURE_TOGGLE]: false,
 };
 
 /**
@@ -334,3 +336,21 @@ export const ADDRESS_MODE = {
   SINGLE: 'single',
   MULTI: 'multi',
 };
+
+/**
+ * Amount display format. Wallet-wide and network-independent — unlike ADDRESS_MODE,
+ * which is namespaced per network to prevent an Unleash rollout being bypassed by
+ * switching networks. That concern does not apply to a purely cosmetic setting.
+ */
+export const AMOUNT_FORMAT = {
+  EXPANDED: 'expanded',
+  COMPRESSED: 'compressed',
+};
+
+export const AMOUNT_FORMAT_DEFAULT = AMOUNT_FORMAT.EXPANDED;
+
+// The `wallet:` prefix is the convention for user preferences, alongside
+// wallet:sentry, wallet:notification and wallet:address_mode. Those live
+// outside storage.js's storageKeys list, so wallet reset must clear this
+// key explicitly — see onWalletReset.
+export const AMOUNT_FORMAT_KEY = 'wallet:amount_format';

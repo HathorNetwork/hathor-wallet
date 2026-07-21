@@ -8,7 +8,6 @@
 import React, { useContext, useState } from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
-import { numberUtils } from '@hathor/wallet-lib';
 import { selectToken } from '../actions/index';
 import { get } from 'lodash';
 import helpers from '../utils/helpers';
@@ -18,6 +17,7 @@ import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LOCAL_STORE from '../storage';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
+import Amount from './Amount';
 
 // Routes that should display the TokenBar
 const ROUTE_WHITELIST = [
@@ -37,7 +37,6 @@ export default function TokenBar () {
   const selectedToken = useSelector((state) => state.selectedToken);
   const tokensBalance = useSelector((state) => state.tokensBalance);
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
-  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const networkTokens = useSelector((state) => state.serverInfo.customTokens);
 
   // If the current route is not in the whitelist, we should not render the tokenbar
@@ -107,14 +106,14 @@ export default function TokenBar () {
    * Gets the balance of one token formatted for exhibition
    *
    * @param {string} uid UID to get balance from
-   * @return {string} String formatted balance, ready for exhibition
+   * @return {JSX.Element} Amount element, ready for exhibition
    */
   const getTokenBalanceFormatted = (uid) => {
     const total = getTokenBalance(uid);
 
-    // Formatting to string for exhibition
+    // Formatting for exhibition
     const isNFT = helpers.isTokenNFT(uid, tokenMetadata);
-    return numberUtils.prettyValue(total, isNFT ? 0 : decimalPlaces);
+    return <Amount value={total} isNFT={isNFT} />;
   };
 
   /**
