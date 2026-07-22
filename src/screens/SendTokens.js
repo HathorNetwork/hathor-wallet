@@ -26,6 +26,7 @@ import { OutputType } from '@hathor/wallet-lib';
 import { SendDataOutputOne } from '../components/SendDataOutputOne';
 import { uniqueId } from 'lodash';
 import { useTokensDetails } from '../hooks/useTokenDetails';
+import { useAmountFormat } from '../hooks/useAmountFormat';
 
 /** @typedef {0|1} LEDGER_MODAL_STATE */
 const LEDGER_MODAL_STATE = {
@@ -58,6 +59,7 @@ function SendTokens() {
       };
     });
   const wallet = getGlobalWallet();
+  const formatValue = useAmountFormat();
   /**
    * Get the full object for the selected token on the TokenBar.
    *
@@ -144,13 +146,13 @@ function SendTokens() {
       }
 
       if (htrBalance < totalFee + outgoingHTR) {
-        const requiredAmount = hathorLib.numberUtils.prettyValue(totalFee + outgoingHTR, decimalPlaces);
+        const requiredAmount = formatValue(totalFee + outgoingHTR);
         return t`Insufficient HTR balance to complete the transaction. It requires ${requiredAmount} for outputs and network fee`;
       }
     }
 
     return '';
-  }, [tokenFees, tokensBalance, dataOutputs]);
+  }, [tokenFees, tokensBalance, dataOutputs, formatValue]);
 
   /**
    * Check if user has enough HTR to pay total fee

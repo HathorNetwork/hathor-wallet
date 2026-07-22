@@ -8,22 +8,9 @@
 import React from 'react';
 import { t } from 'ttag';
 import hathorLib from '@hathor/wallet-lib';
+import { useAmountFormat } from '../../hooks/useAmountFormat';
 
 const DEFAULT_TOKEN_SYMBOL = hathorLib.constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
-
-/**
- * Format token amount with proper decimal places
- */
-const formatAmount = (amount) => {
-  try {
-    if (amount === undefined || amount === null) return null;
-    return hathorLib.numberUtils.prettyValue(amount);
-  } catch (error) {
-    console.error('Error formatting amount:', error);
-    return amount.toString();
-  }
-};
-
 
 /**
  * Renders translated values for token version
@@ -86,6 +73,28 @@ const TokenParameter = ({ label, value, isAddress = false, isBoolean = false }) 
  * @param {Object} data The token data to be displayed
  */
 export default function CreateTokenRequestData({ data }) {
+  const formatValue = useAmountFormat();
+
+  /**
+   * Format an amount from an external dApp payload.
+   *
+   * The request is not under our control, so a missing or malformed amount must
+   * render as nothing rather than throwing during render — prettyValue coerces
+   * with BigInt(), which raises on null, undefined or a non-numeric value.
+   */
+  const renderAmount = (amount) => {
+    if (amount === undefined || amount === null) {
+      return null;
+    }
+
+    try {
+      return formatValue(amount);
+    } catch (error) {
+      console.error('Error formatting amount:', error);
+      return String(amount);
+    }
+  };
+
   /**
    * Check if token has mint authority
    */
@@ -115,7 +124,7 @@ export default function CreateTokenRequestData({ data }) {
       {/* Basic Token Information */}
       <TokenParameter label={t`Name`} value={data.name} />
       <TokenParameter label={t`Symbol`} value={data.symbol} />
-      <TokenParameter label={t`Amount`} value={formatAmount(data.amount)} />
+      <TokenParameter label={t`Amount`} value={renderAmount(data.amount)} />
       <TokenParameter label={t`Type`} value={formatTokenVersion(data.version)} />
 
       {/* Authority Settings */}
@@ -178,13 +187,13 @@ export default function CreateTokenRequestData({ data }) {
       {data.deposit && (
         <TokenParameter
           label={t`Deposit`}
-          value={`${formatAmount(data.deposit)} ${DEFAULT_TOKEN_SYMBOL}`}
+          value={`${renderAmount(data.deposit)} ${DEFAULT_TOKEN_SYMBOL}`}
         />
       )}
       {data.fee !== undefined && data.fee !== null && (
         <TokenParameter
           label={t`Network Fee`}
-          value={data.fee ? `${formatAmount(data.fee)} ${DEFAULT_TOKEN_SYMBOL}` : '-'}
+          value={data.fee ? `${renderAmount(data.fee)} ${DEFAULT_TOKEN_SYMBOL}` : '-'}
         />
       )}
     </div>

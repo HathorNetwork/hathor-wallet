@@ -8,20 +8,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { t } from "ttag";
 import InputNumber from "../InputNumber";
-import { Address, numberUtils } from "@hathor/wallet-lib";
+import { Address } from "@hathor/wallet-lib";
 import { translateTxToProposalUtxo } from "../../utils/atomicSwap";
 import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import { get } from 'lodash';
 import Loading from "../Loading";
 import walletUtils from '../../utils/wallet';
 import { useSelector } from 'react-redux';
+import { useAmountFormat } from '../../hooks/useAmountFormat';
 
 function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHandler, setErrMessage }) {
     const [txId, setTxId] = useState(utxo.tx_id || '');
     const [outputIndex, setOutputIndex] = useState(utxo.index || '');
     const [amount, setAmount] = useState('');
     const [isInvalid, setIsInvalid] = useState(false);
-    const decimalPlaces = useSelector(state => state.serverInfo.decimalPlaces);
+    const formatValue = useAmountFormat();
 
     const raiseInvalidInputError = () => {
         setAmount('');
@@ -63,7 +64,7 @@ function UtxoRow ({ wallet, utxo, token, utxoChanged, showAddButton, addButtonHa
         }
 
         const newAmount = validUtxo.amount;
-        setAmount(numberUtils.prettyValue(newAmount, decimalPlaces));
+        setAmount(formatValue(newAmount));
         setIsInvalid(false);
         setErrMessage('');
         utxoChanged(validUtxo);

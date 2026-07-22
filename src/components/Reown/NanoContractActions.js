@@ -9,8 +9,8 @@ import React, { useCallback } from 'react';
 import { t } from 'ttag';
 import { useSelector } from 'react-redux';
 import helpers from '../../utils/helpers';
-import hathorLib from '@hathor/wallet-lib';
 import { constants, NanoContractActionType } from '@hathor/wallet-lib';
+import { useAmountFormat } from '../../hooks/useAmountFormat';
 const { DEFAULT_NATIVE_TOKEN_CONFIG, NATIVE_TOKEN_UID } = constants;
 
 /**
@@ -86,11 +86,11 @@ const getActionTitle = (tokens, registeredTokens, action) => {
  * Component that displays a single action item
  */
 const ActionItem = ({ action, isNft, title }) => {
-  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
+  const formatValue = useAmountFormat();
 
   const formatAmount = (amount) => {
     try {
-      return hathorLib.numberUtils.prettyValue(amount, isNft ? 0 : decimalPlaces);
+      return formatValue(amount, { isNFT: isNft });
     } catch (error) {
       console.warn('Error formatting amount:', amount, error);
       return '';

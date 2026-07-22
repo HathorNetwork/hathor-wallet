@@ -11,16 +11,17 @@ import { useSelector } from 'react-redux';
 import { DAppInfo } from '../DAppInfo';
 import hathorLib from '@hathor/wallet-lib';
 import helpers from '../../../utils/helpers';
+import { useAmountFormat } from '../../../hooks/useAmountFormat';
 
 /**
  * Modal for confirming UTXO access requests from dApps.
  * Shows the filter parameters and UTXO summary, asks for user confirmation.
  */
 export function GetUtxosModal({ data, onAccept, onReject }) {
-  const { tokenMetadata, decimalPlaces } = useSelector((state) => ({
+  const { tokenMetadata } = useSelector((state) => ({
     tokenMetadata: state.tokenMetadata,
-    decimalPlaces: state.serverInfo.decimalPlaces
   }));
+  const formatValue = useAmountFormat();
 
   // The RPC handler transforms params and may use snake_case keys
   const rawParams = data.params || {};
@@ -63,7 +64,7 @@ export function GetUtxosModal({ data, onAccept, onReject }) {
   const formatAmount = (amount, tokenId) => {
     if (amount === undefined || amount === null) return null;
     const isNFT = tokenId && helpers.isTokenNFT(tokenId, tokenMetadata);
-    return hathorLib.numberUtils.prettyValue(amount, isNFT ? 0 : decimalPlaces);
+    return formatValue(amount, { isNFT });
   };
 
   /**

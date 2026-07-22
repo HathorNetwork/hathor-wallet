@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { t } from 'ttag';
-import { constants, numberUtils } from '@hathor/wallet-lib';
+import { constants } from '@hathor/wallet-lib';
+import Amount from '../Amount';
 
 /**
  * Component for displaying network fee information
@@ -20,7 +21,6 @@ export const TransactionFees = ({ fee }) => {
     return null;
   }
 
-  const formattedFee = numberUtils.prettyValue(fee);
   const symbol = constants.DEFAULT_NATIVE_TOKEN_CONFIG.symbol;
 
   return (
@@ -32,7 +32,7 @@ export const TransactionFees = ({ fee }) => {
             <i className="fa fa-arrow-up text-danger mr-2" />
             <strong>{symbol}</strong>
           </span>
-          <span>{formattedFee} {symbol}</span>
+          <span><Amount value={fee} symbol={symbol} /></span>
         </div>
       </div>
     </div>

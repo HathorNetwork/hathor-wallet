@@ -17,6 +17,8 @@ import InputNumber from '../InputNumber';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { getGlobalWallet } from "../../modules/wallet";
+import { formatAmount, resolveAmountFormat } from '../../utils/amount';
+import { AMOUNT_FORMAT_FEATURE_TOGGLE } from '../../constants';
 
 const mapStateToProps = (state) => {
   return {
@@ -24,6 +26,10 @@ const mapStateToProps = (state) => {
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
     decimalPlaces: state.serverInfo.decimalPlaces,
+    amountFormat: resolveAmountFormat(
+      state.amountFormat,
+      state.featureToggles[AMOUNT_FORMAT_FEATURE_TOGGLE]
+    ),
   };
 };
 
@@ -91,10 +97,20 @@ class TokenMint extends React.Component {
   }
 
   /**
+   * Format an amount using the token's decimal places and NFT status,
+   * respecting the user's amount format preference.
+   */
+  formatValue = (value) => formatAmount(value, {
+    decimalPlaces: this.props.decimalPlaces,
+    isNFT: this.isNFT(),
+    amountFormat: this.props.amountFormat,
+  });
+
+  /**
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const prettyAmountValue = hathorLib.numberUtils.prettyValue(this.state.amount, this.isNFT() ? 0 : this.props.decimalPlaces);
+    const prettyAmountValue = this.formatValue(this.state.amount);
     return t`${prettyAmountValue} ${this.props.token.symbol} minted!`;
   }
 
@@ -202,7 +218,7 @@ class TokenMint extends React.Component {
        renderForm={renderForm}
        title={t`Mint tokens`}
        subtitle={`A deposit of ${depositPercent * 100}% in ${nativeTokenConfig.symbol} of the mint amount is required`}
-       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent, this.props.decimalPlaces)} ${nativeTokenConfig.symbol} (${hathorLib.numberUtils.prettyValue(this.props.htrBalance, this.props.decimalPlaces)} ${nativeTokenConfig.symbol} available)`}
+       deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent, this.props.decimalPlaces, this.props.amountFormat)} ${nativeTokenConfig.symbol} (${formatAmount(this.props.htrBalance, { decimalPlaces: this.props.decimalPlaces, amountFormat: this.props.amountFormat })} ${nativeTokenConfig.symbol} available)`}
        buttonName={t`Go`}
        validateForm={this.mint}
        getSuccessMessage={this.getSuccessMessage}
