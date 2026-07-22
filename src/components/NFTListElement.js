@@ -15,7 +15,7 @@ import {
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import helpers from '../utils/helpers';
 import Loading from '../components/Loading';
-import { numberUtils } from '@hathor/wallet-lib';
+import Amount from './Amount';
 
 
 /**
@@ -99,7 +99,7 @@ class NFTListElement extends React.Component {
             </figure>
             <p>
               <strong>Balance: </strong>
-              { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && numberUtils.prettyValue(this.props.nftElement.balance.data.available, 0) }
+              { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.READY && <Amount value={this.props.nftElement.balance.data.available} isNFT /> }
               { this.props.nftElement.balance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
                 <Loading />
               )}

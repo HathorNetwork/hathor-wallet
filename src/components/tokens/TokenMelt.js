@@ -16,14 +16,19 @@ import ReactLoading from 'react-loading';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../../sagas/tokens';
-import { colors } from '../../constants';
+import { colors, AMOUNT_FORMAT_FEATURE_TOGGLE } from '../../constants';
 import { getGlobalWallet } from "../../modules/wallet";
+import { formatAmount, resolveAmountFormat } from '../../utils/amount';
 
 const mapStateToProps = (state) => {
   return {
     tokenMetadata: state.tokenMetadata,
     useWalletService: state.useWalletService,
     decimalPlaces: state.serverInfo.decimalPlaces,
+    amountFormat: resolveAmountFormat(
+      state.amountFormat,
+      state.featureToggles[AMOUNT_FORMAT_FEATURE_TOGGLE]
+    ),
   };
 };
 
@@ -84,10 +89,20 @@ class TokenMelt extends React.Component {
   }
 
   /**
+   * Format an amount using the token's decimal places and NFT status,
+   * respecting the user's amount format preference.
+   */
+  formatValue = (value) => formatAmount(value, {
+    decimalPlaces: this.props.decimalPlaces,
+    isNFT: this.isNFT(),
+    amountFormat: this.props.amountFormat,
+  });
+
+  /**
    * Return a message to be shown in case of success
    */
   getSuccessMessage = () => {
-    const prettyAmountValue = hathorLib.numberUtils.prettyValue(this.state.amount, this.isNFT() ? 0 : this.props.decimalPlaces);
+    const prettyAmountValue = this.formatValue(this.state.amount);
     return t`${prettyAmountValue} ${this.props.token.symbol} melted!`;
   }
 
@@ -101,7 +116,7 @@ class TokenMelt extends React.Component {
     const walletAmount = get(this.props.tokenBalance, 'data.available', 0);
 
     if (this.state.amount > walletAmount) {
-      const prettyWalletAmount = hathorLib.numberUtils.prettyValue(walletAmount, this.isNFT() ? 0 : this.props.decimalPlaces);
+      const prettyWalletAmount = this.formatValue(walletAmount);
       return t`The total amount you have is only ${prettyWalletAmount}.`;
     }
   }

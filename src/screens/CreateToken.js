@@ -17,12 +17,13 @@ import tokens from '../utils/tokens';
 import SpanFmt from '../components/SpanFmt';
 import BackButton from '../components/BackButton';
 import helpers from '../utils/helpers';
-import { TOKEN_DEPOSIT_RFC_URL, TOKEN_FEE_RFC_URL } from '../constants';
+import { TOKEN_DEPOSIT_RFC_URL, TOKEN_FEE_RFC_URL, AMOUNT_FORMAT_FEATURE_TOGGLE } from '../constants';
 import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useNavigate, useParams } from "react-router-dom";
 import { getGlobalWallet } from "../modules/wallet";
 import { useAmountFormat } from '../hooks/useAmountFormat';
+import { resolveAmountFormat } from '../utils/amount';
 
 /**
  * Create a new token
@@ -38,6 +39,10 @@ function CreateToken() {
   }));
   const wallet = getGlobalWallet();
   const formatValue = useAmountFormat();
+  const amountFormat = useSelector(state => resolveAmountFormat(
+    state.amountFormat,
+    state.featureToggles[AMOUNT_FORMAT_FEATURE_TOGGLE]
+  ));
 
   // Get TokenVersion enum from wallet-lib
   const { TokenVersion } = hathorLib;
@@ -327,7 +332,7 @@ function CreateToken() {
   const renderFeeModelInfo = () => {
     let infoLabel = `${t`Network fee`}: ${requiredFeeAmountText} (${availableBalanceText})`;
     if (isDepositToken) {
-      infoLabel = `${t`Deposit:`} ${tokens.getDepositAmount(amount, depositPercent, decimalPlaces)} ${nativeTokenConfig.symbol} (${availableBalanceText})`;
+      infoLabel = `${t`Deposit:`} ${tokens.getDepositAmount(amount, depositPercent, decimalPlaces, amountFormat)} ${nativeTokenConfig.symbol} (${availableBalanceText})`;
     }
     return <p className="mb-0">{infoLabel}</p>;
   }

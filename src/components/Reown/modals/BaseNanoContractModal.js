@@ -12,10 +12,11 @@ import { types, unregisteredTokensStoreSuccess } from '../../../actions';
 import { NanoContractActions } from '../NanoContractActions';
 import AddressList from '../../AddressList';
 import { NANO_UPDATE_ADDRESS_LIST_COUNT } from '../../../constants';
-import { constants, numberUtils, dateUtils, scriptsUtils, bufferUtils, bigIntUtils } from '@hathor/wallet-lib';
+import { constants, dateUtils, scriptsUtils, bufferUtils, bigIntUtils } from '@hathor/wallet-lib';
 import { DAppInfo } from '../DAppInfo';
 import { SignedDataDisplay } from '../SignedDataDisplay';
 import { TransactionFees } from '../TransactionFees';
+import { useAmountFormat } from '../../../hooks/useAmountFormat';
 
 /**
  * Parse script data from hex string
@@ -93,7 +94,9 @@ const BlueprintInfoCard = ({ nanoContract, blueprintInfo }) => (
 /**
  * Component for Arguments Table
  */
-const ArgumentsTable = ({ args, decimalPlaces, tokens, network }) => {
+const ArgumentsTable = ({ args, tokens, network }) => {
+  const formatValue = useAmountFormat();
+
   if (!args || !args.length) return null;
 
   /**
@@ -111,7 +114,7 @@ const ArgumentsTable = ({ args, decimalPlaces, tokens, network }) => {
     let displayValue = value;
 
     if (type === 'Amount') {
-      displayValue = numberUtils.prettyValue(value, decimalPlaces);
+      displayValue = formatValue(value);
     } else if (type === 'Timestamp') {
       displayValue = dateUtils.parseTimestamp(value);
     } else if (type === 'TxOutputScript') {
@@ -240,7 +243,6 @@ export function BaseNanoContractModal({
   // Redux selectors
   const blueprintInfo = useSelector((state) => state.blueprintsData[nanoContract.blueprintId]);
   const nanoContracts = useSelector((state) => state.nanoContracts);
-  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const firstAddress = useSelector((state) => state.reown.firstAddress);
   const registeredTokens = useSelector((state) => state.tokens);
   const network = useSelector((state) => state.serverInfo.network);
@@ -377,7 +379,6 @@ export function BaseNanoContractModal({
 
         <ArgumentsTable
           args={nanoContract.parsedArgs}
-          decimalPlaces={decimalPlaces}
           tokens={registeredTokens.reduce((acc, token) => {
             acc[token.uid] = token;
             return acc;

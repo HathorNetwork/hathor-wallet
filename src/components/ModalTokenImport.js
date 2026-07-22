@@ -9,13 +9,13 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { t } from 'ttag';
 import ReactLoading from 'react-loading';
-import hathorLib from '@hathor/wallet-lib';
 import { GlobalModalContext, MODAL_TYPES } from './GlobalModal';
 import { tokenRegisterRequested } from '../actions/index';
 import { getGlobalWallet } from '../modules/wallet';
 import walletUtils from '../utils/wallet';
 import helpers from '../utils/helpers';
 import { colors } from '../constants';
+import { useAmountFormat } from '../hooks/useAmountFormat';
 
 /**
  * States the modal can be in.
@@ -64,7 +64,7 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
   const registeredTokens = useSelector((state) => state.tokens);
   const tokensBalance = useSelector((state) => state.tokensBalance);
   const explorerUrl = useSelector((state) => state.networkSettings.data.explorer);
-  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
+  const formatValue = useAmountFormat();
 
   const hideZeroBalance = walletUtils.areZeroBalanceTokensHidden();
   const unknownTokens = useMemo(
@@ -268,7 +268,7 @@ export default function ModalTokenImport({ onClose, manageDomLifecycle }) {
     const available = balanceData.available ?? 0n;
     const locked = balanceData.locked ?? 0n;
     const total = available + locked;
-    return `${hathorLib.numberUtils.prettyValue(total, decimalPlaces)} ${symbol}`;
+    return `${formatValue(total)} ${symbol}`;
   };
 
   const renderZeroBalanceAlert = () => {

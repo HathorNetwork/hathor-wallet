@@ -21,7 +21,8 @@ import {
 } from "../../utils/atomicSwap";
 import { ProposalBalanceTable } from "../../components/atomic-swap/ProposalBalanceTable";
 import { GlobalModalContext, MODAL_TYPES } from '../../components/GlobalModal';
-import { PartialTxProposal, PartialTx, numberUtils } from "@hathor/wallet-lib";
+import Amount from '../../components/Amount';
+import { PartialTxProposal, PartialTx } from "@hathor/wallet-lib";
 import { cloneDeep, get } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from "../../sagas/tokens";
 import Loading from "../../components/Loading";
@@ -41,11 +42,9 @@ export default function EditSwap(props) {
     /**
      * @type Object
      * @property {ReduxProposalData} proposal
-     * @property {number} decimalPlaces
      */
-    const { proposal, decimalPlaces } = useSelector(state => ({
+    const { proposal } = useSelector(state => ({
       proposal: state.proposals[proposalId],
-      decimalPlaces: state.serverInfo.decimalPlaces,
     }));
     /** @type HathorWallet */
     const wallet = getGlobalWallet();
@@ -134,7 +133,7 @@ export default function EditSwap(props) {
                             title={t`This input is signed`}></i>}
                     </td>
                     <td className="text-right">
-                        {numberUtils.prettyValue(input.value, decimalPlaces)}
+                        <Amount value={input.value} />
                     </td>
                     <td className="text-right">
                         {input.index}
@@ -153,7 +152,7 @@ export default function EditSwap(props) {
             return outputs.map((output,index) => {
                 return <tr key={`${output.address}-${index}`}>
                     <td>{output.address}</td>
-                    <td className="text-right">{numberUtils.prettyValue(output.value, decimalPlaces)}</td>
+                    <td className="text-right"><Amount value={output.value} /></td>
                     <td className="text-center">
                         {output.isMine && output.isChange && <i
                             className="fa fa-check ml-1"

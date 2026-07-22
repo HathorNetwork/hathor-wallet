@@ -7,8 +7,7 @@
 
 import React from "react";
 import { t } from 'ttag';
-import { numberUtils } from '@hathor/wallet-lib';
-import { useSelector } from 'react-redux';
+import Amount from '../Amount';
 
 /**
  * @param {PartialTx} partialTx
@@ -21,14 +20,13 @@ export function ProposalBalanceTable ({ partialTx, wallet, balance }) {
     const sendingBalances = balance.filter(b => {
         return b.sending >= 0;
     });
-    const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
 
     const renderRows = () => {
         const renderOne = (amount, symbol) => {
             if (!amount && !symbol) {
                 return '';
             }
-            return <span>{numberUtils.prettyValue(amount, decimalPlaces)} <b>{symbol}</b></span>
+            return <span><Amount value={amount} /> <b>{symbol}</b></span>
         }
 
         if (sendingBalances.length === 0 && receivingBalances.length === 0) {

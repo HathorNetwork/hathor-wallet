@@ -15,6 +15,7 @@ import helpers from '../../utils/helpers';
 import nanoUtils from '../../utils/nanoContracts';
 import hathorLib from '@hathor/wallet-lib';
 import path from 'path-browserify';
+import Amount from '../../components/Amount';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { nanoContractDetailRequest, nanoContractDetailSetStatus, nanoContractUnregister } from '../../actions';
@@ -159,7 +160,7 @@ function NanoContractDetail() {
       return (
         <div key={tokenUid} className="d-flex flex-column nc-token-balance">
           <p><strong>Token: </strong>{tokenUid === hathorLib.constants.NATIVE_TOKEN_UID ? tokenUid : <a href="true" onClick={(e) => goToExplorer(e, tokenUid)}>{tokenUid}</a>}</p>
-          <p><strong>Amount: </strong>{hathorLib.numberUtils.prettyValue(typeof amount.value === 'bigint' ? amount.value : BigInt(amount.value), decimalPlaces)}</p>
+          <p><strong>Amount: </strong><Amount value={typeof amount.value === 'bigint' ? amount.value : BigInt(amount.value)} /></p>
         </div>
       );
     });

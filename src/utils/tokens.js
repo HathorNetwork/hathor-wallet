@@ -11,6 +11,7 @@ import wallet from './wallet';
 import hathorLib from '@hathor/wallet-lib';
 import LOCAL_STORE from '../storage';
 import { getGlobalWallet } from '../modules/wallet';
+import { formatAmount } from './amount';
 
 /**
  * Methods to create and handle tokens
@@ -107,22 +108,24 @@ const tokens = {
   /**
    * Returns the deposit amount in 'pretty' format
    *
+   * The deposit is always paid in HTR, so it is formatted without isNFT.
+   *
    * @param {number} mintAmount Amount of tokens to mint
    * @param {number} depositPercent deposit percentage for creating tokens
    * @param {number} decimalPlaces Number of decimal places
+   * @param {string} [amountFormat] AMOUNT_FORMAT.EXPANDED or COMPRESSED; defaults to expanded
    *
    * @return {string} deposit amount
    *
    * @memberof Tokens
    * @inner
    */
-  getDepositAmount(mintAmount, depositPercent, decimalPlaces) {
+  getDepositAmount(mintAmount, depositPercent, decimalPlaces, amountFormat) {
     if (mintAmount) {
       const deposit = hathorLib.tokensUtils.getDepositAmount(mintAmount, depositPercent);
-      return hathorLib.numberUtils.prettyValue(deposit, decimalPlaces);
-    } else {
-      return '0';
+      return formatAmount(deposit, { decimalPlaces, amountFormat });
     }
+    return '0';
   },
 
   /**

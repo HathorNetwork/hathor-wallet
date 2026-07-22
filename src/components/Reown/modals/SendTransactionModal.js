@@ -8,11 +8,12 @@
 import React, { useEffect } from 'react';
 import { t } from 'ttag';
 import { useSelector, useDispatch } from 'react-redux';
-import { constants, numberUtils } from '@hathor/wallet-lib';
+import { constants } from '@hathor/wallet-lib';
 import { unregisteredTokensStoreSuccess } from '../../../actions';
 import { CopyButton } from '../../CopyButton';
 import helpers from '../../../utils/helpers';
 import { TransactionFees } from '../TransactionFees';
+import { useAmountFormat } from '../../../hooks/useAmountFormat';
 
 export function SendTransactionModal({ data, onAccept, onReject }) {
   const dispatch = useDispatch();
@@ -20,11 +21,11 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
   const params = data?.params || {};
   const { inputs = [], outputs = [] } = params;
 
-  const { tokenMetadata, tokens: registeredTokens, decimalPlaces } = useSelector((state) => ({
+  const { tokenMetadata, tokens: registeredTokens } = useSelector((state) => ({
     tokenMetadata: state.tokenMetadata,
     tokens: state.tokens,
-    decimalPlaces: state.serverInfo.decimalPlaces
   }));
+  const formatAmountValue = useAmountFormat();
 
   useEffect(() => {
     // Collect unregistered tokens from tokenDetails Map
@@ -116,7 +117,7 @@ export function SendTransactionModal({ data, onAccept, onReject }) {
     // Check if the token is an NFT using the helpers utility
     const isNFT = tokenId && helpers.isTokenNFT(tokenId, tokenMetadata);
 
-    return numberUtils.prettyValue(value, isNFT ? 0 : decimalPlaces);
+    return formatAmountValue(value, { isNFT });
   };
 
   const truncateTxId = (txId) => {
