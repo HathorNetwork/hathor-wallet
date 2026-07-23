@@ -44,9 +44,18 @@ class WalletBalance extends React.Component {
     const renderBalance = () => {
       return (
         <div>
-          <p><strong>{t`Total:`}</strong> <Amount value={balance.available + balance.locked} symbol={symbol} isNFT={isNFT} /></p>
-          <p><strong>{t`Available:`}</strong> <Amount value={balance.available} symbol={symbol} isNFT={isNFT} /></p>
-          <p><strong>{t`Locked:`}</strong> <Amount value={balance.locked} symbol={symbol} isNFT={isNFT} /></p>
+          <div className="wallet-balance-row">
+            <strong className="wallet-balance-label">{t`Total:`}</strong>
+            <Amount value={balance.available + balance.locked} symbol={symbol} isNFT={isNFT} />
+          </div>
+          <div className="wallet-balance-row">
+            <strong className="wallet-balance-label">{t`Available:`}</strong>
+            <Amount value={balance.available} symbol={symbol} isNFT={isNFT} />
+          </div>
+          <div className="wallet-balance-row">
+            <strong className="wallet-balance-label">{t`Locked:`}</strong>
+            <Amount value={balance.locked} symbol={symbol} isNFT={isNFT} />
+          </div>
         </div>
       );
     }
