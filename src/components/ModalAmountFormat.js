@@ -10,6 +10,8 @@ import $ from 'jquery';
 import { t } from 'ttag';
 import { AMOUNT_FORMAT } from '../constants';
 import { compressAmountString } from '../utils/amount';
+import RadioGroup from './Radio/RadioGroup';
+import PreferenceSaveButton from './PreferenceSaveButton';
 
 const MODAL_ID = 'amountFormatModal';
 
@@ -40,27 +42,6 @@ function ModalAmountFormat({ currentFormat, onSave, onClose }) {
     return `${PREVIEW_EXPANDED} HTR`;
   };
 
-  const renderOption = ({ format, title, description, isDefault }) => (
-    <div className="amount-format-option" onClick={() => setSelectedFormat(format)}>
-      <input
-        type="radio"
-        id={`amountFormat-${format}`}
-        name="amountFormat"
-        checked={selectedFormat === format}
-        onChange={() => setSelectedFormat(format)}
-      />
-      <div className="amount-format-option-body">
-        <div className="amount-format-option-header">
-          <label className="amount-format-option-title" htmlFor={`amountFormat-${format}`}>
-            {title}
-          </label>
-          {isDefault && <span className="amount-format-tag">{t`Default`}</span>}
-        </div>
-        <p className="amount-format-option-description">{description}</p>
-      </div>
-    </div>
-  );
-
   return (
     <div className="modal fade amount-format-modal" id={MODAL_ID} tabIndex="-1" role="dialog" aria-labelledby={MODAL_ID} aria-hidden="true">
       <div className="modal-dialog" role="document">
@@ -76,21 +57,24 @@ function ModalAmountFormat({ currentFormat, onSave, onClose }) {
               {t`Choose how amounts are displayed across your wallet. You can change your default anytime.`}
             </p>
 
-            <div className="amount-format-card">
-              {renderOption({
-                format: AMOUNT_FORMAT.EXPANDED,
-                title: t`Expanded`,
-                description: t`Standard notation. Leading zeros are written out in full (ex: 0.0000005195).`,
-                isDefault: true,
-              })}
-              <hr className="amount-format-divider" />
-              {renderOption({
-                format: AMOUNT_FORMAT.COMPRESSED,
-                title: t`Compressed`,
-                description: t`Compresses leading zeros into a subscript count for shorter, easier-to-read small values (ex: 0.0₆5195).`,
-                isDefault: false,
-              })}
-            </div>
+            <RadioGroup
+              name="amountFormat"
+              value={selectedFormat}
+              onChange={setSelectedFormat}
+              options={[
+                {
+                  value: AMOUNT_FORMAT.EXPANDED,
+                  title: t`Expanded`,
+                  badge: t`Default`,
+                  description: t`Standard notation. Leading zeros are written out in full (ex: 0.0000005195).`,
+                },
+                {
+                  value: AMOUNT_FORMAT.COMPRESSED,
+                  title: t`Compressed`,
+                  description: t`Compresses leading zeros into a subscript count for shorter, easier-to-read small values (ex: 0.0₆5195).`,
+                },
+              ]}
+            />
 
             <p className="amount-format-preview-label">{t`PREVIEW`}</p>
             <div className="amount-format-preview">
@@ -99,14 +83,11 @@ function ModalAmountFormat({ currentFormat, onSave, onClose }) {
             </div>
           </div>
           <div className="modal-footer justify-content-center">
-            <button
-              type="button"
-              className={`amount-format-save-btn ${hasChanged ? 'amount-format-save-btn--active' : ''}`}
+            <PreferenceSaveButton
+              title={t`Save preferences`}
               disabled={!hasChanged}
               onClick={() => onSave(selectedFormat)}
-            >
-              {t`Save preferences`}
-            </button>
+            />
           </div>
         </div>
       </div>
