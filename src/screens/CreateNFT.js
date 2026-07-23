@@ -350,10 +350,10 @@ function CreateNFT() {
           </div>
         </div>
         <hr className="mb-5 mt-5"/>
-        <p><strong>{nativeTokenConfig.symbol} available:</strong> <Amount value={htrBalance} symbol={nativeTokenConfig.symbol} /></p>
-        <p><strong>Deposit:</strong> <Amount value={depositAmount} symbol={nativeTokenConfig.symbol} /></p>
-        <p><strong>Fee:</strong> {nftFee} {nativeTokenConfig.symbol}</p>
-        <p><strong>Total:</strong> <Amount value={tokensUtils.getNFTFee() + depositAmount} symbol={nativeTokenConfig.symbol} /></p>
+        <p className="amount-label"><strong>{nativeTokenConfig.symbol} available:</strong> <Amount value={htrBalance} symbol={nativeTokenConfig.symbol} /></p>
+        <p className="amount-label"><strong>Deposit:</strong> <Amount value={depositAmount} symbol={nativeTokenConfig.symbol} /></p>
+        <p className="amount-label"><strong>Fee:</strong> {nftFee} {nativeTokenConfig.symbol}</p>
+        <p className="amount-label"><strong>Total:</strong> <Amount value={tokensUtils.getNFTFee() + depositAmount} symbol={nativeTokenConfig.symbol} /></p>
         <button type="button" className="mt-3 btn btn-hathor" onClick={onClickCreate}>Create</button>
       </form>
       <p className="text-danger mt-3">{errorMessage}</p>

@@ -334,7 +334,7 @@ function CreateToken() {
     if (isDepositToken) {
       infoLabel = `${t`Deposit:`} ${tokens.getDepositAmount(amount, depositPercent, decimalPlaces, amountFormat)} ${nativeTokenConfig.symbol} (${availableBalanceText})`;
     }
-    return <p className="mb-0">{infoLabel}</p>;
+    return <p className="mb-0 amount-label">{infoLabel}</p>;
   }
 
   const formContainerStyle = {

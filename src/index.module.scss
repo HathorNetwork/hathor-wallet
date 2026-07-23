@@ -1458,3 +1458,13 @@ div .nc-token-balance:not(:last-child) {
     }
   }
 }
+
+/* Read-only amount labels beside inputs (deposit, fee, available balance) */
+.amount-label {
+  // The label embeds amounts inside a sentence, so the break can land at a
+  // space normally; `anywhere` is the fallback for a single very long number
+  // that exceeds the container on its own.
+  overflow-wrap: anywhere;
+  white-space: normal;
+  max-width: 100%;
+}
