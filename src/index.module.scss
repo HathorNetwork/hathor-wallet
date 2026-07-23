@@ -266,6 +266,11 @@ i.pointer {
 	text-align: right;
 	font-family: monospace;
 	font-size: 1.2rem;
+	// Long amounts wrap onto a second line, right-aligned, and are never
+	// shrunk or ellipsized. min-width stops the column collapsing so far that
+	// the value breaks earlier than it needs to.
+	min-width: 12rem;
+	white-space: normal;
 }
 
 #token-history .voided-element {
@@ -1382,6 +1387,29 @@ div .nc-token-balance:not(:last-child) {
   // space before the fractional digits, so there is no other break opportunity.
   overflow-wrap: anywhere;
   white-space: normal;
+}
+
+/* Dashboard balance rows */
+.wallet-balance {
+  &-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    // Bootstrap's paragraph spacing used to provide this; the rows are divs now.
+    margin-bottom: 1rem;
+
+    // The value is the flex item, so its wrapped continuation lines align under
+    // the value's first character rather than under the label. This is the
+    // hanging indent from the design — it needs no explicit indent.
+    .amount {
+      min-width: 0;
+    }
+  }
+
+  &-label {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 /* Amount format modal */
