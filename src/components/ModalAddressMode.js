@@ -11,6 +11,8 @@ import { t } from 'ttag';
 import { getGlobalWallet } from '../modules/wallet';
 import helpers from '../utils/helpers';
 import { ADDRESS_MODE } from '../constants';
+import RadioGroup from './Radio/RadioGroup';
+import PreferenceSaveButton from './PreferenceSaveButton';
 
 const LEARN_MORE_URL = 'https://docs.hathor.network/explanations/features/wallet-service/address-mode';
 
@@ -66,78 +68,53 @@ function ModalAddressMode({ currentMode, onSave, onClose }) {
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column' }}>
-            <p style={{ marginBottom: 40 }}>
+          <div className="modal-body d-flex flex-column">
+            <p className="address-mode-intro">
               {t`You can set your wallet to `}<strong>{t`single or multi address mode`}</strong>{'.'}
               <br />
               {t`You can switch anytime in the settings.`}
             </p>
 
             <div>
-              <div
-                className={`address-mode-option ${selectedMode === ADDRESS_MODE.SINGLE ? 'address-mode-option--selected' : ''} ${isSingleDisabled ? 'address-mode-option--disabled' : ''}`}
-                onClick={() => !isSingleDisabled && setSelectedMode(ADDRESS_MODE.SINGLE)}
-              >
-                <div className="d-flex align-items-center mb-2" style={{ gap: '6px' }}>
-                  <input
-                    type="radio"
-                    name="addressMode"
-                    checked={selectedMode === ADDRESS_MODE.SINGLE}
-                    disabled={isSingleDisabled}
-                    onChange={() => setSelectedMode(ADDRESS_MODE.SINGLE)}
-                  />
-                  <strong className="address-mode-label">{t`Single Address`}</strong>
-                </div>
-                <p className="address-mode-description">
-                  {t`Your wallet will use only one address (index 0).`}
-                  <br />
-                  <span className="address-mode-hint">{t`Easier to manage and compatible with all dApps.`}</span>
-                </p>
-              </div>
+              <RadioGroup
+                name="addressMode"
+                value={selectedMode}
+                onChange={setSelectedMode}
+                options={[
+                  {
+                    value: ADDRESS_MODE.SINGLE,
+                    title: t`Single Address`,
+                    disabled: isSingleDisabled,
+                    description: t`Your wallet will use only one address (index 0).`,
+                    hint: t`Easier to manage and compatible with all dApps.`,
+                  },
+                  {
+                    value: ADDRESS_MODE.MULTI,
+                    title: t`Multi Address`,
+                    description: t`Your wallet will let you generate multiple addresses.`,
+                    hint: t`Useful for advanced users.`,
+                  },
+                ]}
+              />
 
-              <div>
-                <div
-                  className={`address-mode-option ${selectedMode === ADDRESS_MODE.MULTI ? 'address-mode-option--selected' : ''}`}
-                  onClick={() => setSelectedMode(ADDRESS_MODE.MULTI)}
-                >
-                  <div className="d-flex align-items-center mb-2" style={{ gap: '6px' }}>
-                    <input
-                      type="radio"
-                      name="addressMode"
-                      checked={selectedMode === ADDRESS_MODE.MULTI}
-                      onChange={() => setSelectedMode(ADDRESS_MODE.MULTI)}
-                    />
-                    <strong className="address-mode-label">{t`Multi Address`}</strong>
-                  </div>
-                  <p className="address-mode-description">
-                    {t`Your wallet will let you generate multiple addresses.`}
-                    <br />
-                    <span className="address-mode-hint">{t`Useful for advanced users.`}</span>
-                  </p>
+              {hasTxOutside && (
+                <div className="address-mode-alert">
+                  <i className="fa fa-exclamation-triangle" style={{ color: '#d97706' }}></i>
+                  <span>
+                    {t`You can't switch to single address mode because other addresses in your wallet are already in use.`}
+                    {' '}
+                    <a href="true" onClick={openLearnMore} style={{ textDecoration: 'underline', color: 'inherit' }}>{t`Learn more`}</a>{'.'}
+                  </span>
                 </div>
-
-                {hasTxOutside && (
-                  <div className="address-mode-alert">
-                    <i className="fa fa-exclamation-triangle" style={{ color: '#d97706' }}></i>
-                    <span>
-                      {t`You can't switch to single address mode because other addresses in your wallet are already in use.`}
-                      {' '}
-                      <a href="true" onClick={openLearnMore} style={{ textDecoration: 'underline', color: 'inherit' }}>{t`Learn more`}</a>{'.'}
-                    </span>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
-          <div className="modal-footer justify-content-center" style={{ borderTop: 'none', marginTop: 12 }}>
-            <button
-              type="button"
-              className={`address-mode-save-btn ${hasChanged && !loading ? 'address-mode-save-btn--active' : ''}`}
+          <div className="modal-footer justify-content-center border-top-0 address-mode-footer">
+            <PreferenceSaveButton
+              title={t`Save preferences`}
               disabled={!hasChanged || loading}
               onClick={handleSave}
-            >
-              {t`Save preferences`}
-            </button>
+            />
           </div>
         </div>
       </div>
