@@ -217,7 +217,8 @@ function ModalTransactionOverview({
             fontWeight: 500,
             color: '#404040',
             marginLeft: '12px',
-            whiteSpace: 'nowrap',
+            overflowWrap: 'anywhere',
+            minWidth: 0,
             fontSize: '14px',
           }}
         >
@@ -229,6 +230,7 @@ function ModalTransactionOverview({
               color: arrowColor,
               marginLeft: '10px',
               fontSize: '14px',
+              alignSelf: 'flex-end',
             }}
           />
         </span>
@@ -239,7 +241,15 @@ function ModalTransactionOverview({
   const renderNetworkFeeValue = () => {
     if (hasAnyFee) {
       return (
-        <span style={{ fontSize: '14px', fontWeight: 500, color: '#404040' }}>
+        <span
+          style={{
+            fontSize: '14px',
+            fontWeight: 500,
+            color: '#404040',
+            minWidth: 0,
+            overflowWrap: 'anywhere',
+          }}
+        >
           {formatValue(fee)} HTR
         </span>
       );
@@ -283,8 +293,18 @@ function ModalTransactionOverview({
   const renderTotalPayment = () => {
     return (
       <div className="d-flex justify-content-between mb-4">
-        <span style={{ fontSize: '14px', fontWeight: 600 }}>{t`You will pay`}</span>
-        <span style={{ fontSize: '14px', fontWeight: 500, color: '#404040' }}>
+        <span style={{ fontSize: '14px', fontWeight: 600, flexShrink: 0 }}>{t`You will pay`}</span>
+        <span
+          style={{
+            fontSize: '14px',
+            fontWeight: 500,
+            color: '#404040',
+            lineHeight: '20px',
+            textAlign: 'right',
+            overflowWrap: 'anywhere',
+            minWidth: 0,
+          }}
+        >
           {formatTotalPayment()}
         </span>
       </div>
@@ -308,7 +328,7 @@ function ModalTransactionOverview({
 
       {/* Network fee */}
       <div className="d-flex justify-content-between align-items-center mb-2">
-        <span style={{ fontSize: '14px', fontWeight: 600 }}>
+        <span style={{ fontSize: '14px', fontWeight: 600, flexShrink: 0 }}>
           {t`Network fee`}{' '}
           <span style={{ color: '#57606a', fontWeight: 400 }}>({t`paid in HTR`})</span>
         </span>
