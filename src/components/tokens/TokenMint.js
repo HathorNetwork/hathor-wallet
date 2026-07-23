@@ -219,6 +219,7 @@ class TokenMint extends React.Component {
        title={t`Mint tokens`}
        subtitle={`A deposit of ${depositPercent * 100}% in ${nativeTokenConfig.symbol} of the mint amount is required`}
        deposit={`Deposit: ${tokens.getDepositAmount(getAmountToCalculateDeposit(), depositPercent, this.props.decimalPlaces, this.props.amountFormat)} ${nativeTokenConfig.symbol} (${formatAmount(this.props.htrBalance, { decimalPlaces: this.props.decimalPlaces, amountFormat: this.props.amountFormat })} ${nativeTokenConfig.symbol} available)`}
+       depositClassName="amount-label"
        buttonName={t`Go`}
        validateForm={this.mint}
        getSuccessMessage={this.getSuccessMessage}

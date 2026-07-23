@@ -514,7 +514,7 @@ class SendTokensOne extends React.Component {
       });
 
       return (
-        <span className="ml-3">
+        <span className="ml-3 amount-label">
           (
             {t`Balance available: `}
             { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
@@ -588,21 +588,21 @@ class SendTokensOne extends React.Component {
                   </div>
                 )}
               </span>
-              <span style={{ fontSize: '12px', color: '#404040' }}>
+              <span className="amount-label" style={{ fontSize: '12px', color: '#404040' }}>
                 {this.renderFeeValue()}
               </span>
             </div>
 
             <div className="d-flex justify-content-between align-items-center mb-2">
               <span style={{ fontWeight: 600, fontSize: '14px' }}>{t`Amount to be sent`}</span>
-              <span style={{ fontSize: '12px', color: '#404040' }}>
+              <span className="amount-label" style={{ fontSize: '12px', color: '#404040' }}>
                 {this.getTotalOutputAmount()} {this.state.selected.symbol}
               </span>
             </div>
 
             {!this.state.isDepositToken && this.state.fee > 0n && (
               <div className="d-flex justify-content-end">
-                <span style={{ fontSize: '12px', color: '#8e8e93' }}>
+                <span className="amount-label" style={{ fontSize: '12px', color: '#8e8e93' }}>
                   <strong>{t`You'll pay:`}</strong>
                   {` ${this.getTotalOutputAmount()} ${this.state.selected.symbol} + ${formatAmount(this.state.fee, { decimalPlaces: this.props.decimalPlaces, amountFormat: this.props.amountFormat })} HTR`}
                 </span>
