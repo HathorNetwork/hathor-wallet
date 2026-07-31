@@ -271,12 +271,23 @@ export class LocalStorageStore {
   }
 
   /**
-   * Clean wallet metadata
+   * Clean wallet metadata.
+   *
+   * @param {Object} [options]
+   * @param {boolean} [options.cleanRegisteredData=false] Also drop the
+   *   wallet-scoped registered tokens, nano contracts and Ledger token
+   *   signatures. Used by exit paths that bypass resetStorage, so this data
+   *   doesn't leak into the next wallet.
    */
-  cleanWallet() {
+  cleanWallet({ cleanRegisteredData = false } = {}) {
     this.removeItem(IS_HARDWARE_KEY);
     this.removeItem(CLOSED_KEY);
     this.removeItem(ACCESS_DATA_KEY);
+    if (cleanRegisteredData) {
+      this.removeItem(REGISTERED_TOKENS_KEY);
+      this.removeItem(REGISTERED_NANOCONTRACTS_KEY);
+      this.removeItem(TOKEN_SIGNATURES_KEY);
+    }
     delete this._storage;
     this._storage = null;
   }
