@@ -103,11 +103,10 @@ export const MIN_JOB_ESTIMATION = 1;
 
 let ipcRenderer = null;
 
-if (window.require) {
-  // Requiring electron outside main thread must be done like that
-  // https://github.com/electron/electron/issues/7300
-  const electron = window.require('electron');
-  ipcRenderer = electron.ipcRenderer;
+if (window.electronAPI) {
+  // window.electronAPI (from preload.js) mirrors the ipcRenderer methods the
+  // renderer uses, without requiring nodeIntegration.
+  ipcRenderer = window.electronAPI;
 }
 
 /**
