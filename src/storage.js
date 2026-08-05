@@ -28,6 +28,8 @@ export const ACCESS_DATA_KEY = 'localstorage:accessdata';
 export const REGISTERED_TOKENS_KEY = 'localstorage:registeredTokens';
 export const REGISTERED_NANOCONTRACTS_KEY = 'localstorage:registeredNanoContracts';
 export const NETWORK_TOKENS_KEY = 'localstorage:networkTokens';
+// Cache of the thoth.id `domain suffix -> nano contract` map, per network
+export const THOTH_ID_CONTRACTS_KEY = 'localstorage:thothIdContracts';
 
 export const storageKeys = [
   WALLET_VERSION_KEY,
@@ -44,6 +46,7 @@ export const storageKeys = [
   REGISTERED_TOKENS_KEY,
   REGISTERED_NANOCONTRACTS_KEY,
   NETWORK_TOKENS_KEY,
+  THOTH_ID_CONTRACTS_KEY,
 ];
 
 class HybridStore extends MemoryStore {

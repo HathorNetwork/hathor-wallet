@@ -158,7 +158,9 @@ class SendTokensOne extends React.Component {
     const outputs = [];
     for (const output of this.outputs) {
       if (!output.ref.current) continue;
-      const address = output.ref.current.address?.current?.value?.replace(/\s/g, '');
+      // A thoth.id name still being resolved has no address yet, so the output
+      // is left out of the fee until it resolves
+      const address = output.ref.current.getAddress();
       const value = output.ref.current.value;
       if (address && value && value > 0) {
         outputs.push({ address, value: BigInt(value) });
@@ -340,8 +342,17 @@ class SendTokensOne extends React.Component {
   getData = () => {
     let data = {'outputs': [], 'inputs': []};
     for (const output of this.outputs) {
-      const address = output.ref.current.address.current.value.replace(/\s/g, '');
+      const typedAddress = output.ref.current.getTypedValue();
+      const address = output.ref.current.getAddress();
       const value = output.ref.current.value;
+
+      // A thoth.id name that did not resolve has no address to send to. Sending
+      // must stop here: the typed name is not an address, and letting it
+      // through would fail later with a much less helpful message.
+      if (typedAddress && value && address === null) {
+        this.props.updateState({ errorMessage: t`Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. Could not resolve the name ${typedAddress} to an address.` });
+        return null;
+      }
 
       if (address && value) {
         // Doing the check here because need to validate before doing parseInt
@@ -379,6 +390,26 @@ class SendTokensOne extends React.Component {
     }
 
     return data;
+  }
+
+  /**
+   * Map of address to the thoth.id name it was typed as, for the outputs where
+   * the user typed a name. The transaction itself only ever carries addresses,
+   * so this is what lets the confirmation screen show the name beside it.
+   *
+   * @return {Object.<string, string>}
+   */
+  getAddressNames = () => {
+    const names = {};
+    for (const output of this.outputs) {
+      if (!output.ref.current) continue;
+      const name = output.ref.current.getResolvedName();
+      const address = output.ref.current.getAddress();
+      if (name && address) {
+        names[address] = name;
+      }
+    }
+    return names;
   }
 
   /**

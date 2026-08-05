@@ -988,6 +988,11 @@
         "@hathor/wallet-lib>bitcore-lib>bs58>base-x": true
       }
     },
+    "thoth-id-sdk>bs58": {
+      "packages": {
+        "thoth-id-sdk>bs58>base-x": true
+      }
+    },
     "buffer": {
       "globals": {
         "console": true
@@ -1742,6 +1747,17 @@
         "node-stdlib-browser>string_decoder>safe-buffer": true
       }
     },
+    "thoth-id-sdk": {
+      "globals": {
+        "setTimeout": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true,
+        "axios": true,
+        "thoth-id-sdk>bs58": true,
+        "thoth-id-sdk>zod": true
+      }
+    },
     "react-copy-to-clipboard>copy-to-clipboard>toggle-selection": {
       "globals": {
         "document.activeElement": true,
@@ -1921,6 +1937,20 @@
     "@hathor/wallet-lib>zod": {
       "globals": {
         "URL": true
+      },
+      "packages": {
+        "react-redux>@babel/runtime": true
+      }
+    },
+    "thoth-id-sdk>zod": {
+      "globals": {
+        "File": true,
+        "URL": true,
+        "__zod_globalConfig": true,
+        "__zod_globalRegistry": true,
+        "atob": true,
+        "btoa": true,
+        "navigator": true
       },
       "packages": {
         "react-redux>@babel/runtime": true

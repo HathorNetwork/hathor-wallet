@@ -68,6 +68,7 @@
     "react-scripts": "5.0.1",
     "redux-saga": "1.2.1",
     "redux-thunk": "2.4.1",
+    "thoth-id-sdk": "3.0.0",
     "ttag": "1.8.6",
     "unleash-proxy-client": "3.2.0",
     "viz.js": "2.1.2"
