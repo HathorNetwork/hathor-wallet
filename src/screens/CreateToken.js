@@ -22,6 +22,7 @@ import InputNumber from '../components/InputNumber';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
 import { useNavigate, useParams } from "react-router-dom";
 import { getGlobalWallet } from "../modules/wallet";
+import { useAmountFormat } from '../hooks/useAmountFormat';
 
 /**
  * Create a new token
@@ -36,6 +37,7 @@ function CreateToken() {
     decimalPlaces: state.serverInfo.decimalPlaces,
   }));
   const wallet = getGlobalWallet();
+  const formatValue = useAmountFormat();
 
   // Get TokenVersion enum from wallet-lib
   const { TokenVersion } = hathorLib;
@@ -78,7 +80,7 @@ function CreateToken() {
 
       // Validating maximum amount
       if (amount > hathorLib.constants.MAX_OUTPUT_VALUE) {
-        const max_output_value_str = hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, decimalPlaces);
+        const max_output_value_str = formatValue(hathorLib.constants.MAX_OUTPUT_VALUE);
         setErrorMessage(t`Maximum value to mint token is ${max_output_value_str}`);
         return false;
       }
@@ -252,8 +254,8 @@ function CreateToken() {
   const depositPercent = wallet.storage.getTokenDepositPercentage();
   const depositPercentDisplay = depositPercent * 100;
   const nativeTokenConfig = wallet.storage.getNativeTokenData();
-  const availableBalanceText = `${hathorLib.numberUtils.prettyValue(htrBalance, decimalPlaces)} ${nativeTokenConfig.symbol} ${t`available`}`;
-  const requiredFeeAmountText = `${hathorLib.numberUtils.prettyValue(hathorLib.constants.FEE_PER_OUTPUT, decimalPlaces)} ${nativeTokenConfig.symbol}`;
+  const availableBalanceText = `${formatValue(htrBalance)} ${nativeTokenConfig.symbol} ${t`available`}`;
+  const requiredFeeAmountText = `${formatValue(hathorLib.constants.FEE_PER_OUTPUT)} ${nativeTokenConfig.symbol}`;
 
   /**
    * Calculates the required HTR amount to create a token

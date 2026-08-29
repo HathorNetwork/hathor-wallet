@@ -22,6 +22,9 @@ import InputsWrapper from '../components/InputsWrapper';
 import Loading from '../components/Loading';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
 import LOCAL_STORE from '../storage';
+import Amount from './Amount';
+import { formatAmount, resolveAmountFormat } from '../utils/amount';
+import { AMOUNT_FORMAT_FEATURE_TOGGLE } from '../constants';
 
 
 const mapStateToProps = (state) => {
@@ -32,6 +35,10 @@ const mapStateToProps = (state) => {
     tokenMetadata: state.tokenMetadata,
     height: state.height,
     decimalPlaces: state.serverInfo.decimalPlaces,
+    amountFormat: resolveAmountFormat(
+      state.amountFormat,
+      state.featureToggles[AMOUNT_FORMAT_FEATURE_TOGGLE]
+    ),
   };
 };
 
@@ -129,6 +136,15 @@ class SendTokensOne extends React.Component {
   isNFT = () => {
     return helpers.isTokenNFT(_.get(this.state, 'selected.uid'), this.props.tokenMetadata);
   }
+
+  /**
+   * Format a value using the selected token's NFT status and the user's amount format preference
+   */
+  formatValue = (value) => formatAmount(value, {
+    decimalPlaces: this.props.decimalPlaces,
+    isNFT: this.isNFT(),
+    amountFormat: this.props.amountFormat,
+  });
 
   /**
    * Calculate fee and change output based on input selection mode
@@ -317,7 +333,7 @@ class SendTokensOne extends React.Component {
   getTotalOutputAmount = () => {
     const outputs = this.getOutputsForFeeCalculation();
     const total = outputs.reduce((sum, o) => sum + o.value, 0n);
-    return hathorLib.numberUtils.prettyValue(total, this.isNFT() ? 0 : this.props.decimalPlaces);
+    return this.formatValue(total);
   };
 
   /**
@@ -346,7 +362,7 @@ class SendTokensOne extends React.Component {
       if (address && value) {
         // Doing the check here because need to validate before doing parseInt
         if (value > hathorLib.constants.MAX_OUTPUT_VALUE) {
-          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. Maximum output value is ${hathorLib.numberUtils.prettyValue(hathorLib.constants.MAX_OUTPUT_VALUE, this.isNFT() ? 0 : this.props.decimalPlaces)}` });
+          this.props.updateState({ errorMessage: `Token: ${this.state.selected.symbol}. Output: ${output.ref.current.props.index}. Maximum output value is ${this.formatValue(hathorLib.constants.MAX_OUTPUT_VALUE)}` });
           return null;
         }
         let dataOutput = {'address': address, 'value': value, 'token': this.state.selected.uid};
@@ -441,7 +457,7 @@ class SendTokensOne extends React.Component {
 
     return (
       <span>
-        {hathorLib.numberUtils.prettyValue(this.state.fee, this.props.decimalPlaces)} HTR
+        <Amount value={this.state.fee} symbol="HTR" />
       </span>
     );
   }
@@ -504,7 +520,7 @@ class SendTokensOne extends React.Component {
             { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.LOADING && (
               <Loading />
             )}
-            { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && hathorLib.numberUtils.prettyValue(tokenBalance.data.available, this.isNFT() ? 0 : this.props.decimalPlaces) }
+            { tokenBalance.status === TOKEN_DOWNLOAD_STATUS.READY && <Amount value={tokenBalance.data.available} isNFT={this.isNFT()} /> }
           )
         </span>
       );
@@ -588,7 +604,7 @@ class SendTokensOne extends React.Component {
               <div className="d-flex justify-content-end">
                 <span style={{ fontSize: '12px', color: '#8e8e93' }}>
                   <strong>{t`You'll pay:`}</strong>
-                  {` ${this.getTotalOutputAmount()} ${this.state.selected.symbol} + ${hathorLib.numberUtils.prettyValue(this.state.fee, this.props.decimalPlaces)} HTR`}
+                  {` ${this.getTotalOutputAmount()} ${this.state.selected.symbol} + ${formatAmount(this.state.fee, { decimalPlaces: this.props.decimalPlaces, amountFormat: this.props.amountFormat })} HTR`}
                 </span>
               </div>
             )}

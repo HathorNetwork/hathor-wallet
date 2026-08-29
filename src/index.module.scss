@@ -1319,3 +1319,171 @@ div .nc-token-balance:not(:last-child) {
     }
   }
 }
+
+/* Amount display */
+.amount {
+  // Long amounts wrap onto additional lines rather than clipping, ellipsizing
+  // or shrinking. `anywhere` is required because a formatted amount contains no
+  // space before the fractional digits, so there is no other break opportunity.
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* Amount format modal */
+.amount-format {
+  &-modal .modal-dialog {
+    max-width: 506px;
+  }
+
+  &-description {
+    font-size: 14px;
+    color: #000;
+    margin-bottom: 24px;
+  }
+
+  &-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px 16px;
+  }
+
+  &-divider {
+    margin: 24px 0;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  &-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    cursor: pointer;
+
+    input[type=radio] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 26px;
+      height: 26px;
+      border: 2px solid #c4c4c4;
+      border-radius: 50%;
+      margin: 0;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+
+      &:checked {
+        border-color: $purpleHathor;
+
+        &::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 13px;
+          height: 13px;
+          border-radius: 50%;
+          background: $purpleHathor;
+        }
+      }
+    }
+
+    &-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    &-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    &-title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 20px;
+      color: #000;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+
+    &-description {
+      font-size: 12px;
+      line-height: 20px;
+      color: #979797;
+      margin-bottom: 0;
+    }
+  }
+
+  &-tag {
+    background: #f2f3f5;
+    border-radius: 8px;
+    width: 69px;
+    height: 23px;
+    font-size: 12px;
+    line-height: 20px;
+    color: #6b7280;
+    text-align: center;
+    flex-shrink: 0;
+    padding: 2px 0;
+  }
+
+  &-preview-label {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    color: #000;
+    opacity: 0.5;
+    margin: 24px 0;
+  }
+
+  &-preview {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    background: #f7f7f7;
+    border-radius: 16px;
+    padding: 16px;
+
+    &-key {
+      font-size: 14px;
+      line-height: 20px;
+      color: #767779;
+    }
+
+    &-value {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      color: #000;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &-save-btn {
+    background: #e5e5e5;
+    border: none;
+    border-radius: 8px;
+    padding: 16px;
+    width: 226px;
+    color: #b0b0b0;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: default;
+
+    &--active {
+      background: $purpleHathor;
+      color: white;
+      cursor: pointer;
+
+      &:hover {
+        background: $purpleHathorHover;
+      }
+    }
+  }
+}

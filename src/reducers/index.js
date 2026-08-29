@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { FEATURE_TOGGLE_DEFAULTS, FEE_TOKEN_FEATURE_TOGGLE, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
+import { AMOUNT_FORMAT_DEFAULT, FEATURE_TOGGLE_DEFAULTS, FEE_TOKEN_FEATURE_TOGGLE, NANO_CONTRACT_DETAIL_STATUS, NETWORK_SETTINGS, NETWORK_SETTINGS_STATUS, VERSION } from '../constants';
 import { types } from '../actions';
 import { get, findIndex } from 'lodash';
 import { TOKEN_DOWNLOAD_STATUS } from '../sagas/tokens';
@@ -123,6 +123,7 @@ const initialState = {
   useWalletService: false,
   // Address mode: ADDRESS_MODE.SINGLE or ADDRESS_MODE.MULTI
   addressMode: null,
+  amountFormat: AMOUNT_FORMAT_DEFAULT,
   // Promise to be resolved when the user inputs his PIN correctly on the LockedWallet screen
   lockWalletPromise: null,
   // Track if the Ledger device app was closed while the wallet was loaded.
@@ -500,6 +501,8 @@ const rootReducer = (state = initialState, action) => {
       return onUnregisteredTokensClean(state);
     case types.SET_ADDRESS_MODE:
       return { ...state, addressMode: action.payload };
+    case types.SET_AMOUNT_FORMAT:
+      return { ...state, amountFormat: action.payload };
     case types.TOKEN_REGISTER_REQUESTED:
       return onTokenRegisterRequested(state, action);
     case types.TOKEN_REGISTER_SUCCESS:

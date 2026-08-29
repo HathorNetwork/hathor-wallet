@@ -16,6 +16,7 @@ import helpers from '../utils/helpers';
 import { TOKEN_FEE_RFC_URL, colors } from '../constants';
 import SendTxHandler from './SendTxHandler';
 import { getGlobalWallet } from '../modules/wallet';
+import { useAmountFormat } from '../hooks/useAmountFormat';
 
 const MODAL_ID = 'transactionOverviewModal';
 
@@ -44,6 +45,7 @@ function ModalTransactionOverview({
   const [preparedTx, setPreparedTx] = useState(null);
   const pinInputRef = useRef(null);
   const tokenMetadata = useSelector((state) => state.tokenMetadata);
+  const formatValue = useAmountFormat();
 
   useEffect(() => {
     manageDomLifecycle(`#${MODAL_ID}`);
@@ -63,10 +65,6 @@ function ModalTransactionOverview({
 
   const fee = typeof totalFee === 'bigint' ? totalFee : BigInt(totalFee || 0);
   const hasAnyFee = fee > 0n;
-
-  const getDecimalPlaces = (tokenUid) => {
-    return helpers.isTokenNFT(tokenUid, tokenMetadata) ? 0 : decimalPlaces;
-  };
 
   /**
    * Format total payment string: "0.03 HTR + 1.00 FBT"
@@ -97,7 +95,7 @@ function ModalTransactionOverview({
 
     const parts = [];
     for (const [uid, { symbol, total }] of tokenTotals) {
-      parts.push(`${hathorLib.numberUtils.prettyValue(total, getDecimalPlaces(uid))} ${symbol}`);
+      parts.push(`${formatValue(total, { isNFT: helpers.isTokenNFT(uid, tokenMetadata) })} ${symbol}`);
     }
     return parts.join(' + ');
   };
@@ -223,7 +221,7 @@ function ModalTransactionOverview({
             fontSize: '14px',
           }}
         >
-          {hathorLib.numberUtils.prettyValue(output.value, getDecimalPlaces(output.tokenUid))} {output.tokenSymbol}
+          {formatValue(output.value, { isNFT: helpers.isTokenNFT(output.tokenUid, tokenMetadata) })} {output.tokenSymbol}
           <i
             className={`fa ${arrowClass}`}
             style={{
@@ -242,7 +240,7 @@ function ModalTransactionOverview({
     if (hasAnyFee) {
       return (
         <span style={{ fontSize: '14px', fontWeight: 500, color: '#404040' }}>
-          {hathorLib.numberUtils.prettyValue(fee, decimalPlaces)} HTR
+          {formatValue(fee)} HTR
         </span>
       );
     }

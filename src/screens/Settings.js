@@ -19,8 +19,8 @@ import { str2jsx } from '../utils/i18n';
 import version from '../utils/version';
 import { useDispatch, useSelector } from 'react-redux';
 import { GlobalModalContext, MODAL_TYPES } from '../components/GlobalModal';
-import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE, SINGLE_ADDRESS_FEATURE_TOGGLE, ADDRESS_MODE } from '../constants';
-import { walletReset, reloadWalletRequested } from '../actions';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL, REOWN_FEATURE_TOGGLE, SINGLE_ADDRESS_FEATURE_TOGGLE, ADDRESS_MODE, AMOUNT_FORMAT, AMOUNT_FORMAT_FEATURE_TOGGLE, AMOUNT_FORMAT_KEY } from '../constants';
+import { walletReset, reloadWalletRequested, setAmountFormat } from '../actions';
 import { getGlobalWallet } from '../modules/wallet';
 import LOCAL_STORE from '../storage';
 
@@ -53,6 +53,8 @@ function Settings() {
   const reownSessions = useSelector(state => state.reown.sessions);
   const singleAddressEnabled = useSelector(state => state.featureToggles[SINGLE_ADDRESS_FEATURE_TOGGLE]);
   const addressMode = useSelector(state => state.addressMode);
+  const amountFormatEnabled = useSelector(state => state.featureToggles[AMOUNT_FORMAT_FEATURE_TOGGLE]);
+  const amountFormat = useSelector(state => state.amountFormat);
   const network = useSelector(state => state.networkSettings.data.network);
   const connectedSessionsCount = Object.keys(reownSessions).length;
   const isHardwareWallet = LOCAL_STORE.isHardwareWallet();
@@ -323,6 +325,26 @@ function Settings() {
     }
   };
 
+  const openAmountFormatModal = () => {
+    context.showModal(MODAL_TYPES.AMOUNT_FORMAT, {
+      currentFormat: amountFormat,
+      onSave: handleAmountFormatChange,
+    });
+  };
+
+  const handleAmountFormatChange = (newFormat) => {
+    context.hideModal();
+    LOCAL_STORE.setItem(AMOUNT_FORMAT_KEY, newFormat);
+    dispatch(setAmountFormat(newFormat));
+  };
+
+  const getAmountFormatLabel = () => {
+    if (amountFormat === AMOUNT_FORMAT.COMPRESSED) {
+      return t`Compressed`;
+    }
+    return t`Expanded`;
+  };
+
   const serverURL = useWalletService ? hathorLib.config.getWalletServiceBaseUrl() : hathorLib.config.getServerUrl();
   const wsServerURL = useWalletService ? hathorLib.config.getWalletServiceBaseWsUrl() : '';
   const ledgerCustomTokens = isHardwareWallet && version.isLedgerCustomTokenAllowed();
@@ -374,6 +396,15 @@ function Settings() {
             <strong>{t`Address Mode:`}</strong>{' '}
             {addressMode === ADDRESS_MODE.SINGLE ? t`Single address` : t`Multi address`}
             <a className="settings-change-link" href="true" onClick={(e) => { e.preventDefault(); openAddressModeModal(); }}>
+              {t`Change`}
+            </a>
+          </p>
+        )}
+        {amountFormatEnabled && (
+          <p>
+            <strong>{t`Amount format:`}</strong>{' '}
+            {getAmountFormatLabel()}
+            <a className="settings-change-link" href="true" onClick={(e) => { e.preventDefault(); openAmountFormatModal(); }}>
               {t`Change`}
             </a>
           </p>
