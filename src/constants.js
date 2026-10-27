@@ -104,9 +104,21 @@ export const MIN_JOB_ESTIMATION = 1;
 let ipcRenderer = null;
 
 if (window.electronAPI) {
-  // window.electronAPI (from preload.js) mirrors the ipcRenderer methods the
-  // renderer uses, without requiring nodeIntegration.
-  ipcRenderer = window.electronAPI;
+  // Allowlisted subset of ipcRenderer exposed by public/preload.js; channels
+  // are listed in public/bridge.js and listeners receive undefined as the event.
+  ipcRenderer = {
+    send: window.electronAPI.send,
+    removeAllListeners: window.electronAPI.removeAllListeners,
+    // The preload invokes listeners from its isolated world, where a throw
+    // would never reach this window's error handlers. Re-raise it here.
+    on: (channel, listener) => window.electronAPI.on(channel, (...args) => {
+      try {
+        listener(...args);
+      } catch (error) {
+        window.dispatchEvent(new ErrorEvent('error', { error, message: error?.message }));
+      }
+    }),
+  };
 }
 
 /**

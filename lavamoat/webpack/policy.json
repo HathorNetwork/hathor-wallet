@@ -104,7 +104,7 @@
         "@hathor/wallet-lib>crypto-js": true,
         "@walletconnect/core>events": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
-        "cypress>lodash": true,
+        "lodash": true,
         "node-stdlib-browser>path-browserify": true,
         "@hathor/wallet-lib>queue-microtask": true,
         "@hathor/wallet-lib>zod": true
@@ -135,7 +135,7 @@
         "@hathor/wallet-lib>crypto-js": true,
         "@walletconnect/core>events": true,
         "@hathor/wallet-lib>isomorphic-ws": true,
-        "cypress>lodash": true,
+        "lodash": true,
         "node-stdlib-browser>path-browserify": true,
         "@hathor/wallet-lib>queue-microtask": true,
         "@hathor/wallet-lib>zod": true
@@ -215,220 +215,30 @@
         "@reown/walletkit>@walletconnect/sign-client": true
       }
     },
-    "@sentry/browser>@sentry-internal/feedback": {
-      "globals": {
-        "FormData": true,
-        "HTMLFormElement": true,
-        "Node": true,
-        "__SENTRY_DEBUG__": true,
-        "clearTimeout": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry-internal/feedback>@sentry/core": true,
-        "@sentry/browser>@sentry-internal/feedback>@sentry/utils": true
-      }
-    },
-    "@sentry/browser>@sentry-internal/replay-canvas": {
-      "globals": {
-        "Blob": true,
-        "HTMLCanvasElement": true,
-        "HTMLImageElement": true,
-        "ImageData": true,
-        "URL.createObjectURL": true,
-        "Worker": true,
-        "cancelAnimationFrame": true,
-        "console.error": true,
-        "createImageBitmap": true,
-        "document": true,
-        "requestAnimationFrame": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry-internal/replay-canvas>@sentry/core": true,
-        "@sentry/browser>@sentry-internal/replay-canvas>@sentry/utils": true
-      }
-    },
-    "@sentry/browser>@sentry-internal/tracing": {
-      "globals": {
-        "Headers": true,
-        "PerformanceObserver": true,
-        "Request": true,
-        "__SENTRY_DEBUG__": true,
-        "addEventListener": true,
-        "performance.getEntriesByType": true,
-        "performance.timeOrigin": true,
-        "removeEventListener": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry-internal/tracing>@sentry/core": true,
-        "@sentry/browser>@sentry-internal/tracing>@sentry/utils": true
-      }
-    },
     "@sentry/browser": {
       "globals": {
-        "TextDecoder": true,
-        "TextEncoder": true,
         "XMLHttpRequest": true,
         "__SENTRY_DEBUG__": true,
         "__SENTRY_RELEASE__": true,
-        "indexedDB.open": true,
-        "performance.timeOrigin": true,
         "setTimeout": true
       },
       "packages": {
         "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry-internal/feedback": true,
-        "@sentry/browser>@sentry-internal/replay-canvas": true,
         "@sentry/browser>@sentry-internal/tracing": true,
         "@sentry/browser>@sentry/core": true,
-        "@sentry/browser>@sentry/replay": true,
         "@sentry/browser>@sentry/utils": true
-      }
-    },
-    "@sentry/browser>@sentry-internal/feedback>@sentry/core": {
-      "globals": {
-        "__SENTRY_DEBUG__": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry-internal/feedback>@sentry/utils": true
-      }
-    },
-    "@sentry/browser>@sentry-internal/replay-canvas>@sentry/core": {
-      "packages": {
-        "@sentry/browser>@sentry-internal/replay-canvas>@sentry/utils": true
-      }
-    },
-    "@sentry/browser>@sentry-internal/tracing>@sentry/core": {
-      "globals": {
-        "__SENTRY_DEBUG__": true,
-        "__SENTRY_TRACING__": true,
-        "clearTimeout": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry-internal/tracing>@sentry/utils": true
       }
     },
     "@sentry/browser>@sentry/core": {
       "globals": {
         "__SENTRY_DEBUG__": true,
-        "__SENTRY_TRACING__": true,
         "clearInterval": true,
-        "clearTimeout": true,
         "console.warn": true,
-        "setInterval": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry/utils": true
-      }
-    },
-    "@sentry/browser>@sentry/replay>@sentry/core": {
-      "globals": {
-        "__SENTRY_DEBUG__": true,
-        "clearInterval": true,
         "setInterval": true
       },
       "packages": {
         "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry/replay>@sentry/utils": true
-      }
-    },
-    "@sentry/browser>@sentry/replay": {
-      "globals": {
-        "Blob": true,
-        "CSSConditionRule": true,
-        "CSSGroupingRule": true,
-        "CSSMediaRule": true,
-        "CSSRule": true,
-        "CSSSupportsRule": true,
-        "Document": true,
-        "DragEvent": true,
-        "Element": true,
-        "FormData": true,
-        "HTMLElement": true,
-        "HTMLFormElement": true,
-        "Headers": true,
-        "MouseEvent": true,
-        "MutationObserver": true,
-        "Node.DOCUMENT_FRAGMENT_NODE": true,
-        "Node.prototype.contains": true,
-        "PointerEvent": true,
-        "TextEncoder": true,
-        "URL": true,
-        "URLSearchParams": true,
-        "Worker": true,
-        "__RRWEB_EXCLUDE_IFRAME__": true,
-        "__RRWEB_EXCLUDE_SHADOW_DOM__": true,
-        "__SENTRY_DEBUG__": true,
-        "__SENTRY_EXCLUDE_REPLAY_WORKER__": true,
-        "__rrMutationObserver": true,
-        "addEventListener": true,
-        "clearTimeout": true,
-        "console.error": true,
-        "console.warn": true,
-        "customElements.get": true,
-        "document": true,
-        "innerHeight": true,
-        "innerWidth": true,
-        "location.href": true,
-        "location.origin": true,
-        "parent": true,
-        "requestAnimationFrame": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "@sentry/browser>@sentry-internal/tracing": true,
-        "@sentry/browser>@sentry/replay>@sentry/core": true,
-        "@sentry/browser>@sentry/replay>@sentry/utils": true
-      }
-    },
-    "@sentry/browser>@sentry-internal/feedback>@sentry/utils": {
-      "globals": {
-        "CustomEvent": true,
-        "Element": true,
-        "Event": true,
-        "HTMLElement": true,
-        "TextEncoder": true,
-        "__SENTRY_BROWSER_BUNDLE__": true,
-        "__SENTRY_DEBUG__": true,
-        "console.error": true,
-        "document": true,
-        "module": true,
-        "process": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "process": true
-      }
-    },
-    "@sentry/browser>@sentry-internal/tracing>@sentry/utils": {
-      "globals": {
-        "CustomEvent": true,
-        "DOMError": true,
-        "DOMException": true,
-        "EdgeRuntime": true,
-        "Element": true,
-        "ErrorEvent": true,
-        "Event": true,
-        "HTMLElement": true,
-        "Headers": true,
-        "Request": true,
-        "Response": true,
-        "XMLHttpRequest.prototype": true,
-        "__SENTRY_DEBUG__": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true
+        "@sentry/browser>@sentry/utils": true
       }
     },
     "@sentry/browser>@sentry/utils": {
@@ -455,34 +265,6 @@
       },
       "packages": {
         "react-redux>@babel/runtime": true
-      }
-    },
-    "@sentry/browser>@sentry/replay>@sentry/utils": {
-      "globals": {
-        "CustomEvent": true,
-        "DOMError": true,
-        "DOMException": true,
-        "EdgeRuntime": true,
-        "Element": true,
-        "ErrorEvent": true,
-        "Event": true,
-        "HTMLElement": true,
-        "Headers": true,
-        "Request": true,
-        "Response": true,
-        "TextEncoder": true,
-        "XMLHttpRequest.prototype": true,
-        "__SENTRY_BROWSER_BUNDLE__": true,
-        "__SENTRY_DEBUG__": true,
-        "clearTimeout": true,
-        "console.error": true,
-        "document": true,
-        "module": true,
-        "process": true
-      },
-      "packages": {
-        "react-redux>@babel/runtime": true,
-        "process": true
       }
     },
     "@walletconnect/utils>@stablelib/random>@stablelib/binary": {
@@ -844,7 +626,7 @@
         "node-stdlib-browser>crypto-browserify": true,
         "@walletconnect/utils>elliptic": true,
         "@hathor/wallet-lib>bitcore-lib>inherits": true,
-        "cypress>lodash": true,
+        "lodash": true,
         "process": true,
         "node-stdlib-browser>url": true
       }
@@ -1312,7 +1094,7 @@
         "process": true
       }
     },
-    "cypress>lodash": {
+    "lodash": {
       "globals": {
         "define": true
       }

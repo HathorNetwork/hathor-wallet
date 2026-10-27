@@ -9,108 +9,65 @@
 const { contextBridge, ipcRenderer, shell } = require('electron')
 const Sentry = require('@sentry/electron')
 const constants = require('./constants');
+const {
+  VALID_SEND_CHANNELS,
+  VALID_RECEIVE_CHANNELS,
+  assertChannel,
+  isAllowedExternalUrl,
+} = require('./bridge');
 
+// Init must run enabled, or the SDK skips installing the integration that
+// forwards renderer events to the main process. Reporting is then switched
+// off until the stored consent is read on 'loaded'.
 Sentry.init({
   dsn: constants.SENTRY_DSN,
-  release: process.env.npm_package_version
+  release: constants.versionNumber,
+  // Dropped-event counts would still be sent while reporting is off.
+  sendClientReports: false,
 })
-
-const VALID_SEND_CHANNELS = [
-  'ledger:getVersion',
-  'ledger:getPublicKeyData',
-  'ledger:checkAddress',
-  'ledger:sendTx',
-  'ledger:getSignatures',
-  'ledger:signToken',
-  'ledger:sendTokens',
-  'ledger:verifyTokenSignature',
-  'ledger:verifyManyTokenSignatures',
-  'ledger:resetTokenSignatures',
-  'app:clear_storage_success',
-];
-
-const VALID_RECEIVE_CHANNELS = [
-  'ledger:version',
-  'ledger:publicKeyData',
-  'ledger:address',
-  'ledger:txSent',
-  'ledger:signatures',
-  'ledger:tokenSignature',
-  'ledger:tokenDataSent',
-  'ledger:tokenSignatureValid',
-  'ledger:manyTokenSignatureValid',
-  'ledger:tokenSignatureReset',
-  'ledger:closed',
-  'app:clear_storage',
-];
+setSentryEnabled(false);
 
 /**
- * Restore Buffers that the contextBridge downgraded to Uint8Array, before the
- * IPC send: the main process and ledgerjs expect Buffers, so public/ledger.js
- * stays unchanged. Only plain objects and arrays are traversed; anything else
- * (Date, Map, non-Uint8Array typed arrays, ...) is passed through untouched, and
- * the WeakSet guards against circular payloads.
+ * Flip the live client instead of re-calling Sentry.init: the renderer SDK
+ * ignores every init after the first one.
  */
-function restoreBuffers(value, seen = new WeakSet()) {
-  if (value instanceof Uint8Array) {
-    return Buffer.from(value);
+function setSentryEnabled(enabled) {
+  const client = Sentry.getCurrentHub().getClient();
+  if (client) {
+    client.getOptions().enabled = enabled;
   }
-  if (value === null || typeof value !== 'object') {
-    return value;
-  }
-  if (seen.has(value)) {
-    return value;
-  }
-  seen.add(value);
-  if (Array.isArray(value)) {
-    return value.map((item) => restoreBuffers(item, seen));
-  }
-  const proto = Object.getPrototypeOf(value);
-  if (proto !== Object.prototype && proto !== null) {
-    return value;
-  }
-  return Object.fromEntries(
-    Object.entries(value).map(([key, item]) => [key, restoreBuffers(item, seen)])
-  );
 }
 
-// Replaces the old `window.require('electron')` access that required nodeIntegration.
+// No exposed function may return a Promise.
 contextBridge.exposeInMainWorld('electronAPI', {
   send: (channel, ...args) => {
-    if (VALID_SEND_CHANNELS.includes(channel)) {
-      ipcRenderer.send(channel, ...args.map(restoreBuffers));
-    }
+    assertChannel(VALID_SEND_CHANNELS, channel);
+    ipcRenderer.send(channel, ...args);
   },
   on: (channel, listener) => {
-    if (VALID_RECEIVE_CHANNELS.includes(channel)) {
-      // Don't forward the Electron event across the bridge; pass undefined to
-      // keep the legacy (event, ...args) listener signature.
-      ipcRenderer.on(channel, (_event, ...args) => listener(undefined, ...args));
-    }
+    assertChannel(VALID_RECEIVE_CHANNELS, channel);
+    // The Electron event is not forwarded across the bridge; listeners get
+    // undefined in its place.
+    ipcRenderer.on(channel, (_event, ...args) => listener(undefined, ...args));
   },
   removeAllListeners: (channel) => {
-    if (VALID_RECEIVE_CHANNELS.includes(channel)) {
-      ipcRenderer.removeAllListeners(channel);
-    }
+    assertChannel(VALID_RECEIVE_CHANNELS, channel);
+    ipcRenderer.removeAllListeners(channel);
   },
-  // Only http/https may be opened externally; block file: and custom schemes,
-  // which could trigger host-side execution if the renderer is compromised.
   openExternal: (url) => {
-    try {
-      const { protocol } = new URL(url);
-      if (protocol === 'http:' || protocol === 'https:') {
-        return shell.openExternal(url);
-      }
-    } catch (_e) { /* invalid URL */ }
-    return undefined;
+    if (!isAllowedExternalUrl(url)) {
+      throw new Error(`Refusing to open external URL: ${url}`);
+    }
+    shell.openExternal(url).catch((e) => console.error('openExternal failed', e));
   },
-  // Sentry runs in the preload (@sentry/electron), outside the LavaMoat-governed
-  // renderer bundle, on the renderer's behalf. Empty dsn disables it (consent toggle).
-  sentrySetEnabled: (dsn) => Sentry.init({ dsn, release: process.env.npm_package_version }),
+  sentrySetEnabled: (enabled) => {
+    setSentryEnabled(enabled === true);
+  },
+  // The isolated SDK cannot see the page's errors, so the page forwards them.
   sentryCapture: ({ name, message, stack, extra }) => {
     const error = new Error(message);
     if (name) error.name = name;
-    if (stack) error.stack = stack;
+    error.stack = stack || `${error.name}: ${message}`;
     Sentry.withScope(scope => {
       Object.entries(extra || {}).forEach(([key, item]) => scope.setExtra(key, item));
       Sentry.captureException(error);
@@ -119,6 +76,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 });
 
 process.once('loaded', () => {
+  setSentryEnabled(localStorage.getItem('wallet:sentry') === 'true');
+
   const oldAccessDataRaw = localStorage.getItem('wallet:accessData');
   if (oldAccessDataRaw) {
     // When migrating from wallets with version v0.26.0 and older initialized with hardware devices

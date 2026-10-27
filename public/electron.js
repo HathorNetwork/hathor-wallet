@@ -13,6 +13,7 @@ const url = require('url');
 const path = require('path');
 const constants = require('./constants');
 const { instance: Ledger } = require('./ledger');
+const { ledgerMethods } = require('./bridge');
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
@@ -258,24 +259,6 @@ app.on('activate', function () {
     createWindow()
   }
 })
-
-/**
- * This dict contains all methods available on public/ledger.js and the corresponding event
- * to be sent when we get a reply from ledger. Eg: we receive the event 'ledger:getVersion' and
- * call Ledger.getVersion(). When we get the reply from ledger, we send the event 'ledger:version'
- */
-const ledgerMethods = {
-  'getVersion': 'version',
-  'getPublicKeyData': 'publicKeyData',
-  'checkAddress': 'address',
-  'sendTx': 'txSent',
-  'getSignatures': 'signatures',
-  'signToken': 'tokenSignature',
-  'sendTokens': 'tokenDataSent',
-  'verifyTokenSignature': 'tokenSignatureValid',
-  'verifyManyTokenSignatures': 'manyTokenSignatureValid',
-  'resetTokenSignatures': 'tokenSignatureReset',
-}
 
 function addLedgerListeners(mainWindow) {
   for (const method in ledgerMethods) {

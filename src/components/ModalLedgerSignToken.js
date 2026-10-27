@@ -123,7 +123,7 @@ function ModalLedgerSignToken({token, modalId, cb, onClose}) {
    * The response is the signature received from Ledger.
    *
    *
-   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {undefined} event Always undefined; the preload bridge does not forward the Electron event
    * @param {Object} arg Data returned from the send token data call
    */
   const handleSignature = (event, arg) => {
@@ -154,7 +154,7 @@ function ModalLedgerSignToken({token, modalId, cb, onClose}) {
    * Handle the response of a verify token data call to Ledger.
    * If the signature we already have on storage is valid, we don't have to sign again
    *
-   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {undefined} event Always undefined; the preload bridge does not forward the Electron event
    * @param {Object} arg Data returned from the send token data call
    */
   const handleVerify = (event, arg) => {

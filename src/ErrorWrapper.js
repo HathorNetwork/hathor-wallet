@@ -41,9 +41,13 @@ function ErrorWrapper() {
 	const [error, setError] = useState(null);
 
 	const onError = (newError) => {
+		if (!newError) {
+			setError(null);
+			return;
+		}
 		// Don't propagate error messages listened more than once
 		if (newError !== error) {
-			setError(error);
+			setError(newError);
 			$(UNHANDLED_ERROR_MODAL_ID_SELECTOR).modal('show');
 		}
 	}
@@ -56,6 +60,7 @@ function ErrorWrapper() {
 				onError={onError}
 			/>
 			<ModalUnhandledError
+				error={error}
 				resetError={() => onError(null)}
 			/>
 		</div>

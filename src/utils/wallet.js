@@ -37,6 +37,7 @@ import LOCAL_STORE from '../storage';
 import * as SentryBrowser from '@sentry/browser';
 
 const sentryBridge = (typeof window !== 'undefined' && window.electronAPI) || null;
+const reportedPageErrors = new WeakSet();
 
 /**
  * Key string constants for manipulating the storage
@@ -459,7 +460,8 @@ const wallet = {
    */
   initSentry(dsn) {
     if (sentryBridge) {
-      sentryBridge.sentrySetEnabled(dsn);
+      // The preload owns the DSN; the page only switches reporting on or off.
+      sentryBridge.sentrySetEnabled(Boolean(dsn));
       return;
     }
     SentryBrowser.init({
@@ -485,6 +487,48 @@ const wallet = {
   },
 
   /**
+   * With contextIsolation the preload's Sentry SDK runs in another JS world and
+   * never sees this window's uncaught errors, so they are forwarded through the
+   * bridge. The preload drops them unless the user consented.
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  installPageErrorForwarding() {
+    if (!sentryBridge) {
+      // The browser SDK installs its own global handlers.
+      return;
+    }
+    window.addEventListener('error', (event) => {
+      this.reportPageError(event.error ?? event.message, 'window.error');
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+      this.reportPageError(event.reason, 'unhandledrejection');
+    });
+  },
+
+  /**
+   * Decide whether an uncaught page error is sent to Sentry, and send it.
+   *
+   * @param {unknown} reason The thrown value or rejection reason
+   * @param {'window.error'|'unhandledrejection'} source Which handler caught it
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  reportPageError(reason, source) {
+    // A listener error re-dispatched by IPC_RENDERER can reach both handlers.
+    if (reason !== null && typeof reason === 'object') {
+      if (reportedPageErrors.has(reason)) {
+        return;
+      }
+      reportedPageErrors.add(reason);
+    }
+    const error = reason instanceof Error ? reason : new Error(String(reason));
+    this.sentryWithScope(error, { source });
+  },
+
+  /**
    * Add scope and extra data to sentry exception
    *
    * @param {Object} error Error stacktrace
@@ -497,7 +541,7 @@ const wallet = {
     if (sentryBridge) {
       sentryBridge.sentryCapture({
         name: error?.name,
-        message: error?.message,
+        message: error?.message ?? String(error),
         stack: error?.stack,
         extra: info,
       });

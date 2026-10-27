@@ -1,6 +1,6 @@
 {
   "resources": {
-    "cypress>lodash": {
+    "lodash": {
       "globals": {
         "setTimeout": true,
         "clearTimeout": true
@@ -325,12 +325,6 @@
         "globalThis": true,
         "window": true,
         "self": true
-      }
-    },
-    "cypress>lodash": {
-      "globals": {
-        "setTimeout": true,
-        "clearTimeout": true
       }
     }
   }
