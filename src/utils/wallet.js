@@ -517,7 +517,7 @@ const wallet = {
    * @inner
    */
   reportPageError(reason, source) {
-    // A listener error re-dispatched by IPC_RENDERER can reach both handlers.
+    // Several promises can reject with the same error object.
     if (reason !== null && typeof reason === 'object') {
       if (reportedPageErrors.has(reason)) {
         return;

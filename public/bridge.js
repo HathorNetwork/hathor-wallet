@@ -60,10 +60,55 @@ function isAllowedExternalUrl(url) {
   }
 }
 
+/**
+ * Build the API preload.js exposes as window.electronAPI. Dependencies are
+ * injected so the closures can be tested without Electron.
+ *
+ * No function here may return a Promise.
+ */
+function createElectronAPI({ ipcRenderer, shell, Sentry, setSentryEnabled }) {
+  return {
+    send: (channel, ...args) => {
+      assertChannel(VALID_SEND_CHANNELS, channel);
+      ipcRenderer.send(channel, ...args);
+    },
+    on: (channel, listener) => {
+      assertChannel(VALID_RECEIVE_CHANNELS, channel);
+      // The Electron event is not forwarded across the bridge; listeners get
+      // undefined in its place.
+      ipcRenderer.on(channel, (_event, ...args) => { listener(undefined, ...args); });
+    },
+    removeAllListeners: (channel) => {
+      assertChannel(VALID_RECEIVE_CHANNELS, channel);
+      ipcRenderer.removeAllListeners(channel);
+    },
+    openExternal: (url) => {
+      if (!isAllowedExternalUrl(url)) {
+        throw new Error(`Refusing to open external URL: ${url}`);
+      }
+      shell.openExternal(url).catch((e) => console.error('openExternal failed', e));
+    },
+    sentrySetEnabled: (enabled) => {
+      setSentryEnabled(enabled === true);
+    },
+    // The isolated SDK cannot see the page's errors, so the page forwards them.
+    sentryCapture: ({ name, message, stack, extra }) => {
+      const error = new Error(message);
+      if (name) error.name = name;
+      error.stack = stack || `${error.name}: ${message}`;
+      Sentry.withScope((scope) => {
+        Object.entries(extra || {}).forEach(([key, item]) => scope.setExtra(key, item));
+        Sentry.captureException(error);
+      });
+    },
+  };
+}
+
 module.exports = {
   ledgerMethods,
   VALID_SEND_CHANNELS,
   VALID_RECEIVE_CHANNELS,
   assertChannel,
   isAllowedExternalUrl,
+  createElectronAPI,
 };

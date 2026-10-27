@@ -33,7 +33,13 @@ const helpers = {
     // We use electron shell to open the user external default browser
     // otherwise it would open another electron window and the user wouldn't be able to copy the URL
     if (openExternal !== null) {
-      openExternal(url);
+      try {
+        openExternal(url);
+      } catch (e) {
+        // The preload refuses non-http(s) URLs, e.g. a custom explorer saved
+        // without a scheme; uncaught, this would open the unhandled-error modal.
+        console.error(e);
+      }
     } else {
       // In case it's running on the browser it won't have electron shell
       // This should be used only when testing

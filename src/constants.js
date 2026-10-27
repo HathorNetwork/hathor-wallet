@@ -110,11 +110,13 @@ if (window.electronAPI) {
     send: window.electronAPI.send,
     removeAllListeners: window.electronAPI.removeAllListeners,
     // The preload invokes listeners from its isolated world, where a throw
-    // would never reach this window's error handlers. Re-raise it here.
+    // would never reach this window's error handlers. Re-dispatch synchronous
+    // throws here; async rejections already reach unhandledrejection.
     on: (channel, listener) => window.electronAPI.on(channel, (...args) => {
       try {
         listener(...args);
       } catch (error) {
+        console.error(error);
         window.dispatchEvent(new ErrorEvent('error', { error, message: error?.message }));
       }
     }),
