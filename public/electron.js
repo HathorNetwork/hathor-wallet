@@ -9,16 +9,32 @@
 const { app, BrowserWindow, Tray, Menu, dialog, ipcMain } = require('electron')
 const contextMenu = require('./contextMenu')
 const Sentry = require('@sentry/electron')
+const { ElectronOfflineNetTransport } = require('@sentry/electron/main')
+const fs = require('fs');
 const url = require('url');
 const path = require('path');
 const constants = require('./constants');
 const { instance: Ledger } = require('./ledger');
 const { ledgerMethods } = require('./bridge');
+const { CONSENT_CHANNEL, createConsentStore, gateTransport } = require('./sentryConsent');
+
+// Consent read from the previous run gates everything main sends, including
+// crash dumps from that run, which upload before any window has loaded.
+const sentryConsent = createConsentStore(
+  path.join(app.getPath('userData'), 'sentry-consent.json'),
+  fs,
+);
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
-  release: constants.versionNumber
+  release: constants.versionNumber,
+  transport: gateTransport(ElectronOfflineNetTransport, sentryConsent.isEnabled),
 })
+
+// preload.js reports the user's choice on every load and on every change.
+ipcMain.on(CONSENT_CHANNEL, (_event, enabled) => {
+  sentryConsent.setEnabled(enabled);
+});
 
 let tray = null
 let iconOS = null;
