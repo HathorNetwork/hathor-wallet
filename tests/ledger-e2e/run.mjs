@@ -245,9 +245,10 @@ function report(fatal) {
     if (r.error) console.log(`${' '.repeat(w + 14)}error: ${r.error}`);
   }
   if (fatal) console.log(`FATAL: ${fatal.stack || fatal.message}`);
-  console.log(`sentry envelopes received by local sink: ${summary.sentryEnvelopes.length}`);
+  console.log(`sentry envelopes received by local sink: ${summary.sentryEnvelopes.length} (opted out, must be 0)`);
   console.log(`renderer uncaught exceptions: ${summary.rendererExceptions.length}; console.error lines: ${errorsLogged.length}`);
-  const ok = !fatal && results.length > 0 && results.every((r) => r.status === 'PASS');
+  const ok = !fatal && results.length > 0 && results.every((r) => r.status === 'PASS')
+    && summary.sentryEnvelopes.length === 0;
   return ok;
 }
 

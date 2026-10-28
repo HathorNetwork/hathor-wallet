@@ -24,7 +24,7 @@ One run takes about 40 s once the images, the ELF and `build/` exist. It:
 
 1. Rebuilds the renderer (`npm run build-css && npm run build`) if `build/` is missing or older than `src/` or `public/` (`--skip-build` to refuse instead).
 2. Builds the Ledger app ELF with `build-app.sh`, or reuses the one cached in `~/.cache/hathor-ledger-e2e/` for the app's current commit.
-3. Starts a local Sentry sink and points `SENTRY_DSN` at it, so nothing reaches Sentry.
+3. Starts a local Sentry sink and points `SENTRY_DSN` at it. The flows opt out of bug reports on first run, and the run fails if the sink receives anything. Only main and preload read `SENTRY_DSN` at run time: a checkout whose renderer inits Sentry itself (such as `master`, through `--app-dir`) keeps the DSN baked into its build, which is why the run opts out.
 4. Starts Speculos with `speculos.sh` and a fixed public test seed (Speculos's default mnemonic; its first mainnet address is `HJYAnivCTdRtxcgeJW8pKk1y7przypne3C`).
 5. Launches Electron on a throwaway `XDG_CONFIG_HOME` with the transport shim, runs the flows, prints a PASS/FAIL table and cleans up: app, container, sink and temp dir. Logs (`electron.log`, `ipc.jsonl`, `speculos.log`, `results.json`) are kept in `/tmp/hathor-ledger-e2e-*` only when something fails, or with `--keep`.
 
@@ -42,7 +42,7 @@ Other options: `--flows hw-start,show-address` runs a subset (flows depend on ea
 
 | id | what it checks |
 | --- | --- |
-| `hw-start` | Hardware wallet start: `ledger:getVersion` → `ledger:version` (app 1.1.1), `getPublicKeyData` approved on the device, the xpub rebuilt from the device reply equals the seed xpub, the wallet opens and shows the first address. |
+| `hw-start` | Hardware wallet start: `ledger:getVersion` → `ledger:version` (the app version is reported), `getPublicKeyData` approved on the device, the xpub rebuilt from the device reply equals the seed xpub, the wallet opens and shows the first address. |
 | `show-address` | "Show full address": the device shows the same address as the app's modal, which is `m/44'/280'/0'/0/0` of the seed; approving closes the modal. |
 | `token-sign` | Registers a mainnet token (default `Hathorstrings`/`HS7`, override with `LEDGER_E2E_TOKEN_UID`), signs it with the device (symbol, name and UID on the device must match the app), checks the stored signature, then calls `verifyTokenSignature` through the renderer's own IPC object (the UI has no path to it once a token is signed). |
 | `token-verify-restart` | Restarts the app on the same profile, reconnects the hardware wallet and checks the startup `verifyManyTokenSignatures` payload (`{uid: bytes}`) and its empty "invalid" reply. Needs `token-sign`. |
@@ -75,6 +75,6 @@ Append an object to `FLOWS` in `flows.mjs`:
 ## Files
 
 - `run.mjs` runs everything; `flows.mjs` holds the flows.
-- `build-app.sh` clones or updates the Ledger app (default sibling `../hathor-ledger-app`, `LEDGER_APP_DIR` to change) and builds the ELF for `LEDGER_MODEL` (default `nanosp`) in the builder image, as the host user.
+- `build-app.sh` keeps its own clone of the Ledger app in the cache directory, so it never touches your working copy. It builds `LEDGER_APP_REF` (default: the pinned commit the flows were written against, app 1.1.1) for `LEDGER_MODEL` (default `nanosp`) in the builder image, as the host user. `LEDGER_APP_REPO` can point at a local checkout to build one of its commits.
 - `speculos.sh start <elf> | stop | logs` runs the emulator container.
 - `lib/` holds the shim, the transport, the CDP and device clients, the Sentry sink and the ground-truth script.

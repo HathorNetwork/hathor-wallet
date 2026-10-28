@@ -30,6 +30,13 @@ async function reachWalletType(ctx) {
       await cdp.page('check', '#confirmAgree');
       await cdp.click('Get started', 'button');
     } else if (text.includes('Automatic bug report')) {
+      // Opt out: the run then asserts that nothing reached the Sentry sink.
+      const checked = await cdp.eval(`(() => {
+        const box = document.querySelector('#permission');
+        if (box && box.checked) box.click();
+        return box ? box.checked : null;
+      })()`);
+      eq(checked, false, 'bug report checkbox unticked');
       await cdp.click('Continue', 'button');
     }
     await new Promise((r) => setTimeout(r, 500));

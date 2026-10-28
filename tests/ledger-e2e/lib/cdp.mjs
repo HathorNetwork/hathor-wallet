@@ -112,11 +112,17 @@ export class CDP {
     }
   }
 
-  send(method, params = {}) {
+  /** Fails after `timeout` ms, so an evaluation that never settles fails the run instead of hanging it. */
+  send(method, params = {}, { timeout = 60000 } = {}) {
     if (this.closed) return Promise.reject(new Error('CDP socket closed'));
     const id = ++this.nextId;
     return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`CDP ${method} timed out after ${timeout} ms`));
+      }, timeout);
+      const settle = (fn) => (value) => { clearTimeout(timer); fn(value); };
+      this.pending.set(id, { resolve: settle(resolve), reject: settle(reject) });
       this.ws.send(JSON.stringify({ id, method, params }));
     });
   }
