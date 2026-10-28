@@ -7,7 +7,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { stripBrotli, isBrotliEncoded } = require('../../public/brotliGuard');
+const { stripBrotli, isBrotliEncoded, installBrotliGuard } = require('../../public/brotliGuard');
 
 test('stripBrotli removes br and keeps the other encodings', () => {
   assert.equal(stripBrotli('gzip, deflate, br'), 'gzip, deflate');
@@ -24,4 +24,31 @@ test('isBrotliEncoded detects br in any casing or position', () => {
   assert.equal(isBrotliEncoded({ 'Content-Encoding': ['gzip'], 'X-Note': ['br'] }), false);
   assert.equal(isBrotliEncoded({ 'Content-Type': ['text/plain'] }), false);
   assert.equal(isBrotliEncoded(undefined), false);
+});
+
+test('installBrotliGuard rewrites requests and cancels only br responses', () => {
+  const listeners = {};
+  installBrotliGuard({
+    webRequest: {
+      onBeforeSendHeaders: (fn) => { listeners.send = fn; },
+      onHeadersReceived: (fn) => { listeners.receive = fn; },
+    },
+  });
+  const reply = (listener, details) => {
+    let result;
+    listener(details, (value) => { result = value; });
+    return result;
+  };
+
+  const sent = reply(listeners.send, {
+    requestHeaders: { 'Accept-Encoding': 'gzip, deflate, br', 'X-Wallet': 'hathor' },
+  });
+  assert.deepEqual(sent, {
+    requestHeaders: { 'Accept-Encoding': 'gzip, deflate', 'X-Wallet': 'hathor' },
+  });
+  assert.deepEqual(reply(listeners.send, { requestHeaders: {} }), { requestHeaders: {} });
+
+  assert.deepEqual(reply(listeners.receive, { responseHeaders: { 'Content-Encoding': ['br'] } }), { cancel: true });
+  assert.deepEqual(reply(listeners.receive, { responseHeaders: { 'Content-Encoding': ['gzip'] } }), {});
+  assert.deepEqual(reply(listeners.receive, {}), {});
 });
