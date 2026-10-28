@@ -7,7 +7,12 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { CONSENT_CHANNEL, createConsentStore, gateTransport } = require('../../public/sentryConsent');
+const {
+  CONSENT_CHANNEL,
+  createConsentStore,
+  createConsentHandler,
+  gateTransport,
+} = require('../../public/sentryConsent');
 const { VALID_SEND_CHANNELS, VALID_RECEIVE_CHANNELS } = require('../../public/bridge');
 
 function fakeFs(initial) {
@@ -19,7 +24,15 @@ function fakeFs(initial) {
       return files[path];
     },
     writeFileSync: (path, data) => { files[path] = data; },
+    rmSync: (path) => { delete files[path]; },
   };
+}
+
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+  return { promise, resolve, reject };
 }
 
 test('consent defaults to off when nothing usable is stored', () => {
@@ -64,4 +77,56 @@ test('the gated transport sends nothing without consent', async () => {
 test('the page cannot send or listen on the consent channel', () => {
   assert.ok(!VALID_SEND_CHANNELS.includes(CONSENT_CHANNEL));
   assert.ok(!VALID_RECEIVE_CHANNELS.includes(CONSENT_CHANNEL));
+});
+
+test('a revoke that cannot be written removes the stored grant', () => {
+  const fs = fakeFs({});
+  const store = createConsentStore('/c.json', fs);
+  store.setEnabled(true);
+  fs.writeFileSync = () => { throw new Error('EROFS'); };
+  store.setEnabled(false);
+  assert.equal(store.isEnabled(), false);
+  assert.equal(createConsentStore('/c.json', fs).isEnabled(), false);
+});
+
+test('a revoke waits for events already being processed', async () => {
+  const store = createConsentStore('/c.json', fakeFs({}));
+  const flush = deferred();
+  const apply = createConsentHandler(store, () => flush.promise);
+
+  apply(true);
+  assert.equal(store.isEnabled(), true);
+  const revoked = apply(false);
+  assert.equal(store.isEnabled(), true, 'still sending while main flushes');
+  flush.resolve(true);
+  await revoked;
+  assert.equal(store.isEnabled(), false);
+});
+
+test('a revoke still applies when the flush fails', async () => {
+  const store = createConsentStore('/c.json', fakeFs({}));
+  const apply = createConsentHandler(store, () => Promise.reject(new Error('timeout')));
+  apply(true);
+  await apply(false);
+  assert.equal(store.isEnabled(), false);
+});
+
+test('a grant during a pending revoke wins', async () => {
+  const store = createConsentStore('/c.json', fakeFs({}));
+  const flush = deferred();
+  const apply = createConsentHandler(store, () => flush.promise);
+  apply(true);
+  const revoked = apply(false);
+  apply(true);
+  flush.resolve(true);
+  await revoked;
+  assert.equal(store.isEnabled(), true);
+});
+
+test('anything but a strict true is a revoke', async () => {
+  const store = createConsentStore('/c.json', fakeFs({}));
+  const apply = createConsentHandler(store, () => Promise.resolve());
+  apply(true);
+  await apply('true');
+  assert.equal(store.isEnabled(), false);
 });

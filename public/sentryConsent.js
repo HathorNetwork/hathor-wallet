@@ -35,8 +35,42 @@ function createConsentStore(filePath, fs) {
         fs.writeFileSync(filePath, JSON.stringify({ enabled }));
       } catch (e) {
         console.error('Could not persist Sentry consent', e);
+        if (!enabled) {
+          // A file still granting consent would let the next start upload.
+          try {
+            fs.rmSync(filePath, { force: true });
+          } catch (rmError) {
+            console.error('Could not remove Sentry consent', rmError);
+          }
+        }
       }
     },
+  };
+}
+
+/**
+ * Apply the consent changes preload reports. A grant applies at once. A
+ * revoke first waits for `flush`, so renderer events that reached main just
+ * before it, and are still being processed, send under the consent they were
+ * captured with: the crash modal's "Send error report" grants, captures and
+ * revokes in a single tick. A later change supersedes a pending revoke.
+ */
+function createConsentHandler(store, flush) {
+  let latest = 0;
+  return (enabled) => {
+    const change = ++latest;
+    if (enabled === true) {
+      store.setEnabled(true);
+      return Promise.resolve();
+    }
+    return Promise.resolve()
+      .then(flush)
+      .catch((e) => console.error('Sentry flush before revoking consent failed', e))
+      .then(() => {
+        if (change === latest) {
+          store.setEnabled(false);
+        }
+      });
   };
 }
 
@@ -57,4 +91,4 @@ function gateTransport(Transport, isEnabled) {
   };
 }
 
-module.exports = { CONSENT_CHANNEL, createConsentStore, gateTransport };
+module.exports = { CONSENT_CHANNEL, createConsentStore, createConsentHandler, gateTransport };

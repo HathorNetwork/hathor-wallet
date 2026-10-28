@@ -16,7 +16,12 @@ const path = require('path');
 const constants = require('./constants');
 const { instance: Ledger } = require('./ledger');
 const { ledgerMethods } = require('./bridge');
-const { CONSENT_CHANNEL, createConsentStore, gateTransport } = require('./sentryConsent');
+const {
+  CONSENT_CHANNEL,
+  createConsentStore,
+  createConsentHandler,
+  gateTransport,
+} = require('./sentryConsent');
 
 // Consent read from the previous run gates everything main sends, including
 // crash dumps from that run, which upload before any window has loaded.
@@ -32,8 +37,13 @@ Sentry.init({
 })
 
 // preload.js reports the user's choice on every load and on every change.
+// The top-level @sentry/electron export has no flush; use the client's.
+const applySentryConsent = createConsentHandler(
+  sentryConsent,
+  () => Sentry.getCurrentHub().getClient()?.flush(2000),
+);
 ipcMain.on(CONSENT_CHANNEL, (_event, enabled) => {
-  sentryConsent.setEnabled(enabled);
+  applySentryConsent(enabled);
 });
 
 let tray = null
@@ -190,6 +200,8 @@ function createWindow () {
 
   ipcMain.on('app:clear_storage_success', () => {
     console.log('Data reset success. Closing window...');
+    // The reset cleared the renderer's consent; main's copy goes with it.
+    sentryConsent.setEnabled(false);
     mainWindow.close();
   });
 
