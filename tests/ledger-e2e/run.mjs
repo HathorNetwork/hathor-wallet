@@ -153,7 +153,7 @@ async function main() {
   const device = new Device(`http://127.0.0.1:${ports.api}`);
   const ipc = makeIpc();
 
-  const start = async () => {
+  const start = async ({ early = false } = {}) => {
     app = launchApp({
       appDir, xdgDir, cdpPort: ports.cdp, sentryPort: ports.sentry, ipcLog: files.ipc,
       logFile: files.electron, apiPort: ports.api, apduPort: ports.apdu,
@@ -161,7 +161,7 @@ async function main() {
     const prev = cdp;
     cdp = new CDP({ port: ports.cdp, nodeModules: path.join(appDir, 'node_modules'), log: (m) => fs.appendFileSync(files.electron, `[cdp] ${m}\n`) });
     if (prev) { cdp.exceptions = prev.exceptions; cdp.console = prev.console; }
-    await cdp.connect();
+    await cdp.connect({ early });
     await cdp.waitFor('document.readyState === "complete" && document.body.innerText.length > 20', { timeout: 60000, what: 'app to render' });
     ctx.cdp = cdp;
     log(`app launched (pid ${app.proc.pid})`);
@@ -170,14 +170,25 @@ async function main() {
   const ctx = {
     device, ipc, expected, token, state: {}, cdp: null,
     xpubFromDeviceData: async (hex) => computeExpected({}, hex).xpubFromDevice,
-    restartApp: async () => {
-      log('restarting app');
+    /**
+     * Quits and relaunches on the same profile. `beforeLaunch` runs while
+     * the app is down; `early` attaches CDP during the first navigation.
+     */
+    restartApp: async ({ early = false, beforeLaunch } = {}) => {
+      log(`restarting app${early ? ' (early CDP attach)' : ''}`);
       cdp.close();
       const r = await app.quit();
       log(`app exited (${JSON.stringify(r)})`);
-      await start();
+      if (beforeLaunch) await beforeLaunch();
+      await start({ early });
     },
     stopSpeculos: async () => { speculos('stop'); speculosUp = false; log('speculos stopped'); },
+    startSpeculos: async () => {
+      if (speculosUp) return;
+      speculos('start', elf);
+      speculosUp = true;
+      log('speculos up');
+    },
   };
 
   await start();
