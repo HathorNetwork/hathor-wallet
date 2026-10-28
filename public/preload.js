@@ -136,6 +136,8 @@ process.once('loaded', () => {
       step();
     } catch (error) {
       console.error(`preload: startup step ${step.name} failed`, error);
+      // Sent only with consent, like any other preload error.
+      Sentry.captureException(error);
     }
   }
 })

@@ -150,7 +150,6 @@ function closedHardwareWalletFlow({ id, early }) {
       while (attempt < maxAttempts && !(early && raceFired)) {
         attempt += 1;
         if (attempt > 1) await ctx.cdp.eval(`localStorage.setItem('localstorage:accessdata', ${JSON.stringify(saved)})`);
-        const excBefore = ctx.cdp.exceptions.length;
         const consoleBefore = ctx.cdp.console.length;
         await ctx.restartApp({ early, beforeLaunch: attempt === 1 ? () => ctx.stopSpeculos() : undefined });
         const { cdp } = ctx;
@@ -159,9 +158,9 @@ function closedHardwareWalletFlow({ id, early }) {
         await new Promise((r) => setTimeout(r, 3000));
         // The race shows as the preload's isolated world being created for a
         // document other than the wallet's (the initial about:blank).
-        raceFired = cdp.contexts.some((c) => c.type === 'isolated' && !c.origin.startsWith('file://'))
-          || cdp.exceptions.slice(excBefore).some((e) => e.text.includes('SecurityError'))
-          || cdp.console.slice(consoleBefore).some((c) => c.type === 'error' && c.text.includes('SecurityError'));
+        raceFired = raceFired || cdp.contexts.some((c) => c.type === 'isolated' && !c.origin.startsWith('file://'));
+        const stepErrors = cdp.console.slice(consoleBefore).filter((c) => c.text.includes('preload: startup step'));
+        assert(stepErrors.length === 0, `relaunch ${attempt} logged preload startup step errors: ${stepErrors.map((c) => c.text.slice(0, 200)).join(' | ')}`);
         contextsSeen = cdp.contexts.map((c) => `${c.type}:${c.origin || '(empty)'}`);
         route = await cdp.eval('location.hash');
         accessData = await lsGet(ctx, 'localstorage:accessdata');

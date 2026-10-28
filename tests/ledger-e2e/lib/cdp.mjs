@@ -105,10 +105,11 @@ export class CDP {
       let ready = false;
       appContext.then(() => { ready = true; });
       const end2 = Date.now() + 10000;
-      while (!ready && Date.now() < end2) {
+      while (!ready && !this.closed && Date.now() < end2) {
         this.send('Runtime.evaluate', { expression: '0' }).catch(() => {});
         await sleep(10);
       }
+      if (this.closed) throw new Error('CDP socket closed during the early attach; did the app exit?');
     } else {
       await Promise.race([appContext, sleep(10000)]);
     }
