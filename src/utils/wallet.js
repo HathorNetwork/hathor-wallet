@@ -500,7 +500,10 @@ const wallet = {
       return;
     }
     window.addEventListener('error', (event) => {
-      this.reportPageError(event.error ?? event.message, 'window.error');
+      this.reportPageError(
+        event.error ?? `${event.message} (${event.filename}:${event.lineno})`,
+        'window.error',
+      );
     });
     window.addEventListener('unhandledrejection', (event) => {
       this.reportPageError(event.reason, 'unhandledrejection');

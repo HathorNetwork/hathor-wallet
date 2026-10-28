@@ -18,10 +18,11 @@ const {
 
 function fakes() {
   const calls = { sent: [], listeners: {}, removed: [], opened: [], enabled: [], captured: [] };
+  // Like Electron's, on and removeAllListeners return the ipcRenderer itself.
   const ipcRenderer = {
     send: (...args) => calls.sent.push(args),
-    on: (channel, fn) => { calls.listeners[channel] = fn; },
-    removeAllListeners: (channel) => calls.removed.push(channel),
+    on: (channel, fn) => { calls.listeners[channel] = fn; return ipcRenderer; },
+    removeAllListeners: (channel) => { calls.removed.push(channel); return ipcRenderer; },
   };
   const shell = { openExternal: (url) => { calls.opened.push(url); return Promise.resolve(); } };
   const scope = { extra: {}, setExtra(key, value) { this.extra[key] = value; } };
@@ -99,6 +100,8 @@ test('no electronAPI function returns a Promise', () => {
   assert.equal(api.sentrySetEnabled(true), undefined);
   assert.equal(api.sentryCapture({ message: 'x' }), undefined);
   assert.equal(api.send('ledger:getVersion'), undefined);
+  assert.equal(api.on('ledger:version', () => {}), undefined);
+  assert.equal(api.removeAllListeners('ledger:version'), undefined);
 });
 
 test('openExternal refuses other schemes before reaching the shell', () => {

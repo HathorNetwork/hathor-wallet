@@ -42,8 +42,6 @@ contextBridge.exposeInMainWorld('electronAPI', createElectronAPI({
 }));
 
 process.once('loaded', () => {
-  setSentryEnabled(localStorage.getItem('wallet:sentry') === 'true');
-
   const oldAccessDataRaw = localStorage.getItem('wallet:accessData');
   if (oldAccessDataRaw) {
     // When migrating from wallets with version v0.26.0 and older initialized with hardware devices
@@ -58,6 +56,8 @@ process.once('loaded', () => {
     }
   }
 
+  // Read consent after the migration above, which may clear it.
+  setSentryEnabled(localStorage.getItem('wallet:sentry') === 'true');
 
   // Set closed in localStorage, so user does not open in the wallet page
   localStorage.setItem('localstorage:closed', 'true');

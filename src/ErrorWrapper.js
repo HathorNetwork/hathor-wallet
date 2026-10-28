@@ -21,9 +21,13 @@ function ErrorBoundary(props) {
 	const { onError } = props;
 
 	const handleErrorEvent = (event) => {
-		// Some error events carry no error object (e.g. a cross-origin script
-		// error); null would be read as a reset by onError.
-		onError(event.error ?? new Error(event.message || 'Unknown error'));
+		// Events without an error object are browser notices such as
+		// "ResizeObserver loop completed", not app failures. Passing null
+		// would also be read as a reset by onError.
+		if (event.error == null) {
+			return;
+		}
+		onError(event.error);
 	}
 
 	// Handling errors on the window level
