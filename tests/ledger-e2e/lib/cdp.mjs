@@ -83,7 +83,12 @@ export class CDP {
     this.ws = new this.WebSocket(target.webSocketDebuggerUrl);
     await new Promise((resolve, reject) => { this.ws.once('open', resolve); this.ws.once('error', reject); });
     this.ws.on('message', (raw) => this.onMessage(JSON.parse(raw)));
-    this.ws.on('close', () => { this.closed = true; });
+    this.ws.on('close', () => {
+      this.closed = true;
+      // Settle calls still in flight, e.g. when the app exits mid-evaluate.
+      for (const { reject } of this.pending.values()) reject(new Error('CDP socket closed'));
+      this.pending.clear();
+    });
     const appContext = new Promise((resolve) => { this.onAppContext = resolve; });
     await this.send('Runtime.enable');
     await Promise.race([appContext, sleep(10000)]);
