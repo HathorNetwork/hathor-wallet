@@ -41,8 +41,11 @@ function Welcome() {
     setFormValidated(!isValid);
     if (isValid) {
       LOCAL_STORE.markWalletAsStarted();
-      // For the mainnet sentry will be disabled by default and the user can change this on Settings
-      wallet.disallowSentry();
+      // Sentry is disabled by default and the user can change this on Settings.
+      // A choice already made survives a wallet reset, which leads back here.
+      if (wallet.getSentryPermission() === null) {
+        wallet.disallowSentry();
+      }
       navigate('/wallet_type/');
     }
   };
