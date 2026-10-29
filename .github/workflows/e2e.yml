@@ -34,8 +34,10 @@ jobs:
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
-        # https://github.com/cypress-io/github-action/releases/tag/v6.10.9
-        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7
+        # https://github.com/cypress-io/github-action/releases/tag/v7.4.8
+        # v7 runs on Node 24. v6 runs on Node 20, which GitHub now forces onto
+        # Node 24, where its wait-on ping fails at once instead of retrying.
+        uses: cypress-io/github-action@4ce68f262a3888d22cf3175d62010a145ba737ee
         with:
           start: npm start
           wait-on: 'http://localhost:3000'
