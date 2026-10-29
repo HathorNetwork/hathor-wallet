@@ -7,6 +7,7 @@
 
 import {
   SENTRY_DSN,
+  VERSION,
   WALLET_HISTORY_COUNT,
   METADATA_CONCURRENT_DOWNLOAD,
   ADDRESS_MODE,
@@ -30,14 +31,13 @@ import {
 import { chunk, get } from 'lodash';
 import helpers from '../utils/helpers';
 import LOCAL_STORE from '../storage';
+// In Electron, Sentry runs in the preload (@sentry/electron) via the bridge,
+// keeping it outside the LavaMoat-governed bundle. In a plain browser (dev/tests)
+// there's no bridge, so fall back to the bundled browser SDK.
+import * as SentryBrowser from '@sentry/browser';
 
-let Sentry = null;
-// Need to import with window.require in electron (https://github.com/electron/electron/issues/7300)
-if (window.require) {
-  Sentry = window.require('@sentry/electron');
-} else {
-  Sentry = require('@sentry/browser');
-}
+const sentryBridge = (typeof window !== 'undefined' && window.electronAPI) || null;
+const reportedPageErrors = new WeakSet();
 
 /**
  * Key string constants for manipulating the storage
@@ -459,9 +459,14 @@ const wallet = {
    * @inner
    */
   initSentry(dsn) {
-    Sentry.init({
+    if (sentryBridge) {
+      // The preload owns the DSN; the page only switches reporting on or off.
+      sentryBridge.sentrySetEnabled(Boolean(dsn));
+      return;
+    }
+    SentryBrowser.init({
       dsn: dsn,
-      release: process.env.npm_package_version
+      release: VERSION
     });
   },
 
@@ -482,6 +487,51 @@ const wallet = {
   },
 
   /**
+   * With contextIsolation the preload's Sentry SDK runs in another JS world and
+   * never sees this window's uncaught errors, so they are forwarded through the
+   * bridge. The preload drops them unless the user consented.
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  installPageErrorForwarding() {
+    if (!sentryBridge) {
+      // The browser SDK installs its own global handlers.
+      return;
+    }
+    window.addEventListener('error', (event) => {
+      this.reportPageError(
+        event.error ?? `${event.message} (${event.filename}:${event.lineno})`,
+        'window.error',
+      );
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+      this.reportPageError(event.reason, 'unhandledrejection');
+    });
+  },
+
+  /**
+   * Decide whether an uncaught page error is sent to Sentry, and send it.
+   *
+   * @param {unknown} reason The thrown value or rejection reason
+   * @param {'window.error'|'unhandledrejection'} source Which handler caught it
+   *
+   * @memberof Wallet
+   * @inner
+   */
+  reportPageError(reason, source) {
+    // Several promises can reject with the same error object.
+    if (reason !== null && typeof reason === 'object') {
+      if (reportedPageErrors.has(reason)) {
+        return;
+      }
+      reportedPageErrors.add(reason);
+    }
+    const error = reason instanceof Error ? reason : new Error(String(reason));
+    this.sentryWithScope(error, { source });
+  },
+
+  /**
    * Add scope and extra data to sentry exception
    *
    * @param {Object} error Error stacktrace
@@ -491,12 +541,21 @@ const wallet = {
    * @inner
    */
   sentryWithScope(error, info) {
-    Sentry.withScope(scope => {
-      Object.entries(info).forEach(
+    if (sentryBridge) {
+      sentryBridge.sentryCapture({
+        name: error?.name,
+        message: error?.message ?? String(error),
+        stack: error?.stack,
+        extra: info,
+      });
+      return;
+    }
+    SentryBrowser.withScope(scope => {
+      Object.entries(info || {}).forEach(
         ([key, item]) => scope.setExtra(key, item)
       );
       // TODO: Add storage snapshot to sentry
-      Sentry.captureException(error);
+      SentryBrowser.captureException(error);
     });
   },
 

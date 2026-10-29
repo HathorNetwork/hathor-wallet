@@ -2384,8 +2384,12 @@ msgstr ""
 msgid "Transaction Mining Service URL *"
 msgstr ""
 
-#: src/components/NetworkSettingsForm.js:135
+#: src/components/NetworkSettingsForm.js:136
 msgid "Explorer URL *"
+msgstr ""
+
+#: src/components/NetworkSettingsForm.js:137
+msgid "The explorer URL must start with http:// or https://"
 msgstr ""
 
 #: src/components/NetworkSettingsForm.js:136

@@ -13,6 +13,7 @@ const url = require('url');
 const path = require('path');
 const constants = require('./constants');
 const { instance: Ledger } = require('./ledger');
+const { ledgerMethods } = require('./bridge');
 
 Sentry.init({
   dsn: constants.SENTRY_DSN,
@@ -57,8 +58,13 @@ function createWindow () {
     height: 768,
     icon: path.join(__dirname, iconOS),
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      // No Node in the renderer; it reaches main only through the
+      // contextBridge API in preload.js (window.electronAPI).
+      nodeIntegration: false,
+      contextIsolation: true,
+      // sandbox stays off so the preload can still use Node (require/process)
+      // for the bridge and Sentry — enabling it is a follow-up.
+      sandbox: false,
       preload: path.join(__dirname, 'preload.js')
     }
   })
@@ -253,24 +259,6 @@ app.on('activate', function () {
     createWindow()
   }
 })
-
-/**
- * This dict contains all methods available on public/ledger.js and the corresponding event
- * to be sent when we get a reply from ledger. Eg: we receive the event 'ledger:getVersion' and
- * call Ledger.getVersion(). When we get the reply from ledger, we send the event 'ledger:version'
- */
-const ledgerMethods = {
-  'getVersion': 'version',
-  'getPublicKeyData': 'publicKeyData',
-  'checkAddress': 'address',
-  'sendTx': 'txSent',
-  'getSignatures': 'signatures',
-  'signToken': 'tokenSignature',
-  'sendTokens': 'tokenDataSent',
-  'verifyTokenSignature': 'tokenSignatureValid',
-  'verifyManyTokenSignatures': 'manyTokenSignatureValid',
-  'resetTokenSignatures': 'tokenSignatureReset',
-}
 
 function addLedgerListeners(mainWindow) {
   for (const method in ledgerMethods) {

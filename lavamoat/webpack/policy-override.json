@@ -1,6 +1,6 @@
 {
   "resources": {
-    "cypress>lodash": {
+    "lodash": {
       "globals": {
         "setTimeout": true,
         "clearTimeout": true

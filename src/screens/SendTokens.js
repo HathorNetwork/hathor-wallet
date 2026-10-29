@@ -162,7 +162,7 @@ function SendTokens() {
   /**
    * Handle the response of a send tx call to Ledger.
    *
-   * @param {IpcRendererEvent} _event May be used to reply to the event
+   * @param {undefined} _event Always undefined; the preload bridge does not forward the Electron event
    * @param {Object} arg Data returned from the send tx call
    */
   const handleTxSent = (_event, arg) => {
@@ -176,7 +176,7 @@ function SendTokens() {
   /**
    * Handle the response of a get signatures call to Ledger.
    *
-   * @param {IpcRendererEvent} _event May be used to reply to the event
+   * @param {undefined} _event Always undefined; the preload bridge does not forward the Electron event
    * @param {Object} arg Data returned from the get signatures call
    */
   const handleSignatures = (_event, arg) => {
@@ -191,7 +191,7 @@ function SendTokens() {
    * Handle the response of a send token data call to Ledger.
    * Will list all tokens that failed verification, if all pass then start sign tx
    *
-   * @param {IpcRendererEvent} _event May be used to reply to the event
+   * @param {undefined} _event Always undefined; the preload bridge does not forward the Electron event
    * @param {Object} arg Data returned from the send token data call
    */
   const handleSendToken = (_event, arg) => {
