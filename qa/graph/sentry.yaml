@@ -1,0 +1,917 @@
+# Sentry QA graph for the desktop wallet: consent, the preload and main-process
+# Sentry clients, page error forwarding, crash reports and resets.
+# Schema: qa/graph/README.md. Automation: qa/e2e/sentry/scenarios.mjs.
+#
+#   node qa/graph/tools/cli.js validate --graph qa/graph/sentry.yaml
+#   node qa/graph/tools/cli.js render --graph qa/graph/sentry.yaml
+#
+# Where to look during a run (the Sentry runbook in qa/graph/README.md has the full setup):
+#   SINK     the terminal running `node qa/e2e/sentry/manual-sink.mjs`
+#   CONSENT  cat ~/Library/Application\ Support/Hathor\ Wallet/sentry-consent.json
+#   PAGE     the renderer DevTools console (Debug > Open DevTools, Cmd+B)
+#   MAIN     the main-process inspector (chrome://inspect > "Hathor Wallet" / electron, port 5858)
+#   LOG      the Terminal the wallet was launched from (main's console.* output)
+version: 1
+costs: { cheap: 1, medium: 5, expensive: 20, very-expensive: 60 }
+
+environments:
+  - id: mac-local-sink
+    name: Mac, Sentry pointed at the local sink
+    notes: The wallet is launched from Terminal with SENTRY_DSN=http://qa@127.0.0.1:9876/1 and `node qa/e2e/sentry/manual-sink.mjs` running, so nothing leaves the machine and every envelope is counted. Main and preload read SENTRY_DSN at run time (public/constants.js); the renderer bundle never sees the DSN on this stack.
+  - id: mac-sentry-io
+    name: Mac, real sentry.io project
+    notes: No SENTRY_DSN override, so events go to the real project (constants.SENTRY_DSN). Checks the path the local sink cannot see. The request leaves through Electron's net module on the default session with the Brotli guard installed, and sentry.io has to accept what the 3.0.7 SDK sends from Electron 42. Prefix every manual message with `qa-<your initials>-` so the events can be found and resolved. # QA: confirm whether a staging DSN should be used instead of the production project
+
+features:
+  - id: consent-ui
+    name: Consent screens and settings
+    description: The user grants or revokes automatic bug reports in Settings > "Automatically report bugs to Hathor" > Change (the /permission screen); "Get started" on Welcome sets it to No only if no choice was ever made.
+    status: in-scope
+    screens: [Settings, SentryPermission, Welcome, WalletType, LockedWallet]
+    files:
+      - src/screens/SentryPermission.js
+      - src/screens/Settings.js
+      - src/screens/Welcome.js
+      - src/screens/WalletType.js
+      - src/screens/LockedWallet.js
+      - src/utils/wallet.js
+    flags: []
+    links:
+      - { to: preload-consent, reason: 'Every allow/disallow ends in electronAPI.sentrySetEnabled, which the preload applies' }
+    introduces: []
+    actions: [toggle-consent, onboarding-get-started]
+
+  - id: preload-consent
+    name: Preload Sentry client and startup sync
+    description: The preload's @sentry/electron client starts disabled, reads localStorage 'wallet:sentry' on load and flips its live `enabled` option, and reports the value to main on every load and change.
+    status: in-scope
+    screens: []
+    files:
+      - public/preload.js
+      - public/bridge.js
+      - public/startupSteps.js
+    flags: []
+    links:
+      - { to: main-consent, reason: applySentryConsent sends every change to main over sentry:consent }
+    introduces: ['install:legacy-hw']
+    actions: [startup-step-failure, bridge-probe]
+
+  - id: main-consent
+    name: Main-process consent store and gated transport
+    description: Main keeps its own copy of the choice in <userData>/sentry-consent.json, reads it before Sentry.init, and refuses every request (events, sessions, minidumps, offline-queue retries) at the transport without consent. A revoke waits for in-flight reports to flush.
+    status: in-scope
+    screens: []
+    files:
+      - public/sentryConsent.js
+      - public/electron.js
+    flags: []
+    links: []
+    introduces: ['install:upgrade']
+    actions: [launch-quit, main-crash, offline-queue]
+
+  - id: page-error-forwarding
+    name: Page error forwarding
+    description: With context isolation the preload SDK cannot see page errors, so src/utils/wallet.js forwards window 'error' and 'unhandledrejection' through electronAPI.sentryCapture, deduped per error object.
+    status: in-scope
+    screens: []
+    files:
+      - src/utils/wallet.js
+      - src/index.js
+      - src/constants.js
+    flags: []
+    links:
+      - { to: preload-consent, reason: sentryCapture is dropped by the preload client unless consent is on }
+    introduces: []
+    actions: [page-error, ipc-listener-error]
+
+  - id: crash-modal
+    name: Unhandled-error modal
+    description: An uncaught page error opens the "Ooops... Something went wrong..." modal; when the user has not opted in it offers "Send error report to help the developers", which grants, captures and revokes in one tick.
+    status: in-scope
+    screens: [ModalUnhandledError]
+    files:
+      - src/ErrorWrapper.js
+      - src/components/ModalUnhandledError.js
+    flags: []
+    links:
+      - { to: page-error-forwarding, reason: The report is sent through sentryWithScope over the bridge }
+      - { to: main-consent, reason: The revoke must wait for main to flush the report it just received }
+    introduces: []
+    actions: [crash-modal-report]
+
+  - id: native-crash
+    name: Native crash reporting (Crashpad minidumps)
+    description: Renderer and main native crashes produce a minidump that main's SDK uploads at crash time or at the next start, gated by the stored consent.
+    status: in-scope
+    screens: []
+    files:
+      - public/electron.js
+      - public/sentryConsent.js
+    flags: []
+    links:
+      - { to: main-consent, reason: Uploads go through the gated transport and use the consent stored by the previous run }
+    introduces: []
+    actions: [main-crash]
+
+  - id: data-reset
+    name: Data and wallet reset
+    description: Debug > "Reset all data" clears localStorage and revokes main's copy; Settings / crash-modal / locked-screen "Reset wallet" keeps 'wallet:sentry', and "Get started" keeps a choice already made.
+    status: in-scope
+    screens: [ModalConfirmClearStorage, Settings, Welcome]
+    files:
+      - src/App.js
+      - src/components/ModalConfirmClearStorage.js
+      - src/sagas/wallet.js
+      - src/storage.js
+    flags: []
+    links:
+      - { to: main-consent, reason: app:clear_storage_success revokes main's copy }
+      - { to: consent-ui, reason: "After a wallet reset, Get started must keep the existing choice" }
+    introduces: []
+    actions: [reset-data]
+
+  - id: external-url
+    name: External URL refusal
+    description: openExternal refuses non-http(s) URLs; the refusal is caught so it neither opens the crash modal nor reaches Sentry.
+    status: in-scope
+    screens: [Navigation, NetworkSettings]
+    files:
+      - src/utils/helpers.js
+      - src/components/NetworkSettingsForm.js
+      - public/bridge.js
+    flags: []
+    links:
+      - { to: page-error-forwarding, reason: An uncaught refusal would be forwarded as a page error }
+    introduces: []
+    actions: [external-url]
+
+  - id: noise
+    name: Event volume in normal use
+    description: What reaches Sentry during ordinary use with consent on, now that every uncaught page error and rejection is forwarded (wallet-lib network rejections, LavaMoat policy errors, ResizeObserver notices).
+    status: in-scope
+    screens: [Dashboard, SendTokens, Settings]
+    files:
+      - src/utils/wallet.js
+      - public/brotliGuard.js
+    flags: []
+    links:
+      - { to: page-error-forwarding, reason: The volume is decided by what reportPageError forwards }
+    introduces: []
+    actions: [smoke-noise]
+
+  - id: ledger-ipc
+    name: Ledger IPC through the bridge
+    description: Ledger replies arrive through the allowlisted bridge; a throwing listener is re-dispatched to the page so it reaches the modal and Sentry.
+    status: out-of-scope
+    screens: [StartHardwareWallet, SendTokens]
+    files:
+      - src/constants.js
+      - public/bridge.js
+      - public/ledger.js
+    flags: []
+    links:
+      - { to: page-error-forwarding, reason: Re-dispatched listener errors are forwarded like any page error }
+    # Real-device Ledger flows are QA_LEDGER.md; here only the error path is covered, simulated from MAIN.
+    introduces: []
+    actions: [ipc-listener-error]
+
+flags: []
+
+axes:
+  # Setup axes
+  - id: build
+    name: How the app is run
+    kind: setup
+    values:
+      - { id: unpacked, name: 'Production bundle, unpacked (electron .)' }
+      - { id: packaged, name: Packaged .app }
+    how: 'unpacked: `npm ci && npm run build-css && npm run build`, then `SENTRY_DSN=... npx electron --inspect=5858 . --unsafe-mode --hathor-debug`. LavaMoat bundle, Debug menu and main inspector available. packaged: `npm run electron-pack-mac` (signing off, README "Packaged build"), then run `"/path/Hathor Wallet.app/Contents/MacOS/Hathor Wallet" --unsafe-mode --hathor-debug` from Terminal so SENTRY_DSN reaches it.'
+    switch:
+      cost: expensive
+      transitions:
+        - { from: packaged, to: unpacked, cost: medium, when: build/ is already up to date }
+
+  - id: install
+    name: What userData the run starts from
+    kind: setup
+    values:
+      - { id: fresh, name: Fresh userData (never run) }
+      - { id: upgrade, name: 'Upgraded from v0.35.0 (localStorage consent, no sentry-consent.json)' }
+      - { id: legacy-hw, name: Seeded <= v0.26 hardware-wallet localStorage }
+    how: 'fresh: quit, `mv ~/Library/Application\ Support/Hathor\ Wallet{,.bak-$(date +%s)}`. upgrade: fresh, then run the v0.35.0 release (or master) once, onboard and set the consent, quit, then launch the stack build on the same userData. legacy-hw: on any build, in PAGE run `localStorage.setItem(''wallet:accessData'', JSON.stringify({from_xpub: true})); localStorage.setItem(''wallet:type'', ''hardware'')`, keep wallet:sentry as the setup needs, quit, relaunch.'
+    switch:
+      cost: medium
+      transitions:
+        - { from: fresh, to: upgrade, cost: expensive, when: needs the old build installed next to the stack build }
+        - { from: legacy-hw, to: upgrade, impossible: true, when: the legacy migration has already cleared localStorage }
+      fallback: { cost: expensive, how: move userData away (fresh) and redo the setup }
+
+  - id: launch-consent
+    name: Consent stored when the app starts
+    kind: setup
+    values:
+      - { id: none, name: 'Never set (no wallet:sentry, no sentry-consent.json)' }
+      - { id: in, name: Opted in }
+      - { id: out, name: Opted out }
+    how: Settings > "Automatically report bugs to Hathor" > Change > tick or untick "I allow Hathor Wallet to report error information to Hathor team." > Continue, then quit with Cmd+Q and relaunch. `none` only exists before "Get started" on a fresh userData.
+    switch:
+      cost: cheap
+      transitions:
+        - { from: in, to: none, cost: medium, when: move userData away; there is no way back to "never set" in the UI }
+        - { from: out, to: none, cost: medium, when: move userData away }
+
+  - id: sink
+    name: Where Sentry sends
+    kind: setup
+    values:
+      - { id: local, name: Local sink }
+      - { id: sentry-io, name: Real sentry.io }
+    how: Launch with or without SENTRY_DSN=http://qa@127.0.0.1:9876/1. Changing it needs a relaunch.
+    switch:
+      cost: cheap
+
+  # Action axes
+  - id: quit
+    name: How the app is left
+    kind: action
+    values:
+      - { id: cmd-q, name: Cmd+Q / app menu Quit }
+      - { id: tray-exit, name: Menu-bar tray icon > Exit (app.quit) }
+      - { id: window-close, name: Red close button (window hides to tray) }
+      - { id: dock-quit, name: Dock icon > Quit }
+    how: Turn the tray on first for tray-exit and window-close (app menu > Systray). Pick one per scenario; window-close is not a quit, so follow it with the tray's "Show Wallet" or Cmd+Q.
+    switch: { cost: cheap }
+
+  - id: error-kind
+    name: Kind of page error
+    kind: action
+    values:
+      - { id: throw, name: 'Uncaught throw: setTimeout(() => { throw new Error(''qa-page-throw'') })' }
+      - { id: reject-error, name: 'Unhandled rejection with an Error: Promise.reject(new Error(''qa-page-reject''))' }
+      - { id: reject-string, name: 'Unhandled rejection with a string: Promise.reject(''qa-page-reject-str'')' }
+      - { id: errorless, name: 'Error event without an error object: window.dispatchEvent(new ErrorEvent(''error'', { message: ''qa-errorless'' }))' }
+      - { id: same-twice, name: 'Same Error object rejected twice: e = new Error(''qa-dup''); Promise.reject(e); Promise.reject(e)' }
+    how: Type the snippet in PAGE (top context, not the preload's isolated world).
+    switch: { cost: cheap }
+
+  - id: clicks
+    name: Clicks on "Send error report"
+    kind: action
+    values:
+      - { id: once, name: Once }
+      - { id: twice, name: Twice quickly }
+    how: The button stays on screen after the first click.
+    switch: { cost: cheap }
+
+  - id: toggle
+    name: Consent change
+    kind: action
+    values:
+      - { id: in-to-out, name: Yes to No }
+      - { id: out-to-in, name: No to Yes }
+      - { id: unchanged, name: Continue without changing the box }
+    how: On the /permission screen from Settings.
+    switch: { cost: cheap }
+
+  - id: crash
+    name: Kind of crash
+    kind: action
+    values:
+      - { id: renderer-native, name: 'Renderer native crash: MAIN `process.mainModule.require(''electron'').webContents.getAllWebContents()[0].forcefullyCrashRenderer()`' }
+      - { id: main-exception, name: 'Main JS exception: MAIN `setTimeout(() => { throw new Error(''qa-main-throw'') })`' }
+      - { id: main-native, name: 'Main native crash: MAIN `process.crash()`' }
+    how: In the main-process inspector. If `process.mainModule` is undefined, use `module.require` or open public/electron.js in Sources and run it paused there. # QA: confirm the console form that works on Electron 42
+    switch: { cost: cheap }
+
+  - id: relaunch-consent
+    name: Consent when the app is relaunched after the crash
+    kind: action
+    values:
+      - { id: same, name: Unchanged }
+      - { id: flipped, name: Flipped in Settings right after relaunch }
+    how: After relaunch, check SINK first, then optionally flip the consent in Settings.
+    switch: { cost: cheap }
+
+  - id: retry-consent
+    name: Consent when the offline queue retries
+    kind: action
+    values:
+      - { id: in, name: Still opted in }
+      - { id: out, name: Opted out while offline }
+    how: With Wi-Fi off, change the consent in Settings before reconnecting.
+    switch: { cost: cheap }
+
+  - id: reset-kind
+    name: Kind of reset
+    kind: action
+    values:
+      - { id: reset-all-data, name: Debug > Reset all data }
+      - { id: settings-reset-wallet, name: Settings > Reset wallet }
+      - { id: modal-reset-wallet, name: Crash modal > Reset wallet }
+    how: The crash modal is opened by an error-kind throw from PAGE.
+    switch: { cost: cheap }
+
+  - id: probe
+    name: Bridge probe from the page
+    kind: action
+    values:
+      - { id: send-consent-channel, name: 'electronAPI.send(''sentry:consent'', true)' }
+      - { id: set-enabled-string, name: 'electronAPI.sentrySetEnabled(''true'')' }
+      - { id: capture-direct, name: 'electronAPI.sentryCapture({ message: ''qa-bridge-capture'' })' }
+      - { id: require-gone, name: 'typeof window.require' }
+    how: Type in PAGE.
+    switch: { cost: cheap }
+
+  - id: step
+    name: Preload startup step made to fail
+    kind: action
+    values:
+      - { id: systray, name: "syncSystrayMessage (last step): localStorage.setItem('wallet:systray_message_checked', '{bad')" }
+      - { id: legacy, name: "clearLegacyHardwareData (first step, before consent is read): localStorage.setItem('wallet:accessData', '{bad')" }
+    how: Set the value in PAGE, then reload with `location.reload()` (the preload runs again). Undo with removeItem / setItem('...', 'false') afterwards.
+    switch: { cost: cheap }
+
+  - id: flow
+    name: Flow walked
+    kind: action
+    values:
+      - { id: onboarding, name: Welcome > new software wallet > home }
+      - { id: send, name: 'Send Tokens screen, fill and send (testnet)' }
+      - { id: network-drop, name: 'Wallet loaded, then Wi-Fi off for 60 s and back on' }
+      - { id: settings-tour, name: 'Settings, Network Settings, Address Mode, Custom tokens' }
+    how: Mark the start in SINK (`m smoke:<flow>`) and count the envelopes it produces.
+    switch: { cost: cheap }
+
+setups:
+  - id: fresh-none
+    name: Unpacked, fresh userData, consent never set, local sink
+    values: { build: unpacked, install: fresh, launch-consent: none, sink: local }
+    environment: mac-local-sink
+    runnable: true
+    notes: Run first. Consent file must not exist until "Get started".
+  - id: fresh-in
+    name: Unpacked, opted in, local sink
+    values: { build: unpacked, install: fresh, launch-consent: in, sink: local }
+    environment: mac-local-sink
+    runnable: true
+  - id: fresh-out
+    name: Unpacked, opted out, local sink
+    values: { build: unpacked, install: fresh, launch-consent: out, sink: local }
+    environment: mac-local-sink
+    runnable: true
+  - id: upgrade-in
+    name: Unpacked, upgraded from v0.35.0 while opted in, local sink
+    values: { build: unpacked, install: upgrade, launch-consent: in, sink: local }
+    environment: mac-local-sink
+    runnable: true # QA: confirm the v0.35.0 build is installed on the Mac
+    notes: The v0.35.0 run uses the real DSN baked into its bundle, so keep it short and quit; nothing it sends is part of the test.
+  - id: upgrade-out
+    name: Unpacked, upgraded from v0.35.0 while opted out, local sink
+    values: { build: unpacked, install: upgrade, launch-consent: out, sink: local }
+    environment: mac-local-sink
+    runnable: true # QA: confirm
+  - id: legacy-in
+    name: Unpacked, seeded legacy hardware data while opted in, local sink
+    values: { build: unpacked, install: legacy-hw, launch-consent: in, sink: local }
+    environment: mac-local-sink
+    runnable: true
+    notes: The migration wipes localStorage, consent included, so the run must end opted out.
+  - id: pkg-in
+    name: Packaged .app, opted in, local sink
+    values: { build: packaged, install: fresh, launch-consent: in, sink: local }
+    environment: mac-local-sink
+    runnable: true # QA: confirm the .app builds without the signing keys
+    notes: Crashpad and the preload path inside app.asar are only realistic here.
+  - id: pkg-out
+    name: Packaged .app, opted out, local sink
+    values: { build: packaged, install: fresh, launch-consent: out, sink: local }
+    environment: mac-local-sink
+    runnable: true # QA: confirm
+  - id: io-in
+    name: Packaged .app, opted in, real sentry.io
+    values: { build: packaged, install: fresh, launch-consent: in, sink: sentry-io }
+    environment: mac-sentry-io
+    runnable: true # QA: confirm access to the Sentry project
+    notes: Proves events, sessions and a minidump reach sentry.io through the Brotli guard; check the Sentry Issues and Releases pages, not a sink. qa/e2e runs this setup on Linux with the production DSN and redirects its sentry.io requests to the sink, so the automated runs prove the requests are made and what they carry, not that sentry.io accepts them.
+
+actions:
+  - id: launch-quit
+    name: Launch, idle, quit
+    feature: main-consent
+    axes: []
+    setups: [fresh-none, fresh-in, fresh-out, upgrade-in, upgrade-out, legacy-in, pkg-in, pkg-out, io-in]
+    path:
+      steps:
+        - { id: launch, screen: LockedWallet, name: Launch from Terminal with the setup's SENTRY_DSN; wait for the screen }
+        - { id: inspect, screen: LockedWallet, name: Check CONSENT and LOG (no Sentry error from main or preload on Electron 42) }
+        - { id: quit, screen: LockedWallet, name: Cmd+Q }
+      outcomes:
+        - id: ok-follows-consent
+          kind: success
+          at: quit
+          message: 'Opted in: one session(status=exited, release=0.35.0) at quit. Opted out or never set: no envelope from launch to quit'
+          source: 'public/sentryConsent.js:86'
+          verified: false
+        - id: ok-consent-file
+          kind: success
+          at: inspect
+          message: 'Opted in: CONSENT is {"enabled":true} once the window has loaded. Opted out or never set: CONSENT is absent unless consent was revoked earlier, then {"enabled":false} (a value equal to the stored one is never written)'
+          source: 'public/sentryConsent.js:30'
+          verified: false
+        - id: err-legacy-wiped
+          kind: error
+          at: inspect
+          message: The app opens on the wallet type screen (the wipe keeps localstorage:started) and CONSENT reads {"enabled":false}; nothing in SINK
+          source: 'public/preload.js:73'
+          verified: false
+          note: Expected for legacy-in. Opted-in users coming from <= v0.26 hardware wallets silently lose their consent, which master did too.
+
+  - id: quit-methods
+    name: Quit methods, opted in
+    feature: main-consent
+    axes: [quit]
+    setups: [fresh-in, pkg-in]
+    path:
+      steps:
+        - { id: launch, screen: LockedWallet, name: Launch and unlock }
+        - { id: quit, screen: Dashboard, name: Leave the app with the scenario's quit method }
+        - { id: relaunch, screen: LockedWallet, name: Relaunch and wait 30 s }
+      outcomes:
+        - id: ok-session-exited
+          kind: success
+          at: quit
+          message: One session(status=exited) at quit, nothing extra at relaunch
+          source: 'public/electron.js:37'
+          verified: false
+        - id: edge-tray-exit-session-exited
+          kind: success
+          at: quit
+          message: One session(status=exited) at quit, same as Cmd+Q (tray Exit calls app.quit, so the quit events run); nothing abnormal at the next launch
+          source: 'public/electron.js:269'
+          verified: false
+        - id: edge-window-close-hides
+          kind: error
+          at: quit
+          message: The "Your Hathor Wallet has not been closed" dialog shows and no session is sent; reopening with the tray's "Show Wallet" sends nothing new
+          source: 'public/electron.js:188'
+          verified: false
+
+  - id: onboarding-get-started
+    name: Welcome > Get started
+    feature: consent-ui
+    axes: []
+    setups: [fresh-none, fresh-in, upgrade-in]
+    path:
+      steps:
+        - { id: welcome, screen: Welcome, name: 'On Welcome (for fresh-in / upgrade-in, reach it through Settings > Reset wallet), tick the terms box' }
+        - { id: start, screen: Welcome, name: Click "Get started" }
+        - { id: settings, screen: Settings, name: Finish onboarding and open Settings }
+      outcomes:
+        - id: ok-starts-opted-out
+          kind: success
+          at: settings
+          message: 'Never chosen (fresh-none): Settings shows "Automatically report bugs to Hathor: No", wallet:sentry is false, CONSENT stays absent (a false is never written over no consent) and SINK is empty. Already chosen (reached Welcome through Reset wallet): the choice is kept, so an opted-in user stays opted in and CONSENT stays {"enabled":true}'
+          source: 'src/screens/Welcome.js:46'
+          verified: false
+          note: Get started only sets No when no choice was ever made (HathorNetwork/hathor-wallet#907); before it, a reset opted-in user ended opted out with no prompt.
+
+  - id: toggle-consent
+    name: Change consent in Settings
+    feature: consent-ui
+    axes: [toggle]
+    setups: [fresh-in, fresh-out, pkg-in]
+    path:
+      steps:
+        - { id: open, screen: Settings, name: 'Settings > "Automatically report bugs to Hathor:" > Change' }
+        - { id: choose, screen: SentryPermission, name: Set the box as the scenario says and click "Continue" }
+        - { id: verify, screen: Settings, name: 'Check Settings, CONSENT, then throw a page error (error-kind throw) and check SINK' }
+        - { id: relaunch, screen: LockedWallet, name: 'Cmd+Q, relaunch, unlock, throw again' }
+      outcomes:
+        - id: ok-applied-live
+          kind: success
+          at: verify
+          message: Settings shows the new Yes/No; CONSENT follows (a grant at once, a revoke after the flush, absent if never opted in); the throw is in SINK only when Yes
+          source: 'src/utils/wallet.js:464'
+          verified: false
+        - id: ok-survives-relaunch
+          kind: success
+          at: relaunch
+          message: After relaunch the same three agree, and a main-exception crash follows the same consent
+          source: 'public/preload.js:58'
+          verified: false
+        - id: edge-revoke-flush-wait
+          kind: error
+          at: verify
+          message: 'Yes to No: CONSENT flips only after main flushes (at most about 4 s); a main-process event in that window can still be sent, a page error cannot (the preload client is already off)'
+          source: 'public/sentryConsent.js:58'
+          verified: false
+
+  - id: page-error
+    name: Uncaught page error
+    feature: page-error-forwarding
+    axes: [error-kind]
+    setups: [fresh-none, fresh-in, fresh-out, pkg-in, io-in]
+    path:
+      steps:
+        - { id: run, screen: Dashboard, name: 'Mark SINK, then type the error-kind snippet in PAGE' }
+        - { id: modal, screen: ModalUnhandledError, name: Note whether the "Ooops... Something went wrong..." modal opens; close it with "Dismiss" }
+        - { id: sink, screen: Dashboard, name: Wait 5 s and read SINK }
+      outcomes:
+        - id: ok-sent-once
+          kind: success
+          at: sink
+          message: 'Opted in: exactly one event with extra source=window.error (throw) or unhandledrejection (rejections); nothing when opted out or never set'
+          source: 'src/utils/wallet.js:522'
+          verified: false
+        - id: ok-modal-on-throw
+          kind: success
+          at: modal
+          message: The modal opens for throw only; rejections open no modal
+          source: 'src/ErrorWrapper.js:30'
+          verified: false
+        - id: edge-errorless-no-modal
+          kind: error
+          at: modal
+          message: 'No modal; opted in, SINK gets one event "Error: qa-errorless (:0)" (message plus file:line), not a reset of an open modal'
+          source: 'src/ErrorWrapper.js:27'
+          verified: false
+        - id: edge-dedupe
+          kind: error
+          at: sink
+          message: 'Opted in: one event for the two rejections of the same object, not two'
+          source: 'src/utils/wallet.js:524'
+          verified: false
+        - id: edge-string-reason
+          kind: error
+          at: sink
+          message: 'Opted in: one event "Error: qa-page-reject-str" (wrapped in an Error); its stack starts at the wrapping code in reportPageError, not the caller'
+          source: 'src/utils/wallet.js:530'
+          verified: false
+
+  - id: crash-modal-report
+    name: Crash modal > Send error report
+    feature: crash-modal
+    axes: [clicks]
+    setups: [fresh-in, fresh-out, pkg-out, io-in]
+    path:
+      steps:
+        - { id: trigger, screen: Dashboard, name: Throw from PAGE (error-kind throw) }
+        - { id: modal, screen: ModalUnhandledError, name: Look for "Send error report to help the developers" }
+        - { id: send, screen: ModalUnhandledError, name: Click it (once or twice quickly) }
+        - { id: after, screen: Settings, name: 'Read SINK and CONSENT, then Settings' }
+      outcomes:
+        - id: ok-report-delivered
+          kind: success
+          at: after
+          message: 'The modal says "Report sent to Hathor Team! Thanks for the support!"; SINK gets the report event (plus a session); CONSENT ends {"enabled":false}; Settings still says No'
+          source: 'src/components/ModalUnhandledError.js:61'
+          verified: false
+        - id: ok-report-has-error
+          kind: success
+          at: after
+          message: The reported event carries "qa-page-throw" and its stack, not an empty event (the old ErrorWrapper bug)
+          source: 'src/ErrorWrapper.js:74'
+          verified: false
+        - id: edge-button-hidden-opted-in
+          kind: error
+          at: modal
+          message: 'Opted in: no "Send error report" button; the throw was already sent once automatically'
+          source: 'src/components/ModalUnhandledError.js:87'
+          verified: false
+        - id: edge-double-click
+          kind: error
+          at: send
+          message: Clicking twice sends one report, not two, and still ends opted out
+          source: 'node_modules/@sentry/electron/node_modules/@sentry/browser/dist/sdk.js:15'
+          verified: false
+          note: "The preload SDK's default Dedupe integration drops the second, identical capture. Found by qa/e2e/sentry (crash-modal-report:fresh-out:twice); the button itself is not debounced (src/components/ModalUnhandledError.js:57)." 
+
+  - id: main-crash
+    name: Crash, then relaunch
+    feature: native-crash
+    axes: [crash, relaunch-consent]
+    setups: [fresh-in, fresh-out, upgrade-in, pkg-in, pkg-out, io-in]
+    path:
+      steps:
+        - { id: crash, screen: Dashboard, name: 'Mark SINK, run the crash snippet in MAIN' }
+        - { id: at-crash, screen: Dashboard, name: Read SINK; note whether the app is still alive }
+        - { id: relaunch, screen: LockedWallet, name: 'Quit if still running, relaunch, wait 30 s on the locked screen' }
+        - { id: after, screen: LockedWallet, name: Read SINK again; apply relaunch-consent and wait 30 s more }
+      outcomes:
+        - id: ok-dump-sent
+          kind: success
+          at: at-crash
+          message: 'Opted in, renderer-native: a crashed session and a fatal event with attachment(..., MDMP) arrive at crash time'
+          source: 'public/sentryConsent.js:86'
+          verified: false
+        - id: ok-main-exception-once
+          kind: success
+          at: at-crash
+          message: 'main-exception: one event "Error: qa-main-throw" when opted in, none when opted out; the app keeps running in both'
+          source: 'public/electron.js:37'
+          verified: false
+        - id: ok-main-native-at-next-start
+          kind: success
+          at: relaunch
+          message: 'main-native, opted in: the MDMP event arrives at the relaunch, before or right after the window shows'
+          source: 'public/electron.js:29'
+          verified: false
+        - id: ok-opted-out-silent
+          kind: success
+          at: after
+          message: 'Opted out: nothing at crash, quit or relaunch, and nothing after opting in on relaunch (the dump is deleted, not queued)'
+          source: 'public/sentryConsent.js:86'
+          verified: false
+        - id: edge-upgrade-first-crash
+          kind: error
+          at: relaunch
+          message: 'upgrade-in, first stack launch: a main-native crash before the window loaded is dropped (no consent file yet)'
+          source: 'public/sentryConsent.js:24'
+          verified: false
+        - id: edge-renderer-dead-window
+          kind: error
+          at: at-crash
+          message: After a renderer crash the window stays blank; the app must be quit and relaunched (no automatic reload)
+          source: 'public/electron.js:116'
+          verified: false
+
+  - id: offline-queue
+    name: Event while offline, delivered later
+    feature: main-consent
+    axes: [retry-consent]
+    setups: [fresh-in, pkg-in]
+    path:
+      steps:
+        - { id: offline, screen: Dashboard, name: Turn Wi-Fi off (or stop the sink for the local setups) }
+        - { id: throw, screen: Dashboard, name: Run a main-exception crash and a PAGE throw }
+        - { id: change, screen: Settings, name: 'Apply retry-consent, quit with Cmd+Q' }
+        - { id: online, screen: LockedWallet, name: 'Wi-Fi on / sink started, relaunch, wait 60 s' }
+      outcomes:
+        - id: ok-queued-delivered
+          kind: success
+          at: online
+          message: Still opted in, the two events arrive after the relaunch
+          source: 'public/sentryConsent.js:89'
+          verified: false
+        - id: ok-retry-refused
+          kind: success
+          at: online
+          message: Opted out while offline, no event arrives at the relaunch. Each flush drops only one queued request, so the rest stay on disk and are sent after a later opt-in
+          source: 'public/sentryConsent.js:86'
+          verified: true
+        - id: edge-revoke-waits-offline
+          kind: error
+          at: change
+          message: Opting out while offline can take up to about 4 s (client.flush(2000), processing then transport drain) before CONSENT turns false, usually much less
+          source: 'public/electron.js:44'
+          verified: false
+          note: Stopping the sink makes requests fail fast (connection refused); Wi-Fi off can behave differently. Do both if time allows.
+
+  - id: reset-data
+    name: Reset
+    feature: data-reset
+    axes: [reset-kind]
+    setups: [fresh-in, pkg-in]
+    path:
+      steps:
+        - { id: reset, screen: Settings, name: Run the reset; for Reset all data type "I want to reset my wallet" and click "Reset all data" }
+        - { id: check, screen: Welcome, name: Read CONSENT and SINK }
+        - { id: relaunch, screen: Welcome, name: 'Cmd+Q, relaunch, crash with main-exception' }
+      outcomes:
+        - id: ok-reset-all-revokes
+          kind: success
+          at: check
+          message: 'reset-all-data: the window closes (it may only hide to the tray on macOS); CONSENT is {"enabled":false}; the relaunch crash sends nothing'
+          source: 'public/electron.js:209'
+          verified: false
+        - id: edge-reset-wallet-keeps-consent
+          kind: error
+          at: check
+          message: 'Reset wallet: Welcome shows, CONSENT is still {"enabled":true} and a main-exception still reports, also after "Get started"'
+          source: 'src/sagas/wallet.js:851'
+          verified: false
+          note: wallet:sentry is not in LOCAL_STORE storageKeys, so a wallet reset keeps the consent, and Get started keeps a choice already made.
+
+  - id: startup-step-failure
+    name: Preload startup step throws
+    feature: preload-consent
+    axes: [step]
+    setups: [fresh-in, fresh-out]
+    path:
+      steps:
+        - { id: seed, screen: Dashboard, name: Set the step's bad value in PAGE }
+        - { id: reload, screen: LockedWallet, name: location.reload() }
+        - { id: check, screen: LockedWallet, name: 'Read PAGE console (preload world), SINK, and that the app still loads' }
+        - { id: undo, screen: LockedWallet, name: Restore the value and reload }
+      outcomes:
+        - id: ok-step-reported
+          kind: success
+          at: check
+          message: 'systray: console "preload: startup step syncSystrayMessage failed"; opted in, one SyntaxError event in SINK; opted out, none; the other steps still ran'
+          source: 'public/preload.js:135'
+          verified: false
+        - id: edge-first-step-reported-late
+          kind: success
+          at: check
+          message: 'legacy: console shows "preload: startup step clearLegacyHardwareData failed"; opted in, one SyntaxError event still reaches SINK, because failures are reported after every step has run, so after consent is applied'
+          source: 'public/startupSteps.js:32'
+          verified: true
+
+  - id: bridge-probe
+    name: Consent cannot be forged from the page
+    feature: preload-consent
+    axes: [probe]
+    setups: [fresh-out]
+    path:
+      steps:
+        - { id: probe, screen: Dashboard, name: Type the probe in PAGE }
+        - { id: check, screen: Dashboard, name: 'Read PAGE output, CONSENT and SINK; then throw a page error' }
+      outcomes:
+        - id: ok-channel-blocked
+          kind: success
+          at: probe
+          message: 'IPC channel "sentry:consent" is not allowlisted in public/bridge.js'
+          source: 'public/bridge.js:46'
+          verified: false
+        - id: ok-string-is-false
+          kind: success
+          at: check
+          message: sentrySetEnabled('true') leaves reporting off; CONSENT stays absent (a false is never written over no consent); the follow-up throw is not sent
+          source: 'public/bridge.js:92'
+          verified: false
+        - id: ok-capture-dropped
+          kind: success
+          at: check
+          message: sentryCapture returns undefined and nothing reaches SINK while opted out
+          source: 'public/bridge.js:95'
+          verified: false
+        - id: ok-no-require
+          kind: success
+          at: probe
+          message: '"undefined"'
+          source: 'public/electron.js:94'
+          verified: false
+
+  - id: ipc-listener-error
+    name: Malformed Ledger reply
+    feature: page-error-forwarding
+    axes: []
+    setups: [fresh-in, fresh-out]
+    path:
+      steps:
+        - { id: open, screen: StartHardwareWallet, name: Wallet type > Hardware wallet (no device needed) }
+        - { id: send, screen: StartHardwareWallet, name: "MAIN: process.mainModule.require('electron').webContents.getAllWebContents()[0].send('ledger:version', null)" }
+        - { id: check, screen: ModalUnhandledError, name: Read the modal and SINK }
+      outcomes:
+        - id: ok-modal-and-one-event
+          kind: success
+          at: check
+          message: The "Ooops... Something went wrong..." modal opens; opted in, exactly one event (source=window.error); opted out, none until "Send error report"
+          source: 'src/constants.js:120'
+          verified: false
+
+  - id: external-url
+    name: Explorer URL without a scheme
+    feature: external-url
+    axes: []
+    setups: [fresh-in]
+    path:
+      steps:
+        - { id: seed, screen: Dashboard, name: "In PAGE, change the stored network settings' explorer to 'localhost:3001' (the form now refuses it), reload" }
+        - { id: click, screen: Dashboard, name: Click "Public Explorer" in the top bar }
+        - { id: check, screen: Dashboard, name: Read PAGE console and SINK }
+      outcomes:
+        - id: ok-refused-quietly
+          kind: success
+          at: check
+          message: 'PAGE logs "Refusing to open external URL: localhost:3001"; no modal, no browser, nothing in SINK'
+          source: 'src/utils/helpers.js:41'
+          verified: false
+        - id: ok-form-refuses
+          kind: success
+          at: seed
+          message: The explorer URL must start with http:// or https://
+          source: 'src/components/NetworkSettingsForm.js:137'
+          verified: false
+          note: Shown when trying to save the same value through Network Settings > Custom network.
+
+  - id: smoke-noise
+    name: Normal use, opted in
+    feature: noise
+    axes: [flow]
+    setups: [fresh-in, pkg-in]
+    path:
+      steps:
+        - { id: walk, screen: Dashboard, name: 'Mark SINK, walk the flow' }
+        - { id: count, screen: Dashboard, name: Count and read the envelopes it produced }
+      outcomes:
+        - id: ok-silent
+          kind: success
+          at: count
+          message: No event from onboarding, send or the settings tour; no client_report, ever; no LavaMoat policy error in PAGE
+          source: 'public/preload.js:24'
+          verified: false
+        - id: edge-network-rejections
+          kind: error
+          at: count
+          message: 'network-drop: note every unhandledrejection event (wallet-lib websocket / axios) and how many'
+          source: 'src/utils/wallet.js:508'
+          verified: false
+          note: "Open question on hathor-wallet#899: should these be filtered? This count is the answer's input."
+
+constraints:
+  - id: c-toggle-unchanged
+    action: toggle-consent
+    when: { toggle: unchanged }
+    class: edge
+    outcome: ok-applied-live
+    note: Continue without a change still calls allow/disallow, re-sending the value; a revoke still waits for a flush.
+  - id: c-modal-opted-in
+    action: crash-modal-report
+    when: { launch-consent: in }
+    class: edge
+    outcome: edge-button-hidden-opted-in
+    note: The rest of the path is not reachable when opted in.
+  - id: c-double-click
+    action: crash-modal-report
+    when: { clicks: twice }
+    class: edge
+    outcome: edge-double-click
+    note: Nothing debounces the button; the SDK's Dedupe makes the second click a no-op.
+  - id: c-errorless
+    action: page-error
+    when: { error-kind: errorless }
+    class: edge
+    outcome: edge-errorless-no-modal
+    note: ResizeObserver-style notices.
+  - id: c-dedupe
+    action: page-error
+    when: { error-kind: same-twice, launch-consent: in }
+    class: edge
+    outcome: edge-dedupe
+    note: WeakSet in reportPageError.
+  - id: c-string-reason
+    action: page-error
+    when: { error-kind: reject-string, launch-consent: in }
+    class: edge
+    outcome: edge-string-reason
+    note: Non-Error reasons are wrapped.
+  - id: c-tray-exit
+    action: quit-methods
+    when: { quit: tray-exit }
+    class: edge
+    outcome: edge-tray-exit-session-exited
+    note: Tray Exit calls app.quit, so the SDK's will-quit handler ends the session.
+  - id: c-window-close
+    action: quit-methods
+    when: { quit: window-close }
+    class: edge
+    outcome: edge-window-close-hides
+    note: With the tray on, close hides the window.
+  - id: c-legacy
+    action: launch-quit
+    when: { install: legacy-hw }
+    class: edge
+    outcome: err-legacy-wiped
+    note: clearLegacyHardwareData runs before syncSentryConsent on purpose.
+  - id: c-upgrade-first-crash
+    action: main-crash
+    when: { install: upgrade, crash: main-native }
+    class: edge
+    outcome: edge-upgrade-first-crash
+    note: Only on the very first stack launch; crash before the window loads to hit it (run the snippet in MAIN as soon as the inspector attaches).
+  - id: c-renderer-dead
+    action: main-crash
+    when: { crash: renderer-native }
+    class: edge
+    outcome: edge-renderer-dead-window
+    note: Observe and record; the app has no renderer-gone handler.
+  - id: c-crash-sdk
+    action: main-crash
+    when: { build: packaged }
+    class: lib-risk
+    note: '@sentry/electron 3.0.7 is old for Electron 42; native crash capture (Crashpad paths, the SDK''s injected preload) is where it could break silently.'
+  - id: c-offline-revoke
+    action: offline-queue
+    when: { retry-consent: out }
+    class: edge
+    outcome: edge-revoke-waits-offline
+    note: The flush before a revoke is bounded by client.flush(2000).
+  - id: c-reset-wallet
+    action: reset-data
+    when: { reset-kind: [settings-reset-wallet, modal-reset-wallet] }
+    class: edge
+    outcome: edge-reset-wallet-keeps-consent
+    note: Intended, a reset keeps wallet:sentry and Get started keeps it too.
+  - id: c-step-legacy
+    action: startup-step-failure
+    when: { step: legacy, launch-consent: in }
+    class: edge
+    outcome: edge-first-step-reported-late
+    note: Failures are reported after all steps, so the consent step has already enabled the client.
+  - id: c-network-noise
+    action: smoke-noise
+    when: { flow: network-drop }
+    class: edge
+    outcome: edge-network-rejections
+    note: Feeds the filtering decision.
