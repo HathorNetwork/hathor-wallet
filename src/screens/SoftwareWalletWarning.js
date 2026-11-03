@@ -45,15 +45,15 @@ function SoftwareWalletWarning() {
           <div className="d-flex align-items-start flex-column">
             <div>
               <SoftwareWalletWarningMessage />
-              <form ref={confirmFormRef} className={`w-100 mb-4 ${formValidated && 'was-validated'}`}>
+              <form ref={confirmFormRef} data-testid="software-warning-form" className={`w-100 mb-4 ${formValidated && 'was-validated'}`}>
                 <div className="form-check">
-                  <input required type="checkbox" className="form-check-input" id="confirmWallet" />
+                  <input required type="checkbox" className="form-check-input" id="confirmWallet" data-testid="software-warning-checkbox" />
                   <label className="form-check-label" htmlFor="confirmWallet">{t`Ok, I got it! I want to continue using a software wallet.`}</label>
                 </div>
               </form>
               <div className="d-flex justify-content-between flex-row w-100">
                 <button onClick={() => navigate(-1)} type="button" className="btn btn-secondary">{t`Back`}</button>
-                <button onClick={create} type="button" className="btn btn-hathor">{t`Continue`}</button>
+                <button onClick={create} type="button" data-testid="software-warning-continue" className="btn btn-hathor">{t`Continue`}</button>
               </div>
             </div>
           </div>
