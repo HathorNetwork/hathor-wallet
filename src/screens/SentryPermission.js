@@ -81,12 +81,12 @@ function SentryPermission() {
           <p>{t`The report NEVER collects any sensitive data, such as your seed, your private keys, your addresses, or your balances.`}</p>
         <form>
           <div className="form-check mt-4 mb-4">
-            <input required type="checkbox" onChange={(e) => checkboxChanged(e)} checked={checkboxPermission} className="form-check-input" id="permission" />
+            <input required type="checkbox" onChange={(e) => checkboxChanged(e)} checked={checkboxPermission} className="form-check-input" id="permission" data-testid="sentry-permission-checkbox" />
             <label className="form-check-label" htmlFor="permission"> {t`I allow Hathor Wallet to report error information to Hathor team.`}</label>
           </div>
         </form>
           <div className="d-flex align-items-center flex-column">
-            <button onClick={goContinue} type="button" className="btn btn-hathor">{t`Continue`}</button>
+            <button onClick={goContinue} type="button" className="btn btn-hathor" data-testid="sentry-permission-continue">{t`Continue`}</button>
           </div>
         </div>
         <InitialImages />
