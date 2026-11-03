@@ -83,6 +83,7 @@
     "build-js": "react-app-rewired --openssl-legacy-provider build",
     "build": "react-app-rewired build",
     "test:electron": "node --test 'tests/electron/*.test.js'",
+    "test:ledger-e2e": "node tests/ledger-e2e/run.mjs",
     "test": "react-app-rewired test",
     "e2e": "cypress run",
     "eject": "react-scripts eject",
