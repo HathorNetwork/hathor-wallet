@@ -5,10 +5,11 @@ Reference for `graph.yaml`. The validator (`qa-graph validate`) errors on the re
 ## Contents
 
 - [Required fields](#required-fields) · [Top level](#top-level)
-- [environments](#environments) · [features](#features) · [flags](#flags) · [axes](#axes) · [setups](#setups) · [actions](#actions) · [constraints](#constraints) · [check](#check)
+- [environments](#environments) · [features](#features) · [flags](#flags) · [axes](#axes) · [setups](#setups) · [actions](#actions) · [constraints](#constraints) · [check](#check) · [selection](#selection)
 - [How scenarios are generated](#how-scenarios-are-generated)
 - [How the run plan is ordered](#how-the-run-plan-is-ordered)
 - [How impact spreads](#how-impact-spreads)
+- [How a change selects scenarios](#how-a-change-selects-scenarios)
 - [Modelling idioms](#modelling-idioms)
 - [YAML traps](#yaml-traps)
 - [Run files](#run-files)
@@ -31,7 +32,7 @@ Everything else is optional, but a field left out loses what it drives: no `file
 
 ## Top level
 
-`check` is the one optional top-level key ([check](#check)).
+`check` and `selection` are the optional top-level keys ([check](#check), [selection](#selection)).
 
 `costs` maps a cost key to a number. Every cost named elsewhere must be one of these keys. The standard scale:
 
@@ -140,6 +141,23 @@ check:
 
 `check` diffs `<base>...HEAD`, so it sees committed changes only. Commit the code and the graph before reading its result. Its warnings never change the exit code; only schema errors exit 1.
 
+## selection
+
+Optional. Says which changed files run the whole e2e suite and which run nothing, beyond what the features' `files` map. The e2e runner (`--changed`) reads it; see [How a change selects scenarios](#how-a-change-selects-scenarios).
+
+```yaml
+selection:
+  full: [package.json, public/electron.js, src/store/, qa/e2e/lib/]
+  ignore: ['*.md', locale/, 'src/**/*.test.js']
+```
+
+- `full`: glob patterns. A changed file matching one runs every scenario of every graph.
+- `ignore`: glob patterns. A changed file matching one runs nothing.
+- Patterns: `**` matches across directories, `*` and `?` within one; a pattern ending in `/` is a directory prefix; a pattern with no `/` matches the file name anywhere, as in `.gitignore`. Quote patterns that start with `*`.
+- When several graphs define `selection`, the runner takes the union, so the block can live in any one of them.
+
+`validate` errors when `full` or `ignore` isn't a list of non-empty strings, and warns about other keys.
+
 ## How scenarios are generated
 
 A **scenario** is one (action, setup, action-axis values) combination. Its id is `<action>:<setup>:<values>`, with the action's axis values joined by `.` in the order of `axes`. With no action axes, the id is `<action>:<setup>`.
@@ -166,6 +184,19 @@ A **pick** is an in-scope feature, a flag, or an axis value. The Impact view pre
 - **via axis**: an axis value reaches every action that has a scenario on it. The values are the picked one, those the picked feature introduces, those a picked flag lists in `axisValues`, and those introduced by any feature reached via code or flag.
 
 A feature reached via code or flag re-runs every scenario of the actions it owns, plus the scenarios on the values it introduces. A feature reached only via axis re-runs only the scenarios on those values.
+
+## How a change selects scenarios
+
+`selectByChange(graphs, changedFiles)` (`tools/select.js`) classifies each changed file; the first match wins:
+
+1. **full**: it matches a `selection.full` pattern, so every scenario runs.
+2. **ignored**: it matches a `selection.ignore` pattern, so nothing runs for it.
+3. **area**: it is a graph's own file or under its scenario directory (the caller passes these paths), so every scenario of that graph runs.
+4. **mapped**: some in-scope feature's `files` names it (an exact path, or a directory prefix ending in `/`). Those features become picks, and each pick spreads with [impact](#how-impact-spreads), one graph at a time, since a scenario id belongs to one graph.
+5. **unmapped**: anything else under `src/` or `public/`. Nothing specific runs; the e2e runner adds its tier-1 floor and lists the file.
+6. **other**: anything else, which runs nothing.
+
+Each selected scenario carries the reasons it was picked: the file, the feature it maps to, and how impact reached the scenario's own feature. `qa-graph check` without `--graph` lists every tracked file under `src/` and `public/` that would be unmapped, the same ones `--strict` fails on, so the mapping can't quietly rot.
 
 ## Modelling idioms
 

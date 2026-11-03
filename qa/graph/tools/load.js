@@ -46,8 +46,9 @@ const mappings = (value) => asList(value).filter(isMapping);
 
 // Keys each object type may carry; anything else is reported as a likely typo.
 const KNOWN_KEYS = {
-  graph: ['version', 'costs', 'check', ...TOP_LEVEL_LISTS],
+  graph: ['version', 'costs', 'check', 'selection', ...TOP_LEVEL_LISTS],
   check: ['base', 'inventories'],
+  selection: ['full', 'ignore'],
   inventory: ['kind', 'files', 'pattern'],
   environment: ['id', 'name', 'notes'],
   feature: ['id', 'name', 'description', 'status', 'screens', 'files', 'flags', 'links', 'introduces', 'actions'],
@@ -145,6 +146,23 @@ function validateGraph(graph) {
         } catch (e) {
           err(`${where}: invalid pattern (${e.message})`);
         }
+      });
+    }
+  }
+  if (graph.selection !== undefined) {
+    if (!isMapping(graph.selection)) err('graph: selection must be a mapping');
+    else {
+      checkKeys('selection', graph.selection, 'selection');
+      ['full', 'ignore'].forEach((field) => {
+        const value = graph.selection[field];
+        if (value === undefined) return;
+        if (!Array.isArray(value)) {
+          err(`selection: ${field} must be a list of glob patterns`);
+          return;
+        }
+        value.forEach((p, index) => {
+          if (typeof p !== 'string' || p.trim() === '') err(`selection: ${field}[${index}] must be a non-empty string`);
+        });
       });
     }
   }

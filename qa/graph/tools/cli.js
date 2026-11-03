@@ -13,8 +13,10 @@ const { loadGraph, validateGraph } = require('./load');
 const { renderHtml } = require('./render');
 const { checkFreshness, describeVersion, extractNames } = require('./freshness');
 const { allScenarios } = require('./scenarios');
+const { unmappedFiles } = require('./select');
 
-const USAGE = 'Usage: qa-graph validate|render|check|sources|scenarios --graph <file> [--out <file>] [--base <ref>]';
+const USAGE = 'Usage: qa-graph validate|render|check|sources|scenarios [--graph <file>] [--out <file>] [--base <ref>]\n'
+  + 'Without --graph, the command runs on every *.yaml next to the tools directory.';
 const OPTIONS = ['graph', 'out', 'base'];
 const KIT_ROOT = path.resolve(__dirname, '..');
 
@@ -30,10 +32,17 @@ function parseArgs(argv) {
     i += 1;
     options[key] = rest[i];
   }
-  if (!options.graph) throw new Error(`Missing --graph. ${USAGE}`);
+  if (!options.graph) return { command, options };
   options.graph = path.resolve(options.graph);
-  options.out = path.resolve(options.out || path.join(path.dirname(options.graph), 'dist', 'graph.html'));
+  const name = path.basename(options.graph, path.extname(options.graph));
+  options.out = path.resolve(options.out || path.join(path.dirname(options.graph), 'dist', `${name}.html`));
   return { command, options };
+}
+
+/** The graphs beside the tools directory, e.g. qa/graph/*.yaml. */
+function defaultGraphs() {
+  const dir = path.resolve(__dirname, '..');
+  return fs.readdirSync(dir).filter((f) => /\.ya?ml$/.test(f)).sort().map((f) => path.join(dir, f));
 }
 
 const git = (cwd, args) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -103,8 +112,30 @@ function readInventories(root, check) {
   });
 }
 
+/** `check` across all graphs: src/ and public/ files no feature or selection pattern covers. */
+function printUnmapped(graphPaths) {
+  const root = repoRootOf(graphPaths[0]);
+  if (!root) return;
+  const tracked = git(root, ['ls-files']).split('\n').filter(Boolean);
+  const graphs = graphPaths.map((p) => ({ graph: loadGraph(p) }));
+  const files = unmappedFiles(graphs, tracked);
+  files.forEach((f) => console.log(`NOTE unmapped: ${f} (add it to a feature's files, or to selection.full/ignore)`));
+  console.log(`${files.length} unmapped file(s) under src/ and public/`);
+}
+
 function run(argv) {
   const { command, options } = parseArgs(argv);
+  if (!options.graph) {
+    const graphs = defaultGraphs();
+    if (graphs.length === 0) throw new Error(`No graphs found. ${USAGE}`);
+    let code = 0;
+    graphs.forEach((graphPath) => {
+      console.log(`== ${path.relative(process.cwd(), graphPath)}`);
+      code = Math.max(code, run([command, ...argv.slice(1), '--graph', graphPath]));
+    });
+    if (command === 'check') printUnmapped(graphs);
+    return code;
+  }
   const graph = loadGraph(options.graph);
 
   if (command === 'validate') {
