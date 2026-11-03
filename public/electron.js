@@ -6,7 +6,7 @@
  */
 
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Tray, Menu, dialog, ipcMain } = require('electron')
+const { app, BrowserWindow, Tray, Menu, dialog, ipcMain, session } = require('electron')
 const contextMenu = require('./contextMenu')
 const Sentry = require('@sentry/electron')
 const { ElectronOfflineNetTransport } = require('@sentry/electron/main')
@@ -16,6 +16,7 @@ const path = require('path');
 const constants = require('./constants');
 const { instance: Ledger } = require('./ledger');
 const { ledgerMethods } = require('./bridge');
+const { installBrotliGuard } = require('./brotliGuard');
 const {
   CONSENT_CHANNEL,
   createConsentStore,
@@ -77,6 +78,8 @@ contextMenu({
 let mainWindow
 
 function createWindow () {
+  installBrotliGuard(session.defaultSession);
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     show: false,
