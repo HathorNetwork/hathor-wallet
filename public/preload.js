@@ -11,6 +11,7 @@ const Sentry = require('@sentry/electron')
 const constants = require('./constants');
 const { createElectronAPI } = require('./bridge');
 const { CONSENT_CHANNEL } = require('./sentryConsent');
+const { runStartupSteps } = require('./startupSteps');
 
 // Init must run enabled, or the SDK skips installing the integration that
 // forwards renderer events to the main process. Reporting is then switched
@@ -119,9 +120,6 @@ const startupSteps = [
   syncSystrayMessage,
 ];
 
-/**
- * Each step runs on its own so a failure in one still lets the others run.
- */
 process.once('loaded', () => {
   // A debugger attached while the window first loads can make the preload
   // also run in the window's initial about:blank document, where
@@ -131,13 +129,9 @@ process.once('loaded', () => {
   if (window.location.href === 'about:blank') {
     return;
   }
-  for (const step of startupSteps) {
-    try {
-      step();
-    } catch (error) {
-      console.error(`preload: startup step ${step.name} failed`, error);
-      // Sent only with consent, like any other preload error.
-      Sentry.captureException(error);
-    }
-  }
+  runStartupSteps(startupSteps, {
+    log: (message, error) => console.error(message, error),
+    // Sent only with consent, like any other preload error.
+    report: (error) => Sentry.captureException(error),
+  });
 })

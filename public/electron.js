@@ -51,6 +51,8 @@ let tray = null
 let iconOS = null;
 let trayIcon = null;
 let msgCheck = false;
+// Set once the app is quitting, so the systray close handler lets the window go.
+let quitting = false;
 // We need to save the event that brought the check message from the renderer process, in order to send back to it
 let msgCheckEvent = null;
 
@@ -183,7 +185,7 @@ function createWindow () {
   };
 
   mainWindow.on('close', (e) => {
-    if (tray !== null && !tray.isDestroyed()) {
+    if (!quitting && tray !== null && !tray.isDestroyed()) {
       e.preventDefault()
       // In case the user is using systray we don't close the app, just hide it
       if (!msgCheck){
@@ -263,7 +265,8 @@ const getMenu = (firstItem) => {
       label: 'Exit',
       type: 'normal',
       click() {
-        app.exit()
+        // app.exit() would skip the quit events, so Sentry never ends the session.
+        app.quit()
       }
     }
   ])
@@ -273,6 +276,10 @@ function startSystray() {
   tray = new Tray(path.join(__dirname, trayIcon));
   tray.setContextMenu(getMenu(systrayMenuItemHide));
 }
+
+app.on('before-quit', () => {
+  quitting = true;
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
