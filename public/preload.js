@@ -10,6 +10,7 @@ const { contextBridge, ipcRenderer, shell } = require('electron')
 const Sentry = require('@sentry/electron')
 const constants = require('./constants');
 const { createElectronAPI } = require('./bridge');
+const { CONSENT_CHANNEL } = require('./sentryConsent');
 
 // Init must run enabled, or the SDK skips installing the integration that
 // forwards renderer events to the main process. Reporting is then switched
@@ -34,11 +35,20 @@ function setSentryEnabled(enabled) {
   }
 }
 
+/**
+ * Apply the user's consent here and in the main process, whose own Sentry
+ * client sends crash dumps and sessions.
+ */
+function applySentryConsent(enabled) {
+  setSentryEnabled(enabled);
+  ipcRenderer.send(CONSENT_CHANNEL, enabled);
+}
+
 contextBridge.exposeInMainWorld('electronAPI', createElectronAPI({
   ipcRenderer,
   shell,
   Sentry,
-  setSentryEnabled,
+  setSentryEnabled: applySentryConsent,
 }));
 
 process.once('loaded', () => {
@@ -57,7 +67,7 @@ process.once('loaded', () => {
   }
 
   // Read consent after the migration above, which may clear it.
-  setSentryEnabled(localStorage.getItem('wallet:sentry') === 'true');
+  applySentryConsent(localStorage.getItem('wallet:sentry') === 'true');
 
   // Set closed in localStorage, so user does not open in the wallet page
   localStorage.setItem('localstorage:closed', 'true');
