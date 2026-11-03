@@ -1,0 +1,115 @@
+version: 1
+costs: { cheap: 1, medium: 5, expensive: 20, very-expensive: 60 }
+environments:
+  - { id: testnet, name: Testnet, notes: Public test network }
+features:
+  - id: send-f
+    name: Send
+    description: Send tokens to an address
+    status: in-scope
+    screens: [SendAmountInput]
+    files: [src/screens/Send/]
+    flags: []
+    links:
+      - { to: pin-f, reason: PIN confirms send }
+    introduces: []
+    actions: [send]
+  - id: pin-f
+    name: PIN
+    description: PIN confirmation
+    status: in-scope
+    screens: [PinScreen]
+    files: [src/screens/PinScreen.js]
+    flags: []
+    links: []
+    introduces: []
+    actions: []
+  - id: fee-f
+    name: Fee-based tokens
+    description: Tokens that pay fees in HTR
+    status: in-scope
+    screens: []
+    files: []
+    flags: [fbt]
+    links: []
+    introduces: ['token:fee']
+    actions: []
+  - id: swap-f
+    name: Token swap
+    description: Swap tokens
+    status: out-of-scope
+    screens: []
+    files: [src/screens/TokenSwap/]
+    flags: []
+    links: []
+    introduces: []
+    actions: []
+flags:
+  - id: fbt
+    name: fee-based-tokens.rollout
+    constant: FBT_FEATURE_TOGGLE
+    default: false
+    gates: [fee-f]
+    combinesWith: []
+    appliesAt: next-start
+    status: active
+axes:
+  - id: facade
+    name: Wallet facade
+    kind: setup
+    values: [{ id: ws, name: Wallet service }, { id: fn, name: Fullnode }]
+    how: Toggle the wallet service in settings
+    switch: { cost: expensive, transitions: [] }
+  - id: addr
+    name: Address mode
+    kind: setup
+    values: [{ id: single, name: Single address }, { id: multi, name: Multi address }]
+    how: Settings, address mode
+    switch:
+      cost: cheap
+      transitions:
+        - { from: multi, to: single, impossible: true }
+      fallback: { cost: very-expensive, how: reset wallet and re-import }
+  - id: dest
+    name: Destination
+    kind: action
+    values: [{ id: simple, name: Simple }, { id: multisig, name: Multisig }, { id: shielded, name: Shielded }]
+    how: Paste the address
+    switch: { cost: cheap, transitions: [] }
+  - id: token
+    name: Token
+    kind: action
+    values: [{ id: htr, name: HTR }, { id: fee, name: Fee token }]
+    how: Pick the token
+    switch: { cost: cheap, transitions: [] }
+  - id: privacy
+    name: Privacy
+    kind: action
+    values: [{ id: public, name: Public }, { id: private, name: Private }]
+    how: Toggle privacy
+    switch: { cost: cheap, transitions: [] }
+setups:
+  - { id: ws-single, name: WS single, values: { facade: ws, addr: single }, environment: testnet, runnable: true }
+  - { id: ws-multi, name: WS multi, values: { facade: ws, addr: multi }, environment: testnet, runnable: true }
+  - { id: fn-single, name: FN single, values: { facade: fn, addr: single }, environment: testnet, runnable: true }
+  - { id: fn-multi, name: FN multi, values: { facade: fn, addr: multi }, environment: testnet, runnable: true }
+actions:
+  - id: send
+    name: Send tokens
+    feature: send-f
+    axes: [dest, token, privacy]
+    setups: [ws-single, ws-multi, fn-single, fn-multi]
+    path:
+      steps:
+        - { id: addr-in, screen: SendAddressInput, name: Enter address }
+        - { id: amount, screen: SendAmountInput, name: Enter amount }
+        - { id: confirm, screen: SendConfirmScreen, name: Confirm }
+      outcomes:
+        - { id: ok-sent, kind: success, at: confirm, message: Transaction sent, source: 'src/screens/Send/SendConfirmScreen.js:1', verified: false }
+        - { id: err-priv, kind: error, at: amount, message: The selected privacy mode requires a shielded address., source: 'src/screens/Send/SendAmountInput.js:1', verified: false }
+        - { id: err-htr, kind: error, at: confirm, message: Insufficient HTR to cover the network fee., source: 'src/screens/Send/SendConfirmScreen.js:2', verified: false }
+constraints:
+  - { id: c-shielded-fn, action: send, when: { facade: fn, dest: shielded }, class: invalid, note: Fullnode facade cannot build shielded outputs }
+  - { id: c-priv, action: send, when: { privacy: private, dest: [simple, multisig] }, class: rejected, outcome: err-priv, note: Private needs a shielded destination }
+  - { id: c-multisig, action: send, when: { dest: multisig }, class: lib-risk, note: Multisig signing lives in the lib }
+  - { id: c-fee, action: send, when: { token: fee }, class: edge, outcome: err-htr, note: Fee tokens need HTR for the fee }

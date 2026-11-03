@@ -126,7 +126,8 @@
     "null-loader": "4.0.1",
     "process": "0.11.10",
     "sass": "1.70.0",
-    "ttag-cli": "1.11.2"
+    "ttag-cli": "1.11.2",
+    "yaml": "2.8.0"
   },
   "build": {
     "appId": "network.hathor.macos.wallet",
