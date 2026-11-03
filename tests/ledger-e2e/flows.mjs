@@ -122,6 +122,57 @@ async function selectToken(ctx, symbol) {
   await ctx.cdp.waitFor(`document.querySelector('.token-wrapper.selected') && document.querySelector('.token-wrapper.selected').innerText.trim() === ${JSON.stringify(symbol)}`);
 }
 
+
+/**
+ * A hardware wallet left open must not reopen on the next launch when the
+ * device is gone: the preload drops its access data at startup.
+ */
+function closedHardwareWalletFlow({ id, early }) {
+  return {
+    id,
+    title: `Closed hardware wallet does not reopen without the device (${early ? 'early CDP attach' : 'normal attach'})`,
+    async run(ctx) {
+      await ctx.startSpeculos();
+      if (!(await ctx.cdp.eval('location.hash === "#/wallet/"'))) await startHardwareWallet(ctx);
+      const saved = await lsGet(ctx, 'localstorage:accessdata');
+      const before = JSON.parse(saved);
+      assert(before && (before.walletFlags & 0x02) > 0, `precondition: hardware access data stored (${saved})`);
+
+      // The early attach only sometimes lands before the first navigation
+      // commits, so relaunch until it does. Each attempt restores the access
+      // data the previous launch removed, as if the wallet had been left open.
+      const maxAttempts = early ? 8 : 1;
+      let attempt = 0;
+      let raceFired = false;
+      let route;
+      let accessData;
+      let contextsSeen = [];
+      while (attempt < maxAttempts && !(early && raceFired)) {
+        attempt += 1;
+        if (attempt > 1) await ctx.cdp.eval(`localStorage.setItem('localstorage:accessdata', ${JSON.stringify(saved)})`);
+        const consoleBefore = ctx.cdp.console.length;
+        await ctx.restartApp({ early, beforeLaunch: attempt === 1 ? () => ctx.stopSpeculos() : undefined });
+        const { cdp } = ctx;
+        await cdp.waitFor('location.hash !== "" && document.body.innerText.length > 20', { what: 'app to route' });
+        // Give the router time to settle before judging where the app landed.
+        await new Promise((r) => setTimeout(r, 3000));
+        // The race shows as the preload's isolated world being created for a
+        // document other than the wallet's (the initial about:blank).
+        raceFired = raceFired || cdp.contexts.some((c) => c.type === 'isolated' && !c.origin.startsWith('file://'));
+        const stepErrors = cdp.console.slice(consoleBefore).filter((c) => c.text.includes('preload: startup step'));
+        assert(stepErrors.length === 0, `relaunch ${attempt} logged preload startup step errors: ${stepErrors.map((c) => c.text.slice(0, 200)).join(' | ')}`);
+        contextsSeen = cdp.contexts.map((c) => `${c.type}:${c.origin || '(empty)'}`);
+        route = await cdp.eval('location.hash');
+        accessData = await lsGet(ctx, 'localstorage:accessdata');
+        eq(accessData, null, `hardware access data after relaunch ${attempt}`);
+        assert(route === '#/wallet_type/' || route === '#/welcome/', `relaunch ${attempt} landed on ${route}, expected the wallet type or welcome screen`);
+      }
+      if (early) assert(raceFired, `early attach never hit the first navigation in ${attempt} relaunches`);
+      return { route, accessDataAfterRelaunch: accessData, relaunches: attempt, storageRaceFired: raceFired, contextsSeen };
+    },
+  };
+}
+
 export const FLOWS = [
   {
     id: 'hw-start',
@@ -283,4 +334,6 @@ export const FLOWS = [
       return { route, alert: 'Ledger disconnected! ...', unhandledErrorModal: false };
     },
   },
+  closedHardwareWalletFlow({ id: 'closed-hw-no-reopen', early: false }),
+  closedHardwareWalletFlow({ id: 'closed-hw-no-reopen-early', early: true }),
 ];

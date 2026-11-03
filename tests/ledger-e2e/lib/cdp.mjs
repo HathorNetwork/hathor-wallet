@@ -63,9 +63,15 @@ export class CDP {
     this.pending = new Map();
     this.console = [];
     this.exceptions = [];
+    this.contexts = [];
   }
 
-  async connect({ timeout = 60000 } = {}) {
+  /**
+   * @param {boolean} [early] Attach to the first page target and evaluate
+   *   right away, as a debugger racing the first navigation would. Used to
+   *   reproduce the preload's storage race; flows normally leave it off.
+   */
+  async connect({ timeout = 60000, early = false } = {}) {
     const end = Date.now() + timeout;
     let target;
     while (Date.now() < end) {
@@ -74,10 +80,12 @@ export class CDP {
         // Attach only once the app document has parsed its <title>: on
         // Electron 42 an attach during the first navigation made the
         // preload's `loaded` handler throw on localStorage.
-        target = list.find((t) => t.type === 'page' && t.url.startsWith('file:') && t.title && !t.title.startsWith('file:'));
+        target = list.find((t) => t.type === 'page' && (early
+          ? !t.url.startsWith('devtools://')
+          : t.url.startsWith('file:') && t.title && !t.title.startsWith('file:')));
         if (target) break;
       } catch (_e) { /* not up yet */ }
-      await sleep(300);
+      await sleep(early ? 20 : 300);
     }
     if (!target) throw new Error('no page target on CDP port');
     this.ws = new this.WebSocket(target.webSocketDebuggerUrl);
@@ -91,7 +99,20 @@ export class CDP {
     });
     const appContext = new Promise((resolve) => { this.onAppContext = resolve; });
     await this.send('Runtime.enable');
-    await Promise.race([appContext, sleep(10000)]);
+    if (early) {
+      // Keep evaluating until the app document exists; an evaluate that
+      // lands before it commits runs in the window's initial about:blank.
+      let ready = false;
+      appContext.then(() => { ready = true; });
+      const end2 = Date.now() + 10000;
+      while (!ready && !this.closed && Date.now() < end2) {
+        this.send('Runtime.evaluate', { expression: '0' }).catch(() => {});
+        await sleep(10);
+      }
+      if (this.closed) throw new Error('CDP socket closed during the early attach; did the app exit?');
+    } else {
+      await Promise.race([appContext, sleep(10000)]);
+    }
     return target;
   }
 
@@ -104,6 +125,7 @@ export class CDP {
     }
     if (msg.method === 'Runtime.executionContextCreated') {
       const c = msg.params.context;
+      this.contexts.push({ t: Date.now(), origin: String(c.origin), type: c.auxData && c.auxData.type, name: c.name });
       if (c.auxData && c.auxData.isDefault && String(c.origin).startsWith('file://') && this.onAppContext) this.onAppContext(c);
     } else if (msg.method === 'Runtime.consoleAPICalled') {
       const text = msg.params.args.map((a) => (a.value !== undefined ? (typeof a.value === 'object' ? JSON.stringify(a.value) : String(a.value)) : (a.description || a.type))).join(' ');
