@@ -31,6 +31,8 @@ import {
   IGNORE_WS_TOGGLE_FLAG,
   SINGLE_ADDRESS_FEATURE_TOGGLE,
   ADDRESS_MODE,
+  AMOUNT_FORMAT_KEY,
+  AMOUNT_FORMAT_DEFAULT,
   FEATURE_TOGGLE_DEFAULTS,
 } from '../constants';
 import {
@@ -65,6 +67,7 @@ import {
   startWalletSuccess,
   startWalletReset,
   setAddressMode,
+  setAmountFormat,
   setFeatureToggles,
   newUnknownTokensFound,
 } from '../actions';
@@ -158,6 +161,12 @@ export function* startWallet(action) {
   let xpriv = null;
 
   yield put(loadingAddresses(true));
+
+  // Hydrate the wallet-wide amount format preference (network-independent).
+  // startWallet re-runs on every unlock, so this re-applies a persisted choice
+  // onto the freshly-initialized redux state (which defaults to Expanded).
+  const storedAmountFormat = LOCAL_STORE.getItem(AMOUNT_FORMAT_KEY) ?? AMOUNT_FORMAT_DEFAULT;
+  yield put(setAmountFormat(storedAmountFormat));
 
   // Refresh the mirror before the checkForFeatureFlag reads below: the passphrase
   // flow reaches startWallet right after clean_data wiped it, which would make the
@@ -848,6 +857,10 @@ export function* onWalletReset() {
   // are namespaced per network (wallet:address_mode:<network>) and so must
   // be cleared explicitly here.
   walletUtils.clearAllAddressModes();
+  // Same reasoning for the amount format preference: it lives under the
+  // `wallet:` preference prefix, not in storageKeys, so resetStorage() would
+  // leave it behind for the next wallet.
+  LOCAL_STORE.removeItem(AMOUNT_FORMAT_KEY);
   LOCAL_STORE.resetStorage();
   // We must set the lib config network to mainnet because it's the default network
   // XXX we should have a method in the config to reset all configs

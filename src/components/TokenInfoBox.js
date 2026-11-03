@@ -8,11 +8,11 @@
 import React from 'react';
 import { t } from 'ttag';
 import { get } from 'lodash';
-import { numberUtils } from '@hathor/wallet-lib';
 import { useSelector } from 'react-redux';
 import helpers from '../utils/helpers';
 import { FEE_TOKEN_FEATURE_TOGGLE, FEATURE_TOGGLE_DEFAULTS } from '../constants';
 import FeeModelInfo from './FeeModelInfo';
+import Amount from './Amount';
 
 export default function TokenInfoBox ({
   token,
@@ -26,7 +26,6 @@ export default function TokenInfoBox ({
   children,
 }) {
   const isNFT = helpers.isTokenNFT(get(token, 'uid'), tokenMetadata || {});
-  const decimalPlaces = useSelector((state) => state.serverInfo.decimalPlaces);
   const featureToggles = useSelector((state) => state.featureToggles);
   const feeTokenFeatureEnabled = get(featureToggles, FEE_TOKEN_FEATURE_TOGGLE, FEATURE_TOGGLE_DEFAULTS[FEE_TOKEN_FEATURE_TOGGLE]);
 
@@ -39,7 +38,7 @@ export default function TokenInfoBox ({
       {feeTokenFeatureEnabled && (
         <FeeModelInfo tokenVersion={token.version} isLoading={isLoadingVersion} error={versionError} />
       )}
-      <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong>{numberUtils.prettyValue(totalSupply || 0n, isNFT ? 0 : decimalPlaces)} {token.symbol}</p>
+      <p className="mt-2 mb-2"><strong>{t`Total supply:`} </strong><Amount value={totalSupply || 0n} symbol={token.symbol} isNFT={isNFT} /></p>
       <p className="mt-2 mb-0"><strong>{t`Can mint new tokens:`} </strong>{canMint ? 'Yes' : 'No'}</p>
       <p className="mb-2 subtitle">{t`Indicates whether the token owner can create new tokens, increasing the total supply`}</p>
       <p className="mt-2 mb-0"><strong>{t`Can melt tokens:`} </strong>{canMelt ? 'Yes' : 'No'}</p>

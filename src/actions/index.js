@@ -120,6 +120,7 @@ export const types = {
   UNREGISTERED_TOKENS_CLEAN: 'UNREGISTERED_TOKENS_CLEAN',
   REOWN_SET_ERROR: 'REOWN_SET_ERROR',
   SET_ADDRESS_MODE: 'SET_ADDRESS_MODE',
+  SET_AMOUNT_FORMAT: 'SET_AMOUNT_FORMAT',
   TOKEN_REGISTER_REQUESTED: 'TOKEN_REGISTER_REQUESTED',
   TOKEN_REGISTER_SUCCESS: 'TOKEN_REGISTER_SUCCESS',
   TOKEN_REGISTER_FAILED: 'TOKEN_REGISTER_FAILED',
@@ -252,6 +253,11 @@ export const setUseWalletService = (useWalletService) => ({ type: 'set_use_walle
  * Set the wallet address mode (single or multi)
  */
 export const setAddressMode = (mode) => ({ type: types.SET_ADDRESS_MODE, payload: mode });
+
+/**
+ * Set the wallet amount display format (expanded or compressed)
+ */
+export const setAmountFormat = (mode) => ({ type: types.SET_AMOUNT_FORMAT, payload: mode });
 
 /**
  * Action to display the locked wallet screen and resolve the passed promise after the user typed his PIN
