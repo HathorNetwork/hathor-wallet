@@ -28,6 +28,29 @@ A transaction is displayed.
 
 ### Prerequisites
 
+#### Install nix (preferred)
+
+For a better developer experience we suggest nix usage for managing the enviroment. Visit this [link](https://nixos.org/download/#download-nix) to download it.
+
+To enable the commands `nix develop` and `nix build` using flakes, add the following to your `/etc/nix/nix.conf` file:
+
+```
+experimental-features = nix-command flakes
+```
+
+#### Clone the project and install dependencies
+```sh
+$ git clone https://github.com/HathorNetwork/hathor-wallet.git
+```
+To initialize nix dev environment:
+```sh
+$ nix develop
+```
+then, install the depencies: 
+```sh
+yarn
+```
+
 * Install node v22
 
 ### To install dependencies
