@@ -1,14 +1,15 @@
 /**
- * Electron main-process shim, loaded with NODE_OPTIONS=--require <this file>.
+ * Ledger additions to the shared main-process shim (qa/e2e/lib/shim.cjs),
+ * loaded after it with NODE_OPTIONS=--require <this file>.
  *
  * 1. Resolves `@ledgerhq/hw-transport-node-hid` to a Speculos-backed transport,
  *    so public/ledger.js runs unchanged against the emulator.
  * 2. Records every `ledger:*` IPC message in both directions as JSONL
  *    (LEDGER_E2E_IPC_LOG), with the payload's runtime type, so the harness
  *    can assert what crossed the bridge.
- * 3. Quits the app cleanly on SIGUSR2.
  *
- * Nothing in the app is edited; without the env var this file is not loaded.
+ * The shared shim quits the app cleanly on SIGUSR2. Nothing in the app is
+ * edited; without the env var this file is not loaded.
  */
 const Module = require('module');
 const fs = require('fs');
@@ -103,10 +104,5 @@ function hookElectron(electron, write) {
       }
       return origSend(channel, ...args);
     };
-  });
-
-  process.on('SIGUSR2', () => {
-    write({ kind: 'shim', msg: 'SIGUSR2: quitting' });
-    app.quit();
   });
 }
