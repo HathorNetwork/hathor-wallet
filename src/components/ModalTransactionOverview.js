@@ -204,13 +204,17 @@ function ModalTransactionOverview({
         className="d-flex justify-content-between align-items-center"
         style={{ borderBottom: '1px solid #e9ecef', padding: '10px 0' }}
       >
-        <span
-          className="text-monospace"
-          style={{ wordBreak: 'break-all', fontSize: '13px', minWidth: 0, flex: 1 }}
-        >
-          {output.address}
+        <span style={{ wordBreak: 'break-all', fontSize: '13px', minWidth: 0, flex: 1 }}>
+          {/* A thoth.id name is shown above the address it resolved to, so the
+              user confirms the address the tokens are really going to */}
+          {output.name && (
+            <span style={{ display: 'block', fontWeight: 600 }}>{output.name}</span>
+          )}
+          <span className="text-monospace" style={{ color: output.name ? '#8e8e93' : 'inherit' }}>
+            {output.address}
+          </span>
           {isChange && (
-            <span style={{ color: '#8e8e93', fontWeight: 400, fontFamily: 'inherit' }}> ({t`change`})</span>
+            <span style={{ color: '#8e8e93', fontWeight: 400 }}> ({t`change`})</span>
           )}
         </span>
         <span
@@ -450,6 +454,8 @@ ModalTransactionOverview.propTypes = {
     PropTypes.oneOfType([
       PropTypes.shape({
         address: PropTypes.string.isRequired,
+        /** thoth.id name the address was resolved from, when there is one */
+        name: PropTypes.string,
         value: PropTypes.any.isRequired,
         tokenUid: PropTypes.string.isRequired,
         tokenSymbol: PropTypes.string.isRequired,

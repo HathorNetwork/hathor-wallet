@@ -239,13 +239,15 @@ function SendTokens() {
    * @return {Object} Object holding all inputs and outputs {'inputs': [...], 'outputs': [...]}
    */
   const getFormData = () => {
-    let data = {'inputs': [], 'outputs': [], 'tokens': []};
+    let data = {'inputs': [], 'outputs': [], 'tokens': [], 'addressNames': {}};
     for (const ref of references.current) {
       const instance = ref.current;
       let dataOne = instance.getData();
       if (!dataOne) return;
       data['inputs'] = [...data['inputs'], ...dataOne['inputs']];
       data['outputs'] = [...data['outputs'], ...dataOne['outputs']];
+      // Kept apart from the outputs, which must hold only transaction data
+      Object.assign(data['addressNames'], instance.getAddressNames());
     }
     // if there is any data output, add it to transaction's outputs
     if (dataOutputs.length) {
@@ -469,6 +471,8 @@ function SendTokens() {
             const tokenConfig = txTokens.find(tk => tk.uid === output.token);
             modalOutputs.push({
               address: output.address,
+              // Present only when the user typed a thoth.id name instead of an address
+              name: data.addressNames[output.address],
               value: output.value,
               tokenUid: output.token,
               tokenSymbol: tokenConfig?.symbol || '???',

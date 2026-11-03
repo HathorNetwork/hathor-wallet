@@ -195,6 +195,13 @@ div.new-address-wrapper canvas {
   margin-bottom: 1rem;
 }
 
+/* Feedback line under an address field holding a thoth.id name */
+.thoth-name-resolution {
+  font-size: 12px;
+  margin-top: 0.25rem;
+  word-break: break-all;
+}
+
 #formCreateNFT {
   padding-bottom: 2rem;
 }
