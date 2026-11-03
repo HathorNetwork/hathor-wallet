@@ -50,7 +50,7 @@ function ModalLedgerResetTokenSignatures({ onClose }) {
    *
    * close the modal on success, show error on failure
    *
-   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {undefined} event Always undefined; the preload bridge does not forward the Electron event
    * @param {Object} arg Data returned from the reset token signatures call
    */
   const handleSignatureReset = (event, arg) => {

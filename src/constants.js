@@ -103,11 +103,24 @@ export const MIN_JOB_ESTIMATION = 1;
 
 let ipcRenderer = null;
 
-if (window.require) {
-  // Requiring electron outside main thread must be done like that
-  // https://github.com/electron/electron/issues/7300
-  const electron = window.require('electron');
-  ipcRenderer = electron.ipcRenderer;
+if (window.electronAPI) {
+  // Allowlisted subset of ipcRenderer exposed by public/preload.js; channels
+  // are listed in public/bridge.js and listeners receive undefined as the event.
+  ipcRenderer = {
+    send: window.electronAPI.send,
+    removeAllListeners: window.electronAPI.removeAllListeners,
+    // The preload invokes listeners from its isolated world, where a throw
+    // would never reach this window's error handlers. Re-dispatch synchronous
+    // throws here; async rejections already reach unhandledrejection.
+    on: (channel, listener) => window.electronAPI.on(channel, (...args) => {
+      try {
+        listener(...args);
+      } catch (error) {
+        console.error(error);
+        window.dispatchEvent(new ErrorEvent('error', { error, message: error?.message }));
+      }
+    }),
+  };
 }
 
 /**

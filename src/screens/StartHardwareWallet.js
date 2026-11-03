@@ -43,7 +43,7 @@ function StartHardwareWallet() {
   /**
    * Handle the response of a get version call to Ledger.
    *
-   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {undefined} event Always undefined; the preload bridge does not forward the Electron event
    * @param {Object} arg Data returned from the get version call
    */
   const handleVersion = (event, arg) => {
@@ -88,7 +88,7 @@ function StartHardwareWallet() {
   /**
    * Handle the response of a get public key data call to Ledger.
    *
-   * @param {IpcRendererEvent} event May be used to reply to the event
+   * @param {undefined} event Always undefined; the preload bridge does not forward the Electron event
    * @param {Object} arg Data returned from the get public key data call
    */
   const handlePublicKeyData = (event, arg) => {

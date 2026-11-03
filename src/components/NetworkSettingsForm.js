@@ -132,7 +132,9 @@ function NetworkSettingsForm(props) {
       <>
         <input type="text" ref={nodeRef} required placeholder={t`Full node URL *`} className="form-control col-8" />
         <input type="text" ref={txMiningRef} required placeholder={t`Transaction Mining Service URL *`} className="form-control col-8 mt-3" />
-        <input type="text" ref={explorerRef} required placeholder={t`Explorer URL *`} className="form-control col-8 mt-3" />
+        {/* The app only opens http(s) links, so an explorer without a scheme could never be opened. */}
+        <input type="url" ref={explorerRef} required pattern="https?://.+" placeholder={t`Explorer URL *`} className="form-control col-8 mt-3" />
+        <div className="invalid-feedback">{t`The explorer URL must start with http:// or https://`}</div>
         <input type="text" ref={explorerServiceRef} required placeholder={t`Explorer Service URL *`} className="form-control col-8 mt-3" />
         <input type="text" ref={walletServiceRef} placeholder={t`Wallet Service URL`} className="form-control col-8 mt-3" />
         <input type="text" ref={walletServiceWSRef} placeholder={t`Wallet Service Websocket URL`} className="form-control col-8 mt-3" />

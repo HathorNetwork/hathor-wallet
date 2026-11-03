@@ -6,14 +6,40 @@
  */
 
 // This file is executed right before electron start loading the index
+const { contextBridge, ipcRenderer, shell } = require('electron')
 const Sentry = require('@sentry/electron')
 const constants = require('./constants');
-const { ipcRenderer } = require('electron')
+const { createElectronAPI } = require('./bridge');
 
+// Init must run enabled, or the SDK skips installing the integration that
+// forwards renderer events to the main process. Reporting is then switched
+// off until the stored consent is read on 'loaded'.
 Sentry.init({
   dsn: constants.SENTRY_DSN,
-  release: process.env.npm_package_version
+  release: constants.versionNumber,
+  // EventToMain drops each event after forwarding it to main, which the SDK
+  // counts as lost and would report straight to sentry.io.
+  sendClientReports: false,
 })
+setSentryEnabled(false);
+
+/**
+ * Flip the live client instead of re-calling Sentry.init: the renderer SDK
+ * ignores every init after the first one.
+ */
+function setSentryEnabled(enabled) {
+  const client = Sentry.getCurrentHub().getClient();
+  if (client) {
+    client.getOptions().enabled = enabled;
+  }
+}
+
+contextBridge.exposeInMainWorld('electronAPI', createElectronAPI({
+  ipcRenderer,
+  shell,
+  Sentry,
+  setSentryEnabled,
+}));
 
 process.once('loaded', () => {
   const oldAccessDataRaw = localStorage.getItem('wallet:accessData');
@@ -30,6 +56,8 @@ process.once('loaded', () => {
     }
   }
 
+  // Read consent after the migration above, which may clear it.
+  setSentryEnabled(localStorage.getItem('wallet:sentry') === 'true');
 
   // Set closed in localStorage, so user does not open in the wallet page
   localStorage.setItem('localstorage:closed', 'true');
