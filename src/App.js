@@ -375,8 +375,9 @@ function DefaultComponent({ children }) {
   // If this is a hardware wallet that has been locked, navigate to the "Wallet Type" screen
   if (isLockedScreen &&
     LOCAL_STORE.isHardwareWallet()) {
+    // This exit path bypasses resetStorage, so clear the registered data too.
+    LOCAL_STORE.cleanWallet({ cleanRegisteredData: true });
     // This will redirect the page to Wallet Type screen
-    LOCAL_STORE.cleanWallet();
     return <Navigate to={'/wallet_type/'} />;
   }
 
