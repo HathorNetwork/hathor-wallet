@@ -23,8 +23,10 @@ function createConsentStore(filePath, fs) {
   } catch (_e) {
     enabled = false;
   }
+  const revokeListeners = [];
   return {
     isEnabled: () => enabled,
+    onRevoke: (listener) => { revokeListeners.push(listener); },
     setEnabled: (value) => {
       const next = value === true;
       if (next === enabled) {
@@ -43,6 +45,15 @@ function createConsentStore(filePath, fs) {
             console.error('Could not remove Sentry consent', rmError);
           }
         }
+      }
+      if (!enabled) {
+        revokeListeners.forEach((listener) => {
+          try {
+            listener();
+          } catch (e) {
+            console.error('Sentry consent revoke listener failed', e);
+          }
+        });
       }
     },
   };
@@ -79,11 +90,26 @@ function createConsentHandler(store, flush) {
  * Events, sessions, crash dumps and the offline queue's retries all go
  * through sendRequest; the client's `enabled` option misses the last three.
  * Refused requests are dropped, not queued.
+ *
+ * The offline transport's queue only flushes again after a successful send, so
+ * a refused retry flushes it instead: requests queued under an earlier grant
+ * must not wait on disk for a later one. A revoke starts that at once, since
+ * the next retry can be hours away. Only retries, which carry their queue date,
+ * do this: a flush that throws is captured as a new request, and if that
+ * flushed too the two would feed each other.
  */
-function gateTransport(Transport, isEnabled) {
+function gateTransport(Transport, store) {
   return class ConsentGatedTransport extends Transport {
+    constructor(...args) {
+      super(...args);
+      store.onRevoke(() => this._flushQueue());
+    }
+
     sendRequest(request) {
-      if (!isEnabled()) {
+      if (!store.isEnabled()) {
+        if (request.date) {
+          this._flushQueue();
+        }
         return Promise.resolve({ status: 'skipped' });
       }
       return super.sendRequest(request);

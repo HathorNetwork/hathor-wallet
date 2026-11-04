@@ -34,7 +34,7 @@ const sentryConsent = createConsentStore(
 Sentry.init({
   dsn: constants.SENTRY_DSN,
   release: constants.versionNumber,
-  transport: gateTransport(ElectronOfflineNetTransport, sentryConsent.isEnabled),
+  transport: gateTransport(ElectronOfflineNetTransport, sentryConsent),
 })
 
 // preload.js reports the user's choice on every load and on every change.

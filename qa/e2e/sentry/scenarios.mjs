@@ -7,6 +7,7 @@
  * The expectations are the graph's outcomes.
  */
 import fs from 'fs';
+import path from 'path';
 import {
   assert, eq, sleep, CONFIRM_RESET_MESSAGE,
 } from '../lib/harness.mjs';
@@ -153,6 +154,14 @@ const mainCrash = (setup, crash, relaunch) => async (ctx) => {
 
 // ---- offline-queue -----------------------------------------------------------
 
+/** What main's offline queue holds on disk: its index, and the request bodies beside it. */
+const queueOnDisk = (ctx) => {
+  const dir = path.join(ctx.profile, 'Hathor Wallet', 'sentry', 'queue');
+  if (!fs.existsSync(dir)) return { index: [], bodies: [] };
+  const read = () => { try { return JSON.parse(fs.readFileSync(path.join(dir, 'queue.json'), 'utf8')); } catch (_e) { return []; } };
+  return { index: read(), bodies: fs.readdirSync(dir).filter((f) => f !== 'queue.json') };
+};
+
 const offlineQueue = (retry) => async (ctx) => {
   await ctx.launch();
   await ctx.sink.offline();
@@ -161,11 +170,18 @@ const offlineQueue = (retry) => async (ctx) => {
     await ctx.page('setTimeout(() => { throw new Error("qa-offline-page") }); 1');
     await sleep(3000);
     if (retry === 'out') {
+      const queued = queueOnDisk(ctx).index.length;
+      assert(queued >= 2, `expected the two events queued on disk, got ${queued}`);
       const t0 = Date.now();
       await ctx.setConsentUI(false);
       await ctx.waitConsent(false, 10000);
       // edge-revoke-waits-offline: informational
       ctx.log(`revoke while offline took ${Date.now() - t0} ms`);
+      // ok-retry-refused: opting out empties the queue at once, without a relaunch.
+      await sleep(1000);
+      const left = queueOnDisk(ctx);
+      eq(left.index.length, 0, 'requests queued on disk after opting out');
+      eq(left.bodies.length, 0, 'request bodies on disk after opting out');
     }
     await ctx.quit();
   } finally {
@@ -185,10 +201,8 @@ const offlineQueue = (retry) => async (ctx) => {
   await ctx.relaunch();
   await ctx.control('throw-main', { message: 'qa-offline-new' });
   await ctx.sink.waitFor(isEvent('qa-offline-new'), { since, what: 'the new event after opting in' });
-  await sleep(10000);
-  // Reported, not asserted: see ok-retry-refused for what stays queued.
-  const old = ctx.sink.since(since, (i) => i.type === 'event' && /qa-offline-(main|page)/.test(i.message));
-  return `nothing at the relaunch; ${old.length} old event(s) after a later opt-in`;
+  await ctx.expectNone(since, { ms: 10000, pred: (i) => i.type === 'event' && /qa-offline-(main|page)/.test(i.message), what: 'old queued event after a later opt-in' });
+  return 'queue emptied at the opt-out; nothing old sent, then or after a later opt-in';
 };
 
 // ---- reset-data ---------------------------------------------------------------
