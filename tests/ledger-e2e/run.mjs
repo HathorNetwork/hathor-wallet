@@ -8,16 +8,17 @@
  * Speculos, launches the wallet with the transport shim, runs the flows over
  * CDP, prints a PASS/FAIL table and cleans up.
  */
-import { execFileSync, spawnSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { launchApp, readIpcLog } from './lib/app.mjs';
-import { CDP } from './lib/cdp.mjs';
 import { Device } from './lib/device.mjs';
-import { startSentrySink } from './lib/sentry-sink.mjs';
+import { CDP } from '../../qa/e2e/lib/cdp.mjs';
+import { startSink } from '../../qa/e2e/lib/sink.mjs';
+import { ensureBuild as ensureSharedBuild, ensureElectron } from '../../qa/e2e/lib/build.mjs';
 import { FLOWS } from './flows.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -62,28 +63,9 @@ const t0 = Date.now();
 const log = (msg) => console.log(`[${((Date.now() - t0) / 1000).toFixed(1).padStart(6)}s] ${msg}`);
 
 // ---- helpers ---------------------------------------------------------------
-function newestMtime(dir, skip) {
-  let newest = 0;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, entry.name);
-    if (skip(p)) continue;
-    newest = Math.max(newest, entry.isDirectory() ? newestMtime(p, skip) : fs.statSync(p).mtimeMs);
-  }
-  return newest;
-}
-
 function ensureBuild() {
-  const index = path.join(appDir, 'build/index.html');
-  const generated = (p) => p.endsWith('.css') || p.includes(`${path.sep}locale${path.sep}`);
-  const srcTime = Math.max(newestMtime(path.join(appDir, 'src'), generated), newestMtime(path.join(appDir, 'public'), () => false));
-  const stale = !fs.existsSync(index) || fs.statSync(index).mtimeMs < srcTime;
-  if (!stale) { log(`renderer build is fresh (${index})`); return; }
-  if (skipBuild) throw new Error(`build/ is missing or stale in ${appDir} and --skip-build was given`);
-  log('renderer build missing or stale: npm run build-css && npm run build');
-  for (const script of ['build-css', 'build']) {
-    const r = spawnSync('npm', ['run', script], { cwd: appDir, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' });
-    if (r.status !== 0) throw new Error(`npm run ${script} failed:\n${(r.stdout + r.stderr).slice(-3000)}`);
-  }
+  ensureSharedBuild(appDir, { skipBuild, log });
+  ensureElectron(appDir, { log });
 }
 
 function computeExpected(token, deviceXpubHex) {
@@ -145,7 +127,7 @@ async function main() {
   token.configString = expected.configString;
   log(`seed xpub ${expected.xpub.slice(0, 20)}..., address[0] ${expected.addresses[0]}, token ${token.symbol}/${token.name}`);
 
-  sink = await startSentrySink(ports.sentry);
+  sink = await startSink(ports.sentry);
   speculos('start', elf);
   speculosUp = true;
   log('speculos up');
@@ -240,7 +222,7 @@ function report(fatal) {
   const errorsLogged = cdp ? cdp.console.filter((c) => c.type === 'error').map((c) => c.text.slice(0, 200)) : [];
   const summary = {
     label, appDir, seconds: Number(((Date.now() - t0) / 1000).toFixed(1)),
-    sentryEnvelopes: sink ? sink.envelopes.map((e) => e.types.join(',')) : [],
+    sentryItems: sink ? sink.items.map((i) => i.type) : [],
     rendererExceptions: cdp ? cdp.exceptions.map((e) => e.text.slice(0, 300)) : [],
     consoleErrors: errorsLogged,
     fatal: fatal ? fatal.message : null,
@@ -256,10 +238,10 @@ function report(fatal) {
     if (r.error) console.log(`${' '.repeat(w + 14)}error: ${r.error}`);
   }
   if (fatal) console.log(`FATAL: ${fatal.stack || fatal.message}`);
-  console.log(`sentry envelopes received by local sink: ${summary.sentryEnvelopes.length} (opted out, must be 0)`);
+  console.log(`sentry items received by local sink: ${summary.sentryItems.length} (opted out, must be 0)`);
   console.log(`renderer uncaught exceptions: ${summary.rendererExceptions.length}; console.error lines: ${errorsLogged.length}`);
   const ok = !fatal && results.length > 0 && results.every((r) => r.status === 'PASS')
-    && summary.sentryEnvelopes.length === 0;
+    && summary.sentryItems.length === 0;
   return ok;
 }
 

@@ -4,7 +4,7 @@ Runs the production build of the wallet against an emulated Ledger Nano S Plus (
 
 ## Prerequisites
 
-- Linux with an X display (`DISPLAY`, defaults to `:0`). Electron runs with `--no-sandbox`.
+- Linux with an X display (`E2E_DISPLAY`, else `DISPLAY`, else `:0`). Electron runs with `--no-sandbox`.
 - Docker, with the two Ledger images (pulled on first use):
   - `ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest` (about 3.7 GB, builds the ELF)
   - `ghcr.io/ledgerhq/speculos:latest` (about 1.4 GB, the emulator)
@@ -32,10 +32,10 @@ Other options: `--flows hw-start,show-address` runs a subset (flows depend on ea
 
 ## How it works
 
-- **Transport swap.** `lib/main-shim.js` is loaded into the Electron main process with `NODE_OPTIONS=--require`. It hooks `Module._load` so `require('@ledgerhq/hw-transport-node-hid')` in `public/ledger.js` returns `SpeculosTransport` (`lib/speculos-transport.js`). That class extends the same `@ledgerhq/hw-transport` copy node-hid uses, so `send()`, `decorateAppAPIMethods()` and `TransportStatusError` behave as in production. Only `exchange()` is new: it speaks Speculos's APDU TCP framing (4-byte big-endian length + APDU; the reply is a 4-byte length N, N bytes of data and the 2-byte status word). `listen()` polls the Speculos API and emits `add`/`remove` like USB hot-plug; `transport.device.close()` closes the socket.
+- **Transport swap.** `lib/ledger-shim.js` is loaded into the Electron main process with `NODE_OPTIONS=--require`, after the shared e2e shim (`qa/e2e/lib/shim.cjs`, which also quits the app cleanly on SIGUSR2). It hooks `Module._load` so `require('@ledgerhq/hw-transport-node-hid')` in `public/ledger.js` returns `SpeculosTransport` (`lib/speculos-transport.js`). That class extends the same `@ledgerhq/hw-transport` copy node-hid uses, so `send()`, `decorateAppAPIMethods()` and `TransportStatusError` behave as in production. Only `exchange()` is new: it speaks Speculos's APDU TCP framing (4-byte big-endian length + APDU; the reply is a 4-byte length N, N bytes of data and the 2-byte status word). `listen()` polls the Speculos API and emits `add`/`remove` like USB hot-plug; `transport.device.close()` closes the socket.
 - **IPC record.** The shim also wraps `ipcMain.on` and `webContents.send` for `ledger:*` channels and writes each message, with the runtime type of every payload field (`Buffer`, `Uint8Array`, object, ...), to `ipc.jsonl`. Flows assert on it.
 - **Device.** `lib/device.mjs` reads the screen (`GET /events?currentscreenonly=true`) and presses buttons (`POST /button/{left,right,both}`). `walkAndConfirm(firstText)` waits for a prompt, steps right recording every screen until `Approve`, then presses both. `Device.field(screens, 'Address')` joins a value paged over several screens.
-- **App.** `lib/cdp.mjs` is a small CDP client over `ws`. It records renderer exceptions and console output; a flow fails if the renderer throws or the unhandled-error modal shows. It attaches only after the app document has parsed its `<title>`. Attaching during the window's first navigation makes the preload also run in the window's initial `about:blank` document (most launches on Electron 42, never on Electron 27), where `localStorage` throws `SecurityError`; that document is discarded at once and the preload runs again for the wallet's document. `public/preload.js` skips its startup steps in `about:blank`, and `closed-hw-no-reopen-early` reproduces the race on purpose to keep it that way.
+- **App.** The shared e2e driver launches the app (`qa/e2e/lib/harness.mjs`, through `lib/app.mjs`) and drives it with its CDP client (`qa/e2e/lib/cdp.mjs`), a small client over `ws`. It records renderer exceptions and console output; a flow fails if the renderer throws or the unhandled-error modal shows. It attaches only after the app document has parsed its `<title>`. Attaching during the window's first navigation makes the preload also run in the window's initial `about:blank` document (most launches on Electron 42, never on Electron 27), where `localStorage` throws `SecurityError`; that document is discarded at once and the preload runs again for the wallet's document. `public/preload.js` skips its startup steps in `about:blank`, and `closed-hw-no-reopen-early` reproduces the race on purpose to keep it that way.
 - **Ground truth.** `lib/expected.cjs` derives the xpub and addresses from the seed with `@hathor/wallet-lib`, independently of the app, and builds the token configuration string.
 
 ## Flows
@@ -79,4 +79,4 @@ Append an object to `FLOWS` in `flows.mjs`:
 - `run.mjs` runs everything; `flows.mjs` holds the flows.
 - `build-app.sh` keeps its own clone of the Ledger app in the cache directory, so it never touches your working copy. It builds `LEDGER_APP_REF` (default: the pinned commit the flows were written against, app 1.1.1) for `LEDGER_MODEL` (default `nanosp`) in the builder image, as the host user. `LEDGER_APP_REPO` can point at a local checkout to build one of its commits.
 - `speculos.sh start <elf> | stop | logs` runs the emulator container.
-- `lib/` holds the shim, the transport, the CDP and device clients, the Sentry sink and the ground-truth script.
+- `lib/` holds the Ledger shim, the transport, the launcher wrapper, the device client and the ground-truth script. The CDP client, the launcher, the Sentry sink and the build check are the shared e2e driver's, in `qa/e2e/lib/` (see `qa/e2e/README.md`).
