@@ -111,6 +111,5 @@ These come from reading the code. They're in the tree as `edge` constraints, so 
 - **Upgrade, first launch.** Main has no consent file until the window loads, so a main crash in that window is dropped (`c-upgrade-first-crash`). HathorNetwork/hathor-wallet#903 accepts this.
 - **First startup step failure is reported late.** If `clearLegacyHardwareData` throws, the failure is logged at once but reported after every step has run, so it still reaches Sentry when opted in (`c-step-legacy`).
 - **Reset wallet keeps consent.** `wallet:sentry` isn't in `storageKeys`, so main keeps reporting after a wallet reset, and "Get started" keeps a choice already made (`c-reset-wallet`).
-- **A queue survives an opt-out.** The consent gate drops one queued request per flush and the rest stay on disk, so events captured while opted in and queued offline can be sent after the user opts out and later opts back in (`ok-retry-refused`).
 - **An unchanged value is never written.** Users who never opted in have no `sentry-consent.json`, which is fine, since a missing file means no consent. A user who revoked has `{"enabled":false}`.
 - **wallet-lib rejections.** `smoke-noise:*:network-drop` counts what a Wi-Fi drop forwards as `unhandledrejection`. HathorNetwork/hathor-wallet#899 left open whether to filter these, and this count is the input to that decision.

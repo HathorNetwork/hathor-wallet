@@ -656,9 +656,10 @@ actions:
         - id: ok-retry-refused
           kind: success
           at: online
-          message: Opted out while offline, no event arrives at the relaunch. Each flush drops only one queued request, so the rest stay on disk and are sent after a later opt-in
-          source: 'public/sentryConsent.js:86'
+          message: Opted out while offline, the queue on disk empties at once; nothing arrives, then or after a later opt-in
+          source: 'public/sentryConsent.js:109'
           verified: true
+          note: A send still in flight at the opt-out can queue again, and an unreadable request body stops the emptying; either waits for the next retry or launch, and goes out if the user opts back in first.
         - id: edge-revoke-waits-offline
           kind: error
           at: change
