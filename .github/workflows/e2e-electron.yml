@@ -1,0 +1,68 @@
+name: End-to-end tests
+on:
+  push:
+    branches:
+      - master
+      - release-candidate
+      - release
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - master
+      - release-candidate
+      - release
+  schedule:
+    # Nightly full suite on master.
+    - cron: '0 3 * * *'
+jobs:
+  electron-e2e:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - name: Checkout
+        # https://github.com/actions/checkout/releases/tag/v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          # --changed diffs against the merge base with the PR's base branch.
+          fetch-depth: 0
+      - name: Setup nodejs
+        # https://github.com/actions/setup-node/releases/tag/v4.1.0
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0-0-dev libudev-dev xvfb
+      - name: Install npm dependencies
+        run: npm ci
+      - name: QA tools
+        run: |
+          node --test 'qa/graph/tools/test/*.test.js' 'qa/e2e/test/*.test.mjs'
+          node qa/graph/tools/cli.js validate
+      - name: Build
+        env:
+          # CI=true makes react-scripts fail on warnings, and LavaMoat always warns.
+          CI: 'false'
+        run: npm run build-css && npm run build
+      - name: Select and run the scenarios this pull request reaches
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: xvfb-run -a node qa/e2e/run.mjs --changed "origin/$BASE_REF" --floor --skip-build
+      - name: Run the full suite
+        if: github.event_name != 'pull_request'
+        run: xvfb-run -a node qa/e2e/run.mjs --skip-build
+      - name: Upload run logs
+        if: failure() || cancelled()
+        # https://github.com/actions/upload-artifact/releases/tag/v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: e2e-logs
+          path: /tmp/hathor-e2e-*/
+          if-no-files-found: ignore

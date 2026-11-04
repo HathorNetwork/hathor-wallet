@@ -1,0 +1,1416 @@
+# Frozen snapshot of hathor-wallet-mobile QA/graph/graph.yaml at baa28a00 (feat/qa-feature-graph), kept as a
+# regression fixture for the tools. The live graph is in that repo; do not edit this copy to track it.
+version: 1
+costs: { cheap: 1, medium: 5, expensive: 20, very-expensive: 60 }
+
+environments:
+  - id: testnet
+    name: Public testnet
+    notes: The default public test network; where most manual and future automated tests run.
+  - id: testnet-shielded
+    name: Shielded testnet (testnet-shielded-outputs)
+    notes: The test network with shielded outputs; the only network where the shielded UI, private sends and private receive addresses appear. Reached through the Shielded Testnet preset in Network Settings.
+  - id: local-privnet
+    name: Local privnet (mobile-e2e-flows)
+    notes: A local fullnode and `sender` wallet from `../mobile-e2e-flows`, driven by Maestro on an Android emulator; for large amounts, edge cases and potentially breaking behaviour. Flags are forced on by editing `FEATURE_TOGGLE_DEFAULTS` locally (marked `E2E-LOCAL`), not through Unleash.
+  - id: store-device
+    name: Store build on a physical device
+    notes: The App Store or Play Store build on a real phone; for what only manual QA can verify (passkeys, biometrics, push, camera).
+
+features:
+  # In scope (v1 core money paths and what they depend on)
+  - id: send
+    name: Send tokens
+    description: The user sends HTR or a custom token to an address, typed or scanned, and confirms it.
+    status: in-scope
+    screens: [Send, SendAddressInput, SendScanQRCode, SendAmountInput, ChangeToken, SendConfirmScreen]
+    files:
+      - src/screens/SendAddressInput.js
+      - src/screens/SendScanQRCode.js
+      - src/screens/SendAmountInput.js
+      - src/screens/ChangeToken.js
+      - src/screens/SendConfirmScreen.js
+      - src/components/TokenSelect.js
+      - src/components/AmountTextInput.js
+      - src/components/SendTransactionFeedbackModal.js
+    flags: []
+    links:
+      - { to: pin-unlock, reason: The confirm screen asks for the PIN (or a passkey) before the send goes out }
+      - { to: token-register, reason: Only registered tokens can be picked to send }
+    # Fee tokens, private sends and the facade reach send via axis (token, privacy, dest, facade), not via code.
+    introduces: []
+    actions: [send]
+
+  - id: shielded-send
+    name: Private send
+    description: On the shielded testnet, the user picks a privacy mode (public, hide amount, private) and sends to a shielded address.
+    status: in-scope
+    screens: [SendAmountInput, SendConfirmScreen]
+    files:
+      - src/utils/shieldedSend.js
+      - src/shielded/fees.js
+      - src/components/TransactionPrivacyModal.js
+      - src/components/PrivacyModeSelector.js
+      - src/components/PrivacyModeCard.js
+      - src/components/Shielded/FeeBreakdown.js
+    flags: [shielded-outputs]
+    links:
+      - { to: send, reason: Runs inside the send screens; any change there changes the private send }
+      - { to: shielded, reason: Needs the private balance unlocked and the shielded provider registered }
+      - { to: pin-unlock, reason: On the fullnode facade a locked private balance is unlocked with the PIN or passkey before sending }
+      - { to: privacy-settings, reason: The default privacy mode set in privacy settings preselects the send's mode }
+    introduces: ['privacy:hide-amount', 'privacy:private', 'dest:shielded', 'amount:private-over-limit']
+    # Exercised by send only on the values it introduces, so it owns no whole action.
+    actions: []
+
+  - id: token-create
+    name: Create token
+    description: The user creates a new token by naming it, choosing a symbol and amount, and paying the deposit or fee.
+    status: in-scope
+    screens: [CreateTokenStack, CreateTokenTypeNotice, CreateTokenDepositNotice, CreateTokenName, CreateTokenSymbol, CreateTokenAmount, CreateTokenConfirm, CreateTokenDetail]
+    files:
+      - src/screens/CreateTokenTypeNotice.js
+      - src/screens/CreateTokenDepositNotice.js
+      - src/screens/CreateTokenName.js
+      - src/screens/CreateTokenSymbol.js
+      - src/screens/CreateTokenAmount.js
+      - src/screens/CreateTokenConfirm.js
+      - src/screens/CreateTokenDetail.js
+    flags: [fee-based-tokens, shielded-outputs]
+    links:
+      - { to: fee-tokens, reason: The fee-based tokens flag decides whether the user can pick a fee token instead of a deposit token }
+      - { to: token-register, reason: A created token is registered in the wallet automatically }
+      - { to: pin-unlock, reason: The confirm screen asks for the PIN (or a passkey) }
+      - { to: shielded, reason: On the shielded testnet the minted amount can go to a shielded address }
+    introduces: []
+    actions: [create-token]
+
+  - id: fee-tokens
+    name: Fee-based tokens
+    description: Tokens that charge a small HTR fee on every transfer instead of locking an HTR deposit at creation.
+    status: in-scope
+    screens: [CreateTokenTypeNotice]
+    files:
+      - src/screens/CreateTokenTypeNotice.js
+      - src/components/TxFeesRow.js
+      - src/components/TokenDetails.js
+    flags: [fee-based-tokens]
+    # Send and history reach fee tokens via axis (token = fee), not via code.
+    links: []
+    introduces: ['token:fee']
+    actions: [create-token]
+
+  - id: receive
+    name: Receive
+    description: The user sees the wallet's current address as text and QR code, copies or shares it, and can ask for a new one.
+    status: in-scope
+    screens: [Receive]
+    files:
+      - src/screens/Receive.js
+      - src/components/ReceiveMyAddress.js
+    flags: []
+    links:
+      - { to: address-mode, reason: In single-address mode the address never changes and no new one can be generated }
+      - { to: shielded-receive, reason: On the shielded testnet the screen also shows the private receive address }
+    introduces: []
+    actions: [receive]
+
+  - id: shielded-receive
+    name: Private receive address
+    description: On the shielded testnet, the receive screen shows a shielded address that other wallets can send private amounts to.
+    status: in-scope
+    screens: [Receive]
+    files:
+      - src/components/Shielded/PrivateReceiveAddress.js
+      - src/shielded/newAddress.js
+      - src/shielded/receiveState.js
+    flags: [shielded-outputs]
+    links:
+      - { to: shielded, reason: Needs the shielded provider registered and an unused shielded address on the wallet service }
+      - { to: address-mode, reason: Shielded addresses are not supported in single-address mode }
+      - { to: receive, reason: Shown inside the receive screen }
+    introduces: []
+    actions: [receive]
+
+  - id: address-mode
+    name: Address mode
+    description: The user chooses between one fixed address (single) and a new address after each receive (multi).
+    status: in-scope
+    screens: [AddressMode]
+    files:
+      - src/screens/AddressMode.js
+    flags: [single-address]
+    links:
+      - { to: shielded, reason: An active shielded chain keeps the wallet in multi-address mode }
+      - { to: wallet-load, reason: Changing the mode reloads the wallet }
+    introduces: ['addr:single']
+    actions: [receive]
+
+  - id: tx-history
+    name: Token history and transaction details
+    description: The user opens a token to see its balance and transactions, and opens a transaction to see its details.
+    status: in-scope
+    screens: [MainScreen, TokenDetail]
+    files:
+      - src/screens/MainScreen.js
+      - src/screens/TokenDetail.js
+      - src/components/TxDetailsModal.js
+      - src/components/TransactionStatusLabel.js
+      - src/sagas/tokens.js
+    flags: []
+    links:
+      - { to: token-metadata, reason: History rows and details show token metadata such as the NFT flag }
+      - { to: shielded, reason: On the shielded testnet balances split into public and private and details show the privacy fee }
+    introduces: []
+    actions: [history]
+
+  - id: dashboard
+    name: Home token list
+    description: The home tab lists the registered tokens with their balances and opens a token's history.
+    status: in-scope
+    screens: [Home, Main, Dashboard]
+    files:
+      - src/screens/Dashboard.js
+      - src/components/TokenSelect.js
+    flags: []
+    links:
+      - { to: token-register, reason: Shows only registered tokens }
+      - { to: token-import, reason: Shows the banner to import tokens found in the wallet }
+    introduces: []
+    actions: [history] # history starts on the home token list
+
+  - id: shielded
+    name: Private balance and unlock
+    description: On the shielded testnet, balances split into public and private parts, and the private part is unlocked to be seen and spent.
+    status: in-scope
+    screens: []
+    files:
+      - src/sagas/shielded.js
+      - src/sagas/shieldedProvider.js
+      - src/shielded/balance.js
+      - src/shielded/capability.js
+      - src/shielded/cryptoProvider.js
+      - src/shielded/gating.js
+      - src/shielded/unlock.js
+      - src/shielded/unlockState.js
+      - src/components/Shielded/ShieldedBalanceSplit.js
+      - src/components/Shielded/ShieldedUnlockAction.js
+      - src/components/AuditUnblindingRows.js
+    flags: [shielded-outputs]
+    links:
+      - { to: wallet-service, reason: On the wallet service the private balance comes from the service and needs shielded capability }
+      - { to: network-settings, reason: The shielded UI only exists on the shielded testnet }
+      - { to: feature-flags, reason: The shielded UI turns on or off live with its flag }
+    introduces: ['private-balance:locked', 'private-balance:broken-key']
+    # Exercised only on the shielded networks, so it owns no whole action; it reaches them via its values.
+    actions: []
+
+  - id: wallet-service
+    name: Wallet service or fullnode facade
+    description: The wallet talks either to the wallet service or directly to a fullnode; the choice changes how balances load and transactions are built.
+    status: in-scope
+    screens: []
+    files:
+      - src/sagas/wallet.js
+    flags: [wallet-service]
+    links:
+      - { to: wallet-load, reason: A failed wallet-service start falls back to the fullnode and ignores the flag for 24 hours }
+      - { to: network-settings, reason: An empty wallet-service URL in the network settings forces the fullnode facade }
+      - { to: feature-flags, reason: Turning the wallet-service flag off mid-session reloads the wallet }
+    # Every action runs on one facade; the wallet-service one is reached via its value.
+    introduces: ['facade:wallet-service']
+    actions: []
+
+  - id: network-settings
+    name: Network settings
+    description: The user switches the wallet to another network (testnet, shielded testnet or a custom one), which restarts the wallet.
+    status: in-scope
+    screens: [NetworkSettingsFlowStack, NetworkSettingsDisclaimer, NetworkPreSettings, CustomNetworkSettings]
+    files:
+      - src/screens/NetworkSettings/
+      - src/components/NetworkSettings/
+      - src/sagas/networkSettings.js
+      - src/shielded/preset.js
+    flags: [network-settings, shielded-outputs-network, wallet-service]
+    links:
+      - { to: wallet-load, reason: Saving a network restarts the wallet }
+    # The default network is the public testnet; the others are reached only through these settings.
+    introduces: ['network:testnet-shielded', 'network:local-privnet']
+    actions: []
+
+  - id: wallet-create
+    name: Create wallet
+    description: A new user creates a wallet, writes down the 24 words, confirms some of them and picks a PIN.
+    status: in-scope
+    screens: [Init, WelcomeScreen, InitialScreen, NewWordsScreen, BackupWords, ChoosePinScreen]
+    files:
+      - src/screens/InitWallet.js
+      - src/screens/BackupWords.js
+      - src/screens/ChoosePinScreen.js
+    flags: []
+    links:
+      - { to: pin-setup, reason: The wallet is finished by choosing a PIN }
+      - { to: wallet-load, reason: The new wallet starts and loads right after }
+    introduces: []
+    actions: []
+
+  - id: wallet-import
+    name: Import wallet from words
+    description: A user restores an existing wallet by typing its 24 words and picking a PIN.
+    status: in-scope
+    screens: [LoadWordsScreen, ChoosePinScreen]
+    files:
+      - src/screens/InitWallet.js
+      - src/screens/ChoosePinScreen.js
+    flags: []
+    links:
+      - { to: pin-setup, reason: The import is finished by choosing a PIN }
+      - { to: wallet-load, reason: The imported wallet starts and loads its history }
+      - { to: address-mode, reason: An imported wallet with transactions past the first address is moved to multi-address mode }
+    introduces: []
+    actions: []
+
+  - id: passkey-onboarding
+    name: Passkey wallet
+    description: A user creates or opens a wallet with a passkey instead of words and a PIN.
+    status: in-scope
+    screens: [InitialScreen]
+    files:
+      - src/components/PasskeyOnboardingButton.js
+      - src/passkey/
+    flags: [passkey-onboarding, wallet-service]
+    links:
+      - { to: wallet-load, reason: The passkey wallet starts right after the ceremony }
+      - { to: wallet-service, reason: A passkey wallet registers itself with the wallet service }
+    # Passkey authorization and passkey-derived shielded keys reach the actions via axis (wallet = passkey).
+    introduces: ['wallet:passkey']
+    actions: []
+
+  - id: pin-unlock
+    name: PIN confirmation
+    description: The app asks for the PIN before sensitive actions such as sending, creating a token or exporting keys.
+    status: in-scope
+    screens: [PinScreen]
+    files:
+      - src/screens/PinScreen.js
+      - src/components/PinInput.js
+      - src/components/NumPad.js
+    flags: []
+    links:
+      - { to: biometrics, reason: With biometrics on the PIN screen may be replaced by a fingerprint or face check }
+    introduces: []
+    actions: [send, create-token]
+
+  - id: token-register
+    name: Register token
+    description: The user adds a custom token to the wallet by scanning or pasting its configuration string.
+    status: in-scope
+    screens: [RegisterOptions, RegisterToken, RegisterTokenScreen, RegisterTokenManual]
+    files:
+      - src/screens/RegisterOptionsScreen.js
+      - src/screens/RegisterToken.js
+      - src/screens/RegisterTokenManual.js
+      - src/utils/tokens.js
+    flags: [reown, nano-contract]
+    links:
+      - { to: camera-permission, reason: Scanning the configuration needs the camera permission }
+    introduces: []
+    actions: []
+
+  - id: feature-flags
+    name: Remote feature flags
+    description: The app reads feature flags from Unleash for its device and network every 15 seconds and turns features on or off.
+    status: in-scope
+    screens: []
+    files:
+      - src/sagas/featureToggle.js
+    flags: []
+    links:
+      - { to: network-settings, reason: Flags are read again for the network the wallet is on }
+    introduces: []
+    actions: []
+
+  - id: reset-wallet
+    name: Reset wallet
+    description: The user erases the wallet from the device and goes back to the welcome screen.
+    status: in-scope
+    screens: [ResetWallet]
+    files:
+      - src/screens/ResetWallet.js
+    flags: []
+    links:
+      - { to: wallet-create, reason: A reset ends on the onboarding screens of wallet creation }
+    introduces: []
+    actions: []
+
+  # Out of scope for v1 (inventory only)
+  - id: wallet-load
+    name: Wallet start and history load
+    description: The wallet starts, loads its history, and shows an error screen if it fails.
+    status: out-of-scope
+    screens: [Decide, App]
+    files:
+      - src/screens/LoadHistoryScreen.js
+      - src/screens/LoadWalletErrorScreen.js
+      - src/screens/DecideStackScreen.js
+    flags: [wallet-service]
+    links:
+      - { to: wallet-service, reason: A failed wallet-service start falls back to the fullnode }
+
+  - id: pin-setup
+    name: Choose or change PIN
+    description: The user picks a PIN during onboarding or changes it later in settings.
+    status: out-of-scope
+    screens: [ChoosePinScreen, ChangePin]
+    files:
+      - src/screens/ChangePin.js
+    flags: []
+
+  - id: biometrics
+    name: Biometric unlock
+    description: The user turns fingerprint or face unlock on or off in the security settings.
+    status: out-of-scope
+    screens: [Security]
+    files:
+      - src/screens/Security.js
+    flags: [safe-biometry-mode]
+
+  - id: lock-screen
+    name: App lock
+    description: The app asks for the PIN again after it was in the background for a while.
+    status: out-of-scope
+    screens: [PinScreen]
+    files: []
+    flags: []
+    links:
+      - { to: pin-unlock, reason: The app lock uses the same PIN screen }
+
+  - id: passkey-lock
+    name: Passkey lock screen
+    description: A passkey wallet is unlocked with the passkey after the app was in the background.
+    status: out-of-scope
+    screens: []
+    files:
+      - src/screens/PasskeyLockScreen.js
+    flags: []
+    links:
+      - { to: passkey-onboarding, reason: Only a passkey wallet has a passkey lock }
+
+  - id: privacy-settings
+    name: Privacy settings and key export
+    description: On the shielded testnet, the user sets the default privacy mode and exports the audit keys.
+    status: out-of-scope
+    screens: [PrivacySettings, ExportPrivacyKeys]
+    files:
+      - src/screens/PrivacySettings.js
+      - src/screens/ExportPrivacyKeys.js
+      - src/utils/privacy.js
+      - src/utils/sensitiveClipboard.js
+    flags: [shielded-outputs]
+
+  - id: token-unregister
+    name: Unregister token
+    description: The user removes a custom token from the wallet's list.
+    status: out-of-scope
+    screens: [UnregisterToken]
+    files:
+      - src/screens/UnregisterToken.js
+    flags: []
+
+  - id: token-import
+    name: Import detected tokens
+    description: The wallet finds tokens it holds but has not registered and offers to import them.
+    status: out-of-scope
+    screens: [ImportTokensScreen, ConfirmImportScreen]
+    files:
+      - src/screens/ImportTokensScreen.js
+      - src/screens/ConfirmImportScreen.js
+      - src/sagas/tokenImport.js
+      - src/components/TokenImportBanner.js
+      - src/components/ImportTokensModal.js
+      - src/components/TokenListCard.js
+    flags: []
+
+  - id: nft
+    name: NFT display
+    description: NFT tokens are shown with whole-number amounts.
+    status: out-of-scope
+    screens: []
+    files: []
+    flags: []
+
+  - id: token-metadata
+    name: Token metadata and icons
+    description: The wallet fetches token metadata such as the NFT flag and token icons.
+    status: out-of-scope
+    screens: []
+    files:
+      - src/sagas/tokenIcons.js
+      - src/components/TokenAvatar.js
+    flags: []
+
+  - id: nano-contracts
+    name: Nano contracts
+    description: The user registers nano contracts and sees their details and transactions.
+    status: out-of-scope
+    screens: [RegisterNanoContract, NanoContractRegisterQrCodeScreen, NanoContractRegisterScreen, NanoContractDetailsScreen, NanoContractTransactionScreen]
+    files:
+      - src/screens/NanoContract/
+      - src/screens/NanoContractRegisterQrCodeScreen.js
+      - src/components/NanoContract/
+      - src/sagas/nanoContract.js
+    flags: [nano-contract]
+
+  - id: token-swap
+    name: Token swap
+    description: The user swaps one token for another through a nano contract.
+    status: out-of-scope
+    screens: [Swap, TokenSwap, TokenSwapReview, TokenSwapListInputToken, TokenSwapListOutputToken]
+    files:
+      - src/screens/TokenSwap.js
+      - src/screens/TokenSwapLoadingScreen.js
+      - src/screens/TokenSwapReview.js
+      - src/screens/TokenSwapTokenList.js
+      - src/sagas/tokenSwap.js
+      - src/utils/tokenSwap.js
+    flags: [token-swap, nano-contract]
+    links:
+      - { to: nano-contracts, reason: Swaps run through nano contracts and need them enabled }
+
+  - id: reown
+    name: WalletConnect (Reown) sessions
+    description: The user connects the wallet to dApps through WalletConnect and manages the sessions.
+    status: out-of-scope
+    screens: [ReownList, ReownManual, ReownScan, PendingRequests]
+    files:
+      - src/screens/Reown/ReownList.js
+      - src/screens/Reown/ReownManual.js
+      - src/screens/Reown/ReownScan.js
+      - src/screens/Reown/PendingRequests.js
+      - src/sagas/reown.js
+      - src/hooks/useReownSignal.js
+    flags: [reown]
+    links:
+      - { to: nano-contracts, reason: Reown starts only where nano contracts are enabled on the network }
+
+  - id: dapp-rpc
+    name: dApp requests
+    description: A connected dApp asks the wallet to sign, send, create a token or call a nano contract, and the user approves or rejects.
+    status: out-of-scope
+    screens: [NewNanoContractTransactionScreen, SignMessageRequest, GetAddressRequest, GetAddressClientRequest, GetUtxosRequest, SendTransactionRequest, SignOracleDataRequestScreen, CreateTokenRequest, CreateNanoContractCreateTokenTxRequest, SuccessFeedbackScreen, RegisterTokenAfterSuccess]
+    files:
+      - src/screens/Reown/NewNanoContractTransactionScreen.js
+      - src/screens/Reown/SignMessageRequestScreen.js
+      - src/screens/Reown/GetAddressRequestScreen.js
+      - src/screens/Reown/GetAddressClientRequestScreen.js
+      - src/screens/Reown/GetUtxosRequestScreen.js
+      - src/screens/Reown/SendTransactionRequestScreen.js
+      - src/screens/Reown/SignOracleDataRequestScreen.js
+      - src/screens/Reown/CreateTokenScreen.js
+      - src/screens/Reown/CreateNanoContractCreateTokenTxScreen.js
+      - src/screens/Reown/SuccessFeedbackScreen.js
+      - src/screens/Reown/RegisterTokenAfterSuccess.js
+      - src/components/Reown/
+    flags: [reown]
+    links:
+      - { to: reown, reason: Requests arrive over a Reown session }
+
+  - id: deeplinks
+    name: Deep links
+    description: The wallet opens from a Hathor deep link and routes it to the right screen.
+    status: out-of-scope
+    screens: []
+    files:
+      - src/contexts/HathorDeeplinkContext.js
+    flags: []
+
+  - id: qr-scanner
+    name: QR scanner
+    description: A single scanner reads QR codes for tokens, nano contracts and WalletConnect.
+    status: out-of-scope
+    screens: [UnifiedQRScanner]
+    files:
+      - src/screens/UnifiedQRScanner.js
+      - src/components/QRCodeReader.js
+    flags: [reown, nano-contract]
+
+  - id: camera-permission
+    name: Camera permission
+    description: The app asks for the camera permission before scanning, and offers manual entry when it is denied.
+    status: out-of-scope
+    screens: [RegisterCameraPermissionScreen]
+    files:
+      - src/sagas/permissions.js
+    flags: []
+
+  - id: push-notifications
+    name: Push notifications
+    description: The user turns on push notifications for new transactions and opens a transaction from a notification.
+    status: out-of-scope
+    screens: [PushNotification]
+    files:
+      - src/screens/PushNotification.js
+      - src/sagas/pushNotification.js
+      - src/workers/
+      - src/components/AskForPushNotification.js
+      - src/components/AskForPushNotificationRefresh.js
+      - src/components/PushTxDetailsModal.js
+      - src/components/ShowPushNotificationTxDetails.js
+    flags: [push-notification]
+    links:
+      - { to: wallet-service, reason: Push registration starts a wallet-service wallet }
+
+  - id: amount-format
+    name: Amount format
+    description: The user picks how amounts are formatted (decimal and thousands separators).
+    status: out-of-scope
+    screens: [AmountFormat]
+    files:
+      - src/screens/AmountFormat.js
+    flags: [amount-format]
+
+  - id: settings
+    name: Settings menu
+    description: The settings tab lists the wallet's settings and shows only the entries whose flags are on.
+    status: out-of-scope
+    screens: [Settings]
+    files:
+      - src/screens/Settings.js
+    flags: [network-settings, reown, single-address, amount-format]
+
+  - id: monitoring
+    name: Error reporting
+    description: Unexpected errors show an error modal and are reported to Sentry.
+    status: out-of-scope
+    screens: []
+    files:
+      - src/sagas/errorHandler.js
+      - src/errorHandler.js
+      - src/components/GlobalErrorModal.js
+    flags: []
+
+  - id: security-ses
+    name: SES hardening
+    description: The app locks down the JavaScript environment at start to block tampering.
+    status: out-of-scope
+    screens: []
+    files:
+      - src/sagas/ses.js
+    flags: []
+
+  - id: connectivity
+    name: Offline bar
+    description: A bar tells the user when the wallet lost its connection.
+    status: out-of-scope
+    screens: []
+    files:
+      - src/components/OfflineBar.js
+    flags: []
+
+  - id: about
+    name: About
+    description: Shows the app version and legal links.
+    status: out-of-scope
+    screens: [About]
+    files:
+      - src/screens/About.js
+    flags: []
+
+flags:
+  - id: wallet-service
+    name: wallet-service-mobile.rollout
+    constant: WALLET_SERVICE_FEATURE_TOGGLE
+    default: false
+    gates: [wallet-service, network-settings, passkey-onboarding, wallet-load]
+    axisValues: ['facade:wallet-service']
+    combinesWith:
+      - Needs a wallet-service URL in the network settings; an empty URL forces it off (and push off with it).
+      - Ignored for 24 hours after a failed wallet-service start (IGNORE_WS_TOGGLE_FLAG); the wallet runs on the fullnode meanwhile.
+      - Turning it off mid-session reloads the wallet on the fullnode at once; turning it on takes effect at the next wallet start.
+    appliesAt: next-start
+    status: active
+
+  - id: push-notification
+    name: push-notification.rollout
+    constant: PUSH_NOTIFICATION_FEATURE_TOGGLE
+    default: false
+    gates: [push-notifications]
+    combinesWith:
+      - Always off on the shielded testnet.
+      - Forced off when the network has no wallet-service URL.
+      - Turning it off mid-session hides push at once; turning it on takes effect at the next wallet start.
+    appliesAt: next-start
+    status: active
+
+  - id: reown
+    name: reown.rollout
+    constant: REOWN_FEATURE_TOGGLE
+    default: false
+    gates: [reown, dapp-rpc, qr-scanner, settings, token-register]
+    combinesWith:
+      - Needs nano contracts enabled on the network (server info nano_contracts_enabled).
+      - Turning it off mid-session shuts the sessions down at once; turning it on starts Reown at the next wallet start.
+    appliesAt: next-start
+    status: active
+
+  - id: network-settings
+    name: network-settings.rollout
+    constant: NETWORK_SETTINGS_FEATURE_TOGGLE
+    default: false
+    gates: [network-settings, settings]
+    combinesWith:
+      - Shows the Network Settings entry in the settings menu, read live.
+    appliesAt: live
+    status: active
+
+  - id: nano-contract
+    name: nano-contract.rollout
+    constant: NANO_CONTRACT_FEATURE_TOGGLE
+    default: false
+    gates: [nano-contracts, token-swap, qr-scanner, token-register]
+    combinesWith:
+      - Needs nano contracts enabled on the network (server info nano_contracts_enabled).
+      - Registered contracts load only at wallet start.
+      - Required by token-swap.rollout and reown.rollout.
+    appliesAt: next-start
+    status: active
+
+  - id: safe-biometry-mode
+    name: safe-biometry-mode.rollout
+    constant: SAFE_BIOMETRY_MODE_FEATURE_TOGGLE
+    default: false
+    gates: [biometrics]
+    combinesWith:
+      - The biometry storage is migrated the next time the PIN is read, using the last known flag value.
+    appliesAt: next-pin
+    status: active
+
+  - id: token-swap
+    name: token-swap.rollout
+    constant: TOKEN_SWAP_FEATURE_TOGGLE
+    default: false
+    gates: [token-swap]
+    combinesWith:
+      - Needs nano-contract.rollout on and nano contracts enabled on the network.
+      - The Swap tab appears or disappears live.
+    appliesAt: live
+    status: active
+
+  - id: fee-based-tokens
+    name: fee-based-tokens.rollout
+    constant: FBT_FEATURE_TOGGLE
+    default: false
+    gates: [fee-tokens, token-create]
+    axisValues: ['token:fee', 'flag-fbt:off']
+    combinesWith:
+      - Decides the first create-token screen (type choice vs deposit notice) each time the wizard opens.
+    appliesAt: live
+    status: active
+
+  - id: single-address
+    name: single-address-mobile.rollout
+    constant: SINGLE_ADDRESS_FEATURE_TOGGLE
+    default: false
+    gates: [address-mode, settings]
+    axisValues: ['addr:single']
+    combinesWith:
+      - Shows the Address mode entry in settings live, but the wallet picks its address mode at the next start.
+      - An active shielded chain or transactions past the first address keep the wallet in multi-address mode.
+    appliesAt: next-start
+    status: active
+
+  - id: passkey-onboarding
+    name: passkey-onboarding.rollout
+    constant: PASSKEY_ONBOARDING_FEATURE_TOGGLE
+    default: false
+    gates: [passkey-onboarding]
+    axisValues: ['wallet:passkey']
+    combinesWith:
+      - Shows the passkey button on the onboarding screen, read live.
+    appliesAt: live
+    status: active
+
+  - id: amount-format
+    name: amount-format-mobile.rollout
+    constant: AMOUNT_FORMAT_FEATURE_TOGGLE
+    default: false
+    gates: [amount-format, settings]
+    combinesWith:
+      - Shows the Amount format entry in settings and applies the chosen format, read live.
+    appliesAt: live
+    status: active
+
+  - id: shielded-outputs
+    name: shielded-outputs.rollout
+    constant: SHIELDED_OUTPUTS_FEATURE_TOGGLE
+    default: false
+    gates: [shielded, shielded-send, shielded-receive, privacy-settings, token-create]
+    combinesWith:
+      - The shielded UI also needs the testnet-shielded-outputs network and a registered shielded provider.
+      - Read with the current network, so it is off on the networks the user switches from.
+      - The shielded UI is re-evaluated live and the shared address is read again.
+    appliesAt: live
+    status: active
+
+  - id: shielded-outputs-network
+    name: shielded-outputs-network.rollout
+    constant: SHIELDED_NETWORK_PRESET_FEATURE_TOGGLE
+    default: false
+    gates: [network-settings]
+    axisValues: ['network:testnet-shielded']
+    combinesWith:
+      - Only shows the Shielded Testnet preset in Network Settings; needs network-settings.rollout to reach the screen.
+    appliesAt: live
+    status: active
+
+axes:
+  # Setup axes: expensive to change, they form the setups.
+  - id: network
+    name: Network
+    kind: setup
+    values:
+      - { id: testnet, name: Public testnet }
+      - { id: testnet-shielded, name: Shielded testnet (testnet-shielded-outputs) }
+      - { id: local-privnet, name: Local privnet (mobile-e2e-flows) }
+    how: QA.md "Common Activities" > "Changing Networks" (Settings > Network Settings > "I Understand" > pick a pre-setting or "Customize"); "Identifying the current network" to check it. The wallet restarts and flags are read again for the new network. The Shielded Testnet preset shows only with shielded-outputs-network.rollout on for the device on the current network (QA_SHIELDED.md). The local privnet is a Customize to the emulator's forwarded fullnode, in the debug build of `../mobile-e2e-flows`.
+    switch:
+      cost: expensive # QA: confirm
+      transitions:
+        - { from: testnet, to: local-privnet, cost: very-expensive, when: The privnet runs only in the e2e kit's emulator debug build; the run moves to another install } # QA: confirm
+        - { from: testnet-shielded, to: local-privnet, cost: very-expensive, when: The privnet runs only in the e2e kit's emulator debug build; the run moves to another install } # QA: confirm
+        - { from: local-privnet, to: testnet, cost: very-expensive, when: Leaving the e2e kit's emulator for a normal build } # QA: confirm
+        - { from: local-privnet, to: testnet-shielded, cost: very-expensive, when: Leaving the e2e kit's emulator for a normal build } # QA: confirm
+
+  - id: facade
+    name: Wallet facade
+    kind: setup
+    values:
+      - { id: wallet-service, name: Wallet service }
+      - { id: fullnode, name: Fullnode }
+    how: QA.md "Common Activities" > "Changing the Facade". To the fullnode, Customize the network and empty the "Wallet Service URL" and "Wallet Service WS URL" fields (or turn wallet-service-mobile.rollout off on Unleash for the device). Back to the wallet service, pick a pre-setting again. Check it with "Identifying the current facade". Trap, IGNORE_WS_TOGGLE_FLAG, from "Changing the Facade" > "Wallet Service". After an irrecoverable wallet-service error, the app stays on the fullnode for 24 hours, whatever the flag says. To get back to the wallet service sooner, clear the app data (Android) or reinstall (iOS) and import the wallet again. A passkey wallet stays on the fullnode unless it is registered on the wallet service.
+    switch:
+      cost: expensive # QA: confirm
+      transitions: []
+      fallback: { cost: very-expensive, how: "Clear the app data (Android) or reinstall (iOS), then import the wallet again: this clears IGNORE_WS_TOGGLE_FLAG" } # QA: confirm
+
+  - id: wallet
+    name: Wallet type
+    kind: setup
+    values:
+      - { id: seed, name: Seed (24 words and PIN) }
+      - { id: passkey, name: Passkey (no words and no PIN) }
+    how: QA.md "Reset Wallet", then "New Wallet Flow" or "Import a wallet" for a seed wallet, or the passkey button on the onboarding screen (needs passkey-onboarding.rollout) for a passkey wallet.
+    switch:
+      cost: very-expensive # QA: confirm
+      transitions: []
+
+  - id: addr
+    name: Address mode
+    kind: setup
+    values:
+      - { id: single, name: Single address }
+      - { id: multi, name: Multi address }
+    how: QA.md "Address mode" and QA_ADDRESS_MODE.md. Settings > Address mode (needs single-address-mobile.rollout), then save; the wallet restarts. The mode is stored per network. At start the app moves a single-address wallet to multi when it finds transactions past index 0, and a wallet with an active shielded chain (seed wallets on the shielded testnet) is always multi.
+    switch:
+      cost: cheap # QA: confirm
+      transitions:
+        - { from: multi, to: single, impossible: true, when: wallet has tx past index 0 or a shielded chain is active }
+      fallback: { cost: very-expensive, how: reset and import a fresh seed } # QA: confirm
+
+  - id: flag-fbt
+    name: fee-based-tokens.rollout
+    kind: setup
+    values:
+      - { id: on, name: Flag on }
+      - { id: off, name: Flag off }
+    how: QA.md "Common Activities" > "Setting flags on Unleash", for the device's Unique app identifier on the current network. It applies live within the 15 s polling. On the local privnet, flags are forced by `E2E-LOCAL` edits to FEATURE_TOGGLE_DEFAULTS in the e2e worktree, so a change there needs a rebuild.
+    switch:
+      cost: medium # QA: confirm
+      transitions: []
+
+  # Action axes: cheap to vary inside one setup.
+  - id: dest
+    name: Destination address
+    kind: action
+    values:
+      - { id: simple, name: Simple address (P2PKH) }
+      - { id: multisig, name: Multisig address (P2SH) }
+      - { id: shielded, name: Shielded address }
+    how: Type, paste or scan the address on the send address screen. Keep one address of each kind of the current network at hand.
+    switch:
+      cost: cheap # QA: confirm
+      transitions: []
+
+  - id: token
+    name: Token
+    kind: action
+    values:
+      - { id: htr, name: HTR }
+      - { id: deposit, name: Deposit-based custom token }
+      - { id: fee, name: Fee-based custom token }
+    how: Pick the token on the send amount screen (Change token), or open it from the home list. The wallet must already hold each kind (QA.md "Create a new token Tests").
+    switch:
+      cost: cheap # QA: confirm
+      transitions: []
+
+  - id: privacy
+    name: Privacy mode
+    kind: action
+    values:
+      - { id: public, name: Public }
+      - { id: hide-amount, name: Hide amount }
+      - { id: private, name: Private }
+    how: The privacy selector on the send amount screen, shown only where private sends are possible (shielded testnet with shielded-outputs.rollout on). The default comes from Settings > Privacy.
+    switch:
+      cost: cheap # QA: confirm
+      transitions: []
+
+  - id: amount
+    name: Amount
+    kind: action
+    values:
+      - { id: normal, name: A normal amount below the balance }
+      - { id: max, name: Exactly the available balance }
+      - { id: over-balance, name: More than the available balance }
+      - { id: empty, name: Zero or empty }
+      - { id: decimals, name: Many decimal places }
+      - { id: private-over-limit, name: At or above the shielded output limit (2^40) that private modes reject }
+    how: Type it on the amount input.
+    switch:
+      cost: cheap # QA: confirm
+      transitions: []
+
+  - id: funding
+    name: Funding before the action
+    kind: action
+    values:
+      - { id: enough-htr, name: Holds the token and enough HTR for fees }
+      - { id: zero-htr, name: Holds the token but no HTR }
+    how: Send HTR or the token to the wallet beforehand from another wallet (on the local privnet, `sender/sender.js send`), or send all HTR away to reach zero HTR.
+    switch:
+      cost: medium # QA: confirm
+      transitions: []
+
+  - id: private-balance
+    name: Private balance state
+    kind: action
+    values:
+      - { id: unlocked, name: Unlocked }
+      - { id: locked, name: Locked (scan key not decrypted at start) }
+      - { id: broken-key, name: Broken key (shielded keys don't match) }
+    how: QA_SHIELDED.md "A start that leaves the private funds locked" and "Unlocking a locked private balance". Locked needs a start with a PIN that doesn't decrypt the scan key, and broken key needs a forced shielded-key-mismatch; both are reachable only in a debug build. Unlock with "Unlock private balance" and the PIN, or the passkey.
+    switch:
+      cost: medium # QA: confirm
+      transitions:
+        - { from: unlocked, to: locked, cost: expensive, when: Needs a debug build and a wallet restart with a mismatched PIN } # QA: confirm
+        - { from: unlocked, to: broken-key, cost: expensive, when: Needs a debug build that forces shielded-key-mismatch } # QA: confirm
+        - { from: locked, to: broken-key, cost: expensive, when: Needs a debug build that forces shielded-key-mismatch } # QA: confirm
+
+setups:
+  # Public testnet, seed wallet: the main run (QA.md "Suggested Test Sequence").
+  - id: tn-ws-seed-single
+    name: Testnet, wallet service, seed, single address
+    values: { network: testnet, facade: wallet-service, wallet: seed, addr: single, flag-fbt: on }
+    environment: testnet
+    runnable: true # QA: confirm
+    notes: A new wallet starts in single-address mode; run it first, while no address past index 0 has transactions.
+  - id: tn-ws-seed-multi
+    name: Testnet, wallet service, seed, multi address
+    values: { network: testnet, facade: wallet-service, wallet: seed, addr: multi, flag-fbt: on }
+    environment: testnet
+    runnable: true # QA: confirm
+  - id: tn-ws-seed-multi-nofbt
+    name: Testnet, wallet service, seed, multi address, fee-based tokens off
+    values: { network: testnet, facade: wallet-service, wallet: seed, addr: multi, flag-fbt: off }
+    environment: testnet
+    runnable: true # QA: confirm
+    notes: For create token, which offers only deposit tokens with the flag off.
+  - id: tn-fn-seed-single
+    name: Testnet, fullnode, seed, single address
+    values: { network: testnet, facade: fullnode, wallet: seed, addr: single, flag-fbt: on }
+    environment: testnet
+    runnable: true # QA: confirm
+    notes: Needs a wallet with no transactions past index 0 (a fresh seed), as multi to single is impossible otherwise.
+  - id: tn-fn-seed-multi
+    name: Testnet, fullnode, seed, multi address
+    values: { network: testnet, facade: fullnode, wallet: seed, addr: multi, flag-fbt: on }
+    environment: testnet
+    runnable: true # QA: confirm
+    notes: QA.md "Fullnode Facade tests".
+
+  # Shielded testnet, seed wallet.
+  - id: tns-ws-seed-multi
+    name: Shielded testnet, wallet service, seed, multi address
+    values: { network: testnet-shielded, facade: wallet-service, wallet: seed, addr: multi, flag-fbt: on }
+    environment: testnet-shielded
+    runnable: true # QA: confirm
+    notes: Private sends to shielded recipients need the wallet service's shielded capability to be full.
+  - id: tns-fn-seed-multi
+    name: Shielded testnet, fullnode, seed, multi address
+    values: { network: testnet-shielded, facade: fullnode, wallet: seed, addr: multi, flag-fbt: on }
+    environment: testnet-shielded
+    runnable: true # QA: confirm
+  - id: tns-ws-seed-single
+    name: Shielded testnet, wallet service, seed, single address
+    values: { network: testnet-shielded, facade: wallet-service, wallet: seed, addr: single, flag-fbt: on }
+    environment: testnet-shielded
+    runnable: false
+    notes: Unreachable. A seed wallet on the shielded testnet registers the shielded provider, and its shielded chain keeps it in multi-address mode (src/shielded/gating.js shouldRegisterShieldedProvider, src/screens/AddressMode.js).
+
+  # Local privnet (../mobile-e2e-flows).
+  - id: pn-fn-seed-multi
+    name: Local privnet, fullnode, seed, multi address
+    values: { network: local-privnet, facade: fullnode, wallet: seed, addr: multi, flag-fbt: on }
+    environment: local-privnet
+    runnable: true # QA: confirm
+    notes: For large amounts and edge cases. Funded by the kit's `sender` wallet; flags are forced with `E2E-LOCAL` edits.
+  - id: pn-ws-seed-multi
+    name: Local privnet, wallet service, seed, multi address
+    values: { network: local-privnet, facade: wallet-service, wallet: seed, addr: multi, flag-fbt: on }
+    environment: local-privnet
+    runnable: false
+    notes: Unreachable today. The kit's privnet/docker-compose.yml runs only a fullnode and a tx-mining service, with no wallet service.
+
+  # Passkey wallets: the passkey's RP ID needs a store-signed build on a physical device.
+  - id: tn-ws-passkey-multi
+    name: Testnet, wallet service, passkey, multi address
+    values: { network: testnet, facade: wallet-service, wallet: passkey, addr: multi, flag-fbt: on }
+    environment: store-device
+    runnable: true # QA: confirm
+    notes: The passkey wallet must already be registered on the wallet service, or it stays on the fullnode. passkey-onboarding.rollout must be on to create it.
+  - id: tn-fn-passkey-multi
+    name: Testnet, fullnode, passkey, multi address
+    values: { network: testnet, facade: fullnode, wallet: passkey, addr: multi, flag-fbt: on }
+    environment: store-device
+    runnable: true # QA: confirm
+  - id: tns-fn-passkey-multi
+    name: Shielded testnet, fullnode, passkey, multi address
+    values: { network: testnet-shielded, facade: fullnode, wallet: passkey, addr: multi, flag-fbt: on }
+    environment: store-device
+    runnable: true # QA: confirm
+    notes: The passkey wallet needs its shielded keys, derived in a passkey ceremony, for shielded support; it unlocks its private balance with the passkey.
+actions:
+  - id: send
+    name: Send tokens
+    feature: send
+    axes: [dest, token, privacy, amount, funding, private-balance]
+    setups: [tn-ws-seed-multi, tn-fn-seed-multi, tns-ws-seed-multi, tns-fn-seed-multi, pn-fn-seed-multi, pn-ws-seed-multi, tn-ws-passkey-multi, tn-fn-passkey-multi, tns-fn-passkey-multi]
+    path:
+      steps:
+        - { id: address, screen: SendAddressInput, name: Type or paste or scan the address and tap Next }
+        - { id: amount, screen: SendAmountInput, name: Pick the token and privacy mode and type the amount }
+        - { id: confirm, screen: SendConfirmScreen, name: Review the summary and fees and tap Send }
+        - { id: authorize, screen: PinScreen, name: Enter the PIN (or do the passkey ceremony) }
+      outcomes:
+        - id: ok-sent
+          kind: success
+          at: authorize
+          message: 'Your transfer of **${amountAndToken}** has been confirmed'
+          source: 'src/screens/SendConfirmScreen.js:590'
+          verified: false
+        - id: err-shielded-dest-unsupported
+          kind: error
+          at: address
+          message: Next stays disabled
+          source: 'src/screens/SendAddressInput.js:152'
+          verified: false
+          note: 'The validation message "This wallet does not support shielded addresses." (src/utils.js:257) is set only when Next is tapped, so it does not show.'
+        - id: err-invalid-amount
+          kind: error
+          at: amount
+          message: Next stays disabled
+          source: 'src/screens/SendAmountInput.js:252'
+          verified: false
+          note: '"Invalid amount" (SendAmountInput.js:129) is set only when Next is tapped, so it does not show for an empty or zero amount.'
+        - id: err-insufficient-funds
+          kind: error
+          at: amount
+          message: Insufficient funds
+          source: 'src/screens/SendAmountInput.js:134'
+          verified: false
+        - id: err-privacy-needs-shielded
+          kind: error
+          at: amount
+          message: 'The selected privacy mode requires a shielded address as the recipient. The address you entered is not shielded — change the address or switch to Public.'
+          source: 'src/screens/SendAmountInput.js:144'
+          verified: false
+        - id: err-private-over-limit
+          kind: error
+          at: amount
+          message: 'A private send can be at most ${max} ${symbol}.'
+          source: 'src/screens/SendAmountInput.js:157'
+          verified: false
+        - id: err-no-htr-for-fee
+          kind: error
+          at: confirm
+          message: Insufficient HTR to cover the network fee.
+          source: 'src/screens/SendConfirmScreen.js:107'
+          verified: false
+        - id: err-htr-and-fees
+          kind: error
+          at: confirm
+          message: Insufficient HTR to cover this transaction and its fees.
+          source: 'src/screens/SendConfirmScreen.js:116'
+          verified: false
+        - id: err-privacy-fee
+          kind: error
+          at: confirm
+          message: Insufficient HTR to cover the privacy fees of this transaction.
+          source: 'src/utils/shieldedSend.js:245'
+          verified: false
+        - id: err-private-unavailable
+          kind: error
+          at: confirm
+          message: Private transfers are not available for this wallet.
+          source: 'src/screens/SendConfirmScreen.js:214'
+          verified: false
+        - id: err-ws-shielded-dest
+          kind: error
+          at: confirm
+          message: This wallet does not support shielded addresses.
+          source: 'src/utils.js:257'
+          verified: false
+        - id: edge-locked-unlock
+          kind: error
+          at: confirm
+          message: Your private balance is locked. Unlock it to send privately.
+          source: 'src/screens/SendConfirmScreen.js:559'
+          verified: false
+
+  - id: create-token
+    name: Create a token
+    feature: token-create
+    axes: [token, funding, private-balance]
+    setups: [tn-ws-seed-multi, tn-ws-seed-multi-nofbt, tn-fn-seed-multi, tns-ws-seed-multi, tns-fn-seed-multi, tn-ws-passkey-multi]
+    path:
+      steps:
+        - { id: type, screen: CreateTokenTypeNotice, name: Pick deposit or fee token (or accept the deposit notice when the flag is off) }
+        - { id: name, screen: CreateTokenName, name: Type the token name }
+        - { id: symbol, screen: CreateTokenSymbol, name: Type the token symbol }
+        - { id: amount, screen: CreateTokenAmount, name: Type the amount and check the deposit or fee }
+        - { id: confirm, screen: CreateTokenConfirm, name: Review and tap Create token }
+        - { id: authorize, screen: PinScreen, name: Enter the PIN (or do the passkey ceremony) }
+        - { id: detail, screen: CreateTokenDetail, name: See the new token's details }
+      outcomes:
+        - id: ok-created
+          kind: success
+          at: confirm
+          message: '**${name}** created successfully'
+          source: 'src/screens/CreateTokenConfirm.js:241'
+          verified: false
+        - id: err-not-enough-htr
+          kind: error
+          at: amount
+          message: Next stays disabled and the deposit or fee shows in red
+          source: 'src/screens/CreateTokenAmount.js:133'
+          verified: false
+          note: 'The amount shows in red next to "You have ${amountAvailableText} available" (CreateTokenAmount.js:159).'
+        - id: err-locked
+          kind: error
+          at: confirm
+          message: Your private balance is locked. Unlock it and try again.
+          source: 'src/shielded/newAddress.js:32'
+          verified: false
+        - id: err-private-unavailable
+          kind: error
+          at: confirm
+          message: Private transfers are not available for this wallet.
+          source: 'src/shielded/newAddress.js:36'
+          verified: false
+
+  - id: receive
+    name: Receive (show and share an address)
+    feature: receive
+    axes: [private-balance]
+    setups: [tn-ws-seed-single, tn-ws-seed-multi, tn-fn-seed-single, tn-fn-seed-multi, tns-ws-seed-multi, tns-fn-seed-multi, tns-ws-seed-single]
+    path:
+      steps:
+        - { id: open, screen: Receive, name: Open the Receive tab and read the address and QR code }
+        - { id: new-address, screen: Receive, name: Tap New address (multi-address mode only) }
+        - { id: share, screen: Receive, name: Tap Share and check the shared text }
+      outcomes:
+        - id: ok-shared
+          kind: success
+          at: share
+          message: 'Here is my address: ${lastSharedAddress}'
+          source: 'src/components/ReceiveMyAddress.js:76'
+          verified: false
+        - id: ok-new-address
+          kind: success
+          at: new-address
+          message: A new, different address and QR code are shown
+          source: 'src/components/ReceiveMyAddress.js:69'
+          verified: false
+          note: 'Tapped through the "New address" button (ReceiveMyAddress.js:100); in the shielded environment the new address comes from ReceiveMyAddress.js:62.'
+        - id: edge-private-locked
+          kind: error
+          at: open
+          message: Private receiving is locked
+          source: 'src/components/Shielded/PrivateReceiveAddress.js:55'
+          verified: false
+        - id: edge-private-unavailable
+          kind: error
+          at: open
+          message: Private receiving is unavailable
+          source: 'src/components/Shielded/PrivateReceiveAddress.js:64'
+          verified: false
+
+  - id: history
+    name: Token balance and history
+    feature: tx-history
+    axes: [token, private-balance]
+    setups: [tn-ws-seed-multi, tn-fn-seed-multi, tns-ws-seed-multi, tns-fn-seed-multi]
+    path:
+      steps:
+        - { id: list, screen: Dashboard, name: Read the token list balances on Home }
+        - { id: token, screen: MainScreen, name: Open a token and read its available balance and transactions }
+        - { id: tx, screen: MainScreen, name: Open a transaction and read its details and fees }
+      outcomes:
+        - id: ok-balance
+          kind: success
+          at: token
+          message: The token's available balance and its transactions are shown, and the balance matches the home list
+          source: 'src/screens/MainScreen.js:620'
+          verified: false
+          note: 'The balance sits under the "Available Balance" label (MainScreen.js:620).'
+        - id: edge-locked-count
+          kind: error
+          at: token
+          message: '${count} private output is locked'
+          source: 'src/components/Shielded/ShieldedBalanceSplit.js:48'
+          verified: false
+        - id: edge-private-unavailable
+          kind: error
+          at: token
+          message: Private transfers are not available for this wallet.
+          source: 'src/components/Shielded/ShieldedBalanceSplit.js:97'
+          verified: false
+
+constraints:
+  # send
+  - id: c-send-shielded-dest-outside
+    action: send
+    when: { network: testnet, dest: shielded }
+    class: rejected
+    outcome: err-shielded-dest-unsupported
+    note: 'Outside the shielded environment a shielded address is not valid (src/utils.js validateAddress, allowShielded from isShieldedEnvironment in SendAddressInput.js:53). Next stays disabled, so the message may never show (QA_SHIELDED.md "type and scan a private address: Next stays disabled").'
+  - id: c-send-privacy-outside
+    action: send
+    when: { network: testnet, privacy: [hide-amount, private] }
+    class: invalid
+    note: The privacy selector shows only where the wallet can send privately (canSendPrivately in src/shielded/gating.js); elsewhere every send is public.
+  - id: c-send-private-balance-outside
+    action: send
+    when: { network: testnet, private-balance: [locked, broken-key] }
+    class: invalid
+    note: There is no private balance outside the shielded environment.
+  - id: c-send-privacy-broken-key
+    action: send
+    when: { private-balance: broken-key, privacy: [hide-amount, private] }
+    class: invalid
+    note: With mismatched keys the capability level is none, so canSendPrivately is false and the privacy selector is hidden.
+  - id: c-send-htr-zero-htr
+    action: send
+    when: { token: htr, funding: zero-htr }
+    class: invalid
+    note: '"Holds the token but no HTR" cannot hold for HTR itself.'
+  - id: c-send-over-limit-htr
+    action: send
+    when: { amount: private-over-limit, token: htr }
+    class: invalid
+    note: No test wallet holds 2^40 base units of HTR; reach the limit with a custom token minted with a huge supply.
+  - id: c-send-over-limit-deposit-public
+    action: send
+    when: { amount: private-over-limit, token: deposit, network: [testnet, testnet-shielded] }
+    class: invalid # QA: confirm
+    note: 'Buildable in principle, not with public test funds: minting 2^40 base units of a deposit token locks a 1% HTR deposit, about 110M HTR. On the public networks reach the limit with a fee token (flat creation fee); with a deposit token only on the local privnet, funded by the sender wallet of the e2e kit.'
+  - id: c-send-passkey-broken-key
+    action: send
+    when: { wallet: passkey, private-balance: broken-key }
+    class: invalid
+    note: Mismatched keys are forced only in a debug build, and passkey setups run on a store build.
+  - id: c-send-private-legacy-dest
+    action: send
+    when: { privacy: [hide-amount, private], dest: [simple, multisig] }
+    class: rejected
+    outcome: err-privacy-needs-shielded
+    note: Checks run in order (SendAmountInput.js:128-158), and only the first failure shows. The order is invalid amount, then "Insufficient funds", then this one, then the private amount limit. A private output needs the scan key a shielded address carries (SendAmountInput.js:140-152). If isShieldedAddress throws the check is skipped and the build fails later with wallet-lib's text.
+  - id: c-send-private-over-limit
+    action: send
+    when: { amount: private-over-limit, privacy: [hide-amount, private], dest: shielded }
+    class: rejected
+    outcome: err-private-over-limit
+    note: Checked last on the amount screen, after "Insufficient funds" and the shielded-recipient check; only the first failure shows. A private amount must be below MAX_SHIELDED_OUTPUT_VALUE (2^40) (src/utils/shieldedSend.js:23-33, SendAmountInput.js:154).
+  - id: c-send-over-balance
+    action: send
+    when: { amount: over-balance }
+    class: rejected
+    outcome: err-insufficient-funds
+    note: The amount screen checks only the available balance of the sent token. This check runs before the privacy checks (SendAmountInput.js:133), so it wins when several rejections match.
+  - id: c-send-empty
+    action: send
+    when: { amount: empty }
+    class: rejected
+    outcome: err-invalid-amount
+    note: Next stays disabled for an empty or zero amount (isButtonDisabled); "Invalid amount" shows only if Next is tapped with no parsed amount.
+  - id: c-send-fee-token-zero-htr-fn
+    action: send
+    when: { token: fee, funding: zero-htr, facade: fullnode, privacy: public }
+    class: edge
+    outcome: err-htr-and-fees
+    note: 'The amount screen checks only the fee token''s balance (SendAmountInput.js:126-136), so the missing HTR for the fee shows only when Confirm builds the tx. On the fullnode facade wallet-lib throws "Token: 00. Insufficient amount of tokens to fill the amount." (lib/new/sendTransaction.js:678), which mapTxError maps to this message. The installed wallet-lib is 3.1.1 while package.json pins 4.3.0: confirm the lib message.'
+  - id: c-send-fee-token-zero-htr-ws
+    action: send
+    when: { token: fee, funding: zero-htr, facade: wallet-service, privacy: public }
+    class: edge
+    outcome: err-no-htr-for-fee
+    note: 'As on the fullnode, the missing HTR shows only on Confirm. On the wallet service wallet-lib throws "No UTXOs available for the token 00..." (sendTransactionWalletService.js:392). The installed wallet-lib is 3.1.1 while package.json pins 4.3.0: confirm the lib message.'
+  - id: c-send-zero-htr-private
+    action: send
+    when: { token: [deposit, fee], funding: zero-htr, privacy: [hide-amount, private] }
+    class: edge
+    outcome: err-privacy-fee
+    note: 'A private send pays its privacy fee in HTR. mapShieldedSendError runs before the generic mapping (SendConfirmScreen.js:99), so with no HTR the privacy-fee text is the likely one. The installed wallet-lib is 3.1.1 while package.json pins 4.3.0: confirm the lib message.'
+  - id: c-send-htr-max-with-fee
+    action: send
+    when: { token: htr, amount: max, privacy: [hide-amount, private] }
+    class: edge
+    outcome: err-htr-and-fees
+    note: 'Exactly the available HTR leaves nothing for the privacy fee, which is paid in HTR; it passes the amount screen and fails when Confirm builds the tx. The message may instead be the privacy-fee one from mapShieldedSendError (src/utils/shieldedSend.js:245).'
+  - id: c-send-ws-shielded-dest-public
+    action: send
+    when: { facade: wallet-service, dest: shielded, privacy: public, private-balance: [locked, broken-key] }
+    class: rejected
+    outcome: err-ws-shielded-dest
+    note: On the wallet service a send to a shielded address needs shielded capability full (SendConfirmScreen.js:200-218); below it a public send fails with shieldedAddressNotSupportedText.
+  - id: c-send-ws-private-not-full
+    action: send
+    when: { facade: wallet-service, dest: shielded, privacy: [hide-amount, private], private-balance: locked }
+    class: rejected
+    outcome: err-private-unavailable
+    note: On the wallet service a private send needs shielded capability full (SendConfirmScreen.js:209-216); there is no unlock phase on this facade.
+  - id: c-send-fn-locked-private
+    action: send
+    when: { facade: fullnode, private-balance: locked, privacy: [hide-amount, private], dest: shielded }
+    class: edge
+    outcome: edge-locked-unlock
+    note: On the fullnode facade a locked private balance stops the build at the unlock phase (SendConfirmScreen.js:241-246); after the PIN or passkey unlock the send is built.
+  - id: c-send-multisig
+    action: send
+    when: { dest: multisig }
+    class: lib-risk
+    note: The app treats P2SH like P2PKH; multisig output building lives in wallet-lib, where past breakage happened.
+
+  # create-token
+  - id: c-ct-htr
+    action: create-token
+    when: { token: htr }
+    class: invalid
+    note: A new token is a deposit or fee token, never HTR.
+  - id: c-ct-fee-flag-off
+    action: create-token
+    when: { flag-fbt: off, token: fee }
+    class: invalid
+    note: With fee-based-tokens.rollout off the wizard opens on the deposit notice and offers no fee token (App.js CreateTokenStack).
+  - id: c-ct-private-balance-outside
+    action: create-token
+    when: { network: testnet, private-balance: [locked, broken-key] }
+    class: invalid
+    note: There is no private balance outside the shielded environment.
+  - id: c-ct-passkey-broken-key
+    action: create-token
+    when: { wallet: passkey, private-balance: broken-key }
+    class: invalid
+    note: Mismatched keys are forced only in a debug build, and passkey setups run on a store build.
+  - id: c-ct-zero-htr
+    action: create-token
+    when: { funding: zero-htr }
+    class: rejected
+    outcome: err-not-enough-htr
+    note: Next stays disabled when the deposit or fee is above the available HTR (CreateTokenAmount.js:133); the amount shows in red under the available HTR. Not always, for a deposit token; see c-ct-zero-htr-small-deposit.
+  - id: c-ct-zero-htr-small-deposit
+    action: create-token
+    when: { funding: zero-htr, token: deposit }
+    class: edge
+    note: 'The amount screen floors the deposit (value / 100n, CreateTokenAmount.js:87), while the confirm screen and wallet-lib round it up (getDepositAmount, CreateTokenConfirm.js:105). With zero HTR and an amount below 1.00 the screen shows a zero deposit and Next is enabled, and the creation fails later. Try an amount of 0.50 as well as a normal amount.'
+  - id: c-ct-fee-hardcoded
+    action: create-token
+    when: { token: fee }
+    class: edge
+    note: The amount screen shows a fee of 1 (hard-coded 1n, CreateTokenAmount.js:84-89) while the confirm screen shows FEE_PER_OUTPUT (CreateTokenConfirm.js:107); check both show the same fee.
+  - id: c-ct-locked
+    action: create-token
+    when: { private-balance: locked }
+    class: edge
+    outcome: err-locked
+    note: In the shielded environment the token is minted to a new shielded address, which wallet-lib gives out only with the scan key unlocked (CreateTokenConfirm.js:150-160, QA_SHIELDED.md).
+  - id: c-ct-broken-key
+    action: create-token
+    when: { private-balance: broken-key }
+    class: edge
+    outcome: err-private-unavailable
+    note: With mismatched keys no shielded address can be given out, so the creation fails (newAddressErrorText default branch).
+
+  # receive
+  - id: c-rcv-private-balance-outside
+    action: receive
+    when: { network: testnet, private-balance: [locked, broken-key] }
+    class: invalid
+    note: There is no private balance outside the shielded environment.
+  - id: c-rcv-single-shielded-chain
+    action: receive
+    when: { network: [testnet-shielded, local-privnet], wallet: seed, addr: single }
+    class: invalid
+    note: 'A seed wallet in the shielded environment has a shielded chain, which keeps it in multi-address mode ("Single address mode is not available on this network.", src/screens/AddressMode.js:202).'
+  - id: c-rcv-ws-single-no-shielded
+    action: receive
+    when: { network: testnet-shielded, facade: wallet-service, addr: single }
+    class: invalid
+    note: 'The wallet service gives out no shielded address in single-address mode (receiveState.js:79 maps it to "Private receiving is unavailable"). Unreachable today, as no wallet with a shielded chain can be in single mode; kept so the branch is visible.'
+  - id: c-rcv-single-no-new-address
+    action: receive
+    when: { addr: single }
+    class: edge
+    outcome: ok-shared
+    note: In single-address mode the New address button is hidden and the address never changes (ReceiveMyAddress.js:97-103).
+  - id: c-rcv-locked
+    action: receive
+    when: { private-balance: locked }
+    class: edge
+    outcome: edge-private-locked
+    note: The private receive address is replaced by a notice and an unlock action until the private balance is unlocked.
+  - id: c-rcv-broken-key
+    action: receive
+    when: { private-balance: broken-key }
+    class: edge
+    outcome: edge-private-unavailable
+    note: 'With mismatched keys the receive screen says "Private transfers are not available for this wallet." (receiveState.js:177).'
+
+  # history
+  - id: c-hist-private-balance-outside
+    action: history
+    when: { network: testnet, private-balance: [locked, broken-key] }
+    class: invalid
+    note: There is no private balance outside the shielded environment.
+  - id: c-hist-fee-row
+    action: history
+    when: { token: fee, facade: fullnode }
+    class: edge
+    note: Tx details of a fee-token send show the "Fees" row (src/components/Shielded/FeeBreakdown.js:58) on the fullnode facade only; on the wallet service the tx wallet-lib reads has no fees (QA_SHIELDED.md).
+  - id: c-hist-locked
+    action: history
+    when: { private-balance: locked }
+    class: edge
+    outcome: edge-locked-count
+    note: The token screen counts the locked private outputs and offers "Unlock private balance".
+  - id: c-hist-broken-key
+    action: history
+    when: { private-balance: broken-key }
+    class: edge
+    outcome: edge-private-unavailable
+    note: With mismatched keys the split is replaced by the note that private transfers are not available.
+  - id: c-hist-ws-split
+    action: history
+    when: { facade: wallet-service, network: testnet-shielded }
+    class: lib-risk
+    note: On the wallet service the private part of the balance comes from the service (sagas/tokens.js:225-231 fetchWalletServiceSplitBalance), not from local UTXOs.

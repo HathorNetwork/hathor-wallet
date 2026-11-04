@@ -166,7 +166,7 @@ class ModalBackupWords extends React.Component {
         errorMessage: (
           <span>
             <span>{t`Wrong word. Please double check the words you saved.`}</span>
-            <strong onClick={() => this.setState({ showValidation: false, errorMessage: '' })}>{t`Click here to start the process again.`}</strong>
+            <strong data-testid='backup-words-restart' onClick={() => this.setState({ showValidation: false, errorMessage: '' })}>{t`Click here to start the process again.`}</strong>
           </span>
         ),
       });
@@ -216,7 +216,7 @@ class ModalBackupWords extends React.Component {
     const renderWordsTd = (start, end) => {
       return this.state.words.split(' ').slice(start, end).map((word, idx) => {
         return (
-          <td key={word}><strong>{start+idx+1}.</strong> {word} </td>
+          <td key={word}><strong>{start+idx+1}.</strong> <span data-testid={`backup-words-word-${start+idx+1}`}>{word}</span> </td>
         )
       })
     }
@@ -255,7 +255,7 @@ class ModalBackupWords extends React.Component {
       return (
         <div>
           <button type="button" className="btn btn-secondary mr-3" data-dismiss="modal">{t`Do it later`}</button>
-          <button onClick={this.handleWordsSaved} type="button" className="btn btn-hathor">{t`Ok, I have saved them`}</button>
+          <button onClick={this.handleWordsSaved} type="button" className="btn btn-hathor" data-testid="backup-words-saved">{t`Ok, I have saved them`}</button>
         </div>
       )
     }
@@ -263,7 +263,7 @@ class ModalBackupWords extends React.Component {
     const renderValidationStep = (validationStep) => {
       return (
         <article className='w-100'>
-          <h2 className='validation-step-index d-flex flex-row justify-content-center btn-block mb-16'>
+          <h2 className='validation-step-index d-flex flex-row justify-content-center btn-block mb-16' data-testid='backup-words-step-index'>
             {validationStep.backupIndex}
           </h2>
           <section
@@ -274,6 +274,7 @@ class ModalBackupWords extends React.Component {
             {validationStep.options.map((option, index) => (
               <div key={index} role='listitem'>
                 <button
+                  data-testid={`backup-word-option-${index}`}
                   className={`btn btn-dark btn-block validate-step-option ${
                     validationStep.chosenOption === option
                       ? 'chosen-option'

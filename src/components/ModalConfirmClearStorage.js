@@ -28,7 +28,7 @@ export default function ModalConfirmClearStorage({ onClose, success }) {
   }, [confirmText, setConfirmError]);
 
   return (
-    <div className="modal fade" id="modalConfirmResetAllData" tabIndex="-1" role="dialog" aria-labelledby="alertModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div className="modal fade" id="modalConfirmResetAllData" data-testid="modal-confirm-clear-storage" tabIndex="-1" role="dialog" aria-labelledby="alertModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
@@ -46,7 +46,7 @@ export default function ModalConfirmClearStorage({ onClose, success }) {
               <p>{t`If you want to reset all data, please type '${CONFIRM_RESET_MESSAGE}' in the box below and click on 'Reset all data' button.`}</p>
               <p>{t`After resetting the data, the application will close, and you will need to open it again.`}</p>
               <div>
-                <input type="text" className="form-control" placeholder={t`Write '${CONFIRM_RESET_MESSAGE}'`} onChange={(e) => setConfirmText(e.target.value)} />
+                <input type="text" className="form-control" data-testid="modal-confirm-clear-storage-input" placeholder={t`Write '${CONFIRM_RESET_MESSAGE}'`} onChange={(e) => setConfirmText(e.target.value)} />
                 <span className="text-danger ml-2">
                   {confirmError}
                 </span>
@@ -54,7 +54,7 @@ export default function ModalConfirmClearStorage({ onClose, success }) {
             </div>
           </div>
           <div className="modal-footer">
-            <button onClick={confirmResetData} type="button" className="btn btn-secondary">
+            <button onClick={confirmResetData} type="button" className="btn btn-secondary" data-testid="modal-confirm-clear-storage-confirm">
               {t`Reset all data`}
             </button>
             <button onClick={onClose} type="button" className="btn btn-hathor">

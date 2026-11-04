@@ -1,0 +1,242 @@
+# Onboarding QA graph for the desktop wallet: Welcome, wallet type, the
+# software-wallet warning, a new wallet with and without the words backup,
+# password and PIN, and the first wallet load.
+#
+# Schema: qa/graph/README.md. Automation: qa/e2e/onboarding/scenarios.mjs.
+#
+# Observation points:
+#   PAGE   what the renderer shows (the e2e driver reads it over CDP)
+#   NET    the shim's record of stubbed requests (qa/e2e/lib/shim.cjs)
+#
+# `selection` below applies to every graph in qa/graph/ (the runner takes the
+# union): what a change to these files runs, beyond the features' `files`.
+version: 1
+costs: { cheap: 1, medium: 5, expensive: 20, very-expensive: 60 }
+
+selection:
+  full:
+    - package.json
+    - package-lock.json
+    - config-overrides.js
+    - lavamoat/
+    - patches/
+    - public/electron.js
+    - public/preload.js
+    - src/App.js
+    - src/index.js
+    - src/store/
+    - qa/e2e/lib/
+    - qa/e2e/run.mjs
+    - qa/graph/tools/
+    - .github/workflows/e2e-electron.yml
+  ignore:
+    - '*.md'
+    - locale/
+    - .github/
+    - src/__tests__/
+    - 'src/**/*.test.js'
+
+environments:
+  - id: linux-electron
+    name: Linux, production build under Electron
+    notes: The e2e driver launches build/ with a throwaway profile and the main-process shim. Requests go to the default mainnet full node unless a step stubs them through the shim.
+
+features:
+  - id: welcome
+    name: Welcome and terms
+    description: The first screen. "Get started" needs the terms checkbox, marks the wallet as started and leads to the wallet type screen; once started, the app skips Welcome.
+    status: in-scope
+    screens: [Welcome]
+    files:
+      - src/screens/Welcome.js
+      - src/components/InitialImages.js
+    flags: []
+    links: []
+    introduces: []
+    actions: [welcome-render, welcome-terms, welcome-skipped]
+
+  - id: wallet-type
+    name: Wallet type and software-wallet warning
+    description: Software or hardware wallet; the software path shows a warning that needs a checkbox, then the new-or-import screen.
+    status: in-scope
+    screens: [WalletType, SoftwareWalletWarning, Signin]
+    files:
+      - src/screens/WalletType.js
+      - src/screens/SoftwareWalletWarning.js
+      - src/components/SoftwareWalletWarningMessage.js
+      - src/screens/Signin.js
+    flags: []
+    links: []
+    introduces: []
+    actions: [software-warning]
+
+  - id: new-wallet
+    name: New wallet, password and PIN
+    description: Generates 24 words, offers the backup now or later, then asks for a password and a PIN, each typed twice and checked against a pattern.
+    status: in-scope
+    screens: [NewWallet, ChoosePassword, ChoosePin]
+    files:
+      - src/screens/NewWallet.js
+      - src/components/ChoosePassword.js
+      - src/components/ChoosePin.js
+      - src/components/PinPasswordWrapper.js
+    flags: []
+    links:
+      - { to: wallet-type, reason: The new-wallet path starts from the software-wallet warning and Signin }
+      - { to: wallet-load, reason: A new wallet ends by loading it }
+    introduces: []
+    actions: [new-wallet-no-backup]
+
+  - id: backup-words
+    name: Words backup
+    description: Shows the 24 words, then asks for the word at five random positions; a wrong word stops the check until it is restarted.
+    status: in-scope
+    screens: [ModalBackupWords]
+    files:
+      - src/components/ModalBackupWords.js
+    flags: []
+    links:
+      - { to: new-wallet, reason: The backup runs inside the new-wallet flow }
+      - { to: wallet-load, reason: The backup path covers the failed first load }
+    introduces: []
+    actions: [new-wallet-backup]
+
+  - id: wallet-load
+    name: First wallet load
+    description: After the PIN the wallet loads its history from the full node; the dashboard shows the balance and the missing-backup warning, and a failed load shows the retry screen.
+    status: in-scope
+    screens: [LoadingAddresses, LoadWalletFailed, Wallet]
+    files:
+      - src/screens/LoadingAddresses.js
+      - src/screens/LoadWalletFailed.js
+      - src/screens/Wallet.js
+      - src/components/WalletBalance.js
+    flags: []
+    links: []
+    introduces: []
+    actions: []
+
+flags: []
+
+axes:
+  - id: install
+    name: Profile state
+    kind: setup
+    values:
+      - { id: fresh, name: Fresh profile }
+      - { id: started, name: Terms accepted (Get started pressed) }
+    how: 'fresh: an empty XDG_CONFIG_HOME. started: press Get started on a fresh profile, then quit.'
+    switch:
+      cost: medium
+      transitions:
+        - { from: started, to: fresh, cost: medium, when: 'Debug > Reset all data, or a new profile' }
+
+setups:
+  - { id: fresh, name: Fresh install, values: { install: fresh }, environment: linux-electron, notes: Nothing stored. }
+  - { id: started, name: Terms accepted, values: { install: started }, environment: linux-electron, notes: Welcome done once; the app opens on the wallet type screen. }
+
+actions:
+  - id: welcome-render
+    name: Open the app on a fresh profile
+    feature: welcome
+    axes: []
+    setups: [fresh]
+    path:
+      steps:
+        - { id: open, screen: Welcome, name: Launch the app }
+      outcomes:
+        - { id: ok-welcome, kind: success, at: open, message: 'PAGE shows "Welcome to Hathor Wallet!"', source: 'src/screens/Welcome.js:79', verified: true }
+
+  - id: welcome-terms
+    name: Get started without and with the terms
+    feature: welcome
+    axes: []
+    setups: [fresh]
+    path:
+      steps:
+        - { id: press-unchecked, screen: Welcome, name: Press "Get started" with the terms checkbox unchecked }
+        - { id: press-checked, screen: Welcome, name: Check the terms checkbox and press "Get started" again }
+      outcomes:
+        - { id: err-terms-required, kind: error, at: press-unchecked, message: 'The form is marked invalid (was-validated) and Welcome stays', source: 'src/screens/Welcome.js:85', verified: true }
+        - { id: ok-wallet-type, kind: success, at: press-checked, message: 'PAGE shows the wallet type screen with "Software wallet" and "Hardware wallet"', source: 'src/screens/WalletType.js:87', verified: true }
+
+  - id: welcome-skipped
+    name: Relaunch after Get started
+    feature: welcome
+    axes: []
+    setups: [started]
+    path:
+      steps:
+        - { id: open, screen: WalletType, name: Launch the app }
+      outcomes:
+        - { id: ok-no-welcome, kind: success, at: open, message: 'PAGE does not show "Welcome to Hathor Wallet!"; it opens on the wallet type screen', source: 'src/App.js:297', verified: true }
+
+  - id: software-warning
+    name: Continue past the software-wallet warning
+    feature: wallet-type
+    axes: []
+    setups: [started]
+    path:
+      steps:
+        - { id: software, screen: WalletType, name: Press "Software wallet" }
+        - { id: continue-unchecked, screen: SoftwareWalletWarning, name: Press "Continue" with the checkbox unchecked }
+        - { id: continue-checked, screen: SoftwareWalletWarning, name: 'Check "Ok, I got it!" and press "Continue"' }
+      outcomes:
+        - { id: ok-warning, kind: success, at: software, message: 'PAGE shows "Using a software wallet is not the safest way to secure your tokens."', source: 'src/components/SoftwareWalletWarningMessage.js:20', verified: true }
+        - { id: err-confirm-required, kind: error, at: continue-unchecked, message: 'The form is marked invalid (was-validated) and the warning stays', source: 'src/screens/SoftwareWalletWarning.js:48', verified: true }
+        - { id: ok-signin, kind: success, at: continue-checked, message: 'PAGE shows "You can start a new wallet or import data from a wallet that already exists."', source: 'src/screens/Signin.js:43', verified: true }
+
+  - id: new-wallet-no-backup
+    name: New wallet, backup later, bad then good password and PIN
+    feature: new-wallet
+    axes: []
+    setups: [started]
+    path:
+      steps:
+        - { id: new-wallet, screen: Signin, name: 'Software wallet > confirm > Continue, then "New wallet"' }
+        - { id: create-unchecked, screen: NewWallet, name: Press "Create my words" with the checkbox unchecked }
+        - { id: create, screen: NewWallet, name: 'Check "Ok, I got it!" and press "Create my words"' }
+        - { id: later, screen: NewWallet, name: Press "Do it later" }
+        - { id: password-short, screen: ChoosePassword, name: Type "abc" twice and press Next }
+        - { id: password-mismatch, screen: ChoosePassword, name: 'Type a valid password and its reverse, press Next' }
+        - { id: password-ok, screen: ChoosePassword, name: Type "Abc1234%" twice and press Next }
+        - { id: pin-letters, screen: ChoosePin, name: Type "abc" twice and press Next }
+        - { id: pin-mismatch, screen: ChoosePin, name: 'Type "123456" and "654321", press Next' }
+        - { id: pin-ok, screen: ChoosePin, name: Type "123456" twice and press Next }
+      outcomes:
+        - { id: ok-step1, kind: success, at: new-wallet, message: 'PAGE shows ". A new wallet is generated by 24 words."', source: 'src/screens/NewWallet.js:139', verified: true }
+        - { id: err-create-confirm, kind: error, at: create-unchecked, message: 'The form is marked invalid (was-validated)', source: 'src/screens/NewWallet.js:57', verified: true }
+        - { id: ok-words-created, kind: success, at: create, message: 'PAGE shows "Your words have been created!"', source: 'src/screens/NewWallet.js:159', verified: true }
+        - { id: ok-password-screen, kind: success, at: later, message: 'PAGE shows "Please, choose a password to encrypt your sensitive data while using the wallet."', source: 'src/components/ChoosePassword.js:40', verified: true }
+        - { id: err-password-pattern, kind: error, at: password-short, message: 'The form is marked invalid (was-validated)', source: 'src/components/PinPasswordWrapper.js:54', verified: true }
+        - { id: err-password-mismatch, kind: error, at: password-mismatch, message: 'PAGE shows "Both fields must be equal"', source: 'src/components/PinPasswordWrapper.js:49', verified: true }
+        - { id: ok-pin-screen, kind: success, at: password-ok, message: 'PAGE shows "The PIN is a 6-digit password requested to authorize actions in your wallet, such as generating new addresses and sending tokens."', source: 'src/components/ChoosePin.js:35', verified: true }
+        - { id: err-pin-pattern, kind: error, at: pin-letters, message: 'The form is marked invalid (was-validated)', source: 'src/components/PinPasswordWrapper.js:54', verified: true }
+        - { id: err-pin-mismatch, kind: error, at: pin-mismatch, message: 'PAGE shows "Both fields must be equal"', source: 'src/components/PinPasswordWrapper.js:49', verified: true }
+        - { id: ok-dashboard, kind: success, at: pin-ok, message: 'PAGE shows "Total: 0.00 HTR" once the full node answers the empty history', source: 'src/components/WalletBalance.js:47', verified: true }
+        - { id: ok-backup-warning, kind: success, at: pin-ok, message: 'PAGE shows "You haven''t done the backup of your wallet yet."', source: 'src/screens/Wallet.js:365', verified: true }
+
+  - id: new-wallet-backup
+    name: New wallet, backup with a wrong word, then a full node failure
+    feature: backup-words
+    axes: []
+    setups: [started]
+    path:
+      steps:
+        - { id: backup-now, screen: NewWallet, name: 'Reach "Your words have been created!" and press "Backup now"; note the 24 words' }
+        - { id: wrong-word, screen: ModalBackupWords, name: '"Ok, I have saved them", pick the right word once, then a wrong one' }
+        - { id: restart, screen: ModalBackupWords, name: '"Click here to start the process again.", "Ok, I have saved them", then the right word five times' }
+        - { id: credentials, screen: ChoosePin, name: 'Type "Abc1234%" twice, Next, "123456" twice' }
+        - { id: load-fails, screen: LoadWalletFailed, name: 'With the full node answering address_history with HTTP 500, press Next' }
+      outcomes:
+        - { id: err-wrong-word, kind: error, at: wrong-word, message: 'PAGE shows "Wrong word. Please double check the words you saved."', source: 'src/components/ModalBackupWords.js:168', verified: true }
+        - { id: ok-backup-done, kind: success, at: restart, message: 'The words check passes and the password screen shows', source: 'src/components/ModalBackupWords.js:177', verified: true }
+        - { id: err-load-failed, kind: error, at: load-fails, message: 'PAGE shows "There has been a problem loading your wallet, click here to retry." (the wallet library retries for up to about 35 s first)', source: 'src/screens/LoadWalletFailed.js:65', verified: true }
+
+constraints:
+  - id: c-load-fails
+    action: new-wallet-backup
+    when: { install: started }
+    class: edge
+    outcome: err-load-failed
+    note: The run stubs address_history with HTTP 500 (NET) to cover the failure screen, so this action's expectation is the error, not a loaded dashboard.

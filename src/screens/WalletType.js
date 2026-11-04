@@ -84,8 +84,8 @@ function WalletType() {
               </p>
               <p className="mt-4 mb-4"><SpanFmt>{t`**Software wallets**, on the other hand, store the information on your computer.`}</SpanFmt></p>
               <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
-                <button onClick={goToHardwareWallet} type="button" className="btn btn-hathor mr-3">{t`Hardware wallet`}</button>
-                <button onClick={goToSoftwareWallet} type="button" className="btn btn-hathor">{t`Software wallet`}</button>
+                <button onClick={goToHardwareWallet} type="button" data-testid="wallet-type-hardware" className="btn btn-hathor mr-3">{t`Hardware wallet`}</button>
+                <button onClick={goToSoftwareWallet} type="button" data-testid="wallet-type-software" className="btn btn-hathor">{t`Software wallet`}</button>
               </div>
             </div>
           </div>

@@ -45,6 +45,7 @@ function ChoosePassword({ success, back }) {
 
   return (
     <PinPasswordWrapper
+      testId="choose-password"
       message={renderMessage()}
       success={handleSuccess}
       back={back}

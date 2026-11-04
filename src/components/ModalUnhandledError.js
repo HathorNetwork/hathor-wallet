@@ -69,7 +69,7 @@ function ModalUnhandledError({ resetError, error, renderError, info }) {
   const { message = null, stack = null } = error || {}
   const readableError = t`Error Message: ${message}\nStack trace: ${stack}`
   return (
-    <div className="modal fade" id={UNHANDLED_ERROR_MODAL_ID} tabIndex="-1" role="dialog" aria-labelledby="unhandledErrorModal" aria-hidden="true">
+    <div className="modal fade" id={UNHANDLED_ERROR_MODAL_ID} data-testid="modal-unhandled-error" tabIndex="-1" role="dialog" aria-labelledby="unhandledErrorModal" aria-hidden="true">
       <div className="modal-dialog" role="document">
         <div className="modal-content">
           <div className="modal-header">
@@ -84,7 +84,7 @@ function ModalUnhandledError({ resetError, error, renderError, info }) {
                   <button className="btn send-tokens btn-hathor">{t`Copy Error`}</button>
                 </CopyToClipboard>
               </div>
-              {!walletUtils.isSentryAllowed() && <div><button className="btn send-tokens btn-hathor" onClick={onSendErrorToSentry}>{t`Send error report to help the developers`}</button></div>}
+              {!walletUtils.isSentryAllowed() && <div><button className="btn send-tokens btn-hathor" onClick={onSendErrorToSentry} data-testid="modal-unhandled-error-send-report">{t`Send error report to help the developers`}</button></div>}
             </div>
             <p>{t`Send it to us with all relevant information about the issues you are experiencing.`}</p>
             <p>{t`If you are facing recurrent issues, resetting your wallet may solve your problem. Please, double-check your backup before doing it.`}</p>
@@ -96,7 +96,7 @@ function ModalUnhandledError({ resetError, error, renderError, info }) {
                 {renderError
                   ? <button onClick={handleGoToHome} type="button" className="btn btn-secondary mr-2" data-dismiss="modal">{t`Home`}</button>
                   : <button type="button" className="btn btn-secondary mr-2" data-dismiss="modal">{t`Dismiss`}</button>}
-                <button onClick={handleConfirm} type="button" className="btn btn-hathor" data-dismiss="modal">{t`Reset wallet`}</button>
+                <button onClick={handleConfirm} type="button" className="btn btn-hathor" data-dismiss="modal" data-testid="modal-unhandled-error-reset-wallet">{t`Reset wallet`}</button>
               </div>
             </div>
           </div>

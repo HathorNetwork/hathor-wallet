@@ -6,10 +6,6 @@ src/**/*.css
 
 # testing
 /coverage
-# Cypress
-cypress/screenshots/
-cypress/videos/
-
 # production
 /build
 
@@ -43,3 +39,6 @@ yarn-error.log*
 # yalc
 .yalc/
 yalc.lock
+
+# QA graph pages (node qa/graph/tools/cli.js render)
+qa/graph/dist/

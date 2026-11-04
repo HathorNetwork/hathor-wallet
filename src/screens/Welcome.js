@@ -82,9 +82,9 @@ function Welcome() {
           <p>{t`Using this wallet you can (i) check your balance and history, (ii) send & receive tokens running on Hathor, and (iii) create and manage your own tokens.`}</p>
           <p>{t`You should never share any information besides your addresses to other people. You're fully responsible for keeping your tokens safe.`}</p>
           <p>{t`For further information, check our website (https://hathor.network/).`}</p>
-          <form ref={agreeForm} className={`w-100 mb-4 ${formValidated ? 'was-validated' : ''}`}>
+          <form ref={agreeForm} data-testid="welcome-terms-form" className={`w-100 mb-4 ${formValidated ? 'was-validated' : ''}`}>
           <div className="form-check">
-            <input required type="checkbox" className="form-check-input" id="confirmAgree" />
+            <input required type="checkbox" className="form-check-input" id="confirmAgree" data-testid="welcome-terms-checkbox" />
             <label className="form-check-label" htmlFor="confirmAgree">
               {str2jsx(
                 t` I agree with the |link1:Terms of Service| and |link2:Privacy Policy| and understand that I am fully responsible for keeping my tokens safe and that it is not possible to revert transactions after they are executed.`,
@@ -97,7 +97,7 @@ function Welcome() {
           </div>
         </form>
           <div className="d-flex align-items-center flex-column">
-            <button onClick={getStarted} type="button" className="btn btn-hathor">{t`Get started`}</button>
+            <button onClick={getStarted} type="button" data-testid="welcome-get-started" className="btn btn-hathor">{t`Get started`}</button>
           </div>
         </div>
         <InitialImages />

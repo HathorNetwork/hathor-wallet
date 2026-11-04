@@ -1,0 +1,17 @@
+# This test was run based on qa/graph/<area>.yaml of <date>, version from commit <hash>.
+# Copy to runs/<date>-<area>-<machine>.yaml. Results never go in the graph.
+yamlCommit: <hash>     # `git log -1 --format=%h -- qa/graph/<area>.yaml`
+yamlDate: <date>
+toolsCommit: <hash>    # the rendered page's label shows it
+appBuild: <version> <unpacked | packaged>
+electron: <version>
+device: <machine, chip>
+os: <name and version>
+environment: <environment id from the graph>
+scope:
+  reason: <why this run covers these picks>
+  picks: []            # tiers, features, actions or setups that were picked
+results:
+  - scenario: <scenario id as of yamlCommit>
+    status: passed     # passed | failed | skipped
+    notes: ''          # e.g. the sink lines after this scenario's marker, the consent file after it

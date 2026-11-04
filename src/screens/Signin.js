@@ -43,8 +43,8 @@ function Signin() {
           <p className="mt-4 mb-4">{t`You can start a new wallet or import data from a wallet that already exists.`}</p>
           <div className="d-flex align-items-center flex-row justify-content-between w-100 mt-4">
             <button onClick={() => navigate(-1)} type="button" className="btn btn-secondary">{t`Back`}</button>
-            <button onClick={goToNewWallet} type="button" className="btn btn-hathor mr-3">{t`New wallet`}</button>
-            <button onClick={goToLoadWallet} type="button" className="btn btn-hathor">{t`Import wallet`}</button>
+            <button onClick={goToNewWallet} type="button" data-testid="signin-new-wallet" className="btn btn-hathor mr-3">{t`New wallet`}</button>
+            <button onClick={goToLoadWallet} type="button" data-testid="signin-import-wallet" className="btn btn-hathor">{t`Import wallet`}</button>
           </div>
         </div>
         <InitialImages />
